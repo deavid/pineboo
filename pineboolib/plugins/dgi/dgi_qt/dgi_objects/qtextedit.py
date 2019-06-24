@@ -2,17 +2,18 @@
 from PyQt5 import QtWidgets, QtCore
 from pineboolib import decorators
 
+
 class QTextEdit(QtWidgets.QTextEdit):
     LogText = 0
     RichText = 1
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super(QTextEdit, self).__init__(parent)
         self.LogText = 0
 
-    def setText(self, text):       
+    def setText(self, text):
         super(QTextEdit, self).setText(text)
-        #if not pineboolib.project._DGI.localDesktop():
+        # if not pineboolib.project._DGI.localDesktop():
         #    pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text)
 
     def getText(self):
@@ -36,7 +37,7 @@ class QTextEdit(QtWidgets.QTextEdit):
             super().show()
         else:
             super().hide()
-    
+
     def getPlainText(self):
         return super(QTextEdit, self).toPlainText()
 

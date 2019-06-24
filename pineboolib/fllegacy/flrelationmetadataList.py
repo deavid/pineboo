@@ -3,9 +3,10 @@
 # Completa Si
 
 
-class FLRelationMetaDataList():
+class FLRelationMetaDataList:
     """
     Lista de relaciones
     """
+
     # typedef QDict<FLFieldMetaData> FLFieldMetaDataList;
     FLRelationMetaDataList = []

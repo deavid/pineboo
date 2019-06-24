@@ -10,7 +10,6 @@ from pineboolib.fllegacy.kugar.mpagecollection import MPageCollection
 
 
 class FLReportPages(MPageCollection):
-
     class PageOrientation(Enum):
         Portrait = 0
         Landscape = 1

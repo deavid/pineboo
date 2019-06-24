@@ -18,6 +18,6 @@ class FLMYSQL_INNODB2(FLMYSQL_MYISAM2):
 
     def canSavePoint(self):
         return True
-    
+
     def canTransaction(self):
         return True

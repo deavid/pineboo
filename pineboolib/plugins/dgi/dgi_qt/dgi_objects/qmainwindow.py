@@ -2,8 +2,8 @@
 
 from PyQt5 import QtWidgets
 
-class QMainWindow(QtWidgets.QMainWindow):
 
+class QMainWindow(QtWidgets.QMainWindow):
     def child(self, n, c=None):
         ret = None
 

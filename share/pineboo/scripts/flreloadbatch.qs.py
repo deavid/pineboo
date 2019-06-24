@@ -76,14 +76,18 @@ class FormInternalObj(FormDBWidget):
             resComando = self.iface.ejecutarComando(u"find . -name *.mod")
 
         if resComando.ok == False:
-            MessageBox.warning(util.translate(u"scripts", u"Error al buscar los módulos en el directorio:\n") +
-                               dirMods, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton)
+            MessageBox.warning(
+                util.translate(u"scripts", u"Error al buscar los módulos en el directorio:\n") + dirMods,
+                MessageBox.Ok,
+                MessageBox.NoButton,
+                MessageBox.NoButton,
+            )
             return
 
         opciones = resComando.salida.split(u"\n")
         opciones.pop()
         modulos = self.iface.elegirOpcion(opciones)
-        if modulos == - 1 or modulos == - 2:
+        if modulos == -1 or modulos == -2:
             return
         i = 0
         while_pass = True
@@ -95,8 +99,9 @@ class FormInternalObj(FormDBWidget):
             while_pass = False
             sys.processEvents()
             if not self.iface.cargarModulo(modulos[i]):
-                MessageBox.warning(util.translate(u"scripts", u"Error al cargar el módulo:\n") +
-                                   modulos[i], MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton)
+                MessageBox.warning(
+                    util.translate(u"scripts", u"Error al cargar el módulo:\n") + modulos[i], MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton
+                )
                 return
             i += 1
             while_pass = True
@@ -127,7 +132,7 @@ class FormInternalObj(FormDBWidget):
     def oficial_cargarModulo(self, nombreFichero=None):
         util = FLUtil()
         if util.getOS() == u"WIN32":
-            nombreFichero = nombreFichero[0:len(nombreFichero) - 1]
+            nombreFichero = nombreFichero[0 : len(nombreFichero) - 1]
 
         if not isinstance(nombreFichero, str):
             nombreFichero = nombreFichero.data().decode("utf-8")
@@ -200,7 +205,7 @@ class FormInternalObj(FormDBWidget):
 
         # DEBUG:: Argument 0 not understood
         # DEBUG:: <Value><Constant><regexbody><regexchar arg00="LBRACKET"/><regexchar arg00="ICONST:'0'"/><regexchar arg00="MINUS"/><regexchar arg00="ICONST:'9'"/><regexchar arg00="RBRACKET"/><regexchar arg00="PLUS"/><regexchar arg00="PERIOD"/><regexchar arg00="LBRACKET"/><regexchar arg00="ICONST:'0'"/><regexchar arg00="MINUS"/><regexchar arg00="ICONST:'9'"/><regexchar arg00="RBRACKET"/><regexchar arg00="PLUS"/></regexbody></Constant></Value>
-        #versionSys = sys.version().match(unknownarg)
+        # versionSys = sys.version().match(unknownarg)
         # if self.iface.compararVersiones(versionSys, versionMinimaFL) == 2:
         #    contVersion = MessageBox.warning(util.translate(u"scripts", u"Este módulo necesita la versión ") + versionMinimaFL + util.translate(u"scripts", u" o superior de la aplicación base,\nactualmente la versión instalada es la ") + sys.version() + util.translate(u"scripts", u".\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"), MessageBox.Yes, MessageBox.No)
         #    if contVersion == MessageBox.No:
@@ -212,7 +217,7 @@ class FormInternalObj(FormDBWidget):
         recargar = util.sqlSelect(u"flmodules", u"idmodulo", ustr(u"idmodulo = '", modulo, u"'"))
         curModulo = FLSqlCursor(u"flmodules")
         if recargar:
-             # WITH_START
+            # WITH_START
             curModulo.select(ustr(u"idmodulo = '", modulo, u"'"))
             curModulo.first()
             curModulo.setModeAccess(curModulo.Edit)
@@ -270,7 +275,7 @@ class FormInternalObj(FormDBWidget):
 
     def oficial_traducirCadena(self, cadena=None, path=None, modulo=None):
         util = FLUtil()
-        if cadena.find(u"QT_TRANSLATE_NOOP") == - 1:
+        if cadena.find(u"QT_TRANSLATE_NOOP") == -1:
             return cadena
         cadena2 = cadena
         cadena = QString(cadena).mid(41, len(cadena) - 43)
@@ -360,10 +365,10 @@ class FormInternalObj(FormDBWidget):
                     break
 
         else:
-            return - 1
+            return -1
 
         if len(resultado) == 0:
-            return - 1
+            return -1
         return resultado
 
 

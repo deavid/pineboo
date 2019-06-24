@@ -47,6 +47,7 @@ class parsertools(object):
 
     def ratio_correction_w(self, value):
         return value * self._fix_ratio_w
+
     """
     Cuando es un calculatedField , se envia un dato al qsa de tipo node.
     @param data. xml con información de la linea de datos afectada.
@@ -55,9 +56,9 @@ class parsertools(object):
 
     def convertToNode(self, data):
 
-        #node = Node()
+        # node = Node()
         from pineboolib.pncontrolsfactory import FLDomElement, FLDomNode, FLDomDocument
-        
+
         doc = FLDomDocument()
         ele = doc.createElement("element")
         for k in data.keys():
@@ -80,7 +81,7 @@ class parsertools(object):
         else:
             h = int(xml.get("Height"))
             if h:
-                ret_ =  h
+                ret_ = h
 
         return ret_
 
@@ -95,10 +96,9 @@ class parsertools(object):
         self.logger.debug("%s:getSpecial %s" % (__name__, name))
         ret = "None"
         if name[0] == "[":
-            name = name[1: len(name) -1]
+            name = name[1 : len(name) - 1]
         if name in ("Fecha", "Date"):
-            ret = str(datetime.date.__format__(
-                datetime.date.today(), "%d.%m.%Y"))
+            ret = str(datetime.date.__format__(datetime.date.today(), "%d.%m.%Y"))
         if name in ("NúmPágina", "PageNo", "NÃºmPÃ¡gina"):
             ret = str(page_num)
 
@@ -113,29 +113,28 @@ class parsertools(object):
     @return Valor calculado.
     """
 
-    def calculated(self, value, data_type, p = None, data = None):
-        
+    def calculated(self, value, data_type, p=None, data=None):
+
         p = 0 if p is None else int(p)
-        
-        
-        
+
         from pineboolib.pncontrolsfactory import aqApp
+
         ret_ = value
-        if data_type == 2: # Double
+        if data_type == 2:  # Double
             if value in (None, "None"):
                 return
-            ret_ = aqApp.localeSystem().toString(float(value),'f', p)
+            ret_ = aqApp.localeSystem().toString(float(value), "f", p)
         elif data_type == 0:
             pass
         elif data_type == 3:
             if value.find("T") > -1:
-                value = value[:value.find("T")]
+                value = value[: value.find("T")]
             ret_ = FLUtil().dateAMDtoDMA(value)
-            
+
         elif data_type == 5:  # Imagen
             pass
-                
-        elif data_type == 6: # Barcode
+
+        elif data_type == 6:  # Barcode
             pass
         elif data:
             ret_ = data.get(value)
@@ -154,10 +153,10 @@ class parsertools(object):
         if ref_key is not None:
             value = None
             from pineboolib.pncontrolsfactory import aqApp
-            
+
             tmp_dir = aqApp.tmp_dir()
             img_file = "%s/%s.png" % (tmp_dir, ref_key)
-            
+
             if not os.path.exists(img_file) and ref_key[0:3] == "RK@":
                 if not aqApp.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
                     table_name += "_%s" % ref_key.split("@")[1]
@@ -175,16 +174,16 @@ class parsertools(object):
                         self.logger.warning("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
                         ret = None
                     else:
-                       ret = img_file
+                        ret = img_file
             elif ref_key.endswith(".xpm"):
                 pix = QPixmap(ref_key)
-                img_file = ref_key.replace(".xpm",".png")
+                img_file = ref_key.replace(".xpm", ".png")
                 if not pix.save(img_file):
                     self.logger.warning("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
                     ret = None
                 else:
                     ret = img_file
-                
+
             else:
 
                 ret = img_file
@@ -259,11 +258,10 @@ class parsertools(object):
         elif size in (30, 31):
             r = Custom  # "CUSTOM"
         if r is None:
-            self.logger.warning(
-                "porcessXML:No se encuentra pagesize para %s. Usando A4" % size)
+            self.logger.warning("porcessXML:No se encuentra pagesize para %s. Usando A4" % size)
             r = [595, 842]
 
-        #if orientation != 0:
+        # if orientation != 0:
         #    r = [r[1], r[0]]
 
         return r
@@ -291,57 +289,54 @@ class parsertools(object):
         else:
             self.logger.warning("KUTPARSERTOOLS: Plataforma desconocida %s", sys.platform)
             return False
-        
+
         font_name = font_name.replace(" ", "_")
-        
+
         font_name = font_name
         font_name2 = font_name
         font_name3 = font_name
-        
+
         if font_name.endswith("BI"):
-            font_name2 = font_name.replace("BI","_Bold_Italic")
-            font_name3 = font_name.replace("BI","bi")
-        
+            font_name2 = font_name.replace("BI", "_Bold_Italic")
+            font_name3 = font_name.replace("BI", "bi")
+
         if font_name.endswith("B"):
-            font_name2 = font_name.replace("B","_Bold")
-            font_name3 = font_name.replace("B","b")
-        
+            font_name2 = font_name.replace("B", "_Bold")
+            font_name3 = font_name.replace("B", "b")
+
         if font_name.endswith("I"):
-            font_name2 = font_name.replace("I","_Italic")
-            font_name3 = font_name.replace("I","i")
-        
-        
+            font_name2 = font_name.replace("I", "_Italic")
+            font_name3 = font_name.replace("I", "i")
 
         for folder in fonts_folders:
             for root, dirnames, filenames in os.walk(folder):
 
-                for filename in fnmatch.filter(filenames, '%s.ttf' % font_name):
+                for filename in fnmatch.filter(filenames, "%s.ttf" % font_name):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
-                for filename in fnmatch.filter(filenames, '%s%s.ttf' % (font_name[0].upper(), font_name[1:])):
+                for filename in fnmatch.filter(filenames, "%s%s.ttf" % (font_name[0].upper(), font_name[1:])):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
-                for filename in fnmatch.filter(filenames, '%s.ttf' % font_name2):
+                for filename in fnmatch.filter(filenames, "%s.ttf" % font_name2):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
-                for filename in fnmatch.filter(filenames, '%s%s.ttf' % (font_name2[0].upper(), font_name2[1:])):
-                    ret_ = os.path.join(root, filename)
-                    return ret_
-                
-
-                for filename in fnmatch.filter(filenames, '%s.ttf' % font_name3):
+                for filename in fnmatch.filter(filenames, "%s%s.ttf" % (font_name2[0].upper(), font_name2[1:])):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
-                for filename in fnmatch.filter(filenames, '%s%s.ttf' % (font_name3[0].upper(), font_name3[1:])):
+                for filename in fnmatch.filter(filenames, "%s.ttf" % font_name3):
                     ret_ = os.path.join(root, filename)
                     return ret_
-                
+
+                for filename in fnmatch.filter(filenames, "%s%s.ttf" % (font_name3[0].upper(), font_name3[1:])):
+                    ret_ = os.path.join(root, filename)
+                    return ret_
+
         return None
-    
+
     def calculate_sum(self, field_name, line, xml_list, level):
         val = 0
         for l in xml_list:
@@ -351,14 +346,14 @@ class parsertools(object):
             val += float(l.get(field_name))
             if l is line:
                 break
-        
+
         return val
-    
+
     def restore_text(self, t):
         ret_ = t
         ret_ = ret_.replace("__RPAREN__", ")")
         ret_ = ret_.replace("__LPAREN__", "(")
         ret_ = ret_.replace("__ASTERISK__", "*")
         ret_ = ret_.replace("__PLUS__", "+")
-        
+
         return ret_

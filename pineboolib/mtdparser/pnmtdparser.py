@@ -12,10 +12,11 @@ def mtd_parse(fileobj):
     metadata_name = fileobj.filename[:-4]
     dest_file = "%s_model.py" % mtd_file[:-4]
     from pineboolib.pncontrolsfactory import aqApp
+
     mtd = aqApp.db().manager().metadata(metadata_name)
-    
+
     lines = generate_model(dest_file, mtd) if not mtd.isQuery() else []
-    
+
     if lines:
         f = open(dest_file, "w")
         for line in lines:
@@ -23,38 +24,39 @@ def mtd_parse(fileobj):
         f.close()
 
 
-def generate_model( dest_file, mtd_table):
+def generate_model(dest_file, mtd_table):
     from pineboolib.pncontrolsfactory import aqApp
+
     data = []
     pk_found = False
     data.append("# -*- coding: utf-8 -*-")
-    #data.append("from sqlalchemy.ext.declarative import declarative_base")
+    # data.append("from sqlalchemy.ext.declarative import declarative_base")
     data.append("from sqlalchemy import Column, Integer, Numeric, String, BigInteger, Boolean, DateTime, ForeignKey, LargeBinary")
     data.append("from sqlalchemy.orm import relationship, validates")
     data.append("from pineboolib.pnobjectsfactory import Calculated, load_model")
     data.append("from pineboolib.pncontrolsfactory import aqApp")
     data.append("")
-    #data.append("Base = declarative_base()")
+    # data.append("Base = declarative_base()")
     data.append("Base = aqApp.db().declarative_base()")
     data.append("engine = aqApp.db().engine()")
     data.append("")
-    #for field in mtd_table.fieldList():
+    # for field in mtd_table.fieldList():
     #    if field.relationM1():
     #        rel = field.relationM1()
-    #        data.append("load_model('%s')" % rel.foreignTable()) 
-    
+    #        data.append("load_model('%s')" % rel.foreignTable())
+
     data.append("")
     data.append("class %s%s(Base):" % (mtd_table.name()[0].upper(), mtd_table.name()[1:]))
     data.append("    __tablename__ = '%s'" % mtd_table.name())
     data.append("")
-    
+
     validator_list = []
-    
+
     data.append("")
     data.append("# --- Fields ---> ")
     data.append("")
-    
-    for field in mtd_table.fieldList(): #Crea los campos 
+
+    for field in mtd_table.fieldList():  # Crea los campos
         if field.name() in validator_list:
             logger.warning("Hay un campo %s duplicado en %s.mtd. Omitido", field.name(), mtd_table.name())
         else:
@@ -67,40 +69,36 @@ def generate_model( dest_file, mtd_table):
             validator_list.append(field.name())
             if field.isPrimaryKey():
                 pk_found = True
-        
-            
-            
-        
+
         data.append("".join(field_data))
-    
+
     data.append("")
     data.append("# <--- Fields --- ")
     data.append("")
-    
+
     data.append("")
     data.append("# --- Relations 1:M ---> ")
     data.append("")
-    
-    
-    for field in mtd_table.fieldList(): #Creamos relaciones 1M
+
+    for field in mtd_table.fieldList():  # Creamos relaciones 1M
         for r in field.relationList():
             foreign_table_mtd = aqApp.db().manager().metadata(r.foreignTable())
-            #if aqApp.db().manager().existsTable(r.foreignTable()):
+            # if aqApp.db().manager().existsTable(r.foreignTable()):
             if foreign_table_mtd:
-                #comprobamos si existe el campo...
+                # comprobamos si existe el campo...
                 if foreign_table_mtd.field(r.foreignField()):
-                    
+
                     foreign_object = "%s%s" % (r.foreignTable()[0].upper(), r.foreignTable()[1:])
                     relation_ = "    %s_%s = relationship('%s'" % (r.foreignTable(), r.foreignField(), foreign_object)
                     relation_ += ", foreign_keys='%s.%s'" % (foreign_object, r.foreignField())
                     relation_ += ")"
-            
+
                     data.append(relation_)
-    
+
     data.append("")
     data.append("# <--- Relations 1:M --- ")
     data.append("")
-    
+
     """
     data.append("")
     data.append("# --- Relations M:1 ---> ")
@@ -135,8 +133,7 @@ def generate_model( dest_file, mtd_table):
     data.append("")
     data.append("    def bufferChanged(self, fn):")
     data.append("        pass")
-    
-    
+
     data.append("")
     data.append("    def beforeCommit(self):")
     data.append("        return True")
@@ -152,36 +149,31 @@ def generate_model( dest_file, mtd_table):
     data.append("")
     data.append("        if not self.afterCommit():")
     data.append("            return False")
-    
-    
-    
-    
-    
-    #for field in mtd_table.fieldList(): #Relaciones M:1
+
+    # for field in mtd_table.fieldList(): #Relaciones M:1
     #    if field.relationList():
     #        rel_data = []
     #        for r in field.relationList():
     #            if r.cardinality() == r.RELATION_1M:
     #                obj_name = "%s%s" % (r.foreignTable()[0].upper(), r.foreignTable()[1:])
     #                rel_data.append("    %s = relationship('%s', backref='parent'%s)\n" % (r.foreignTable(), obj_name, ", cascade ='all, delete'" if r.deleteCascade() else ""))
-                
+
     #        data.append("".join(rel_data))
-    
-    #data.append("if not engine.dialect.has_table(engine.connect(),'%s'):" % mtd_table.name())
-    #data.append("    %s%s.__table__.create(engine)" % (mtd_table.name()[0].upper(), mtd_table.name()[1:]))
-    
-    
+
+    # data.append("if not engine.dialect.has_table(engine.connect(),'%s'):" % mtd_table.name())
+    # data.append("    %s%s.__table__.create(engine)" % (mtd_table.name()[0].upper(), mtd_table.name()[1:]))
+
     if not pk_found:
         from pineboolib.fllegacy.flsettings import FLSettings
+
         settings = FLSettings()
         if settings.readBoolEntry("application/isDebuggerMode", False):
             logger.warning("La tabla %s no tiene definida una clave primaria. No se generará el model %s\n" % (mtd_table.name(), mtd_table.primaryKey()))
         data = []
-    
 
-          
     return data
- 
+
+
 def field_type(field):
     ret = "String"
     if field.type() in ("int, serial"):
@@ -193,57 +185,52 @@ def field_type(field):
     elif field.type() in ("double"):
         ret = "Numeric"
         ret += "(%s , %s)" % (field.partInteger(), field.partDecimal())
-        
+
     elif field.type() in ("string", "stringlist", "pixmap"):
         ret = "String"
         if field.length():
             ret += "(%s)" % field.length()
-            
+
     elif field.type() in ("bool", "unlock"):
         ret = "Boolean"
         ret += ", unique=False"
-    
+
     elif field.type() in ("time, date"):
         ret = "DateTime"
-    
+
     elif field.type() in ("bytearray"):
-        ret = "LargeBinary"  
-    
+        ret = "LargeBinary"
+
     else:
         ret = "Desconocido %s" % field.type()
-        
-    
+
     if field.relationM1() is not None:
         from pineboolib.pncontrolsfactory import aqApp
+
         rel = field.relationM1()
         if aqApp.db().manager().existsTable(rel.foreignTable()):
             ret += ", ForeignKey('%s.%s'" % (rel.foreignTable(), rel.foreignField())
             if rel.deleteCascade():
                 ret += ", ondelete='CASCADE'"
-            
+
             ret += ")"
-                
-    
-    
+
     if field.isPrimaryKey() or field.isCompoundKey():
         ret += ", primary_key=True"
-    
+
     if (not field.isPrimaryKey() and not field.isCompoundKey()) and field.type() == "serial":
         ret += ", autoincrement=True"
-    
+
     if field.isUnique():
         ret += ", unique=True"
-    
-    
+
     if not field.allowNull() and field.type() not in ("bool", "unlock"):
         ret += ", nullable=False"
-    
+
     if field.defaultValue() is not None:
         value = field.defaultValue()
         if isinstance(value, str):
             value = "'%s'" % value
         ret += ", default=%s" % value
-        
-    
-    
-    return ret    
+
+    return ret

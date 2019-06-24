@@ -62,6 +62,7 @@ class FLAccessControl(object):
     """
     Almacena el nombre del objeto de alto nivel.
     """
+
     name_ = None
     """
     Almacena el nombre del usuario de la base de datos.
@@ -271,8 +272,9 @@ class FLAccessControl(object):
         nameAcos = None
         i = 0
         while i < len(acos):
-            self.acosPerms_[acos[i]] = acos[i +1]
+            self.acosPerms_[acos[i]] = acos[i + 1]
             i += 2
+
     """
     Obtiene una lista de cadenas de texto correspondiente a la lista de ACOs establecida
 

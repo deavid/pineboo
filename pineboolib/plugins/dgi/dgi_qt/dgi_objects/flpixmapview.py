@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, QtWidgets,QtGui 
+from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtWidgets import QLabel
+
 
 class FLPixmapView(QtWidgets.QScrollArea):
     frame_ = None
@@ -27,7 +28,7 @@ class FLPixmapView(QtWidgets.QScrollArea):
         self._parent = parent
 
     def setPixmap(self, pix):
-        #if not pineboolib.project._DGI.localDesktop():
+        # if not pineboolib.project._DGI.localDesktop():
         #    pineboolib.project._DGI._par.addQueque("%s_setPixmap" % self._parent.objectName(
         #    ), self._parent.cursor_.valueBuffer(self._parent.fieldName_))
         #    return

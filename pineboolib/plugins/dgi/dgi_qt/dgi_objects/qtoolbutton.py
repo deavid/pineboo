@@ -2,6 +2,7 @@
 from PyQt5 import QtWidgets
 from pineboolib import decorators
 
+
 class QToolButton(QtWidgets.QToolButton):
 
     groupId = None

@@ -2,6 +2,7 @@
 from PyQt5 import QtCore, QtWidgets
 import logging
 
+
 class FLLineEdit(QtWidgets.QLineEdit):
     logger = logging.getLogger(__name__)
     _tipo = None
@@ -26,146 +27,141 @@ class FLLineEdit(QtWidgets.QLineEdit):
             self.partDecimal = 0
             self.autoSelect = True
             self.partInteger = parent.cursor_.metadata().field(self._fieldName).partInteger()
-            
+
             self._parent = parent
-            
+
             if self._tipo is "string":
                 self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
                 self.setMaxLength(self._longitudMax)
 
             if self._tipo in ("int", "uint", "double"):
                 self.setAlignment(QtCore.Qt.AlignRight)
-            
-            
 
     def setText(self, text_, check_focus=True):
         from pineboolib.pncontrolsfactory import aqApp
+
         text_ = str(text_)
-        #if not pineboolib.project._DGI.localDesktop():
+        # if not pineboolib.project._DGI.localDesktop():
         #    pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text_)
-        #else:
+        # else:
         if check_focus:
-                
+
             if text_ in ("", None) or self.hasFocus():
                 super(FLLineEdit, self).setText(text_)
                 return
-            
+
         ok = False
         s = text_
         minus = False
-            
+
         if self._tipo == "double":
             if s[0] == "-":
                 minus = True
                 s = s[1:]
             if aqApp.commaSeparator() == ",":
                 s = s.replace(".", ",")
-                        
-                    
+
             val, ok = aqApp.localeSystem().toDouble(s)
             if ok:
-                s = aqApp.localeSystem().toString(val,'f',self.partDecimal)
+                s = aqApp.localeSystem().toString(val, "f", self.partDecimal)
             if minus:
                 s = "-%s" % s
-                
+
         elif self._tipo in ("int"):
             val, ok = aqApp.localeSystem().toInt(s)
             if ok:
                 s = aqApp.localeSystem().toString(val)
-            
+
         elif self._tipo in ("uint"):
             val, ok = aqApp.localeSystem().toUInt(s)
             if ok:
                 s = aqApp.localeSystem().toString(val)
-                    
-        super(FLLineEdit, self).setText(s)    
-                        
-        
-            
-    
+
+        super(FLLineEdit, self).setText(s)
 
     def text(self):
         from pineboolib.pncontrolsfactory import aqApp
+
         text_ = super(FLLineEdit, self).text()
         if text_ == "":
             return text_
-        
+
         ok = False
         minus = False
-        
+
         if self._tipo == "double":
             if text_[0] == "-":
                 minus = True
                 text_ = text_[1:]
-            
+
             val, ok = aqApp.localeSystem().toDouble(text_)
             if ok:
                 text_ = str(val)
-            
-                    
+
             if minus:
                 text_ = "-%s" % text_
-        
+
         elif self._tipo == "uint":
-            val, ok = aqApp.localeSystem().toUInt(text_)                
+            val, ok = aqApp.localeSystem().toUInt(text_)
             if ok:
                 text_ = str(val)
-        
+
         elif self._tipo == "int":
             val, ok = aqApp.localeSystem().toInt(text_)
-                
+
             if ok:
                 text_ = str(val)
-        
+
         return text_
-    
+
     def setMaxValue(self, max_value):
         self._maxValue = max_value
-    
-    
+
     def focusOutEvent(self, f):
-        
+
         from pineboolib.pncontrolsfactory import aqApp
-        if self._tipo in ("double","int","uint"):
+
+        if self._tipo in ("double", "int", "uint"):
             text_ = super(FLLineEdit, self).text()
-            
+
             if self._tipo == "double":
-                                    
+
                 val, ok = aqApp.localeSystem().toDouble(text_)
-                
+
                 if ok:
-                    text_ = aqApp.localeSystem().toString(val,'f',self.partDecimal)
+                    text_ = aqApp.localeSystem().toString(val, "f", self.partDecimal)
                 super(FLLineEdit, self).setText(text_)
             else:
-                
+
                 self.setText(text_)
         super(FLLineEdit, self).focusOutEvent(f)
-    
+
     def focusInEvent(self, f):
         if self.isReadOnly():
             return
-        
+
         from pineboolib.pncontrolsfactory import aqApp
-        if self._tipo in ("double","int","uint"):
+
+        if self._tipo in ("double", "int", "uint"):
             self.blockSignals(True)
-            s= self.text()
+            s = self.text()
             if self._tipo is ("double"):
                 if s is not "":
-                    s = aqApp.localeSystem().toString(float(s),'f',self.partDecimal)
+                    s = aqApp.localeSystem().toString(float(s), "f", self.partDecimal)
                 if aqApp.commaSeparator() == ",":
                     s = s.replace(".", "")
                 else:
                     s = s.replace(",", "")
-                    
+
             v = self.validator()
             if v:
                 pos = 0
                 v.validate(s, pos)
-            
+
             super(FLLineEdit, self).setText(s)
             self.blockSignals(False)
-        
+
         if self.autoSelect and not self.selectedText() and not self.isReadOnly():
             self.selectAll()
-        
+
         super(FLLineEdit, self).focusInEvent(f)

@@ -57,6 +57,7 @@ class FLFormSearchDB(FLFormDB):
             return
 
         from pineboolib.pncontrolsfactory import aqApp
+
         parent = parent or aqApp.mainWidget()
         if isinstance(name_or_cursor, str):
             action = pineboolib.project.conn.manager().action(name_or_cursor)
@@ -98,6 +99,7 @@ class FLFormSearchDB(FLFormDB):
 
     def loadControls(self):
         from pineboolib.pncontrolsfactory import QToolButton
+
         self.bottomToolbar = QtWidgets.QFrame()
         self.bottomToolbar.setMaximumHeight(64)
         self.bottomToolbar.setMinimumHeight(16)
@@ -109,14 +111,13 @@ class FLFormSearchDB(FLFormDB):
         self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
         self.layout.addWidget(self.bottomToolbar)
 
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
         sizePolicy.setHeightForWidth(True)
 
         pbSize = self.iconSize
         settings = FLSettings()
         if settings.readBoolEntry("application/isDebuggerMode", False):
-            
+
             pushButtonExport = QToolButton(self)
             pushButtonExport.setObjectName("pushButtonExport")
             pushButtonExport.setSizePolicy(sizePolicy)
@@ -129,7 +130,7 @@ class FLFormSearchDB(FLFormDB):
             pushButtonExport.setFocusPolicy(QtCore.Qt.NoFocus)
             self.bottomToolbar.layout.addWidget(pushButtonExport)
             pushButtonExport.clicked.connect(self.exportToXml)
-            
+
             if settings.readBoolEntry("ebcomportamiento/show_snaptshop_button", False):
                 push_button_snapshot = QToolButton(self)
                 push_button_snapshot.setObjectName("pushButtonSnapshot")
@@ -143,11 +144,9 @@ class FLFormSearchDB(FLFormDB):
                 push_button_snapshot.setFocusPolicy(QtCore.Qt.NoFocus)
                 self.bottomToolbar.layout.addWidget(push_button_snapshot)
                 push_button_snapshot.clicked.connect(self.saveSnapShot)
-            
+
             spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
             self.bottomToolbar.layout.addItem(spacer)
-        
-        
 
         if not self.pushButtonAccept:
             self.pushButtonAccept = QToolButton(self)
@@ -157,14 +156,11 @@ class FLFormSearchDB(FLFormDB):
         self.pushButtonAccept.setSizePolicy(sizePolicy)
         self.pushButtonAccept.setMaximumSize(pbSize)
         self.pushButtonAccept.setMinimumSize(pbSize)
-        self.pushButtonAccept.setIcon(
-            QtGui.QIcon(filedir("../share/icons", "gtk-save.png")))
+        self.pushButtonAccept.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-save.png")))
         # pushButtonAccept->setAccel(QKeySequence(Qt::Key_F10)); FIXME
         self.pushButtonAccept.setFocus()
-        self.pushButtonAccept.setWhatsThis(
-            "Seleccionar registro actual y cerrar formulario (F10)")
-        self.pushButtonAccept.setToolTip(
-            "Seleccionar registro actual y cerrar formulario (F10)")
+        self.pushButtonAccept.setWhatsThis("Seleccionar registro actual y cerrar formulario (F10)")
+        self.pushButtonAccept.setToolTip("Seleccionar registro actual y cerrar formulario (F10)")
         self.pushButtonAccept.setFocusPolicy(QtCore.Qt.NoFocus)
         self.bottomToolbar.layout.addWidget(self.pushButtonAccept)
         self.pushButtonAccept.show()
@@ -177,14 +173,11 @@ class FLFormSearchDB(FLFormDB):
         self.pushButtonCancel.setSizePolicy(sizePolicy)
         self.pushButtonCancel.setMaximumSize(pbSize)
         self.pushButtonCancel.setMinimumSize(pbSize)
-        self.pushButtonCancel.setIcon(
-            QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
+        self.pushButtonCancel.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
         self.pushButtonCancel.setFocusPolicy(QtCore.Qt.NoFocus)
         # pushButtonCancel->setAccel(Esc); FIXME
-        self.pushButtonCancel.setWhatsThis(
-            "Cerrar formulario sin seleccionar registro (Esc)")
-        self.pushButtonCancel.setToolTip(
-            "Cerrar formulario sin seleccionar registro (Esc)")
+        self.pushButtonCancel.setWhatsThis("Cerrar formulario sin seleccionar registro (Esc)")
+        self.pushButtonCancel.setToolTip("Cerrar formulario sin seleccionar registro (Esc)")
         self.bottomToolbar.layout.addWidget(self.pushButtonCancel)
         self.pushButtonCancel.show()
 
@@ -219,12 +212,10 @@ class FLFormSearchDB(FLFormDB):
                 self.initFocusWidget_.setFocus()
             return False
 
-
         self.inExec_ = True
         self.acceptingRejecting_ = False
         self.accepted_ = False
-        
-        
+
         super(FLFormSearchDB, self).show()
         if self.initFocusWidget_:
             self.initFocusWidget_.setFocus()
@@ -240,21 +231,16 @@ class FLFormSearchDB(FLFormDB):
             timer2 = QtCore.QTimer(self)
             timer2.singleShot(0, self.emitFormReady)
 
-        
-        
         self.loop = True
         self.eventloop.exec_()
         self.loop = False
         self.inExec_ = False
-        
+
         if self.accepted_ and valor:
             return self.cursor_.valueBuffer(valor)
         else:
             self.close()
             return False
-
-        
-        
 
     """
     Aplica un filtro al cursor
@@ -273,8 +259,6 @@ class FLFormSearchDB(FLFormDB):
         else:
             newF = "%s AND %s" % (previousF, f)
         self.cursor_.setMainFilter(newF)
-    
-    
 
     """
     Devuelve el nombre de la clase del formulario en tiempo de ejecución
@@ -325,6 +309,7 @@ class FLFormSearchDB(FLFormDB):
     """
     Invoca a la función "init" del script "masterprocess" asociado al formulario
     """
+
     @QtCore.pyqtSlot()
     def callInitScript(self):
         pass
@@ -332,6 +317,7 @@ class FLFormSearchDB(FLFormDB):
     """
     Redefinida por conveniencia
     """
+
     @QtCore.pyqtSlot()
     def hide(self):
         if self.isHidden():
@@ -345,6 +331,7 @@ class FLFormSearchDB(FLFormDB):
     """
     Se activa al pulsar el boton aceptar
     """
+
     @QtCore.pyqtSlot()
     def accept(self):
         if self.acceptingRejecting_:
@@ -359,13 +346,14 @@ class FLFormSearchDB(FLFormDB):
         self.accepted_ = True
         self.saveGeometry()
         self.hide()
-        
+
         if isinstance(self.parent(), QMdiSubWindow):
             self.parent().hide()
 
     """
     Se activa al pulsar el botón cancelar
     """
+
     @QtCore.pyqtSlot()
     def reject(self):
         if self.acceptingRejecting_:
@@ -382,6 +370,7 @@ class FLFormSearchDB(FLFormDB):
     """
     Redefinida por conveniencia
     """
+
     @QtCore.pyqtSlot()
     def show(self):
         self.exec_()

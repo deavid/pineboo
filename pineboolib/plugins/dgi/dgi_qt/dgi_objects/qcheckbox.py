@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore
 
+
 class QCheckBox(QtWidgets.QCheckBox):
 
     _parent = None
@@ -16,7 +17,7 @@ class QCheckBox(QtWidgets.QCheckBox):
     @checked.setter
     def checked(self, b):
         if isinstance(b, str):
-            b = (b == "true")
+            b = b == "true"
         super(QCheckBox, self).setChecked(b)
-        #if not pineboolib.project._DGI.localDesktop():
+        # if not pineboolib.project._DGI.localDesktop():
         #    pineboolib.project._DGI._par.addQueque("%s_setChecked" % self._parent.objectName(), b)

@@ -5,7 +5,7 @@
 from pineboolib import decorators
 
 
-class FLRelationMetaData():
+class FLRelationMetaData:
 
     """
     Constantes de tipos de cardinalidades de una relacion
@@ -22,8 +22,7 @@ class FLRelationMetaData():
         if len(args) == 1:
             self.inicializeFromFLRelationMetaData(args[0])
         else:
-            self.inicializeNewFLRelationMetaData(
-                args[0], args[1], args[2], args[3], args[4], args[5])
+            self.inicializeNewFLRelationMetaData(args[0], args[1], args[2], args[3], args[4], args[5])
 
         ++self.count_
 
@@ -105,22 +104,25 @@ class FLRelationMetaData():
 
     @return Devuelve TRUE si la relacion implica borrados en cascada, FALSE en caso contrario
     """
+
     @decorators.BetaImplementation
     def deleteCascade(self):
-        return (self.d.deleteCascade_ and self.d.cardinality_ == self.RELATION_M1)
+        return self.d.deleteCascade_ and self.d.cardinality_ == self.RELATION_M1
 
     """
     Obtiene si la relación implica modificaciones en cascada, sólo se tiene en cuenta en cardinalidades M1.
 
     @return Devuelve TRUE si la relacion implica modificaciones en cascada, FALSE en caso contrario
     """
+
     @decorators.BetaImplementation
     def updateCascade(self):
-        return (self.d.updateCascade_ and self.d.cardinality_ == self.RELATION_M1)
+        return self.d.updateCascade_ and self.d.cardinality_ == self.RELATION_M1
 
     """
     Obtiene si se deben aplicar la reglas de integridad sobre la relación
     """
+
     @decorators.BetaImplementation
     def checkIn(self):
         return self.d.checkIn_
@@ -138,11 +140,12 @@ class FLRelationMetaData():
         self.d.checkIn_ = other.d.checkIn_
 
 
-class FLRelationMetaDataPrivate():
+class FLRelationMetaDataPrivate:
 
     """
     Nombre del campo a relacionar
     """
+
     field_ = None
 
     """
@@ -179,8 +182,7 @@ class FLRelationMetaDataPrivate():
         if len(args) == 0:
             self.inicializeFromFLRelationMetaDataPrivate()
         else:
-            self.inicializeNewFLRelationMetaDataPrivate(
-                args[0], args[1], args[2], args[3], args[4], args[5])
+            self.inicializeNewFLRelationMetaDataPrivate(args[0], args[1], args[2], args[3], args[4], args[5])
 
     def inicializeNewFLRelationMetaDataPrivate(self, fT, fF, rC, dC, uC, cI):
         self.foreignTable_ = fT.lower()

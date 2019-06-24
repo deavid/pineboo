@@ -3,7 +3,6 @@ from PyQt5 import QtCore
 import logging
 
 
-
 class QTranslator(QtCore.QObject):
     d = None
 
@@ -34,34 +33,32 @@ class QTranslator(QtCore.QObject):
             return
 
         s = QtCore.QDataStream(self.d.messageArray, QtCore.QIODevice.ReadOnly)
-        
+
         while True:
             if s.__hash__() == 0:
                 break
-            
+
             self.d.messages.append(m)
 
     def elfHash(self, name):
-        
+
         k = None
         h = 0
         g = None
-        
+
         if name:
             for k in range(len(name)):
-                h = (h << 4 ) + (k + 1)
-                g = (h & 0xf0000000)
+                h = (h << 4) + (k + 1)
+                g = h & 0xF0000000
                 if g != 0:
                     h ^= g >> 24
-                
+
                 h &= ~g
-        
+
         if not h:
             h = 1
-        
-        return h 
 
-    
+        return h
 
     def squeeze(self, mode):
         if not self.d.messages:
@@ -69,76 +66,73 @@ class QTranslator(QtCore.QObject):
                 self.unsquezze()
             else:
                 return
-        
-        
+
         self.clear()
-        
+
         self.d.messageArray = QtCore.QByteArray()
         self.d.offsetArray = QtCore.QByteArray()
         self.d.contextArray = QtCore.QByteArray()
-        
+
         ds = QtCore.QDataStream(self.d.offsetArray, QtCore.QIODevice.WriteOnly)
         t = QtCore.QDataStream(self.d.contextArray, QtCore.QIODevice.WriteOnly)
         ms = QtCore.QDataStream(self.d.messageArray, QtCore.QIODevice.WriteOnly)
-        
+
         messages = []
         offsets = {}
         contexts = []
-        
-        for m in self.d.messages: 
-            
-            if m.type_() > 0 and m.sourceText() is not "":#Si Terminada
-                #print("mensaje", m.context(), m.sourceText(), m.translation(), len(m.sourceText()), m.sourceText() == "", m.type_())
-                messages.append(m) # Añado mensaje
-                 
-                if m.context() not in contexts: #Si el context es nuevo
-                    contexts.append(m.context()) # Añado context
+
+        for m in self.d.messages:
+
+            if m.type_() > 0 and m.sourceText() is not "":  # Si Terminada
+                # print("mensaje", m.context(), m.sourceText(), m.translation(), len(m.sourceText()), m.sourceText() == "", m.type_())
+                messages.append(m)  # Añado mensaje
+
+                if m.context() not in contexts:  # Si el context es nuevo
+                    contexts.append(m.context())  # Añado context
                     offsets[m.context()] = obj_()
                     offsets[m.context()].k = 0
                     offsets[m.context()].o = 0
-                
-                
-        #Aquí creamos offsets
-        #| h 32       | o 32        |
-        #| 00 00 00 00| 00 00 00 00 |
-        
+
+        # Aquí creamos offsets
+        # | h 32       | o 32        |
+        # | 00 00 00 00| 00 00 00 00 |
+
         for key in offsets.keys():
-            ds.writeUInt32(offsets[key].h) #Marca
-            ds.writeUInt32(offsets[key].o) #Incremental!!
-        
-        
-        #| Init |  len source(32)| sourceText (16 *char)         | len context 1 (32) | context              | espacio | suma flag | value offset_context 32 bits | fin |
-        #| 03   | 00 00 00 10    | 00 01 00 02 00 03 00 04 00 05 | 00 00 00 08        | 51 44 69 61 6C 6F 67 | 00      | 05        | 00 00 00 00                  | 01  |
-        
-        #Aquí creamos msg
+            ds.writeUInt32(offsets[key].h)  # Marca
+            ds.writeUInt32(offsets[key].o)  # Incremental!!
+
+        # | Init |  len source(32)| sourceText (16 *char)         | len context 1 (32) | context              | espacio | suma flag | value offset_context 32 bits | fin |
+        # | 03   | 00 00 00 10    | 00 01 00 02 00 03 00 04 00 05 | 00 00 00 08        | 51 44 69 61 6C 6F 67 | 00      | 05        | 00 00 00 00                  | 01  |
+
+        # Aquí creamos msg
         for msg in messages:
-            ms.writeUInt8(3) # Nuevo msg
+            ms.writeUInt8(3)  # Nuevo msg
             ms.writeUInt32(len(msg.translation() * 2))
             for st in msg.translation():
-                #print("***", st , type(st))
+                # print("***", st , type(st))
                 ms.writeUInt8(0x0)
                 ms.writeUInt8(st if isinstance(st, int) else ord(st))
-                #if not msg.translation():
+                # if not msg.translation():
                 #    ms.writeUInt8(0x07)
-                #else:
+                # else:
                 #    continue
-                    #Meter traduccion
-            #ms.writeUInt32(len(m.context()) + 1)
-            #for cc in m.context():
-                #print(cc, type(cc), m.context(), len(m.context()) + 1)
-            #    ms.writeUInt8(cc if isinstance(cc, int) else ord(cc))           
-            
-            #ms.writeUInt8(0)
+                # Meter traduccion
+            # ms.writeUInt32(len(m.context()) + 1)
+            # for cc in m.context():
+            # print(cc, type(cc), m.context(), len(m.context()) + 1)
+            #    ms.writeUInt8(cc if isinstance(cc, int) else ord(cc))
+
+            # ms.writeUInt8(0)
             ms.writeUInt8(5)
-            
-            ms.writeUInt32(offsets[m.context()].h) #Aqui se mete el offset al que pertenece
-            #ms.writeUInt32(0)
+
+            ms.writeUInt32(offsets[m.context()].h)  # Aqui se mete el offset al que pertenece
+            # ms.writeUInt32(0)
             ms.writeUInt8(1)
-        
-        #| len(ctx) | ctx 8 * char  | espacio |
-        #| 05       | 01 02 03 04 05| 00 |
-        
-        #Aquí creamos contexts
+
+        # | len(ctx) | ctx 8 * char  | espacio |
+        # | 05       | 01 02 03 04 05| 00 |
+
+        # Aquí creamos contexts
         h_table_size = 0
         if len(contexts) < 200:
             h_table_size = 151 if len(contexts) < 60 else 503
@@ -146,45 +140,35 @@ class QTranslator(QtCore.QObject):
             h_table_size = 1511 if len(contexts) < 750 else 5003
         else:
             h_table_size = 15013
-        
-        
-        t.writeUInt16(h_table_size) #1º table size
-        t.device().seek(2 + (h_table_size << 1)) #2º posicionado
-        t.writeUInt16(0) #Primer offset tiene q ser cero
-        
-        #Aumentamos tamaño de context hasta _table_size:
-        #ampliar_context = h_table_size - len(contexts)
-        #for i in range(ampliar_context):
+
+        t.writeUInt16(h_table_size)  # 1º table size
+        t.device().seek(2 + (h_table_size << 1))  # 2º posicionado
+        t.writeUInt16(0)  # Primer offset tiene q ser cero
+
+        # Aumentamos tamaño de context hasta _table_size:
+        # ampliar_context = h_table_size - len(contexts)
+        # for i in range(ampliar_context):
         #    contexts.append(False)
-        
-        
-        
+
         for ctx in contexts:
             if ctx is not False:
                 t.writeInt8(len(ctx) if len(ctx) < 255 else 255)
                 if len(ctx) == 255:
                     ctx = ctx[0:254]
-                
+
                 for c in ctx:
                     t.writeInt8(c if isinstance(c, int) else ord(c))
-            
+
             t.writeInt8(0x0)
-        
-            
-        
+
         del messages
-               
-    
+
     def clear(self):
         pass
-    
-    
 
-                
-            
     def save_qm(self, file_name, mode):
 
-        magic = [0x3c, 0xb8, 0x64, 0x18, 0xca, 0xef, 0x9c, 0x95, 0xcd, 0x21, 0x1c, 0xbf, 0x60, 0xa1, 0xbd, 0xdd]
+        magic = [0x3C, 0xB8, 0x64, 0x18, 0xCA, 0xEF, 0x9C, 0x95, 0xCD, 0x21, 0x1C, 0xBF, 0x60, 0xA1, 0xBD, 0xDD]
 
         f = QtCore.QFile(file_name)
         if f.open(QtCore.QIODevice.WriteOnly):
@@ -195,38 +179,38 @@ class QTranslator(QtCore.QObject):
                 s.writeUInt8(m)
 
             tag = None
-            
-            #print("*** context ", self.d.contextArray.data(), self.d.contextArray.size())
-            #print("*** ofsets ", self.d.offsetArray.data(), self.d.offsetArray.size())
-            #print("*** messages ", self.d.messageArray.data(), self.d.messageArray.size())
-        
+
+            # print("*** context ", self.d.contextArray.data(), self.d.contextArray.size())
+            # print("*** ofsets ", self.d.offsetArray.data(), self.d.offsetArray.size())
+            # print("*** messages ", self.d.messageArray.data(), self.d.messageArray.size())
+
             if self.d.offsetArray is not None:
                 tag = QTranslatorPrivate.Hashes
-                oas = self.d.offsetArray.size() #42
+                oas = self.d.offsetArray.size()  # 42
                 s.writeUInt8(tag)
                 s.writeUInt32(oas)
                 if self.d.offsetArray.size() > 0:
                     s.writeBytes(self.d.offsetArray.data())
-            
+
             if self.d.messageArray is not None:
-                tag = QTranslatorPrivate.Messages #69
+                tag = QTranslatorPrivate.Messages  # 69
                 mas = self.d.messageArray.size()
                 s.writeUInt8(tag)
-                #s.writeUInt32(mas)
+                # s.writeUInt32(mas)
                 if self.d.messageArray.size() > 0:
                     s.writeBytes(self.d.messageArray.data())
-            
+
             if self.d.contextArray is not None:
-                tag = QTranslatorPrivate.Contexts #2f
+                tag = QTranslatorPrivate.Contexts  # 2f
                 cas = self.d.contextArray.size()
                 s.writeUInt8(tag)
-                #s.writeUInt32(cas)
+                # s.writeUInt32(cas)
                 if self.d.contextArray.size() > 0:
                     s.writeBytes(self.d.contextArray.data())
-        
-            #s.writeUInt8(0x0)
+
+            # s.writeUInt8(0x0)
             return True
-    
+
         return False
 
     """
@@ -328,9 +312,10 @@ class QTranslator(QtCore.QObject):
         return None
     """
 
+
 class QTranslatorPrivate(QtCore.QObject):
-    
-    Contexts = 0x2f
+
+    Contexts = 0x2F
     Hashes = 0x42
     Messages = 0x69
 
@@ -340,15 +325,12 @@ class QTranslatorPrivate(QtCore.QObject):
         self.messageArray = QtCore.QByteArray()
         self.offsetArray = QtCore.QByteArray()
         self.contextArray = QtCore.QByteArray()
-        
+
         self.unmapPointer = 0
         self.unmapLength = 0
 
         self.messages = {}
         self.oldPermissionLookup = 0
-
-
-
 
     def Offset(*args):
         h = None
@@ -362,7 +344,7 @@ class QTranslatorPrivate(QtCore.QObject):
             h = args[0].hash()
             o = args[1]
 
+
 class obj_(object):
     h = 0
     o = 0
-    

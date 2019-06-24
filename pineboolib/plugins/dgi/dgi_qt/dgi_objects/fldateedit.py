@@ -3,6 +3,7 @@
 from PyQt5 import QtCore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qdateedit import QDateEdit
 
+
 class FLDateEdit(QDateEdit):
 
     valueChanged = QtCore.pyqtSignal()
@@ -31,9 +32,9 @@ class FLDateEdit(QDateEdit):
             date = convert_to_qdate(d)
 
         super(FLDateEdit, self).setDate(date)
-        #if not pineboolib.project._DGI.localDesktop():
+        # if not pineboolib.project._DGI.localDesktop():
         #    pineboolib.project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), date.toString())
-        #else:
-        self.setStyleSheet('color: black')
+        # else:
+        self.setStyleSheet("color: black")
 
     date = property(getDate, setDate)

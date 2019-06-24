@@ -140,8 +140,8 @@ class FormInternalObj(FormDBWidget):
         # arg00="ICONST:'0'"/><regexchar arg00="MINUS"/><regexchar
         # arg00="ICONST:'9'"/><regexchar arg00="RBRACKET"/><regexchar
         # arg00="PLUS"/></regexbody></Constant></Value>
-        #versionSys = sys.version().match(unknownarg)
-        #if self.iface.compararVersiones(versionSys, versionMinimaFL) == 2:
+        # versionSys = sys.version().match(unknownarg)
+        # if self.iface.compararVersiones(versionSys, versionMinimaFL) == 2:
         #    contVersion = MessageBox.warning(util.translate(u"scripts", u"Este módulo necesita la versión ") + versionMinimaFL + util.translate(u"scripts", u" o superior de la aplicación base,\nactualmente la versión instalada es la ") +
         #                                     sys.version() + util.translate(u"scripts", u".\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"), MessageBox.Yes, MessageBox.No)
         #    if contVersion == MessageBox.No:
@@ -153,7 +153,7 @@ class FormInternalObj(FormDBWidget):
         recargar = util.sqlSelect(u"flmodules", u"idmodulo", ustr(u"idmodulo = '", modulo, u"'"))
         curModulo = FLSqlCursor(u"flmodules")
         if recargar:
-             # WITH_START
+            # WITH_START
             curModulo.select(ustr(u"idmodulo = '", modulo, u"'"))
             curModulo.first()
             curModulo.setModeAccess(curModulo.Edit)
@@ -162,7 +162,7 @@ class FormInternalObj(FormDBWidget):
         else:
             curModulo.setModeAccess(curModulo.Insert)
 
-         # WITH_START
+        # WITH_START
         curModulo.refreshBuffer()
         curModulo.setValueBuffer(u"idmodulo", modulo)
         curModulo.setValueBuffer(u"descripcion", descripcion)
@@ -207,7 +207,7 @@ class FormInternalObj(FormDBWidget):
 
     def oficial_traducirCadena(self, cadena=None, path=None, modulo=None):
         util = FLUtil()
-        if cadena.find(u"QT_TRANSLATE_NOOP") == - 1:
+        if cadena.find(u"QT_TRANSLATE_NOOP") == -1:
             return cadena
         cadena = QString(cadena).mid(41, len(cadena) - 43)
         nombreFichero = None

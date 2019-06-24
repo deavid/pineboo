@@ -1,13 +1,13 @@
-
-#from PyQt5.QtCore import QTime, QDate, QDateTime
-#from PyQt5.Qt import qWarning, QDomDocument, QRegExp
-#from PyQt5.QtWidgets import QMessageBox, QProgressDialog 
+# from PyQt5.QtCore import QTime, QDate, QDateTime
+# from PyQt5.Qt import qWarning, QDomDocument, QRegExp
+# from PyQt5.QtWidgets import QMessageBox, QProgressDialog
 
 from pineboolib.utils import checkDependencies
 from pineboolib import decorators
-#from pineboolib.fllegacy.flutil import FLUtil
-#from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-#from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+
+# from pineboolib.fllegacy.flutil import FLUtil
+# from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+# from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
 import traceback
 import pineboolib
@@ -18,75 +18,71 @@ import json
 
 logger = logging.getLogger(__name__)
 
+
 class cursor_class(object):
     driver_ = None
     id_ = None
     data_ = None
     current_ = None
     last_sql = None
-    
+
     def __init__(self, driver, n):
         self.driver_ = driver
-        self.id_ =  n
+        self.id_ = n
         self.current_ = None
         self.last_sql = None
         self.description = None
-    
+
     def __getattr__(self, name):
-        logger.warning("cursor(%s).%s !!", self.id_,name, stack_info = True)
-    
+        logger.warning("cursor(%s).%s !!", self.id_, name, stack_info=True)
+
     def execute(self, sql):
         self.last_sql = sql
         self.data_ = self.driver_.send_to_server(self.driver_.create_dict("execute", {"cursor_id": self.id_, "sql": sql}))
         self.current_ = 0
-    
+
     def close(self):
         self.driver_.send_to_server(self.driver_.create_dict("close", {"cursor_id": self.id_}))
-    
+
     def fetchone(self):
         ret_ = self.driver_.send_to_server(self.driver_.create_dict("fetchone", {"cursor_id": self.id_}))
-        #print(self.id_, "**", self.last_sql, ret_)
+        # print(self.id_, "**", self.last_sql, ret_)
         return ret_
-    
+
     def fetchall(self):
         ret_ = self.driver_.send_to_server(self.driver_.create_dict("fetchall", {"cursor_id": self.id_}))
-        #print(self.id_, "**", self.last_sql, ret_)
+        # print(self.id_, "**", self.last_sql, ret_)
         return ret_
-        
-        
+
     def __iter__(self):
         return self
 
     def __next__(self):
-        ret =  self.driver_.send_to_server(self.driver_.create_dict("fetchone", {"cursor_id": self.id_}))
+        ret = self.driver_.send_to_server(self.driver_.create_dict("fetchone", {"cursor_id": self.id_}))
         if ret is None:
             raise StopIteration
         return ret
-        
 
 
 class conn_class(object):
-    
+
     db_name_ = None
     driver_ = None
     list_cursor = None
-    
+
     def __init__(self, db_name, driver):
         self.db_name_ = db_name
         self.driver_ = driver
         self.list_cursor = []
-    
+
     def is_valid(self):
         db_name_server = self.driver_.send_to_server(self.driver_.create_dict("db_name"))
         return self.db_name_ == db_name_server
-    
+
     def cursor(self):
         cur = cursor_class(self.driver_, len(self.list_cursor))
         self.list_cursor.append(cur)
         return cur
-    
-        
-        
 
 
 class FLREMOTECLIENT(object):
@@ -116,13 +112,13 @@ class FLREMOTECLIENT(object):
         self.id_ = 0
         self.url = None
         checkDependencies({"requests": "requests"}, False)
-    
+
     def useThreads(self):
         return False
 
     def useTimer(self):
         return True
-    
+
     def desktopFile(self):
         return False
 
@@ -146,20 +142,21 @@ class FLREMOTECLIENT(object):
 
     def DBName(self):
         return self._dbname
-    
-    def create_dict(self, fun, data = []): 
+
+    def create_dict(self, fun, data=[]):
         fun = "%s__%s" % (self.id_, fun)
         return pineboolib.utils.create_dict("dbdata", fun, self.id_, data)
-    
+
     def send_to_server(self, js):
         import requests
-        headers = {'content-type': 'application/json'}
-        
+
+        headers = {"content-type": "application/json"}
+
         req = requests.post(self.url, data=json.dumps(js), headers=headers).json()
         res_ = req["result"] if "result" in req.keys() else None
-        #if res_ is None:
+        # if res_ is None:
         #    print("FAIL %s --> %s\n%s" % (js, self.url, req))
-        
+
         if res_ == "Desconocido":
             print("%s -> %s\nresult: %s" % (js, self.url, res_))
         return res_
@@ -174,51 +171,68 @@ class FLREMOTECLIENT(object):
         except Exception as exc:
             print(exc)
             return False
-            
+
         server_found = False
-        
-        
+
         if ret[0:7] == "Welcome":
             server_found = True
-        
-        
+
         if server_found:
             self.conn_ = conn_class(db_name, self)
-            
+
             if not self.conn_.is_valid():
                 return False
 
         return self.conn_
-    
-    def existsTable(self, name): #Siempre True
+
+    def existsTable(self, name):  # Siempre True
         return True
-    
+
     def mismatchedTable(self, *args):
         return False
 
     def __getattr__(self, name):
         return virtual_function(name, self).virtual
-    
+
     def refreshQuery(self, curname, fields, table, where, cursor, conn):
-        self.send_to_server(self.create_dict("refreshQuery", {"cursor_id": cursor.id_, "curname": "%s_%s" % (self.id_, curname), "fields": fields, "table": table, "where": where}))
-    
+        self.send_to_server(
+            self.create_dict(
+                "refreshQuery", {"cursor_id": cursor.id_, "curname": "%s_%s" % (self.id_, curname), "fields": fields, "table": table, "where": where}
+            )
+        )
+
     def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
-        self.send_to_server(self.create_dict("refreshFetch", {"cursor_id": cursor.id_, "curname": "%s_%s" % (self.id_, curname), "fields": fields, "table": table, "where_filter": where_filter, "number": number}))
-        
+        self.send_to_server(
+            self.create_dict(
+                "refreshFetch",
+                {
+                    "cursor_id": cursor.id_,
+                    "curname": "%s_%s" % (self.id_, curname),
+                    "fields": fields,
+                    "table": table,
+                    "where_filter": where_filter,
+                    "number": number,
+                },
+            )
+        )
+
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
-        return self.send_to_server(self.create_dict("fetchAll", {"cursor_id": cursor.id_, "tablename": tablename, "where_filter": where_filter, "fields": fields , "curname": "%s_%s" % (self.id_, curname)}))
+        return self.send_to_server(
+            self.create_dict(
+                "fetchAll",
+                {"cursor_id": cursor.id_, "tablename": tablename, "where_filter": where_filter, "fields": fields, "curname": "%s_%s" % (self.id_, curname)},
+            )
+        )
+
 
 class virtual_function(object):
     name_ = None
     driver_ = None
-    
+
     def __init__(self, name, driver):
         self.name_ = name
         self.driver_ = driver
-        
+
     def virtual(self, *args):
-        #return self.driver_.send_to_server(self.driver_.create_dict("%s_%s" % (self.driver_.conn_.user_name_, self.name_), args))
+        # return self.driver_.send_to_server(self.driver_.create_dict("%s_%s" % (self.driver_.conn_.user_name_, self.name_), args))
         return self.driver_.send_to_server(self.driver_.create_dict(self.name_, args))
-        
-        
-        

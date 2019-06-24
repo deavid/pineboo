@@ -8,8 +8,6 @@ from pineboolib.utils import load2xml
 import logging
 
 
-
-
 logger = logging.getLogger(__name__)
 
 BARCODE_ANY = 0
@@ -38,10 +36,12 @@ class FLCodBar(object):
     p = None
     pError = None
 
-
-    def __init__(self, value=None, type_=BARCODE_128, margin=10, scale=1.0, cut=1.0, rotation=0, text_flag=False, fg=QtCore.Qt.black, bg=QtCore.Qt.white, res=72):
+    def __init__(
+        self, value=None, type_=BARCODE_128, margin=10, scale=1.0, cut=1.0, rotation=0, text_flag=False, fg=QtCore.Qt.black, bg=QtCore.Qt.white, res=72
+    ):
         dict_ = {"barcode": "python-barcode"}
         from pineboolib.utils import checkDependencies
+
         checkDependencies(dict_)
         self.pError = "Not Implemented"
 
@@ -61,7 +61,7 @@ class FLCodBar(object):
                 self.writingStdout = False
                 self.barcode["value"] = value
                 self.barcode["type"] = type_
-                self.barcode["margin"] = margin 
+                self.barcode["margin"] = margin
                 self.barcode["scale"] = scale
                 self.barcode["cut"] = cut
                 self.barcode["rotation"] = rotation
@@ -73,7 +73,6 @@ class FLCodBar(object):
 
             else:
                 self._copyBarCode(value, self.barcode)
-
 
     def pixmap(self):
         self._createBarcode()
@@ -258,7 +257,6 @@ class FLCodBar(object):
         else:
             return "ANY"
 
-
     def _createBarcode(self):
         if self.barcode["value"] == "":
             return
@@ -277,50 +275,45 @@ class FLCodBar(object):
             fg_ = QColor(self.barcode["fg"]).name()
 
         margin_ = self.barcode["margin"] / 10
-        
+
         render_options = {}
-        render_options['module_width'] = 0.6
-        render_options['module_height'] = 10
-        render_options['background'] = bg_.lower()
-        render_options['foreground'] = fg_.lower()
-        render_options['font_size'] = 8
-        render_options['write_text'] = self.barcode["text"]
-        render_options['text_distance'] = 35
-        render_options['quiet_zone'] = margin_ 
+        render_options["module_width"] = 0.6
+        render_options["module_height"] = 10
+        render_options["background"] = bg_.lower()
+        render_options["foreground"] = fg_.lower()
+        render_options["font_size"] = 8
+        render_options["write_text"] = self.barcode["text"]
+        render_options["text_distance"] = 35
+        render_options["quiet_zone"] = margin_
         if self.barcode["text"]:
-            render_options['text'] = value_  
+            render_options["text"] = value_
         else:
-            render_options['text'] = " "
-            
-        
-        
-        
-        
-        
+            render_options["text"] = " "
+
         import barcode
         from barcode.writer import ImageWriter
         from PyQt5.QtSvg import QSvgRenderer
 
         barC = barcode.get_barcode_class(type_.lower())
         try:
-            bar_ = barC(u'%s' % value_)
+            bar_ = barC(u"%s" % value_)
         except Exception:
-            bar_ = barC('000000000000')
-            
+            bar_ = barC("000000000000")
+
         svg = bar_.render(render_options)
         xml_svg = load2xml(svg.decode("utf-8"))
-        svg_w = (3.779 * float(xml_svg.get("width")[0:6])) 
-        svg_h = (3.779 * float(xml_svg.get("height")[0:6]))
+        svg_w = 3.779 * float(xml_svg.get("width")[0:6])
+        svg_h = 3.779 * float(xml_svg.get("height")[0:6])
         self.p = QPixmap(svg_w, svg_h)
         render = QSvgRenderer(svg)
         self.p.fill(QtCore.Qt.transparent)
         painter = Qt.QPainter(self.p)
-        render.render(painter, QRectF(0,0,svg_w * 3.4 , svg_h * 3.4))
+        render.render(painter, QRectF(0, 0, svg_w * 3.4, svg_h * 3.4))
 
         if self.p.isNull():
             self.barcode["valid"] = False
         else:
-            
+
             if self.barcode["scale"] != 1.0:
                 wS_ = self.barcode["x"] * self.barcode["scale"]
                 hS_ = self.barcode["y"] * self.barcode["scale"]
@@ -330,7 +323,6 @@ class FLCodBar(object):
             self.barcode["y"] = self.p.height()
 
             self.barcode["valid"] = True
-            
 
     def _copyBarCode(self, source, dest):
         dest["value"] = source["value"]

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib.qsa import *
 import traceback
+
 sys = SysType()
 
 
@@ -30,7 +31,7 @@ class FormInternalObj(FormDBWidget):
 
     def tipoDeFichero(self, nombre=None):
         posPunto = nombre.rfind(u".")
-        return nombre[(len(nombre) - (len(nombre) - posPunto)):]
+        return nombre[(len(nombre) - (len(nombre) - posPunto)) :]
 
     def editarFichero(self):
         cursor = self.cursor()
@@ -40,11 +41,11 @@ class FormInternalObj(FormDBWidget):
             nombre = cursor.valueBuffer(u"nombre")
             tipo = self.tipoDeFichero(nombre)
             temporal = System.getenv(u"TMP")
-            if temporal == '':
+            if temporal == "":
                 temporal = System.getenv(u"TMPDIR")
-            if temporal == '':
+            if temporal == "":
                 temporal = System.getenv(u"HOME")
-            if temporal == '':
+            if temporal == "":
                 temporal = ustr(sys.installPrefix(), u"/share/facturalux/tmp")
             temporal = ustr(temporal, u"/", cursor.valueBuffer(u"nombre"))
             contenido = self.child(u"contenido").text
@@ -129,11 +130,11 @@ class FormInternalObj(FormDBWidget):
         util = FLUtil()
         if cursor.checkIntegrity():
             temporal = System.getenv(u"TMP")
-            if temporal == '':
+            if temporal == "":
                 temporal = System.getenv(u"TMPDIR")
-            if temporal == '':
+            if temporal == "":
                 temporal = System.getenv(u"HOME")
-            if temporal == '':
+            if temporal == "":
                 temporal = ustr(sys.installPrefix(), u"/share/facturalux/tmp")
             temporal = ustr(temporal, u"/", cursor.valueBuffer(u"nombre"))
             comando = ""
@@ -146,7 +147,7 @@ class FormInternalObj(FormDBWidget):
                 comando = ustr(sys.installPrefix(), u"/bin/teddy")
 
             self.setDisabled(True)
-            Process.execute([comando,temporal])
+            Process.execute([comando, temporal])
             self.child(u"contenido").text = File.read(temporal)
             self.setDisabled(False)
 

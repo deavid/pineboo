@@ -5,5 +5,6 @@ import pineboolib
 
 pluginType = MODULE
 
+
 def moduleInformation():
-    return 'pineboolib.plugins.dgi.dgi_qt.dgi_objects.flfielddb', ('FLFieldDB')
+    return "pineboolib.plugins.dgi.dgi_qt.dgi_objects.flfielddb", ("FLFieldDB")

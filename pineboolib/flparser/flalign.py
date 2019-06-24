@@ -142,12 +142,7 @@ def appliedDiff(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
                     conflict = True
                 AddedC.append(lineaC)
             linefrom = modefrom
-        line = (
-            modefrom, modetype,
-            linenumbers,
-            linefrom,
-            linetext
-        )
+        line = (modefrom, modetype, linenumbers, linefrom, linetext)
         # ConflictMode = False
         if len(ConflictMode):
             if linetext[0] != "#":
@@ -206,8 +201,7 @@ def appliedDiff(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
                     # Removing twice!
                     nBase.error = "removing-twice"
                 else:
-                    print("??", nRemote.letter,
-                          nDiffRemote.symbol(), nDiffRemote.line())
+                    print("??", nRemote.letter, nDiffRemote.symbol(), nDiffRemote.line())
             else:
                 next(nRemote)
 
@@ -227,8 +221,7 @@ def appliedDiff(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
                     next(nDiffRemote)
                 if nDiffRemote.symbol() == "+":
                     if not quiet:
-                        print("!~", nRemote.letter,
-                              nDiffRemote.symbol(), nDiffRemote.line())
+                        print("!~", nRemote.letter, nDiffRemote.symbol(), nDiffRemote.line())
                     next(nDiffRemote)
                     next(nRemote)
 
@@ -248,11 +241,7 @@ def appliedDiff(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
 
     while True:
 
-        if (
-            int(nlA) >= maxA and
-            int(nlB) >= maxB and
-            int(nlC) >= maxC
-        ):
+        if int(nlA) >= maxA and int(nlB) >= maxB and int(nlC) >= maxC:
             break
         lineaA = " "
         sAB = cAB = lineaA = " "
@@ -291,8 +280,7 @@ def appliedDiff(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
             AddPatchLine("A=")
             if debug:
                 if prefer == "":
-                    print("ABC=%04d%+d%+d" %
-                          (nlA, nlB - nlA, nlC - nlA), lineaA)
+                    print("ABC=%04d%+d%+d" % (nlA, nlB - nlA, nlC - nlA), lineaA)
                 elif prefer == "A":
                     print("A=%04d" % nlA, lineaA)
                 elif prefer == "B":
@@ -362,26 +350,22 @@ def appliedDiff(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
             print("-", name)
 
     if conflictsAA:
-        print("CONFLICTS SAME BLOCK ADDED B(%s)-C(%s):" %
-              (B.filename, C.filename))
+        print("CONFLICTS SAME BLOCK ADDED B(%s)-C(%s):" % (B.filename, C.filename))
         for name in conflictsAA:
             print("-", name)
 
     if conflictsDD:
-        print("CONFLICTS SAME BLOCK DELETED B(%s)-C(%s):" %
-              (B.filename, C.filename))
+        print("CONFLICTS SAME BLOCK DELETED B(%s)-C(%s):" % (B.filename, C.filename))
         for name in conflictsDD:
             print("-", name)
 
     if conflictsAD:
-        print("CONFLICTS BLOCK ADDED BY %s , DELETED BY %s:" %
-              (B.filename, C.filename))
+        print("CONFLICTS BLOCK ADDED BY %s , DELETED BY %s:" % (B.filename, C.filename))
         for name in conflictsAD:
             print("-", name)
 
     if conflictsDA:
-        print("CONFLICTS BLOCK DELETED BY %s , ADDED BY %s:" %
-              (B.filename, C.filename))
+        print("CONFLICTS BLOCK DELETED BY %s , ADDED BY %s:" % (B.filename, C.filename))
         for name in conflictsDA:
             print("-", name)
 
@@ -426,9 +410,7 @@ def writeAlignedFile(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
             print("!!!ERROR MERGING!!")
             continue
 
-        text = "".join(
-            F[Fwhich].lines[int(linebegin):int(lineend)]
-        )
+        text = "".join(F[Fwhich].lines[int(linebegin) : int(lineend)])
         # text = text.replace("\t","        ")
         sline = line.split(":")
         if sline[0] == "classdeclaration":
@@ -444,10 +426,8 @@ def writeAlignedFile(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
                 if rs1:
                     if lastclass != rs1.group(2):
                         # print "INFO: Changing >> class", thisclass, "extends",rs1.group(2), "--> extends", lastclass
-                        text = re.sub(
-                            r"class (\w+) extends (\w+)", "class %s extends %s" % (thisclass, lastclass), text)
-                rs2 = re.search(
-                    r"function .*%s\(.*context.*\) { (\w+)" % thisclass, text)
+                        text = re.sub(r"class (\w+) extends (\w+)", "class %s extends %s" % (thisclass, lastclass), text)
+                rs2 = re.search(r"function .*%s\(.*context.*\) { (\w+)" % thisclass, text)
                 if rs2:
                     if lastclass != rs2.group(1):
                         badline = rs2.group(0)
@@ -472,17 +452,11 @@ def main():
     #                action="store_false", dest="verbose", default=True,
     #                help="don't print status messages to stdout")
 
-    parser.add_option("--optdebug",
-                      action="store_true", dest="optdebug", default=False,
-                      help="debug optparse module")
+    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
 
-    parser.add_option("-q", "--quiet",
-                      action="store_true", dest="quiet", default=False,
-                      help="don't print status messages to stdout")
+    parser.add_option("-q", "--quiet", action="store_true", dest="quiet", default=False, help="don't print status messages to stdout")
 
-    parser.add_option("--debug",
-                      action="store_true", dest="debug", default=False,
-                      help="prints lots of useless messages")
+    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
 
     (options, args) = parser.parse_args()
     if options.optdebug:

@@ -13,7 +13,6 @@ from pineboolib.fllegacy.flutil import FLUtil
 import pineboolib
 
 
-
 import sys
 import traceback
 
@@ -21,7 +20,6 @@ import logging
 from PyQt5.QtCore import QTime, QDate, QDateTime
 
 logger = logging.getLogger(__name__)
-
 
 
 class FLMYSQL_MYISAM2(object):
@@ -73,7 +71,7 @@ class FLMYSQL_MYISAM2(object):
         return self.pure_python_
 
     def safe_load(self):
-        return checkDependencies({"PyMySQL": "PyMySQL", "sqlalchemy":"sqlAlchemy"}, False)
+        return checkDependencies({"PyMySQL": "PyMySQL", "sqlalchemy": "sqlAlchemy"}, False)
 
     def mobile(self):
         return self.mobile_
@@ -86,19 +84,17 @@ class FLMYSQL_MYISAM2(object):
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         self._dbname = db_name
-        checkDependencies({"PyMySQL": "PyMySQL", "sqlalchemy":"sqlAlchemy"})
+        checkDependencies({"PyMySQL": "PyMySQL", "sqlalchemy": "sqlAlchemy"})
         import pymysql
         from sqlalchemy import create_engine
 
         try:
             self.conn_ = pymysql.connect(host=db_host, user=db_userName, password=db_password, db=db_name, charset="utf8", autocommit=True)
-            self.engine_ = create_engine('mysql+mysqldb://%s:%s@%s:%s/%s' % (db_userName, db_password, db_host, db_port, db_name))
+            self.engine_ = create_engine("mysql+mysqldb://%s:%s@%s:%s/%s" % (db_userName, db_password, db_host, db_port, db_name))
         except pymysql.Error as e:
             pineboolib.project._splash.hide()
             if "Unknown database" in str(e):
-                ret = QMessageBox.warning(None, "Pineboo",
-                                          "La base de datos %s no existe.\n¿Desea crearla?" % db_name,
-                                          QMessageBox.Ok | QMessageBox.No)
+                ret = QMessageBox.warning(None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No)
                 if ret == QMessageBox.No:
                     return False
                 else:
@@ -108,7 +104,7 @@ class FLMYSQL_MYISAM2(object):
                         try:
                             cursor.execute("CREATE DATABASE %s" % db_name)
                         except Exception:
-                            print("ERROR: FLMYSQL2.connect",traceback.format_exc())
+                            print("ERROR: FLMYSQL2.connect", traceback.format_exc())
                             cursor.execute("ROLLBACK")
                             cursor.close()
                             return False
@@ -116,50 +112,47 @@ class FLMYSQL_MYISAM2(object):
                         return self.connect(db_name, db_host, db_port, db_userName, db_password)
                     except Exception:
                         qWarning(traceback.format_exc())
-                        QMessageBox.information(
-                            None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok)
-                        print(
-                            "ERROR: No se ha podido crear la Base de Datos %s" % db_name)
+                        QMessageBox.information(None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok)
+                        print("ERROR: No se ha podido crear la Base de Datos %s" % db_name)
                         return False
-            
-            
+
             else:
-                QMessageBox.information(
-                    None, "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok)
+                QMessageBox.information(None, "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok)
                 return False
 
         if self.conn_:
             self.open_ = True
-            #self.conn_.autocommit(True)
-            #self.conn_.set_character_set('utf8')
+            # self.conn_.autocommit(True)
+            # self.conn_.set_character_set('utf8')
 
         return self.conn_
-    
+
     def cursor(self):
         if not self.cursor_:
             self.cursor_ = self.conn_.cursor()
         return self.cursor_
-    
+
     def engine(self):
         return self.engine_
-    
+
     def session(self):
         if self.session_ is None:
             from sqlalchemy.orm import sessionmaker
-            #from sqlalchemy import event
-            #from pineboolib.pnobjectsfactory import before_commit, after_commit
+
+            # from sqlalchemy import event
+            # from pineboolib.pnobjectsfactory import before_commit, after_commit
             Session = sessionmaker(bind=self.engine())
             self.session_ = Session()
-            #event.listen(Session, 'before_commit', before_commit, self.session_)
-            #event.listen(Session, 'after_commit', after_commit, self.session_)
-    
+            # event.listen(Session, 'before_commit', before_commit, self.session_)
+            # event.listen(Session, 'after_commit', after_commit, self.session_)
+
     def declarative_base(self):
         if self.declarative_base_ is None:
             from sqlalchemy.ext.declarative import declarative_base
+
             self.declarative_base_ = declarative_base()
-        
+
         return self.declarative_base_
-    
 
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"
@@ -205,7 +198,7 @@ class FLMYSQL_MYISAM2(object):
             s = text2bool(v)
 
         elif type_ == "date":
-            #val = util.dateDMAtoAMD(v)
+            # val = util.dateDMAtoAMD(v)
             val = v
             if val is None:
                 s = "Null"
@@ -246,30 +239,25 @@ class FLMYSQL_MYISAM2(object):
 
     def canOverPartition(self):
         return True
-    
-    
+
     def tables(self, type_name=None):
         tl = []
         if not self.isOpen():
             return tl
-        
+
         q_tables = FLSqlQuery()
         q_tables.exec_("show tables")
         while q_tables.next():
             tl.append(q_tables.value(0))
-        
-        return tl
 
-            
-            
-    
+        return tl
 
     def nextSerialVal(self, table, field):
         if not self.isOpen():
             logger.warning("%s::beginTransaction: Database not open", self.name_)
             return None
 
-        #self.transaction()
+        # self.transaction()
         #    self.setLastError("No se puede iniciar la transacción", "BEGIN WORK")
         #    return None
 
@@ -279,7 +267,7 @@ class FLMYSQL_MYISAM2(object):
         cur_max = 0
         updateQry = False
         ret = None
-        
+
         q = FLSqlQuery()
         q.setSelect("max(%s)" % field)
         q.setFrom(table)
@@ -292,22 +280,18 @@ class FLMYSQL_MYISAM2(object):
 
         cursor = self.conn_.cursor()
 
-
-
-        #print(1,"max de %s.%s = %s" % (table, field, max))
-
+        # print(1,"max de %s.%s = %s" % (table, field, max))
 
         strQry = "SELECT seq FROM flseqs WHERE tabla = '%s' AND campo ='%s'" % (table, field)
         try:
             cur_max = cursor.execute(strQry)
         except Exception:
-            logger.warning("%s:: La consulta a la base de datos ha fallado" , self.name_, traceback.format_exc())
+            logger.warning("%s:: La consulta a la base de datos ha fallado", self.name_, traceback.format_exc())
             self.rollbackTransaction()
             return
-        
-        
-        #print(2,"cur_max de %s.%s = %s" % (table, field , cur_max))
-        
+
+        # print(2,"cur_max de %s.%s = %s" % (table, field , cur_max))
+
         updateQry = cur_max > 0
 
         strQry = None
@@ -317,25 +301,24 @@ class FLMYSQL_MYISAM2(object):
                 strQry = "UPDATE flseqs SET seq=%s WHERE tabla = '%s' AND campo = '%s'" % (ret, table, field)
         else:
             strQry = "INSERT INTO flseqs (tabla,campo,seq) VALUES('%s','%s',%s)" % (table, field, ret)
-        
+
         result = None
-        
+
         if strQry is not None:
             try:
                 result = cursor.execute(strQry)
             except Exception:
-                logger.warning("%s:: La consulta a la base de datos ha fallado\n %s" ,self.name_, traceback.format_exc())
+                logger.warning("%s:: La consulta a la base de datos ha fallado\n %s", self.name_, traceback.format_exc())
                 self.rollbackTransaction()
 
                 return
 
-
-        #self.commitTransaction()
+        # self.commitTransaction()
         #    qWarning("%s:: No se puede aceptar la transacción" % self.name_)
         #    return
 
         return ret
-    
+
     def queryUpdate(self, name, update, filter):
         sql = "UPDATE %s SET %s WHERE %s" % (name, update, filter)
         return sql
@@ -343,7 +326,7 @@ class FLMYSQL_MYISAM2(object):
     def savePoint(self, n):
         if n == 0:
             return True
-        
+
         if not self.isOpen():
             logger.warning("%s::savePoint: Database not open", self.name_)
             return False
@@ -352,8 +335,7 @@ class FLMYSQL_MYISAM2(object):
         try:
             cursor.execute("SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError(
-                "No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
+            self.setLastError("No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
             logger.warning("MySQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s \n %s ", n, traceback.format_exc())
             return False
 
@@ -361,14 +343,14 @@ class FLMYSQL_MYISAM2(object):
 
     def canSavePoint(self):
         return False
-    
+
     def canTransaction(self):
         return False
 
     def rollbackSavePoint(self, n):
         if n == 0:
             return True
-        
+
         if not self.isOpen():
             logger.warning("%s::rollbackSavePoint: Database not open", self.name_)
             return False
@@ -377,8 +359,7 @@ class FLMYSQL_MYISAM2(object):
         try:
             cursor.execute("ROLLBACK TO SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError(
-                "No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
+            self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
             logger.warning("%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s", self.name_, n, traceback.format_exc())
             return False
 
@@ -391,7 +372,7 @@ class FLMYSQL_MYISAM2(object):
         return self.lastError_
 
     def commitTransaction(self):
-        
+
         if not self.isOpen():
             logger.warning("%s::commitTransaction: Database not open", self.name_)
 
@@ -423,7 +404,7 @@ class FLMYSQL_MYISAM2(object):
         return True
 
     def transaction(self):
-        
+
         if not self.isOpen():
             logger.warning("%s::transaction: Database not open", self.name_)
 
@@ -440,7 +421,7 @@ class FLMYSQL_MYISAM2(object):
     def releaseSavePoint(self, n):
         if n == 0:
             return True
-        
+
         if not self.isOpen():
             qWarning("%s::releaseSavePoint: Database not open" % self.name_)
             return False
@@ -449,10 +430,8 @@ class FLMYSQL_MYISAM2(object):
         try:
             cursor.execute("RELEASE SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError(
-                "No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
-            qWarning("MySQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s\n %s" % (
-                n, traceback.format_exc()))
+            self.setLastError("No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
+            qWarning("MySQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s\n %s" % (n, traceback.format_exc()))
 
             return False
 
@@ -467,7 +446,6 @@ class FLMYSQL_MYISAM2(object):
     def refreshQuery(self, curname, fields, table, where, cursor, conn):
         if curname not in self.cursorsArray_.keys():
             self.cursorsArray_[curname] = cursor
-        
 
         sql = "SELECT %s FROM %s WHERE %s " % (fields, table, where)
         sql = self.fix_query(sql)
@@ -475,20 +453,20 @@ class FLMYSQL_MYISAM2(object):
             self.cursorsArray_[curname].execute(sql)
         except Exception:
             qWarning("CursorTableModel.Refresh\n %s" % traceback.format_exc())
-    
+
     def fix_query(self, val):
-        ret_ = val.replace("'true'","1")
+        ret_ = val.replace("'true'", "1")
         ret_ = ret_.replace("'false'", "0")
-        ret_ = ret_.replace("\'0\'", "0")
-        ret_ = ret_.replace("\'1\'", "1")
-        #ret_ = ret_.replace(";", "")
+        ret_ = ret_.replace("'0'", "0")
+        ret_ = ret_.replace("'1'", "1")
+        # ret_ = ret_.replace(";", "")
         return ret_
 
     def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
         pass
-        #try:
+        # try:
         #    self.cursorsArray_[curname].fetchmany(number)
-        #except Exception:
+        # except Exception:
         #    qWarning("%s.refreshFetch\n %s" %(self.name_, traceback.format_exc()))
 
     def useThreads(self):
@@ -500,7 +478,7 @@ class FLMYSQL_MYISAM2(object):
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
         if curname not in self.rowsFetched.keys():
             self.rowsFetched[curname] = 0
-        
+
         rowsF = []
         try:
             rows = list(self.cursorsArray_[curname])
@@ -513,10 +491,9 @@ class FLMYSQL_MYISAM2(object):
 
                 self.rowsFetched[curname] = i
         except Exception:
-            logger.error("%s:: fetchAll:%s",self.name_, traceback.format_exc())
-        
-        return rowsF
+            logger.error("%s:: fetchAll:%s", self.name_, traceback.format_exc())
 
+        return rowsF
 
     def existsTable(self, name):
         if not self.isOpen():
@@ -527,7 +504,7 @@ class FLMYSQL_MYISAM2(object):
         ok = t.exec_("SHOW TABLES LIKE '%s'" % name)
         if ok:
             ok = t.next()
-            
+
         return ok
 
     def sqlCreateTable(self, tmd):
@@ -556,17 +533,17 @@ class FLMYSQL_MYISAM2(object):
             sql = sql + field.name()
             if field.type() == "int":
                 sql += " INT"
-            elif field.type() in ["uint","serial"]:
+            elif field.type() in ["uint", "serial"]:
                 sql += " INT UNSIGNED"
             elif field.type() in ("bool", "unlock"):
                 sql += " BOOL"
             elif field.type() == "double":
-                sql += " DECIMAL(%s,%s)" % (field.partInteger() + field.partDecimal() +5 , field.partDecimal() + 5)
+                sql += " DECIMAL(%s,%s)" % (field.partInteger() + field.partDecimal() + 5, field.partDecimal() + 5)
             elif field.type() == "time":
                 sql += " TIME"
             elif field.type() == "date":
                 sql += " DATE"
-            elif field.type() in ["pixmap","stringlist"]:
+            elif field.type() in ["pixmap", "stringlist"]:
                 sql += " MEDIUMTEXT"
             elif field.type() == "string":
                 if field.length() > 0:
@@ -574,25 +551,31 @@ class FLMYSQL_MYISAM2(object):
                         sql += " VARCHAR"
                     else:
                         sql += " CHAR"
-                    
+
                     sql += "(%s)" % field.length()
                 else:
                     sql += " CHAR(255)"
-                    
+
             elif field.type() == "bytearray":
                 sql = sql + " LONGBLOB"
-
 
             if field.isPrimaryKey():
                 if primaryKey is None:
                     sql += " PRIMARY KEY"
                     primaryKey = field.name()
                 else:
-                    qWarning(QApplication.tr("FLManager : Tabla-> ") + tmd.name() +
-                             QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ") +
-                             field.name() + QApplication.tr(" , pero el campo ") + primaryKey +
-                             QApplication.tr(" ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData,"
-                                             " use FLCompoundKey para crear claves compuestas."))
+                    qWarning(
+                        QApplication.tr("FLManager : Tabla-> ")
+                        + tmd.name()
+                        + QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ")
+                        + field.name()
+                        + QApplication.tr(" , pero el campo ")
+                        + primaryKey
+                        + QApplication.tr(
+                            " ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData,"
+                            " use FLCompoundKey para crear claves compuestas."
+                        )
+                    )
                     return None
             else:
                 if field.isUnique():
@@ -608,13 +591,12 @@ class FLMYSQL_MYISAM2(object):
 
         engine = ") ENGINE=INNODB" if not self.noInnoDB else ") ENGINE=MyISAM"
         sql += engine
-        
+
         sql += " DEFAULT CHARACTER SET = utf8 COLLATE = utf8_bin"
-        
+
         qWarning("NOTICE: CREATE TABLE (%s%s)" % (tmd.name(), engine))
 
         return sql
-
 
     def Mr_Proper(self):
         util = FLUtil()
@@ -634,12 +616,13 @@ class FLMYSQL_MYISAM2(object):
         else:
             listOldBks = []
 
-        qry.exec_("select nombre from flfiles where nombre regexp"
-                  "'.*[[:digit:]][[:digit:]][[:digit:]][[:digit:]]-[[:digit:]][[:digit:]].*:[[:digit:]][[:digit:]]$' or nombre regexp"
-                  "'.*alteredtable[[:digit:]][[:digit:]][[:digit:]][[:digit:]].*' or (bloqueo=0 and nombre like '%.mtd')")
+        qry.exec_(
+            "select nombre from flfiles where nombre regexp"
+            "'.*[[:digit:]][[:digit:]][[:digit:]][[:digit:]]-[[:digit:]][[:digit:]].*:[[:digit:]][[:digit:]]$' or nombre regexp"
+            "'.*alteredtable[[:digit:]][[:digit:]][[:digit:]][[:digit:]].*' or (bloqueo=0 and nombre like '%.mtd')"
+        )
 
-        util.createProgressDialog(
-            util.tr("Borrando backups"), len(listOldBks) + qry.size() + 2)
+        util.createProgressDialog(util.tr("Borrando backups"), len(listOldBks) + qry.size() + 2)
 
         while qry.next():
             item = qry.value(0)
@@ -648,8 +631,7 @@ class FLMYSQL_MYISAM2(object):
             if item.find("alteredtable") > -1:
                 if self.existsTable(item.replace(".mtd", "")):
                     util.setLabelText(util.tr("Borrando tabla %s" % item))
-                    qry2.exec_("DROP TABLE %s CASCADE" %
-                               item.replace(".mtd", ""))
+                    qry2.exec_("DROP TABLE %s CASCADE" % item.replace(".mtd", ""))
 
             steps = steps + 1
             util.setProgress(steps)
@@ -673,21 +655,21 @@ class FLMYSQL_MYISAM2(object):
 
         steps = 0
         qry3.exec_("SHOW TABLES")
-        
-        
-        
+
         util.createProgressDialog(util.tr("Comprobando base de datos"), qry3.size())
         while qry3.next():
             item = qry3.value(0)
-            #print("Comprobando", item)
-            #qry2.exec_("alter table %s convert to character set utf8 collate utf8_bin" % item)
+            # print("Comprobando", item)
+            # qry2.exec_("alter table %s convert to character set utf8 collate utf8_bin" % item)
             mustAlter = self.mismatchedTable(item, item)
             if mustAlter:
                 conte = self.db_.managerModules().content("%s.mtd" % item)
                 if conte:
-                    msg = util.tr("La estructura de los metadatos de la tabla '%s' y su "
-                                  "estructura interna en la base de datos no coinciden. "
-                                  "Intentando regenerarla." % item)
+                    msg = util.tr(
+                        "La estructura de los metadatos de la tabla '%s' y su "
+                        "estructura interna en la base de datos no coinciden. "
+                        "Intentando regenerarla." % item
+                    )
 
                     logger.warning("%s", msg)
                     self.alterTable2(conte, conte, None, True)
@@ -698,13 +680,11 @@ class FLMYSQL_MYISAM2(object):
         self.db_.dbAux().driver().transaction()
         self.active_create_index = True
         steps = 0
-        #sqlCursor = FLSqlCursor(None, True, self.db_.dbAux())
+        # sqlCursor = FLSqlCursor(None, True, self.db_.dbAux())
         engine = "MyISAM" if self.noInnoDB else "INNODB"
         convert_engine = False
         do_ques = True
-        
-        
-        
+
         sqlQuery = FLSqlQuery(None, self.db_.dbAux())
         sql_query2 = FLSqlQuery(None, self.db_.dbAux())
         if sqlQuery.exec_("SHOW TABLES"):
@@ -736,45 +716,51 @@ class FLMYSQL_MYISAM2(object):
                             buf.setValue(it.name(), v)
                             cur.update(False)
 
-                #sqlCursor.setName(item, True)
+                # sqlCursor.setName(item, True)
 
-            # self.db_.dbAux().driver().commit()
+                # self.db_.dbAux().driver().commit()
                 sql_query2.exec_("show table status where Engine='%s' and Name='%s'" % (engine, item))
-                if (not sql_query2.next()):
+                if not sql_query2.next():
                     if do_ques:
-                        res = QMessageBox.question(None, util.tr("Mr. Proper"), util.tr("Existen tablas que no son del tipo %s utilizado por el driver de la conexión actual.\n"
-                                                                                        "Ahora es posible convertirlas, pero asegurése de tener una COPIA DE SEGURIDAD,\n"
-                                                                                        "se pueden peder datos en la conversión de forma definitiva.\n\n"
-                                                                                        "¿ Quiere convertirlas ?" % (engine)), QMessageBox.Yes, QMessageBox.No)
+                        res = QMessageBox.question(
+                            None,
+                            util.tr("Mr. Proper"),
+                            util.tr(
+                                "Existen tablas que no son del tipo %s utilizado por el driver de la conexión actual.\n"
+                                "Ahora es posible convertirlas, pero asegurése de tener una COPIA DE SEGURIDAD,\n"
+                                "se pueden peder datos en la conversión de forma definitiva.\n\n"
+                                "¿ Quiere convertirlas ?" % (engine)
+                            ),
+                            QMessageBox.Yes,
+                            QMessageBox.No,
+                        )
                         if res == QMessageBox.Yes:
                             convert_engine = True
-                    
+
                     do_ques = False
                     if convert_engine:
                         conte = self.db_.managerModules().content("%s.mtd" % item)
                         self.alterTable2(conte, conte, None, True)
-                
-                
-                                                                                        
+
         self.active_create_index = False
         util.destroyProgressDialog()
-    
-    def alterTable(self, mtd1, mtd2, key, force = False):
+
+    def alterTable(self, mtd1, mtd2, key, force=False):
         return self.alterTable2(mtd1, mtd2, key, force)
-    
+
     def hasCheckColumn(self, mtd):
         field_list = mtd.fieldList()
         if not field_list:
             return False
-        
+
         for field in field_list:
             if field.isCheck() or field.name().endswith("_check_column"):
                 return True
-        
+
         return False
 
     def alterTable2(self, mtd1, mtd2, key, force=False):
-        
+
         util = FLUtil()
 
         oldMTD = None
@@ -789,7 +775,7 @@ class FLMYSQL_MYISAM2(object):
 
         if oldMTD and oldMTD.isQuery():
             return True
-        
+
         if oldMTD and self.hasCheckColumn(oldMTD):
             return False
 
@@ -842,7 +828,7 @@ class FLMYSQL_MYISAM2(object):
             return False
 
         fieldList = oldMTD.fieldList()
-        #oldField = None
+        # oldField = None
 
         if not fieldList:
             print("FLManager::alterTable : " + util.tr("Los antiguos metadatos no tienen campos."))
@@ -852,14 +838,12 @@ class FLMYSQL_MYISAM2(object):
                 del newMTD
 
             return False
-        
+
         fieldsNamesOld = []
         if not force:
             for it in fieldList:
                 if newMTD.field(it.name()) is not None:
                     fieldsNamesOld.append(it.name())
-        
-        
 
         renameOld = "%salteredtable%s" % (oldMTD.name()[0:5], QDateTime().currentDateTime().toString("ddhhssz"))
 
@@ -871,32 +855,31 @@ class FLMYSQL_MYISAM2(object):
 
             return False
 
-        #self.db_.dbAux().transaction()
+        # self.db_.dbAux().transaction()
         fieldList = newMTD.fieldList()
-        
+
         if not fieldList:
             qWarning("FLManager::alterTable : " + util.tr("Los nuevos metadatos no tienen campos"))
-            
+
             if oldMTD and oldMTD != newMTD:
                 del oldMTD
             if newMTD:
                 del newMTD
 
             return False
-        
+
         q = FLSqlQuery(None, "dbAux")
         in_sql = "ALTER TABLE %s RENAME TO %s" % (oldMTD.name(), renameOld)
         logger.warning(in_sql)
         if not q.exec_(in_sql):
             qWarning("FLManager::alterTable : " + util.tr("No se ha podido renombrar la tabla antigua."))
-            
+
             if oldMTD and oldMTD != newMTD:
                 del oldMTD
             if newMTD:
                 del newMTD
 
             return False
-        
 
         if not self.db_.manager().createTable(newMTD):
             self.db_.dbAux().rollbackTransaction()
@@ -906,59 +889,60 @@ class FLMYSQL_MYISAM2(object):
                 del newMTD
 
             return False
-        
-        
-        
+
         self.db_.dbAux().transaction()
-        
+
         if not force and key and len(key) == 40:
             c = FLSqlCursor("flfiles", True, sel.db_.dbAux())
-            #oldCursor.setModeAccess(oldCursor.Browse)
+            # oldCursor.setModeAccess(oldCursor.Browse)
             c.setForwardOnly(True)
             c.setFilter("nombre='%s.mtd'" % renameOld)
             c.select()
             if not c.next():
-                #c.setModeAccess(c.Insert)
-                #c.refreshBuffer()
-                #c.setValueBuffer("nombre","%s.mtd" % renameOld)
-                #c.setValueBuffer("contenido", mtd1)
-                #c.setValueBuffer("sha", key)
-                #c.commitBuffer()
-        
-        
-                in_sql = "INSERT INTO flfiles(nombre,contenido,idmodulo,sha) VALUES ('%s.mtd','%s','%s','%s')" % (renameOld, mtd1, self.db_.managerModules().idModuleOfFile("%s.mtd" % oldMTD.name()), key)
+                # c.setModeAccess(c.Insert)
+                # c.refreshBuffer()
+                # c.setValueBuffer("nombre","%s.mtd" % renameOld)
+                # c.setValueBuffer("contenido", mtd1)
+                # c.setValueBuffer("sha", key)
+                # c.commitBuffer()
+
+                in_sql = "INSERT INTO flfiles(nombre,contenido,idmodulo,sha) VALUES ('%s.mtd','%s','%s','%s')" % (
+                    renameOld,
+                    mtd1,
+                    self.db_.managerModules().idModuleOfFile("%s.mtd" % oldMTD.name()),
+                    key,
+                )
                 logger.warning(in_sql)
-                q.exec_(in_sql)    
-                
-                
-        
+                q.exec_(in_sql)
+
         ok = False
         if force and fieldsNamesOld:
-            #sel = fieldsNamesOld.join(",")
-            #in_sql = "INSERT INTO %s(%s) SELECT %s FROM %s" % (newMTD.name(), sel, sel, renameOld)
-            #logger.warning(in_sql)
-            #ok = q.exec_(in_sql)
+            # sel = fieldsNamesOld.join(",")
+            # in_sql = "INSERT INTO %s(%s) SELECT %s FROM %s" % (newMTD.name(), sel, sel, renameOld)
+            # logger.warning(in_sql)
+            # ok = q.exec_(in_sql)
             if not ok:
                 self.db_.dbAux().rollback()
                 if oldMTD and oldMTD != newMTD:
                     del oldMTD
                 if newMTD:
                     del newMTD
-            
+
             return self.alterTable2(mtd1, mtd2, key, True)
-        
+
         if not ok:
             import pymysql
+
             oldCursor = self.conn_.cursor(pymysql.cursors.DictCursor)
-            #print("Lanzando!!", "SELECT * FROM %s WHERE 1 = 1" % (renameOld))
+            # print("Lanzando!!", "SELECT * FROM %s WHERE 1 = 1" % (renameOld))
             oldCursor.execute("SELECT * FROM %s WHERE 1 = 1" % (renameOld))
             result_set = oldCursor.fetchall()
             totalSteps = len(result_set)
-            #oldCursor = FLSqlCursor(renameOld, True, "dbAux")
-            #oldCursor.setModeAccess(oldCursor.Browse)
-            #oldCursor.setForwardOnly(True)
-            #oldCursor.select()
-            #totalSteps = oldCursor.size()
+            # oldCursor = FLSqlCursor(renameOld, True, "dbAux")
+            # oldCursor.setModeAccess(oldCursor.Browse)
+            # oldCursor.setForwardOnly(True)
+            # oldCursor.select()
+            # totalSteps = oldCursor.size()
 
             util.createProgressDialog(util.tr("Reestructurando registros para %s...") % newMTD.alias(), totalSteps)
             util.setLabelText(util.tr("Tabla modificada"))
@@ -971,7 +955,7 @@ class FLMYSQL_MYISAM2(object):
             vector_fields = {}
             default_values = {}
             v = None
-                
+
             for it2 in fieldList:
                 oldField = oldMTD.field(it2.name())
                 if oldField is None or not result_set or oldField.name() not in result_set[0].keys():
@@ -981,21 +965,19 @@ class FLMYSQL_MYISAM2(object):
                         v = it2.defaultValue()
                         step += 1
                         default_values[str(step)] = v
-                
+
                 step += 1
                 vector_fields[str(step)] = it2
                 step += 1
                 vector_fields[str(step)] = oldField
-            
 
-            
             step2 = 0
             ok = True
             x = 0
-            for row in result_set: 
+            for row in result_set:
                 x += 1
                 newBuffer = newBufferInfo
-                
+
                 i = 0
 
                 while i < step:
@@ -1007,7 +989,7 @@ class FLMYSQL_MYISAM2(object):
                         newField = vector_fields[str(i)]
                         i += 1
                         oldField = vector_fields[str(i)]
-                        
+
                     else:
                         i += 1
                         newField = vector_fields[str(i)]
@@ -1018,11 +1000,10 @@ class FLMYSQL_MYISAM2(object):
                             defVal = newField.defaultValue()
                             if defVal is not None:
                                 v = defVal
-                    
-                    
+
                     if v is not None and newField.type() == "string" and newField.length() > 0:
-                        v = v[:newField.length()]
-                    
+                        v = v[: newField.length()]
+
                     if (not oldField.allowNull() or not newField.allowNull()) and v is None:
                         if oldField.type() == FLFieldMetaData.Serial:
                             v = int(self.nextSerialVal(newMTD.name(), newField.name()))
@@ -1035,8 +1016,8 @@ class FLMYSQL_MYISAM2(object):
                         elif oldField.type() == "date":
                             v = QDate.currentDate()
                         else:
-                            v = "NULL"[:newField.length()]
-                    
+                            v = "NULL"[: newField.length()]
+
                     new_b = []
                     for buffer in newBuffer:
                         if buffer[0] == newField.name():
@@ -1050,48 +1031,45 @@ class FLMYSQL_MYISAM2(object):
                             new_buffer.append(buffer[6])
                             listRecords.append(new_buffer)
                             break
-                    #newBuffer.setValue(newField.name(), v)
-                
-                    
+                    # newBuffer.setValue(newField.name(), v)
+
                 if listRecords:
                     if not self.insertMulti(newMTD.name(), listRecords):
                         ok = False
                     listRecords = []
-                
+
             util.setProgress(totalSteps)
-                
-                
-        
-        util.destroyProgressDialog()      
+
+        util.destroyProgressDialog()
         if ok:
             self.db_.dbAux().commit()
-            
+
             if force:
                 q.exec_("DROP TABLE %s CASCADE" % renameOld)
         else:
             self.db_.dbAux().rollbackTransaction()
-                
+
             q.exec_("DROP TABLE %s CASCADE" % oldMTD.name())
             q.exec_("ALTER TABLE %s RENAME TO %s" % (renameOld, oldMTD.name()))
-                
+
             if oldMTD and oldMTD != newMTD:
-                del oldMTD 
+                del oldMTD
             if newMTD:
-                del newMTD 
+                del newMTD
             return False
-        
+
         if oldMTD and oldMTD != newMTD:
-            del oldMTD    
+            del oldMTD
         if newMTD:
             del newMTD
-                
+
         return True
 
     def insertMulti(self, table_name, records):
 
         if not records:
             return False
-            
+
         mtd = self.db_.manager().metadata(table_name)
         fList = []
         vList = []
@@ -1105,24 +1083,19 @@ class FLMYSQL_MYISAM2(object):
                     value = self.db_.normalizeValue(value)
                 value = self.formatValue(field.type(), value, False)
                 vList.append(value)
-            
 
-        sql = """INSERT INTO %s(%s) values (%s)""" % (table_name, ", ".join(fList), ", ".join(map(str, vList)))      
-                
+        sql = """INSERT INTO %s(%s) values (%s)""" % (table_name, ", ".join(fList), ", ".join(map(str, vList)))
+
         if not fList:
             return False
-        
-            
+
         try:
             cursor_.execute(sql)
         except Exception as exc:
-            print(sql,"\n",exc)
+            print(sql, "\n", exc)
             return False
 
-        
         return True
-
-
 
     def mismatchedTable(self, table1, tmd_or_table2, db_=None):
         if db_ is None:
@@ -1148,16 +1121,15 @@ class FLMYSQL_MYISAM2(object):
                             found = True
                             if self.notEqualsFields(field, fieldMtd):
                                 mismatch = True
-                            
+
                             recBd.remove(field)
                             break
-                            
 
                     if not found:
                         if fieldMtd[0] not in processed_fields:
                             mismatch = True
                             break
-                        
+
                 if len(recBd) > 0:
                     mismatch = True
 
@@ -1168,70 +1140,63 @@ class FLMYSQL_MYISAM2(object):
 
         else:
             return self.mismatchedTable(table1, tmd_or_table2.name(), db_)
-    
+
     def recordInfo2(self, tablename):
         if not self.isOpen():
             return False
         info = []
         cursor = self.conn_.cursor()
-        
+
         cursor.execute("SHOW FIELDS FROM %s" % tablename)
-        #print("Campos", tablename)
-        for field in cursor.fetchall():  
+        # print("Campos", tablename)
+        for field in cursor.fetchall():
             col_name = field[0]
             allow_null = True if field[2] == "NO" else False
             tipo_ = field[1]
             if field[1].find("(") > -1:
-                tipo_ = field[1][:field[1].find("(")]
-            
-                
-            
-            
-            
-            #len_
+                tipo_ = field[1][: field[1].find("(")]
+
+            # len_
             len_ = "0"
             if field[1].find("(") > -1:
-                len_ = field[1][field[1].find("(") + 1:  field[1].find(")")]
-            
+                len_ = field[1][field[1].find("(") + 1 : field[1].find(")")]
+
             precision_ = 0
 
-            
-            
             tipo_ = self.decodeSqlType(tipo_)
-            
-            if tipo_ in ["uint","int","double"]:
-                len_ = '0'
-                #print("****", tipo_, field)
+
+            if tipo_ in ["uint", "int", "double"]:
+                len_ = "0"
+                # print("****", tipo_, field)
             else:
                 if len_.find(",") > -1:
-                    precision_ = len_[len_.find(","):]
-                    len_ = len_[:len_.find(",")]
-            
+                    precision_ = len_[len_.find(",") :]
+                    len_ = len_[: len_.find(",")]
+
             len_ = int(len_)
-            
+
             if len_ == 255 and tipo_ == "string":
                 len_ = 0
-            
-            
+
             default_value_ = field[4]
             primary_key_ = True if field[3] == "PRI" else False
-            #print("***", field)
-            #print("Nombre:", col_name)
-            #print("Tipo:", tipo_)
-            #print("Nulo:", allow_null)
-            #print("longitud:", len_)
-            #print("Precision:", precision_)
-            #print("Defecto:", default_value_)
-            info.append([col_name, tipo_, allow_null,len_, precision_, default_value_ , primary_key_])
-            #info.append(desc[0], desc[1], not desc[6], , part_decimal, default_value, is_primary_key) 
-        
+            # print("***", field)
+            # print("Nombre:", col_name)
+            # print("Tipo:", tipo_)
+            # print("Nulo:", allow_null)
+            # print("longitud:", len_)
+            # print("Precision:", precision_)
+            # print("Defecto:", default_value_)
+            info.append([col_name, tipo_, allow_null, len_, precision_, default_value_, primary_key_])
+            # info.append(desc[0], desc[1], not desc[6], , part_decimal, default_value, is_primary_key)
+
         return info
 
     def decodeSqlType(self, t):
-        
+
         ret = t
-        
-        if t in ["char","varchar","text"]:
+
+        if t in ["char", "varchar", "text"]:
             ret = "string"
         elif t == "int":
             ret = "uint"
@@ -1241,17 +1206,18 @@ class FLMYSQL_MYISAM2(object):
             ret = "stringlist"
         elif t == "tinyint":
             ret = "bool"
-        elif t in ["decimal","double"]:
+        elif t in ["decimal", "double"]:
             ret = "double"
         elif t == "longblob":
             ret = "bytearray"
         elif t == "time":
             ret = "time"
-        
+
         else:
             logger.warning("formato desconocido %s", ret)
-    
+
         return ret
+
     def recordInfo(self, tablename_or_query):
         if not self.isOpen():
             return None
@@ -1269,7 +1235,7 @@ class FLMYSQL_MYISAM2(object):
 
                 return self.recordInfo2(tablename)
 
-            #docElem = doc.documentElement()
+            # docElem = doc.documentElement()
             mtd = self.db_.manager().metadata(tablename, True)
             if not mtd:
                 return self.recordInfo2(tablename)
@@ -1280,15 +1246,16 @@ class FLMYSQL_MYISAM2(object):
 
             for f in mtd.fieldsNames():
                 field = mtd.field(f)
-                info.append([field.name(), field.type(), not field.allowNull(), field.length(
-                ), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()])
+                info.append(
+                    [field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()]
+                )
 
             del mtd
 
         return info
-    
+
     def notEqualsFields(self, field1, field2):
-        #print("comparando", field1, field1[1], field2, field2[1])
+        # print("comparando", field1, field1[1], field2, field2[1])
         ret = False
         try:
             if not field1[2] == field2[2] and not field2[6]:
@@ -1312,24 +1279,21 @@ class FLMYSQL_MYISAM2(object):
         except Exception:
             print(traceback.format_exc())
 
-        return ret       
-        
-        
+        return ret
+
     def normalizeValue(self, text):
         if text is None:
             return None
-        
+
         import pymysql
-        
+
         return pymysql.escape_string(text)
-        #text = text.replace("'", "''")
-        #text = text.replace('\\"', '\\\\"')
-        #text = text.replace("\\n", "\\\\n")
-        #text = text.replace("\\r", "\\\\r")
-        
-        
-       
-        #return text
+        # text = text.replace("'", "''")
+        # text = text.replace('\\"', '\\\\"')
+        # text = text.replace("\\n", "\\\\n")
+        # text = text.replace("\\r", "\\\\r")
+
+        # return text
 
     def cascadeSupport(self):
         return True
@@ -1349,8 +1313,8 @@ class FLMYSQL_MYISAM2(object):
         try:
             q = self.fix_query(q)
             cursor.execute(q)
-        except Exception as exc:         
+        except Exception as exc:
             self.setLastError("No se puedo ejecutar la siguiente query %s" % q, q)
             logger.warning("MySQLDriver:: No se puedo ejecutar la siguiente query %s\n %s", q, traceback.format_exc())
-        
+
         return cursor

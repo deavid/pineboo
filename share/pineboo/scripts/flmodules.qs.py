@@ -18,7 +18,18 @@ class FormInternalObj(FormDBWidget):
             botonExportar.setEnabled(False)
 
     def cargarFicheroEnBD(self, nombre=None, contenido=None, log=None, directorio=None):
-        if not util.isFLDefFile(contenido) and not nombre.endswith(u".mod") and not nombre.endswith(u".xpm") and not nombre.endswith(u".signatures") and not nombre.endswith(u".checksum") and not nombre.endswith(u".certificates") and not nombre.endswith(u".qs") and not nombre.endswith(u".ar") and not nombre.endswith(u".qs.py") and not nombre.endswith(u".kut"):
+        if (
+            not util.isFLDefFile(contenido)
+            and not nombre.endswith(u".mod")
+            and not nombre.endswith(u".xpm")
+            and not nombre.endswith(u".signatures")
+            and not nombre.endswith(u".checksum")
+            and not nombre.endswith(u".certificates")
+            and not nombre.endswith(u".qs")
+            and not nombre.endswith(u".ar")
+            and not nombre.endswith(u".qs.py")
+            and not nombre.endswith(u".kut")
+        ):
             return
         cursorFicheros = FLSqlCursor(u"flfiles")
         cursor = self.cursor()
@@ -69,7 +80,7 @@ class FormInternalObj(FormDBWidget):
         log.append(util.translate(u"scripts", u"Convirtiendo %s a kut") % (str(nombre)))
         contenido = sys.toUnicode(contenido, u"UTF-8")
         contenido = flar2kut.iface.pub_ar2kut(contenido)
-        nombre = ustr(parseString(nombre)[0:len(nombre) - 3], u".kut")
+        nombre = ustr(parseString(nombre)[0 : len(nombre) - 3], u".kut")
         if contenido:
             localEnc = util.readSettingEntry(u"scripts/sys/conversionArENC")
             if not localEnc:
@@ -92,7 +103,8 @@ class FormInternalObj(FormDBWidget):
         i = 0
         from pineboolib.fllegacy.flsettings import FLSettings
         from pineboolib.flparser import postparse
-        settings= FLSettings()
+
+        settings = FLSettings()
         while_pass = True
         while i < len(ficheros):
             if not while_pass:
@@ -110,7 +122,7 @@ class FormInternalObj(FormDBWidget):
                 if os.path.exists(file_py_path_):
                     value_py = File(file_py_path_).read()
                     self.cargarFicheroEnBD("%s.py" % ficheros[i], value_py, log, directorio)
-                
+
             value = File(path_).read()
             self.cargarFicheroEnBD(ficheros[i], value, log, directorio)
             sys.processEvents()
@@ -132,8 +144,17 @@ class FormInternalObj(FormDBWidget):
     def aceptarLicenciaDelModulo(self, directorio=None):
         licencia = Dir.cleanDirPath(ustr(directorio, u"/COPYING"))
         if not File.exists(licencia):
-            MessageBox.critical(util.translate(u"scripts", ustr(u"El fichero ", licencia,
-                                                                u" con la licencia del módulo no existe.\nEste fichero debe existir para poder aceptar la licencia que contiene.")), MessageBox.Ok)
+            MessageBox.critical(
+                util.translate(
+                    u"scripts",
+                    ustr(
+                        u"El fichero ",
+                        licencia,
+                        u" con la licencia del módulo no existe.\nEste fichero debe existir para poder aceptar la licencia que contiene.",
+                    ),
+                ),
+                MessageBox.Ok,
+            )
             return False
         licencia = File.read(licencia)
         dialog = Dialog()
@@ -221,7 +242,7 @@ class FormInternalObj(FormDBWidget):
                     file = curFiles.valueBuffer(u"nombre")
                     tipo = self.tipoDeFichero(file)
                     contenido = curFiles.valueBuffer(u"contenido")
-                    if not contenido == '':
+                    if not contenido == "":
                         s01_when = tipo
                         s01_do_work, s01_work_done = False, False
                         if s01_when == u".xml":
@@ -278,7 +299,7 @@ class FormInternalObj(FormDBWidget):
                             sys.write(u"UTF-8", ustr(directorio, u"/scripts/", file), contenido)
                             log.append(util.translate(u"scripts", ustr(u"* Exportando ", file, u".")))
                             s01_do_work = False  # BREAK
-                        
+
                         if s01_when == u".qry":
                             s01_do_work, s01_work_done = True, True
                         if s01_do_work:
@@ -319,8 +340,25 @@ class FormInternalObj(FormDBWidget):
                         sys.write(u"ISO-8859-1", ustr(directorio, u"/", cursorModules.valueBuffer(u"idmodulo"), u".xpm"), cursorModules.valueBuffer(u"icono"))
                         log.append(util.translate(u"scripts", ustr(u"* Exportando ", cursorModules.valueBuffer(u"idmodulo"), u".xpm (Regenerado).")))
                     if not File.exists(ustr(directorio, u"/", cursorModules.valueBuffer(u"idmodulo"), u".mod")):
-                        contenido = ustr(u'<!DOCTYPE MODULE>\n<MODULE>\n<name>', cursorModules.valueBuffer(u"idmodulo"), u'</name>\n<alias>QT_TRANSLATE_NOOP("FLWidgetApplication","', cursorModules.valueBuffer(u"descripcion"), u'")</alias>\n<area>', cursorModules.valueBuffer(u"idarea"), u'</area>\n<areaname>QT_TRANSLATE_NOOP("FLWidgetApplication","',
-                                         areaName, u'")</areaname>\n<version>', cursorModules.valueBuffer(u"version"), u'</version>\n<icon>', cursorModules.valueBuffer(u"idmodulo"), u'.xpm</icon>\n<flversion>', cursorModules.valueBuffer(u"version"), u'</flversion>\n<description>', cursorModules.valueBuffer(u"idmodulo"), u'</description>\n</MODULE>')
+                        contenido = ustr(
+                            u"<!DOCTYPE MODULE>\n<MODULE>\n<name>",
+                            cursorModules.valueBuffer(u"idmodulo"),
+                            u'</name>\n<alias>QT_TRANSLATE_NOOP("FLWidgetApplication","',
+                            cursorModules.valueBuffer(u"descripcion"),
+                            u'")</alias>\n<area>',
+                            cursorModules.valueBuffer(u"idarea"),
+                            u'</area>\n<areaname>QT_TRANSLATE_NOOP("FLWidgetApplication","',
+                            areaName,
+                            u'")</areaname>\n<version>',
+                            cursorModules.valueBuffer(u"version"),
+                            u"</version>\n<icon>",
+                            cursorModules.valueBuffer(u"idmodulo"),
+                            u".xpm</icon>\n<flversion>",
+                            cursorModules.valueBuffer(u"version"),
+                            u"</flversion>\n<description>",
+                            cursorModules.valueBuffer(u"idmodulo"),
+                            u"</description>\n</MODULE>",
+                        )
                         sys.write(u"ISO-8859-1", ustr(directorio, u"/", cursorModules.valueBuffer(u"idmodulo"), u".mod"), contenido)
                         log.append(util.translate(u"scripts", ustr(u"* Generando ", cursorModules.valueBuffer(u"idmodulo"), u".mod (Regenerado).")))
 

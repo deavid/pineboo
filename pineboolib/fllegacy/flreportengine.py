@@ -23,7 +23,6 @@ class FLReportEngine(object):
     report_ = None
 
     class FLReportEnginePrivate(object):
-
         def __init__(self, q):
             self.qry_ = 0
             self.qFieldMtdList_ = 0
@@ -38,7 +37,7 @@ class FLReportEngine(object):
         def addRowToReportData(self, l):
             if not self.qry_.isValid():
                 return
-            
+
             row = self.q_.rptXmlData().createElement("Row")
             row.setAttribute("level", l)
             i = 0
@@ -53,7 +52,7 @@ class FLReportEngine(object):
 
                     key = self.qry_.value(i, False)
                     row.setAttribute(it, key)
-                    
+
                 else:
                     row.setAttribute(it, strVal)
                 i += 1
@@ -66,10 +65,9 @@ class FLReportEngine(object):
 
             self.qGroupDict_
             lev = 0
-            
+
             while lev < levelMax and str(self.qry_.value(self.qGroupDict_[lev])) == str(vA[lev]):
                 lev += 1
-            
 
             for i in range(lev, levelMax):
                 self.addRowToReportData(i)
@@ -93,7 +91,7 @@ class FLReportEngine(object):
                 i = len(self.qFieldList_) - 1
                 while i >= 0:
                     it = self.qFieldList_[i]
-                    key = it[it.find(".") + 1:].lower()
+                    key = it[it.find(".") + 1 :].lower()
                     if key in self.qFieldMtdList_.keys():
                         fmtd = self.qFieldMtdList_[key]
                         if fmtd.type() == "pixmap":
@@ -110,11 +108,10 @@ class FLReportEngine(object):
 
     def __init__(self, parent):
         self.d_ = FLReportEngine.FLReportEnginePrivate(self)
-        self.relDpi_ = 78.
+        self.relDpi_ = 78.0
         self.rd = None
         self.logger = logging.getLogger("FLReportEngine")
-        parserName = FLSettings().readEntry("ebcomportamiento/kugarParser",
-                                            pineboolib.project.kugarPlugin.defaultParser())
+        parserName = FLSettings().readEntry("ebcomportamiento/kugarParser", pineboolib.project.kugarPlugin.defaultParser())
         self.parser_ = pineboolib.project.kugarPlugin.loadParser(parserName)
 
     def rptXmlData(self):
@@ -126,14 +123,13 @@ class FLReportEngine(object):
     def relDpi(self):
         return self.relDpi_
 
-    def setReportData(self, q = None):
+    def setReportData(self, q=None):
         if isinstance(q, FLDomNodeInterface):
             return self.setFLReportData(q)
         if q is None:
             return
-              
-        self.rd = QtXml.QDomDocument("KugarData")
 
+        self.rd = QtXml.QDomDocument("KugarData")
 
         self.d_.rows_ = self.rd.createDocumentFragment()
         self.d_.setQuery(q)
@@ -149,16 +145,12 @@ class FLReportEngine(object):
                 vA = []
                 for i in range(10):
                     vA.append(None)
-                
+
                 ok = True
                 while ok:
                     self.d_.groupBy(len(g), vA)
                     if not q.next():
                         ok = False
-                        
-            
-            
-            
 
         data = self.rd.createElement("KugarData")
         data.appendChild(self.d_.rows_)
@@ -174,7 +166,7 @@ class FLReportEngine(object):
         tmp_doc.appendChild(n)
         self.rd = tmp_doc
         return True
-        #return super(FLReportEngine, self).setReportData(n)
+        # return super(FLReportEngine, self).setReportData(n)
 
     def setFLReportTemplate(self, t):
         # buscamos el .kut o el .rlab
@@ -211,7 +203,6 @@ class FLReportEngine(object):
     def reportData(self):
         return self.rd if self.rd else QtXml.QDomDocument()
 
-
     def reportTemplate(self):
         return self.rt if self.rt else QtXml.QDomDocument()
 
@@ -226,7 +217,7 @@ class FLReportEngine(object):
         if self.rt and self.rt.find("KugarTemplate") > -1:
             data = self.rd.toString(1)
             self.report_ = self.parser_.parse(self.d_.template_, self.rt, data, self.report_, flags)
-            
+
             return True if self.report_ else False
 
         return False
@@ -285,7 +276,6 @@ class FLReportEngine(object):
                     self.preferedTemplate.emit(tempname)
                     break
             n = n.nextSibling()
-    
+
     def number_pages(self):
         return self.parser_.number_pages() if self.parser_ else 0
-            

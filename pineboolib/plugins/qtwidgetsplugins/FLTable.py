@@ -5,5 +5,6 @@ import pineboolib
 
 pluginType = MODULE
 
+
 def moduleInformation():
-    return 'pineboolib.pncontrolsfactory', ('FLTable')
+    return "pineboolib.pncontrolsfactory", ("FLTable")

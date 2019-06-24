@@ -3,6 +3,7 @@
 from PyQt5 import QtCore
 import sys
 
+
 class Process(QtCore.QProcess):
 
     stderr = None
@@ -15,7 +16,7 @@ class Process(QtCore.QProcess):
         self.stderr = None
         self.normalExit = self.NormalExit
         self.crashExit = self.CrashExit
-        
+
         if args:
             self.setProgram(args[0])
             argumentos = args[1:]
@@ -41,7 +42,7 @@ class Process(QtCore.QProcess):
 
     def readStderr(self):
         return self.stderr
-    
+
     def readStdout(self):
         return self.stdout
 
@@ -53,16 +54,16 @@ class Process(QtCore.QProcess):
 
     def getIsRunning(self):
         return self.state() in (self.Running, self.Starting)
-    
+
     def exitcode(self):
         return self.exitCode()
-    
+
     def executeNoSplit(comando, stdin_buffer):
-        
+
         list_ = []
         for c in comando:
             list_.append(c)
-            
+
         pro = QtCore.QProcess()
         programa = list_[0]
         arguments = list_[1:]
@@ -75,13 +76,10 @@ class Process(QtCore.QProcess):
         pro.waitForFinished(30000)
         Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
         Process.stderr = pro.readAllStandardError().data().decode(encoding)
-        
-        
-        
-        
 
     def execute(comando):
         import sys
+
         encoding = sys.getfilesystemencoding()
         pro = QtCore.QProcess()
         if isinstance(comando, str):

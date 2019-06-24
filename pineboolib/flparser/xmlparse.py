@@ -53,16 +53,14 @@ def char_data(data):
     if lasttextdata.strip():
         # show_end = True
         lstelements.pop()
-        lstelements.append("/".join(elements) + "(%s)" %
-                           repr(lasttextdata.strip()))
+        lstelements.append("/".join(elements) + "(%s)" % repr(lasttextdata.strip()))
 
         # print "/".join(elements)+ "(%s)" % repr(data)
 
 
 def unmap(lines):
 
-    runmap = re.compile(
-        r"^(?P<depth>/*)(?P<tagname>\w+)(?P<attrs>&[^\(]+)*(?P<txt>\(.+\))?$")
+    runmap = re.compile(r"^(?P<depth>/*)(?P<tagname>\w+)(?P<attrs>&[^\(]+)*(?P<txt>\(.+\))?$")
     # depthlevel
     # tagname
     elementpool = []
@@ -77,9 +75,9 @@ def unmap(lines):
             print(line)
             break
 
-        depth = len(rg1.group('depth'))
-        tagname = str(rg1.group('tagname'))
-        t_attrs = rg1.group('attrs')
+        depth = len(rg1.group("depth"))
+        tagname = str(rg1.group("tagname"))
+        t_attrs = rg1.group("attrs")
         attrs = []
         if t_attrs:
             lattrs = t_attrs[1:].split("&")
@@ -87,7 +85,7 @@ def unmap(lines):
                 key, val = attr.split("=")
                 attrs.append((key, val))
 
-        t_txt = rg1.group('txt')
+        t_txt = rg1.group("txt")
         txt = ""
         if t_txt:
             txt = ast.literal_eval(t_txt[1:-1])
@@ -102,7 +100,7 @@ def unmap(lines):
             txtattrs = ""
             if attrs:
                 for k, v in attrs:
-                    txtattrs += " %s=\"%s\"" % (k, v)
+                    txtattrs += ' %s="%s"' % (k, v)
 
             if txt:
                 txt = txt.encode("utf-8")
@@ -130,17 +128,11 @@ def main():
     parser = OptionParser()
     # parser.add_option("-f", "--file", dest="filename",
     #                  help="write report to FILE", metavar="FILE")
-    parser.add_option("-q", "--quiet",
-                      action="store_false", dest="verbose", default=True,
-                      help="don't print status messages to stdout")
+    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
 
-    parser.add_option("--optdebug",
-                      action="store_true", dest="optdebug", default=False,
-                      help="debug optparse module")
+    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
 
-    parser.add_option("--debug",
-                      action="store_true", dest="debug", default=False,
-                      help="prints lots of useless messages")
+    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
 
     (options, args) = parser.parse_args()
     if options.optdebug:
@@ -153,11 +145,7 @@ def main():
 
     if action == "map":
         global lstelements
-        separators = [
-            "hbox",
-            "vbox",
-            "grid",
-        ]
+        separators = ["hbox", "vbox", "grid"]
         # r1 = re.compile("/widget")
         for fname in args:
             p = xml.parsers.expat.ParserCreate()

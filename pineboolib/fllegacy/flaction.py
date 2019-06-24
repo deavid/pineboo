@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class FLAction(object):
 
     """
@@ -109,6 +110,7 @@ class FLAction(object):
 
     def setFormRecord(self, f):
         self.formRecord_ = "%s.ui" % f
+
     """
     Establece el texto de la barra de título del formulario maestro
     """
@@ -171,6 +173,7 @@ class FLAction(object):
 
     def form(self):
         return self.form_
+
     """
     Obtiene el nombre del formulario de edición de registros
     """

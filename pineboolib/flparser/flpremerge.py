@@ -26,8 +26,7 @@ class processedFile(object):
 
     def processHashFile(self):
         self.cacheFullQname = {}
-        self.table, self.idxdepth, self.idxtree, self.hashes, self.list_hashes = process(
-            self.filename + ".hash")
+        self.table, self.idxdepth, self.idxtree, self.hashes, self.list_hashes = process(self.filename + ".hash")
 
     def indexNames(self):
         self.names = {}
@@ -53,7 +52,7 @@ class processedFile(object):
             name = []
 
             for n in range(len(p)):
-                ps1 = p[:n + 1]
+                ps1 = p[: n + 1]
                 name.append(self.Qname(ps1))
             fullname = "/".join(name)
             dcache[p] = fullname
@@ -116,24 +115,22 @@ class processedFile(object):
                 blockdesc = []
                 if len(sB.splitlines(1)) != endline - startline + 1:
                     print(startline, endline, repr(sB))
-                    print(linePosChar[endline - 1] - bhasta, linePosChar[endline] -
-                          bhasta, linePosChar[endline + 1] - bhasta)
+                    print(linePosChar[endline - 1] - bhasta, linePosChar[endline] - bhasta, linePosChar[endline + 1] - bhasta)
 
-                    print("Block lines doesnt match:", len(
-                        sB.splitlines(1)), endline - startline, startline, endline)
-                    print(linePosChar[startline - 2:startline + 3], bdesde)
-                    print(linePosChar[endline - 2:endline + 3], bhasta)
+                    print("Block lines doesnt match:", len(sB.splitlines(1)), endline - startline, startline, endline)
+                    print(linePosChar[startline - 2 : startline + 3], bdesde)
+                    print(linePosChar[endline - 2 : endline + 3], bhasta)
                     print(repr(sB.splitlines(1)))
                 for line in sB.splitlines(1):
                     nline += 1
-                    if line[-1] != '\n':
+                    if line[-1] != "\n":
                         break
                     ltype = "junk"
-                    isseparator = re.match(r'[ \t]*\n', line)
-                    iscommentline1 = re.match(r'[ \t]*//.+\n', line)
-                    iscommentline2 = re.match(r'[ \t]*/\*.+\*/\n', line)
-                    iscommentbegin = re.match(r'[ \t]*/\*.+\n', line)
-                    iscommentend = re.match(r'.+\*/[ \t]*\n', line)
+                    isseparator = re.match(r"[ \t]*\n", line)
+                    iscommentline1 = re.match(r"[ \t]*//.+\n", line)
+                    iscommentline2 = re.match(r"[ \t]*/\*.+\*/\n", line)
+                    iscommentbegin = re.match(r"[ \t]*/\*.+\n", line)
+                    iscommentend = re.match(r".+\*/[ \t]*\n", line)
 
                     if isseparator:
                         ltype = "separator"
@@ -157,14 +154,13 @@ class processedFile(object):
                         if mode:
                             if mode == "comment_blockend":
                                 mode = "comment_block"
-                            thisblock = ((beginline, nline - 1),
-                                         "" + mode, ".".join(blockdesc)[:32])
+                            thisblock = ((beginline, nline - 1), "" + mode, ".".join(blockdesc)[:32])
                             blockdesc = []
                             bblocks.append(thisblock)
                         mode = ltype
                         beginline = nline - 1
 
-                    words = re.split(r'\W+', line)
+                    words = re.split(r"\W+", line)
                     if words:
                         text = " ".join(words)
                         text = text.strip()
@@ -176,8 +172,7 @@ class processedFile(object):
                     if mode == "comment_blockend":
                         mode = "comment_block"
 
-                    thisblock = ((beginline, nline), "" + mode,
-                                 ".".join(blockdesc)[:32])
+                    thisblock = ((beginline, nline), "" + mode, ".".join(blockdesc)[:32])
                     bblocks.append(thisblock)
                     blockdesc = []
                     # print ltype, line,
@@ -203,8 +198,7 @@ class processedFile(object):
             # linenum += 1
             endline = linenum
             if linePosChar[startline] - desde != 0 or linePosChar[endline] - hasta < 1 or linePosChar[endline] - hasta > 2:
-                print(linePosChar[startline] - desde,
-                      linePosChar[endline - 1] - hasta, linePosChar[endline] - hasta, bl_name)
+                print(linePosChar[startline] - desde, linePosChar[endline - 1] - hasta, linePosChar[endline] - hasta, bl_name)
             name = bl_name
             # print (startline, endline), name, (linePosChar[startline], linePosChar[endline]), pk, (hasta-desde)+1
             self.computedBlocks.append((startline, endline, name))
@@ -240,17 +234,11 @@ def main():
     parser = OptionParser()
     # parser.add_option("-f", "--file", dest="filename",
     #                  help="write report to FILE", metavar="FILE")
-    parser.add_option("-q", "--quiet",
-                      action="store_false", dest="verbose", default=True,
-                      help="don't print status messages to stdout")
+    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
 
-    parser.add_option("--optdebug",
-                      action="store_true", dest="optdebug", default=False,
-                      help="debug optparse module")
+    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
 
-    parser.add_option("--debug",
-                      action="store_true", dest="debug", default=False,
-                      help="prints lots of useless messages")
+    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
 
     (options, args) = parser.parse_args()
     if options.optdebug:
@@ -274,7 +262,7 @@ def main():
 
 def tree_parents(pk):
     parents = []
-    while (len(pk) > 0):
+    while len(pk) > 0:
         parents.append(pk)
         pk = pk[:-1]
     return parents
@@ -290,22 +278,18 @@ class FindEquivalences(object):
             self.compute()
 
     def compute(self):
-        print("Finding equivalences between A (%s) -> B (%s):" % (
-            self.pfA.filename,
-            self.pfB.filename
-        ))
+        print("Finding equivalences between A (%s) -> B (%s):" % (self.pfA.filename, self.pfB.filename))
         print("Modified names:")
         commonNames = sorted(list(self.pfA.sNames & self.pfB.sNames))
         for name in commonNames:
             if len(self.pfA.names[name]) > 1 or len(self.pfB.names[name]) > 1:
-                print("-", name, "(%d,%d)" %
-                      (len(self.pfA.names[name]), len(self.pfB.names[name])))
+                print("-", name, "(%d,%d)" % (len(self.pfA.names[name]), len(self.pfB.names[name])))
             else:
                 keyA = self.pfA.idxtree[self.pfA.names[name][0]]
                 rowA = self.pfA.table[keyA]
                 keyB = self.pfB.idxtree[self.pfB.names[name][0]]
                 rowB = self.pfB.table[keyB]
-                if rowA['hash'] != rowB['hash']:
+                if rowA["hash"] != rowB["hash"]:
                     print("###", name, "###")
                     fileA = self.pfA.filename.replace(".hash", "")
                     fileB = self.pfB.filename.replace(".hash", "")
@@ -322,8 +306,7 @@ class FindEquivalences(object):
 
                         sA = sA.replace("\t", "        ")
                         sB = sB.replace("\t", "        ")
-                        lines = list(difflib.ndiff(sA.splitlines(
-                            1), sB.splitlines(1), linejunk, charjunk))
+                        lines = list(difflib.ndiff(sA.splitlines(1), sB.splitlines(1), linejunk, charjunk))
                         modifiedlines = []
                         for n, line in enumerate(lines):
                             if line[0] != " ":
@@ -344,40 +327,37 @@ class FindEquivalences(object):
                                 if len(omit):
                                     if len(omit) >= Context:
                                         for line in omit:
-                                            if line[0] in (' ', '+'):
+                                            if line[0] in (" ", "+"):
                                                 n += 1
-                                        print(
-                                            "   ", "(... %d lines ommitted ...)" % len(omit))
+                                        print("   ", "(... %d lines ommitted ...)" % len(omit))
                                     else:
                                         for line in omit:
-                                            if line[0] in (' ', '+'):
+                                            if line[0] in (" ", "+"):
                                                 n += 1
-                                            print("%03d" % n, line, end=' ')
+                                            print("%03d" % n, line, end=" ")
                                     omit = []
-                                if line[0] in (' ', '+'):
+                                if line[0] in (" ", "+"):
                                     n += 1
-                                    print("%03d" % n, line, end=' ')
+                                    print("%03d" % n, line, end=" ")
                                 else:
-                                    print("%03d" % (n + 1), line, end=' ')
+                                    print("%03d" % (n + 1), line, end=" ")
                             else:
                                 omit.append(line)
                         if len(omit):
                             if len(omit) >= Context:
                                 for line in omit:
-                                    if line[0] in (' ', '+'):
+                                    if line[0] in (" ", "+"):
                                         n += 1
-                                print("   ", "(... %d lines ommitted ...)" %
-                                      len(omit))
+                                print("   ", "(... %d lines ommitted ...)" % len(omit))
                             else:
                                 for line in omit:
-                                    if line[0] in (' ', '+'):
+                                    if line[0] in (" ", "+"):
                                         n += 1
-                                    print("%03d" % n, line, end=' ')
+                                    print("%03d" % n, line, end=" ")
                             omit = []
                         print()
                     else:
-                        print(
-                            "(diff ommitted because we couldn't find original files)")
+                        print("(diff ommitted because we couldn't find original files)")
 
         print()
         print("Deleted names:")
@@ -439,7 +419,7 @@ class FindEquivalences(object):
         self.parent_equivalences2 = {}
         for pA in sorted(self.parent_equivalences):
             count = {}
-            if pA[:len(norepeat)] == norepeat:
+            if pA[: len(norepeat)] == norepeat:
                 continue
             for pB, punt in self.parent_equivalences[pA]:
                 if pB not in count:
@@ -476,8 +456,7 @@ class FindEquivalences(object):
                 punt, pB = max(rcount)
                 self.parent_equivalences2[pA] = pB
                 rowB = self.pfB.table[self.pfB.idxtree[pB]]
-                print("parent:", pA, self.pfA.fullQName(pA), "%d%%\t" %
-                      punt, pB, len(rcount), self.pfB.fullQName(pB))
+                print("parent:", pA, self.pfA.fullQName(pA), "%d%%\t" % punt, pB, len(rcount), self.pfB.fullQName(pB))
                 if punt > 100:
                     norepeat = pA
             else:
@@ -619,21 +598,9 @@ def load(filename):
     def getpk(row):
         return (row["start"], row["end"])
 
-    fields = [
-        "depth",
-        "hash",
-        "start",
-        "end",
-        "name",
-        "len"
-    ]
+    fields = ["depth", "hash", "start", "end", "name", "len"]
     rows = {}
-    intfields = [
-        "depth",
-        "start",
-        "end",
-        "len"
-    ]
+    intfields = ["depth", "start", "end", "len"]
     bydepth = {}
     for line in file:
         row = dict(list(zip(fields, line[:-1].split("\t"))))
@@ -666,8 +633,8 @@ def load(filename):
                 it = 0
                 while offset != 0:
                     it += 1
-                    assert(np >= 0)
-                    assert(np < len(bydepth[pdepth]))
+                    assert np >= 0
+                    assert np < len(bydepth[pdepth])
                     ppk = bydepth[pdepth][np]
                     offset = isinside(ppk, pk)
                     np += offset
@@ -675,7 +642,7 @@ def load(filename):
                         n = 1
                     if offset < 0:
                         print(list(enumerate(bydepth[pdepth])))
-                        assert(offset >= 0)
+                        assert offset >= 0
                     # if it > 100:
                     #    print it,n,pk,np, ppk, offset
                     #    if offset < 0:

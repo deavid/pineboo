@@ -7,15 +7,14 @@ import logging
 
 logger = logging.getLogger("messageBox")
 
-class MessageBox(QMessageBox):
 
-        
+class MessageBox(QMessageBox):
     @classmethod
     def msgbox(cls, typename, text, button0, button1=None, button2=None, title=None, form=None):
-        
+
         if pineboolib.project._splash:
             pineboolib.project._splash.hide()
-        
+
         parent = pineboolib.project.main_window
 
         if not isinstance(text, str):
@@ -25,10 +24,7 @@ class MessageBox(QMessageBox):
             title = button0
             button0 = button2
             button2 = None
-              
-        
-        
-          
+
         if form:
             logger.warning("MessageBox: Se intentó usar form, y no está implementado.")
         icon = QMessageBox.NoIcon
@@ -62,15 +58,14 @@ class MessageBox(QMessageBox):
             msg.addButton(button1)
         if button2:
             msg.addButton(button2)
-        
-        #size = msg.sizeHint()
-        #screen_rect = QDesktopWidget().screenGeometry(parent)
-        #screen_num = QDesktopWidget().screenNumber(parent)
-        #geo = QDesktopWidget().availableGeometry(screen_num)
-        #print("*", geo, geo.x(), geo.y())
-        #msg.move(QPoint(geo.x() + ( geo.width() / 2 ) + 100, geo.y() + ( geo.height() / 2 )))
-           
-        
+
+        # size = msg.sizeHint()
+        # screen_rect = QDesktopWidget().screenGeometry(parent)
+        # screen_num = QDesktopWidget().screenNumber(parent)
+        # geo = QDesktopWidget().availableGeometry(screen_num)
+        # print("*", geo, geo.x(), geo.y())
+        # msg.move(QPoint(geo.x() + ( geo.width() / 2 ) + 100, geo.y() + ( geo.height() / 2 )))
+
         return msg.exec_()
 
     @classmethod
@@ -87,7 +82,7 @@ class MessageBox(QMessageBox):
         clip_board.clear()
         text_ = args[0] if isinstance(args[0], str) else args[2]
         clip_board.setText(text_)
-        
+
         return cls.msgbox("warning", *args)
 
     @classmethod

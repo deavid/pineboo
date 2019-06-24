@@ -9,10 +9,39 @@ from xml import etree
 
 
 def id_translate(name):
-    python_keywords = ['and', 'del', 'for', 'is', 'raise', 'assert', 'elif',
-                       'from', 'lambda', 'return', 'break', 'else', 'global', 'not', 'try',
-                       'class', 'except', 'if', 'or', 'while', 'continue', 'from',
-                       'exec', 'import', 'pass', 'yield', 'def', 'finally', 'in', 'print','str']
+    python_keywords = [
+        "and",
+        "del",
+        "for",
+        "is",
+        "raise",
+        "assert",
+        "elif",
+        "from",
+        "lambda",
+        "return",
+        "break",
+        "else",
+        "global",
+        "not",
+        "try",
+        "class",
+        "except",
+        "if",
+        "or",
+        "while",
+        "continue",
+        "from",
+        "exec",
+        "import",
+        "pass",
+        "yield",
+        "def",
+        "finally",
+        "in",
+        "print",
+        "str",
+    ]
     if name in python_keywords:
         return name + "_"
     if name == "false":
@@ -223,8 +252,6 @@ class FunctionAnon(Function):
     pass
 
 
-
-
 class FunctionCall(ASTPython):
     def generate(self, **kwargs):
         name = id_translate(self.elem.get("name"))
@@ -254,7 +281,7 @@ class FunctionCall(ASTPython):
         if parent and parent.tag == "InstructionCall":
             class_ = None
             p_ = parent
-            while (p_):
+            while p_:
                 if p_.tag == "Class":
                     class_ = p_
                     break
@@ -264,7 +291,7 @@ class FunctionCall(ASTPython):
                 extends = class_.get("extends")
                 if extends == name:
                     name = "super(%s, self).__init__" % class_.get("name")
-            functions = parent.findall("Function[@name=\"%s\"]" % name)
+            functions = parent.findall('Function[@name="%s"]' % name)
             for f in functions:
                 # yield "debug", "Function to:" + etree.ElementTree.tostring(f)
                 name = "self.%s" % name
@@ -288,10 +315,11 @@ class FunctionCall(ASTPython):
                 arguments.append(" ".join(expr))
 
         yield "expr", "%s(%s)" % (name, ", ".join(arguments))
-        
+
 
 class FunctionAnonExec(FunctionCall):
     pass
+
 
 class If(ASTPython):
     def generate(self, break_mode=False, **kwargs):
@@ -299,7 +327,7 @@ class If(ASTPython):
         for n, arg in enumerate(self.elem.findall("Condition/*")):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate(isolate=False, ):
+            for dtype, data in parse_ast(arg).generate(isolate=False):
                 if dtype == "line+1":
                     yield "debug", "Inline update inside IF condition not allowed. Unexpected behavior."
                     dtype = "line"
@@ -618,9 +646,30 @@ class Switch(ASTPython):
 
 
 class With(ASTPython):
-    python_keywords = ["Insert","Edit","Del","Browse", "select", "first", "next", "prev", "last", "setValueBuffer", "valueBuffer",
-                       "setTablesList", "setSelect", "setFrom", "setWhere", "setForwardOnly", "setModeAccess",
-                       "commitBuffer", "commit", "refreshBuffer", "setNull", "setUnLock"]
+    python_keywords = [
+        "Insert",
+        "Edit",
+        "Del",
+        "Browse",
+        "select",
+        "first",
+        "next",
+        "prev",
+        "last",
+        "setValueBuffer",
+        "valueBuffer",
+        "setTablesList",
+        "setSelect",
+        "setFrom",
+        "setWhere",
+        "setForwardOnly",
+        "setModeAccess",
+        "commitBuffer",
+        "commit",
+        "refreshBuffer",
+        "setNull",
+        "setUnLock",
+    ]
 
     def generate(self, **kwargs):
         # key = "%02x" % random.randint(0, 255)
@@ -647,13 +696,12 @@ class With(ASTPython):
                 obj_1 = obj[1].replace("self", " ".join(var_expr))
             else:
                 obj_1 = obj[1]
-            
+
             for t in self.python_keywords:
                 if obj_1.startswith(t):
                     obj_1 = "%s.%s" % (" ".join(var_expr), obj_1)
                 elif obj_1.find(".") == -1 and obj_1.find(t) > -1:
                     obj_1 = obj_1.replace(t, "%s.%s" % (" ".join(var_expr), t))
-            
 
             if not obj_:
                 obj_ = (obj[0], obj_1)
@@ -697,14 +745,14 @@ class Variable(ASTPython):
             if dtype is None:
                 yield "expr", "None"
             elif dtype == "String":
-                yield "expr", "\"\""
+                yield "expr", '""'
             elif dtype == "Number":
                 yield "expr", "0"
             else:
                 parent1 = self.elem.get("parent_")
                 parent2 = parent1.get("parent_")
                 parent3 = parent2.get("parent_")
-                #print("**", parent2.tag, parent3.tag)
+                # print("**", parent2.tag, parent3.tag)
                 # if parent2.tag == "Source" and parent3.tag == "Class":
                 #    yield "expr", "None"
                 # else:
@@ -882,28 +930,27 @@ class Member(ASTPython):
             parent = self.elem.get("parent_")
             funs = None
             p_ = parent
-            while(p_):
+            while p_:
                 if p_.tag == "Function":
                     funs = p_
                     break
                 p_ = p_.get("parent_")
 
             if funs:
-                #fun = funs[-1]
+                # fun = funs[-1]
                 fun = funs
                 full_fun_name = fun.get("name")
                 fun_name = arguments[2][2:]
                 if fun_name.find("(") > -1:
-                    fun_name = fun_name[:fun_name.find("(")]
-                
+                    fun_name = fun_name[: fun_name.find("(")]
+
                 if full_fun_name.find("_%s" % fun_name):
                     classname = full_fun_name.replace("_%s" % fun_name, "")
                 else:
                     classname = full_fun_name.split("_")[0]
-                    
+
                 arguments[2] = arguments[2][2:]
                 arguments[0:2] = ["super(%s, %s)" % (classname, ".".join(arguments[0:2]))]
-                
 
         # Lectura del self.iface.__init() al nuevo estilo yeboyebo
         if len(arguments) >= 2 and arguments[0:1] == ["_i"] and arguments[1].startswith("__"):
@@ -912,20 +959,20 @@ class Member(ASTPython):
             parent = self.elem.get("parent_")
             funs = None
             p_ = parent
-            while(p_):
+            while p_:
                 if p_.tag == "Function":
                     funs = p_
                     break
                 p_ = p_.get("parent_")
             if funs:
-                #fun = funs[-1]
+                # fun = funs[-1]
                 fun = funs
-                #name_parts = fun.get("name").split("_")
+                # name_parts = fun.get("name").split("_")
                 full_fun_name = fun.get("name")
                 fun_name = arguments[1][2:]
                 if fun_name.find("(") > -1:
-                    fun_name = fun_name[:fun_name.find("(")]
-                
+                    fun_name = fun_name[: fun_name.find("(")]
+
                 if full_fun_name.find("_%s" % fun_name):
                     classname = full_fun_name.replace("_%s" % fun_name, "")
                 else:
@@ -947,7 +994,7 @@ class Member(ASTPython):
             "charAt",
             "charCodeAt",
             "arg",
-            "substring", 
+            "substring",
             "attributeValue",
             "match",
             "replace",
@@ -959,73 +1006,68 @@ class Member(ASTPython):
                     expr = arg_expr[idx]
                     part1 = arguments[:idx]
                     try:
-                        part2 = arguments[idx + 1:]
+                        part2 = arguments[idx + 1 :]
                     except IndexError:
                         part2 = []  # Para los que son últimos y no tienen parte adicional
                     if member == "toString()":
-                        arguments = ["parseString(%s)" %
-                                     ".".join(part1)] + part2
+                        arguments = ["parseString(%s)" % ".".join(part1)] + part2
                     #    arguments = ["str(%s)" % (".".join(part1))] + part2
                     elif member == "isEmpty()":
                         arguments = ["%s == ''" % (".".join(part1))] + part2
                     elif member == "left":
                         value = arg[5:]
-                        value = value[:len(value) - 1]
-                        arguments = ["%s[0:%s]" %
-                                     (".".join(part1), value)] + part2
+                        value = value[: len(value) - 1]
+                        arguments = ["%s[0:%s]" % (".".join(part1), value)] + part2
                     elif member == "right":
                         value = arg[6:]
-                        value = value[:len(value) - 1]
-                        arguments = [
-                            "%s[(len(%s) - (%s)):]" % (".".join(part1), ".".join(part1), value)] + part2
+                        value = value[: len(value) - 1]
+                        arguments = ["%s[(len(%s) - (%s)):]" % (".".join(part1), ".".join(part1), value)] + part2
                     elif member == "substring":
                         value = arg[10:]
-                        value = value[:len(value) - 1]
+                        value = value[: len(value) - 1]
                         value = value.replace(",", ":")
                         arguments = ["%s[ %s]" % (".".join(part1), value)] + part2
                     elif member == "mid":
                         value = arg[4:]
-                        value = value[: len(value) -1]
+                        value = value[: len(value) - 1]
                         if value.find(",") > -1:
                             if (value.find("(") < value.find(",")) and value.find(")") < value.find(","):
-                                 i, l = value.split(",")
-                        #if (len(value.split(",")) == 2 and value.find("(") == -1) or value.find("(") < value.find(","):
-                        #    i, l = value.split(",")
-                        #    if i.find("(") > -1 and i.find(")") == -1:
-                        #        i = "%s)" % i
-                        #        l = l.repalce(")", "")
+                                i, l = value.split(",")
+                            # if (len(value.split(",")) == 2 and value.find("(") == -1) or value.find("(") < value.find(","):
+                            #    i, l = value.split(",")
+                            #    if i.find("(") > -1 and i.find(")") == -1:
+                            #        i = "%s)" % i
+                            #        l = l.repalce(")", "")
                             else:
                                 i = 0
                                 l = value
-                        
+
                         else:
                             i = 0
                             l = value
-                        
+
                         value = "%s + %s:" % (i, l)
                         arguments = ["%s[%s]" % (".".join(part1), value)] + part2
-    
+
                     elif member == "length":
                         value = arg[7:]
-                        value = value[:len(value) - 1]
+                        value = value[: len(value) - 1]
                         arguments = ["qsa_length(%s)" % (".".join(part1))] + part2
                     elif member == "charAt":
                         value = arg[7:]
-                        value = value[:len(value) - 1]
-                        arguments = ["%s[%s]" %
-                                     (".".join(part1), value)] + part2
+                        value = value[: len(value) - 1]
+                        arguments = ["%s[%s]" % (".".join(part1), value)] + part2
                     elif member == "search":
                         value = arg[7:]
-                        value = value[:len(value) - 1]
+                        value = value[: len(value) - 1]
                         arguments = ["%s.find('%s')" % (".".join(part1), value)] + part2
                     elif member == "charCodeAt":
                         value = arg[11:]
-                        value = value[:len(value) - 1]
-                        arguments = ["ord(%s[%s])" %
-                                     (".".join(part1), value)] + part2
+                        value = value[: len(value) - 1]
+                        arguments = ["ord(%s[%s])" % (".".join(part1), value)] + part2
                     elif member == "arg":
                         value = arg[4:]
-                        value = value[:len(value) - 1]
+                        value = value[: len(value) - 1]
                         sPart1 = ".".join(part1)
                         strValue = "str(" + value + ")"
                         if sPart1.find(strValue) > -1:
@@ -1034,62 +1076,56 @@ class Member(ASTPython):
                             sPart2 = ""
                             if len(part2) > 0:
                                 for i in range(len(part2)):
-                                    part2[i] = str(part2[i]).replace(
-                                        "arg", "str")
+                                    part2[i] = str(part2[i]).replace("arg", "str")
                                 sPart2 = ", " + ", ".join(part2)
                             sPart1 = re.sub(r"%\d", "%s", sPart1)
-                            arguments = [
-                                "%s %% (str(%s" % (sPart1, value + ")" + sPart2 + ")")]
+                            arguments = ["%s %% (str(%s" % (sPart1, value + ")" + sPart2 + ")")]
 
                     elif member == "join":
                         value = arg[5:]
-                        value = value[:len(value) - 1]
+                        value = value[: len(value) - 1]
                         arguments = ["%s.join(%s)" % (value, ".".join(part1))] + part2
                     elif member == "match":
                         value = arg[6:]
-                        value = value[:len(value) - 1]
+                        value = value[: len(value) - 1]
                         arguments = ["re.match(%s, %s)" % (value, ".".join(part1))] + part2
                     elif member == "push":
                         value = arg[5:]
-                        value = value[:len(value) - 1]
+                        value = value[: len(value) - 1]
                         arguments = ["%s.append(%s)" % (".".join(part1), value)] + part2
                     elif member == "attributeValue":
                         value = arg[15:]
-                        value = value[:len(value) - 1]
+                        value = value[: len(value) - 1]
                         arguments = ["%s.attributes().namedItem(%s).nodeValue()" % (".".join(part1), value)] + part2
                     elif member == "replace":
                         value = arg[8:-1]
                         part_list = []
-                        if value.startswith("\",\""):
-                            part_list.append("\",\"")
-                            part_list.append(value[4:]) 
+                        if value.startswith('","'):
+                            part_list.append('","')
+                            part_list.append(value[4:])
                         else:
                             part_list = value.split(",")
-                            
-                            
+
                         if part_list[0].find("re.compile") > -1:
                             arguments = ["%s.sub(%s,%s)" % (part_list[0], part_list[1], ".".join(part1))] + part2
                         else:
                             if not part2:
                                 if ".".join(part1):
-                                    arguments = ["%s.%s if isinstance(%s, str) else %s.replace(%s, %s)" % (".".join(part1), arg, part_list[0], part_list[0], ".".join(part1), part_list[1])] + part2
-                                
-                            
-                            
-                            
-                            #Es un regexpr
-                        #else:
+                                    arguments = [
+                                        "%s.%s if isinstance(%s, str) else %s.replace(%s, %s)"
+                                        % (".".join(part1), arg, part_list[0], part_list[0], ".".join(part1), part_list[1])
+                                    ] + part2
+
+                            # Es un regexpr
+                        # else:
                         #    if ".".join(part1):
                         #        arguments = ["%s.%s" % (".".join(part1), arg)] + part2
-                        
-                        
+
                     else:
                         if ".".join(part1):
                             arguments = ["%s.%s" % (".".join(part1), arg)] + part2
                         else:
                             arguments = ["%s" % arg] + part2
-        
-        
 
         yield "expr", ".".join(arguments)
 
@@ -1101,15 +1137,15 @@ class ArrayMember(ASTPython):
             arg.set("parent_", self.elem)
             expr = []
             for dtype, data in parse_ast(arg).generate(isolate=False):
-                #if data.find(".") > -1:
+                # if data.find(".") > -1:
                 #    l = data.split(".")
                 #    data = "%s['%s']" % (l[0], l[1])
-                    
+
                 if dtype == "expr":
                     expr.append(data)
                 else:
                     yield dtype, data
-            
+
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
@@ -1141,8 +1177,8 @@ class Expression(ASTPython):
         if isolate:
             yield "expr", "("
         coerce_string_mode = False
-        if self.elem.findall("OpMath[@type=\"PLUS\"]"):
-            if self.elem.findall("Constant[@type=\"String\"]"):
+        if self.elem.findall('OpMath[@type="PLUS"]'):
+            if self.elem.findall('Constant[@type="String"]'):
                 coerce_string_mode = True
         if coerce_string_mode:
             yield "expr", "ustr("
@@ -1220,12 +1256,12 @@ class DictObject(ASTPython):
                 if key:
                     yield dtype, "'%s'" % data
                     key = False
-                else:   
+                else:
                     yield dtype, data
             # Como en Python la coma final la ignora, pues la ponemos.
             yield "expr", ","
             key = True
-            
+
         yield "expr", "}"
 
 
@@ -1269,7 +1305,7 @@ class New(ASTPython):
                     continue
                 if child.tag == "Identifier":
                     data = data + "()"
-                ident = data[:data.find("(")]
+                ident = data[: data.find("(")]
                 if ident.find(".") == -1:
                     parentClass_ = self.elem.get("parent_")
                     classIdent_ = False
@@ -1296,14 +1332,13 @@ class Constant(ASTPython):
                     # .... este generador convertirá todos los arrays en vacíos, sin importar
                     # .... si realmente tienen algo.
                     yield "expr", "[]"
-                
+
                 elif child.tag == "regex":
                     val = ""
                     for dtype, data in parse_ast(child).generate(isolate=False):
                         if data:
                             val += data
-                    yield "expr", "re.compile(\"/%s/i\")" % val
-                
+                    yield "expr", 're.compile("/%s/i")' % val
 
                 elif child.tag == "CallArguments":
                     arguments = []
@@ -1328,7 +1363,7 @@ class Constant(ASTPython):
             if delim == "'":
                 yield "expr", "'%s'" % value
             else:
-                yield "expr", "\"%s\"" % value
+                yield "expr", '"%s"' % value
         elif ctype == "Number":
             value = value.lstrip("0")
             if value == "":
@@ -1343,17 +1378,18 @@ class Identifier(ASTPython):
         name = id_translate(self.elem.get("name"))
         yield "expr", name
 
+
 class regex(ASTPython):
     def generate(self, **kwargs):
         child = self.elem.find("regexbody")
         args_ = self.elem.items()
         if not child:
             return
-        
+
         for arg in child:
             for dtype, data in parse_ast(arg).generate(isolate=False):
                 yield "expr", data
-                
+
 
 class regexchar(ASTPython):
     def generate(self, **kwargs):
@@ -1396,10 +1432,9 @@ class regexchar(ASTPython):
         else:
             if val.find(":") > -1:
                 ret = val.split(":")[1]
-                ret = ret.replace("'","")
+                ret = ret.replace("'", "")
             else:
                 print("regexchar:: item desconocido %s" % val)
-        
 
         yield "exp", ret
 
@@ -1504,6 +1539,8 @@ class Unknown(ASTPython):
     @classmethod
     def can_process_tag(self, tagname):
         return True
+
+
 # -----------------
 
 
@@ -1535,8 +1572,7 @@ def file_template(ast):
         cls.set("parent_", ast)
         sourceclasses.append(cls)
 
-    mainclass = etree.ElementTree.SubElement(
-        sourceclasses, "Class", name="FormInternalObj", extends="FormDBWidget")
+    mainclass = etree.ElementTree.SubElement(sourceclasses, "Class", name="FormInternalObj", extends="FormDBWidget")
     mainsource = etree.ElementTree.SubElement(mainclass, "Source")
 
     constructor = etree.ElementTree.SubElement(mainsource, "Function", name="_class_init")
@@ -1572,8 +1608,7 @@ def write_python_file(fobj, ast):
             line = data
             numline += 1
             try:
-                lines_since_last_indent = numline - \
-                    last_line_for_indent[len(indent)]
+                lines_since_last_indent = numline - last_line_for_indent[len(indent)]
             except KeyError:
                 lines_since_last_indent = 0
             if lines_since_last_indent > 4:
@@ -1602,8 +1637,7 @@ def write_python_file(fobj, ast):
                 pass
             endblock = indent.pop()
             if endblock != data:
-                line = "# END-ERROR!! was %s but %s found. (%s)" % (
-                    endblock, data, repr(indent))
+                line = "# END-ERROR!! was %s but %s found. (%s)" % (endblock, data, repr(indent))
 
         if line is not None:
             ASTPython.numline += 1
@@ -1635,21 +1669,13 @@ def pythonize(filename, destfilename, debugname=None):
 
 def main():
     parser = OptionParser()
-    parser.add_option("-q", "--quiet",
-                      action="store_false", dest="verbose", default=True,
-                      help="don't print status messages to stdout")
+    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
 
-    parser.add_option("--optdebug",
-                      action="store_true", dest="optdebug", default=False,
-                      help="debug optparse module")
+    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
 
-    parser.add_option("--debug",
-                      action="store_true", dest="debug", default=False,
-                      help="prints lots of useless messages")
+    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
 
-    parser.add_option("--path",
-                      dest="storepath", default=None,
-                      help="store PY results in PATH")
+    parser.add_option("--path", dest="storepath", default=None, help="store PY results in PATH")
 
     (options, args) = parser.parse_args()
     if options.optdebug:

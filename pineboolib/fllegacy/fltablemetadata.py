@@ -79,6 +79,7 @@ class FLTableMetaData(object):
             if field.type() == FLFieldMetaData.Unlock:
                 self.d.fieldsNamesUnlock_.append(field.name())
         """
+
     """
     destructor
     """
@@ -148,7 +149,6 @@ class FLTableMetaData(object):
 
     def isQuery(self):
         return True if self.d.query_ else False
-
 
     """
     Añade la descripción de un campo a lista de descripciones de campos.
@@ -258,10 +258,10 @@ class FLTableMetaData(object):
             if f.name() == fN.lower():
                 type_ = f.type()
                 break
-        
+
         ret_ = None
         if type_ is not None:
-            if type_ in ("string","counter"):
+            if type_ in ("string", "counter"):
                 ret_ = 3
             elif type_ == "stringlist":
                 ret_ = 4
@@ -282,9 +282,9 @@ class FLTableMetaData(object):
             elif type_ == "check":
                 ret_ = 300
             else:
-                #FIXME: Falta stringlist e int
+                # FIXME: Falta stringlist e int
                 self.logger.warning("FIXME:: No hay definido un valor numérico para el tipo %s", type_)
-        
+
         return ret_
 
     """
@@ -309,11 +309,11 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldIsIndex(self, field_name = None):
-        
+    def fieldIsIndex(self, field_name=None):
+
         if field_name in self.fieldsNames():
             return self.fieldsNames().index(field_name)
-        
+
         self.logger.warning("FLTableMetaData.fieldIsIndex(%s) No encontrado", field_name)
         return None
 
@@ -596,9 +596,8 @@ class FLTableMetaData(object):
     #    #print("FiledList count", len(self.d.fieldList_))
     #    return self.d.fieldList_
 
-    def indexPos(self, field_name = None):
-       return self.fieldIsIndex(field_name)
-
+    def indexPos(self, field_name=None):
+        return self.fieldIsIndex(field_name)
 
     """
     Obtiene la lista de campos de una clave compuesta, a partir del nombre de
@@ -632,6 +631,7 @@ class FLTableMetaData(object):
 
     def fieldsNamesUnlock(self):
         return self.d.fieldsNamesUnlock_
+
     """
     @return El indicador FLTableMetaData::concurWarn_
     """
@@ -649,6 +649,7 @@ class FLTableMetaData(object):
     """
     @return El indicador FLTableMetaData::detectLocks_
     """
+
     @decorators.BetaImplementation
     def detectLocks(self):
         return self.d.detectLocks_
@@ -705,11 +706,12 @@ class FLTableMetaData(object):
         return ret
 
 
-class FLTableMetaDataPrivate():
+class FLTableMetaDataPrivate:
 
     """
     Nombre de la tabla
     """
+
     name_ = None
 
     """
@@ -847,7 +849,7 @@ class FLTableMetaDataPrivate():
     @param  f   Campo objeto cuyo alias se desea formatear
     """
 
-    def formatAlias(self, f = None):
+    def formatAlias(self, f=None):
         if f is None:
             return
 

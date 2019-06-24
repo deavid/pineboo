@@ -5,5 +5,6 @@ import pineboolib
 
 pluginType = MODULE
 
+
 def moduleInformation():
-    return 'pineboolib.fllegacy.fltabledb', ('FLTableDB')
+    return "pineboolib.fllegacy.fltabledb", ("FLTableDB")

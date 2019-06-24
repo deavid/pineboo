@@ -19,7 +19,7 @@ cursor asociado.
 """
 
 
-class opInfo():
+class opInfo:
 
     primaryKey = None
     op = None
@@ -111,11 +111,12 @@ class opInfo():
     """
 
 
-class FLSqlSavePoint():
+class FLSqlSavePoint:
 
     """
     Pila para almacenar informacion de las operaciones.
     """
+
     opInfos = []
 
     """
@@ -142,6 +143,7 @@ class FLSqlSavePoint():
             self.id_ = self.opInfos[0]
 
         self.countRefSavePoint = self.countRefSavePoint + 1
+
     """
     destructor.
     """
@@ -175,9 +177,11 @@ class FLSqlSavePoint():
 
     def clear(self):
         self.opInfos.clear()
+
     """
     Deshace el punto de salvaguarda.
     """
+
     @decorators.BetaImplementation
     def undo(self):
 
@@ -191,6 +195,7 @@ class FLSqlSavePoint():
                 self.undoDel(opInf)
             del opInf
         self.clear()
+
     """
     Guarda el buffer con el contenido del registro insertado.
 
@@ -198,12 +203,13 @@ class FLSqlSavePoint():
     @param buffer buffer con el contenido del registro.
     @param cursor Cursor asociado.
     """
+
     @decorators.BetaImplementation
     def saveInsert(self, primaryKey, buffer, cursor):
         if not cursor or not buffer:
             return
-        self.opInfos.append(opInfo(primaryKey, 0, buffer, cursor.at(
-        ), cursor.sort(), cursor.filter(), cursor.name, cursor))
+        self.opInfos.append(opInfo(primaryKey, 0, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
+
     """
     Guarda el buffer con el contenido del registro a editar.
 
@@ -216,8 +222,8 @@ class FLSqlSavePoint():
         if not cursor or not buffer:
             return
 
-        self.opInfos.append(opInfo(primaryKey, 1, buffer, cursor.at(
-        ), cursor.sort(), cursor.filter(), cursor.name, cursor))
+        self.opInfos.append(opInfo(primaryKey, 1, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
+
     """
     Guarda el buffer con el contenido del registro a borrar.
 
@@ -225,18 +231,19 @@ class FLSqlSavePoint():
     @param buffer buffer con el contenido del registro.
     @param cursor Cursor asociado.
     """
+
     @decorators.BetaImplementation
     def saveDel(self, primaryKey, buffer, cursor):
         if not cursor or not buffer:
             return
-        self.opInfos.append(opInfo(primaryKey, 2, buffer, cursor.at(
-        ), cursor.sort(), cursor.filter(), cursor.name, cursor))
+        self.opInfos.append(opInfo(primaryKey, 2, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
 
     """
     Deshace una operacion de insertar.
 
     @param opInf Información de la operación.
     """
+
     @decorators.BetaImplementation
     def undoInsert(self, opInf):
         cursor_ = opInf.cursor
@@ -250,10 +257,8 @@ class FLSqlSavePoint():
             return
 
         if opInf.buffer.contains(opInf.primaryKey) and not opInf.buffer.isNull(opInf.primaryKey):
-            valuePrimaryKey = str(
-                opInf.buffer.value(opInf.primaryKey))  # FIXME
-            ok = cursor_.select(opInf.primaryKey + "='" +
-                                valuePrimaryKey + "'")
+            valuePrimaryKey = str(opInf.buffer.value(opInf.primaryKey))  # FIXME
+            ok = cursor_.select(opInf.primaryKey + "='" + valuePrimaryKey + "'")
             if ok and cursor_.next():
                 cursor_.primeDelete()
                 del cursor_
@@ -269,6 +274,7 @@ class FLSqlSavePoint():
 
     @param opInf Información de la operación.
     """
+
     @decorators.BetaImplementation
     def undoEdit(self, opInf):
         cursor_ = opInf.cursor
@@ -299,6 +305,7 @@ class FLSqlSavePoint():
 
     @param opInf Información de la operación.
     """
+
     @decorators.BetaImplementation
     def undoDel(self, opInf):
         cursor_ = opInf.cursor

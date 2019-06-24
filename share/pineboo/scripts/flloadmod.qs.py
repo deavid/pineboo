@@ -8,8 +8,14 @@ class FormInternalObj(FormDBWidget):
         self.util = FLUtil()
 
     def main(self):
-        continuar = MessageBox.warning(util.translate(
-            u"scripts", u"Antes de cargar un módulo asegúrese de tener una copia de seguridad de todos los datos,\ny de que no hay ningun otro usuario conectado a la base de datos mientras se realiza la carga.\n\n¿Desea continuar?"), MessageBox.Yes, MessageBox.No)
+        continuar = MessageBox.warning(
+            util.translate(
+                u"scripts",
+                u"Antes de cargar un módulo asegúrese de tener una copia de seguridad de todos los datos,\ny de que no hay ningun otro usuario conectado a la base de datos mientras se realiza la carga.\n\n¿Desea continuar?",
+            ),
+            MessageBox.Yes,
+            MessageBox.No,
+        )
         if continuar == MessageBox.No:
             return
         nombreFichero = FileDialog.getOpenFileName(u"modfiles(*.mod)", util.translate(u"scripts", u"Elegir Fichero"))
@@ -76,16 +82,15 @@ class FormInternalObj(FormDBWidget):
                     # arg00="SEMI"/><regexchar
                     # arg00="RBRACKET"/></regexbody></Constant></Value>
                     dependencias = dameValor(aF[7]).split(unknownarg)
-            
+
             descripcion = traducirCadena(descripcion, fichero.path, modulo)
             desArea = traducirCadena(desArea, fichero.path, modulo)
             fichIcono = File(ustr(fichero.path, u"/", nombreIcono))
             fichIcono.open(File.ReadOnly)
             icono = fichIcono.read()
 
-            
-            #versionSys = sys.version().match("/ [ 0 - 9 ] + .[ 0 - 9 ] + /")
-            #if compararVersiones(versionSys, versionMinimaFL) == 2:
+            # versionSys = sys.version().match("/ [ 0 - 9 ] + .[ 0 - 9 ] + /")
+            # if compararVersiones(versionSys, versionMinimaFL) == 2:
             #    contVersion = MessageBox.warning(util.translate(u"scripts", u"Este módulo necesita la versión ") + versionMinimaFL + util.translate(u"scripts", u" o superior de la aplicación base,\nactualmente la versión instalada es la ") +
             #                                     sys.version() + util.translate(u"scripts", u".\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"), MessageBox.Yes, MessageBox.No)
             #    if contVersion == MessageBox.No:
@@ -93,8 +98,11 @@ class FormInternalObj(FormDBWidget):
             if evaluarDependencias(dependencias) == False:
                 return
             if not valorPorClave(u"flareas", u"idarea", ustr(u"idarea = '", area, u"'")):
-                crearArea = MessageBox.warning(util.translate(u"scripts", u"El área con el identificador ") + area +
-                                               util.translate(u"scripts", u" no existe. ¿Desea crearla?"), MessageBox.Yes, MessageBox.No)
+                crearArea = MessageBox.warning(
+                    util.translate(u"scripts", u"El área con el identificador ") + area + util.translate(u"scripts", u" no existe. ¿Desea crearla?"),
+                    MessageBox.Yes,
+                    MessageBox.No,
+                )
                 if crearArea == MessageBox.No:
                     return
                 dialogo = Dialog()
@@ -119,13 +127,16 @@ class FormInternalObj(FormDBWidget):
 
             recargar = None
             if valorPorClave(u"flmodules", u"idmodulo", ustr(u"idmodulo = '", modulo, u"'")):
-                recargar = MessageBox.warning(util.translate(u"scripts", u"El módulo ") + modulo + util.translate(u"scripts",
-                                                                                                                  u" ya existe. ¿Desea recargarlo?"), MessageBox.Yes, MessageBox.No)
+                recargar = MessageBox.warning(
+                    util.translate(u"scripts", u"El módulo ") + modulo + util.translate(u"scripts", u" ya existe. ¿Desea recargarlo?"),
+                    MessageBox.Yes,
+                    MessageBox.No,
+                )
                 if recargar == MessageBox.No:
                     return
             curModulo = FLSqlCursor(u"flmodules")
             if recargar == MessageBox.Yes:
-                 # WITH_START
+                # WITH_START
                 curModulo.select(ustr(u"idmodulo = '", modulo, u"'"))
                 curModulo.first()
                 curModulo.setModeAccess(curModulo.Edit)
@@ -134,7 +145,7 @@ class FormInternalObj(FormDBWidget):
             else:
                 curModulo.setModeAccess(curModulo.Insert)
 
-             # WITH_START
+            # WITH_START
             curModulo.refreshBuffer()
             curModulo.setValueBuffer(u"idmodulo", modulo)
             curModulo.setValueBuffer(u"descripcion", descripcion)
@@ -153,8 +164,10 @@ class FormInternalObj(FormDBWidget):
             util.writeSettingEntry(setting, nombreFichero)
             aqApp.reinit()
 
+
 def dameValor(self, linea=None):
     return linea
+
 
 def valorPorClave(tabla=None, campo=None, where=None):
     valor = None
@@ -167,6 +180,7 @@ def valorPorClave(tabla=None, campo=None, where=None):
     if query.next():
         valor = query.value(0)
     return valor
+
 
 def compararVersiones(v1=None, v2=None):
     a1 = None
@@ -195,6 +209,7 @@ def compararVersiones(v1=None, v2=None):
 
     return 0
 
+
 def evaluarDependencias(dependencias=None):
     res = None
     if not dependencias:
@@ -207,11 +222,16 @@ def evaluarDependencias(dependencias=None):
             while_pass = True
             continue
         while_pass = False
-        if dependencias[i] == '':
+        if dependencias[i] == "":
             continue
         if sys.isLoadedModule(dependencias[i]) == False:
-            res = MessageBox.warning(util.translate(u"scripts", u"Este módulo depende del módulo ") + dependencias[i] + util.translate(
-                u"scripts", u", que no está instalado.\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"), MessageBox.Yes, MessageBox.No)
+            res = MessageBox.warning(
+                util.translate(u"scripts", u"Este módulo depende del módulo ")
+                + dependencias[i]
+                + util.translate(u"scripts", u", que no está instalado.\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"),
+                MessageBox.Yes,
+                MessageBox.No,
+            )
             if res == MessageBox.No:
                 return False
         i += 1
@@ -223,8 +243,9 @@ def evaluarDependencias(dependencias=None):
 
     return True
 
+
 def traducirCadena(cadena=None, path=None, modulo=None):
-    if cadena.find(u"QT_TRANSLATE_NOOP") == - 1:
+    if cadena.find(u"QT_TRANSLATE_NOOP") == -1:
         return cadena
     cadena = QString(cadena).mid(41, len(cadena) - 43)
     nombreFichero = None

@@ -4,6 +4,7 @@ from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
 import pineboolib
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -67,6 +68,7 @@ class FLAccessControlLists(object):
         util = FLUtil()
         if aclXml is None:
             from pineboolib.pncontrolsfactory import aqApp
+
             aclXml = aqApp.db().managerModules().content("acl.xml")
 
         doc = QDomDocument("ACL")
@@ -96,8 +98,7 @@ class FLAccessControlLists(object):
                 ac = FLAccessControlFactory().create(e.tagName())
                 if ac:
                     ac.set(e)
-                    self.accessControlList_["%s::%s::%s" %
-                                            (ac.type(), ac.name(), ac.user())] = ac
+                    self.accessControlList_["%s::%s::%s" % (ac.type(), ac.name(), ac.user())] = ac
                     no = no.nextSibling()
                     continue
 
@@ -155,18 +156,17 @@ class FLAccessControlLists(object):
 
         if q.exec_():
             step = 0
-            progress = util.ProgressDialog(
-                util.tr("Instalando control de acceso..."), None, q.size(), None, None, True)
+            progress = util.ProgressDialog(util.tr("Instalando control de acceso..."), None, q.size(), None, None, True)
             progress.setCaption(util.tr("Instalando ACL"))
             progress.setMinimumDuration(0)
             progress.setProgress(++step)
             while q.next():
                 self.makeRule(q, doc)
                 progress.setProgress(++step)
-            
-            from pineboolib.pnconrolsfactory import aqApp
-            aqApp.db().managerModules().setContent("acl.xml", "sys", doc.toString())
 
+            from pineboolib.pnconrolsfactory import aqApp
+
+            aqApp.db().managerModules().setContent("acl.xml", "sys", doc.toString())
 
     def makeRule(self, q, d):
         """
@@ -225,7 +225,7 @@ class FLAccessControlLists(object):
 
             del ac
 
-    def makeRuleGroup(self, q, d, idgroup = ""):
+    def makeRuleGroup(self, q, d, idgroup=""):
         """
         Crea varios nodos DOM correspondientes a un registro de la tabla "flacs" y para un grupo de usuarios determinado.
 

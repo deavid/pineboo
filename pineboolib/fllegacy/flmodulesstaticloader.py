@@ -21,7 +21,7 @@ class AQStaticDirInfo(object):
 
         if len(args) == 1:
             self.active_ = args[0][len(args) - 1]
-            self.path_ = args[1:len(args) - 1]
+            self.path_ = args[1 : len(args) - 1]
         else:
             self.active_ = args[0]
             self.path_ = args[1]
@@ -93,6 +93,7 @@ class FLStaticLoader(QtCore.QObject):
 
         from pineboolib.fllegacy.flmanagermodules import FLManagerModules
         from pineboolib.utils import filedir
+
         self.ui_ = FLManagerModules().createUI(filedir("../share/pineboo/forms/FLStaticLoaderUI.ui"))
         self.b_ = b
         self.pixOn.setVisible(False)
@@ -130,6 +131,7 @@ class FLStaticLoader(QtCore.QObject):
             self.tblDirs.setNumRows(n_rows)
             row = 0
             from pineboolib.pncontrolsfactory import FLCheckBox
+
             for info in self.b_.dirs_:
                 self.tblDirs.setText(row, 0, info.path_)
 
@@ -151,6 +153,7 @@ class FLStaticLoader(QtCore.QObject):
 
         if dir:
             from pineboolib.pncontrolsfactory import FLCheckBox
+
             n_rows = self.tblDirs.numRows()
             self.tblDirs.setNumRows(n_rows + 1)
             self.tblDirs.setText(n_rows, 0, dir)
@@ -189,7 +192,9 @@ class FLStaticLoader(QtCore.QObject):
         if cur_row == -1:
             return
 
-        if QtWidgets.QMessageBox.No == QtWidgets.QMessageBox.warning(None, self.tr("Borrar registro"), self.tr("El registro activo será borrado. ¿ Está seguro ?"), QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No):
+        if QtWidgets.QMessageBox.No == QtWidgets.QMessageBox.warning(
+            None, self.tr("Borrar registro"), self.tr("El registro activo será borrado. ¿ Está seguro ?"), QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No
+        ):
             return
 
         info = self.b_.findPath(self.tblDirs.text(cur_row, 0))
@@ -221,7 +226,7 @@ class FLStaticLoader(QtCore.QObject):
 
     def setup(b):
         diag_setup = FLStaticLoader(b)
-        if (QtWidgets.QDialog.Accepted == diag_setup.ui_.exec_()):
+        if QtWidgets.QDialog.Accepted == diag_setup.ui_.exec_():
             b.writeSettings()
 
     def content(n, b, only_path=False):
@@ -255,6 +260,7 @@ class FLStaticLoader(QtCore.QObject):
                     return content_path
                 else:
                     from pineboolib.pncontrolsfactory import aqApp
+
                     return aqApp.db().managerModules().contentFS(info.path_ + separator + n)
 
         return None
@@ -277,7 +283,7 @@ class FLStaticLoaderWarning(QtCore.QObject):
         if not self.warns_:
             return
 
-        msg = "<p><img source=\"about.png\" align=\"right\"><b><u>CARGA ESTATICA ACTIVADA</u></b><br><br><font face=\"Monospace\">"
+        msg = '<p><img source="about.png" align="right"><b><u>CARGA ESTATICA ACTIVADA</u></b><br><br><font face="Monospace">'
 
         for it in self.warns_:
             msg += "%s<br>" % it

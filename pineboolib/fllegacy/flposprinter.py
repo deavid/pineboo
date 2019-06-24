@@ -6,7 +6,7 @@ P57_5MM = 57
 P69_5MM = 69
 
 
-class FLPosPrinter():
+class FLPosPrinter:
 
     PaperWidth = []
     paperWidth_ = None

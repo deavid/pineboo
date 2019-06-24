@@ -389,7 +389,7 @@ class Project(object):
 
         self.acl_ = FLAccessControlLists()
         self.acl_.init()
-        
+
         return True
 
     """

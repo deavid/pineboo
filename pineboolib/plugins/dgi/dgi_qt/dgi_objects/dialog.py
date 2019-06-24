@@ -1,8 +1,8 @@
-
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qdialog import QDialog
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qpushbutton import QPushButton
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qtabwidget import QTabWidget
 from PyQt5 import QtCore, QtWidgets
+
 
 class Dialog(QDialog):
     _layout = None
@@ -25,10 +25,8 @@ class Dialog(QDialog):
         self.buttonBox = QtWidgets.QDialogButtonBox()
         self.okButton = QPushButton("&Aceptar")
         self.cancelButton = QPushButton("&Cancelar")
-        self.buttonBox.addButton(
-            self.okButton, QtWidgets.QDialogButtonBox.AcceptRole)
-        self.buttonBox.addButton(
-            self.cancelButton, QtWidgets.QDialogButtonBox.RejectRole)
+        self.buttonBox.addButton(self.okButton, QtWidgets.QDialogButtonBox.AcceptRole)
+        self.buttonBox.addButton(self.cancelButton, QtWidgets.QDialogButtonBox.RejectRole)
         self.okButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
         self._tab = QTabWidget()
@@ -43,7 +41,7 @@ class Dialog(QDialog):
     def exec_(self):
         if self.okButtonText:
             self.okButton.setText(str(self.okButtonText))
-        if (self.cancelButtonText):
+        if self.cancelButtonText:
             self.cancelButton.setText(str(self.cancelButtonText))
         self._layout.addWidget(self.buttonBox)
 
