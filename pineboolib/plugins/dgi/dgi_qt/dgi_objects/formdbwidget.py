@@ -134,7 +134,8 @@ class FormDBWidget(QtWidgets.QWidget):
             self.cursor_ = cursor
         else:
             if not self.cursor_:
-                from pineboolib.pncontrolsfactory import FLSqlCursor, aqApp
+                from pineboolib.pncontrolsfactory import aqApp
+                from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
                 action = aqApp.db().manager().action(self._action.name)
                 self.cursor_ = FLSqlCursor(action.name())
 
