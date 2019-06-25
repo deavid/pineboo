@@ -692,9 +692,9 @@ class FLDataTable(QtWidgets.QTableView):
             else:
                 return
 
-        index = self.cursor().model().index(position, 0)
-        if index is not None:
-            self.scrollTo(index)
+        #index = self.cursor().model().index(position, 0)
+        #if index is not None:
+        #    self.scrollTo(index)
 
     """
     Foco rápido sin refrescos para optimizar
