@@ -1062,7 +1062,8 @@ class FLApplication(QtCore.QObject):
             self.last_text_caption_ = value
         
         if pineboolib.project.main_form_name != "eneboo_mdi":
-            self.mainWidget().setWindowTitle("Pineboo v%s - %s" % (pineboolib.project.version, self.last_text_caption_))
+            mode = "DBAdmin" if FLSettings().readBoolEntry("application/dbadmin_enabled", False) else "Quick"
+            self.mainWidget().setWindowTitle("Pineboo %s v%s - %s" % (mode, pineboolib.project.version, self.last_text_caption_))
             return
         
         else:
