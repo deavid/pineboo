@@ -239,7 +239,7 @@ class SysType(object):
     def isDebuggerMode(self) -> bool:
         from pineboolib.fllegacy.flsettings import FLSettings
 
-        return FLSettings().readBoolEntry("application/isDebuggerMode")
+        return FLSettings().readBoolEntry("application/isDebuggerMode", False)
 
     def reinit(self):
         aqApp.reinit()

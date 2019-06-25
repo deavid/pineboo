@@ -80,8 +80,8 @@ class FLSqlQuery(object):
             self._cursor = self.db().cursor()
             logger.trace("exec_: Ejecutando consulta: <%s> en <%s>", sql, self._cursor)
             self._cursor.execute(sql)
-
-            self._posicion = None
+            self._datos = self._cursor.fetchall()
+            self._posicion = -1
             self._is_active = True
         except Exception as exc:
             logger.error(exc)
@@ -515,7 +515,8 @@ class FLSqlQuery(object):
             mtd_field = self.fields_cache[name]
 
         try:
-            retorno = self._row[pos]
+            if self._row is not None:
+                retorno = self._row[pos]
         except Exception:
             self.logger.exception("value::error retrieving row position %s", pos)
 
@@ -562,7 +563,7 @@ class FLSqlQuery(object):
             #    retorno = bytearray(retorno)
             elif not isinstance(retorno, (str, int, bool, float, pineboolib.qsa.Date)):
                 retorno = float(retorno)
-
+            
         self.logger.debug("value(%s)::return:: %s", n, retorno)
         return retorno
 
@@ -674,7 +675,7 @@ class FLSqlQuery(object):
     """
 
     def size(self):
-        return self._cursor.rowcount if self._cursor else 0
+        return len(self._datos)
 
     """
     Para obtener la lista de definiciones de campos de la consulta
@@ -724,17 +725,16 @@ class FLSqlQuery(object):
     def isActive(self):
         return self._is_active
 
-    @decorators.NotImplementedWarn
+
     def at(self):
-        pass
+        return self._posicion
 
-    @decorators.NotImplementedWarn
     def lastQuery(self):
-        pass
+        return self.sql()
 
-    @decorators.NotImplementedWarn
+
     def numRowsAffected(self):
-        pass
+        return len(self._datos)
 
     @decorators.NotImplementedWarn
     def lastError(self):
@@ -768,74 +768,69 @@ class FLSqlQuery(object):
     def QSqlQuery_value(self, i):
         pass
 
-    @decorators.NotImplementedWarn
+
     def seek(self, i, relative=False):
-        pass
+        if not self._cursor:
+            return False
+        
+        pos = i
+        if relative:
+            pos = i + self._posicion
+        
+        if self._datos:
+            if pos > 0 and pos < len(self._datos) -1:
+                self._posicion = pos
+                self._row = self._datos[self._posicion]
+                return True
+        
+        return False
+                
 
     def next(self):
         if not self._cursor:
             return False
 
-        if self._posicion is None:
-            self._posicion = 0
-        else:
-            self._posicion += 1
         if self._datos:
-            if self._posicion >= len(self._datos):
-                return False
-            self._row = self._datos[self._posicion]
-            return True
-        else:
-            try:
-                self._row = self._cursor.fetchone()
-                if self._row is None:
-                    return False
-                else:
-                    return True
-            except Exception:
-                print(traceback.format_exc())
-                return False
+            self._posicion += 1
+            if self._posicion < len(self._datos):
+                self._row = self._datos[self._posicion]
+                return True
+
+        return False
 
     def prev(self):
         if not self._cursor:
             return False
-
-        self._posicion -= 1
+        
         if self._datos:
-            if self._posicion < 0:
-                return False
-            self._row = self._datos[self._posicion]
-            return True
-        else:
-            return False
+            self._posicion -= 1
+            if self._posicion >= 0:
+                self._row = self._datos[self._posicion]
+                return True
+
+        return False
 
     def first(self):
         if not self._cursor:
             return False
-
-        self._posicion = 0
+        
         if self._datos:
-            self._row = self._datos[0]
+            self._posicion = 0
+            self._row = self._datos[self._posicion]
             return True
-        else:
-            try:
-                self._row = self._cursor.fetchone()
-                if self._row is None:
-                    return False
-                else:
-                    return True
-            except Exception:
-                return False
+        
+        return False
 
     def last(self):
         if not self._cursor:
             return False
-
+        
         if self._datos:
             self._posicion = len(self._datos) - 1
             self._row = self._datos[self._posicion]
-        else:
-            return False
+            return True
+
+        return False
 
     @decorators.NotImplementedWarn
     def prepare(self, query):

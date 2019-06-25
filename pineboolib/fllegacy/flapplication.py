@@ -1060,20 +1060,18 @@ class FLApplication(QtCore.QObject):
 
         if value:
             self.last_text_caption_ = value
-
-        if not self.main_widget_:
-            mwi = self.mainWidget()
-            if mwi:
-                # db = self.db().driverNameToDriverAlias(self.db().driverName())
-                self.mainWidget().setWindowTitle("Pineboo v%s - %s" % (pineboolib.project.version, self.last_text_caption_))
-
+        
+        if pineboolib.project.main_form_name != "eneboo_mdi":
+            mode = "DBAdmin" if FLSettings().readBoolEntry("application/dbadmin_enabled", False) else "Quick"
+            self.mainWidget().setWindowTitle("Pineboo %s v%s - %s" % (mode, pineboolib.project.version, self.last_text_caption_))
             return
+        
+        else:
+            descript_area = self.db().managerModules().idAreaToDescription(self.db().managerModules().activeIdArea())
+            descript_module = self.db().managerModules().idModuleToDescription(self.main_widget_.objectName())
 
-        descript_area = self.db().managerModules().idAreaToDescription(self.db().managerModules().activeIdArea())
-        descript_module = self.db().managerModules().idModuleToDescription(self.main_widget_.objectName())
-
-        if descript_area:
-            self.main_widget_.setWindowTitle("%s - %s - %s" % (self.last_text_caption_, descript_area, descript_module))
+            if descript_area:
+                self.main_widget_.setWindowTitle("%s - %s - %s" % (self.last_text_caption_, descript_area, descript_module))
 
     @decorators.NotImplementedWarn
     def setNotExit(self, b):
