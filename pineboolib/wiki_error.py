@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -7,6 +8,10 @@ logger = logging.getLogger(__name__)
 def wiki_error(e):
     # FIXME: No hay un nombre mejor? Crea entradas de la wikipedia?
     from pineboolib.pncontrolsfactory import SysType as sys
+    import pineboolib
+
+    e = e.replace(pineboolib.project.tmpdir, "...")
+    e = re.sub(r"/[0-9a-f]{35,60}\.qs\.py", ".qs.py", e)
 
     text = sys.translate("scripts", "Error ejecutando un script")
     text += ":\n%s" % e

@@ -118,7 +118,9 @@ class Project(object):
 
     def show_time(self, text="", stack=False):
         now_ = time.time()
-        self.logger.warning("%s Tiempo : %s", text, round(now_ - self.time_, 5), stack_info=stack)
+        self.logger.warning("%s Tiempo : %s", text, round(now_ - self.time_, 5))
+        if stack:
+            self.logger.info(stack_info=True)
 
     """
     Retorna si hay o no acls cargados
@@ -483,7 +485,7 @@ class Project(object):
         except Exception:
             from pineboolib.pncontrolsfactory import wiki_error
 
-            msg_w = wiki_error(traceback.format_exc())
+            msg_w = wiki_error(traceback.format_exc(limit=-6, chain=False))
             if pineboolib.project._DGI.localDesktop():
                 from pineboolib.pncontrolsfactory import aqApp
 

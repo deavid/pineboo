@@ -2073,7 +2073,7 @@ def runTransaction(f=None, oParam=None):
             return False
 
     except Exception:
-        e = traceback.format_exc()
+        e = traceback.format_exc(limit=-6, chain=False)
         curT.rollback()
         if gui:
             try:

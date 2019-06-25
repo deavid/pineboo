@@ -425,7 +425,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                     try:
                         widget.layout.addWidget(new_widget, row, col, int(rowSpan), int(colSpan))
                     except Exception:
-                        logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget, stack_info=True)
+                        logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget)
+                        logger.trace("Detalle:", stack_info=True)
 
             elif c.tag == "spacer":
                 # sH = None

@@ -82,7 +82,9 @@ class FLSqlQuery(object):
             self._posicion = None
             self._is_active = True
         except Exception as exc:
-            logger.warning("Error en consulta:%s\n %s", exc, sql, stack_info=True)
+            logger.error(exc)
+            logger.info("Error ejecutando consulta: <%s>", sql)
+            logger.trace("Detalle:", stack_info=True)
             return False
         # conn.commit()
 

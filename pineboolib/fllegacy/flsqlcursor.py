@@ -841,7 +841,7 @@ class FLSqlCursor(QtCore.QObject):
         from pineboolib.utils import XMLStruct
 
         if isinstance(name, XMLStruct):
-            logger.warning("FIXME::__init__ XMLSTRUCT %s", name.name, stack_info=True)
+            logger.trace("FIXME::__init__ XMLSTRUCT %s", name.name, stack_info=True)
             name_action = name.name
         else:
             name_action = name

@@ -374,24 +374,28 @@ class FLQPSQL(object):
         sql = "DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s " % (curname, fields, table, where)
         try:
             cursor.execute(sql)
-        except Exception:
-            logger.warning("Error en consulta %s\n%s", sql, traceback.format_exc(), stack_info=True)
-            return
-            qWarning("CursorTableModel.Refresh\n %s" % traceback.format_exc())
+        except Exception as e:
+            logger.error("refreshQuery: %s", e)
+            logger.info("SQL: %s", sql)
+            logger.trace("Detalle:", stack_info=True)
 
     def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
         sql = "FETCH %d FROM %s" % (number, curname)
         try:
             cursor.execute(sql)
-        except Exception:
-            qWarning("PSQLDriver.refreshFetch\n %s" % traceback.format_exc())
+        except Exception as e:
+            logger.error("refreshFetch: %s", e)
+            logger.info("SQL: %s", sql)
+            logger.trace("Detalle:", stack_info=True)
 
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
         ret_ = []
         try:
             ret_ = cursor.fetchall()
-        except Exception:
-            qWarning("PSQLDriver.fetchAll\n %s" % traceback.format_exc())
+        except Exception as e:
+            logger.error("fetchAll: %s", e)
+            logger.info("where_filter: %s", where_filter)
+            logger.trace("Detalle:", stack_info=True)
 
         return ret_
 

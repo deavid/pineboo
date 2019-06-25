@@ -375,7 +375,7 @@ def slot_done(fn, signal, sender, caller):
                 res = fn(*args[0:args_num])
         except Exception:
             # script_name = caller.__module__ if caller is not None else "????"
-            aqApp.msgBoxWarning(wiki_error(traceback.format_exc()), pineboolib.project._DGI)
+            aqApp.msgBoxWarning(wiki_error(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI)
 
         if caller is not None:
             try:

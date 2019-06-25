@@ -24,7 +24,7 @@ def auto_qt_translate_text(text):
 
     if isinstance(text, str):
         if text.find("QT_TRANSLATE") != -1:
-            match = re.search(r"""QT_TRANSLATE\w*\(.+,["'](.+)["']\)""", text)       
+            match = re.search(r"""QT_TRANSLATE\w*\(.+,["'](.+)["']\)""", text)
             text = match.group(1) if match else ""
 
     return text

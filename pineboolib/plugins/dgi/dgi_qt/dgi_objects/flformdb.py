@@ -249,7 +249,7 @@ class FLFormDB(QtWidgets.QDialog):
                     # script_name = self.iface.__module__
                     from pineboolib.pncontrolsfactory import aqApp, wiki_error
 
-                    aqApp.msgBoxWarning(wiki_error(traceback.format_exc()), pineboolib.project._DGI)
+                    aqApp.msgBoxWarning(wiki_error(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI)
 
             return True
 

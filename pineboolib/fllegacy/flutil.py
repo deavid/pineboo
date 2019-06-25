@@ -744,7 +744,8 @@ class FLUtil(QtCore.QObject):
         if isinstance(fecha, str):
             fecha = Date(fecha, "yyyy-MM-dd")
         if not isinstance(fecha, Date):
-            logger.error("addDays: No reconozco el tipo de dato %s", type(fecha), stack_info=True)
+            logger.error("addDays: No reconozco el tipo de dato %s", type(fecha))
+            logger.trace("Detalle:", stack_info=True)
             return None
         return fecha.addDays(offset)
 
@@ -761,7 +762,8 @@ class FLUtil(QtCore.QObject):
         if isinstance(fecha, str):
             fecha = Date(fecha)
         if not isinstance(fecha, Date):
-            logger.error("addMonths: No reconozco el tipo de dato %s", type(fecha), stack_info=True)
+            logger.error("addMonths: No reconozco el tipo de dato %s", type(fecha))
+            logger.trace("Detalle:", stack_info=True)
             return None
         return fecha.addMonths(offset)
 
