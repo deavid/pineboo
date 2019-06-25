@@ -15,6 +15,43 @@ logger = logging.getLogger("PNControlsFactory")
 
 processed_ = []
 
+"""
+Esta librería crea y registra modelos sqlAlchemy en el arbol qsa. 
+Para llamar a uno de estos se puede hacer desde cualquier script de la siguiente manera
+
+from pineboolib.qsa import *
+
+cli = Clientes() <- Este es un modelo disponible, nombre del mtd existente y comenzando en Mayuscula.
+
+También es posible recargar estos modelos creados a raiz de los mtds. Se puede crear por ejemplo 
+tempdata/cache/nombre_de_bd/models/Clientes_model.py. Esta librería sobrecargará en el arbol qsa la previa por defecto.
+
+Un ejemplo sería:
+
+    from pineboolib.qsa import *
+    from sqlalchemy.orm import reconstructor
+
+    class Clientes(Clientes):
+        @reconstructor
+
+        def init(self):
+            print("Inicializado", self.nombre)
+
+    
+        def saluda(self):
+            print("Hola", self.nombre)
+
+
+Ejemplo de uso:
+    from pineboolib.qsa import *
+    
+    session = aqApp.session()
+    
+    for instance in session.query(Clientes).order_by(Clientes.codcliente):
+        instance.saluda()
+
+"""
+
 
 def base_model(name):
     # print("Base", name)
