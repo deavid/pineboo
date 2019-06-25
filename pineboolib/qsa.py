@@ -234,6 +234,8 @@ class Array(object):
                         new[m] = self.dict_[m]
                 
                 i += 1
+            
+            self.dict_ = new
 
                     
             
