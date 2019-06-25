@@ -6,6 +6,11 @@ logger = logging.getLogger(__name__)
 
 reserved_words = ["pass"]
 
+"""
+    Esta librería es un parser de mtd a model de sqlAlchemy.
+    Se crea un fichero .py y se aloja al lado del .mtd relacionado. También se puede sobrecargar con una clase personalizada para aumentar/modificar
+        las funciones disponibles. Ver pineboolib.pnobjectsfactory.py
+"""
 
 def mtd_parse(fileobj):
     mtd_file = _dir("cache", fileobj.filekey)
