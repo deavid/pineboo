@@ -9,11 +9,12 @@ logger = logging.getLogger("messageBox")
 class MessageBox(QMessageBox):
     @classmethod
     def msgbox(cls, typename, text, button0, button1=None, button2=None, title=None, form=None):
-
+        
+        
         if pineboolib.project._splash:
             pineboolib.project._splash.hide()
 
-        parent = pineboolib.project.main_window
+        
 
         if not isinstance(text, str):
             # temp = text
@@ -45,9 +46,9 @@ class MessageBox(QMessageBox):
             if not title:
                 title = "Critical"
         # title = unicode(title,"UTF-8")
-        # text = unicode(text,"UTF-8")
+        # text = unicode(text,"UTF-8")      
         msg = QMessageBox(icon, title, text)
-        msg.setParent(parent)
+        msg.setParent(QApplication.activeModalWidget())
         msg.setWindowModality(1)
         msg.setEnabled(True)
         if button0:
