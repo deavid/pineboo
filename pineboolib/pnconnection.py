@@ -254,24 +254,24 @@ class PNConnection(QtCore.QObject):
         else:
             if settings.readBoolEntry("application/isDebuggerMode", False):
                 aqApp.statusHelpMsg("Creando punto de salvaguarda %s" % self.transaction_)
-                if not self.canSavePoint():
-                    if self.transaction_ == 0:
-                        if self.currentSavePoint_:
-                            del self.currentSavePoint_
-                            self.currentSavePoint_ = None
-
-                        self.stackSavePoints_.clear()
-                        self.queueSavePoints_.clear()
-
+            if not self.canSavePoint():
+                if self.transaction_ == 0:
                     if self.currentSavePoint_:
-                        if self.stackSavePoints_:
-                            self.stackSavePoints_.insert(0, self.currentSavePoint_)
-                        else:
-                            self.stackSavePoints_.append(self.currentSavePoint_)
+                        del self.currentSavePoint_
+                        self.currentSavePoint_ = None
 
-                    self.currentSavePoint_ = FLSqlSavePoint(self.transaction_)
-                else:
-                    self.savePoint(self.transaction_)
+                    self.stackSavePoints_.clear()
+                    self.queueSavePoints_.clear()
+
+                if self.currentSavePoint_:
+                    if self.stackSavePoints_:
+                        self.stackSavePoints_.insert(0, self.currentSavePoint_)
+                    else:
+                        self.stackSavePoints_.append(self.currentSavePoint_)
+
+                self.currentSavePoint_ = FLSqlSavePoint(self.transaction_)
+            else:
+                self.savePoint(self.transaction_)
 
             self.transaction_ = self.transaction_ + 1
             if cursor.d.transactionsOpened_:
