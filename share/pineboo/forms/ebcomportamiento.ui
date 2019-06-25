@@ -8,8 +8,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>574</width>
-            <height>543</height>
+            <width>615</width>
+            <height>632</height>
         </rect>
     </property>
     <property name="caption">
@@ -287,6 +287,36 @@
                                         </widget>
                                     </vbox>
                                 </widget>
+                                <widget class="QGroupBox">
+                                    <property name="name">
+                                        <cstring>groupBox31</cstring>
+                                    </property>
+                                    <property name="title">
+                                        <string>Modo de trabajo</string>
+                                    </property>
+                                    <vbox>
+                                        <property name="name">
+                                            <cstring>unnamed</cstring>
+                                        </property>
+                                        <widget class="QCheckBox">
+                                            <property name="name">
+                                                <cstring>cb_dbadmin</cstring>
+                                            </property>
+                                            <property name="minimumSize">
+                                                <size>
+                                                    <width>0</width>
+                                                    <height>0</height>
+                                                </size>
+                                            </property>
+                                            <property name="text">
+                                                <string>Usar en modo DBAdmin. Habilita menú de sistema y funciones en la gestión de tablas.</string>
+                                            </property>
+                                            <property name="tristate">
+                                                <bool>false</bool>
+                                            </property>
+                                        </widget>
+                                    </vbox>
+                                </widget>
                                 <spacer>
                                     <property name="name">
                                         <cstring>unnamed</cstring>
@@ -300,7 +330,7 @@
                                     <property name="sizeHint">
                                         <size>
                                             <width>20</width>
-                                            <height>20</height>
+                                            <height>16</height>
                                         </size>
                                     </property>
                                 </spacer>
