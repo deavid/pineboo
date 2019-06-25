@@ -640,7 +640,7 @@ class FLQPSQL(object):
                 del mtd
                 return self.recordInfo2(tablename)
 
-            for f in mtd.fieldsNames():
+            for f in mtd.fieldNames():
                 field = mtd.field(f)
                 info.append(
                     [field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()]
@@ -994,10 +994,10 @@ class FLQPSQL(object):
 
             return False
 
-        fieldsNamesOld = []
+        fieldNamesOld = []
         for it in fieldList:
             if newMTD.field(it.name()):
-                fieldsNamesOld.append(it.name())
+                fieldNamesOld.append(it.name())
 
             if it.isUnique():
                 constraintName = "%s_%s_key" % (oldMTD.name(), it.name())
@@ -1039,7 +1039,7 @@ class FLQPSQL(object):
         v = None
         ok = False
 
-        if not force and not fieldsNamesOld:
+        if not force and not fieldNamesOld:
             self.db_.dbAux().rollback()
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
@@ -1050,7 +1050,7 @@ class FLQPSQL(object):
 
         if not ok:
             oldCursor = self.db_.dbAux().cursor()
-            oldCursor.execute("SELECT %s FROM %s WHERE 1 = 1" % (", ".join(fieldsNamesOld), renameOld))
+            oldCursor.execute("SELECT %s FROM %s WHERE 1 = 1" % (", ".join(fieldNamesOld), renameOld))
             result_set = oldCursor.fetchall()
             totalSteps = len(result_set)
             util.createProgressDialog(util.tr("application", "Reestructurando registros para %s..." % newMTD.alias()), totalSteps)
@@ -1106,7 +1106,7 @@ class FLQPSQL(object):
                         i += 1
                         oldField = vector_fields[str(i)]
                         pos = 0
-                        for field_name in fieldsNamesOld:
+                        for field_name in fieldNamesOld:
                             if newField.name() == field_name:
                                 v = row[pos]
                                 break
