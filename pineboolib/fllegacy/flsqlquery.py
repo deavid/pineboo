@@ -80,7 +80,7 @@ class FLSqlQuery(object):
             self._cursor = self.db().cursor()
             self._cursor.execute(sql)
             self._datos = self._cursor.fetchall()
-            self._posicion = None
+            self._posicion = -1
             self._is_active = True
         except Exception as exc:
             logger.error(exc)
@@ -718,17 +718,16 @@ class FLSqlQuery(object):
     def isActive(self):
         return self._is_active
 
-    @decorators.NotImplementedWarn
+
     def at(self):
-        pass
+        return self._posicion
 
-    @decorators.NotImplementedWarn
     def lastQuery(self):
-        pass
+        return self.sql()
 
-    @decorators.NotImplementedWarn
+
     def numRowsAffected(self):
-        pass
+        return len(self._datos)
 
     @decorators.NotImplementedWarn
     def lastError(self):
@@ -783,9 +782,6 @@ class FLSqlQuery(object):
     def next(self):
         if not self._cursor:
             return False
-        
-        if self._posicion is None:
-            self._posicion = -1
 
         if self._datos:
             self._posicion += 1
