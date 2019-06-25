@@ -507,8 +507,8 @@ class FLSqlQuery(object):
             retorno = self._row[pos]
         except Exception:
             pass
-        
-        if retorno in (None, "None"):
+
+        if retorno is None:
             if mtd_field is not None:
                 # retorno = self.db().formatValue(mtd_field.type(), None, False)
                 if mtd_field.type() in ("double", "uint", "int"):
@@ -530,6 +530,9 @@ class FLSqlQuery(object):
                                 raw = True
                         if raw:
                             retorno = self.d.db_.manager().fetchLargeValue(retorno)
+                    elif mtd_field.type() == "string":
+                        if retorno == "None":
+                            retorno = ""
 
                 elif retorno.find(":") > -1:
                     if retorno.find(":") < retorno.find("."):
