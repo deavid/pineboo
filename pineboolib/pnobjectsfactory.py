@@ -135,25 +135,3 @@ def load_models():
 
 
 Calculated = String
-"""
-def before_commit(s):
-    for o in s.new:
-        o.beforeCommit()
-    for o in s.dirty:
-        o.beforeCommit()
-    for o in s.deleted:
-        o.beforeCommit()
-
-
-def after_commit(s):
-    for o in s.new:
-        o.afterCommit()
-    for o in s.dirty:
-        o.afterCommit()
-    for o in s.deleted:
-        o.afterCommit()
-
-def after_flush(*args):
-    print("****", args)
-
-"""

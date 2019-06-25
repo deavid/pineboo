@@ -26,6 +26,7 @@ class PNConnection(QtCore.QObject):
     db_userName = None
     db_password = None
     conn = None
+    connAux = None
     driverSql = None
     transaction_ = None
     _managerModules = None
@@ -42,7 +43,7 @@ class PNConnection(QtCore.QObject):
         super(PNConnection, self).__init__()
 
         self.driverSql = PNSqlDrivers()
-
+        self.connAux = {}
         if name:
             self._isOpen = False
             self.name = name
@@ -96,7 +97,7 @@ class PNConnection(QtCore.QObject):
             return self.connAux[name]
 
         name_conn = name
-        if name == "dbAux":
+        if name in ("dbAux", "Aux"):
             name_conn = None
 
         self.connAux[name] = PNConnection(
@@ -150,7 +151,6 @@ class PNConnection(QtCore.QObject):
 
     def conectar(self, db_name, db_host, db_port, db_userName, db_password):
 
-        self.connAux = {}
         self.db_name = db_name
         self.db_host = db_host
         self.db_port = db_port

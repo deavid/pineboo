@@ -216,7 +216,6 @@ class Project(object):
         if self.conn.conn is False:
             return False
 
-        from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
         from pineboolib.pnobjectsfactory import load_models
         from pineboolib.pncontrolsfactory import aqApp
 
