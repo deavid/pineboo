@@ -617,7 +617,7 @@ class FLSQLITE(object):
                 del mtd
                 return self.recordInfo2(tablename)
 
-            for f in mtd.fieldsNames():
+            for f in mtd.fieldNames():
                 field = mtd.field(f)
                 info.append(
                     [field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()]

@@ -545,6 +545,17 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def _refresh_field_info(self, qry):
+        is_query = self.metadata().isQuery()
+        qry_tables = []
+        if is_query:
+            qry_select = [x.strip() for x in (qry.select()).split(",")]
+            qry_fields = {fieldname.split(".")[-1]: fieldname for fieldname in qry_select}
+
+            for table in qry.tablesList():
+                mtd = self.db().manager().metadata(table, True)
+                if mtd:
+                    qry_tables.append((table, mtd))
+
         for n, field in enumerate(self.metadata().fieldList()):
             # if field.visibleGrid():
             #    sql_fields.append(field.name())
@@ -553,25 +564,26 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             if field.isCompoundKey():
                 self.ckpos.append(n)
 
-            if self.metadata().isQuery():
-                found = False
-                for table in qry.tablesList():
-                    mtd = self.db().manager().metadata(table, True)
-                    if mtd:
-                        if field.name() in mtd.fieldsNames():
+            if is_query:
+                if field.name() in qry_fields:
+                    self.sql_fields.append(qry_fields[field.name()])
+                else:
+                    found = False
+                    for table, mtd in qry_tables:
+                        if field.name() in mtd.fieldNames():
                             self.sql_fields.append("%s.%s" % (table, field.name()))
                             found = True
                             break
-                # Omito los campos que aparentemente no existen
-                if not found and not field.name() in self.sql_fields_omited:
-                    # NOTE: Esto podría ser por ejemplo porque no entendemos los campos computados.
-                    self.logger.error(
-                        "CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s ",
-                        field.name(),
-                        self.metadata().name(),
-                        qry.tablesList(),
-                    )
-                    self.sql_fields_omited.append(field.name())
+                    # Omito los campos que aparentemente no existen
+                    if not found and not field.name() in self.sql_fields_omited:
+                        # NOTE: Esto podría ser por ejemplo porque no entendemos los campos computados.
+                        self.logger.error(
+                            "CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s ",
+                            field.name(),
+                            self.metadata().name(),
+                            qry.tablesList(),
+                        )
+                        self.sql_fields_omited.append(field.name())
 
             else:
                 if field.type() != field.Check:

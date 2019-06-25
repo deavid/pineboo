@@ -22,6 +22,7 @@ class FLSqlQuery(object):
     invalidTables = False
     fields_cache = None
     _is_active = False
+    logger = logging.getLogger("FLSqlQuery")
 
     def __init__(self, cx=None, connection_name="default"):
         # super(FLSqlQuery, self).__init__()
@@ -469,12 +470,14 @@ class FLSqlQuery(object):
         # field = None
         mtd_field = None
         retorno = None
-
-        pos = self.fieldNameToPos(n) if isinstance(n, str) else n
-        name = self.posToFieldName(pos)
+        if isinstance(n, str):
+            pos = self.fieldNameToPos(n)
+            name = n
+        else:
+            pos = n
+            name = self.posToFieldName(n)
 
         if name not in self.fields_cache.keys():
-
             if name:
                 tables_list = self.tablesList()
                 if name.find(".") > -1 and name[0 : name.find(".")] in tables_list:
@@ -493,7 +496,7 @@ class FLSqlQuery(object):
                             name_fixed = name_fixed.replace("SUM(", "")
                             name_fixed = name_fixed.replace("COUNT(", "")
 
-                        if mtd is not None and name_fixed in mtd.fieldsNames():
+                        if mtd is not None and name_fixed in mtd.fieldNames():
                             table_name = t
                             field_name = name_fixed
                             break
@@ -508,7 +511,7 @@ class FLSqlQuery(object):
         try:
             retorno = self._row[pos]
         except Exception:
-            pass
+            self.logger.exception("value::error retrieving row position %s", pos)
 
         if retorno is None:
             if mtd_field is not None:

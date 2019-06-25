@@ -1656,7 +1656,7 @@ class FLTableDB(QtWidgets.QWidget):
                 if fieldCheck is None:
                     self.fieldNameCheckColumn_ = "%s_check_column" % tMD.name()
 
-                    if self.fieldNameCheckColumn_ not in tMD.fieldsNames():
+                    if self.fieldNameCheckColumn_ not in tMD.fieldNames():
                         fieldCheck = FLFieldMetaData(
                             self.fieldNameCheckColumn_,
                             self.tr(self.aliasCheckColumn_),
@@ -2221,7 +2221,7 @@ class FLTableDB(QtWidgets.QWidget):
         spread_sheet = AQOdsSpreadSheet(ods_gen)
         sheet = AQOdsSheet(spread_sheet, mtd.alias())
         tdb_num_rows = cursor.size()
-        tdb_num_cols = len(mtd.fieldsNames())
+        tdb_num_cols = len(mtd.fieldNames())
 
         util = FLUtil()
         id_pix = 0

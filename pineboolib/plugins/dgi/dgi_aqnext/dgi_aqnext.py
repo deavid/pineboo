@@ -390,7 +390,7 @@ class dgi_aqnext(dgi_schema):
         dict["desc"]["visible"] = True
         dict["desc"]["tipo"] = 3
         dict["desc"]["visiblegrid"] = False
-        fields_list = mtd.fieldsNames()
+        fields_list = mtd.fieldNames()
 
         fields_list.append("pk")
 

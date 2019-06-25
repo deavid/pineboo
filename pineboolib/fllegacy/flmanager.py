@@ -207,7 +207,7 @@ class FLManager(QtCore.QObject):
 
                 acl = pineboolib.project.acl()
 
-                # if ret.fieldsNamesUnlock():
+                # if ret.fieldNamesUnlock():
                 #    ret = FLTableMetaData(ret)
 
                 if acl:
@@ -353,7 +353,7 @@ class FLManager(QtCore.QObject):
                     fL = qry.fieldList()
                     table = None
                     field = None
-                    fields = tmd.fieldsNames()
+                    fields = tmd.fieldNames()
                     # .split(",")
                     fieldsEmpty = not fields
 
@@ -385,8 +385,8 @@ class FLManager(QtCore.QObject):
                                 newRef = not isForeignKey
                                 fmtdAuxName = fmtdAux.name().lower()
                                 if fmtdAuxName.find(".") == -1:
-                                    # fieldsAux = tmd.fieldsNames().split(",")
-                                    fieldsAux = tmd.fieldsNames()
+                                    # fieldsAux = tmd.fieldNames().split(",")
+                                    fieldsAux = tmd.fieldNames()
                                     if fmtdAuxName not in fieldsAux:
                                         if not isForeignKey:
                                             fmtdAux = FLFieldMetaData(fmtdAux)

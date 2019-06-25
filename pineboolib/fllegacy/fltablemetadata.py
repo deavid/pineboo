@@ -48,17 +48,17 @@ class FLTableMetaData(object):
 
     def inicializeFLTableMetaData(self, other):
         self.d = FLTableMetaDataPrivate()
-        self.d.fieldsNames_ = []
+        self.d.fieldNames_ = []
         self.copy(other)
 
     def inicializeNewFLTableMetaData(self, n, a, q=None):
         self.d = FLTableMetaDataPrivate(n, a, q)
-        self.d.fieldsNames_ = []
+        self.d.fieldNames_ = []
 
     def inicializeFLTableMetaDataP(self, name):
         self.d = FLTableMetaDataPrivate(name)
         self.d.compoundKey_ = FLCompoundKey()
-        self.d.fieldsNames_ = []
+        self.d.fieldNames_ = []
 
         """
         try:
@@ -74,10 +74,10 @@ class FLTableMetaData(object):
                 self.d.primaryKey_ = field.name()
 
             self.d.fieldList_.append(field)
-            self.d.fieldsNames_.append(field.name())
+            self.d.fieldNames_.append(field.name())
 
             if field.type() == FLFieldMetaData.Unlock:
-                self.d.fieldsNamesUnlock_.append(field.name())
+                self.d.fieldNamesUnlock_.append(field.name())
         """
 
     """
@@ -165,7 +165,7 @@ class FLTableMetaData(object):
         self.d.addFieldName(f.name())
         self.d.formatAlias(f)
         if f.type() == FLFieldMetaData.Unlock:
-            self.d.fieldsNamesUnlock_.append(f.name())
+            self.d.fieldNamesUnlock_.append(f.name())
         if f.d.isPrimaryKey_:
             self.d.primaryKey_ = f.name().lower()
 
@@ -311,8 +311,8 @@ class FLTableMetaData(object):
 
     def fieldIsIndex(self, field_name=None):
 
-        if field_name in self.fieldsNames():
-            return self.fieldsNames().index(field_name)
+        if field_name in self.fieldNames():
+            return self.fieldNames().index(field_name)
 
         self.logger.warning("FLTableMetaData.fieldIsIndex(%s) No encontrado", field_name)
         return None
@@ -622,15 +622,15 @@ class FLTableMetaData(object):
     se han añadido con el método addFieldMD() o addFieldName()
     """
 
-    def fieldsNames(self):
-        return self.d.fieldsNames_
+    def fieldNames(self):
+        return self.d.fieldNames_
 
     """
     Lista de nombres de campos de la tabla que son del tipo FLFieldMetaData::Unlock
     """
 
-    def fieldsNamesUnlock(self):
-        return self.d.fieldsNamesUnlock_
+    def fieldNamesUnlock(self):
+        return self.d.fieldNamesUnlock_
 
     """
     @return El indicador FLTableMetaData::concurWarn_
@@ -737,7 +737,7 @@ class FLTableMetaDataPrivate:
     """
     Cadena de texto con los nombre de los campos separados por comas
     """
-    fieldsNames_ = []
+    fieldNames_ = []
 
     """
     Mapas alias<->nombre
@@ -748,7 +748,7 @@ class FLTableMetaDataPrivate:
     """
     Lista de nombres de campos de la tabla que son del tipo FLFieldMetaData::Unlock
     """
-    fieldsNamesUnlock_ = []
+    fieldNamesUnlock_ = []
 
     """
     Clave primaria
@@ -790,7 +790,7 @@ class FLTableMetaDataPrivate:
 
     def __init__(self, n=None, a=None, q=None):
         self.fieldList_ = []
-        self.fieldsNamesUnlock_ = []
+        self.fieldNamesUnlock_ = []
         self.aliasFieldMap_ = {}
         self.fieldAliasMap_ = {}
         # print("Vaciando field list ahora",  len(self.fieldList_))
@@ -820,28 +820,28 @@ class FLTableMetaDataPrivate:
         self.alias_ = self.name_
 
     """
-    Añade el nombre de un campo a la cadena de nombres de campos, ver fieldsNames()
+    Añade el nombre de un campo a la cadena de nombres de campos, ver fieldNames()
 
     @param n Nombre del campo
     """
 
     def addFieldName(self, n):
-        self.fieldsNames_.append(n.lower())
+        self.fieldNames_.append(n.lower())
 
     """
-    Elimina el nombre de un campo a la cadena de nombres de campos, ver fieldsNames()
+    Elimina el nombre de un campo a la cadena de nombres de campos, ver fieldNames()
 
     @param n Nombre del campo
     """
 
     def removeFieldName(self, n):
 
-        if self.fieldsNames_:
-            oldFN = self.fieldsNames_
-            self.fieldsNames_ = []
+        if self.fieldNames_:
+            oldFN = self.fieldNames_
+            self.fieldNames_ = []
             for value in oldFN:
                 if not value.name().lower() == n.lower():
-                    self.fieldsNames.append(value)
+                    self.fieldNames.append(value)
 
     """
     Formatea el alias del campo indicado para evitar duplicados
@@ -872,7 +872,7 @@ class FLTableMetaDataPrivate:
 
     def clearFieldList(self):
         self.fieldList_ = []
-        self.fieldsNames_ = []
+        self.fieldNames_ = []
 
 
 # endif

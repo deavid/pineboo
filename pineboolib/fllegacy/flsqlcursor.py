@@ -2131,7 +2131,7 @@ class FLSqlCursor(QtCore.QObject):
         if self.d.modeAccess_ is not self.Insert:
             row = self.currentRegister()
 
-            for field in self.metadata().fieldsNamesUnlock():
+            for field in self.metadata().fieldNamesUnlock():
                 if row > -1:
                     if self.model().value(row, field) not in ("True", True, 1, "1"):
                         ret_ = True

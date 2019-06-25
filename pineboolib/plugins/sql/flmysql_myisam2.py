@@ -833,11 +833,11 @@ class FLMYSQL_MYISAM2(object):
 
             return False
 
-        fieldsNamesOld = []
+        fieldNamesOld = []
         if not force:
             for it in fieldList:
                 if newMTD.field(it.name()) is not None:
-                    fieldsNamesOld.append(it.name())
+                    fieldNamesOld.append(it.name())
 
         renameOld = "%salteredtable%s" % (oldMTD.name()[0:5], QDateTime().currentDateTime().toString("ddhhssz"))
 
@@ -910,8 +910,8 @@ class FLMYSQL_MYISAM2(object):
                 q.exec_(in_sql)
 
         ok = False
-        if force and fieldsNamesOld:
-            # sel = fieldsNamesOld.join(",")
+        if force and fieldNamesOld:
+            # sel = fieldNamesOld.join(",")
             # in_sql = "INSERT INTO %s(%s) SELECT %s FROM %s" % (newMTD.name(), sel, sel, renameOld)
             # logger.warning(in_sql)
             # ok = q.exec_(in_sql)
@@ -1238,7 +1238,7 @@ class FLMYSQL_MYISAM2(object):
                 del mtd
                 return self.recordInfo2(tablename)
 
-            for f in mtd.fieldsNames():
+            for f in mtd.fieldNames():
                 field = mtd.field(f)
                 info.append(
                     [field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()]

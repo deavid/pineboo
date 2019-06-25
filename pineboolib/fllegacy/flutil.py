@@ -322,7 +322,7 @@ class FLUtil(QtCore.QObject):
         """
         from pineboolib.pncontrolsfactory import aqApp
 
-        campos = aqApp.db().manager().metadata(tablename).fieldsNames()
+        campos = aqApp.db().manager().metadata(tablename).fieldNames()
         return [len(campos)] + campos
 
     def calcularDC(self, n):

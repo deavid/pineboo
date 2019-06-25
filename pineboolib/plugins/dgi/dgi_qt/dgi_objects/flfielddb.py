@@ -2259,8 +2259,8 @@ class FLFieldDB(QtWidgets.QWidget):
                     # Añade campo al cursor ...    FIXME!!
                     # cur.append(self.autoComFieldName_, field.type(), -1, field.length(), -1)
 
-                    # for fieldsNames in tMD.fieldsNames().split(","):
-                    #    field = tMD.field(fieldsNames)
+                    # for fieldNames in tMD.fieldNames().split(","):
+                    #    field = tMD.field(fieldNames)
                     #    if field:
                     # cur.append(field.name(), field.type(), -1, field.length(), -1,
                     # "Variant", None, True) #qvariant,0,true

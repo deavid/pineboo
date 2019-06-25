@@ -1283,6 +1283,8 @@ class OpUnary(ASTPython):
             yield "expr", "not"
         elif ctype == "MINUS":
             yield "expr", "-"
+        elif ctype == "PLUS":
+            yield "expr", "+"
         else:
             yield "expr", ctype
         if isolate:
