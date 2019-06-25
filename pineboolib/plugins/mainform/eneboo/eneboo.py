@@ -468,10 +468,10 @@ class MainForm(QtWidgets.QMainWindow):
         mng = aqApp.db().managerModules()
         areas = mng.listIdAreas()
         for area in areas:
+            if not sys.isDebuggerEnabled() and area == "sys":
+                break
             ag = QActionGroup(self.ag_menu_)
             ag.setObjectName(area)
-            if not sys.isDebuggerEnabled() and ag.name == "sys":
-                break
             ag_action = QAction(ag)
             ag_action.setObjectName("%s_actiongroup_name" % ag.objectName())
             ag_action.setText(mng.idAreaToDescription(ag.objectName()))
