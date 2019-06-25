@@ -517,6 +517,8 @@ class FLApplication(QtCore.QObject):
         c = 65
 
         for it in self.db().managerModules().listIdAreas():
+            if it == "sys" and not FLSettings().readBoolEntry("application/dbadmin_enabled", False):
+                    continue
             descript_area = self.db().managerModules().idAreaToDescription(it)
             new_area_bar = QToolBar(self.tr(descript_area), self.container_)
             new_area_bar.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
@@ -537,9 +539,10 @@ class FLApplication(QtCore.QObject):
                 if str(chr(c)) == "Q":
                     c += 1
                     continue
+                
 
                 if mod == "sys":
-                    if FLSettings().readBoolEntry("application/isDebuggerMode"):
+                    if FLSettings().readBoolEntry("application/isDebuggerMode", False):
 
                         descript_module = "%s: %s" % (str(chr(c)), self.tr("Carga Estática desde Disco Duro"))
                         new_module_action = QAction(new_area_bar)
