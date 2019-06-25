@@ -1614,7 +1614,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 rMD = FLRelationMetaData(curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
 
                 fMD.addRelationMD(rMD)
-                self.logger.info(
+                self.logger.trace(
                     "FLFieldDB : La relación entre la tabla del formulario ( %s ) y la tabla ( %s ) de este campo ( %s ) no existe, "
                     "pero sin embargo se han indicado los campos de relación( %s, %s)",
                     curName,
@@ -1623,9 +1623,9 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.fieldRelation_,
                     self.foreignField_,
                 )
-                self.logger.info("FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s", self.tableName_, self.fieldRelation_, curName, self.foreignField_)
+                self.logger.trace("FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s", self.tableName_, self.fieldRelation_, curName, self.foreignField_)
             else:
-                self.logger.info(
+                self.logger.trace(
                     "FLFieldDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )",
                     self.fieldRelation_,
                     self.tableName_,

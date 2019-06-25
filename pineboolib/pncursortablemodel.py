@@ -564,13 +564,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                             break
                 # Omito los campos que aparentemente no existen
                 if not found and not field.name() in self.sql_fields_omited:
-                    if pineboolib.project.debugLevel > 50:
-                        self.logger.info(
-                            "CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s ",
-                            field.name(),
-                            self.metadata().name(),
-                            qry.tablesList(),
-                        )
+                    # NOTE: Esto podría ser por ejemplo porque no entendemos los campos computados.
+                    self.logger.error(
+                        "CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s ",
+                        field.name(),
+                        self.metadata().name(),
+                        qry.tablesList(),
+                    )
                     self.sql_fields_omited.append(field.name())
 
             else:

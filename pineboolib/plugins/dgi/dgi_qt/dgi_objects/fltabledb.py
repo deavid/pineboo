@@ -255,7 +255,7 @@ class FLTableDB(QtWidgets.QWidget):
 
                 rMD = FLRelationMetaData(self.tableName_, self.fieldRelation_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
                 fMD.addRelationMD(rMD)
-                logger.warning(
+                logger.trace(
                     "FLTableDB : La relación entre la tabla del formulario %s y esta tabla %s de este campo no existe, "
                     "pero sin embargo se han indicado los campos de relación( %s, %s )",
                     curName,
@@ -263,9 +263,9 @@ class FLTableDB(QtWidgets.QWidget):
                     self.fieldRelation_,
                     self.foreignField_,
                 )
-                logger.warning("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s", curName, self.foreignField_, self.tableName_, self.fieldRelation_)
+                logger.trace("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s", curName, self.foreignField_, self.tableName_, self.fieldRelation_)
             else:
-                logger.warning(
+                logger.trace(
                     "FLTableDB : El campo ( %s ) indicado en la propiedad foreignField no se encuentra en la tabla ( %s )", self.foreignField_, curName
                 )
                 pass
@@ -277,11 +277,11 @@ class FLTableDB(QtWidgets.QWidget):
                 rMD = FLRelationMetaData(curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, False)
                 fMD.addRelationMD(rMD)
                 if DEBUG:
-                    logger.warning("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s", self.tableName_, self.fieldRelation_, curName, self.foreignField_)
+                    logger.trace("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s", self.tableName_, self.fieldRelation_, curName, self.foreignField_)
 
             else:
                 if DEBUG:
-                    logger.warning(
+                    logger.trace(
                         "FLTableDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )",
                         self.fieldRelation_,
                         self.tableName_,
