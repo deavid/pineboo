@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-pluginType = MODULE  # noqa  # FIXME: Esto no es Python.
+pluginType = MODULE  # noqa  # La constante MODULE es parte de cómo PyQt carga los plugins. Es insertada por el loader en el namespace local
 
 
 def moduleInformation():
