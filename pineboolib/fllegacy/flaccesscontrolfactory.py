@@ -63,8 +63,8 @@ class FLAccessControlMainWindow(FLAccessControl):
             return
 
         if not self.perm_:
-            l = QtCore.QObjectList(mw.queryList("QAction"))
-            ito = QtCore.QObjectListIt(l)
+            list1 = QtCore.QObjectList(mw.queryList("QAction"))
+            ito = QtCore.QObjectListIt(list1)
             a = QtCore.QAction
 
             while not ito.current() == 0:
@@ -171,7 +171,7 @@ class FLAccessControlForm(FLAccessControl):
                 print("WARN: FLAccessControlFactory: No se encuentra el control %s para procesar ACLS." % it)
 
     def setFromObject(self, object):
-        print("FLAccessControlform::setFromObject %s" % FLUtil.translate(self, "app", "No implementado todavía."))
+        print("FLAccessControlform::setFromObject: No implementado todavía.")
 
 
 class FLAccessControlTable(FLAccessControl):
