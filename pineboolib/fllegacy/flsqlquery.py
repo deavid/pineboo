@@ -78,6 +78,7 @@ class FLSqlQuery(object):
         try:
 
             self._cursor = self.db().cursor()
+            logger.trace("exec_: Ejecutando consulta: <%s> en <%s>", sql, self._cursor)
             self._cursor.execute(sql)
 
             self._posicion = None
@@ -470,6 +471,9 @@ class FLSqlQuery(object):
         # field = None
         mtd_field = None
         retorno = None
+        if n is None:
+            self.logger.trace("value::invalid use with n=None.", stack_info=True)
+            return None
         if isinstance(n, str):
             pos = self.fieldNameToPos(n)
             name = n
@@ -478,6 +482,8 @@ class FLSqlQuery(object):
             name = self.posToFieldName(n)
 
         if name not in self.fields_cache.keys():
+            self.logger.debug("value()::name %s not in cache", name)
+
             if name:
                 tables_list = self.tablesList()
                 if name.find(".") > -1 and name[0 : name.find(".")] in tables_list:
@@ -557,7 +563,8 @@ class FLSqlQuery(object):
             elif not isinstance(retorno, (str, int, bool, float, pineboolib.qsa.Date)):
                 retorno = float(retorno)
 
-            return retorno
+        self.logger.debug("value(%s)::return:: %s", n, retorno)
+        return retorno
 
     """
     Indica si un campo de la consulta es nulo o no
@@ -808,7 +815,7 @@ class FLSqlQuery(object):
 
         self._posicion = 0
         if self._datos:
-            self._row == self._datos[0]
+            self._row = self._datos[0]
             return True
         else:
             try:
