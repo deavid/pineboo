@@ -650,12 +650,14 @@ def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
 
         if type(value) is dict:
             # print "*"
-            if depth < 950:
+            # FIXME> Esto o no parsea todos los elementos o hace stackoverflow. problematico para programas largos
+            if depth < 900:
                 try:
                     tree_obj = calctree(value, depth + 1, num + [str(n)], ctype, alias_mode=alias_mode)
                 except Exception:
                     print("ERROR: trying to calculate member %d on:" % n, repr(obj))
             else:
+                print("PANIC: *** Stack overflow trying to calculate member %d on:" % n, repr(obj))
                 tree_obj = None
 
             if type(tree_obj) is dict:
