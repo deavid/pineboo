@@ -787,9 +787,8 @@ class FLSqlQuery(object):
         if self._posicion is None:
             self._posicion = -1
 
-        self._posicion += 1
-        
         if self._datos:
+            self._posicion += 1
             if self._posicion < len(self._datos):
                 self._row = self._datos[self._posicion]
                 return True
@@ -800,8 +799,8 @@ class FLSqlQuery(object):
         if not self._cursor:
             return False
         
-        self._posicion -= 1
         if self._datos:
+            self._posicion -= 1
             if self._posicion >= 0:
                 self._row = self._datos[self._posicion]
                 return True
@@ -812,8 +811,8 @@ class FLSqlQuery(object):
         if not self._cursor:
             return False
         
-        self._posicion = 0
         if self._datos:
+            self._posicion = 0
             self._row = self._datos[self._posicion]
             return True
         
