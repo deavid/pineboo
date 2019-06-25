@@ -59,6 +59,7 @@ class FormInternalObj(FormDBWidget):
         w.child("cb_snapshot").checked = self.leerValorLocal("show_snaptshop_button")
         w.child("cb_mdi").checked = self.leerValorLocal("mdi_mode")
         w.child("cb_imagenes").checked = self.leerValorLocal("no_img_cached")
+        w.child("cb_dbadmin").checked = self.leerValorLocal("dbadmin_enabled")
         autoComp = self.leerValorLocal("autoComp")
         if not autoComp or autoComp == "OnDemandF4":
             autoComp = "Bajo Demanda (F4)"
@@ -111,7 +112,7 @@ class FormInternalObj(FormDBWidget):
 
     def leerValorLocal(self, valor_name):
         util = FLUtil()
-        if valor_name == u"isDebuggerMode":
+        if valor_name in ("isDebuggerMode","dbadmin_enabled"):
             valor = settings.readBoolEntry("application/%s" % valor_name)
         else:
             if valor_name in ("ebCallFunction", "maxPixImages", "kugarParser", "colorObligatorio", "kugar_temp_dir", "git_updates_repo"):
@@ -127,7 +128,7 @@ class FormInternalObj(FormDBWidget):
 
     def grabarValorLocal(self, valor_name=None, value=None):
 
-        if valor_name == "isDebuggerMode":
+        if valor_name in ("isDebuggerMode","dbadmin_enabled"):
             settings.writeEntry("application/%s" % valor_name, value)
         else:
             if valor_name == "maxPixImages" and value is None:
@@ -178,7 +179,7 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("show_snaptshop_button", w.child("cb_snapshot").checked)
         self.grabarValorLocal("mdi_mode", w.child("cb_mdi").checked)
         self.grabarValorLocal("no_img_cached", w.child("cb_imagenes").checked)
-
+        self.grabarValorLocal("dbadmin_enabled", w.child("cb_dbadmin").checked)
         autoComp = w.child(u"cbAutoComp").currentText()
         if autoComp == "Nunca":
             autoComp = "NeverAuto"

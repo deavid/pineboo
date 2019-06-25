@@ -108,6 +108,7 @@ def parse_options():
     parser.add_option("--dgi", dest="dgi", default="qt", help="Change the gdi mode by default", metavar="DGI")
     parser.add_option("--dgi_parameter", dest="dgi_parameter", help="Change the gdi mode by default", metavar="DGIPARAMETER")
     parser.add_option("--test", action="store_true", dest="test", default=False, help="Launch all test")
+    parser.add_option("--dbadmin", action="store_true", dest="enable_dbadmin", default=False, help="Enables DBAdmin mode")
 
     (options, args) = parser.parse_args()
 
@@ -310,6 +311,12 @@ def main():
     if options.test:
         project.test()
         return
+    
+    if options.enable_dbadmin:
+        from pineboolib.fllegacy.flsettings import FLSettings
+        settings = FLSettings()
+        if not settings.readBoolEntry("application/dbadmin_enabled", False):
+            settings.writeEntry("application/dbadmin_enabled", True)
 
     if not _DGI.useMLDefault():
         app = _DGI.alternativeMain(options)

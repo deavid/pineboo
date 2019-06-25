@@ -248,7 +248,8 @@ class SysType(object):
         aqApp.setCaptionMainWidget(t)
 
     def isDebuggerEnabled(self) -> bool:
-        return True
+        from pineboolib.fllegacy.flsettings import FLSettings
+        return FLSettings().readBoolEntry("application/dbadmin_enabled", False)
 
     def nameDriver(self, connName="default"):
         return aqApp.db().useConn(connName).driverName()

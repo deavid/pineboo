@@ -131,7 +131,7 @@ class FLManager(QtCore.QObject):
 
         del self
 
-    def metadata(self, n, quick=True):
+    def metadata(self, n, quick=None):
         """
         Para obtener definicion de una tabla de la base de datos, a partir de un fichero XML.
 
@@ -156,6 +156,10 @@ class FLManager(QtCore.QObject):
 
         if not n:
             return None
+        
+        if quick is None:
+            quick = False if util.readSettingEntry("application/dbadmin_enabled", False) else True
+                
 
         if isinstance(n, str):
             if not n or not self.db_.dbAux():
