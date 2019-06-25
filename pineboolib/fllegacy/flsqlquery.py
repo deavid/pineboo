@@ -507,8 +507,8 @@ class FLSqlQuery(object):
             retorno = self._row[pos]
         except Exception:
             pass
-
-        if retorno is None:
+        
+        if retorno in (None, "None"):
             if mtd_field is not None:
                 # retorno = self.db().formatValue(mtd_field.type(), None, False)
                 if mtd_field.type() in ("double", "uint", "int"):
