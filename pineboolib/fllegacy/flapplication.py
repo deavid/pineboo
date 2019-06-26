@@ -60,6 +60,7 @@ class FLApplication(QtCore.QObject):
     event_loop = None
     window_menu = None
     last_text_caption_ = None
+    mode_and_version_ = None
 
     def __init__(self):
         super(FLApplication, self).__init__()
@@ -97,6 +98,8 @@ class FLApplication(QtCore.QObject):
         self.show_debug_ = True  # FIXME
         self.script_entry_function_ = None
         self.last_text_caption_ = None
+        
+        self.mode_and_version_ = "Database Admin" if FLSettings().readBoolEntry("application/dbadmin_enabled", False) else "Quick"
 
         # self.fl_factory_ = FLObjectFactory() #FIXME para un futuro
         self.time_user_ = QtCore.QDateTime.currentDateTime()
@@ -267,7 +270,7 @@ class FLApplication(QtCore.QObject):
         if self.db() is not None:
             self.container_.setWindowTitle(self.db().database())
         else:
-            self.container_.setWindowTitle("Eneboo %s" % pineboolib.project.version)
+            self.container_.setWindowTitle("Pineboo %s" % pineboolib.project.version)
 
         # FLDiskCache.init(self)
 
@@ -402,7 +405,7 @@ class FLApplication(QtCore.QObject):
             if self.db() is not None:
                 self.container_.setWindowTitle(self.db().database())
             else:
-                self.container_.setWindowTitle("Eneboo %s" % pineboolib.project.version)
+                self.container_.setWindowTitle("Pineboo %s" % pineboolib.project.version)
 
             return
 
@@ -698,7 +701,7 @@ class FLApplication(QtCore.QObject):
 
         tb = mw.menuBar()
         if tb is None:
-            print("*** No se encuentra toolbar en", mw.objectName())
+            logger.warning("No se encuentra toolbar en %s", mw.objectName())
             return
 
         # tb.setMovingEnabled(False)
@@ -1062,9 +1065,7 @@ class FLApplication(QtCore.QObject):
             self.last_text_caption_ = value
         
         if pineboolib.project.main_form_name != "eneboo_mdi":
-            mode = "DBAdmin" if FLSettings().readBoolEntry("application/dbadmin_enabled", False) else "Quick"
-            self.mainWidget().setWindowTitle("Pineboo %s v%s - %s" % (mode, pineboolib.project.version, self.last_text_caption_))
-            return
+            self.mainWidget().setWindowTitle("Pineboo %s v%s - %s" % (self.mode_and_version_, pineboolib.project.version, self.last_text_caption_))
         
         else:
             descript_area = self.db().managerModules().idAreaToDescription(self.db().managerModules().activeIdArea())
