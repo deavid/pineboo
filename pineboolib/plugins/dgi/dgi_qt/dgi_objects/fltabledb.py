@@ -704,6 +704,10 @@ class FLTableDB(QtWidgets.QWidget):
             if k.key() == QtCore.Qt.Key_F2:
                 self.comboBoxFieldToSearch.popup()
                 return True
+        
+        if ev.type() == QtCore.QEvent.WindowUnblocked and isinstance(obj, FLDataTable):
+            obj.refresh()
+            return True
 
         if ev.type() == QtCore.QEvent.KeyPress and isinstance(obj, QtWidgets.QLineEdit):
             k = ev
