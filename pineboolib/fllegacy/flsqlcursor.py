@@ -2373,24 +2373,25 @@ class FLSqlCursor(QtCore.QObject):
         mid = None
         comp = None
         midVal = None
+        
+        if fN in self.metadata().fieldNames():
+            while ini <= fin:
+                mid = int((ini + fin) / 2)
+                midVal = str(self.model().value(mid, fN))
+                if v == midVal:
+                    ret = mid
+                    break
 
-        while ini <= fin:
-            mid = int((ini + fin) / 2)
-            midVal = str(self.model().value(mid, fN))
-            if v == midVal:
-                ret = mid
-                break
+                if orderAsc:
+                    comp = v < midVal
+                else:
+                    comp = v > midVal
 
-            if orderAsc:
-                comp = v < midVal
-            else:
-                comp = v > midVal
-
-            if not comp:
-                ini = mid + 1
-            else:
-                fin = mid - 1
-            ret = ini
+                if not comp:
+                    ini = mid + 1
+                else:
+                    fin = mid - 1
+                ret = ini
 
         return ret
 
