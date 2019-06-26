@@ -706,7 +706,10 @@ class FLTableDB(QtWidgets.QWidget):
                 return True
         
         if ev.type() == QtCore.QEvent.WindowUnblocked and isinstance(obj, FLDataTable):
-            obj.refresh()
+            row = self.currentRow()
+            self.refresh(True, True)
+            if row > -1:
+                self.setCurrentRow(row)
             return True
 
         if ev.type() == QtCore.QEvent.KeyPress and isinstance(obj, QtWidgets.QLineEdit):
