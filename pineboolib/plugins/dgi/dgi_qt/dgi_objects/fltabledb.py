@@ -1918,7 +1918,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @QtCore.pyqtSlot(bool)
-    def deleteRecord(self, unknown):
+    def deleteRecord(self, unknown = None):
         w = self.sender()
         if isinstance(w, FLDataTable):
             w = None
@@ -2149,6 +2149,7 @@ class FLTableDB(QtWidgets.QWidget):
             return
 
         t.selectRow(r)
+        t.scrollTo(t.cursor().model().index(r, 0))
 
     """
     @return Ancho de la columna
