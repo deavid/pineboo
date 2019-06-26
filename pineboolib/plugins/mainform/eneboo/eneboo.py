@@ -1047,12 +1047,4 @@ mainWindow = MainForm()
 
 
 # Definiciones usadas solo externamente::
-from pineboolib.fllegacy.flposprinter import FLPosPrinter  # noqa
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery  # noqa
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor  # noqa
-from pineboolib.fllegacy.flnetwork import FLNetwork  # noqa
-from pineboolib.fllegacy.flreportviewer import FLReportViewer  # noqa
-from pineboolib.fllegacy.flvar import FLVar  # noqa
-
-from pineboolib.utils import ustr, ustr1  # noqa
 from pineboolib.pncontrolsfactory import *  # noqa
