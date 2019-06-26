@@ -661,6 +661,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         type_ = field.type()
+        
         # v = QVariant(cv)
         if field.hasOptionsList():
             idxItem = -1
@@ -711,7 +712,7 @@ class FLFieldDB(QtWidgets.QWidget):
         #v.cast(fltype_) FIXME
 
         """
-        if type_ == "uint" or type_ == "int" or type_ == "string":
+        if type_ in ("uint", "int", "string"):
             if self.editor_:
                 doHome = False
                 if not self.editor_.text():
@@ -786,9 +787,10 @@ class FLFieldDB(QtWidgets.QWidget):
                 else:
                     self.editor_.setTime(v)
 
-        elif type == "bool":
+        elif type_ == "bool":
             if self.editor_ and v is not None:
                 self.editor_.setChecked(v)
+        
 
     """
     Obtiene el valor contenido en el campo.
