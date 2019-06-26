@@ -382,7 +382,7 @@ class PNConnection(QtCore.QObject):
             return False
 
         if not notify:
-            cur.autocommit.emit()
+            cur.autoCommit.emit()
 
         if self.transaction_ > 0:
             if cur.d.transactionsOpened_:
