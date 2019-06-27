@@ -80,7 +80,7 @@ class kut2rml(object):
         # print(etree.ElementTree.tostring(self.rml_))
         res_ = etree.ElementTree.tostring(self.rml_)
         res_ = '<!DOCTYPE document SYSTEM "rml_1_0.dtd">%s' % res_.decode("utf-8")
-        pdfname = pineboolib.project.getTempDir()
+        pdfname = pineboolib.project.get_temp_dir()
         pdfname += "/%s.pdf" % datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         pPDF = parsePDF()
         pPDF.parse(res_, pdfname)

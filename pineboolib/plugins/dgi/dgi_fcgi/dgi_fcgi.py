@@ -3,7 +3,7 @@ import logging
 from flup.server.fcgi import WSGIServer
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from pineboolib.fllegacy.pncontrolsfactory import SysType
+from pineboolib.pncontrolsfactory import SysType
 from pineboolib.utils import checkDependencies
 
 import pineboolib
@@ -24,7 +24,7 @@ class dgi_fcgi(dgi_schema):
         self._name = "fcgi"
         self._alias = "FastCGI"
         self._fcgiCall = "flfactppal.iface.fcgiProcessRequest"
-        self._fcgiSocket = "%s/pineboo-fastcgi.socket" % pineboolib.project.getTempDir()
+        self._fcgiSocket = "%s/pineboo-fastcgi.socket" % pineboolib.project.get_temp_dir()
         self.setUseDesktop(False)
         self.setUseMLDefault(False)
         self.showInitBanner()

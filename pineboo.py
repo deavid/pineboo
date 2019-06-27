@@ -152,7 +152,7 @@ def load_dgi(name):
     modname = "dgi_%s" % name
     modpath = "pineboolib.plugins.dgi.%s.%s" % (modname, modname)
     try:
-        import pineboolib
+        import pineboolib  # noqa: F401
     except Exception:
         print("Cargando como invitado")
         modpath = "pineboo.%s" % modpath
@@ -160,7 +160,8 @@ def load_dgi(name):
     try:
         dgi_pymodule = importlib.import_module(modpath)
     except ImportError:
-        raise ImportError("No se ha encontrado el módulo DGI %s" % modpath)
+        print("No se ha encontrado el módulo DGI %s" % (modpath))
+        raise
 
     dgi_entrypoint = getattr(dgi_pymodule, modname, None)
     if dgi_entrypoint is None:
@@ -179,7 +180,6 @@ def load_dgi(name):
 
 def create_app(DGI):
     """Create a MainForm using the DGI or the core."""
-    from PyQt5 import QtGui, QtWidgets, QtCore
     from pineboolib.utils import filedir
     import pineboolib
 
@@ -188,6 +188,7 @@ def create_app(DGI):
     pineboolib._DGI = DGI  # Almacenamos de DGI seleccionado para futuros usos
 
     if DGI.localDesktop():
+        from PyQt5 import QtGui
 
         noto_fonts = ["NotoSans-BoldItalic.ttf", "NotoSans-Bold.ttf", "NotoSans-Italic.ttf", "NotoSans-Regular.ttf"]
         for fontfile in noto_fonts:
@@ -312,14 +313,16 @@ def main():
     if options.test:
         project.test()
         return
-    
+
     if options.enable_dbadmin:
         from pineboolib.fllegacy.flsettings import FLSettings
+
         settings = FLSettings()
         settings.writeEntry("application/dbadmin_enabled", True)
-    
+
     if options.enable_quick:
         from pineboolib.fllegacy.flsettings import FLSettings
+
         settings = FLSettings()
         settings.writeEntry("application/dbadmin_enabled", False)
 
