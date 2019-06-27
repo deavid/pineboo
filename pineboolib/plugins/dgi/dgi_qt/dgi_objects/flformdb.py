@@ -145,6 +145,7 @@ class FLFormDB(QtWidgets.QDialog):
     cursor_ = None
     bottomToolbar = None
     pushButtonCancel = None
+    toolButtonClose = None
 
     _uiName = None
     _scriptForm = None
@@ -658,7 +659,7 @@ class FLFormDB(QtWidgets.QDialog):
         if self.pushButtonCancel:
             self.pushButtonCancel.hide()
 
-        if self.bottomToolbar:
+        if self.bottomToolbar and self.toolButtonClose:
             self.toolButtonClose.hide()
         self.bottomToolbar = QtWidgets.QFrame()
         self.bottomToolbar.setMinimumSize(self.iconSize)
