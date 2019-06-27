@@ -24,7 +24,7 @@ class dgi_fcgi(dgi_schema):
         self._name = "fcgi"
         self._alias = "FastCGI"
         self._fcgiCall = "flfactppal.iface.fcgiProcessRequest"
-        self._fcgiSocket = "%s/pineboo-fastcgi.socket" % pineboolib.project.get_temp_dir()
+        self._fcgiSocket = "pineboo-fastcgi.socket"
         self.setUseDesktop(False)
         self.setUseMLDefault(False)
         self.showInitBanner()
