@@ -61,7 +61,9 @@ def translate_connstring(connstring):
         raise ValueError("base de datos no valida")
     if not re.match(r"\d+", port):
         raise ValueError("puerto no valido")
-    logger.debug("user:%s, passwd:%s, driver_alias:%s, host:%s, port:%s, dbname:%s", user, "*" * len(passwd), driver_alias, host, port, dbname)
+    logger.debug(
+        "user:%s, passwd:%s, driver_alias:%s, host:%s, port:%s, dbname:%s", user, "*" * len(passwd), driver_alias, host, port, dbname
+    )
     return user, passwd, driver_alias, host, port, dbname
 
 
@@ -251,6 +253,6 @@ def init_project(DGI, splash, options, project, mainForm, app):
 
 
 if __name__ == "__main__":
-    from pinebooloader.main import startup
+    from pineboolib.loader.main import startup
 
     startup()

@@ -4,46 +4,9 @@ import logging
 import sys
 import traceback
 
-from .utils_base import (  # noqa: F401  # FIXME: Code should import from utils_base when needed.
-    auto_qt_translate_text,
-    aqtt,
-    one,
-    Struct,
-    XMLStruct,
-    DefFun,
-    traceit,
-    TraceBlock,
-    trace_function,
-    downloadManager,
-    copy_dir_recursive,
-    text2bool,
-    getTableObj,
-    ustr,
-    ustr1,
-    StructMyDict,
-    version_check,
-    version_normalize,
-    convert2FLAction,
-    load2xml,
-    parse_for_duplicates,
-    indent,
-    format_double,
-    format_int,
-    unformat_number,
-    convert_to_qdate,
-    resolve_pagination,
-    resolve_query,
-    resolve_order_params,
-    resolve_where_params,
-    get_tipo_aqnext,
-    create_dict,
-    is_deployed,
-    filedir,
-    download_files,
-    parseTable,  # FIXME: parseTable is something too specific to be in utils.py
-)
 import pineboolib
-from pineboolib.fllegacy.flsettings import FLSettings
+from .utils_base import version_check, is_deployed
+from pineboolib.core.settings import config, settings
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +61,7 @@ def cacheXPM(value):
         else:
             file_name = "%s/%s.xpm" % (cache_dir, xpm_name)
 
-        if not os.path.exists(file_name) or FLSettings().readBoolEntry("ebcomportamiento/no_img_cached", False):
+        if not os.path.exists(file_name) or config.value("ebcomportamiento/no_img_cached", False):
             f = open(file_name, "w")
             f.write(value)
             f.close()
@@ -115,7 +78,7 @@ def saveGeometryForm(name, geo):
     from pineboolib.pncontrolsfactory import aqApp
 
     name = "geo/%s/%s" % (aqApp.db().DBName(), name)
-    FLSettings().writeEntry(name, geo)
+    settings.set_value(name, geo)
 
 
 def loadGeometryForm(name):
@@ -127,7 +90,7 @@ def loadGeometryForm(name):
     from pineboolib.pncontrolsfactory import aqApp
 
     name = "geo/%s/%s" % (aqApp.db().DBName(), name)
-    return FLSettings().readEntry(name, None)
+    return settings.value(name, None)
 
 
 DEPENDENCIES_CHECKED = {}
