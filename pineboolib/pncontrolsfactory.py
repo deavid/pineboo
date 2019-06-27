@@ -249,6 +249,7 @@ class SysType(object):
 
     def isDebuggerEnabled(self) -> bool:
         from pineboolib.fllegacy.flsettings import FLSettings
+
         return FLSettings().readBoolEntry("application/dbadmin_enabled", False)
 
     def nameDriver(self, connName="default"):

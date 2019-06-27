@@ -152,7 +152,7 @@ def load_dgi(name):
     modname = "dgi_%s" % name
     modpath = "pineboolib.plugins.dgi.%s.%s" % (modname, modname)
     try:
-        import pineboolib
+        import pineboolib  # noqa: F401
     except Exception:
         print("Cargando como invitado")
         modpath = "pineboo.%s" % modpath
@@ -160,7 +160,8 @@ def load_dgi(name):
     try:
         dgi_pymodule = importlib.import_module(modpath)
     except ImportError:
-        raise ImportError("No se ha encontrado el módulo DGI %s" % modpath)
+        print("No se ha encontrado el módulo DGI %s" % (modpath))
+        raise
 
     dgi_entrypoint = getattr(dgi_pymodule, modname, None)
     if dgi_entrypoint is None:
@@ -179,7 +180,6 @@ def load_dgi(name):
 
 def create_app(DGI):
     """Create a MainForm using the DGI or the core."""
-    from PyQt5 import QtGui, QtWidgets, QtCore
     from pineboolib.utils import filedir
     import pineboolib
 
@@ -188,6 +188,7 @@ def create_app(DGI):
     pineboolib._DGI = DGI  # Almacenamos de DGI seleccionado para futuros usos
 
     if DGI.localDesktop():
+        from PyQt5 import QtGui
 
         noto_fonts = ["NotoSans-BoldItalic.ttf", "NotoSans-Bold.ttf", "NotoSans-Italic.ttf", "NotoSans-Regular.ttf"]
         for fontfile in noto_fonts:
@@ -312,14 +313,16 @@ def main():
     if options.test:
         project.test()
         return
-    
+
     if options.enable_dbadmin:
         from pineboolib.fllegacy.flsettings import FLSettings
+
         settings = FLSettings()
         settings.writeEntry("application/dbadmin_enabled", True)
-    
+
     if options.enable_quick:
         from pineboolib.fllegacy.flsettings import FLSettings
+
         settings = FLSettings()
         settings.writeEntry("application/dbadmin_enabled", False)
 
@@ -590,14 +593,15 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
 
 
 if __name__ == "__main__":
+    startup_check_dependencies()
     # PyQt 5.5 o superior aborta la ejecución si una excepción en un slot()
     # no es capturada dentro de la misma; el programa falla con SegFault.
     # Aunque esto no debería ocurrir, y se debería prevenir lo máximo posible
     # es bastante incómodo y genera problemas graves para detectar el problema.
     # Agregamos sys.excepthook para controlar esto y hacer que PyQt5 no nos
     # dé un segfault, aunque el resultado no sea siempre correcto:
-    startup_check_dependencies()
     sys.excepthook = traceback.print_exception
+    # -------------------
     ret = main()
     gc.collect()
     print("Closing Pineboo...")
