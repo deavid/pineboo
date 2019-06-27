@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtCore import QSettings
+from pineboo.core.settings import settings
 
 
 class FLSettings(object):
-    s = None
-
-    def __init__(self):
-        self.s = QSettings(QSettings.NativeFormat, QSettings.UserScope, "Eneboo", "Pineboo")
+    s = settings
 
     def readListEntry(self, key):
         ret = self.s.value(key)

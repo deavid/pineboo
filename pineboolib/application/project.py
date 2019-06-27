@@ -4,6 +4,7 @@ from typing import List, Optional, Union
 
 from pineboolib.exceptions import CodeDoesNotBelongHereException
 from pineboolib.utils_base import filedir, Struct, cacheXPM, _dir
+from pineboolib.core.settings import config
 
 from .structs import DBServer, DBAuth
 
@@ -53,7 +54,7 @@ class Project(object):
         if self._DGI.mobilePlatform():
             self.main_form_name = "mobile"
         else:
-            if FLSettings().readBoolEntry("ebcomportamiento/mdi_mode"):
+            if config.value("ebcomportamiento/mdi_mode"):
                 self.main_form_name = "eneboo_mdi"
 
         # pineboolib.project = self  # FIXME: not good.
@@ -64,7 +65,7 @@ class Project(object):
         self.tables = {}
         self.files = {}
         self.apppath = filedir("..")
-        self.tmpdir = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))
+        self.tmpdir = config("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))
         if not os.path.exists(self.tmpdir):
             os.mkdir(self.tmpdir)
         from pineboolib.plugins.kugar.pnkugarplugins import PNKugarPlugins
@@ -171,6 +172,7 @@ class Project(object):
         """
 
         if not self.conn:
+            # FIXME: Connecting is not Project responsibility
             from pineboolib.pnconnection import PNConnection
 
             self.conn = PNConnection(
@@ -188,6 +190,7 @@ class Project(object):
 
         if self.deleteCache and os.path.exists(_dir("cache/%s" % self.conn.DBName())):
             if self._splash:
+                # FIXME: Add progress communication method.
                 self._splash.showMessage("Borrando caché ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
             self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", _dir("cache/%s" % self.conn.DBName()))
             for root, dirs, files in os.walk(_dir("cache/%s" % self.conn.DBName()), topdown=False):
