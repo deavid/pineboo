@@ -1,3 +1,4 @@
+import traceback
 import logging
 
 logger = logging.getLogger(__name__)
@@ -80,15 +81,15 @@ def monkey_patch_connect():
                     # print("Calling slot: %r %r" % (slot, args))
                     ret = slot(*args)
                 except Exception:
-                    print("Unhandled exception in slot %r (%r): %r" % (slot, self, args))
-                    print("-- Connection --")
-                    print(traceback.format_list(connect_stack)[-2].rstrip())
+                    logger.error("Unhandled exception in slot %r (%r): %r" % (slot, self, args))
+                    logger.error("-- Connection --")
+                    logger.error(traceback.format_list(connect_stack)[-2].rstrip())
                     last_emit_stack = BoundSignal._LAST_EMITTED_SIGNAL.get(selfid, None)
                     if last_emit_stack:
-                        print("-- Last signal emmitted --")
-                        print(traceback.format_list(last_emit_stack)[-2].rstrip())
-                    print("-- Slot traceback --")
-                    print(traceback.format_exc())
+                        logger.error("-- Last signal emmitted --")
+                        logger.error(traceback.format_list(last_emit_stack)[-2].rstrip())
+                    logger.error("-- Slot traceback --")
+                    logger.error(traceback.format_exc())
                 return ret
 
             return decorated_slot

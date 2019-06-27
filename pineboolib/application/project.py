@@ -7,6 +7,7 @@ from pineboolib.exceptions import CodeDoesNotBelongHereException
 from pineboolib.utils_base import filedir, Struct, cacheXPM, _dir
 from pineboolib.core.settings import config, settings
 from pineboolib.interfaces.dgi_schema import dgi_schema
+from pineboolib.pnsqldrivers import PNSqlDrivers
 
 from .structs import DBServer, DBAuth
 from .module import Module
@@ -55,9 +56,9 @@ class Project(object):
         self.tmpdir = None
         self.parser = None
         self.version = 0.8
-        self.main_form_name = "eneboo"
+        self.main_form_name = "eneboo"  # FIXME: Belongs to loader.main
         if config.value("ebcomportamiento/mdi_mode"):
-            self.main_form_name = "eneboo_mdi"
+            self.main_form_name = "eneboo_mdi"  # FIXME: Belongs to loader.main
 
         # pineboolib.project = self  # FIXME: not good.
         self.deleteCache = False
@@ -73,13 +74,14 @@ class Project(object):
         from pineboolib.plugins.kugar.pnkugarplugins import PNKugarPlugins
 
         self.kugarPlugin = PNKugarPlugins()
+        self.sql_drivers_manager = PNSqlDrivers()  # FIXME: Does this belong here?
 
     def init_dgi(self, DGI: dgi_schema) -> None:
         """Load and associate the defined DGI onto this project"""
         # FIXME: Actually, DGI should be loaded here, or kind of.
         self._DGI = DGI
         if self._DGI.mobilePlatform():
-            self.main_form_name = "mobile"
+            self.main_form_name = "mobile"  # FIXME: Belongs to loader.main
 
         if not self._DGI.localDesktop():
             # FIXME: Maybe it is a good idea to call this regardless of localDesktop

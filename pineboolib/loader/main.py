@@ -5,6 +5,7 @@ import logging
 
 from pineboolib.core.utils import is_deployed
 from pineboolib.application.project import Project
+from pineboolib.core.settings import config
 
 from .dgi import load_dgi
 
@@ -90,23 +91,17 @@ def exec_main(options):
         return
 
     if options.enable_dbadmin:
-        from pineboolib.fllegacy.flsettings import FLSettings
-
-        settings = FLSettings()
-        settings.writeEntry("application/dbadmin_enabled", True)
+        config.set_value("application/dbadmin_enabled", True)
 
     if options.enable_quick:
-        from pineboolib.fllegacy.flsettings import FLSettings
+        config.set_value("application/dbadmin_enabled", False)
 
-        settings = FLSettings()
-        settings.writeEntry("application/dbadmin_enabled", False)
+    from .create_app import create_app
 
-    if not _DGI.useMLDefault():
-        app = _DGI.alternativeMain(options)
-    else:
-        app = create_app(_DGI)
+    app = create_app(_DGI)
 
     if _DGI.useDesktop():
+        # FIXME: What is happening here? Why dynamic load?
         project.main_form = (
             importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (project.main_form_name, project.main_form_name))
             if _DGI.localDesktop()
@@ -114,7 +109,6 @@ def exec_main(options):
         )
         project.main_window = project.main_form.mainWindow
 
-    project.sql_drivers_manager = PNSqlDrivers()
     project.setDebugLevel(options.debug_level)
     if _DGI.useDesktop():
         project.main_form.MainForm.setDebugLevel(options.debug_level)
