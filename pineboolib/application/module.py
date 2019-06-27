@@ -1,17 +1,27 @@
+import os.path
+import logging
+
+from pineboolib.utils_base import _path, parseTable
+
+# FIXME: parseTable is something too specific to be in utils.py
+
+# For types only:
+from .file import File
+
+
 class Module(object):
-    """
-    Esta clase almacena la información de los módulos cargados
+    """Esta clase almacena la información de los módulos cargados
     """
 
-    """
-    Constructor
-    @param areaid. Identificador de area.
-    @param name. Nombre del módulo
-    @param description. Descripción del módulo
-    @param icon. Icono del módulo
-    """
+    logger = logging.getLogger("application.Module")
 
     def __init__(self, areaid: str, name: str, description: str, icon: str) -> None:
+        """Constructor
+        @param areaid. Identificador de area.
+        @param name. Nombre del módulo
+        @param description. Descripción del módulo
+        @param icon. Icono del módulo
+        """
         self.areaid = areaid
         self.name = name
         self.description = description  # En python2 era .decode(UTF-8)
@@ -19,23 +29,20 @@ class Module(object):
         self.files = {}
         self.tables = {}
         self.loaded = False
-        self.path = pineboolib.project.path
-        self.logger = logging.getLogger("main.Module")
-
-    """
-    Añade ficheros al array que controla que ficehros tengo.
-    @param fileobj. Objeto File con información del fichero
-    """
+        # self.path = pineboolib.project.path  # FIXME: nope.
 
     def add_project_file(self, fileobj: File) -> None:
+        """Añade ficheros al array que controla que ficehros tengo.
+        @param fileobj. Objeto File con información del fichero
+        """
         self.files[fileobj.filename] = fileobj
 
-    """
-    Carga las acciones pertenecientes a este módulo
-    @return Boolean. True si ok, False si hay problemas
-    """
-
     def load(self) -> bool:
+        """Carga las acciones pertenecientes a este módulo
+        @return Boolean. True si ok, False si hay problemas
+        """
+        from .moduleactions import ModuleActions
+
         pathxml = _path("%s.xml" % self.name)
         # pathui = _path("%s.ui" % self.name)
         if pathxml is None:
@@ -44,8 +51,6 @@ class Module(object):
         # if pathui is None:
         #    self.logger.error("módulo %s: fichero UI no existe", self.name)
         #    return False
-        if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
-            tiempo_1 = time.time()
         try:
             self.actions = ModuleActions(self, pathxml, self.name)
             self.actions.load()
@@ -56,8 +61,6 @@ class Module(object):
         # TODO: Load Main Script:
         self.mainscript = None
         # /-----------------------
-        if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
-            tiempo_2 = time.time()
 
         for tablefile in self.files:
             if not tablefile.endswith(".mtd") or tablefile.find("alteredtable") > -1:
@@ -73,12 +76,7 @@ class Module(object):
                 self.logger.warning("No se pudo procesar. Se ignora tabla %s/%s ", self.name, name)
                 continue
             self.tables[name] = tableObj
-            pineboolib.project.tables[name] = tableObj
-
-        if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
-            tiempo_3 = time.time()
-            if tiempo_3 - tiempo_1 > 0.2:
-                self.logger.debug("Carga del módulo %s : %.3fs ,  %.3fs", self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2)
+            # pineboolib.project.tables[name] = tableObj  # FIXME: nope
 
         self.loaded = True
         return True

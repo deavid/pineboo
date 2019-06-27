@@ -3,7 +3,9 @@ import logging
 from typing import List, Optional, Union
 
 from pineboolib.exceptions import CodeDoesNotBelongHereException
-from pineboolib.utils_base import filedir, Struct, cacheXPM, XMLStruct, _dir
+from pineboolib.utils_base import filedir, Struct, cacheXPM, _dir
+
+from .structs import DBServer, DBAuth
 
 # from pineboolib.mtdparser.pnmtdparser import mtd_parse
 # from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists # FIXME: Not allowed yet
@@ -164,16 +166,16 @@ class Project(object):
 
         return True
 
-    """
-    Arranca el projecto. Conecta a la BD y carga los datos
-    """
-
     def run(self) -> bool:
+        """Arranca el proyecto. Conecta a la BD y carga los datos
+        """
 
         if not self.conn:
             from pineboolib.pnconnection import PNConnection
 
-            self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port, self.dbauth.username, self.dbauth.password, self.dbserver.type)
+            self.conn = PNConnection(
+                self.dbname, self.dbserver.host, self.dbserver.port, self.dbauth.username, self.dbauth.password, self.dbserver.type
+            )
 
         if self.conn.conn is False:
             return False
@@ -226,7 +228,8 @@ class Project(object):
 
         # Obtener módulos activos
         cursor_.execute(
-            """ SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = %s """ % self.conn.driver().formatValue("bool", "True", False)
+            """ SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = %s """
+            % self.conn.driver().formatValue("bool", "True", False)
         )
         self.modules = {}
         for idarea, idmodulo, descripcion, icono in cursor_:
@@ -368,7 +371,9 @@ class Project(object):
     @return Boolean con el resultado.
     """
 
-    def call(self, function: str, aList: List[Union[List[str], str, bool]], object_context: None = None, showException: bool = True) -> Optional[bool]:
+    def call(
+        self, function: str, aList: List[Union[List[str], str, bool]], object_context: None = None, showException: bool = True
+    ) -> Optional[bool]:
         # FIXME: No deberíamos usar este método. En Python hay formas mejores
         # de hacer esto.
         self.logger.trace("JS.CALL: fn:%s args:%s ctx:%s", function, aList, object_context, stack_info=True)
@@ -543,21 +548,3 @@ class Project(object):
 
     def get_temp_dir(self) -> str:
         return self.tmpdir
-
-
-class DBServer(XMLStruct):
-    """
-    Almacena los datos del serividor de la BD principal
-    """
-
-    host = None
-    port = None
-
-
-class DBAuth(XMLStruct):
-    """
-    Almacena los datos de autenticación de la BD principal
-    """
-
-    username = None
-    password = None

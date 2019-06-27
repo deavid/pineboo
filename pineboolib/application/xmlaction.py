@@ -1,9 +1,13 @@
-"""
-Contiene Información de cada action del mainForm
-"""
+import logging
+
+from pineboolib.utils_base import XMLStruct
 
 
 class XMLMainFormAction(XMLStruct):
+    """
+    Contiene Información de cada action del mainForm
+    """
+
     name = "unnamed"
     text = ""
     mainform = None
@@ -12,11 +16,10 @@ class XMLMainFormAction(XMLStruct):
     slot = None
     logger = logging.getLogger("main.XMLMainFormAction")
 
-    """
-    Lanza la action
-    """
-
     def run(self):
+        """
+        Lanza la action
+        """
         self.logger.debug("Running: %s %s %s", self.name, self.text, self.slot)
         try:
             action = self.mod.actions[self.name]
@@ -25,19 +28,17 @@ class XMLMainFormAction(XMLStruct):
             self.logger.debug("END of Running: %s %s %s", self.name, self.text, self.slot)
 
 
-"""
-Contiene información de las actions especificadas en el .xml del módulo
-"""
-
-
 class XMLAction(XMLStruct):
+    """
+    Contiene información de las actions especificadas en el .xml del módulo
+    """
+
     logger = logging.getLogger("main.XMLAction")
 
-    """
-    Constructor
-    """
-
     def __init__(self, *args, **kwargs) -> None:
+        """
+        Constructor
+        """
         super(XMLAction, self).__init__(*args, **kwargs)
         self.form = self._v("form")
         self.name = self._v("name")
@@ -95,7 +96,9 @@ class XMLAction(XMLStruct):
                 self.mainform_widget.widget.doCleanUp()
             self.logger.debug("Loading action %s . . . ", self.name)
             if pineboolib.project._DGI.useDesktop() and hasattr(pineboolib.project.main_window, "w_"):
-                self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, pineboolib.project.main_window.w_, None)
+                self.mainform_widget = pineboolib.project.conn.managerModules().createForm(
+                    self, None, pineboolib.project.main_window.w_, None
+                )
             else:
                 self.scriptform = getattr(self, "scriptform", None)
                 self.load_script(self.scriptform, None)

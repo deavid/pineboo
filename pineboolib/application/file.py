@@ -1,11 +1,16 @@
-from typing import Callable, Optional, Union
+import os.path
 import logging
+from typing import Optional
+
+from pineboolib.utils_base import _dir
 
 
 class File(object):
     """
     Clase que gestiona cada uno de los ficheros de un módulo
     """
+
+    logger = logging.getLogger("application.File")
 
     def __init__(self, module: str, filename: str, sha: Optional[str] = None, basedir: Optional[str] = None) -> None:
         """
@@ -24,8 +29,8 @@ class File(object):
         else:
             self.name, self.ext = os.path.splitext(filename)
 
-        db_name = pineboolib.project.conn.DBName()
-
+        # db_name = pineboolib.project.conn.DBName()  # FIXME: Wait, no.
+        db_name = "not-known"  # FIXME: publish data in another way. Also, why File should be aware of the Database?
         if self.sha:
             self.filekey = "%s/%s/file%s/%s/%s%s" % (db_name, module, self.ext, self.name, sha, self.ext)
         else:

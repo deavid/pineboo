@@ -27,7 +27,8 @@ aqtt = auto_qt_translate_text
 
 
 def one(x, default=None):
-    """ Se le pasa una lista de elementos (normalmente de un xml) y devuelve el primero o None; sirve para ahorrar try/excepts y limpiar código"""
+    """ Se le pasa una lista de elementos (normalmente de un xml) y devuelve el primero o None;
+    sirve para ahorrar try/excepts y limpiar código"""
     try:
         return x[0]
     except IndexError:
@@ -400,7 +401,11 @@ def load2xml(form_path_or_str):
     """
     try:
         parser = ET.XMLParser(html=0)
-        if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE KugarData") > -1 or form_path_or_str.find("DOCTYPE svg") > -1:
+        if (
+            form_path_or_str.find("KugarTemplate") > -1
+            or form_path_or_str.find("DOCTYPE KugarData") > -1
+            or form_path_or_str.find("DOCTYPE svg") > -1
+        ):
             form_path_or_str = parse_for_duplicates(form_path_or_str)
             ret = ET.fromstring(form_path_or_str, parser)
         else:
@@ -408,7 +413,11 @@ def load2xml(form_path_or_str):
     except Exception:
         try:
             parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
-            if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE KugarData") > -1 or form_path_or_str.find("DOCTYPE svg") > -1:
+            if (
+                form_path_or_str.find("KugarTemplate") > -1
+                or form_path_or_str.find("DOCTYPE KugarData") > -1
+                or form_path_or_str.find("DOCTYPE svg") > -1
+            ):
                 form_path_or_str = parse_for_duplicates(form_path_or_str)
                 ret = ET.fromstring(form_path_or_str, parser)
             else:
@@ -816,3 +825,34 @@ def download_files():
     copy_dir_recursive(":/share", filedir("../share"))
     if not os.path.exists(filedir("../tempdata")):
         os.mkdir(filedir("../tempdata"))
+
+
+def parseTable(nombre, contenido, encoding="UTF-8", remove_blank_text=True):
+    # FIXME: parseTable is something too specific to be in utils.py
+    from io import StringIO
+    from xml import etree
+
+    file_alike = StringIO(contenido)
+    try:
+        tree = etree.ElementTree.parse(file_alike)
+    except Exception:
+        logger.exception("Error al procesar tabla: %s", nombre)
+        return None
+
+    root = tree.getroot()
+    obj_name = root.find("name")
+    query = root.find("query")
+    if query:
+        if query.text != nombre:
+            logger.warning(
+                "WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)"
+                % (obj_name.text, nombre)
+            )
+            query.text = nombre
+    elif obj_name.text != nombre:
+        logger.warning(
+            "WARN: Nombre de tabla %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de tabla)"
+            % (obj_name.text, nombre)
+        )
+        obj_name.text = nombre
+    return getTableObj(tree, root)

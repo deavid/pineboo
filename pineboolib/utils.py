@@ -3,9 +3,6 @@ import os
 import logging
 import sys
 import traceback
-from io import StringIO
-
-from xml import etree
 
 from .utils_base import (  # noqa: F401  # FIXME: Code should import from utils_base when needed.
     auto_qt_translate_text,
@@ -43,6 +40,7 @@ from .utils_base import (  # noqa: F401  # FIXME: Code should import from utils_
     is_deployed,
     filedir,
     download_files,
+    parseTable,  # FIXME: parseTable is something too specific to be in utils.py
 )
 import pineboolib
 from pineboolib.fllegacy.flsettings import FLSettings
@@ -106,44 +104,6 @@ def cacheXPM(value):
             f.close()
 
     return file_name
-
-
-def parseTable(nombre, contenido, encoding="UTF-8", remove_blank_text=True):
-    file_alike = StringIO(contenido)
-
-    # parser = etree.XMLParser(
-    #    ns_clean=True,
-    #    encoding=encoding,
-    #    recover=False,
-    #    remove_blank_text=remove_blank_text,
-    # )
-    try:
-        # tree = etree.parse(file_alike, parser)
-        tree = etree.ElementTree.parse(file_alike)
-    except Exception:
-        print("Error al procesar tabla:", nombre)
-        print(traceback.format_exc())
-        return None
-    root = tree.getroot()
-
-    obj_name = root.find("name")
-    query = root.find("query")
-    settings = FLSettings()
-    if query is not None:
-        if query.text != nombre:
-
-            if settings.readBoolEntry("application/isDebuggerMode", False):
-                logger.warning(
-                    "WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)" % (obj_name.text, nombre)
-                )
-            query.text = nombre
-    elif obj_name.text != nombre:
-        if settings.readBoolEntry("application/isDebuggerMode", False):
-            logger.warning(
-                "WARN: Nombre de tabla %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de tabla)" % (obj_name.text, nombre)
-            )
-        obj_name.text = nombre
-    return getTableObj(tree, root)
 
 
 def saveGeometryForm(name, geo):
