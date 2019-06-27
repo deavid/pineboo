@@ -3,6 +3,11 @@ import sys
 import traceback
 import logging
 
+from pineboolib.core.utils import is_deployed
+from pineboolib.application.project import Project
+
+from .dgi import load_dgi
+
 logger = logging.getLogger(__name__)
 
 
@@ -34,7 +39,7 @@ def startup():
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     # -------------------
 
-    ret = main(options)
+    ret = exec_main(options)
     # setup()
     # exec_()
     gc.collect()
@@ -45,7 +50,7 @@ def startup():
         sys.exit(0)
 
 
-def main(options):
+def exec_main(options):
     """Exec main program.
 
     Handles optionlist and help.
@@ -59,11 +64,6 @@ def main(options):
     # FIXME: This function should not initialize the program
 
     # TODO: Refactorizar función en otras más pequeñas
-    from pineboolib import is_deployed
-
-    from .dgi import load_dgi
-
-    _DGI = load_dgi(options.dgi)
 
     if is_deployed():
         logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -80,10 +80,9 @@ def main(options):
 
         monkey_patch_connect()
 
-    if options.dgi_parameter:
-        _DGI.setParameter(options.dgi_parameter)
-
-    project = pineboolib.pnapplication.Project(_DGI)
+    project = Project()
+    _DGI = load_dgi(options.dgi, options.dgi_parameter)
+    project.init_dgi(_DGI)
     project.no_python_cache = options.no_python_cache
 
     if options.test:

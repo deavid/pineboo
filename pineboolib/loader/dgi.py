@@ -4,7 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def load_dgi(name):
+def load_dgi(name, param):
     """Load a DGI module dynamically."""
 
     modname = "dgi_%s" % name
@@ -32,6 +32,9 @@ def load_dgi(name):
     except Exception:
         logger.exception("Error inesperado al cargar el módulo DGI %s" % modpath)
         raise
+
+    if param:
+        dgi.setParameter(param)
 
     logger.info("DGI loaded: %s", name)
 

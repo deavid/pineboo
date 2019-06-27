@@ -6,6 +6,8 @@ from typing import List, Optional, Union
 from pineboolib.exceptions import CodeDoesNotBelongHereException
 from pineboolib.utils_base import filedir, Struct, cacheXPM, _dir
 from pineboolib.core.settings import config, settings
+from pineboolib.interfaces.dgi_schema import dgi_schema
+
 from .structs import DBServer, DBAuth
 from .module import Module
 from .file import File
@@ -38,12 +40,12 @@ class Project(object):
     sql_drivers_manager = None
     timer_ = None
     no_python_cache = False  # TODO: Fill this one instead
-    """
-    Constructor
-    """
 
-    def __init__(self, DGI: dgi_qt) -> None:
-        self._DGI = DGI
+    def __init__(self) -> None:
+        """
+        Constructor
+        """
+        self._DGI = None
         self.tree = None
         self.root = None
         self.dbserver = None
@@ -54,11 +56,8 @@ class Project(object):
         self.parser = None
         self.version = 0.8
         self.main_form_name = "eneboo"
-        if self._DGI.mobilePlatform():
-            self.main_form_name = "mobile"
-        else:
-            if config.value("ebcomportamiento/mdi_mode"):
-                self.main_form_name = "eneboo_mdi"
+        if config.value("ebcomportamiento/mdi_mode"):
+            self.main_form_name = "eneboo_mdi"
 
         # pineboolib.project = self  # FIXME: not good.
         self.deleteCache = False
@@ -75,15 +74,22 @@ class Project(object):
 
         self.kugarPlugin = PNKugarPlugins()
 
+    def init_dgi(self, DGI: dgi_schema) -> None:
+        """Load and associate the defined DGI onto this project"""
+        # FIXME: Actually, DGI should be loaded here, or kind of.
+        self._DGI = DGI
+        if self._DGI.mobilePlatform():
+            self.main_form_name = "mobile"
+
         if not self._DGI.localDesktop():
+            # FIXME: Maybe it is a good idea to call this regardless of localDesktop
             self._DGI.extraProjectInit()
 
-    """
-    Especifica el nivel de debug de la aplicación
-    @param q Número con el nimvel espeficicado
-    """
-
     def setDebugLevel(self, q: int) -> None:
+        """
+        Especifica el nivel de debug de la aplicación
+        @param q Número con el nivel espeficicado
+        """
         Project.debugLevel = q
         # self._DGI.pnqt3ui.Options.DEBUG_LEVEL = q
 
@@ -94,18 +100,20 @@ class Project(object):
     #     """
     #     return self.acl_
     def acl(self):
+        """Devuelve el ACL cargado"""
         raise CodeDoesNotBelongHereException("ACL Does not belong to PROJECT. Go away.")
 
-    """
-    Especifica los datos para luego conectarse a la BD.
-    @param dbname. Nombre de la BD.
-    @param host. Nombre del equipo anfitrión de la BD.
-    @param port. Puerto a usar para conectarse a la BD.
-    @param passwd. Contraseña de la BD.
-    @param driveralias. Alias del pluging a usar en la conexión
-    """
-
     def load_db(self, dbname, host, port, user, passwd, driveralias):
+        """
+        Especifica los datos para luego conectarse a la BD.
+        @param dbname. Nombre de la BD.
+        @param host. Nombre del equipo anfitrión de la BD.
+        @param port. Puerto a usar para conectarse a la BD.
+        @param passwd. Contraseña de la BD.
+        @param driveralias. Alias del pluging a usar en la conexión
+        """
+        # FIXME: All those dbserver, dbauth and dbname should belong to a single object, not three.
+        # FIXME: Method name misleading: its called "load_db". but nothing is loaded from DB and no connect happens.
         self.dbserver = DBServer()
         self.dbserver.host = host
         self.dbserver.port = port
@@ -115,10 +123,12 @@ class Project(object):
         self.dbauth.password = passwd
         self.dbname = dbname
 
+        # Why are those two part of load_db? Looks like we want to setup a new object.
         self.actions = {}
         self.tables = {}
 
     def load(self, file_name: str) -> bool:
+        # FIXME: What this method loads, actually? what is the intent?
         from xml.etree import ElementTree as ET
         import hashlib
 
@@ -173,7 +183,7 @@ class Project(object):
     def run(self) -> bool:
         """Arranca el proyecto. Conecta a la BD y carga los datos
         """
-
+        # FIXME: function too complex.
         if not self.conn:
             # FIXME: Connecting is not Project responsibility
             from pineboolib.pnconnection import PNConnection
@@ -311,9 +321,9 @@ class Project(object):
                         for f in files:
                             os.remove(os.path.join(root, f))
 
-                if settings.value("application/isDebuggerMode", False):
-                    if self._splash:
-                        self._splash.showMessage("Volcando a caché %s..." % nombre, QtCore.Qt.AlignLeft, QtCore.Qt.white)
+                # if settings.value("application/isDebuggerMode", False):
+                #     if self._splash:
+                #         self._splash.showMessage("Volcando a caché %s..." % nombre, QtCore.Qt.AlignLeft, QtCore.Qt.white)
 
                 if contenido and not os.path.exists(file_name):
                     f2 = open(file_name, "wb")
@@ -371,18 +381,17 @@ class Project(object):
 
         return True
 
-    """
-    LLama a una función del projecto.
-    @param function. Nombre de la función a llamar.
-    @param aList. Array con los argumentos.
-    @param objectContext. Contexto en el que se ejecuta la función.
-    @param showException. Boolean que especifica si se muestra los errores.
-    @return Boolean con el resultado.
-    """
-
     def call(
         self, function: str, aList: List[Union[List[str], str, bool]], object_context: None = None, showException: bool = True
     ) -> Optional[bool]:
+        """
+        LLama a una función del projecto.
+        @param function. Nombre de la función a llamar.
+        @param aList. Array con los argumentos.
+        @param objectContext. Contexto en el que se ejecuta la función.
+        @param showException. Boolean que especifica si se muestra los errores.
+        @return Boolean con el resultado.
+        """
         # FIXME: No deberíamos usar este método. En Python hay formas mejores
         # de hacer esto.
         self.logger.trace("JS.CALL: fn:%s args:%s ctx:%s", function, aList, object_context, stack_info=True)
@@ -461,12 +470,11 @@ class Project(object):
 
         return None
 
-    """
-    Convierte un script .qs a .py lo deja al lado
-    @param scriptname, Nombre del script a convertir
-    """
-
     def parseScript(self, scriptname: str, txt_: str = "") -> None:
+        """
+        Convierte un script .qs a .py lo deja al lado
+        @param scriptname, Nombre del script a convertir
+        """
 
         # Intentar convertirlo a Python primero con flscriptparser2
         if not os.path.isfile(scriptname):
@@ -501,13 +509,12 @@ class Project(object):
             except Exception as e:
                 self.logger.warning("El fichero %s no se ha podido convertir: %s", scriptname, e)
 
-    """
-    Lanza los test
-    @param name, Nombre del test específico. Si no se especifica se lanzan todos los tests disponibles
-    @return Texto con la valoración de los test aplicados
-    """
-
     def test(self, name=None):
+        """
+        Lanza los test
+        @param name, Nombre del test específico. Si no se especifica se lanzan todos los tests disponibles
+        @return Texto con la valoración de los test aplicados
+        """
         from importlib import import_module
 
         dirlist = os.listdir(filedir("../pineboolib/plugins/test"))
@@ -547,10 +554,11 @@ class Project(object):
 
         return result
 
-    """
-    Retorna la carpeta temporal predefinida de pineboo
-    @return ruta a la carpeta temporal
-    """
-
     def get_temp_dir(self) -> str:
-        return self.tmpdir
+        """
+        Retorna la carpeta temporal predefinida de pineboo
+        @return ruta a la carpeta temporal
+        """
+        # FIXME: anti-pattern in Python. Getters for plain variables are wrong.
+        raise CodeDoesNotBelongHereException("Use project.tmpdir instead, please.")
+        # return self.tmpdir

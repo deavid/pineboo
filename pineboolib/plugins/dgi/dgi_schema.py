@@ -17,12 +17,18 @@ class dgi_schema(object):
     _localDesktop = True
     _mobile = False
     _clean_no_python = True
-    _clean_no_python_changeable = True
+    _clean_no_python_changeable = True  # FIXME: Someone explain why it is "changeable"
+    # FIXME: Guess this is because there is conditional code we don't want to run on certain DGI
+    # .... this is really obscure. Please avoid at all costs. Having __NO_PYTHON__ is bad enough.
     _alternative_content_cached = False
 
     def __init__(self):
+        # FIXME: This init is intended to be called only on certain conditions.
+        # ... Worse than it seems: looks like this class is prepared to be constructed without
+        # ... calling __init__, on purpose, to have different behavior than calling it.
+
         self._desktopEnabled = True  # Indica si se usa en formato escritorio con interface Qt
-        self.setUseMLDefault(True)
+        self.setUseMLDefault(True)  # FIXME: Setters are wrong. Inside private context, even wronger.
         self.setLocalDesktop(True)
         self._name = "dgi_shema"
         self._alias = "Default Schema"
@@ -32,14 +38,14 @@ class dgi_schema(object):
             import PyQt5.QtAndroidExtras  # noqa   # FIXME
 
             self._mobile = True
+            # FIXME: Did we just assume that we're running on android just because we found a library??
         except ImportError:
             self._mobile = False
 
         if AQSettings().readBoolEntry(u"ebcomportamiento/mobileMode", False):
+            # FIXME: But now we enable mobile mode regardless of the library
             self._mobile = True
-
-        self.set_clean_no_python(True)
-        self.set_clean_no_python_changeable(False)
+        # FIXME: Then, if not, can we disable it even if it is found? (...)
 
     def name(self):
         return self._name
@@ -124,23 +130,14 @@ class dgi_schema(object):
 
         return size
 
-    def clean_no_python(self):
-        return self._clean_no_python
-
-    def set_clean_no_python(self, b):
-        if self._clean_no_python_changeable:
-            self._clean_no_python = b
-
-    def clean_no_python_changeable(self):
-        return self._clean_no_python_changeable
-
-    def set_clean_no_python_changeable(self, b):
-        self._clean_no_python_changeable = b
-
     def alternative_content_cached(self):
+        # FIXME: This is not needed. Use "content_cached" to return an exception or None, to signal
+        # ... the module is unaware on how to perform the task
+        # ... also the naming is bad. It conveys having done a cache in the past.
         return self._alternative_content_cached
 
     def alternative_script_path(self, script_name):
+        # FIXME: Probably the same. Not needed.
         return None
 
     def use_model(self):
