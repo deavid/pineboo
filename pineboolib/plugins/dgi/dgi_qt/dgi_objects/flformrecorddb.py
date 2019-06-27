@@ -213,8 +213,9 @@ class FLFormRecordDB(FLFormDB):
         if self.pushButtonLast:
             self.pushButtonLast.hide()
 
-        if self.bottomToolbar:
+        if self.bottomToolbar and self.toolButtonClose:
             self.toolButtonClose.hide()
+            
         self.bottomToolbar = QtWidgets.QFrame()
         self.bottomToolbar.setMinimumSize(self.iconSize)
         self.bottomToolbar.layout = QtWidgets.QHBoxLayout()
