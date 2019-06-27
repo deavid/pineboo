@@ -16,7 +16,6 @@ class dgi_schema(object):
     _alias = None
     _localDesktop = True
     _mobile = False
-    _deployed = False
     _clean_no_python = True
     _clean_no_python_changeable = True
     _alternative_content_cached = False
@@ -39,9 +38,6 @@ class dgi_schema(object):
         if AQSettings().readBoolEntry(u"ebcomportamiento/mobileMode", False):
             self._mobile = True
 
-        from pineboolib.utils import imFrozen
-
-        self._deployed = imFrozen()
         self.set_clean_no_python(True)
         self.set_clean_no_python_changeable(False)
 
@@ -111,7 +107,13 @@ class dgi_schema(object):
         return self._mobile
 
     def isDeployed(self):
-        return self._deployed
+        """Returns True only if the code is running inside a PyInstaller bundle"""
+        # FIXME: Delete me. This functionality DOES NOT DEPEND on which interface is being used.
+        # .... a bundle is a bundle regardless of wether is running as jsonrpc or Qt.
+        # .... A copy of this function has been moved to pineboolib.is_deployed() for convenience
+        import sys
+
+        return getattr(sys, "frozen", False)
 
     def iconSize(self):
         from PyQt5 import QtCore
