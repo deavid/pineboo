@@ -152,28 +152,29 @@ class FLMYSQL_MYISAM2(object):
 
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"
+        
+        if len(v):
+            if type_ == "bool":
+                from pineboolib.pncontrolsfactory import aqApp
+                s = str(v[0]).upper()
+                if s == aqApp.tr("Sí")[0].upper():
+                    res = "=1"
+                elif aqApp.tr("No")[0].upper():
+                    res = "=0"
 
-        if type_ == "bool":
-            s = str(v[0]).upper()
-            if s == str(QApplication.tr("Sí")[0]).upper():
-                res = "=1"
-            elif str(QApplication.tr("No")[0]).upper():
-                res = "=0"
+            elif type_ == "date":
+                res = " LIKE '%" + FLUtil().dateDMAtoAMD(str(v)) + "'"
 
-        elif type_ == "date":
-            util = FLUtil()
-            res = " LIKE '%" + util.dateDMAtoAMD(str(v)) + "'"
+            elif type_ == "time":
+                t = v.toTime()
+                res = " LIKE '" + t.toString(Qt.ISODate) + "%'"
 
-        elif type_ == "time":
-            t = v.toTime()
-            res = " LIKE '" + t.toString(Qt.ISODate) + "%'"
+            else:
+                res = str(v)
+                if upper:
+                    res = res.upper()
 
-        else:
-            res = str(v)
-            if upper:
-                res = res.upper()
-
-            res = " LIKE '" + res + "%'"
+                res = " LIKE '" + res + "%'"
 
         return res
 
@@ -446,6 +447,7 @@ class FLMYSQL_MYISAM2(object):
         try:
             self.cursorsArray_[curname].execute(sql)
         except Exception:
+            print("*", sql)
             qWarning("CursorTableModel.Refresh\n %s" % traceback.format_exc())
 
     def fix_query(self, val):
