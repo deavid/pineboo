@@ -1,6 +1,11 @@
 import logging
+import os.path
 
 from pineboolib.utils_base import XMLStruct
+from pineboolib.interfaces import IFormDB, IFormRecordDB
+from pineboolib.utils import _path, coalesce_path
+
+from typing import Optional
 
 
 class XMLMainFormAction(XMLStruct):
@@ -35,11 +40,14 @@ class XMLAction(XMLStruct):
 
     logger = logging.getLogger("main.XMLAction")
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, project, **kwargs) -> None:
         """
         Constructor
         """
         super(XMLAction, self).__init__(*args, **kwargs)
+        if not project:
+            raise ValueError("XMLActions must belong to a project")
+        self.project = project
         self.form = self._v("form")
         self.name = self._v("name")
         self.script = self._v("script")  # script_form_record
@@ -57,7 +65,7 @@ class XMLAction(XMLStruct):
     @return widget con form inicializado
     """
 
-    def loadRecord(self, cursor: None) -> FLFormRecordDB:
+    def loadRecord(self, cursor: None) -> IFormRecordDB:
         self._loaded = getattr(self.formrecord_widget, "_loaded", False)
         if not self._loaded:
             if getattr(self.formrecord_widget, "widget", None):
@@ -65,8 +73,9 @@ class XMLAction(XMLStruct):
                 # self.formrecord_widget.widget = None
 
             self.logger.debug("Loading record action %s . . . ", self.name)
-            if pineboolib.project._DGI.useDesktop():
-                self.formrecord_widget = pineboolib.project.conn.managerModules().createFormRecord(self, None, cursor, None)
+            if self.project._DGI.useDesktop():
+                # FIXME: looks like code duplication. Bet both sides of the IF do the same.
+                self.formrecord_widget = self.project.conn.managerModules().createFormRecord(self, None, cursor, None)
             else:
                 # self.script = getattr(self, "script", None)
                 # if isinstance(self.script, str) or self.script is None:
@@ -89,16 +98,14 @@ class XMLAction(XMLStruct):
 
         return self.formrecord_widget
 
-    def load(self) -> FLFormDB:
+    def load(self) -> IFormDB:
         self._loaded = getattr(self.mainform_widget, "_loaded", False)
         if not self._loaded:
             if getattr(self.mainform_widget, "widget", None):
                 self.mainform_widget.widget.doCleanUp()
             self.logger.debug("Loading action %s . . . ", self.name)
-            if pineboolib.project._DGI.useDesktop() and hasattr(pineboolib.project.main_window, "w_"):
-                self.mainform_widget = pineboolib.project.conn.managerModules().createForm(
-                    self, None, pineboolib.project.main_window.w_, None
-                )
+            if self.project._DGI.useDesktop() and hasattr(self.project.main_window, "w_"):
+                self.mainform_widget = self.project.conn.managerModules().createForm(self, None, self.project.main_window.w_, None)
             else:
                 self.scriptform = getattr(self, "scriptform", None)
                 self.load_script(self.scriptform, None)
@@ -121,18 +128,18 @@ class XMLAction(XMLStruct):
     """
 
     def execMainScript(self, name):
-        a = pineboolib.project.conn.manager().action(name)
+        a = self.project.conn.manager().action(name)
         if not a:
             self.logger.warning("No existe la acción %s", name)
             return True
-        pineboolib.project.call("%s.main" % a.name(), [], None, False)
+        self.project.call("%s.main" % a.name(), [], None, False)
 
     """
     Retorna el widget del formRecord. Esto es necesario porque a veces no hay un FLformRecordDB inicialidado todavía
     @return wigdet del formRecord.
     """
 
-    def formRecordWidget(self) -> FLFormRecordDB:
+    def formRecordWidget(self) -> IFormRecordDB:
         if not getattr(self.formrecord_widget, "_loaded", None):
             self.loadRecord(None)
 
@@ -148,7 +155,7 @@ class XMLAction(XMLStruct):
         w = self.loadRecord(cursor)
         # w.init()
         if w:
-            if pineboolib.project._DGI.localDesktop():
+            if self.project._DGI.localDesktop():
                 w.show()
 
     def openDefaultForm(self):
@@ -156,7 +163,7 @@ class XMLAction(XMLStruct):
         w = self.load()
 
         if w:
-            if pineboolib.project._DGI.localDesktop():
+            if self.project._DGI.localDesktop():
                 w.show()
 
     """
@@ -180,13 +187,13 @@ class XMLAction(XMLStruct):
     @param parent. Objecto al que carga el script, si no se especifica es a self.script
     """
 
-    def load_script(self, scriptname: str, parent: Optional[Union[FLFormDB, FLFormRecordDB]] = None) -> None:
+    def load_script(self, scriptname: str, parent: Optional[IFormDB] = None) -> None:
+        # FIXME: Parent logic is broken. We're loading scripts to two completely different objects.
         from importlib import machinery
 
         if scriptname:
             scriptname = scriptname.replace(".qs", "")
-        # if scriptname:
-        #    self.logger.info("Cargando script %s de %s accion %s", scriptname, parent, self.name)
+            # self.logger.info("Cargando script %s de %s accion %s", scriptname, parent, self.name)
 
         parent_ = parent
         if parent is None:
@@ -195,7 +202,7 @@ class XMLAction(XMLStruct):
         else:
             action_ = parent._action if hasattr(parent, "_action") else self
 
-            # import aqui para evitar dependencia ciclica
+        # import aqui para evitar dependencia ciclica
         from pineboolib.utils import convertFLAction
 
         if not isinstance(action_, XMLAction):
@@ -208,18 +215,18 @@ class XMLAction(XMLStruct):
         parent.script = emptyscript
 
         if scriptname is None:
-            parent.script.form = parent.script.FormInternalObj(action=action_, project=pineboolib.project, parent=parent)
+            parent.script.form = parent.script.FormInternalObj(action=action_, project=self.project, parent=parent)
             parent.widget = parent.script.form
             parent.iface = parent.widget.iface
             return
 
-        script_path_py = pineboolib.project._DGI.alternative_script_path("%s.py" % scriptname)
+        script_path_py = self.project._DGI.alternative_script_path("%s.py" % scriptname)
 
         if script_path_py is None:
             script_path_qs = _path("%s.qs" % scriptname, False)
             script_path_py = coalesce_path("%s.py" % scriptname, "%s.qs.py" % scriptname, None)
 
-        mng_modules = pineboolib.project.conn.managerModules()
+        mng_modules = self.project.conn.managerModules()
         if mng_modules.staticBdInfo_ and mng_modules.staticBdInfo_.enabled_:
             from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader
 
@@ -237,23 +244,23 @@ class XMLAction(XMLStruct):
             if not os.path.isfile(script_path):
                 raise IOError
             try:
-                self.logger.info("Cargando %s : %s ", scriptname, script_path.replace(pineboolib.project.tmpdir, "tempdata"))
+                self.logger.info("Cargando %s : %s ", scriptname, script_path.replace(self.project.tmpdir, "tempdata"))
                 parent.script = machinery.SourceFileLoader(scriptname, script_path).load_module()
             except Exception:
                 self.logger.exception("ERROR al cargar script PY para la accion %s:", action_.name)
 
         elif script_path_qs:
             script_path = script_path_qs
-            pineboolib.project.parseScript(script_path)
+            self.project.parseScript(script_path)
             self.logger.info("Loading script QS %s . . . ", scriptname)
             python_script_path = (script_path + ".xml.py").replace(".qs.xml.py", ".qs.py")
             try:
-                self.logger.info("Cargando %s : %s ", scriptname, python_script_path.replace(pineboolib.project.tmpdir, "tempdata"))
+                self.logger.info("Cargando %s : %s ", scriptname, python_script_path.replace(self.project.tmpdir, "tempdata"))
                 parent.script = machinery.SourceFileLoader(scriptname, python_script_path).load_module()
             except Exception:
                 self.logger.exception("ERROR al cargar script QS para la accion %s:", action_.name)
 
-        parent.script.form = parent.script.FormInternalObj(action_, pineboolib.project, parent_)
+        parent.script.form = parent.script.FormInternalObj(action_, self.project, parent_)
         if parent_:
             parent.widget = parent.script.form
             if getattr(parent.widget, "iface", None):

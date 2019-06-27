@@ -6,6 +6,7 @@ from PyQt5.Qt import QKeySequence
 from pineboolib.utils import filedir, loadGeometryForm, saveGeometryForm
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib import decorators
+from pineboolib.interfaces import IFormDB
 import pineboolib
 import traceback
 
@@ -31,7 +32,7 @@ componentes serán plugins, como FLFieldDB o FLTableDB.
 """
 
 
-class FLFormDB(QtWidgets.QDialog):
+class FLFormDB(IFormDB, QtWidgets.QDialog):
 
     """
     Cursor, con los registros, utilizado por el formulario

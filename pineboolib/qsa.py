@@ -10,7 +10,8 @@ import logging
 # FLObjects
 from pineboolib.utils import ustr, filedir
 from pineboolib.pncontrolsfactory import FLUtil, SysType, aqApp, QInputDialog, QLineEdit
-from pineboolib.pnobjectsfactory import load_model, Calculated
+
+# from pineboolib.pnobjectsfactory import load_model, Calculated
 
 from . import decorators
 from functools import total_ordering
@@ -192,9 +193,9 @@ class Array(object):
             return len(self.dict_)
         else:
             return self.dict_[k]
-    
+
     def splice(self, *args):
-        if len(args) == 2: # Delete
+        if len(args) == 2:  # Delete
             pos_ini = args[0]
             length_ = args[1]
             i = 0
@@ -204,23 +205,23 @@ class Array(object):
                 if i >= pos_ini and x <= length_:
                     new[m] = self.dict_[m]
                     x += 1
-                
+
                 i += 1
-                
+
             self.dict_ = new
-            
-        elif len(args) > 2 and args[1] == 0: # Insertion
+
+        elif len(args) > 2 and args[1] == 0:  # Insertion
             for i in range(2, len(args)):
                 self.append(args[i])
-        elif len(args) > 2 and args[1] > 0: # Replacement
+        elif len(args) > 2 and args[1] > 0:  # Replacement
             pos_ini = args[0]
             replacement_size = args[1]
             new_values = args[2:]
-            
+
             i = 0
             x = 0
             new = {}
-            for m in self.dict_.keys():  
+            for m in self.dict_.keys():
                 if i < pos_ini:
                     new[m] = self.dict_[m]
                 else:
@@ -228,17 +229,14 @@ class Array(object):
                         if x == 0:
                             for n in new_values:
                                 new[n] = n
-                    
+
                         x += 1
                     else:
                         new[m] = self.dict_[m]
-                
-                i += 1
-            
-            self.dict_ = new
 
-                    
-            
+                i += 1
+
+            self.dict_ = new
 
     def __len__(self):
         return len(self.dict_)
@@ -453,7 +451,7 @@ class qsaRegExp(object):
         self.is_global = False
 
     def search(self, text):
-        self.result_ = re.search(r'%s' % self.strRE_, text)
+        self.result_ = re.search(r"%s" % self.strRE_, text)
         return self.result_
 
     def replace(self, target, new_value):

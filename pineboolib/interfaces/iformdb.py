@@ -1,0 +1,2 @@
+class IFormDB(object):
+    pass

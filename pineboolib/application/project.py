@@ -1,12 +1,15 @@
 import os
+import time
 import logging
 from typing import List, Optional, Union
 
 from pineboolib.exceptions import CodeDoesNotBelongHereException
 from pineboolib.utils_base import filedir, Struct, cacheXPM, _dir
-from pineboolib.core.settings import config
-
+from pineboolib.core.settings import config, settings
 from .structs import DBServer, DBAuth
+from .module import Module
+from .file import File
+
 
 # from pineboolib.mtdparser.pnmtdparser import mtd_parse
 # from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists # FIXME: Not allowed yet
@@ -65,7 +68,7 @@ class Project(object):
         self.tables = {}
         self.files = {}
         self.apppath = filedir("..")
-        self.tmpdir = config("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))
+        self.tmpdir = config.value("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))
         if not os.path.exists(self.tmpdir):
             os.mkdir(self.tmpdir)
         from pineboolib.plugins.kugar.pnkugarplugins import PNKugarPlugins
@@ -189,9 +192,9 @@ class Project(object):
         # Preparar temporal
 
         if self.deleteCache and os.path.exists(_dir("cache/%s" % self.conn.DBName())):
-            if self._splash:
-                # FIXME: Add progress communication method.
-                self._splash.showMessage("Borrando caché ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+            # if self._splash:
+            #     # FIXME: Add progress communication method.
+            #     self._splash.showMessage("Borrando caché ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
             self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", _dir("cache/%s" % self.conn.DBName()))
             for root, dirs, files in os.walk(_dir("cache/%s" % self.conn.DBName()), topdown=False):
                 for name in files:
@@ -206,7 +209,7 @@ class Project(object):
             os.makedirs(_dir("cache/%s" % self.conn.DBName()))
 
         if not self.deleteCache:
-            keep_images = FLSettings().readBoolEntry("ebcomportamiento/keep_general_cache", False)
+            keep_images = config.value("ebcomportamiento/keep_general_cache", False)
             if keep_images is False:
                 for f in os.listdir(self.tmpdir):
                     if f.find(".") > -1:
@@ -219,8 +222,8 @@ class Project(object):
         for table in ("flareas", "flmodules", "flfiles", "flgroups", "fllarge", "flserial", "flusers", "flvar", "flmetadata"):
             self.conn.manager().createSystemTable(table)
 
-        util = FLUtil()
-        util.writeSettingEntry(u"DBA/lastDB", self.conn.DBName())
+        # FIXME: settings in this step already?
+        settings.set_value("DBA/lastDB", self.conn.DBName())
         cursor_ = self.conn.cursor()
         self.areas = {}
         cursor_.execute(""" SELECT idarea, descripcion FROM flareas WHERE 1 = 1""")
@@ -302,15 +305,13 @@ class Project(object):
                 if str(nombre).endswith(".kut") or str(nombre).endswith(".ts"):
                     encode_ = "utf-8"
 
-                settings = FLSettings()
-
                 folder = _dir("cache", "/".join(fileobj.filekey.split("/")[: len(fileobj.filekey.split("/")) - 1]))
                 if os.path.exists(folder) and not file_name:  # Borra la carpeta si no existe el fichero destino
                     for root, dirs, files in os.walk(folder):
                         for f in files:
                             os.remove(os.path.join(root, f))
 
-                if settings.readBoolEntry("application/isDebuggerMode", False):
+                if settings.value("application/isDebuggerMode", False):
                     if self._splash:
                         self._splash.showMessage("Volcando a caché %s..." % nombre, QtCore.Qt.AlignLeft, QtCore.Qt.white)
 
@@ -321,7 +322,10 @@ class Project(object):
                     f2.close()
 
             if nombre.endswith(".mtd"):
-                mtd_parse(fileobj)
+                pass
+                # FIXME:
+                # from pineboolib.mtdparser.pnmtdparser import mtd_parse
+                # mtd_parse(fileobj)
 
             if self.parseProject and nombre.endswith(".qs") and settings.readBoolEntry("application/isDebuggerMode", False):
                 # if self._splash:
@@ -333,9 +337,8 @@ class Project(object):
 
                 pos_qs += 1
 
-        if self._DGI.useDesktop() and self._DGI.localDesktop():
-            tiempo_fin = time.time()
-            self.logger.info("Descarga del proyecto completo a disco duro: %.3fs", (tiempo_fin - tiempo_ini))
+        tiempo_fin = time.time()
+        self.logger.info("Descarga del proyecto completo a disco duro: %.3fs", (tiempo_fin - tiempo_ini))
 
         # Cargar el núcleo común del proyecto
         idmodulo = "sys"
@@ -348,20 +351,23 @@ class Project(object):
                     if self.parseProject and nombre.endswith(".qs"):
                         self.parseScript(_dir(root, nombre))
 
-        if self._splash:
-            self._splash.showMessage("Cargando objetos ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-            self._DGI.processEvents()
+        # FIXME:
+        # if self._splash:
+        #     self._splash.showMessage("Cargando objetos ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+        #     self._DGI.processEvents()
 
         load_models()
 
-        if self._splash:
-            self._splash.showMessage("Cargando traducciones ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-            self._DGI.processEvents()
+        # FIXME:
+        # if self._splash:
+        #     self._splash.showMessage("Cargando traducciones ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+        #     self._DGI.processEvents()
 
         aqApp.loadTranslations()
 
-        self.acl_ = FLAccessControlLists()
-        self.acl_.init()
+        # FIXME: ACLs needed at this level?
+        # self.acl_ = FLAccessControlLists()
+        # self.acl_.init()
 
         return True
 
@@ -467,34 +473,31 @@ class Project(object):
             raise IOError
         python_script_path = (scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or self.no_python_cache:
-            settings = FLSettings()
-            debug_postparse = False
-            if settings.readBoolEntry("application/isDebuggerMode", False):
-                util = FLUtil()
-                file_name = scriptname.split("\\") if util.getOS() == "WIN32" else scriptname.split("/")
+            file_name = scriptname.split(os.sep)  # FIXME: is a bad idea to split by os.sep
+            file_name = file_name[len(file_name) - 2]
 
-                file_name = file_name[len(file_name) - 2]
+            msg = "Convirtiendo a Python . . . %s.qs %s" % (file_name, txt_)
+            self.logger.debug(msg)
+            if settings.value("ebcomportamiento/SLConsola", False):
+                debug_postparse = True
+            else:
+                debug_postparse = False
 
-                msg = "Convirtiendo a Python . . . %s.qs %s" % (file_name, txt_)
-                if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
-                    debug_postparse = True
-                    self.logger.warning(msg)
+            # if self._splash:
+            #     self._splash.showMessage(msg, QtCore.Qt.AlignLeft, QtCore.Qt.white)
+            #
+            # else:
+            #     if settings.readBoolEntry("ebcomportamiento/SLInterface", False):
+            #         from pineboolib.pncontrolsfactory import aqApp
+            #
+            #         aqApp.popupWarn(msg)
 
-                if self._splash:
-                    self._splash.showMessage(msg, QtCore.Qt.AlignLeft, QtCore.Qt.white)
-
-                else:
-                    if settings.readBoolEntry("ebcomportamiento/SLInterface", False):
-                        from pineboolib.pncontrolsfactory import aqApp
-
-                        aqApp.popupWarn(msg)
-
-            clean_no_python = self._DGI.clean_no_python()
+            # clean_no_python = self._DGI.clean_no_python() # FIXME: No longer needed. Applied on the go.
 
             from pineboolib.flparser import postparse
 
             try:
-                postparse.pythonify(scriptname, debug_postparse, clean_no_python)
+                postparse.pythonify(scriptname, debug_postparse)
             except Exception as e:
                 self.logger.warning("El fichero %s no se ha podido convertir: %s", scriptname, e)
 
