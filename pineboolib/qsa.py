@@ -449,11 +449,12 @@ class qsaRegExp(object):
     is_global = None
 
     def __init__(self, strRE):
-        self.strRE_ = repr(strRE)
+        self.strRE_ = strRE
         self.is_global = False
 
     def search(self, text):
-        return re.search(self.strRE_, text)
+        self.result_ = re.search(r'%s' % self.strRE_, text)
+        return self.result_
 
     def replace(self, target, new_value):
         pattern = re.compile('r"' + self.strRE_ + '"')
