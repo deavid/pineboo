@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import Qt
-from pineboolib import decorators
+from pineboolib.core import decorators
 import pineboolib
 import logging
 

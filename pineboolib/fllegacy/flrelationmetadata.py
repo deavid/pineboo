@@ -2,7 +2,7 @@
 
 # Completada Si
 
-from pineboolib import decorators
+from pineboolib.core import decorators
 
 
 class FLRelationMetaData:

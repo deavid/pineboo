@@ -1,4 +1,4 @@
-from pineboolib import decorators
+from pineboolib.core import decorators
 from pineboolib.flcontrols import ProjectClass
 
 

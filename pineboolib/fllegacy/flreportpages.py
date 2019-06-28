@@ -2,7 +2,7 @@ from enum import Enum
 
 from PyQt5 import QtCore
 
-from pineboolib import decorators
+from pineboolib.core import decorators
 
 from pineboolib.fllegacy.FLPicture import FLPicture
 

@@ -5,7 +5,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from pineboolib.fllegacy.fltranslator import FLTranslator
 from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib import decorators
+from pineboolib.core import decorators
 
 import pineboolib
 

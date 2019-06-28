@@ -18,7 +18,7 @@ from jsonrpc import JSONRPCResponseManager, dispatcher
 
 import pineboolib
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from pineboolib import decorators
+from pineboolib.core import decorators
 
 logger = logging.getLogger(__name__)
 

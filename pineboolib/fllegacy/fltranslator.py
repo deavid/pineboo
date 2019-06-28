@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from pineboolib.utils import filedir
+from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.fltranslations import FLTranslations
 from pineboolib.fllegacy.flsettings import FLSettings
 
@@ -47,7 +47,9 @@ class FLTranslator(QTranslator):
         else:
             from pineboolib.pncontrolsfactory import aqApp
 
-            ts_file = filedir("%s/cache/%s/%s/file.ts/%s.%s/%s" % (aqApp.tmp_dir(), aqApp.db().database(), self.idM_, self.idM_, self.lang_, key))
+            ts_file = filedir(
+                "%s/cache/%s/%s/file.ts/%s.%s/%s" % (aqApp.tmp_dir(), aqApp.db().database(), self.idM_, self.idM_, self.lang_, key)
+            )
         # qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
 
         ret_ = None

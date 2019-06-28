@@ -5,7 +5,7 @@ from PyQt5.Qt import QKeySequence
 
 from pineboolib.utils import filedir, loadGeometryForm, saveGeometryForm
 from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib import decorators
+from pineboolib.core import decorators
 from pineboolib.interfaces import IFormDB
 import pineboolib
 import traceback

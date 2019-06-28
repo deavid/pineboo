@@ -4,7 +4,7 @@ from PyQt5 import QtXml
 from PyQt5.QtCore import Qt, QObject
 from PyQt5.Qt import QFileDialog, QMessageBox
 
-from pineboolib import decorators
+from pineboolib.core import decorators
 import pineboolib
 
 

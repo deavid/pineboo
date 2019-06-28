@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
-from pineboolib import decorators
+from pineboolib.core import decorators
 
 
 class QButtonGroup(QGroupBox):

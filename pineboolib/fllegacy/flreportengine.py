@@ -1,6 +1,6 @@
 from PyQt5 import QtXml
 
-from pineboolib import decorators
+from pineboolib.core import decorators
 from pineboolib.fllegacy.flsettings import FLSettings
 from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
 import pineboolib
