@@ -210,7 +210,7 @@ class XMLAction(XMLStruct):
 
         python_script_path = None
         # primero default, luego sobreescribimos
-        from pineboolib import emptyscript
+        from pineboolib.interfaces import emptyscript
 
         parent.script = emptyscript
 

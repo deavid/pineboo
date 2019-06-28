@@ -3,9 +3,10 @@
 import os
 import re
 import math
+import logging
+from functools import total_ordering
 
 from PyQt5 import QtCore
-import logging
 
 # FLObjects
 from pineboolib.core.utils.utils_base import ustr, filedir
@@ -13,10 +14,9 @@ from pineboolib.pncontrolsfactory import FLUtil, qsa_sys, aqApp, QInputDialog, Q
 
 # from pineboolib.pnobjectsfactory import load_model, Calculated
 
-from . import decorators
-from functools import total_ordering
-
+from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import StructMyDict
+
 
 logger = logging.getLogger(__name__)
 
