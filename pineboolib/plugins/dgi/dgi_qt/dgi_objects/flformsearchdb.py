@@ -7,7 +7,7 @@ from PyQt5.Qt import QKeySequence
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib.utils import filedir
+from pineboolib.core.utils.utils_base import filedir
 import pineboolib
 from pineboolib.pncontrolsfactory import QMdiSubWindow
 

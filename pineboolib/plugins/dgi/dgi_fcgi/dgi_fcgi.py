@@ -4,7 +4,7 @@ from flup.server.fcgi import WSGIServer
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.pncontrolsfactory import SysType
-from pineboolib.utils import check_dependencies
+from pineboolib.core.utils.utils_base import check_dependencies
 
 import pineboolib
 

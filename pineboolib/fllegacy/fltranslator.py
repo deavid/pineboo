@@ -94,7 +94,7 @@ class FLTranslator(QTranslator):
 
     def load_ts(self, file_name):
         try:
-            from pineboolib.utils import load2xml
+            from pineboolib.core.utils.utils_base import load2xml
 
             root_ = load2xml(file_name)
             for context in root_.findall("context"):

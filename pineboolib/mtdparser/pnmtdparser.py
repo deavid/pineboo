@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pineboolib.utils import _dir
+from pineboolib.core.utils.utils_base import _dir
 import logging
 
 logger = logging.getLogger(__name__)

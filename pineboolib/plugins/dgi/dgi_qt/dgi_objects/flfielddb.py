@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt, QDateTime
 
 from pineboolib.core import decorators
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-from pineboolib.utils import filedir, aqtt
+from pineboolib.core.utils.utils_base import filedir, aqtt
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
@@ -1250,7 +1250,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 #    return
                 if isinstance(v, str):
                     if v.find("static char") > -1:
-                        from pineboolib.utils import cacheXPM
+                        from pineboolib.core.utils.utils_base import cacheXPM
 
                         v = cacheXPM(v)
 
@@ -1466,7 +1466,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             if isinstance(v, str):
                 if v.find("static char") > -1:
-                    from pineboolib.utils import cacheXPM
+                    from pineboolib.core.utils.utils_base import cacheXPM
 
                     v = cacheXPM(v)
 

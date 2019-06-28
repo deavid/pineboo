@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, Qt
 from pineboolib.core import decorators
-from pineboolib.utils import filedir
+from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
 from PyQt5.QtWidgets import QCheckBox

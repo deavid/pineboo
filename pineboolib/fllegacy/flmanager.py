@@ -4,7 +4,8 @@ from PyQt5.QtXml import QDomDocument
 
 
 from pineboolib.core import decorators
-from pineboolib.utils import filedir, auto_qt_translate_text, cacheXPM
+from pineboolib.core.utils.utils_base import filedir, auto_qt_translate_text
+from pineboolib.application.utils.xpm import cacheXPM
 
 
 from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
@@ -156,10 +157,9 @@ class FLManager(QtCore.QObject):
 
         if not n:
             return None
-        
+
         if quick is None:
             quick = False if util.readSettingEntry("application/dbadmin_enabled", False) else True
-                
 
         if isinstance(n, str):
             if not n or not self.db_.dbAux():
@@ -660,7 +660,11 @@ class FLManager(QtCore.QObject):
                 if field1.isUnique() != field2.isUnique() or field1.isIndex() != field2.isIndex():
                     return False
 
-                if field1.length() != field2.length() or field1.partDecimal() != field2.partDecimal() or field1.partInteger() != field2.partInteger():
+                if (
+                    field1.length() != field2.length()
+                    or field1.partDecimal() != field2.partDecimal()
+                    or field1.partInteger() != field2.partInteger()
+                ):
                     return False
 
             field_list = mtd2.fieldList()
@@ -681,7 +685,11 @@ class FLManager(QtCore.QObject):
                 if field1.isUnique() != field2.isUnique() or field1.isIndex() != field2.isIndex():
                     return False
 
-                if field1.length() != field2.length() or field1.partDecimal() != field2.partDecimal() or field1.partInteger() != field2.partInteger():
+                if (
+                    field1.length() != field2.length()
+                    or field1.partDecimal() != field2.partDecimal()
+                    or field1.partInteger() != field2.partInteger()
+                ):
                     return False
 
             return True
@@ -1127,7 +1135,9 @@ class FLManager(QtCore.QObject):
 
             no = no.nextSibling()
 
-        f = FLFieldMetaData(n, util.translate("Metadata", a), aN, iPK, t, length, c, v, ed, pI, pD, iNX, uNI, coun, dV, oT, rX, vG, True, ck)
+        f = FLFieldMetaData(
+            n, util.translate("Metadata", a), aN, iPK, t, length, c, v, ed, pI, pD, iNX, uNI, coun, dV, oT, rX, vG, True, ck
+        )
         f.setFullyCalculated(fullCalc)
         f.setTrimed(trimm)
 
@@ -1362,7 +1372,8 @@ class FLManager(QtCore.QObject):
                 self.createTable(table)
             if not tmd:
                 logger.warning(
-                    "FLManager::cleanupMetaData %s", FLUtil().translate("application", "No se ha podido crear los metadatatos para la tabla %s") % table
+                    "FLManager::cleanupMetaData %s",
+                    FLUtil().translate("application", "No se ha podido crear los metadatatos para la tabla %s") % table,
                 )
 
             c.select("tabla='%s'" % table)

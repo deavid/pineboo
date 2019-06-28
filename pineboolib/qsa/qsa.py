@@ -8,7 +8,7 @@ from PyQt5 import QtCore
 import logging
 
 # FLObjects
-from pineboolib.utils import ustr, filedir
+from pineboolib.core.utils.utils_base import ustr, filedir
 from pineboolib.pncontrolsfactory import FLUtil, SysType, aqApp, QInputDialog, QLineEdit
 
 # from pineboolib.pnobjectsfactory import load_model, Calculated
@@ -16,7 +16,7 @@ from pineboolib.pncontrolsfactory import FLUtil, SysType, aqApp, QInputDialog, Q
 from . import decorators
 from functools import total_ordering
 
-from pineboolib.utils import StructMyDict
+from pineboolib.core.utils.utils_base import StructMyDict
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ def Object(x: None = None) -> StructMyDict:
     if x is None:
         x = {}
 
-    from pineboolib.utils import StructMyDict
+    from pineboolib.core.utils.utils_base import StructMyDict
 
     return StructMyDict(x)
 
@@ -983,5 +983,5 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor  # noqa
 from pineboolib.fllegacy.flnetwork import FLNetwork  # noqa
 from pineboolib.fllegacy.flreportviewer import FLReportViewer  # noqa
 from pineboolib.fllegacy.flvar import FLVar  # noqa
-from pineboolib.utils import ustr, ustr1, filedir  # noqa
+from pineboolib.core.utils.utils_base import ustr, ustr1, filedir  # noqa
 from pineboolib.pncontrolsfactory import *  # noqa

@@ -22,7 +22,7 @@ class MainForm(QMainWindow):
         MainForm.debugLevel = q
 
     def initScript(self):
-        from pineboolib.utils import filedir
+        from pineboolib.core.utils.utils_base import filedir
 
         mw = mainWindow
         mw.createUi(filedir("plugins/mainform/eneboo_mdi/mainform.ui"))

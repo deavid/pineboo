@@ -359,7 +359,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                         if not self.db().manager().isSystemTable(self._parent.table()):
                             d = self.db().manager().fetchLargeValue(d)
                         else:
-                            from pineboolib.utils import cacheXPM
+                            from pineboolib.core.utils.utils_base import cacheXPM
 
                             d = cacheXPM(d)
                         if d:

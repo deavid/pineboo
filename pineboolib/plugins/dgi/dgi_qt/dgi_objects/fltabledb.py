@@ -4,7 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 
 from pineboolib.core import decorators
-from pineboolib.utils import DefFun, filedir
+from pineboolib.core.utils.utils_base import DefFun, filedir
 
 
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldatatable import FLDataTable

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import pineboolib
-from pineboolib.utils import _path, filedir
+from pineboolib.application.utils.path import _path
+from pineboolib.core.utils.utils_base import filedir
 from importlib import machinery
 
 from sqlalchemy import String

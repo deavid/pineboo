@@ -3,7 +3,7 @@ import os.path
 
 from pineboolib.utils_base import XMLStruct
 from pineboolib.interfaces import IFormDB, IFormRecordDB
-from pineboolib.utils import _path, coalesce_path
+from pineboolib.core.utils.utils_base import _path, coalesce_path
 
 from typing import Optional
 
@@ -203,7 +203,7 @@ class XMLAction(XMLStruct):
             action_ = parent._action if hasattr(parent, "_action") else self
 
         # import aqui para evitar dependencia ciclica
-        from pineboolib.utils import convertFLAction
+        from pineboolib.core.utils.utils_base import convertFLAction
 
         if not isinstance(action_, XMLAction):
             action_ = convertFLAction(action_)

@@ -199,7 +199,7 @@ class SysType(object):
         aqApp.db().Mr_Proper()
 
     def installPrefix(self):
-        from pineboolib.utils import filedir
+        from pineboolib.core.utils.utils_base import filedir
 
         return filedir("..")
 

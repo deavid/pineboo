@@ -2,7 +2,7 @@
 from xml import etree
 from xml.etree.ElementTree import Element, SubElement
 from PyQt5.QtGui import QColor
-from pineboolib.utils import filedir
+from pineboolib.core.utils.utils_base import filedir
 import pineboolib
 import logging
 import traceback
@@ -34,7 +34,7 @@ class kut2rml(object):
     _parser_tools = None
 
     def __init__(self):
-        from pineboolib.utils import check_dependencies
+        from pineboolib.core.utils.utils_base import check_dependencies
 
         dict_ = {"z3c.rml": "z3c.rml"}
         check_dependencies(dict_)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pineboolib.utils import check_dependencies, filedir, load2xml
+from pineboolib.core.utils.utils_base import check_dependencies, filedir, load2xml
 import pineboolib
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil

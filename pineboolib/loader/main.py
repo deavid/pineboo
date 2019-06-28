@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def startup():
     # FIXME: No hemos cargado pineboo aún. No se pueden usar métodos internos.
-    # from pineboolib.utils import check_dependencies
+    # from pineboolib.core.utils.utils_base import check_dependencies
     # check_dependencies({"ply": "python3-ply", "PyQt5.QtCore": "python3-pyqt5", "Python": "Python"})
 
     MIN_PYTHON = (3, 6)
@@ -57,7 +57,7 @@ def exec_main(options):
     # -------------------
 
     # import pineboolib.pnapplication
-    # from pineboolib.utils import filedir
+    # from pineboolib.core.utils.utils_base import filedir
     # from pineboolib.pnsqldrivers import PNSqlDrivers
 
     # FIXME: This function should not initialize the program
@@ -65,7 +65,7 @@ def exec_main(options):
     # TODO: Refactorizar función en otras más pequeñas
 
     if options.trace_debug:
-        from pineboolib.utils import traceit
+        from pineboolib.core.utils.utils_base import traceit
 
         sys.settrace(traceit)
     if options.trace_signals:

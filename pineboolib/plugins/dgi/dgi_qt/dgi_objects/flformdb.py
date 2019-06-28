@@ -3,7 +3,7 @@ import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import QKeySequence
 
-from pineboolib.utils import filedir, loadGeometryForm, saveGeometryForm
+from pineboolib.core.utils.utils_base import filedir, loadGeometryForm, saveGeometryForm
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.core import decorators
 from pineboolib.interfaces import IFormDB

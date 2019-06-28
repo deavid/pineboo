@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtWidgets import QWidget, QApplication
-from pineboolib.utils import DEPENDENCIES_CHECKED
+from pineboolib.core.utils.utils_base import DEPENDENCIES_CHECKED
 from PyQt5 import QtCore
 
 
@@ -15,7 +15,7 @@ class about_pineboo(QWidget):
     def load(self):
         import pineboolib
         from pineboolib.fllegacy.flmanagermodules import FLManagerModules
-        from pineboolib.utils import filedir
+        from pineboolib.core.utils.utils_base import filedir
 
         mng_mod = FLManagerModules()
 

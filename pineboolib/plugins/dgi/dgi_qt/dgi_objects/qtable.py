@@ -2,7 +2,7 @@
 
 from PyQt5 import QtWidgets, QtCore, Qt
 from pineboolib.core import decorators
-from pineboolib.utils import format_double
+from pineboolib.core.utils.utils_base import format_double
 
 
 class QTable(QtWidgets.QTableWidget):

@@ -2,7 +2,7 @@
 
 from pineboolib.qsa import *
 import pineboolib
-from pineboolib.utils import filedir
+from pineboolib.core.utils.utils_base import filedir
 from PyQt5 import QtCore
 
 settings = AQSettings()
@@ -48,7 +48,9 @@ class FormInternalObj(FormDBWidget):
         w.child(u"cbParseProject").checked = self.leerValorLocal("parseProject")
         w.child(u"cbActionsMenuRed").checked = self.leerValorLocal("ActionsMenuRed")
         w.child(u"cbKugarParser").addItems(pineboolib.project.kugarPlugin.listAvalibles())
-        w.child(u"cbKugarParser").setCurrentText(self.leerValorLocal("kugarParser") if not "" else pineboolib.project.kugarPlugin.defaultParser())
+        w.child(u"cbKugarParser").setCurrentText(
+            self.leerValorLocal("kugarParser") if not "" else pineboolib.project.kugarPlugin.defaultParser()
+        )
         w.child(u"cbSpacerLegacy").checked = self.leerValorLocal("spacerLegacy")
         w.child(u"cbParseModulesOnLoad").checked = self.leerValorLocal("parseModulesOnLoad")
         w.child(u"cb_traducciones").checked = self.leerValorLocal("translations_from_qm")
@@ -70,7 +72,7 @@ class FormInternalObj(FormDBWidget):
 
         w.child(u"leCO").hide()
         self.colorActual_ = self.leerValorLocal("colorObligatorio")
-        if self.colorActual_ is "":
+        if not self.colorActual_:
             self.colorActual_ = "#FFE9AD"
 
         w.child(u"leCO").setStyleSheet("background-color:" + self.colorActual_)
@@ -111,12 +113,12 @@ class FormInternalObj(FormDBWidget):
 
     def leerValorLocal(self, valor_name):
         util = FLUtil()
-        if valor_name in ("isDebuggerMode","dbadmin_enabled"):
+        if valor_name in ("isDebuggerMode", "dbadmin_enabled"):
             valor = settings.readBoolEntry("application/%s" % valor_name)
         else:
             if valor_name in ("ebCallFunction", "maxPixImages", "kugarParser", "colorObligatorio", "kugar_temp_dir", "git_updates_repo"):
                 valor = util.readSettingEntry("ebcomportamiento/%s" % valor_name, u"")
-                if valor_name is "kugar_temp_dir" and valor is "":
+                if valor_name == "kugar_temp_dir" and valor == "":
                     from pineboolib.pncontrolsfactory import aqApp
 
                     valor = aqApp.tmp_dir()
@@ -127,7 +129,7 @@ class FormInternalObj(FormDBWidget):
 
     def grabarValorLocal(self, valor_name=None, value=None):
 
-        if valor_name in ("isDebuggerMode","dbadmin_enabled"):
+        if valor_name in ("isDebuggerMode", "dbadmin_enabled"):
             settings.writeEntry("application/%s" % valor_name, value)
         else:
             if valor_name == "maxPixImages" and value is None:

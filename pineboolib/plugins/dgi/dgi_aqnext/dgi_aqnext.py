@@ -77,7 +77,7 @@ class dgi_aqnext(dgi_schema):
         return True
 
     def content_cached(self, tmp_folder, db_name, module_id, file_ext, file_name, sha_key):
-        from pineboolib.utils import filedir
+        from pineboolib.core.utils.utils_base import filedir
         from pineboolib.pncontrolsfactory import aqApp
 
         data_ = None

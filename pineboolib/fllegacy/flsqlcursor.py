@@ -841,7 +841,7 @@ class FLSqlCursor(QtCore.QObject):
         else:
             self.ext_cursor = None
         # FIXME: XMLAction Tiene que ser eliminado de fuera de pnapplication
-        from pineboolib.utils import XMLStruct
+        from pineboolib.core.utils.utils_base import XMLStruct
 
         if isinstance(name, XMLStruct):
             logger.trace("FIXME::__init__ XMLSTRUCT %s", name.name, stack_info=True)
@@ -1375,7 +1375,7 @@ class FLSqlCursor(QtCore.QObject):
                     v_large = self.db().manager().fetchLargeValue(v)
 
                 else:
-                    from pineboolib.utils import cacheXPM
+                    from pineboolib.core.utils.utils_base import cacheXPM
 
                     v_large = cacheXPM(v)
 

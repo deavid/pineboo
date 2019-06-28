@@ -759,7 +759,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.activateWindow()
 
     def initScript(self):
-        from pineboolib.utils import filedir
+        from pineboolib.core.utils.utils_base import filedir
 
         mw = mainWindow
         mw.createUi(filedir("plugins/mainform/mobile/mainform.ui"))
@@ -851,7 +851,7 @@ class MainForm(QtWidgets.QMainWindow):
             debug("tiggerAction: Unhandled slot : %s" % signature)
 
     # def load(self):
-    #    from pineboolib.utils import filedir
+    #    from pineboolib.core.utils.utils_base import filedir
     #    self.ui_ = pineboolib.project.conn.managerModules().createUI(filedir('plugins/mainform/eneboo/mainform.ui'), None, self)
 
     @classmethod

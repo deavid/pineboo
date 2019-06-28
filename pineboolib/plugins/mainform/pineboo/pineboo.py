@@ -4,7 +4,7 @@ import sys
 import pineboolib
 import logging
 
-from pineboolib.utils import filedir, Struct
+from pineboolib.core.utils.utils_base import filedir, Struct
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLUtil import FLUtil
 
