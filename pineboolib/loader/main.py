@@ -5,7 +5,6 @@ import logging
 
 from pineboolib.core.utils import is_deployed
 from pineboolib.core.settings import config
-from pineboolib.application.project import Project
 from .dgi import load_dgi
 
 logger = logging.getLogger(__name__)
@@ -80,9 +79,9 @@ def exec_main(options):
         download_files()
 
     _DGI = load_dgi(options.dgi, options.dgi_parameter)
-    
+
     from .create_app import create_app
-    
+
     app = create_app(_DGI, options)
 
     from .connection import config_dbconn, connect_to_db, DEFAULT_SQLITE_CONN
@@ -117,7 +116,6 @@ def exec_main(options):
 
     if options.enable_quick:
         config.set_value("application/dbadmin_enabled", False)
-
 
     if _DGI.useDesktop():
         # FIXME: What is happening here? Why dynamic load?
