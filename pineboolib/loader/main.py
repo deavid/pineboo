@@ -80,6 +80,10 @@ def exec_main(options):
         download_files()
 
     _DGI = load_dgi(options.dgi, options.dgi_parameter)
+    
+    from .create_app import create_app
+    
+    app = create_app(_DGI, options)
 
     from .connection import config_dbconn, connect_to_db, DEFAULT_SQLITE_CONN
 
@@ -114,9 +118,6 @@ def exec_main(options):
     if options.enable_quick:
         config.set_value("application/dbadmin_enabled", False)
 
-    from .create_app import create_app
-
-    app = create_app(_DGI)
 
     if _DGI.useDesktop():
         # FIXME: What is happening here? Why dynamic load?
