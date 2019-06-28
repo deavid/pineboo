@@ -2,7 +2,9 @@ from PyQt5.QtCore import QTime, QDate, QDateTime, Qt
 from PyQt5.Qt import qWarning, QDomDocument, QRegExp
 from PyQt5.QtWidgets import QMessageBox, QProgressDialog
 
-from pineboolib.utils import text2bool, auto_qt_translate_text, checkDependencies
+from pineboolib.core.utils.utils_base import text2bool, auto_qt_translate_text
+from pineboolib.application.utils.check_dependencies import check_dependencies
+
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
@@ -68,7 +70,7 @@ class FLQPSQL(object):
         return self.pure_python_
 
     def safe_load(self):
-        return checkDependencies({"psycopg2": "python3-psycopg2", "sqlalchemy": "sqlAlchemy"}, False)
+        return check_dependencies({"psycopg2": "python3-psycopg2", "sqlalchemy": "sqlAlchemy"}, False)
 
     def mobile(self):
         return self.mobile_
@@ -78,10 +80,16 @@ class FLQPSQL(object):
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         self._dbname = db_name
-        checkDependencies({"psycopg2": "python3-psycopg2", "sqlalchemy": "sqlAlchemy"})
+        check_dependencies({"psycopg2": "python3-psycopg2", "sqlalchemy": "sqlAlchemy"})
         import psycopg2
 
-        conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (db_name, db_host, db_port, db_userName, db_password)
+        conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (
+            db_name,
+            db_host,
+            db_port,
+            db_userName,
+            db_password,
+        )
 
         try:
             self.conn_ = psycopg2.connect(conninfostr)
@@ -94,11 +102,18 @@ class FLQPSQL(object):
                 return False
 
             if "does not exist" in str(e) or "no existe" in str(e):
-                ret = QMessageBox.warning(None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No)
+                ret = QMessageBox.warning(
+                    None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No
+                )
                 if ret == QMessageBox.No:
                     return False
                 else:
-                    conninfostr2 = "dbname=postgres host=%s port=%s user=%s password=%s connect_timeout=5" % (db_host, db_port, db_userName, db_password)
+                    conninfostr2 = "dbname=postgres host=%s port=%s user=%s password=%s connect_timeout=5" % (
+                        db_host,
+                        db_port,
+                        db_userName,
+                        db_password,
+                    )
                     try:
                         tmpConn = psycopg2.connect(conninfostr2)
 
@@ -116,7 +131,9 @@ class FLQPSQL(object):
                         return self.connect(db_name, db_host, db_port, db_userName, db_password)
                     except Exception:
                         qWarning(traceback.format_exc())
-                        QMessageBox.information(None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok)
+                        QMessageBox.information(
+                            None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok
+                        )
                         print("ERROR: No se ha podido crear la Base de Datos %s" % db_name)
                         return False
             else:
@@ -294,7 +311,9 @@ class FLQPSQL(object):
             cursor.execute("ROLLBACK TO SAVEPOINT sv_%s" % n)
         except Exception:
             self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
-            qWarning("PSQLDriver:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s" % (n, traceback.format_exc()))
+            qWarning(
+                "PSQLDriver:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s" % (n, traceback.format_exc())
+            )
             return False
 
         return True
@@ -643,7 +662,15 @@ class FLQPSQL(object):
             for f in mtd.fieldNames():
                 field = mtd.field(f)
                 info.append(
-                    [field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()]
+                    [
+                        field.name(),
+                        field.type(),
+                        not field.allowNull(),
+                        field.length(),
+                        field.partDecimal(),
+                        field.defaultValue(),
+                        field.isPrimaryKey(),
+                    ]
                 )
 
             del mtd
@@ -755,7 +782,9 @@ class FLQPSQL(object):
                 return False
             if oldField.isUnique():
                 constraintName = "%s_%s_key" % (oldMTD.name(), oldField.name())
-                if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
+                if self.constraintExists(constraintName) and not q.exec_(
+                    "ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)
+                ):
                     self.db_.dbAux().rollback()
                     return False
 
@@ -780,7 +809,10 @@ class FLQPSQL(object):
         oldCursor.select()
         totalSteps = oldCursor.size()
         progress = QProgressDialog(
-            util.translate("application", "Reestructurando registros para %1...").arg(newMTD.alias()), util.translate("application", "Cancelar"), 0, totalSteps
+            util.translate("application", "Reestructurando registros para %1...").arg(newMTD.alias()),
+            util.translate("application", "Cancelar"),
+            0,
+            totalSteps,
         )
         progress.setLabelText(util.translate("application", "Tabla modificada"))
 
@@ -827,7 +859,9 @@ class FLQPSQL(object):
                     if v is not None and not newBuffer.field(newField.name()).type() == newField.type():
                         print(
                             "FLManager::alterTable : "
-                            + util.translate("application", "Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.").arg(newField.name())
+                            + util.translate("application", "Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.").arg(
+                                newField.name()
+                            )
                         )
 
                     if v is not None and newField.type() == "string" and newField.length() > 0:
@@ -933,7 +967,8 @@ class FLQPSQL(object):
 
         if not self.db_.manager().existsTable(oldMTD.name()):
             logger.warning(
-                "FLManager::alterTable : " + util.translate("application", "La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name())
+                "FLManager::alterTable : "
+                + util.translate("application", "La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name())
             )
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
@@ -984,7 +1019,9 @@ class FLQPSQL(object):
         if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
             logger.warning(
                 "FLManager : "
-                + util.translate("application", "En método alterTable, no se ha podido borrar el índice %1_pkey de la tabla antigua.").arg(oldMTD.name())
+                + util.translate("application", "En método alterTable, no se ha podido borrar el índice %1_pkey de la tabla antigua.").arg(
+                    oldMTD.name()
+                )
             )
             self.db_.dbAux().rollback()
             if oldMTD and not oldMTD == newMTD:
@@ -1001,12 +1038,14 @@ class FLQPSQL(object):
 
             if it.isUnique():
                 constraintName = "%s_%s_key" % (oldMTD.name(), it.name())
-                if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
+                if self.constraintExists(constraintName) and not q.exec_(
+                    "ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)
+                ):
                     logger.warning(
                         "FLManager : "
-                        + util.translate("application", "En método alterTable, no se ha podido borrar el índice %1_%2_key de la tabla antigua.").arg(
-                            oldMTD.name(), oldField.name()
-                        )
+                        + util.translate(
+                            "application", "En método alterTable, no se ha podido borrar el índice %1_%2_key de la tabla antigua."
+                        ).arg(oldMTD.name(), oldField.name())
                     )
                     self.db_.dbAux().rollback()
                     if oldMTD and not oldMTD == newMTD:
@@ -1112,7 +1151,11 @@ class FLQPSQL(object):
                                 break
                             pos += 1
 
-                        if (not oldField.allowNull() or not newField.allowNull()) and (v is None) and newField.type() != FLFieldMetaData.Serial:
+                        if (
+                            (not oldField.allowNull() or not newField.allowNull())
+                            and (v is None)
+                            and newField.type() != FLFieldMetaData.Serial
+                        ):
                             defVal = newField.defaultValue()
                             if defVal is not None:
                                 v = defVal
@@ -1299,7 +1342,9 @@ class FLQPSQL(object):
         # sqlCursor = FLSqlCursor(None, True, self.db_.dbAux())
         sqlQuery = FLSqlQuery(None, self.db_.dbAux())
         if sqlQuery.exec_(
-            "select relname from pg_class where ( relkind = 'r' ) " "and ( relname !~ '^Inv' ) " "and ( relname !~ '^pg_' ) and ( relname !~ '^sql_' )"
+            "select relname from pg_class where ( relkind = 'r' ) "
+            "and ( relname !~ '^Inv' ) "
+            "and ( relname !~ '^pg_' ) and ( relname !~ '^sql_' )"
         ):
 
             util.setTotalSteps(sqlQuery.size())

@@ -1,6 +1,7 @@
 from PyQt5.Qt import QDomDocument, QDateTime, QProgressDialog, QDate, QRegExp, QApplication
 from PyQt5.QtCore import QTime, Qt
-from pineboolib.utils import auto_qt_translate_text, checkDependencies
+from pineboolib.core.utils.utils_base import auto_qt_translate_text
+from pineboolib.application.utils.check_dependencies import check_dependencies
 
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
@@ -72,7 +73,7 @@ class FLSQLITE(object):
         return self.name_
 
     def safe_load(self):
-        return checkDependencies({"sqlite3": "sqlite3", "sqlalchemy": "sqlAlchemy"}, False)
+        return check_dependencies({"sqlite3": "sqlite3", "sqlalchemy": "sqlAlchemy"}, False)
 
     def isOpen(self):
         return self.open_
@@ -102,7 +103,7 @@ class FLSQLITE(object):
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         import pineboolib
 
-        checkDependencies({"sqlite3": "sqlite3", "sqlalchemy": "sqlAlchemy"})
+        check_dependencies({"sqlite3": "sqlite3", "sqlalchemy": "sqlAlchemy"})
         self.db_filename = db_name
         db_is_new = not os.path.exists("%s" % self.db_filename)
 
@@ -620,7 +621,15 @@ class FLSQLITE(object):
             for f in mtd.fieldNames():
                 field = mtd.field(f)
                 info.append(
-                    [field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()]
+                    [
+                        field.name(),
+                        field.type(),
+                        not field.allowNull(),
+                        field.length(),
+                        field.partDecimal(),
+                        field.defaultValue(),
+                        field.isPrimaryKey(),
+                    ]
                 )
 
             del mtd
@@ -711,7 +720,9 @@ class FLSQLITE(object):
             return True
 
         if not self.db_.manager().existsTable(oldMTD.name()):
-            self.logger.warning("FLManager::alterTable : " + util.tr("La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
+            self.logger.warning(
+                "FLManager::alterTable : " + util.tr("La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name())
+            )
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -756,7 +767,9 @@ class FLSQLITE(object):
                 c.insert()
 
         q = FLSqlQuery("", self.db_.dbAux())
-        if not q.exec_("CREATE TABLE %s AS SELECT * FROM %s;" % (renameOld, oldMTD.name())) or not q.exec_("DROP TABLE %s;" % oldMTD.name()):
+        if not q.exec_("CREATE TABLE %s AS SELECT * FROM %s;" % (renameOld, oldMTD.name())) or not q.exec_(
+            "DROP TABLE %s;" % oldMTD.name()
+        ):
             self.logger.warning("FLManager::alterTable : " + util.tr("No se ha podido renombrar la tabla antigua."))
 
             self.db_.dbAux().rollback()
@@ -825,7 +838,8 @@ class FLSQLITE(object):
 
                     if not newBuffer.field(newField.name()).type() == newField.type():
                         self.logger.warning(
-                            "FLManager::alterTable : " + util.tr("Los tipos del campo %s no son compatibles. Se introducirá un valor nulo." % newField.name())
+                            "FLManager::alterTable : "
+                            + util.tr("Los tipos del campo %s no son compatibles. Se introducirá un valor nulo." % newField.name())
                         )
 
                 if not oldField.allowNull() or not newField.allowNull() and v is not None:

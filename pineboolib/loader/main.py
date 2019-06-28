@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 def startup():
     # FIXME: No hemos cargado pineboo aún. No se pueden usar métodos internos.
-    # from pineboolib.utils import checkDependencies
-    # checkDependencies({"ply": "python3-ply", "PyQt5.QtCore": "python3-pyqt5", "Python": "Python"})
+    # from pineboolib.utils import check_dependencies
+    # check_dependencies({"ply": "python3-ply", "PyQt5.QtCore": "python3-pyqt5", "Python": "Python"})
 
     MIN_PYTHON = (3, 6)
     if sys.version_info < MIN_PYTHON:

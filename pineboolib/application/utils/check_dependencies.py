@@ -3,7 +3,7 @@ import sys
 import logging
 import traceback
 
-from pineboolib.core.utils import version_check, is_deployed
+from pineboolib.core.utils.utils_base import version_check, is_deployed
 
 logger = logging.getLogger("application.utils.check_dependencies")
 DEPENDENCIES_CHECKED = {}

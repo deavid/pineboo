@@ -40,9 +40,9 @@ class FLCodBar(object):
         self, value=None, type_=BARCODE_128, margin=10, scale=1.0, cut=1.0, rotation=0, text_flag=False, fg=QtCore.Qt.black, bg=QtCore.Qt.white, res=72
     ):
         dict_ = {"barcode": "python-barcode"}
-        from pineboolib.utils import checkDependencies
+        from pineboolib.utils import check_dependencies
 
-        checkDependencies(dict_)
+        check_dependencies(dict_)
         self.pError = "Not Implemented"
 
         self.barcode["value"] = ""

@@ -2,8 +2,9 @@ from PyQt5.Qt import qWarning, QApplication, QRegExp, qApp
 from PyQt5.QtXml import QDomDocument
 from PyQt5.QtWidgets import QMessageBox
 
-from pineboolib.utils import auto_qt_translate_text, checkDependencies
-from pineboolib.utils import text2bool
+from pineboolib.core.utils.utils_base import auto_qt_translate_text
+from pineboolib.application.utils.check_dependencies import check_dependencies
+from pineboolib.core.utils.utils_base import text2bool
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
@@ -67,7 +68,7 @@ class FLMYSQL_MYISAM2(object):
         return self.pure_python_
 
     def safe_load(self):
-        return checkDependencies({"PyMySQL": "PyMySQL", "sqlalchemy": "sqlAlchemy"}, False)
+        return check_dependencies({"PyMySQL": "PyMySQL", "sqlalchemy": "sqlAlchemy"}, False)
 
     def mobile(self):
         return self.mobile_
@@ -80,7 +81,7 @@ class FLMYSQL_MYISAM2(object):
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         self._dbname = db_name
-        checkDependencies({"PyMySQL": "PyMySQL", "sqlalchemy": "sqlAlchemy"})
+        check_dependencies({"PyMySQL": "PyMySQL", "sqlalchemy": "sqlAlchemy"})
         import pymysql
         from sqlalchemy import create_engine
 
@@ -90,7 +91,9 @@ class FLMYSQL_MYISAM2(object):
         except pymysql.Error as e:
             pineboolib.project._splash.hide()
             if "Unknown database" in str(e):
-                ret = QMessageBox.warning(None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No)
+                ret = QMessageBox.warning(
+                    None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No
+                )
                 if ret == QMessageBox.No:
                     return False
                 else:
@@ -108,7 +111,9 @@ class FLMYSQL_MYISAM2(object):
                         return self.connect(db_name, db_host, db_port, db_userName, db_password)
                     except Exception:
                         qWarning(traceback.format_exc())
-                        QMessageBox.information(None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok)
+                        QMessageBox.information(
+                            None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok
+                        )
                         print("ERROR: No se ha podido crear la Base de Datos %s" % db_name)
                         return False
 
@@ -152,10 +157,11 @@ class FLMYSQL_MYISAM2(object):
 
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"
-        
+
         if len(v):
             if type_ == "bool":
                 from pineboolib.pncontrolsfactory import aqApp
+
                 s = str(v[0]).upper()
                 if s == aqApp.tr("Sí")[0].upper():
                     res = "=1"
@@ -355,7 +361,9 @@ class FLMYSQL_MYISAM2(object):
             cursor.execute("ROLLBACK TO SAVEPOINT sv_%s" % n)
         except Exception:
             self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
-            logger.warning("%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s", self.name_, n, traceback.format_exc())
+            logger.warning(
+                "%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s", self.name_, n, traceback.format_exc()
+            )
             return False
 
         return True
@@ -992,7 +1000,11 @@ class FLMYSQL_MYISAM2(object):
                         i += 1
                         oldField = vector_fields[str(i)]
                         v = row[newField.name()]
-                        if (not oldField.allowNull() or not newField.allowNull()) and (v is None) and newField.type() != FLFieldMetaData.Serial:
+                        if (
+                            (not oldField.allowNull() or not newField.allowNull())
+                            and (v is None)
+                            and newField.type() != FLFieldMetaData.Serial
+                        ):
                             defVal = newField.defaultValue()
                             if defVal is not None:
                                 v = defVal
@@ -1243,7 +1255,15 @@ class FLMYSQL_MYISAM2(object):
             for f in mtd.fieldNames():
                 field = mtd.field(f)
                 info.append(
-                    [field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()]
+                    [
+                        field.name(),
+                        field.type(),
+                        not field.allowNull(),
+                        field.length(),
+                        field.partDecimal(),
+                        field.defaultValue(),
+                        field.isPrimaryKey(),
+                    ]
                 )
 
             del mtd
