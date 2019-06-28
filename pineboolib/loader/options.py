@@ -61,7 +61,7 @@ def parse_options():
     log_format = "%(levelname)s: %(name)s: %(message)s"
 
     if options.log_time:
-        log_format = "%(asctime)s - %(name)s:%(levelname)s: %(message)s"
+        log_format = "%(asctime)s - %(levelname)s: %(name)s: %(message)s"
 
     # FIXME: Logging configuration is not part of options parsing.
     from pineboolib.loader.utils import addLoggingLevel

@@ -577,6 +577,20 @@ def parseArgs(argv):
 
 
 def main():
+    import logging
+
+    log_format = "%(asctime)s - %(levelname)s: %(name)s: %(message)s"
+
+    # FIXME: Logging configuration is not part of options parsing.
+    from pineboolib.loader.utils import addLoggingLevel
+
+    addLoggingLevel("TRACE", logging.DEBUG - 5)
+    addLoggingLevel("NOTICE", logging.INFO - 5)
+    addLoggingLevel("HINT", logging.INFO - 2)
+    addLoggingLevel("MESSAGE", logging.WARN - 5)
+
+    logging.basicConfig(format=log_format, level=0)
+
     options, args = parseArgs(sys.argv[1:])
     execute(options, args)
 

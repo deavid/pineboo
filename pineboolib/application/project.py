@@ -49,7 +49,7 @@ class Project(object):
         self.tree = None
         self.root = None
         self.apppath = None
-        self.tmpdir = None
+        self.tmpdir = filedir("../tempdata")
         self.parser = None
         self.version = 0.8
         self.main_form_name = None

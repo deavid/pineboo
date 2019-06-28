@@ -28,7 +28,7 @@ except ImportError:
 try:
     import pineboolib
 
-    tempDir = pineboolib.project.tmpdir
+    tempDir = pineboolib.project.tmpdir or "/tmp"
 except (ImportError, AttributeError):
     tempDir = "/tmp"
 
@@ -92,7 +92,19 @@ def p_parse(token):
         endoffile = fromline, lexspan, token.slice[0]
     # print(repr(token.slice), context, lexspan)
 
-    token[0] = {"00-toktype": str(token.slice[0]), "02-size": lexspan, "50-contents": [{"01-type": s.type, "99-value": s.value} for s in token.slice[1:]]}
+    token[0] = {
+        "00-toktype": str(token.slice[0]),
+        "02-size": lexspan,
+        "50-contents": [{"01-type": s.type, "99-value": s.value} for s in token.slice[1:]],
+    }
+
+    for n in reversed(range(len(token[0]["50-contents"]))):
+        contents = token[0]["50-contents"][n]
+        if contents["01-type"] == token[0]["00-toktype"]:
+            # If the first element is same type, unpack left. This is for recursing lists
+            # Makes tree calculation faster and less recursive.
+            token[0]["50-contents"][n : n + 1] = contents["99-value"]["50-contents"]
+
     numelems = len([s for s in token.slice[1:] if s.type != "empty" and s.value is not None])
 
     rspan = lexspan[0]
@@ -321,7 +333,6 @@ p_parse.__doc__ = """
 
     callargs    : callarg
                 | callargs COMMA callarg
-                | empty
 
     varmemcall  : variable_1
                 | funccall_1
@@ -426,6 +437,7 @@ p_parse.__doc__ = """
     docstring   : DOCSTRINGOPEN AT ID COMMENTCLOSE
                 | DOCSTRINGOPEN AT ID ID COMMENTCLOSE
 
+    list_constant   : LBRACKET RBRACKET
     list_constant   : LBRACKET callargs RBRACKET
     list_constant   : LBRACKET callargs COMMA RBRACKET
 
@@ -650,14 +662,15 @@ def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
 
         if type(value) is dict:
             # print "*"
-            # FIXME> Esto o no parsea todos los elementos o hace stackoverflow. problematico para programas largos
-            if depth < 900:
+            # FIXME: Esto o no parsea todos los elementos o hace stackoverflow. problematico para programas largos
+            if depth < 150:
                 try:
                     tree_obj = calctree(value, depth + 1, num + [str(n)], ctype, alias_mode=alias_mode)
-                except Exception:
-                    print("ERROR: trying to calculate member %d on:" % n, repr(obj))
+                except Exception as e:
+                    print("ERROR: trying to calculate member:", e)
+                    tree_obj = None
             else:
-                print("PANIC: *** Stack overflow trying to calculate member %d on:" % n, repr(obj))
+                print("PANIC: *** Stack overflow trying to calculate member %d on:" % n, ctype)
                 tree_obj = None
 
             if type(tree_obj) is dict:
