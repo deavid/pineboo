@@ -5,7 +5,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QObject
 from PyQt5.QtCore import Qt
 
-from pineboolib import decorators
+from pineboolib.core import decorators
 
 
 class FLPicture(QObject):

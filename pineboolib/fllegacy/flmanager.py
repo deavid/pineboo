@@ -3,7 +3,7 @@ from PyQt5 import QtCore
 from PyQt5.QtXml import QDomDocument
 
 
-from pineboolib import decorators
+from pineboolib.core import decorators
 from pineboolib.utils import filedir, auto_qt_translate_text, cacheXPM
 
 

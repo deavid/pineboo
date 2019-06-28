@@ -5,7 +5,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtCore
 from PyQt5 import QtXml
 from PyQt5.QtCore import Qt
-from pineboolib import decorators
+from pineboolib.core import decorators
 import pineboolib
 
 

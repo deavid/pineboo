@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
-from pineboolib import decorators
-from PyQt5 import QtCore
-import pineboolib
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.fllegacy.flsettings import FLSettings
 import platform
 import hashlib
 import datetime
 import logging
+
+from PyQt5 import QtCore
+
+import pineboolib
+from pineboolib.core import decorators
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.fllegacy.flsettings import FLSettings
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +62,18 @@ class FLUtil(QtCore.QObject):
     ]
 
     vecDecenas = ["", "", "", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"]
-    vecCentenas = ["", "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"]
+    vecCentenas = [
+        "",
+        "ciento",
+        "doscientos",
+        "trescientos",
+        "cuatrocientos",
+        "quinientos",
+        "seiscientos",
+        "setecientos",
+        "ochocientos",
+        "novecientos",
+    ]
 
     def deleteCascade(self, collector, field, sub_objs, using):
         for o in sub_objs:
@@ -1521,7 +1534,7 @@ class FLUtil(QtCore.QObject):
 
         if mtd is None:
             return False
-
+        field = None  # FIXME
         return False if field is None else field.isCompoundKey()
 
     def fieldDefaultValue(self, fn, tn, conn_name="default"):

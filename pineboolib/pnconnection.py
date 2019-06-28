@@ -7,7 +7,7 @@ from PyQt5 import QtCore, QtWidgets
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
-from pineboolib import decorators
+from pineboolib.core import decorators
 from pineboolib.pncontrolsfactory import aqApp
 from pineboolib.pnsqldrivers import PNSqlDrivers
 

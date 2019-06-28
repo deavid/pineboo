@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtGui
-from pineboolib import decorators
+from pineboolib.core import decorators
 from PyQt5.QtCore import pyqtSignal
 
 

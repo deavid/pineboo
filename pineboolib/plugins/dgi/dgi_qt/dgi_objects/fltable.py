@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pineboolib.pncontrolsfactory import QTable
-from pineboolib import decorators
+from pineboolib.core import decorators
 
 
 class FLTable(QTable):

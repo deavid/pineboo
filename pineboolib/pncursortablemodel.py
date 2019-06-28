@@ -10,7 +10,7 @@ from datetime import date
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 
 import pineboolib
-from pineboolib.utils import filedir
+from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.flutil import FLUtil
 
 DEBUG = False

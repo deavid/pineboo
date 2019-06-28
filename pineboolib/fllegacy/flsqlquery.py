@@ -1,6 +1,5 @@
-from pineboolib import decorators
+from pineboolib.core import decorators
 import pineboolib
-import traceback
 import datetime
 import logging
 
@@ -563,7 +562,7 @@ class FLSqlQuery(object):
             #    retorno = bytearray(retorno)
             elif not isinstance(retorno, (str, int, bool, float, pineboolib.qsa.Date)):
                 retorno = float(retorno)
-            
+
         self.logger.debug("value(%s)::return:: %s", n, retorno)
         return retorno
 
@@ -725,13 +724,11 @@ class FLSqlQuery(object):
     def isActive(self):
         return self._is_active
 
-
     def at(self):
         return self._posicion
 
     def lastQuery(self):
         return self.sql()
-
 
     def numRowsAffected(self):
         return len(self._datos)
@@ -768,23 +765,21 @@ class FLSqlQuery(object):
     def QSqlQuery_value(self, i):
         pass
 
-
     def seek(self, i, relative=False):
         if not self._cursor:
             return False
-        
+
         pos = i
         if relative:
             pos = i + self._posicion
-        
+
         if self._datos:
-            if pos > 0 and pos < len(self._datos) -1:
+            if pos > 0 and pos < len(self._datos) - 1:
                 self._posicion = pos
                 self._row = self._datos[self._posicion]
                 return True
-        
+
         return False
-                
 
     def next(self):
         if not self._cursor:
@@ -801,7 +796,7 @@ class FLSqlQuery(object):
     def prev(self):
         if not self._cursor:
             return False
-        
+
         if self._datos:
             self._posicion -= 1
             if self._posicion >= 0:
@@ -813,18 +808,18 @@ class FLSqlQuery(object):
     def first(self):
         if not self._cursor:
             return False
-        
+
         if self._datos:
             self._posicion = 0
             self._row = self._datos[self._posicion]
             return True
-        
+
         return False
 
     def last(self):
         if not self._cursor:
             return False
-        
+
         if self._datos:
             self._posicion = len(self._datos) - 1
             self._row = self._datos[self._posicion]

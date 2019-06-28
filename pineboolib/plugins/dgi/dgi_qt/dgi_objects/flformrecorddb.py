@@ -3,7 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import QKeySequence
 
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
-from pineboolib import decorators
+from pineboolib.core import decorators
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery

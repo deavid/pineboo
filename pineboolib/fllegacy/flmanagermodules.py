@@ -3,7 +3,7 @@ import os
 import logging
 
 import pineboolib
-from pineboolib import decorators
+from pineboolib.core import decorators
 from pineboolib.utils import filedir, cacheXPM
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaction import FLAction

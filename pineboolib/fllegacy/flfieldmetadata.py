@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pineboolib.utils import aqtt
+from pineboolib.core.utils.utils_base import aqtt
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 import logging
 
@@ -72,7 +72,9 @@ class FLFieldMetaData(object):
         gen=True,
         iCK=False,
     ):
-        self.d = FLFieldMetaDataPrivate(n, a, aN, isPrimaryKey, t, length_, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK)
+        self.d = FLFieldMetaDataPrivate(
+            n, a, aN, isPrimaryKey, t, length_, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK
+        )
 
     """
     desctructor

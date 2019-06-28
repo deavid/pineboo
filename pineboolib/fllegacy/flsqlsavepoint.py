@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # Completada Si
-from pineboolib import decorators, fllegacy
+from pineboolib.core import decorators
+from pineboolib import fllegacy
 
 
 """

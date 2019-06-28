@@ -27,31 +27,31 @@ class DGILoader(object):
     def load_dgi_qt():
         from pineboolib.plugins.dgi.dgi_qt import dgi_qt as dgi
 
-        return dgi.dgi_qt()
+        return dgi.dgi_qt
 
     @staticmethod
     def load_dgi_aqnext():
         from pineboolib.plugins.dgi.dgi_aqnext import dgi_aqnext as dgi
 
-        return dgi.dgi_aqnext()
+        return dgi.dgi_aqnext
 
     @staticmethod
     def load_dgi_fcgi():
         from pineboolib.plugins.dgi.dgi_fcgi import dgi_fcgi as dgi
 
-        return dgi.dgi_fcgi()
+        return dgi.dgi_fcgi
 
     @staticmethod
     def load_dgi_jsonrpc():
         from pineboolib.plugins.dgi.dgi_jsonrpc import dgi_jsonrpc as dgi
 
-        return dgi.dgi_jsonrpc()
+        return dgi.dgi_jsonrpc
 
     @staticmethod
     def load_dgi_server():
         from pineboolib.plugins.dgi.dgi_server import dgi_server as dgi
 
-        return dgi.dgi_server()
+        return dgi.dgi_server
 
     @classmethod
     def load_dgi(cls, name):

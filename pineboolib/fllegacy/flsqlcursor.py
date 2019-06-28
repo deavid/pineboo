@@ -3,7 +3,7 @@ from PyQt5 import QtCore
 
 
 import pineboolib
-from pineboolib import decorators
+from pineboolib.core import decorators
 
 from pineboolib.pncursortablemodel import PNCursorTableModel
 
@@ -252,11 +252,14 @@ class PNBuffer(object):
     Setea el valor de un campo del buffer
     @param name. Nombre del campo
     @param value. Valor a asignar al campo
-    @param mark_. Si True comprueba que ha cambiado respecto al valor asignado en primeUpdate y si ha cambiado lo marca como modificado (Por defecto a True)
+    @param mark_. Si True comprueba que ha cambiado respecto al valor asignado en primeUpdate
+                y si ha cambiado lo marca como modificado (Por defecto a True)
     """
 
     def setValue(self, name, value, mark_=True):
-        if value is not None and not isinstance(value, (int, float, str, datetime.time, datetime.date, bool, pineboolib.qsa.Date, bytearray)):
+        if value is not None and not isinstance(
+            value, (int, float, str, datetime.time, datetime.date, bool, pineboolib.qsa.Date, bytearray)
+        ):
             raise ValueError("No se admite el tipo %r , en setValue(%s,%r)" % (type(value), name, value))
 
         field = self.field(name)
@@ -942,7 +945,9 @@ class FLSqlCursor(QtCore.QObject):
             except Exception:
                 pass
             cR.newBuffer.connect(self.clearPersistentFilter)
-            if pineboolib.project._DGI.use_model() and cR.meta_model():  # Si el cursor_relation tiene un model asociado , este cursor carga el propio también
+            if (
+                pineboolib.project._DGI.use_model() and cR.meta_model()
+            ):  # Si el cursor_relation tiene un model asociado , este cursor carga el propio también
                 self.assoc_model()
 
         else:
@@ -1178,7 +1183,12 @@ class FLSqlCursor(QtCore.QObject):
             q = FLSqlQuery(None, self.db().dbAux())
             ret = q.exec_(
                 "UPDATE  %s SET %s = %s WHERE %s"
-                % (self.metadata().name(), fN, self.db().manager().formatValue(type, v), self.db().manager().formatAssignValue(self.metadata().field(pK), pKV))
+                % (
+                    self.metadata().name(),
+                    fN,
+                    self.db().manager().formatValue(type, v),
+                    self.db().manager().formatAssignValue(self.metadata().field(pK), pKV),
+                )
             )
             if ret:
                 self.db().dbAux().commit()
@@ -1245,7 +1255,12 @@ class FLSqlCursor(QtCore.QObject):
             largeValue = self.db().manager().storeLargeValue(self.metadata(), vv)
             if largeValue:
                 vv = largeValue
-        if field.outTransaction() and self.db().dbAux() and not self.db().db() is self.db().dbAux() and not self.modeAccess() == self.Insert:
+        if (
+            field.outTransaction()
+            and self.db().dbAux()
+            and not self.db().db() is self.db().dbAux()
+            and not self.modeAccess() == self.Insert
+        ):
             pK = self.metadata().primaryKey()
 
             if self.cursorRelation() and not self.modeAccess() == self.Browse:
@@ -1322,13 +1337,22 @@ class FLSqlCursor(QtCore.QObject):
         type_ = field.type()
 
         v = None
-        if field.outTransaction() and self.db().dbAux() and not self.db().db() == self.db().dbAux() and not self.modeAccess() == self.Insert:
+        if (
+            field.outTransaction()
+            and self.db().dbAux()
+            and not self.db().db() == self.db().dbAux()
+            and not self.modeAccess() == self.Insert
+        ):
             pK = self.metadata().primaryKey()
             if pK:
                 pKV = self.buffer().value(pK)
                 # q = FLSqlQuery()
                 q = FLSqlQuery(None, "dbAux")
-                sql_query = "SELECT %s FROM %s WHERE %s" % (fN, self.metadata().name(), self.db().manager().formatAssignValue(self.metadata().field(pK), pKV))
+                sql_query = "SELECT %s FROM %s WHERE %s" % (
+                    fN,
+                    self.metadata().name(),
+                    self.db().manager().formatAssignValue(self.metadata().field(pK), pKV),
+                )
                 # q.exec_(self.db().dbAux(), sql_query)
                 q.exec_(sql_query)
                 if q.next():
@@ -1645,7 +1669,11 @@ class FLSqlCursor(QtCore.QObject):
 
         if m == self.Del:
             res = QMessageBox.warning(
-                QApplication.focusWidget(), self.tr("Aviso"), self.tr("El registro activo será borrado. ¿ Está seguro ?"), QMessageBox.Ok, QMessageBox.No
+                QApplication.focusWidget(),
+                self.tr("Aviso"),
+                self.tr("El registro activo será borrado. ¿ Está seguro ?"),
+                QMessageBox.Ok,
+                QMessageBox.No,
             )
             if res == QMessageBox.No:
                 return
@@ -1815,10 +1843,8 @@ class FLSqlCursor(QtCore.QObject):
                         #       "FLSqlCursor : Error en metadatos, el campo %1 tiene un campo asociado pero no existe relación muchos a uno"
                         #       ).arg(self.metadata().name()) + ":" + fiName)
                         msg = (
-                            msg
-                            + "\n"
-                            + "FLSqlCursor : Error en metadatos, el campo %s tiene un campo asociado pero no existe relación muchos a uno:%s"
-                            % (self.metadata().name(), fiName)
+                            msg + "\n" + "FLSqlCursor : Error en metadatos, el campo %s tiene un campo asociado pero no existe "
+                            "relación muchos a uno:%s" % (self.metadata().name(), fiName)
                         )
                         continue
 
@@ -1847,13 +1873,11 @@ class FLSqlCursor(QtCore.QObject):
                         q.setForwardOnly(True)
                         q.exec_()
                         if not q.next():
-                            # msg = msg + "\n" + self.metadata().name() + ":" + field.alias() + FLUtil.tr(" : %1 no pertenece a %2").arg(s, ss)
                             msg = msg + "\n" + self.metadata().name() + ":" + field.alias() + " : %s no pertenece a %s" % (s, ss)
                         else:
                             self.buffer().setValue(fmdName, q.value(0))
 
                     else:
-                        # msg = msg + "\n" + self.metadata().name() + ":" + field.alias() + FLUtil.tr(" : %1 no se puede asociar a un valor NULO").arg(s)
                         msg = msg + "\n" + self.metadata().name() + ":" + field.alias() + " : %s no se puede asociar a un valor NULO" % s
                     if not tMD.inCache():
                         del tMD
@@ -1886,8 +1910,6 @@ class FLSqlCursor(QtCore.QObject):
                         q.setForwardOnly(True)
                         q.exec_()
                         if q.next():
-                            # msg = (msg + "\n" + self.metadata().name() + ":" + field.alias()
-                            #       + FLUtil.tr(" : Requiere valores únicos, y ya hay otro registro con el valor %1 en este campo").arg(str(s)))
                             msg = (
                                 msg
                                 + "\n"
@@ -1906,8 +1928,6 @@ class FLSqlCursor(QtCore.QObject):
                     q.setForwardOnly(True)
                     q.exec_()
                     if q.next():
-                        # msg = msg + "\n" + self.metadata().name() + ":" + field.alias() + FLUtil.tr(
-                        #       " : Es clave primaria y requiere valores únicos, y ya hay otro registro con el valor %1 en este campo").arg(str(s))
                         msg = (
                             msg
                             + "\n"
@@ -1934,7 +1954,14 @@ class FLSqlCursor(QtCore.QObject):
                         if not q.next():
                             # msg = msg + "\n" + self.metadata().name() + ":" + field.alias() +
                             #           FLUtil.tr(" : El valor %1 no existe en la tabla %2").arg(str(s), r.foreignTable())
-                            msg = msg + "\n" + self.metadata().name() + ":" + field.alias() + " : El valor %s no existe en la tabla %s" % (s, r.foreignTable())
+                            msg = (
+                                msg
+                                + "\n"
+                                + self.metadata().name()
+                                + ":"
+                                + field.alias()
+                                + " : El valor %s no existe en la tabla %s" % (s, r.foreignTable())
+                            )
                         else:
                             self.buffer().setValue(fiName, q.value(0))
 
@@ -1970,7 +1997,6 @@ class FLSqlCursor(QtCore.QObject):
                         q.setForwardOnly(True)
                         q.exec_()
                         if q.next():
-                            # msg = msg + "\n" + fields + FLUtil.tr(" : Requiere valor único, y ya hay otro registro con el valor %1").arg(valuesFields)
                             msg = msg + "\n%s : Requiere valor único, y ya hay otro registro con el valor %s" % (field, valuesFields)
 
                         checkedCK = True
@@ -2020,8 +2046,6 @@ class FLSqlCursor(QtCore.QObject):
                                 continue
 
                         else:
-                            # msg = msg + "\n" + FLUtil.tr("FLSqlCursor : Error en metadatos, %1.%2 no es válido.\nCampo relacionado con %3.%4."
-                            #           ).arg(mtd.name(), r.foreignField(), self.metadata().name(), field.name())
                             msg = (
                                 msg
                                 + "\n"
@@ -2373,7 +2397,7 @@ class FLSqlCursor(QtCore.QObject):
         mid = None
         comp = None
         midVal = None
-        
+
         if fN in self.metadata().fieldNames():
             while ini <= fin:
                 mid = int((ini + fin) / 2)
@@ -3203,7 +3227,9 @@ class FLSqlCursor(QtCore.QObject):
         from pineboolib.pncontrolsfactory import QMessageBox, QApplication
 
         if not self.isValid() or self.size() <= 0:
-            QMessageBox.warning(QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"), QMessageBox.Ok)
+            QMessageBox.warning(
+                QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"), QMessageBox.Ok
+            )
             return
 
         field_list = self.d.metadata_.fieldList()
@@ -3227,7 +3253,12 @@ class FLSqlCursor(QtCore.QObject):
             if it is None:
                 continue
 
-            if self.d.buffer_.isNull(it.name()) and not it.isPrimaryKey() and not self.d.metadata_.fieldListOfCompoundKey(it.name()) and not it.calculated():
+            if (
+                self.d.buffer_.isNull(it.name())
+                and not it.isPrimaryKey()
+                and not self.d.metadata_.fieldListOfCompoundKey(it.name())
+                and not it.calculated()
+            ):
                 self.d.buffer_.setValue(it.name(), buffer_aux.value(it.name()))
 
             del buffer_aux
@@ -3879,7 +3910,8 @@ class FLSqlCursor(QtCore.QObject):
                 if row is not None:
                     if self.model().value(row, self.model().pK()) != pKValue:
                         raise AssertionError(
-                            "Los indices del CursorTableModel devolvieron un registro erroneo: %r != %r" % (self.model().value(row, self.model().pK()), pKValue)
+                            "Los indices del CursorTableModel devolvieron un registro erroneo: %r != %r"
+                            % (self.model().value(row, self.model().pK()), pKValue)
                         )
                     self.model().setValuesDict(row, dict_update)
 

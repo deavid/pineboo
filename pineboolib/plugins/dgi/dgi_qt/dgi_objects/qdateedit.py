@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtWidgets, QtCore
-from pineboolib import decorators
+from pineboolib.core import decorators
 
 
 class QDateEdit(QtWidgets.QDateEdit):
