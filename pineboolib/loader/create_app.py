@@ -4,7 +4,7 @@ def create_app(DGI, options):
     if not DGI.useMLDefault():
         return DGI.alternativeMain(options)
 
-    from pineboolib.utils import filedir
+    from pineboolib.core.utils.utils_base import filedir
     import pineboolib
 
     app = DGI.create_app()
