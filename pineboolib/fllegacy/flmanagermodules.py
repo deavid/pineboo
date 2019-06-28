@@ -4,7 +4,8 @@ import logging
 
 import pineboolib
 from pineboolib.core import decorators
-from pineboolib.utils import filedir, cacheXPM
+from pineboolib.core.utils.utils_base import filedir 
+from pineboolib.application.utils.xpm import cacheXPM
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flsettings import FLSettings
