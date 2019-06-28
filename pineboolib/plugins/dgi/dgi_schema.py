@@ -17,7 +17,6 @@ class dgi_schema(object):
     _localDesktop = True
     _mobile = False
     _clean_no_python = True
-    _clean_no_python_changeable = True  # FIXME: Someone explain why it is "changeable"
     # FIXME: Guess this is because there is conditional code we don't want to run on certain DGI
     # .... this is really obscure. Please avoid at all costs. Having __NO_PYTHON__ is bad enough.
     _alternative_content_cached = False
