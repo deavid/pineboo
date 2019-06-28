@@ -93,7 +93,7 @@ def exec_main(options):
         if not _DGI.mobilePlatform():
             from .conn_dialog import show_connection_dialog
 
-            configdb = show_connection_dialog()
+            configdb = show_connection_dialog(app)
         else:
             configdb = DEFAULT_SQLITE_CONN
 

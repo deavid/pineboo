@@ -4,7 +4,7 @@ from .projectconfig import ProjectConfig
 logger = logging.getLogger("loader.conn_dialog")
 
 
-def show_connection_dialog():
+def show_connection_dialog(app):
     """Show the connection dialog, and configure the project accordingly."""
     from .dlgconnect import DlgConnect
 

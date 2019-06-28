@@ -17,7 +17,7 @@ class AQOdsGenerator_class(object):
     """
 
     def __init__(self):
-        from pineboolib.utils import check_dependencies
+        from pineboolib.application.utils.check_dependencies import check_dependencies
 
         check_dependencies({"odf": "odfpy"})
 

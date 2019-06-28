@@ -46,7 +46,7 @@ class DlgConnect(QtWidgets.QWidget):
         from pineboolib.fllegacy.flmanagermodules import FLManagerModules
 
         mM = FLManagerModules()
-        dlg_ = filedir("dlgconnect/dlgconnect.ui")
+        dlg_ = filedir("loader/dlgconnect/dlgconnect.ui")
 
         self.ui = mM.createUI(dlg_, None, self)
         del mM

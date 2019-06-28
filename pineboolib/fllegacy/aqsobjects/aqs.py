@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 
-from pineboolib.utils import filedir
+from pineboolib.core.utils.utils_base import filedir
 
 import logging
 from PyQt5.QtXml import QDomDocument
