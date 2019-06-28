@@ -10,7 +10,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui, Qt, QtXml
 from PyQt5.QtWidgets import qApp
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from pineboolib.core.utils.utils_base import load2xml, filedir
+from pineboolib.core.utils.utils_base import filedir, load2xml
 from pineboolib.application.utils.path import _path
 from pineboolib.fllegacy.flsettings import FLSettings
 
