@@ -2,7 +2,7 @@
 # from PyQt5.Qt import qWarning, QDomDocument, QRegExp
 # from PyQt5.QtWidgets import QMessageBox, QProgressDialog
 
-from pineboolib.utils import checkDependencies
+from pineboolib.application.utils.check_dependencies import check_dependencies
 
 # from pineboolib.core import decorators
 # from pineboolib.fllegacy.flutil import FLUtil
@@ -110,7 +110,7 @@ class FLREMOTECLIENT(object):
         self.defaultPort_ = 4000
         self.id_ = 0
         self.url = None
-        checkDependencies({"requests": "requests"}, False)
+        check_dependencies({"requests": "requests"}, False)
 
     def useThreads(self):
         return False
@@ -196,7 +196,8 @@ class FLREMOTECLIENT(object):
     def refreshQuery(self, curname, fields, table, where, cursor, conn):
         self.send_to_server(
             self.create_dict(
-                "refreshQuery", {"cursor_id": cursor.id_, "curname": "%s_%s" % (self.id_, curname), "fields": fields, "table": table, "where": where}
+                "refreshQuery",
+                {"cursor_id": cursor.id_, "curname": "%s_%s" % (self.id_, curname), "fields": fields, "table": table, "where": where},
             )
         )
 
@@ -219,7 +220,13 @@ class FLREMOTECLIENT(object):
         return self.send_to_server(
             self.create_dict(
                 "fetchAll",
-                {"cursor_id": cursor.id_, "tablename": tablename, "where_filter": where_filter, "fields": fields, "curname": "%s_%s" % (self.id_, curname)},
+                {
+                    "cursor_id": cursor.id_,
+                    "tablename": tablename,
+                    "where_filter": where_filter,
+                    "fields": fields,
+                    "curname": "%s_%s" % (self.id_, curname),
+                },
             )
         )
 

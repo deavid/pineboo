@@ -9,7 +9,6 @@ from .utils.xpm import cacheXPM
 from .utils.path import _dir
 from pineboolib.core.settings import config, settings
 from pineboolib.interfaces.dgi_schema import dgi_schema
-from pineboolib.pnsqldrivers import PNSqlDrivers
 
 from .module import Module
 from .file import File
@@ -73,7 +72,6 @@ class Project(object):
         from pineboolib.plugins.kugar.pnkugarplugins import PNKugarPlugins
 
         self.kugarPlugin = PNKugarPlugins()
-        self.sql_drivers_manager = PNSqlDrivers()  # FIXME: Does this belong here?
         self.deleteCache = config.value("ebcomportamiento/deleteCache", False)
         self.parseProject = config.value("ebcomportamiento/parseProject", False)
 

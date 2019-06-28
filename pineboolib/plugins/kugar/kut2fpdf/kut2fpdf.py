@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pineboolib.utils import checkDependencies, filedir, load2xml
+from pineboolib.utils import check_dependencies, filedir, load2xml
 import pineboolib
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
@@ -49,7 +49,7 @@ class kut2fpdf(object):
     def __init__(self):
 
         self.logger = logging.getLogger("kut2fpdf")
-        checkDependencies({"fpdf": "pyfpdf"})
+        check_dependencies({"fpdf": "pyfpdf"})
         from pineboolib.plugins.kugar.parsertools import parsertools
 
         self._parser_tools = parsertools()

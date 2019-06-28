@@ -4,14 +4,14 @@ from flup.server.fcgi import WSGIServer
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.pncontrolsfactory import SysType
-from pineboolib.utils import checkDependencies
+from pineboolib.utils import check_dependencies
 
 import pineboolib
 
 
 logger = logging.getLogger(__name__)
 
-checkDependencies({"flup": "flup-py3"})
+check_dependencies({"flup": "flup-py3"})
 
 
 class dgi_fcgi(dgi_schema):

@@ -17,9 +17,9 @@ class AQOdsGenerator_class(object):
     """
 
     def __init__(self):
-        from pineboolib.utils import checkDependencies
+        from pineboolib.utils import check_dependencies
 
-        checkDependencies({"odf": "odfpy"})
+        check_dependencies({"odf": "odfpy"})
 
     """
     Genera el fichero ODS
