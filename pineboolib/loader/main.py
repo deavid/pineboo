@@ -128,15 +128,18 @@ def exec_main(options):
 
     # Cargando spashscreen
     # Create and display the splash screen
-    if _DGI.localDesktop() and not options.action:
-        splash = show_splashscreen(project)
-        _DGI.processEvents()
-    else:
-        splash = None
+    # if _DGI.localDesktop() and not options.action:
+    #     splash = show_splashscreen(project)
+    #     _DGI.processEvents()
+    # else:
+    #     splash = None
+    splash = None
 
     project._splash = splash
     project.run()
     if project.conn.conn is False:
         logger.warning("No connection was provided. Aborting Pineboo load.")
     else:
+        from .init_project import init_project
+
         init_project(_DGI, splash, options, project, project.main_form if _DGI.useDesktop() else None, app)

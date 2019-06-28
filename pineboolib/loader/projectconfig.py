@@ -5,7 +5,7 @@ import re
 class ProjectConfig:
     logger = logging.getLogger("loader.projectConfig")
 
-    def __init__(self, load_xml=None, connstring=None, database=None, host=None, port=None, type=None, username=None, password=None):
+    def __init__(self, database=None, host=None, port=None, type=None, username=None, password=None, load_xml=None, connstring=None):
         if connstring:
             username, password, type, host, port, database = self.translate_connstring(connstring)
         self.database = database

@@ -1,6 +1,6 @@
 from .projectconfig import ProjectConfig
 
-DEFAULT_SQLITE_CONN = ProjectConfig("pineboo.sqlite3", None, None, None, None, "SQLite3 (SQLITE3)")
+DEFAULT_SQLITE_CONN = ProjectConfig(database="pineboo.sqlite3", type="SQLite3 (SQLITE3)")
 
 
 def config_dbconn(options):
