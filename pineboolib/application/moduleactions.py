@@ -1,7 +1,8 @@
 import logging
 
-from pineboolib.utils_base import load2xml, XMLAction
-from pineboolib.exceptions import CodeDoesNotBelongHereException
+from pineboolib.core.utils.utils_base import load2xml
+from pineboolib.core.exceptions import CodeDoesNotBelongHereException
+from pineboolib.application.xmlaction import XMLAction
 
 from .module import Module
 from .proxy import DelayedObjectProxyLoader
@@ -32,11 +33,12 @@ class ModuleActions(object):
         """
         # Ojo: Almacena un arbol con los módulos cargados
         from pineboolib import qsa as qsa_dict_modules
+        from pineboolib import project
 
         self.tree = load2xml(self.path)
         self.root = self.tree.getroot()
 
-        action = XMLAction()
+        action = XMLAction(project=project)
         action.mod = self
         action.name = self.mod.name
         action.alias = self.mod.name
@@ -53,7 +55,7 @@ class ModuleActions(object):
             setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % action.name))
 
         for xmlaction in self.root:
-            action_xml = XMLAction(xmlaction)
+            action_xml = XMLAction(xmlaction, project=project)
             action_xml.mod = self
             name = action_xml.name
             if name != "unnamed":

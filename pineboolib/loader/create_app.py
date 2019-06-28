@@ -5,10 +5,8 @@ def create_app(DGI, options):
         return DGI.alternativeMain(options)
 
     from pineboolib.core.utils.utils_base import filedir
-    import pineboolib
 
     app = DGI.create_app()
-    pineboolib._DGI = DGI  # Almacenamos de DGI seleccionado para futuros usos
 
     if DGI.localDesktop():
         from PyQt5 import QtGui

@@ -9,7 +9,7 @@ import logging
 
 # FLObjects
 from pineboolib.core.utils.utils_base import ustr, filedir
-from pineboolib.pncontrolsfactory import FLUtil, SysType, aqApp, QInputDialog, QLineEdit
+from pineboolib.pncontrolsfactory import FLUtil, qsa_sys, aqApp, QInputDialog, QLineEdit
 
 # from pineboolib.pnobjectsfactory import load_model, Calculated
 
@@ -21,7 +21,7 @@ from pineboolib.core.utils.utils_base import StructMyDict
 logger = logging.getLogger(__name__)
 
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
-sys = SysType()
+sys = qsa_sys
 print_ = print
 
 undefined = None

@@ -21,8 +21,10 @@ import pineboolib
 from xml import etree
 import logging
 
-# import os
 logger = logging.getLogger(__name__)
+
+# FIXME: This class is emulating Eneboo, but the way is set up it is a core part of Pineboo now.
+# ... we should probably create our own one. Not this one.
 
 
 class FLManager(QtCore.QObject):
@@ -205,7 +207,8 @@ class FLManager(QtCore.QObject):
                 if not ret.isQuery() and not self.existsTable(n):
                     self.createTable(ret)
 
-                acl = pineboolib.project.acl()
+                # acl = pineboolib.project.acl()
+                acl = None  # FIXME: Add ACL later
 
                 # if ret.fieldNamesUnlock():
                 #    ret = FLTableMetaData(ret)
@@ -401,7 +404,8 @@ class FLManager(QtCore.QObject):
 
                     del qry
 
-            acl = pineboolib.project.acl()
+            # acl = pineboolib.project.acl()
+            acl = None  # FIXME: Add ACL later
             if acl:
                 acl.process(tmd)
 

@@ -1676,7 +1676,7 @@ class FLApplication(QtCore.QObject):
         return self.comma_separator
 
     def tmp_dir(self):
-        return pineboolib.project.get_temp_dir()
+        return pineboolib.project.tmpdir
 
 
 """

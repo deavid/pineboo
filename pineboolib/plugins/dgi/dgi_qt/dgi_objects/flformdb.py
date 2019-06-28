@@ -620,7 +620,8 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
     """
 
     def initForm(self):
-        acl = pineboolib.project.acl()
+        # acl = pineboolib.project.acl()
+        acl = None  # FIXME: Add ACL later
         if acl:
             acl.process(self)
 

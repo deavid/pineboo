@@ -308,7 +308,7 @@ class FLManagerModules(object):
     """
 
     def createUI(self, n, connector=None, parent=None, name=None):
-        return pineboolib._DGI.createUI(n, connector, parent, name)
+        return pineboolib.project._DGI.createUI(n, connector, parent, name)
 
     """
     Crea el formulario maestro de una acción a partir de su fichero de descripción.

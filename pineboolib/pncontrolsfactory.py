@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-
-from PyQt5 import QtCore
-from pineboolib.fllegacy.flapplication import FLApplication
-from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.wiki_error import wiki_error
-
 import inspect
 import pineboolib
 import logging
@@ -14,6 +8,13 @@ import os
 import traceback
 
 from typing import Any, Callable
+
+from PyQt5 import QtCore
+from pineboolib.fllegacy.flapplication import FLApplication
+from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.wiki_error import wiki_error
+from pineboolib.core.utils.singleton import Singleton
+
 
 logger = logging.getLogger("PNControlsFactory")
 
@@ -29,12 +30,11 @@ Devuelve un objecto a partir de su nombre
 
 
 def resolveObject(name: str) -> Any:
-    obj_ = getattr(pineboolib._DGI, name, None)
+    obj_ = getattr(pineboolib.project._DGI, name, None)
     if obj_:
         return obj_
 
-    if pineboolib._DGI.show_object_not_found_warnings():
-        logger.warning("el objeto %s no se encuentra en el dgi %s", name, pineboolib._DGI.alias().lower())
+    logger.warning("el objeto %s no se encuentra en el dgi %s", name, pineboolib.project._DGI.alias().lower())
 
 
 # Clases Qt
@@ -154,7 +154,7 @@ TimeEdit = resolveObject("QTimeEdit")
 auth = resolveObject("auth")
 
 
-class SysType(object):
+class SysType(object, metaclass=Singleton):
     def __init__(self) -> None:
         self._name_user = None
         self.sys_widget = None
@@ -205,11 +205,15 @@ class SysType(object):
 
     def __getattr__(self, fun_: str) -> Callable:
         if self.sys_widget is None:
-            self.sys_widget = pineboolib.project.actions["sys"].load().widget
-        return getattr(self.sys_widget, fun_)
+            if "sys" in pineboolib.project.actions:
+                self.sys_widget = pineboolib.project.actions["sys"].load().widget
+            else:
+                logger.warn("No action found for 'sys'")
+        return getattr(self.sys_widget, fun_, None)
 
     def installACL(self, idacl):
-        acl_ = pineboolib.project.acl()
+        # acl_ = pineboolib.project.acl()
+        acl_ = None  # FIXME: Add ACL later
         if acl_:
             acl_.installACL(idacl)
 
@@ -559,3 +563,5 @@ def print_stack(maxsize=1):
 from pineboolib.packager.aqunpacker import AQUnpacker  # noqa:
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData  # noqa:
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
+
+qsa_sys = SysType()

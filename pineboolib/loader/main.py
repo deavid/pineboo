@@ -75,7 +75,7 @@ def exec_main(options):
 
     if is_deployed():
         logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-        from pineboolib.utils_base import download_files
+        from pineboolib.core.utils.utils_base import download_files
 
         download_files()
 

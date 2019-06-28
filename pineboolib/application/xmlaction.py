@@ -1,9 +1,9 @@
 import logging
 import os.path
 
-from pineboolib.utils_base import XMLStruct
+from pineboolib.core.utils.utils_base import XMLStruct
 from pineboolib.interfaces import IFormDB, IFormRecordDB
-from pineboolib.core.utils.utils_base import _path, coalesce_path
+from .utils.path import _path, coalesce_path
 
 from typing import Optional
 
