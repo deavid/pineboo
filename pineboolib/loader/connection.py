@@ -4,7 +4,7 @@ DEFAULT_SQLITE_CONN = ProjectConfig(database="pineboo.sqlite3", type="SQLite3 (S
 
 
 def config_dbconn(options):
-    from pineboolib.core.utils import filedir
+    from pineboolib.core.utils.utils_base import filedir
     from .projectconfig import ProjectConfig
 
     if options.project:  # FIXME: --project debería ser capaz de sobreescribir algunas opciones
