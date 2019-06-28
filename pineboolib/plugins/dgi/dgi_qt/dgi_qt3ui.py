@@ -139,7 +139,7 @@ def loadUi(form_path, widget, parent=None):
         try:
             getattr(sender, sg_name).connect(getattr(receiver, sl_name))
         except Exception:
-            logger.exception("Error connecting:", sender, signal_name, receiver, slot_name)
+            logger.exception("Error connecting: %s:%s %s:%s", sender, signal_name, receiver, slot_name)
 
     # Cargamos menubar ...
     xmlmenubar = root.find("menubar")

@@ -44,7 +44,7 @@ def resolveObject(name: str) -> Any:
     if obj_:
         return obj_
 
-    logger.warning("el objeto %s no se encuentra en el dgi %s", name, pineboolib.project._DGI.alias().lower())
+    logger.warning("resolveObject: class <%s> not found in dgi <%s>", name, pineboolib.project._DGI.alias().lower())
     return ObjectNotFoundInCurrentDGI
 
 

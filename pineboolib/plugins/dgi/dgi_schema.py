@@ -148,12 +148,16 @@ class dgi_schema(object):
 
     def resolveObject(self, module_name, name):
         cls = None
+        mod_name_full = "pineboolib.plugins.dgi.dgi_%s.dgi_objects.%s" % (module_name, name.lower())
         try:
             # FIXME: Please, no.
-            mod_ = import_module("pineboolib.plugins.dgi.dgi_%s.dgi_objects.%s" % (module_name, name.lower()))
+            mod_ = import_module(mod_name_full)
             cls = getattr(mod_, name, None)
+            logger.trace("resolveObject: Loaded module %s", mod_name_full)
+        except ModuleNotFoundError:
+            logger.trace("resolveObject: Module not found %s", mod_name_full)
         except Exception:
-            pass
+            logger.exception("resolveObject: Unable to load module %s", mod_name_full)
         return cls
 
     def sys_mtds(self):

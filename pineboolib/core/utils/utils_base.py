@@ -368,18 +368,6 @@ def version_normalize(v):
     return [int(x) for x in re.sub(r"(\.0+)*$", "", v).split(".")]
 
 
-def convert2FLAction(action):
-    name = None
-    if isinstance(action, str):
-        name = str
-    else:
-        name = action.name
-
-    from pineboolib.pncontrolsfactory import aqApp
-
-    return aqApp.db().manager().action(name)
-
-
 def load2xml(form_path_or_str):
     from xml.etree import ElementTree as ET
 
@@ -799,7 +787,7 @@ def is_deployed():
 def get_base_dir():
     base_dir = os.path.dirname(__file__)
     base_dir = "%s/../.." % base_dir
-    
+
     if is_deployed():
         if base_dir.startswith(":"):
             base_dir = ".%s" % base_dir[1:]

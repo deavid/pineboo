@@ -4,8 +4,9 @@ import logging
 
 import pineboolib
 from pineboolib.core import decorators
-from pineboolib.core.utils.utils_base import filedir 
+from pineboolib.core.utils.utils_base import filedir
 from pineboolib.application.utils.xpm import cacheXPM
+from pineboolib.application.utils.convert_flaction import convert2FLAction
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flsettings import FLSettings
@@ -323,7 +324,7 @@ class FLManagerModules(object):
         from pineboolib.pncontrolsfactory import FLFormDB
 
         if not isinstance(a, FLAction):
-            a = pineboolib.utils.convert2FLAction(a)
+            a = convert2FLAction(a)
 
         return None if not a else FLFormDB(parent, a, load=True)
 
@@ -341,7 +342,7 @@ class FLManagerModules(object):
 
         # Falta implementar conector y name
         if not isinstance(a, FLAction):
-            a = pineboolib.utils.convert2FLAction(a)
+            a = convert2FLAction(a)
 
         if not a:
             return None
