@@ -87,9 +87,9 @@ def exec_main(options):
 
     if not configdb and _DGI.useDesktop() and _DGI.localDesktop():
         if not _DGI.mobilePlatform():
-            from conn_dialog import show_connection_dialog
+            from .conn_dialog import show_connection_dialog
 
-            configdb = show_connection_dialog(project, app)
+            configdb = show_connection_dialog()
         else:
             configdb = DEFAULT_SQLITE_CONN
 

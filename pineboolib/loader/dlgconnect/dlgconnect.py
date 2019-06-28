@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QSize
 
 
-from pineboolib.utils import filedir, indent
+from pineboolib.core.utils.utils_base import filedir, indent
 from pineboolib.fllegacy.flsettings import FLSettings
 
 import os
@@ -18,7 +18,6 @@ class DlgConnect(QtWidgets.QWidget):
     Esta clase muestra gestiona el dialogo de Login
     """
 
-    _DGI = None
     optionsShowed = True
     minSize = None
     maxSize = None
@@ -26,13 +25,11 @@ class DlgConnect(QtWidgets.QWidget):
     pNSqlDrivers = None
     edit_mode = None
 
-    def __init__(self, _DGI):
+    def __init__(self):
         """
         Constructor
-        @param _DGI. DGI cargado.
         """
         super(DlgConnect, self).__init__()
-        self._DGI = _DGI
         self.optionsShowed = True
         self.minSize = QSize(350, 140)
         self.maxSize = QSize(350, 495)
