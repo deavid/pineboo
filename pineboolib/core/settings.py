@@ -13,13 +13,13 @@ class PinebooSettings(QSettings):
         scope = QSettings.UserScope
         organization = "Eneboo"
         application = "Pineboo" + name
-        super(PinebooSettings, self).__init__(format, scope, organization, application)
+        super().__init__(format, scope, organization, application)
 
     def dump_value(self, value):
         return json.dumps(value)
 
     def value(self, key, default=None):
-        value = super(QSettings, self).value(key, None)
+        value = super().value(key, None)
         if value is None:
             return default
         try:
@@ -30,7 +30,7 @@ class PinebooSettings(QSettings):
             return value
 
     def set_value(self, key, value):
-        return super(QSettings, self).setValue(key, json.dumps(value))
+        return super().setValue(key, json.dumps(value))
 
     setValue = set_value
 
