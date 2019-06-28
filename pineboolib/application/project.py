@@ -5,8 +5,6 @@ from typing import List, Optional, Union
 
 from pineboolib.core.exceptions import CodeDoesNotBelongHereException, NotConnectedError
 from pineboolib.core.utils.utils_base import filedir, Struct
-from .utils.xpm import cacheXPM
-from .utils.path import _dir
 from pineboolib.core.settings import config, settings
 from pineboolib.interfaces.dgi_schema import dgi_schema
 
@@ -116,6 +114,8 @@ class Project(object):
     def run(self) -> bool:
         """Arranca el proyecto. Conecta a la BD y carga los datos
         """
+        from .utils.path import _dir
+
         self.actions = {}
         self.tables = {}
 
@@ -174,6 +174,8 @@ class Project(object):
             """ SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = %s """
             % self.conn.driver().formatValue("bool", "True", False)
         )
+        from .utils.xpm import cacheXPM
+
         self.modules = {}
         for idarea, idmodulo, descripcion, icono in cursor_:
             icono = cacheXPM(icono)

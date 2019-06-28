@@ -2,7 +2,6 @@
 
 from importlib import import_module
 
-from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -41,7 +40,9 @@ class dgi_schema(object):
         except ImportError:
             self._mobile = False
 
-        if AQSettings().readBoolEntry(u"ebcomportamiento/mobileMode", False):
+        from pineboolib.core.settings import config
+
+        if config.value(u"ebcomportamiento/mobileMode", False):
             # FIXME: But now we enable mobile mode regardless of the library
             self._mobile = True
         # FIXME: Then, if not, can we disable it even if it is found? (...)
