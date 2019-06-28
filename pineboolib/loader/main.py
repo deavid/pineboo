@@ -89,10 +89,11 @@ def exec_main(options):
         if not _DGI.mobilePlatform():
             from conn_dialog import show_connection_dialog
 
-            show_connection_dialog(project, app)
+            configdb = show_connection_dialog(project, app)
         else:
             configdb = DEFAULT_SQLITE_CONN
-    else:
+
+    if not configdb:
         raise ValueError("No connection given. Nowhere to connect. Cannot start.")
 
     project = Project(connection=connect_to_db(configdb))

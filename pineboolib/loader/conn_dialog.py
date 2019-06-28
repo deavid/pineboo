@@ -1,4 +1,5 @@
 import logging
+from .projectconfig import ProjectConfig
 
 logger = logging.getLogger("loader.conn_dialog")
 
@@ -32,7 +33,4 @@ def show_connection_dialog(project, app):
                 connection_window.driveralias,
             )
         else:
-            # FIXME: Wrong context for sys.exit. Not this function's responsibility
-            import sys
-
-            sys.exit(ret)
+            return None
