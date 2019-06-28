@@ -169,8 +169,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             if not found_:
                 self.logger.debug(
-                    "%s. Se intenta ordernar por una columna (%s) que no está definida en el order by previo (%s). El order by previo se perderá"
-                    % (__name__, col_name, self._sortOrder)
+                    "%s. Se intenta ordernar por una columna (%s) que no está definida en el order by previo (%s). "
+                    "El order by previo se perderá" % (__name__, col_name, self._sortOrder)
                 )
             else:
                 self._sortOrder = ",".join(order_list)
@@ -473,7 +473,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         if self.fetchedRows - ROW_BATCH_COUNT - 1 > torow:
             torow = self.fetchedRows - ROW_BATCH_COUNT - 1
 
-        # print("refrescando modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
+        # print("refrescando modelo tabla %r , query %r, rows: %d %r"
+        #    % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
         if torow < fromrow:
             return
 
@@ -523,7 +524,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.indexes_valid = True
         self.rowsLoaded = torow + 1
         self.endInsertRows()
-        # print("fin refresco modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
+        # print("fin refresco modelo tabla %r , query %r, rows: %d %r"
+        #        % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
         topLeft = self.index(fromrow, 0)
         bottomRight = self.index(torow, self.cols - 1)
         self.dataChanged.emit(topLeft, bottomRight)
@@ -536,7 +538,11 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         if tiempo_final - tiempo_inicial > 0.2:
             self.logger.info(
-                "fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)", self.metadata().name(), self.rows, (fromrow, torow), tiempo_final - tiempo_inicial
+                "fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)",
+                self.metadata().name(),
+                self.rows,
+                (fromrow, torow),
+                tiempo_final - tiempo_inicial,
             )
 
     """
@@ -772,7 +778,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return
 
         if self.value(row, self.pK()) != pKValue:
-            raise AssertionError("Los indices del CursorTableModel devolvieron un registro erroneo: %r != %r" % (self.value(row, self.pK()), pKValue))
+            raise AssertionError(
+                "Los indices del CursorTableModel devolvieron un registro erroneo: %r != %r" % (self.value(row, self.pK()), pKValue)
+            )
 
         self.setValuesDict(row, dict_update)
         pkey_name = self.metadata().primaryKey()
@@ -1047,7 +1055,11 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             util = FLUtil()
             if self.metadata():
                 from_ = self.db().manager().query(self.metadata().query()).from_() if self.metadata().isQuery() else self.metadata().name()
-                where_ = self.where_filter[: self.where_filter.find("ORDER BY")] if self.where_filter.find("ORDER BY") > -1 else self.where_filter
+                where_ = (
+                    self.where_filter[: self.where_filter.find("ORDER BY")]
+                    if self.where_filter.find("ORDER BY") > -1
+                    else self.where_filter
+                )
                 # where_ = (
                 #     self.where_filter.replace("ORDER BY", "GROUP BY %s ORDER BY" % self.metadata().primaryKey())
                 #     if self.where_filter.find("ORDER BY") > -1

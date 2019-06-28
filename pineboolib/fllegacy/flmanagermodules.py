@@ -270,7 +270,9 @@ class FLManagerModules(object):
             """Ruta por defecto"""
             if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (aqApp.tmp_dir(), self.conn_.DBName(), modId, ext_, name_)):
                 utf8_ = True if ext_ == "kut" else False
-                data = self.contentFS("%s/cache/%s/%s/file.%s/%s/%s.%s" % (aqApp.tmp_dir(), self.conn_.DBName(), modId, ext_, name_, shaKey, ext_), utf8_)
+                data = self.contentFS(
+                    "%s/cache/%s/%s/file.%s/%s/%s.%s" % (aqApp.tmp_dir(), self.conn_.DBName(), modId, ext_, name_, shaKey, ext_), utf8_
+                )
 
         if data is None:
             if os.path.exists(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_))):

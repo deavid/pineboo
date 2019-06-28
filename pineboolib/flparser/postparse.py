@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 from builtins import str
 from builtins import object
 from optparse import OptionParser
@@ -6,15 +6,16 @@ import os
 import os.path
 import sys
 import imp
-import traceback
 from xml.etree import ElementTree
 from xml.dom import minidom
-
+import logging
 
 try:
-    from pineboolib.flparser import flscriptparse
+    from . import flscriptparse
 except ImportError:
     import flscriptparse
+
+logger = logging.getLogger("flparser.postparse")
 
 USEFUL_TOKENS = "ID,ICONST,FCONST,SCONST,CCONST,RXCONST".split(",")
 
@@ -541,10 +542,10 @@ class Module(object):
             self.module = imp.load_module(name, fp, pathname, description)
             result = True
         except FileNotFoundError:
-            print("Fichero %r no encontrado" % self.name)
+            logger.error("Fichero %r no encontrado" % self.name)
             result = False
         except Exception:
-            print(traceback.format_exc())
+            logger.exception("Unexpected exception on loadModule")
             result = False
         if fp:
             fp.close()
@@ -580,63 +581,43 @@ def main():
     execute(options, args)
 
 
-def pythonify(filelist, verbose=False, clean_no_python=True):
+def pythonify(filelist):
+    if not isinstance(filelist, list):
+        raise ValueError("First argument must be a list")
     options, args = parseArgs([])
     options.full = True
-    options.clean_no_python = clean_no_python
-    if not verbose:
-        options.verbose = False
-    if isinstance(filelist, str):
-        filelist = [filelist]
     execute(options, filelist)
-    if options.verbose:
-        print(filelist)
 
 
 def execute(options, args):
-    if options.optdebug:
-        if options.verbose:
-            print(options, args)
-
-    if not hasattr(options, "clean_no_python"):
-        options.clean_no_python = True
-
     if options.full:
         execpython = options.exec_python
         options.exec_python = False
         options.full = False
         options.toxml = True
-        if options.verbose:
-            print("Pass 1 - Parse and write XML file . . .")
+        logger.info("Pass 1 - Parse and write XML file . . .")
         try:
             execute(options, args)
         except Exception:
-            print("Error parseando:")
-            print(traceback.format_exc())
+            logger.exception("Error parseando:")
 
         options.toxml = False
         options.topython = True
-        if options.verbose:
-            print("Pass 2 - Pythonize and write PY file . . .")
+        logger.info("Pass 2 - Pythonize and write PY file . . .")
         try:
             execute(options, [arg + ".xml" for arg in args])
         except Exception:
-            print("Error convirtiendo:")
-            print(traceback.format_exc())
+            logger.exception("Error convirtiendo:")
 
         if execpython:
             options.exec_python = execpython
-            if options.verbose:
-                print("Pass 3 - Test PY file load . . .")
+            logger.info("Pass 3 - Test PY file load . . .")
             options.topython = False
             try:
                 execute(options, [(arg + ".xml.py").replace(".qs.xml.py", ".qs.py") for arg in args])
             except Exception:
-                print("Error al ejecutar Python:")
-                print(traceback.format_exc())
-
-        if options.verbose:
-            print("Done.")
+                logger.exception("Error al ejecutar Python:")
+        logger.debug("Done.")
 
     elif options.exec_python:
         # import qsatype
@@ -644,12 +625,12 @@ def execute(options, args):
             realpath = os.path.realpath(filename)
             path, name = os.path.split(realpath)
             if not os.path.exists(realpath):
-                print("Fichero no existe: %s" % name)
+                logger.error("Fichero no existe: %s" % name)
                 continue
 
             mod = Module(name, path)
             if not mod.loadModule():
-                print("Error cargando modulo %s" % name)
+                logger.error("Error cargando modulo %s" % name)
 
     elif options.topython:
         from .pytnyzer import pythonize
@@ -672,24 +653,20 @@ def execute(options, args):
                 destname = filename + ".py"
             destname = destname.replace(".qs.xml.py", ".qs.py")
             if not os.path.exists(filename):
-                print("Fichero %r no encontrado" % filename)
+                logger.error("Fichero %r no encontrado" % filename)
                 continue
-            if options.verbose:
-                sys.stdout.write("Pythonizing File: %-35s . . . .        (%.1f%%)        \r" % (bname, 100.0 * (nf + 1.0) / nfs))
-            if options.verbose and hasattr(sys.stdout, "flush"):
-                sys.stdout.flush()
+            logger.info("Pythonizing File: %-35s . . . .        (%.1f%%)" % (bname, 100.0 * (nf + 1.0) / nfs))
             old_stderr = sys.stdout
             stream = io.StringIO()
             sys.stdout = stream
             try:
                 pythonize(filename, destname, destname + ".debug")
             except Exception:
-                print("Error al pythonificar %r:" % filename)
-                print(traceback.format_exc())
+                logger.exception("Error al pythonificar %r:" % filename)
             sys.stdout = old_stderr
             text = stream.getvalue()
             if len(text) > 2:
-                print("%s: " % bname + ("\n%s: " % bname).join(text.splitlines()))
+                logger.info("%s: " % bname + ("\n%s: " % bname).join(text.splitlines()))
 
     else:
         if options.cache:
@@ -697,26 +674,18 @@ def execute(options, args):
         nfs = len(args)
         for nf, filename in enumerate(args):
             bname = os.path.basename(filename)
-            if options.verbose:
-                sys.stdout.write("Parsing File: %-35s . . . .        (%.1f%%)    " % (bname, 100.0 * (nf + 1.0) / nfs))
-            if options.verbose and hasattr(sys.stdout, "flush"):
-                sys.stdout.flush()
+            logger.info("Parsing File: %-35s . . . .        (%.1f%%)" % (bname, 100.0 * (nf + 1.0) / nfs))
             try:
                 filecontent = open(filename, "r", encoding="latin-1").read()
-                filecontent = flscriptparse.cleanNoPythonNever(filecontent)
-                if options.clean_no_python:
-                    filecontent = flscriptparse.cleanNoPython(filecontent)
-            except Exception as e:
-                print("Error: No se pudo abrir fichero %-35s          \n" % (repr(filename)), e)
+            except Exception:
+                logger.exception("Error: No se pudo abrir fichero %s", filename)
                 continue
             prog = flscriptparse.parse(filecontent)
-            if options.verbose:
-                sys.stdout.write("\r")
             if not prog:
-                print("Error: No se pudo abrir %-35s          \n" % (repr(filename)))
+                logger.error("Error: No se pudo abrir %s" % (repr(filename)))
                 continue
             if prog["error_count"] > 0:
-                print("Encontramos %d errores parseando: %-35s          \n" % (prog["error_count"], repr(filename)))
+                logger.error("Encontramos %d errores parseando: %-35s" % (prog["error_count"], repr(filename)))
                 continue
             if not options.toxml:
                 # Si no se quiere guardar resultado, no hace falta calcular mas
@@ -726,15 +695,14 @@ def execute(options, args):
             try:
                 tree_data = flscriptparse.calctree(prog, alias_mode=0)
             except Exception:
-                print("Error al convertir a XML %r:" % bname)
-                print("\n".join(traceback.format_exc().splitlines()[-7:]))
+                logger.exception("Error al convertir a XML %r:" % bname)
 
             if not tree_data:
-                print("No se pudo parsear %-35s          \n" % (repr(filename)))
+                logger.error("No se pudo parsear %s" % (repr(filename)))
                 continue
             ast = post_parse(tree_data)
             if ast is None:
-                print("No se pudo analizar %-35s          \n" % (repr(filename)))
+                logger.error("No se pudo analizar %s" % (repr(filename)))
                 continue
             if options.storepath:
                 destname = os.path.join(options.storepath, bname + ".xml")

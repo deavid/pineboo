@@ -8,6 +8,7 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.interfaces import IFormRecordDB
 import pineboolib
 
 import traceback
@@ -33,7 +34,7 @@ edición de registros definidos en los metadatos
 """
 
 
-class FLFormRecordDB(FLFormDB):
+class FLFormRecordDB(IFormRecordDB, FLFormDB):
 
     """
     Boton Aceptar
@@ -215,7 +216,7 @@ class FLFormRecordDB(FLFormDB):
 
         if self.bottomToolbar and self.toolButtonClose:
             self.toolButtonClose.hide()
-            
+
         self.bottomToolbar = QtWidgets.QFrame()
         self.bottomToolbar.setMinimumSize(self.iconSize)
         self.bottomToolbar.layout = QtWidgets.QHBoxLayout()

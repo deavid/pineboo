@@ -3,16 +3,9 @@ import os
 import re
 import logging
 import sys
-import traceback
-from io import StringIO
-
-from xml import etree
 from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
-
-import pineboolib
-from pineboolib.fllegacy.flsettings import FLSettings
 
 logger = logging.getLogger(__name__)
 
@@ -33,69 +26,9 @@ def auto_qt_translate_text(text):
 aqtt = auto_qt_translate_text
 
 
-"""
-filedir(path1[, path2, path3 , ...])
-@param array de carpetas de la ruta
-@return devuelve la ruta absoluta resultado de concatenar los paths que se le pasen y aplicarlos desde la ruta del proyecto.
-Es útil para especificar rutas a recursos del programa.
-"""
-
-
-def filedir(*path):
-    base_dir = getattr(pineboolib, "base_dir", None)
-    if not base_dir:
-        base_dir = os.path.dirname(__file__)
-
-        if getattr(sys, "frozen", False):
-            if base_dir.startswith(":"):
-                base_dir = ".%s" % base_dir[1:]
-
-    ruta_ = os.path.realpath(os.path.join(base_dir, *path))
-    return ruta_
-
-
-"""
-Calcula la ruta de una carpeta
-@param x. str o array con la ruta de la carpeta
-@return str con ruta absoluta a una carpeta
-"""
-
-
-def _dir(*x):
-    return os.path.join(pineboolib.project.tmpdir, *x)
-
-
-"""
-Retorna el primer fichero existente de un grupo de ficheros
-@return ruta al primer fichero encontrado
-"""
-
-
-def coalesce_path(*filenames):
-    for filename in filenames:
-        if filename is None:
-            return None
-        if filename in pineboolib.project.files:
-            return pineboolib.project.files[filename].path()
-    logger.error("Ninguno de los ficheros especificados ha sido encontrado en el proyecto: %s", repr(filenames), stack_info=False)
-
-
-"""
-Retorna el primer fichero existente de un grupo de ficheros
-@return ruta al fichero
-"""
-
-
-def _path(filename, showNotFound=True):
-    if filename not in pineboolib.project.files:
-        if showNotFound:
-            logger.error("Fichero %s no encontrado en el proyecto.", filename, stack_info=False)
-        return None
-    return pineboolib.project.files[filename].path()
-
-
 def one(x, default=None):
-    """ Se le pasa una lista de elementos (normalmente de un xml) y devuelve el primero o None; sirve para ahorrar try/excepts y limpiar código"""
+    """ Se le pasa una lista de elementos (normalmente de un xml) y devuelve el primero o None;
+    sirve para ahorrar try/excepts y limpiar código"""
     try:
         return x[0]
     except IndexError:
@@ -221,7 +154,7 @@ def trace_function(f):
     return wrapper
 
 
-class downloadManager(QObject):
+class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
     manager = None
     currentDownload = None
     reply = None
@@ -297,17 +230,6 @@ class downloadManager(QObject):
             self.result = reply.errorString()
 
 
-def download_files():
-    dir_ = filedir("forms")
-    if os.path.exists(dir_):
-        return
-
-    copy_dir_recursive(":/pineboolib", filedir("../pineboolib"))
-    copy_dir_recursive(":/share", filedir("../share"))
-    if not os.path.exists(filedir("../tempdata")):
-        os.mkdir(filedir("../tempdata"))
-
-
 def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
     dir = QDir()
     dir.setPath(from_dir)
@@ -347,30 +269,6 @@ def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
     return True
 
 
-def cacheXPM(value):
-    file_name = None
-    if value:
-        xpm_name = value[: value.find("[]")]
-        xpm_name = xpm_name[xpm_name.rfind(" ") + 1 :]
-        from pineboolib.pncontrolsfactory import aqApp
-
-        cache_dir = "%s/cache/%s/cacheXPM" % (aqApp.tmp_dir(), aqApp.db().DBName())
-        if not os.path.exists(cache_dir):
-            os.mkdir(cache_dir)
-
-        if value.find("cacheXPM") > -1:
-            file_name = value
-        else:
-            file_name = "%s/%s.xpm" % (cache_dir, xpm_name)
-
-        if not os.path.exists(file_name) or FLSettings().readBoolEntry("ebcomportamiento/no_img_cached", False):
-            f = open(file_name, "w")
-            f.write(value)
-            f.close()
-
-    return file_name
-
-
 def text2bool(text):
     text = str(text).strip().lower()
     if text.startswith("t"):
@@ -398,44 +296,6 @@ def text2bool(text):
     raise ValueError("Valor booleano no comprendido '%s'" % text)
 
 
-def parseTable(nombre, contenido, encoding="UTF-8", remove_blank_text=True):
-    file_alike = StringIO(contenido)
-
-    # parser = etree.XMLParser(
-    #    ns_clean=True,
-    #    encoding=encoding,
-    #    recover=False,
-    #    remove_blank_text=remove_blank_text,
-    # )
-    try:
-        # tree = etree.parse(file_alike, parser)
-        tree = etree.ElementTree.parse(file_alike)
-    except Exception:
-        print("Error al procesar tabla:", nombre)
-        print(traceback.format_exc())
-        return None
-    root = tree.getroot()
-
-    obj_name = root.find("name")
-    query = root.find("query")
-    settings = FLSettings()
-    if query is not None:
-        if query.text != nombre:
-
-            if settings.readBoolEntry("application/isDebuggerMode", False):
-                logger.warning(
-                    "WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)" % (obj_name.text, nombre)
-                )
-            query.text = nombre
-    elif obj_name.text != nombre:
-        if settings.readBoolEntry("application/isDebuggerMode", False):
-            logger.warning(
-                "WARN: Nombre de tabla %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de tabla)" % (obj_name.text, nombre)
-            )
-        obj_name.text = nombre
-    return getTableObj(tree, root)
-
-
 def getTableObj(tree, root):
     table = Struct()
     table.xmltree = tree
@@ -455,34 +315,6 @@ def getTableObj(tree, root):
     table.pk = []
     table.fields_idx = {}
     return table
-
-
-"""
-Guarda la geometría de una ventana
-@param name, Nombre de la ventana
-@param geo, QSize con los valores de la ventana
-"""
-
-
-def saveGeometryForm(name, geo):
-    from pineboolib.pncontrolsfactory import aqApp
-
-    name = "geo/%s/%s" % (aqApp.db().DBName(), name)
-    FLSettings().writeEntry(name, geo)
-
-
-"""
-Carga la geometría de una ventana
-@param name, Nombre de la ventana
-@return QSize con los datos de la geometríca de la ventana guardados.
-"""
-
-
-def loadGeometryForm(name):
-    from pineboolib.pncontrolsfactory import aqApp
-
-    name = "geo/%s/%s" % (aqApp.db().DBName(), name)
-    return FLSettings().readEntry(name, None)
 
 
 def ustr(*t1):
@@ -525,76 +357,6 @@ class StructMyDict(dict):
         self[name] = value
 
 
-DEPENDENCIES_CHECKED = {}
-
-
-def checkDependencies(dict_, exit=True):
-
-    from importlib import import_module
-
-    dependences = []
-    error = []
-    mod_ver = None
-    mod_ = None
-    for key in dict_.keys():
-
-        try:
-            if key != "Python":
-                mod_ = import_module(key)
-            if key == "ply":
-                version_check(key, mod_.__version__, "3.9")
-            if key == "Python":
-                version_check(key, sys.version[: sys.version.find("(")], "3.6")
-                mod_ver = sys.version[: sys.version.find("(")]
-            elif key == "Pillow":
-                version_check(key, mod_.__version__, "5.1.0")
-            elif key == "fpdf":
-                version_check(key, mod_.__version__, "1.7.3")
-            elif key == "odf":
-                from odf import namespaces
-
-                mod_ver = namespaces.__version__
-            elif key == "PyQt5.QtCore":
-                version_check("PyQt5", mod_.QT_VERSION_STR, "5.11")
-                mod_ver = mod_.QT_VERSION_STR
-
-            if mod_ver is None:
-                mod_ver = getattr(mod_, "__version__", None) or getattr(mod_, "version", "???")
-
-            # settings = FLSettings()
-            # if settings.readBoolEntry("application/isDebuggerMode", False):
-            # if not key in DEPENDENCIES_CHECKED.keys():
-            #    logger.warning("Versión de %s: %s", key, mod_ver)
-        except ImportError:
-            dependences.append(dict_[key])
-            # print(traceback.format_exc())
-            error.append(traceback.format_exc())
-
-    msg = ""
-    if len(dependences) > 0 and key not in DEPENDENCIES_CHECKED.keys():
-        logger.warning("HINT: Dependencias incumplidas:")
-        for dep in dependences:
-            logger.warning("HINT: Instale el paquete %s" % dep)
-            msg += "Instale el paquete %s.\n%s" % (dep, error)
-            if dep == "pyfpdf":
-                msg += "\n\n\n Use pip3 install -i https://test.pypi.org/simple/ pyfpdf==1.7.3"
-
-        if exit:
-            if getattr(pineboolib.project, "_DGI", None):
-                if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
-                    from pineboolib.pncontrolsfactory import QMessageBox
-
-                    QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, QMessageBox.Ok)
-
-            if not getattr(sys, "frozen", False):
-                sys.exit(32)
-
-    if key not in DEPENDENCIES_CHECKED.keys():
-        DEPENDENCIES_CHECKED[key] = mod_ver
-
-    return len(dependences) == 0
-
-
 def version_check(mod_name, mod_ver, min_ver):
     """Compare two version numbers and raise a warning if "minver" is not met."""
     if version_normalize(mod_ver) < version_normalize(min_ver):
@@ -604,13 +366,6 @@ def version_check(mod_name, mod_ver, min_ver):
 def version_normalize(v):
     """Normalize version string numbers like 3.10.1 so they can be compared."""
     return [int(x) for x in re.sub(r"(\.0+)*$", "", v).split(".")]
-
-
-def convertFLAction(action):
-    if action.name() in pineboolib.project.actions.keys():
-        return pineboolib.project.actions[action.name()]
-    else:
-        return None
 
 
 def convert2FLAction(action):
@@ -646,7 +401,11 @@ def load2xml(form_path_or_str):
     """
     try:
         parser = ET.XMLParser(html=0)
-        if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE KugarData") > -1 or form_path_or_str.find("DOCTYPE svg") > -1:
+        if (
+            form_path_or_str.find("KugarTemplate") > -1
+            or form_path_or_str.find("DOCTYPE KugarData") > -1
+            or form_path_or_str.find("DOCTYPE svg") > -1
+        ):
             form_path_or_str = parse_for_duplicates(form_path_or_str)
             ret = ET.fromstring(form_path_or_str, parser)
         else:
@@ -654,7 +413,11 @@ def load2xml(form_path_or_str):
     except Exception:
         try:
             parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
-            if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE KugarData") > -1 or form_path_or_str.find("DOCTYPE svg") > -1:
+            if (
+                form_path_or_str.find("KugarTemplate") > -1
+                or form_path_or_str.find("DOCTYPE KugarData") > -1
+                or form_path_or_str.find("DOCTYPE svg") > -1
+            ):
                 form_path_or_str = parse_for_duplicates(form_path_or_str)
                 ret = ET.fromstring(form_path_or_str, parser)
             else:
@@ -737,10 +500,6 @@ def parse_for_duplicates(text):
 
     # print(ret_)
     return ret_
-
-
-def imFrozen():
-    return getattr(sys, "frozen", False)
 
 
 """
@@ -1028,3 +787,41 @@ def get_tipo_aqnext(tipo):
 def create_dict(method, fun, id, arguments=[]):
     data = [{"function": fun, "arguments": arguments, "id": id}]
     return {"method": method, "params": data, "jsonrpc": "2.0", "id": id}
+
+
+def is_deployed(self):
+    """Returns True only if the code is running inside a PyInstaller bundle"""
+    import sys
+
+    return getattr(sys, "frozen", False)
+
+
+def get_base_dir():
+    base_dir = os.path.dirname(__file__)
+
+    if is_deployed():
+        if base_dir.startswith(":"):
+            base_dir = ".%s" % base_dir[1:]
+
+    return os.path.realpath(base_dir)
+
+
+def filedir(*path):
+    """
+    filedir(path1[, path2, path3 , ...])
+    @param array de carpetas de la ruta
+    @return devuelve la ruta absoluta resultado de concatenar los paths que se le pasen y aplicarlos desde la ruta del proyecto.
+    Es útil para especificar rutas a recursos del programa.
+    """
+    ruta_ = os.path.realpath(os.path.join(get_base_dir(), *path))
+    return ruta_
+
+
+def download_files():
+    if os.path.exists(filedir("forms")):
+        return
+
+    copy_dir_recursive(":/pineboolib", filedir("../pineboolib"))
+    copy_dir_recursive(":/share", filedir("../share"))
+    if not os.path.exists(filedir("../tempdata")):
+        os.mkdir(filedir("../tempdata"))

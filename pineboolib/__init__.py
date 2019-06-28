@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
 """Módulo base para la ejecución de pineboo.
 Librería orientada a emular Eneboo desde python."""
-project = None
-no_python_cache = False
+from .utils_base import is_deployed  # noqa: F401

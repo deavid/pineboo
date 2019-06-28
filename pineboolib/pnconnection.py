@@ -101,7 +101,13 @@ class PNConnection(QtCore.QObject):
             name_conn = None
 
         self.connAux[name] = PNConnection(
-            self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password, self.driverSql.nameToAlias(self.driverName()), name_conn
+            self.db_name,
+            self.db_host,
+            self.db_port,
+            self.db_userName,
+            self.db_password,
+            self.driverSql.nameToAlias(self.driverName()),
+            name_conn,
         )
         return self.connAux[name]
 
@@ -288,7 +294,12 @@ class PNConnection(QtCore.QObject):
             return False
 
         cancel = False
-        if self.interactiveGUI() and cur.d.modeAccess_ in (FLSqlCursor.Insert, FLSqlCursor.Edit) and cur.isModifiedBuffer() and cur.d.askForCancelChanges_:
+        if (
+            self.interactiveGUI()
+            and cur.d.modeAccess_ in (FLSqlCursor.Insert, FLSqlCursor.Edit)
+            and cur.isModifiedBuffer()
+            and cur.d.askForCancelChanges_
+        ):
             import pineboolib
 
             if pineboolib.project._DGI.localDesktop():
@@ -308,7 +319,11 @@ class PNConnection(QtCore.QObject):
             if cur.d.transactionsOpened_:
                 trans = cur.d.transactionsOpened_.pop()
                 if not trans == self.transaction_:
-                    logger.info("FLSqlDatabase: El cursor va a deshacer la transacción %s pero la última que inició es la %s", self.transaction_, trans)
+                    logger.info(
+                        "FLSqlDatabase: El cursor va a deshacer la transacción %s pero la última que inició es la %s",
+                        self.transaction_,
+                        trans,
+                    )
             else:
                 logger.info("FLSqlDatabaser : El cursor va a deshacer la transacción %s pero no ha iniciado ninguna", self.transaction_)
 

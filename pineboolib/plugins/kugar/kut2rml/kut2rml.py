@@ -15,6 +15,7 @@ pageFormat_ = []
 
 
 class kut2rml(object):
+    logger = logging.getLogger("kut2rml")
     rml_ = None
     header_ = None
     repeatHeader_ = False
@@ -38,15 +39,14 @@ class kut2rml(object):
         dict_ = {"z3c.rml": "z3c.rml"}
         checkDependencies(dict_)
         self.rml_ = Element(None)
-        self.logger = logging.getLogger("kut2rml")
         self.correccionAncho_ = 0.927
 
     def parse(self, name, kut, dataString):
-        if not pineboolib.project._DGI.isDeployed():
-            from reportlab.pdfbase import pdfmetrics
-        else:
+        if pineboolib.is_deployed():
+            self.logger.error("Reportlab not available for Bundles")
             return None
 
+        from reportlab.pdfbase import pdfmetrics
         from pineboolib.plugins.kugar.parsertools import parsertools
 
         self._parser_tools = parsertools()
@@ -500,12 +500,14 @@ class kut2rml(object):
 
 
 class parsePDF(object):
+    logger = logging.getLogger("parsePDF")
+
     def parse(self, xml, filename):
-        print(pineboolib.project._DGI.isDeployed())
-        if not pineboolib.project._DGI.isDeployed():
-            from z3c.rml import rml2pdf
-        else:
+        if pineboolib.is_deployed():
+            self.logger.error("RML2PDF not available on Bundles")
             return
+
+        from z3c.rml import rml2pdf
 
         res_ = rml2pdf.parseString(xml).read()
         with open(filename, "wb") as w:

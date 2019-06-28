@@ -266,7 +266,9 @@ class SysType(object):
             if not conn_db.isOpen():
                 conn_db.driverName_ = aqApp.db().driverName_
                 conn_db.driverSql = aqApp.db().driverSql
-                conn_db.conn = conn_db.conectar(aqApp.db().db_name, aqApp.db().db_host, aqApp.db().db_port, aqApp.db().db_userName, aqApp.db().db_password)
+                conn_db.conn = conn_db.conectar(
+                    aqApp.db().db_name, aqApp.db().db_host, aqApp.db().db_port, aqApp.db().db_userName, aqApp.db().db_password
+                )
                 if conn_db.conn is False:
                     return False
 
@@ -491,7 +493,9 @@ def solve_connection(sender, signal, receiver, slot):
                 return False
         return oSignal, oSlot
     else:
-        logger.error("Al realizar connect %s:%s -> %s:%s ; " "el slot no se reconoce y el receptor no es QObject.", sender, signal, receiver, slot)
+        logger.error(
+            "Al realizar connect %s:%s -> %s:%s ; " "el slot no se reconoce y el receptor no es QObject.", sender, signal, receiver, slot
+        )
     return False
 
 

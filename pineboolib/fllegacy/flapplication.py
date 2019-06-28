@@ -98,7 +98,7 @@ class FLApplication(QtCore.QObject):
         self.show_debug_ = True  # FIXME
         self.script_entry_function_ = None
         self.last_text_caption_ = None
-        
+
         self.mode_and_version_ = "Database Admin" if FLSettings().readBoolEntry("application/dbadmin_enabled", False) else "Quick"
 
         # self.fl_factory_ = FLObjectFactory() #FIXME para un futuro
@@ -261,7 +261,18 @@ class FLApplication(QtCore.QObject):
         pass
 
     def init(self):
-        from pineboolib.pncontrolsfactory import AQS, QWidget, QVBoxLayout, QPushButton, QKeySequence, QMenu, QAction, QSizePolicy, QToolBox, QIcon
+        from pineboolib.pncontrolsfactory import (
+            AQS,
+            QWidget,
+            QVBoxLayout,
+            QPushButton,
+            QKeySequence,
+            QMenu,
+            QAction,
+            QSizePolicy,
+            QToolBox,
+            QIcon,
+        )
         from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
 
         self.dict_main_widgets_ = {}
@@ -521,7 +532,7 @@ class FLApplication(QtCore.QObject):
 
         for it in self.db().managerModules().listIdAreas():
             if it == "sys" and not FLSettings().readBoolEntry("application/dbadmin_enabled", False):
-                    continue
+                continue
             descript_area = self.db().managerModules().idAreaToDescription(it)
             new_area_bar = QToolBar(self.tr(descript_area), self.container_)
             new_area_bar.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
@@ -542,7 +553,6 @@ class FLApplication(QtCore.QObject):
                 if str(chr(c)) == "Q":
                     c += 1
                     continue
-                
 
                 if mod == "sys":
                     if FLSettings().readBoolEntry("application/isDebuggerMode", False):
@@ -1063,10 +1073,13 @@ class FLApplication(QtCore.QObject):
 
         if value:
             self.last_text_caption_ = value
-        
+
+        # FIXME: main_form_name Belongs to loader.main; will be removed
         if pineboolib.project.main_form_name != "eneboo_mdi":
-            self.mainWidget().setWindowTitle("Pineboo %s v%s - %s" % (self.mode_and_version_, pineboolib.project.version, self.last_text_caption_))
-        
+            self.mainWidget().setWindowTitle(
+                "Pineboo %s v%s - %s" % (self.mode_and_version_, pineboolib.project.version, self.last_text_caption_)
+            )
+
         else:
             descript_area = self.db().managerModules().idAreaToDescription(self.db().managerModules().activeIdArea())
             descript_module = self.db().managerModules().idModuleToDescription(self.main_widget_.objectName())
@@ -1331,7 +1344,9 @@ class FLApplication(QtCore.QObject):
 
         from pineboolib.pncontrolsfactory import QMessageBox
 
-        ret = QMessageBox.information(self.mainWidget(), self.tr("Salir ..."), self.tr("¿ Quiere salir de la aplicación ?"), QMessageBox.Yes, QMessageBox.No)
+        ret = QMessageBox.information(
+            self.mainWidget(), self.tr("Salir ..."), self.tr("¿ Quiere salir de la aplicación ?"), QMessageBox.Yes, QMessageBox.No
+        )
         return ret == QMessageBox.Yes
 
     def writeState(self):
