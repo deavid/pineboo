@@ -25,21 +25,6 @@ def startup():
 
     options = parse_options()
 
-    # PyQt 5.5 o superior aborta la ejecución si una excepción en un slot()
-    # no es capturada dentro de la misma; el programa falla con SegFault.
-    # Aunque esto no debería ocurrir, y se debería prevenir lo máximo posible
-    # es bastante incómodo y genera problemas graves para detectar el problema.
-    # Agregamos sys.excepthook para controlar esto y hacer que PyQt5 no nos
-    # dé un segfault, aunque el resultado no sea siempre correcto:
-    sys.excepthook = traceback.print_exception
-    # -------------------
-
-    # Corregir Control-C:
-    import signal
-
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-    # -------------------
-
     ret = exec_main(options)
     # setup()
     # exec_()
@@ -57,6 +42,21 @@ def exec_main(options):
     Handles optionlist and help.
     Also initializes all the objects
     """
+    # PyQt 5.5 o superior aborta la ejecución si una excepción en un slot()
+    # no es capturada dentro de la misma; el programa falla con SegFault.
+    # Aunque esto no debería ocurrir, y se debería prevenir lo máximo posible
+    # es bastante incómodo y genera problemas graves para detectar el problema.
+    # Agregamos sys.excepthook para controlar esto y hacer que PyQt5 no nos
+    # dé un segfault, aunque el resultado no sea siempre correcto:
+    sys.excepthook = traceback.print_exception
+    # -------------------
+
+    # Corregir Control-C:
+    import signal
+
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    # -------------------
+
     # import pineboolib.pnapplication
     # import pineboolib.dlgconnect
     # from pineboolib.utils import filedir
@@ -108,10 +108,9 @@ def exec_main(options):
             else _DGI.mainForm()
         )
         project.main_window = project.main_form.mainWindow
+        project.main_form.MainForm.setDebugLevel(options.debug_level)
 
     project.setDebugLevel(options.debug_level)
-    if _DGI.useDesktop():
-        project.main_form.MainForm.setDebugLevel(options.debug_level)
 
     if options.project:  # FIXME: --project debería ser capaz de sobreescribir algunas opciones
         if not options.project.endswith(".xml"):
