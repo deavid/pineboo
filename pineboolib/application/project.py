@@ -93,6 +93,11 @@ class Project(object):
             # FIXME: Maybe it is a good idea to call this regardless of localDesktop
             self._DGI.extraProjectInit()
 
+        from pineboolib import pncontrolsfactory
+
+        # FIXME: Find a saner way to do this
+        pncontrolsfactory.reload_from_DGI()
+
     def setDebugLevel(self, q: int) -> None:
         """
         Especifica el nivel de debug de la aplicación

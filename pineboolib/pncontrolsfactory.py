@@ -29,129 +29,157 @@ Devuelve un objecto a partir de su nombre
 """
 
 
+class ObjectNotFoundInCurrentDGI(object):
+    pass
+
+
+class ObjectNotFoundDGINotLoaded(object):
+    pass
+
+
 def resolveObject(name: str) -> Any:
+    if not pineboolib.project._DGI:
+        return ObjectNotFoundDGINotLoaded
     obj_ = getattr(pineboolib.project._DGI, name, None)
     if obj_:
         return obj_
 
     logger.warning("el objeto %s no se encuentra en el dgi %s", name, pineboolib.project._DGI.alias().lower())
+    return ObjectNotFoundInCurrentDGI
 
 
-# Clases Qt
-QComboBox = resolveObject("QComboBox")
-QTable = resolveObject("QTable")
-QLayoutWidget = resolveObject("QWidget")
-QToolButton = resolveObject("QToolButton")
-QTabWidget = resolveObject("QTabWidget")
-QLabel = resolveObject("QLabel")
-QGroupBox = resolveObject("QGroupBox")
-QListView = resolveObject("QListView")
-QPushButton = resolveObject("QPushButton")
-QTextEdit = resolveObject("QTextEdit")
-QLineEdit = resolveObject("QLineEdit")
-QDateEdit = resolveObject("QDateEdit")
-QTimeEdit = resolveObject("QTimeEdit")
-QCheckBox = resolveObject("QCheckBox")
-QWidget = resolveObject("QWidget")
-QtWidgets = resolveObject("QtWidgets")
-QColor = resolveObject("QColor")
-QMessageBox = resolveObject("MessageBox")
-QButtonGroup = resolveObject("QButtonGroup")
-QDialog = resolveObject("QDialog")
-QVBoxLayout = resolveObject("QVBoxLayout")
-QHBoxLayout = resolveObject("QHBoxLayout")
-QFrame = resolveObject("QFrame")
-QMainWindow = resolveObject("QMainWindow")
-QSignalMapper = resolveObject("QSignalMapper")
-QDomDocument = resolveObject("QDomDocument")
-QMenu = resolveObject("QMenu")
-QToolBar = resolveObject("QToolBar")
-QListWidgetItem = resolveObject("QListWidgetItem")
-QListViewWidget = resolveObject("QListWidget")
-QPixmap = resolveObject("QPixmap")
-QImage = resolveObject("QImage")
-QIcon = resolveObject("QIcon")
-QAction = resolveObject("QAction")
-QActionGroup = resolveObject("QActionGroup")
-QTreeWidget = resolveObject("QTreeWidget")
-QTreeWidgetItem = resolveObject("QTreeWidgetItem")
-QTreeWidgetItemIterator = resolveObject("QTreeWidgetItemIterator")
-QDataView = resolveObject("QWidget")
-QProcess = resolveObject("Process")
-QByteArray = resolveObject("QByteArray")
-QRadioButton = resolveObject("QRadioButton")
-QSpinBox = resolveObject("FLSpinBox")
-QInputDialog = resolveObject("QInputDialog")
-QLineEdit = resolveObject("QLineEdit")
-QApplication = resolveObject("QApplication")
-qApp = resolveObject("qApp")
-QStyleFactory = resolveObject("QStyleFactory")
-QFontDialog = resolveObject("QFontDialog")
-QDockWidget = resolveObject("QDockWidget")
-QMdiArea = resolveObject("QMdiArea")
-QMdiSubWindow = resolveObject("QMdiSubWindow")
-QKeySequence = resolveObject("QKeySequence")
-QSize = resolveObject("QSize")
-QSizePolicy = resolveObject("QSizePolicy")
-QToolBox = resolveObject("QToolBox")
-QPainter = resolveObject("QPainter")
-QBrush = resolveObject("QBrush")
-QProgressDialog = resolveObject("QProgressDialog")
-QFileDialog = resolveObject("QFileDialog")
+def reload_from_DGI():
+    # Clases Qt
+    global QComboBox, QTable, QLayoutWidget, QToolButton, QTabWidget, QLabel, QGroupBox, QListView, QPushButton, QTextEdit
+    global QLineEdit, QDateEdit, QTimeEdit, QCheckBox, QWidget, QtWidgets, QColor, QMessageBox, QButtonGroup, QDialog
+    global QVBoxLayout, QHBoxLayout, QFrame, QMainWindow, QSignalMapper, QDomDocument, QMenu, QToolBar, QListWidgetItem, QListViewWidget
+    global QPixmap, QImage, QIcon, QAction, QActionGroup, QTreeWidget, QTreeWidgetItem, QTreeWidgetItemIterator, QDataView
+    global QProcess, QByteArray, QRadioButton, QSpinBox, QInputDialog, QLineEdit, QApplication, qApp, QStyleFactory, QFontDialog
+    global QDockWidget, QMdiArea, QMdiSubWindow, QKeySequence, QSize, QSizePolicy, QToolBox, QPainter, QBrush, QProgressDialog, QFileDialog
+    # Clases FL
+    global FLLineEdit, FLTimeEdit, FLDateEdit, FLPixmapView, FLDomDocument, FLDomElement
+    global FLDomNode, FLDomNodeList, FLListViewItem, FLTable, FLDataTable, FLCheckBox, FLTextEditOutput
+    global FLSpinBox, FLTableDB, FLFieldDB, FLFormDB, FLFormRecordDB, FLFormSearchDB, FLDoubleValidator
+    global FLIntValidator, FLUIntValidator, FLCodBar, FLWidget, FLWorkSpace, FormDBWidget
+    # Clases QSA
+    global CheckBox, ComboBox, TextEdit, LineEdit, FileDialog, MessageBox, RadioButton, Color, Dialog
+    global Label, GroupBox, Process, SpinBox, Line, NumberEdit, DateEdit, TimeEdit
+    # Clases AQNext
+    global auth
+    # Clases Qt
+    QComboBox = resolveObject("QComboBox")
+    QTable = resolveObject("QTable")
+    QLayoutWidget = resolveObject("QWidget")
+    QToolButton = resolveObject("QToolButton")
+    QTabWidget = resolveObject("QTabWidget")
+    QLabel = resolveObject("QLabel")
+    QGroupBox = resolveObject("QGroupBox")
+    QListView = resolveObject("QListView")
+    QPushButton = resolveObject("QPushButton")
+    QTextEdit = resolveObject("QTextEdit")
+    QLineEdit = resolveObject("QLineEdit")
+    QDateEdit = resolveObject("QDateEdit")
+    QTimeEdit = resolveObject("QTimeEdit")
+    QCheckBox = resolveObject("QCheckBox")
+    QWidget = resolveObject("QWidget")
+    QtWidgets = resolveObject("QtWidgets")
+    QColor = resolveObject("QColor")
+    QMessageBox = resolveObject("MessageBox")
+    QButtonGroup = resolveObject("QButtonGroup")
+    QDialog = resolveObject("QDialog")
+    QVBoxLayout = resolveObject("QVBoxLayout")
+    QHBoxLayout = resolveObject("QHBoxLayout")
+    QFrame = resolveObject("QFrame")
+    QMainWindow = resolveObject("QMainWindow")
+    QSignalMapper = resolveObject("QSignalMapper")
+    QDomDocument = resolveObject("QDomDocument")
+    QMenu = resolveObject("QMenu")
+    QToolBar = resolveObject("QToolBar")
+    QListWidgetItem = resolveObject("QListWidgetItem")
+    QListViewWidget = resolveObject("QListWidget")
+    QPixmap = resolveObject("QPixmap")
+    QImage = resolveObject("QImage")
+    QIcon = resolveObject("QIcon")
+    QAction = resolveObject("QAction")
+    QActionGroup = resolveObject("QActionGroup")
+    QTreeWidget = resolveObject("QTreeWidget")
+    QTreeWidgetItem = resolveObject("QTreeWidgetItem")
+    QTreeWidgetItemIterator = resolveObject("QTreeWidgetItemIterator")
+    QDataView = resolveObject("QWidget")
+    QProcess = resolveObject("Process")
+    QByteArray = resolveObject("QByteArray")
+    QRadioButton = resolveObject("QRadioButton")
+    QSpinBox = resolveObject("FLSpinBox")
+    QInputDialog = resolveObject("QInputDialog")
+    QLineEdit = resolveObject("QLineEdit")
+    QApplication = resolveObject("QApplication")
+    qApp = resolveObject("qApp")
+    QStyleFactory = resolveObject("QStyleFactory")
+    QFontDialog = resolveObject("QFontDialog")
+    QDockWidget = resolveObject("QDockWidget")
+    QMdiArea = resolveObject("QMdiArea")
+    QMdiSubWindow = resolveObject("QMdiSubWindow")
+    QKeySequence = resolveObject("QKeySequence")
+    QSize = resolveObject("QSize")
+    QSizePolicy = resolveObject("QSizePolicy")
+    QToolBox = resolveObject("QToolBox")
+    QPainter = resolveObject("QPainter")
+    QBrush = resolveObject("QBrush")
+    QProgressDialog = resolveObject("QProgressDialog")
+    QFileDialog = resolveObject("QFileDialog")
 
-"""
-QIconSet = resolveObject("QIconSet")
-"""
-# Clases FL
-FLLineEdit = resolveObject("FLLineEdit")
-FLTimeEdit = resolveObject("FLTimeEdit")
-FLDateEdit = resolveObject("FLDateEdit")
-FLPixmapView = resolveObject("FLPixmapView")
-FLDomDocument = resolveObject("QDomDocument")
-FLDomElement = resolveObject("QDomElement")
-FLDomNode = resolveObject("QDomNode")
-FLDomNodeList = resolveObject("QDomNodeList")
-FLListViewItem = resolveObject("FLListViewItem")
-FLTable = resolveObject("QTable")
-FLDataTable = resolveObject("FLDataTable")
-FLCheckBox = resolveObject("FLCheckBox")
-FLTextEditOutput = resolveObject("FLTextEditOutput")
-FLSpinBox = resolveObject("FLSpinBox")
-FLTableDB = resolveObject("FLTableDB")
-FLFieldDB = resolveObject("FLFieldDB")
-FLFormDB = resolveObject("FLFormDB")
-FLFormRecordDB = resolveObject("FLFormRecordDB")
-FLFormSearchDB = resolveObject("FLFormSearchDB")
-FLDoubleValidator = resolveObject("FLDoubleValidator")
-FLIntValidator = resolveObject("FLIntValidator")
-FLUIntValidator = resolveObject("FLUIntValidator")
-FLCodBar = resolveObject("FLCodBar")
-FLWidget = resolveObject("FLWidget")
-FLWorkSpace = resolveObject("FLWorkSpace")
+    """
+    QIconSet = resolveObject("QIconSet")
+    """
+    # Clases FL
+    FLLineEdit = resolveObject("FLLineEdit")
+    FLTimeEdit = resolveObject("FLTimeEdit")
+    FLDateEdit = resolveObject("FLDateEdit")
+    FLPixmapView = resolveObject("FLPixmapView")
+    FLDomDocument = resolveObject("QDomDocument")
+    FLDomElement = resolveObject("QDomElement")
+    FLDomNode = resolveObject("QDomNode")
+    FLDomNodeList = resolveObject("QDomNodeList")
+    FLListViewItem = resolveObject("FLListViewItem")
+    FLTable = resolveObject("QTable")
+    FLDataTable = resolveObject("FLDataTable")
+    FLCheckBox = resolveObject("FLCheckBox")
+    FLTextEditOutput = resolveObject("FLTextEditOutput")
+    FLSpinBox = resolveObject("FLSpinBox")
+    FLTableDB = resolveObject("FLTableDB")
+    FLFieldDB = resolveObject("FLFieldDB")
+    FLFormDB = resolveObject("FLFormDB")
+    FLFormRecordDB = resolveObject("FLFormRecordDB")
+    FLFormSearchDB = resolveObject("FLFormSearchDB")
+    FLDoubleValidator = resolveObject("FLDoubleValidator")
+    FLIntValidator = resolveObject("FLIntValidator")
+    FLUIntValidator = resolveObject("FLUIntValidator")
+    FLCodBar = resolveObject("FLCodBar")
+    FLWidget = resolveObject("FLWidget")
+    FLWorkSpace = resolveObject("FLWorkSpace")
 
+    FormDBWidget = resolveObject("FormDBWidget")
+    # Clases QSA
+    CheckBox = resolveObject("CheckBox")
+    ComboBox = resolveObject("QComboBox")
+    TextEdit = QTextEdit
+    LineEdit = resolveObject("LineEdit")
+    FileDialog = resolveObject("FileDialog")
+    MessageBox = resolveObject("MessageBox")
+    RadioButton = resolveObject("RadioButton")
+    Color = QColor
+    Dialog = resolveObject("Dialog")
+    Label = resolveObject("QLabel")
+    GroupBox = resolveObject("GroupBox")
+    Process = resolveObject("Process")
+    SpinBox = resolveObject("FLSpinBox")
+    Line = resolveObject("QLine")
+    NumberEdit = resolveObject("NumberEdit")
+    DateEdit = resolveObject("QDateEdit")
+    TimeEdit = resolveObject("QTimeEdit")
 
-FormDBWidget = resolveObject("FormDBWidget")
-# Clases QSA
-CheckBox = resolveObject("CheckBox")
-ComboBox = resolveObject("QComboBox")
-TextEdit = QTextEdit
-LineEdit = resolveObject("LineEdit")
-FileDialog = resolveObject("FileDialog")
-MessageBox = resolveObject("MessageBox")
-RadioButton = resolveObject("RadioButton")
-Color = QColor
-Dialog = resolveObject("Dialog")
-Label = resolveObject("QLabel")
-GroupBox = resolveObject("GroupBox")
-Process = resolveObject("Process")
-SpinBox = resolveObject("FLSpinBox")
-Line = resolveObject("QLine")
-NumberEdit = resolveObject("NumberEdit")
-DateEdit = resolveObject("QDateEdit")
-TimeEdit = resolveObject("QTimeEdit")
-
-# Clases AQNext
-auth = resolveObject("auth")
+    # Clases AQNext
+    auth = resolveObject("auth")
 
 
 class SysType(object, metaclass=Singleton):
@@ -170,6 +198,12 @@ class SysType(object, metaclass=Singleton):
 
     def interactiveGUI(self):
         return aqApp.DGI().interactiveGUI()
+
+    def isNebulaBuild(self):
+        return False
+
+    def isQuickBuild(self):
+        return False
 
     def isLoadedModule(self, modulename: str) -> bool:
         return modulename in aqApp.db().managerModules().listAllIdModules()
@@ -565,3 +599,4 @@ from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData  # noqa:
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
 
 qsa_sys = SysType()
+reload_from_DGI()

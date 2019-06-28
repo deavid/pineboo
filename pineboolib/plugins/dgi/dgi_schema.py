@@ -149,6 +149,7 @@ class dgi_schema(object):
     def resolveObject(self, module_name, name):
         cls = None
         try:
+            # FIXME: Please, no.
             mod_ = import_module("pineboolib.plugins.dgi.dgi_%s.dgi_objects.%s" % (module_name, name.lower()))
             cls = getattr(mod_, name, None)
         except Exception:

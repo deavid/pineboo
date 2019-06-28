@@ -12,7 +12,6 @@ from PyQt5.QtWidgets import qApp
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.core.utils.utils_base import filedir, load2xml
 from pineboolib.application.utils.path import _path
-from pineboolib.fllegacy.flsettings import FLSettings
 
 
 logger = logging.getLogger(__name__)
@@ -38,7 +37,7 @@ class dgi_qt(dgi_schema):
 
     def __getattr__(self, name):
 
-        cls = super().resolveObject(self._name, name)
+        cls = self.resolveObject(self._name, name)
         if cls is None:
             mod_ = import_module(__name__)
             cls = getattr(mod_, name, None)
