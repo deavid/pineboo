@@ -326,7 +326,9 @@ class DlgConnect(QtWidgets.QWidget):
                         self.ui.leProfilePassword.setText(psP)
                         self.ui.cbAutoLogin.setChecked(False)
         else:
-            QMessageBox.information(self.ui, "Pineboo", "Tiene que volver a escribir las contraseñas\ndel perfil antes de guardar.", QtWidgets.QMessageBox.Ok)
+            QMessageBox.information(
+                self.ui, "Pineboo", "Tiene que volver a escribir las contraseñas\ndel perfil antes de guardar.", QtWidgets.QMessageBox.Ok
+            )
             self.ui.cbAutoLogin.setChecked(False)
 
         self.ui.leDescription.setText(self.ui.cbProfiles.currentText())
@@ -365,7 +367,9 @@ class DlgConnect(QtWidgets.QWidget):
             tree = ET.parse(fileName)
             root = tree.getroot()
         except Exception:
-            QMessageBox.warning(self.ui, "Pineboo", "El perfil %s no parece válido" % self.ui.cbProfiles.currentText(), QtWidgets.QMessageBox.Ok)
+            QMessageBox.warning(
+                self.ui, "Pineboo", "El perfil %s no parece válido" % self.ui.cbProfiles.currentText(), QtWidgets.QMessageBox.Ok
+            )
             return
 
         version = root.get("Version")
@@ -401,7 +405,9 @@ class DlgConnect(QtWidgets.QWidget):
 
     def change_profile_dir(self):
 
-        new_dir = QtWidgets.QFileDialog.getExistingDirectory(self.ui, self.tr("Carpeta profiles"), self.profile_dir, QtWidgets.QFileDialog.ShowDirsOnly)
+        new_dir = QtWidgets.QFileDialog.getExistingDirectory(
+            self.ui, self.tr("Carpeta profiles"), self.profile_dir, QtWidgets.QFileDialog.ShowDirsOnly
+        )
 
         if new_dir and new_dir is not self.profile_dir:
             FLSettings().writeEntry("ebcomportamiento/profiles_folder", new_dir)

@@ -1,11 +1,16 @@
+import logging
+
+logger = logging.getLogger("loader.conn_dialog")
+
+
 def show_connection_dialog(project, app):
     """Show the connection dialog, and configure the project accordingly."""
-    from pineboolib.dlgconnect import dlgconnect
+    from .dlgconnect import DlgConnect
 
-    connection_window = dlgconnect.DlgConnect(project._DGI)
+    connection_window = DlgConnect(project._DGI)
     connection_window.load()
     connection_window.show()
-    ret = app.exec_()
+    ret = app.exec_()  # FIXME: App should be started before this function
     if connection_window.close():
         # if connection_window.ruta:
         #    prjpath = connection_window.ruta
@@ -27,4 +32,7 @@ def show_connection_dialog(project, app):
                 connection_window.driveralias,
             )
         else:
+            # FIXME: Wrong context for sys.exit. Not this function's responsibility
+            import sys
+
             sys.exit(ret)

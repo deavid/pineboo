@@ -1,10 +1,15 @@
+import logging
+
+logger = logging.getLogger("loader.init_project")
+
+
 def init_project(DGI, splash, options, project, mainForm, app):
     """Initialize the project and start it."""
-    from PyQt5 import QtCore
+    # from PyQt5 import QtCore
 
-    if DGI.useDesktop() and DGI.localDesktop() and splash:
-        splash.showMessage("Iniciando proyecto ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-        DGI.processEvents()
+    # if DGI.useDesktop() and DGI.localDesktop() and splash:
+    #     splash.showMessage("Iniciando proyecto ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+    #     DGI.processEvents()
     logger.info("Iniciando proyecto ...")
 
     # Necesario para que funcione isLoadedModule ¿es este el mejor sitio?
@@ -27,9 +32,9 @@ def init_project(DGI, splash, options, project, mainForm, app):
         else:
             raise ValueError("Action name %s not found" % options.action)
 
-    if DGI.localDesktop() and splash:
-        splash.showMessage("Creando interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-        DGI.processEvents()
+    # if DGI.localDesktop() and splash:
+    #     splash.showMessage("Creando interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+    #     DGI.processEvents()
 
     if mainForm is not None:
         logger.info("Creando interfaz ...")
@@ -38,20 +43,25 @@ def init_project(DGI, splash, options, project, mainForm, app):
         ret = 0
 
     if options.preload:
+        import sys
+        from .preload import preload_actions
+
         preload_actions(project, options.forceload)
 
+        sys.exit(0)  # FIXME
+
     if mainForm is not None:
-        if DGI.localDesktop():
-            splash.showMessage("Abriendo interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-            DGI.processEvents()
+        # if DGI.localDesktop():
+        #     splash.showMessage("Abriendo interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+        #     DGI.processEvents()
 
         logger.info("Abriendo interfaz ...")
         main_window.show()
-        if DGI.localDesktop():
-            splash.showMessage("Listo ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-            DGI.processEvents()
-            # main_window.w_.activateWindow()
-        QtCore.QTimer.singleShot(1000, splash.hide)
+        # if DGI.localDesktop():
+        #     splash.showMessage("Listo ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+        #     DGI.processEvents()
+        #     # main_window.w_.activateWindow()
+        # QtCore.QTimer.singleShot(1000, splash.hide)
 
     if objaction:
         project.openDefaultForm(objaction.form())

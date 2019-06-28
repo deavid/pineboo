@@ -1,3 +1,8 @@
+import logging
+
+logger = logging.getLogger("loader.preload_actions")
+
+
 def preload_actions(project, forceload=None):
     """Preload actions for warming up the pythonizer cache.
 
@@ -13,6 +18,5 @@ def preload_actions(project, forceload=None):
         try:
             project.actions[action].load()
         except Exception:
-            print(traceback.format_exc())
+            logger.exception("Failure trying to load action %s", action)
             project.conn.conn.rollback()
-    sys.exit(0)

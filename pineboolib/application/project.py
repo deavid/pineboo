@@ -3,13 +3,12 @@ import time
 import logging
 from typing import List, Optional, Union
 
-from pineboolib.exceptions import CodeDoesNotBelongHereException
+from pineboolib.exceptions import CodeDoesNotBelongHereException, NotConnectedError
 from pineboolib.utils_base import filedir, Struct, cacheXPM, _dir
 from pineboolib.core.settings import config, settings
 from pineboolib.interfaces.dgi_schema import dgi_schema
 from pineboolib.pnsqldrivers import PNSqlDrivers
 
-from .structs import DBServer, DBAuth
 from .module import Module
 from .file import File
 
@@ -42,16 +41,14 @@ class Project(object):
     timer_ = None
     no_python_cache = False  # TODO: Fill this one instead
 
-    def __init__(self) -> None:
+    def __init__(self, connection) -> None:
         """
         Constructor
         """
+        self.conn = connection
         self._DGI = None
         self.tree = None
         self.root = None
-        self.dbserver = None
-        self.dbauth = None
-        self.dbname = None
         self.apppath = None
         self.tmpdir = None
         self.parser = None
@@ -105,97 +102,14 @@ class Project(object):
         """Devuelve el ACL cargado"""
         raise CodeDoesNotBelongHereException("ACL Does not belong to PROJECT. Go away.")
 
-    def load_db(self, dbname, host, port, user, passwd, driveralias):
-        """
-        Especifica los datos para luego conectarse a la BD.
-        @param dbname. Nombre de la BD.
-        @param host. Nombre del equipo anfitrión de la BD.
-        @param port. Puerto a usar para conectarse a la BD.
-        @param passwd. Contraseña de la BD.
-        @param driveralias. Alias del pluging a usar en la conexión
-        """
-        # FIXME: All those dbserver, dbauth and dbname should belong to a single object, not three.
-        # FIXME: Method name misleading: its called "load_db". but nothing is loaded from DB and no connect happens.
-        self.dbserver = DBServer()
-        self.dbserver.host = host
-        self.dbserver.port = port
-        self.dbserver.type = driveralias
-        self.dbauth = DBAuth()
-        self.dbauth.username = user
-        self.dbauth.password = passwd
-        self.dbname = dbname
-
-        # Why are those two part of load_db? Looks like we want to setup a new object.
-        self.actions = {}
-        self.tables = {}
-
-    def load(self, file_name: str) -> bool:
-        # FIXME: What this method loads, actually? what is the intent?
-        from xml.etree import ElementTree as ET
-        import hashlib
-
-        tree = ET.parse(file_name)
-        root = tree.getroot()
-
-        version = root.get("Version")
-        if version is None:
-            version = 1.0
-        else:
-            version = float(version)  # FIXME: Esto es muy mala idea. Tratar versiones como float causará problemas al comparar.
-
-        for profile in root.findall("profile-data"):
-            invalid_password = False
-            if version == 1.0:
-                if getattr(profile.find("password"), "text", None) is not None:
-                    invalid_password = True
-            else:
-                profile_pwd = getattr(profile.find("password"), "text", None)
-                user_pwd = hashlib.sha256("".encode()).hexdigest()
-                if profile_pwd != user_pwd:
-                    invalid_password = True
-
-            if invalid_password:
-                self.logger.warning("No se puede cargar un profile con contraseña por consola")
-                return False
-
-        self.dbname = root.find("database-name").text
-        for db in root.findall("database-server"):
-            self.dbserver = DBServer()
-            self.dbserver.host = db.find("host").text
-            self.dbserver.port = db.find("port").text
-            self.dbserver.type = db.find("type").text
-            if self.dbserver.type not in self.sql_drivers_manager.aliasList():
-                self.logger.warning("Esta versión de pineboo no soporta el driver '%s'" % self.dbserver.type)
-                self.database = None
-                return False
-
-        for credentials in root.findall("database-credentials"):
-            self.dbauth = DBAuth()
-            self.dbauth.username = credentials.find("username").text
-            ps = credentials.find("password").text
-            if ps:
-                import base64
-
-                self.dbauth.password = base64.b64decode(ps).decode()
-            else:
-                self.dbauth.password = ""
-
-        return True
-
     def run(self) -> bool:
         """Arranca el proyecto. Conecta a la BD y carga los datos
         """
-        # FIXME: function too complex.
-        if not self.conn:
-            # FIXME: Connecting is not Project responsibility
-            from pineboolib.pnconnection import PNConnection
+        self.actions = {}
+        self.tables = {}
 
-            self.conn = PNConnection(
-                self.dbname, self.dbserver.host, self.dbserver.port, self.dbauth.username, self.dbauth.password, self.dbserver.type
-            )
-
-        if self.conn.conn is False:
-            return False
+        if not self.conn or not self.conn.conn:
+            raise NotConnectedError("Cannot execute Pineboo Project without a connection in place")
 
         from pineboolib.pnobjectsfactory import load_models
         from pineboolib.pncontrolsfactory import aqApp

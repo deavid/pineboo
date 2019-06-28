@@ -4,9 +4,8 @@ import traceback
 import logging
 
 from pineboolib.core.utils import is_deployed
-from pineboolib.application.project import Project
 from pineboolib.core.settings import config
-
+from pineboolib.application.project import Project
 from .dgi import load_dgi
 
 logger = logging.getLogger(__name__)
@@ -58,19 +57,12 @@ def exec_main(options):
     # -------------------
 
     # import pineboolib.pnapplication
-    # import pineboolib.dlgconnect
     # from pineboolib.utils import filedir
     # from pineboolib.pnsqldrivers import PNSqlDrivers
 
     # FIXME: This function should not initialize the program
 
     # TODO: Refactorizar función en otras más pequeñas
-
-    if is_deployed():
-        logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-        from pineboolib.utils_base import download_files
-
-        download_files()
 
     if options.trace_debug:
         from pineboolib.utils import traceit
@@ -81,8 +73,30 @@ def exec_main(options):
 
         monkey_patch_connect()
 
-    project = Project()
+    if is_deployed():
+        logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+        from pineboolib.utils_base import download_files
+
+        download_files()
+
     _DGI = load_dgi(options.dgi, options.dgi_parameter)
+
+    from .connection import config_dbconn, connect_to_db, DEFAULT_SQLITE_CONN
+
+    configdb = config_dbconn(options)
+
+    if not configdb and _DGI.useDesktop() and _DGI.localDesktop():
+        if not _DGI.mobilePlatform():
+            from conn_dialog import show_connection_dialog
+
+            show_connection_dialog(project, app)
+        else:
+            configdb = DEFAULT_SQLITE_CONN
+    else:
+        raise ValueError("No connection given. Nowhere to connect. Cannot start.")
+
+    project = Project(connection=connect_to_db(configdb))
+    project.setDebugLevel(options.debug_level)
     project.init_dgi(_DGI)
     project.no_python_cache = options.no_python_cache
 
@@ -102,6 +116,8 @@ def exec_main(options):
 
     if _DGI.useDesktop():
         # FIXME: What is happening here? Why dynamic load?
+        import importlib  # FIXME: Delete dynamic import and move this code between Project and DGI plugins
+
         project.main_form = (
             importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (project.main_form_name, project.main_form_name))
             if _DGI.localDesktop()
@@ -109,26 +125,6 @@ def exec_main(options):
         )
         project.main_window = project.main_form.mainWindow
         project.main_form.MainForm.setDebugLevel(options.debug_level)
-
-    project.setDebugLevel(options.debug_level)
-
-    if options.project:  # FIXME: --project debería ser capaz de sobreescribir algunas opciones
-        if not options.project.endswith(".xml"):
-            options.project += ".xml"
-        prjpath = filedir("../profiles", options.project)
-        if not os.path.isfile(prjpath):
-            logger.warning("el proyecto %s no existe." % options.project)
-        else:
-            if not project.load(prjpath):
-                return
-    elif options.connection:
-        user, passwd, driver_alias, host, port, dbname = translate_connstring(options.connection)
-        project.load_db(dbname, host, port, user, passwd, driver_alias)
-    elif _DGI.useDesktop() and _DGI.localDesktop():
-        if not _DGI.mobilePlatform():
-            show_connection_dialog(project, app)
-        else:
-            project.load_db("pineboo.sqlite3", None, None, None, None, "SQLite3 (SQLITE3)")
 
     # Cargando spashscreen
     # Create and display the splash screen
