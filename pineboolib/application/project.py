@@ -420,10 +420,6 @@ class Project(object):
 
             msg = "Convirtiendo a Python . . . %s.qs %s" % (file_name, txt_)
             self.logger.debug(msg)
-            if settings.value("ebcomportamiento/SLConsola", False):
-                debug_postparse = True
-            else:
-                debug_postparse = False
 
             # if self._splash:
             #     self._splash.showMessage(msg, QtCore.Qt.AlignLeft, QtCore.Qt.white)
@@ -439,9 +435,9 @@ class Project(object):
             from pineboolib.flparser import postparse
 
             try:
-                postparse.pythonify(scriptname, debug_postparse)
-            except Exception as e:
-                self.logger.warning("El fichero %s no se ha podido convertir: %s", scriptname, e)
+                postparse.pythonify([scriptname])
+            except Exception:
+                self.logger.exception("El fichero %s no se ha podido convertir", scriptname)
 
     def test(self, name=None):
         """
