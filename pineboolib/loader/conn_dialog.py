@@ -20,10 +20,6 @@ def show_connection_dialog(project, app):
         # elif connection_window.database:
         if getattr(connection_window, "database", None):
             logger.info("Cargando credenciales")
-            from pineboolib.fllegacy.flsettings import FLSettings
-
-            project.deleteCache = FLSettings().readBoolEntry("ebcomportamiento/deleteCache", False)
-            project.parseProject = FLSettings().readBoolEntry("ebcomportamiento/parseProject", False)
             project.load_db(
                 connection_window.database,
                 connection_window.hostname,

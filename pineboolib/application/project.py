@@ -74,6 +74,8 @@ class Project(object):
 
         self.kugarPlugin = PNKugarPlugins()
         self.sql_drivers_manager = PNSqlDrivers()  # FIXME: Does this belong here?
+        self.deleteCache = config.value("ebcomportamiento/deleteCache", False)
+        self.parseProject = config.value("ebcomportamiento/parseProject", False)
 
     def init_dgi(self, DGI: dgi_schema) -> None:
         """Load and associate the defined DGI onto this project"""
