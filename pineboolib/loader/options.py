@@ -58,10 +58,7 @@ def parse_options():
     options.debug_level = 200  # 50 - (options.quiet - options.verbose) * 25
 
     # ---- LOGGING -----
-    if options.loglevel > 30:
-        log_format = "%(name)s:%(levelname)s: %(message)s"
-    else:
-        log_format = "%(levelname)s: %(message)s"
+    log_format = "%(levelname)s: %(name)s: %(message)s"
 
     if options.log_time:
         log_format = "%(asctime)s - %(name)s:%(levelname)s: %(message)s"

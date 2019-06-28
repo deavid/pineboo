@@ -24,7 +24,7 @@ FLFormDB
 
 def AQFormDB(action_name, parent, other):
     ac_flaction = pineboolib.project.conn.manager().action(action_name)
-    from pineboolib.core.utils.utils_base import convertFLAction
+    from pineboolib.application.utils.convert_flaction import convertFLAction
 
     ac_xml = convertFLAction(ac_flaction)
     ac_xml.load()

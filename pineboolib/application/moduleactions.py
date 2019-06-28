@@ -1,7 +1,6 @@
 import logging
 
 from pineboolib.core.utils.utils_base import load2xml
-from pineboolib.core.exceptions import CodeDoesNotBelongHereException
 from pineboolib.application.xmlaction import XMLAction
 
 from .module import Module
@@ -46,7 +45,7 @@ class ModuleActions(object):
         action.form = None
         action.table = None
         action.scriptform = self.mod.name
-        # pineboolib.project.actions[action.name] = action  # FIXME: Nope
+        project.actions[action.name] = action  # FIXME: Actions should be loaded to their parent, not the singleton
         # settings = FLSettings()  # FIXME: Nope
         if hasattr(qsa_dict_modules, action.name):
             if action.name != "sys":
@@ -66,7 +65,7 @@ class ModuleActions(object):
                         self.module_name,
                     )
                 else:  # Se crea la action del form
-                    # pineboolib.project.actions[name] = action_xml  # FIXME: nope
+                    project.actions[name] = action_xml  # FIXME: Actions should be loaded to their parent, not the singleton
                     delayed_action = DelayedObjectProxyLoader(action_xml.load, name="QSA.Module.%s.Action.form%s" % (self.mod.name, name))
                     setattr(qsa_dict_modules, "form" + name, delayed_action)
 
@@ -82,20 +81,18 @@ class ModuleActions(object):
     def __contains__(self, k):
         """Busca si es propietario de una action
         """
-        # return k in pineboolib.project.actions # FIXME
-        raise CodeDoesNotBelongHereException(
-            "Whoever was creating the moduleActions is responsible to store them wherever you might want to search them later"
-        )
+        from pineboolib import project
+
+        return k in project.actions  # FIXME: Actions should be loaded to their parent, not the singleton
 
     def __getitem__(self, name):
         """Recoge una action determinada
         @param name. Nombre de la action
         @return Retorna el XMLAction de la action dada
         """
-        # return pineboolib.project.actions[name] # FIXME
-        raise CodeDoesNotBelongHereException(
-            "Whoever was creating the moduleActions is responsible to store them wherever you might want to search them later"
-        )
+        from pineboolib import project
+
+        return project.actions[name]  # FIXME: Actions should be loaded to their parent, not the singleton
 
     """
     Añade una action a propiedad del módulo

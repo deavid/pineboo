@@ -563,7 +563,6 @@ class FLSqlQuery(object):
             elif not isinstance(retorno, (str, int, bool, float, pineboolib.qsa.Date)):
                 retorno = float(retorno)
 
-        self.logger.debug("value(%s)::return:: %s", n, retorno)
         return retorno
 
     """

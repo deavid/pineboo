@@ -203,7 +203,7 @@ class XMLAction(XMLStruct):
             action_ = parent._action if hasattr(parent, "_action") else self
 
         # import aqui para evitar dependencia ciclica
-        from pineboolib.core.utils.utils_base import convertFLAction
+        from pineboolib.application.utils.convert_flaction import convertFLAction
 
         if not isinstance(action_, XMLAction):
             action_ = convertFLAction(action_)
