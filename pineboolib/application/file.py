@@ -2,7 +2,7 @@ import os.path
 import logging
 from typing import Optional
 
-from pineboolib.utils_base import _dir
+from .utils.path import _dir
 
 
 class File(object):

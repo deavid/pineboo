@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pineboo.core.settings import settings
+from pineboolib.core.settings import settings
 
 
 class FLSettings(object):

@@ -1,7 +1,8 @@
 import os.path
 import logging
 
-from pineboolib.utils_base import _path, parseTable
+from pineboolib.core.parsetable import parseTable
+from .utils.path import _path
 
 # FIXME: parseTable is something too specific to be in utils.py
 

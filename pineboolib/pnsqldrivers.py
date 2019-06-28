@@ -20,7 +20,7 @@ class PNSqlDrivers(object):
     """
 
     def __init__(self, _DGI=None):
-        from pineboolib.utils import filedir
+        from pineboolib.core.utils.utils_base import filedir
         import os
         import sys
 

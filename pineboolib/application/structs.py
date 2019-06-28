@@ -1,4 +1,4 @@
-from pineboolib.utils_base import XMLStruct
+from pineboolib.core.utils.utils_base import XMLStruct
 
 
 class DBServer(XMLStruct):

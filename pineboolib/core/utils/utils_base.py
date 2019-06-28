@@ -789,7 +789,7 @@ def create_dict(method, fun, id, arguments=[]):
     return {"method": method, "params": data, "jsonrpc": "2.0", "id": id}
 
 
-def is_deployed(self):
+def is_deployed():
     """Returns True only if the code is running inside a PyInstaller bundle"""
     import sys
 
@@ -798,7 +798,8 @@ def is_deployed(self):
 
 def get_base_dir():
     base_dir = os.path.dirname(__file__)
-
+    base_dir = "%s/../.." % base_dir
+    
     if is_deployed():
         if base_dir.startswith(":"):
             base_dir = ".%s" % base_dir[1:]

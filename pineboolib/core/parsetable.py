@@ -1,5 +1,5 @@
 import logging
-from .utils_base import getTableObj
+from .utils.utils_base import getTableObj
 
 logger = logging.getLogger("core.parsetable")
 

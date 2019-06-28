@@ -3,8 +3,10 @@ import time
 import logging
 from typing import List, Optional, Union
 
-from pineboolib.exceptions import CodeDoesNotBelongHereException
-from pineboolib.utils_base import filedir, Struct, cacheXPM, _dir
+from pineboolib.core.exceptions import CodeDoesNotBelongHereException
+from pineboolib.core.utils.utils_base import filedir, Struct
+from .utils.xpm import cacheXPM
+from .utils.path import _dir
 from pineboolib.core.settings import config, settings
 from pineboolib.interfaces.dgi_schema import dgi_schema
 from pineboolib.pnsqldrivers import PNSqlDrivers
