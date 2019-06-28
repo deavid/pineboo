@@ -3,23 +3,24 @@
 import logging
 import importlib
 
+from pineboolib.core.utils.singleton import Singleton
+
 logger = logging.getLogger(__name__)
 
-"""
-Esta clase gestiona los diferentes controladores de BD.
-"""
 
+class PNSqlDrivers(object, metaclass=Singleton):
+    """
+    Esta clase gestiona los diferentes controladores de BD.
+    """
 
-class PNSqlDrivers(object):
     driverName = None
     driver_ = None
     only_pure_python_ = None
 
-    """
-    Constructor
-    """
-
     def __init__(self, _DGI=None):
+        """
+        Constructor
+        """
         from pineboolib.core.utils.utils_base import filedir
         import os
         import sys
