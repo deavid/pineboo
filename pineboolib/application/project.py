@@ -42,11 +42,11 @@ class Project(object):
     timer_ = None
     no_python_cache = False  # TODO: Fill this one instead
 
-    def __init__(self, connection) -> None:
+    def __init__(self) -> None:
         """
         Constructor
         """
-        self.conn = connection
+        self.conn = None
         self._DGI = None
         self.tree = None
         self.root = None
@@ -54,17 +54,21 @@ class Project(object):
         self.tmpdir = None
         self.parser = None
         self.version = 0.8
-        self.main_form_name = "eneboo"  # FIXME: Belongs to loader.main
-        if config.value("ebcomportamiento/mdi_mode"):
-            self.main_form_name = "eneboo_mdi"  # FIXME: Belongs to loader.main
-
-        # pineboolib.project = self  # FIXME: not good.
+        self.main_form_name = None
         self.deleteCache = False
         self.parseProject = False
         self.translator_ = []
         self.actions = {}
         self.tables = {}
         self.files = {}
+        self.apppath = None
+        self.tmpdir = None
+        self.kugarPlugin = None
+        self.deleteCache = None
+        self.parseProject = None
+
+    def init_conn(self, connection):
+        self.conn = connection
         self.apppath = filedir("..")
         self.tmpdir = config.value("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))
         if not os.path.exists(self.tmpdir):
@@ -79,6 +83,11 @@ class Project(object):
         """Load and associate the defined DGI onto this project"""
         # FIXME: Actually, DGI should be loaded here, or kind of.
         self._DGI = DGI
+
+        self.main_form_name = "eneboo"  # FIXME: Belongs to loader.main
+        if config.value("ebcomportamiento/mdi_mode"):
+            self.main_form_name = "eneboo_mdi"  # FIXME: Belongs to loader.main
+
         if self._DGI.mobilePlatform():
             self.main_form_name = "mobile"  # FIXME: Belongs to loader.main
 

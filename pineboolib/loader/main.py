@@ -96,9 +96,12 @@ def exec_main(options):
     if not configdb:
         raise ValueError("No connection given. Nowhere to connect. Cannot start.")
 
-    project = Project(connection=connect_to_db(configdb))
+    import pineboolib
+
+    project = pineboolib.project  # FIXME: next time, proper singleton
     project.setDebugLevel(options.debug_level)
     project.init_dgi(_DGI)
+    project.init_conn(connection=connect_to_db(configdb))
     project.no_python_cache = options.no_python_cache
 
     if options.test:
