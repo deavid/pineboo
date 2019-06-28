@@ -459,14 +459,6 @@
                                                 <string>Convertir a Python los script QSA al cargar un módulo en la BD.</string>
                                             </property>
                                         </widget>
-                                        <widget class="QCheckBox">
-                                            <property name="name">
-                                                <cstring>cb_clean_no_python</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Respetar etiquetas NOPYTHON.</string>
-                                            </property>
-                                        </widget>
                                     </vbox>
                                 </widget>
                                 <widget class="QGroupBox">

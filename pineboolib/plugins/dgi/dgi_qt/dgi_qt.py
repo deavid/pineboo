@@ -26,8 +26,6 @@ class dgi_qt(dgi_schema):
         super(dgi_qt, self).__init__()  # desktopEnabled y mlDefault a True
         self._name = "qt"
         self._alias = "Qt5"
-        self.set_clean_no_python_changeable(True)
-        self.set_clean_no_python(FLSettings().readBoolEntry("ebcomportamiento/clean_no_python", False))
 
         from pineboolib.plugins.dgi.dgi_qt import dgi_qt3ui
 
