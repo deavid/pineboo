@@ -596,6 +596,7 @@ def print_stack(maxsize=1):
 # FIXME: No se debe usar import * !!!
 from pineboolib.packager.aqunpacker import AQUnpacker  # noqa:
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData  # noqa:
+
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
 
 qsa_sys = SysType()

@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
-from pineboolib.pncontrolsfactory import aqApp
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QTreeWidgetItem
+from PyQt5.QtWidgets import QTreeWidgetItem, QTreeWidget, QMainWindow
+from PyQt5.QtXml import QDomDocument
+
+from pineboolib.core.settings import settings
 from pineboolib.fllegacy.aqsobjects.aqs import AQS
-from pineboolib.pncontrolsfactory import qsa_sys
+from pineboolib.pncontrolsfactory import aqApp
+from pineboolib import pncontrolsfactory
+from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQUtil, AQSettings
+
 import logging
 
 
-logging.getLogger("mainForm_%s" % __name__)
+logger = logging.getLogger("mainForm_%s" % __name__)
 
 
 class MainForm(QtWidgets.QMainWindow):
