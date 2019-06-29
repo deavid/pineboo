@@ -7,8 +7,9 @@ from .utils.path import _path, coalesce_path
 
 from typing import Optional
 
-
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+
+
 class XMLMainFormAction(XMLStruct):
     """
     Contiene Información de cada action del mainForm
