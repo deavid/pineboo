@@ -25,7 +25,7 @@ def init_project(DGI, splash, options, project, mainForm, app):
     if options.preload:
         from .preload import preload_actions
 
-        preload_actions(project, options.forceload)  # FIXME: No funciona, abre una ventana y se queda colgado
+        preload_actions(project, options.forceload)
 
         logger.info("Finished preloading")
         return

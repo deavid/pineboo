@@ -31,8 +31,8 @@ class dgi_fcgi(dgi_schema):
 
     def alternativeMain(self, main_):
         logger.info("=============================================")
-        logger.info("FCGI:INFO: Listening socket", self._fcgiSocket)
-        logger.info("FCGI:INFO: Sending queries to", self._fcgiCall)
+        logger.info("FCGI:INFO: Listening socket %s", self._fcgiSocket)
+        logger.info("FCGI:INFO: Sending queries to %s", self._fcgiCall)
         par_ = parser(main_, self._fcgiCall)
         WSGIServer(par_.call, bindAddress=self._fcgiSocket).run()
 
@@ -65,9 +65,9 @@ class parser(object):
             retorno_ = pineboolib.project.call(self._callScript, aList)
         except Exception:
             logger.info(self._callScript, environ["QUERY_STRING"])
-            retorno_ = """<html><head><title>Pineboo %s - FastCGI - </title></head><body><h1>Function %s not found!</h1></body></html>""" % (
-                SysType().version(),
-                self._callScript,
+            retorno_ = (
+                """<html><head><title>Pineboo %s - FastCGI - </title></head><body><h1>Function %s not found!</h1></body></html>"""
+                % (SysType().version(), self._callScript)
             )
             pass
         logger.info("FCGI:INFO: Processing '%s' ...", environ["QUERY_STRING"])

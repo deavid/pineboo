@@ -338,15 +338,18 @@ class FLManagerModules(object):
     """
 
     def createFormRecord(self, a, connector=None, parent_or_cursor=None, name=None):
+        logger.trace("createFormRecord: init")
         from pineboolib.pncontrolsfactory import FLFormRecordDB
 
         # Falta implementar conector y name
         if not isinstance(a, FLAction):
+            logger.trace("createFormRecord: convert2FLAction")
             a = convert2FLAction(a)
 
         if not a:
             return None
 
+        logger.trace("createFormRecord: load FormRecordDB")
         return FLFormRecordDB(parent_or_cursor, a, load=False)
 
     """

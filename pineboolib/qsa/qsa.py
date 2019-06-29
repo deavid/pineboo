@@ -773,13 +773,16 @@ class File(QtCore.QFile):
     encode_ = None
     last_seek = None
 
-    def __init__(self, rutaFichero, encode=None):
+    def __init__(self, rutaFichero=None, encode=None):
         self.encode_ = "iso-8859-15"
-        if isinstance(rutaFichero, tuple):
-            rutaFichero = rutaFichero[0]
-        self.fichero = str(rutaFichero)
-        super().__init__(rutaFichero)
-        self.path = os.path.dirname(os.path.abspath(self.fichero))
+        if rutaFichero:
+            if isinstance(rutaFichero, tuple):
+                rutaFichero = rutaFichero[0]
+            self.fichero = str(rutaFichero)
+            super().__init__(rutaFichero)
+            self.path = os.path.dirname(os.path.abspath(self.fichero))
+        else:
+            super().__init__()
 
         if encode is not None:
             self.encode_ = encode

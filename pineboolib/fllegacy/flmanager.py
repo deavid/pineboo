@@ -483,6 +483,7 @@ class FLManager(QtCore.QObject):
         @param n Nombre de la accion
         @return Un objeto FLAction con la descripcion de la accion
         """
+        # FIXME: Urgent! This function call hangs up on some XML.
         if not n:
             return None
 

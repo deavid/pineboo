@@ -12,6 +12,7 @@ from pineboolib.interfaces import IFormRecordDB
 import pineboolib
 
 import traceback
+import logging
 
 DEBUG = False
 
@@ -36,6 +37,7 @@ edición de registros definidos en los metadatos
 
 class FLFormRecordDB(IFormRecordDB, FLFormDB):
 
+    logger = logging.getLogger("dgi_qt.FLFormRecordDB")
     """
     Boton Aceptar
     """
@@ -101,6 +103,7 @@ class FLFormRecordDB(IFormRecordDB, FLFormDB):
     """
 
     def __init__(self, parent_or_cursor, action, load=False):
+        self.logger.trace("__init__: parent_or_cursor=%s, action=%s, load=%s", parent_or_cursor, action, load)
         from pineboolib.pncontrolsfactory import aqApp
 
         if isinstance(action, str):
@@ -115,7 +118,7 @@ class FLFormRecordDB(IFormRecordDB, FLFormDB):
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         if cursor:
             self.setCursor(parent_or_cursor)
-
+        self.logger.trace("__init__: load formRecord")
         self._uiName = action.formRecord()
         self._scriptForm = action.scriptFormRecord() or "emptyscript"
 
@@ -131,8 +134,11 @@ class FLFormRecordDB(IFormRecordDB, FLFormDB):
                 print("*** FLFormRecordDB::__init__ -> Sin cursor??")
             self.initialModeAccess = FLSqlCursor.Browse
 
+        self.logger.trace("__init__: load form")
         self.load()
+        self.logger.trace("__init__: init form")
         self.initForm()
+        self.logger.trace("__init__: done")
 
     """
     Reimplementado, añade un widget como principal del formulario

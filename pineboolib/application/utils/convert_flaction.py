@@ -1,4 +1,7 @@
 import pineboolib
+import logging
+
+logger = logging.getLogger("application.utils.convert_flaction")
 
 
 def convertFLAction(action):
@@ -17,4 +20,7 @@ def convert2FLAction(action):
 
     from pineboolib.pncontrolsfactory import aqApp
 
-    return aqApp.db().manager().action(name)
+    logger.trace("convert2FLAction: Load action from db manager")
+    action = aqApp.db().manager().action(name)
+    logger.trace("convert2FLAction: done")
+    return action
