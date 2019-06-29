@@ -136,6 +136,12 @@ def exec_main(options: Values) -> None:
 
     _DGI = load_dgi(options.dgi, options.dgi_parameter)
 
+    if _DGI.useDesktop() and not options.enable_gui:
+        raise Exception("Selected DGI <%s> is not compatible with <pineboo-core>. Use <pineboo> instead" % options.dgi)
+
+    if not _DGI.useDesktop() and options.enable_gui:
+        logger.info("Selected DGI <%s> does not need graphical interface. Use <pineboo-core> for better results" % options.dgi)
+
     if not _DGI.useMLDefault():
         # When a particular DGI doesn't want the standard init, we stop loading here
         # and let it take control of the remaining pieces.
