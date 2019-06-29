@@ -1,7 +1,7 @@
 import os
 import time
 import logging
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Any, Dict
 
 from pineboolib.core.exceptions import CodeDoesNotBelongHereException, NotConnectedError
 from pineboolib.core.utils.utils_base import filedir, Struct
@@ -9,9 +9,11 @@ from pineboolib.core.settings import config, settings
 from pineboolib.interfaces.dgi_schema import dgi_schema
 
 # from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists # FIXME: Not allowed yet
+from PyQt5 import QtCore
 
 from .module import Module
 from .file import File
+from optparse import Values
 
 
 from pineboolib.interfaces.iconnection import IConnection
@@ -23,10 +25,13 @@ class Project(object):
     """
 
     logger = logging.getLogger("main.Project")
+    app: QtCore.QCoreApplication = None
     conn = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
+    options: Values = None
 
     # _initModules = None
+    main_form: Any = None  # FIXME: How is this used? Which type?
     main_window = None
     acl_ = None
     _DGI = None
@@ -50,13 +55,13 @@ class Project(object):
         self.tmpdir = filedir("../tempdata")
         self.parser = None
         self.version = 0.8
-        self.main_form_name = None
+        self.main_form_name: Optional[str] = None
         self.deleteCache = False
         self.parseProject = False
-        self.translator_ = []
-        self.actions = {}
-        self.tables = {}
-        self.files = {}
+        self.translator_: List[Any] = []  # FIXME: Add proper type
+        self.actions: Dict[Any, Any] = {}  # FIXME: Add proper type
+        self.tables: Dict[Any, Any] = {}  # FIXME: Add proper type
+        self.files: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.apppath = None
         self.tmpdir = None
         self.kugarPlugin = None
@@ -163,7 +168,7 @@ class Project(object):
             self.conn.manager().createSystemTable(table)
 
         cursor_ = self.conn.cursor()
-        self.areas = {}
+        self.areas: Dict[str, Struct] = {}
         cursor_.execute(""" SELECT idarea, descripcion FROM flareas WHERE 1 = 1""")
         for idarea, descripcion in cursor_:
             self.areas[idarea] = Struct(idarea=idarea, descripcion=descripcion)
@@ -177,7 +182,7 @@ class Project(object):
         )
         from .utils.xpm import cacheXPM
 
-        self.modules = {}
+        self.modules: Dict[str, Module] = {}
         for idarea, idmodulo, descripcion, icono in cursor_:
             icono = cacheXPM(icono)
             self.modules[idmodulo] = Module(idarea, idmodulo, descripcion, icono)
@@ -364,7 +369,7 @@ class Project(object):
             elif aFunction[1] == "widget":
                 fR = None
                 funAction.load_script(aFunction[0], fR)
-                object_context = fR.iface
+                object_context = fR.iface  # FIXME: Don't expect passing fR by reference. It is None.
             else:
                 return False
 

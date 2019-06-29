@@ -1,13 +1,11 @@
 # # -*- coding: utf-8 -*-
 import logging
 import os
-import sys
 import pineboolib
 
 from importlib import import_module
 
 from PyQt5 import QtWidgets, QtCore, QtGui, Qt, QtXml
-from PyQt5.QtWidgets import qApp
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.core.utils.utils_base import filedir, load2xml
@@ -30,11 +28,6 @@ class dgi_qt(dgi_schema):
 
         self.pnqt3ui = dgi_qt3ui
 
-    def create_app(self):
-        app = QtWidgets.QApplication(sys.argv)
-        app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
-        return app
-
     def __getattr__(self, name):
 
         cls = self.resolveObject(self._name, name)
@@ -54,6 +47,8 @@ class dgi_qt(dgi_schema):
         return cls
 
     def msgBoxWarning(self, t):
+        from PyQt5.QtWidgets import qApp
+
         parent = qApp.focusWidget().parent() if hasattr(qApp.focusWidget(), "parent") else qApp.focusWidget()
         self.MessageBox.warning(t, self.MessageBox.Ok, self.MessageBox.NoButton, self.MessageBox.NoButton, "Pineboo", parent)
 

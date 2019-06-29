@@ -7,6 +7,8 @@ from pineboolib.core.utils import is_deployed
 from pineboolib.core.settings import config, settings
 from .dgi import load_dgi
 
+from PyQt5 import QtCore
+
 from optparse import Values
 
 logger = logging.getLogger(__name__)
@@ -36,6 +38,44 @@ def startup():
         sys.exit(0)
 
 
+def excepthook(type, value, tback):
+    return traceback.print_exception(type, value, tback)
+
+
+def setup_gui(app: QtCore.QCoreApplication, options: Values):
+    from pineboolib.core.utils.utils_base import filedir
+    from pineboolib.application.utils.mobilemode import is_mobile_mode
+    from PyQt5 import QtGui
+
+    noto_fonts = ["NotoSans-BoldItalic.ttf", "NotoSans-Bold.ttf", "NotoSans-Italic.ttf", "NotoSans-Regular.ttf"]
+    for fontfile in noto_fonts:
+        QtGui.QFontDatabase.addApplicationFont(filedir("../share/fonts/Noto_Sans", fontfile))
+
+    from pineboolib.fllegacy.flsettings import FLSettings
+
+    sett_ = FLSettings()
+
+    styleA = sett_.readEntry("application/style", None)
+    if styleA is None:
+        styleA = "Fusion"
+
+    app.setStyle(styleA)
+
+    fontA = sett_.readEntry("application/font", None)
+    if fontA is None:
+        if is_mobile_mode():
+            font = QtGui.QFont("Noto Sans", 14)
+        else:
+            font = QtGui.QFont("Noto Sans", 9)
+        font.setBold(False)
+        font.setItalic(False)
+    else:
+        # FIXME: FLSettings.readEntry does not return an array
+        font = QtGui.QFont(fontA[0], int(fontA[1]), int(fontA[2]), fontA[3] == "true")
+
+    app.setFont(font)
+
+
 def exec_main(options: Values) -> None:
     """Exec main program.
 
@@ -48,7 +88,7 @@ def exec_main(options: Values) -> None:
     # es bastante incómodo y genera problemas graves para detectar el problema.
     # Agregamos sys.excepthook para controlar esto y hacer que PyQt5 no nos
     # dé un segfault, aunque el resultado no sea siempre correcto:
-    sys.excepthook = traceback.print_exception
+    sys.excepthook = excepthook
     # -------------------
 
     # Corregir Control-C:
@@ -64,6 +104,20 @@ def exec_main(options: Values) -> None:
     # FIXME: This function should not initialize the program
 
     # TODO: Refactorizar función en otras más pequeñas
+    import pineboolib
+
+    project = pineboolib.project  # FIXME: next time, proper singleton
+    project.setDebugLevel(options.debug_level)
+
+    project.options = options
+    if options.enable_gui:
+        from PyQt5 import QtWidgets
+
+        project.app = QtWidgets.QApplication(sys.argv)
+        project.app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+        setup_gui(project.app, options)
+    else:
+        project.app = QtCore.QCoreApplication(sys.argv)
 
     if options.trace_debug:
         from pineboolib.core.utils.utils_base import traceit
@@ -82,18 +136,16 @@ def exec_main(options: Values) -> None:
 
     _DGI = load_dgi(options.dgi, options.dgi_parameter)
 
-    from .create_app import create_app
-
-    app = create_app(_DGI, options)
+    if not _DGI.useMLDefault():
+        # When a particular DGI doesn't want the standard init, we stop loading here
+        # and let it take control of the remaining pieces.
+        _DGI.alternativeMain(options)
+        return
 
     from .connection import config_dbconn, connect_to_db, DEFAULT_SQLITE_CONN
 
     configdb = config_dbconn(options)
 
-    import pineboolib
-
-    project = pineboolib.project  # FIXME: next time, proper singleton
-    project.setDebugLevel(options.debug_level)
     project.init_dgi(_DGI)
 
     if not configdb and _DGI.useDesktop() and _DGI.localDesktop():
@@ -152,4 +204,4 @@ def exec_main(options: Values) -> None:
     else:
         from .init_project import init_project
 
-        init_project(_DGI, splash, options, project, project.main_form if _DGI.useDesktop() else None, app)
+        init_project(_DGI, splash, options, project, project.main_form if _DGI.useDesktop() else None, project.app)

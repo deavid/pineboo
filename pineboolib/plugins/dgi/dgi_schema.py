@@ -1,5 +1,5 @@
 # # -*- coding: utf-8 -*-
-
+from pineboolib.application.utils.mobilemode import is_mobile_mode
 from importlib import import_module
 
 import logging
@@ -32,26 +32,18 @@ class dgi_schema(object):
         self._alias = "Default Schema"
         self._show_object_not_found_warnings = True
         self.loadReferences()
-        try:
-            import PyQt5.QtAndroidExtras  # noqa   # FIXME
-
-            self._mobile = True
-            # FIXME: Did we just assume that we're running on android just because we found a library??
-        except ImportError:
-            self._mobile = False
-
-        from pineboolib.core.settings import config
-
-        if config.value(u"ebcomportamiento/mobileMode", False):
-            # FIXME: But now we enable mobile mode regardless of the library
-            self._mobile = True
-        # FIXME: Then, if not, can we disable it even if it is found? (...)
+        self._mobile = is_mobile_mode()
 
     def name(self):
         return self._name
 
     def alias(self):
         return self._alias
+
+    def create_app(self):
+        from pineboolib import project
+
+        return project.app
 
     # Establece un lanzador alternativo al de la aplicación
     def alternativeMain(self, options):

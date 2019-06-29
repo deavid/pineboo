@@ -1,7 +1,6 @@
 # # -*- coding: utf-8 -*-
 import traceback
 import logging
-import sys
 import inspect
 import datetime
 
@@ -218,10 +217,8 @@ class dgi_server(dgi_schema):
         # self.parserDGI = parserJson()
 
     def alternativeMain(self, options):
-        app = QtCore.QCoreApplication(sys.argv)
         if options.dgi_parameter:
             self._listenSocket = int(options.dgi_parameter)
-        return app
 
     def exec_(self):
         self._par = parser()

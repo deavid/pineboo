@@ -49,6 +49,7 @@ def parse_options() -> Values:
     parser.add_option("--test", action="store_true", dest="test", default=False, help="Launch all test")
     parser.add_option("--dbadmin", action="store_true", dest="enable_dbadmin", default=False, help="Enables DBAdmin mode")
     parser.add_option("--quick", action="store_true", dest="enable_quick", default=False, help="Enables Quick mode")
+    parser.add_option("--no-x", action="store_false", dest="enable_gui", default=True, help="Disables graphical interface")
 
     (options, args) = parser.parse_args()
 

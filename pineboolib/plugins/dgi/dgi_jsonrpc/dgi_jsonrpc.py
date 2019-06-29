@@ -167,10 +167,6 @@ class dgi_jsonrpc(dgi_schema):
     def extraProjectInit(self):
         pass
 
-    def create_app(self):
-        app = QtCore.QCoreApplication(sys.argv)
-        return app
-
     def setParameter(self, param):
         self._listenSocket = param
 
