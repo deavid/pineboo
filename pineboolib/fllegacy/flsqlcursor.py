@@ -203,7 +203,7 @@ class PNBuffer(object):
         if field is None:
             # FIXME: Esto es un error. Si el campo no existe, es una llamada
             # errónea.
-            logger.warn("Call to cursor.isNull(None); This is an error.")
+            logger.debug("Call to cursor.isNull(None); This is an error.")
             return True
 
         if field.type_ in ("bool", "unlock"):
