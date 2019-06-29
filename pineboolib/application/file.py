@@ -29,8 +29,10 @@ class File(object):
         else:
             self.name, self.ext = os.path.splitext(filename)
 
-        # db_name = pineboolib.project.conn.DBName()  # FIXME: Wait, no.
-        db_name = "not-known"  # FIXME: publish data in another way. Also, why File should be aware of the Database?
+        from pineboolib import project
+
+        db_name = project.conn.DBName()  # FIXME: Wait, no.
+        db_name = db_name or "not-known"  # FIXME: publish data in another way. Also, why File should be aware of the Database?
         if self.sha:
             self.filekey = "%s/%s/file%s/%s/%s%s" % (db_name, module, self.ext, self.name, sha, self.ext)
         else:

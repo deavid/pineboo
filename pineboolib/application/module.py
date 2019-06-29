@@ -4,8 +4,6 @@ import logging
 from pineboolib.core.parsetable import parseTable
 from .utils.path import _path
 
-# FIXME: parseTable is something too specific to be in utils.py
-
 # For types only:
 from .file import File
 
@@ -23,6 +21,9 @@ class Module(object):
         @param description. Descripción del módulo
         @param icon. Icono del módulo
         """
+        from pineboolib import project  # FIXME
+
+        self.project = project
         self.areaid = areaid
         self.name = name
         self.description = description  # En python2 era .decode(UTF-8)
@@ -30,7 +31,7 @@ class Module(object):
         self.files = {}
         self.tables = {}
         self.loaded = False
-        # self.path = pineboolib.project.path  # FIXME: nope.
+        self.path = self.project.path
 
     def add_project_file(self, fileobj: File) -> None:
         """Añade ficheros al array que controla que ficehros tengo.
@@ -77,7 +78,7 @@ class Module(object):
                 self.logger.warning("No se pudo procesar. Se ignora tabla %s/%s ", self.name, name)
                 continue
             self.tables[name] = tableObj
-            # pineboolib.project.tables[name] = tableObj  # FIXME: nope
+            self.project.tables[name] = tableObj  # FIXME: Tables belong to project or module?
 
         self.loaded = True
         return True

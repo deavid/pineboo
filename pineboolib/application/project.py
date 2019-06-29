@@ -8,15 +8,10 @@ from pineboolib.core.utils.utils_base import filedir, Struct
 from pineboolib.core.settings import config, settings
 from pineboolib.interfaces.dgi_schema import dgi_schema
 
+# from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists # FIXME: Not allowed yet
+
 from .module import Module
 from .file import File
-
-
-# from pineboolib.mtdparser.pnmtdparser import mtd_parse
-# from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists # FIXME: Not allowed yet
-# from PyQt5 import QtCore  # FIXME: Not allowed yet
-# from pineboolib.fllegacy.flsettings import FLSettings # FIXME: Not allowed yet
-# from pineboolib.plugins.dgi.dgi_qt.dgi_qt import dgi_qt
 
 
 class Project(object):
@@ -82,12 +77,12 @@ class Project(object):
         # FIXME: Actually, DGI should be loaded here, or kind of.
         self._DGI = DGI
 
-        self.main_form_name = "eneboo"  # FIXME: Belongs to loader.main
+        self.main_form_name = "eneboo"  # FIXME: Belongs to loader.main .. or dgi-qt5
         if config.value("ebcomportamiento/mdi_mode"):
-            self.main_form_name = "eneboo_mdi"  # FIXME: Belongs to loader.main
+            self.main_form_name = "eneboo_mdi"  # FIXME: Belongs to loader.main .. or dgi-qt5
 
         if self._DGI.mobilePlatform():
-            self.main_form_name = "mobile"  # FIXME: Belongs to loader.main
+            self.main_form_name = "mobile"  # FIXME: Belongs to loader.main .. or dgi-qt5
 
         if not self._DGI.localDesktop():
             # FIXME: Maybe it is a good idea to call this regardless of localDesktop
@@ -164,8 +159,6 @@ class Project(object):
         for table in ("flareas", "flmodules", "flfiles", "flgroups", "fllarge", "flserial", "flusers", "flvar", "flmetadata"):
             self.conn.manager().createSystemTable(table)
 
-        # FIXME: settings in this step already?
-        settings.set_value("DBA/lastDB", self.conn.DBName())
         cursor_ = self.conn.cursor()
         self.areas = {}
         cursor_.execute(""" SELECT idarea, descripcion FROM flareas WHERE 1 = 1""")

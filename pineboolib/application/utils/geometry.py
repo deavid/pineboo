@@ -7,9 +7,9 @@ def saveGeometryForm(name, geo):
     @param name, Nombre de la ventana
     @param geo, QSize con los valores de la ventana
     """
-    from pineboolib.pncontrolsfactory import aqApp  # FIXME
+    from pineboolib import project  # FIXME
 
-    name = "geo/%s/%s" % (aqApp.db().DBName(), name)
+    name = "geo/%s/%s" % (project.conn.DBName(), name)
     settings.set_value(name, geo)
 
 
@@ -19,7 +19,7 @@ def loadGeometryForm(name):
     @param name, Nombre de la ventana
     @return QSize con los datos de la geometríca de la ventana guardados.
     """
-    from pineboolib.pncontrolsfactory import aqApp  # FIXME
+    from pineboolib import project  # FIXME
 
-    name = "geo/%s/%s" % (aqApp.db().DBName(), name)
+    name = "geo/%s/%s" % (project.conn.DBName(), name)
     return settings.value(name, None)

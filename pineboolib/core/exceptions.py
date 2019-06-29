@@ -6,3 +6,7 @@ class CodeDoesNotBelongHereException(Exception):
 
 class NotConnectedError(Exception):
     """Code expected a connection to be made already but it wasn't"""
+
+
+class ForbiddenError(Exception):
+    """Action attempted is not allowed"""

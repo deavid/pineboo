@@ -46,7 +46,7 @@ def init_project(DGI, splash, options, project, mainForm, app):
         import sys
         from .preload import preload_actions
 
-        preload_actions(project, options.forceload)
+        preload_actions(project, options.forceload)  # FIXME: No funciona, abre una ventana y se queda colgado
 
         sys.exit(0)  # FIXME
 

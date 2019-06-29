@@ -1,8 +1,8 @@
 import logging
 
+from pineboolib.core.exceptions import ForbiddenError
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.xmlaction import XMLAction
-
 from .module import Module
 from .proxy import DelayedObjectProxyLoader
 
@@ -21,6 +21,9 @@ class ModuleActions(object):
         @param path. Ruta del módulo
         @param modulename. Nombre del módulo
         """
+        from pineboolib import project  # FIXME
+
+        self.project = project
         self.mod = module
         self.path = path
         self.module_name = modulename
@@ -32,12 +35,11 @@ class ModuleActions(object):
         """
         # Ojo: Almacena un arbol con los módulos cargados
         from pineboolib import qsa as qsa_dict_modules
-        from pineboolib import project
 
         self.tree = load2xml(self.path)
         self.root = self.tree.getroot()
 
-        action = XMLAction(project=project)
+        action = XMLAction(project=self.project)
         action.mod = self
         action.name = self.mod.name
         action.alias = self.mod.name
@@ -45,8 +47,7 @@ class ModuleActions(object):
         action.form = None
         action.table = None
         action.scriptform = self.mod.name
-        project.actions[action.name] = action  # FIXME: Actions should be loaded to their parent, not the singleton
-        # settings = FLSettings()  # FIXME: Nope
+        self.project.actions[action.name] = action  # FIXME: Actions should be loaded to their parent, not the singleton
         if hasattr(qsa_dict_modules, action.name):
             if action.name != "sys":
                 self.logger.warning("No se sobreescribe variable de entorno %s", action.name)
@@ -54,7 +55,7 @@ class ModuleActions(object):
             setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % action.name))
 
         for xmlaction in self.root:
-            action_xml = XMLAction(xmlaction, project=project)
+            action_xml = XMLAction(xmlaction, project=self.project)
             action_xml.mod = self
             name = action_xml.name
             if name != "unnamed":
@@ -65,7 +66,7 @@ class ModuleActions(object):
                         self.module_name,
                     )
                 else:  # Se crea la action del form
-                    project.actions[name] = action_xml  # FIXME: Actions should be loaded to their parent, not the singleton
+                    self.project.actions[name] = action_xml  # FIXME: Actions should be loaded to their parent, not the singleton
                     delayed_action = DelayedObjectProxyLoader(action_xml.load, name="QSA.Module.%s.Action.form%s" % (self.mod.name, name))
                     setattr(qsa_dict_modules, "form" + name, delayed_action)
 
@@ -81,18 +82,14 @@ class ModuleActions(object):
     def __contains__(self, k):
         """Busca si es propietario de una action
         """
-        from pineboolib import project
-
-        return k in project.actions  # FIXME: Actions should be loaded to their parent, not the singleton
+        return k in self.project.actions  # FIXME: Actions should be loaded to their parent, not the singleton
 
     def __getitem__(self, name):
         """Recoge una action determinada
         @param name. Nombre de la action
         @return Retorna el XMLAction de la action dada
         """
-        from pineboolib import project
-
-        return project.actions[name]  # FIXME: Actions should be loaded to their parent, not the singleton
+        return self.project.actions[name]  # FIXME: Actions should be loaded to their parent, not the singleton
 
     """
     Añade una action a propiedad del módulo
@@ -101,5 +98,5 @@ class ModuleActions(object):
     """
 
     def __setitem__(self, name, action_):
-        raise NotImplementedError("Actions are not writable!")
-        # pineboolib.project.actions[name] = action_
+        raise ForbiddenError("Actions are not writable!")
+        # self.project.actions[name] = action_

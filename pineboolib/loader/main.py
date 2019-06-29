@@ -4,7 +4,7 @@ import traceback
 import logging
 
 from pineboolib.core.utils import is_deployed
-from pineboolib.core.settings import config
+from pineboolib.core.settings import config, settings
 from .dgi import load_dgi
 
 logger = logging.getLogger(__name__)
@@ -87,9 +87,9 @@ def exec_main(options):
     from .connection import config_dbconn, connect_to_db, DEFAULT_SQLITE_CONN
 
     configdb = config_dbconn(options)
-    
+
     import pineboolib
-    
+
     project = pineboolib.project  # FIXME: next time, proper singleton
     project.setDebugLevel(options.debug_level)
     project.init_dgi(_DGI)
@@ -105,10 +105,11 @@ def exec_main(options):
     if not configdb:
         raise ValueError("No connection given. Nowhere to connect. Cannot start.")
 
-    
+    conn = connect_to_db(configdb)
+    project.init_conn(connection=conn)
 
+    settings.set_value("DBA/lastDB", conn.DBName())
 
-    project.init_conn(connection=connect_to_db(configdb))
     project.no_python_cache = options.no_python_cache
 
     if options.test:

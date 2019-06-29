@@ -514,6 +514,7 @@ def indent(elem, level=0):
 
 
 def format_double(d, part_integer, part_decimal):
+    # FIXME: Move commaSeparator to Pineboo internals, not aqApp
     from pineboolib.pncontrolsfactory import aqApp
 
     if d == "":
@@ -548,6 +549,7 @@ def format_double(d, part_integer, part_decimal):
 
 
 def format_int(value, part_intenger=None):
+    # FIXME: Move commaSeparator to Pineboo internals, not aqApp
     from pineboolib.pncontrolsfactory import aqApp
 
     str_integer = value

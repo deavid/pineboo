@@ -7,7 +7,9 @@ from pineboolib.fllegacy.fltranslator import FLTranslator
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.core import decorators
 
-import pineboolib
+# import pineboolib
+from pineboolib import project, pncontrolsfactory
+from pineboolib.application.proxy import DelayedObjectProxyLoader
 
 from PyQt5.QtCore import QTimer, QEvent, QRect, QObject
 
@@ -162,16 +164,14 @@ class FLApplication(QtCore.QObject):
         self.aqApp = None
 
     def eventFilter(self, obj, ev):
-        from pineboolib.pncontrolsfactory import QApplication, QMainWindow
-
         if self.initializing_ or self.destroying_:
             return super().eventFilter(obj, ev)
 
-        if QApplication.activeModalWidget() or QApplication.activePopupWidget():
+        if pncontrolsfactory.QApplication.activeModalWidget() or pncontrolsfactory.QApplication.activePopupWidget():
             return super().eventFilter(obj, ev)
 
         evt = ev.type()
-        if obj != self.main_widget_ and not isinstance(obj, QMainWindow):
+        if obj != self.main_widget_ and not isinstance(obj, pncontrolsfactory.QMainWindow):
             return super().eventFilter(obj, ev)
 
         aw = None
@@ -239,7 +239,7 @@ class FLApplication(QtCore.QObject):
             else:
                 return False
 
-        elif evt == QEvent.Resize and isinstance(obj, pineboolib.project.main_form.MainForm):
+        elif evt == QEvent.Resize and isinstance(obj, project.main_form.MainForm):
             for bt in self.mdi_toolbuttons:
                 bt.setMinimumWidth(obj.width() - 10)
 
@@ -248,9 +248,7 @@ class FLApplication(QtCore.QObject):
         return super().eventFilter(obj, ev)
 
     def eventLoop(self):
-        from pineboolib.pncontrolsfactory import QEventLoop
-
-        return QEventLoop()
+        return pncontrolsfactory.QEventLoop()
 
     @decorators.NotImplementedWarn
     def checkForUpdate(self):
@@ -261,18 +259,8 @@ class FLApplication(QtCore.QObject):
         pass
 
     def init(self):
-        from pineboolib.pncontrolsfactory import (
-            AQS,
-            QWidget,
-            QVBoxLayout,
-            QPushButton,
-            QKeySequence,
-            QMenu,
-            QAction,
-            QSizePolicy,
-            QToolBox,
-            QIcon,
-        )
+        from pineboolib.pncontrolsfactory import AQS, QWidget, QVBoxLayout, QPushButton, QKeySequence, QMenu, QAction
+        from pineboolib.pncontrolsfactory import QSizePolicy, QToolBox, QIcon
         from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
 
         self.dict_main_widgets_ = {}
@@ -281,7 +269,7 @@ class FLApplication(QtCore.QObject):
         if self.db() is not None:
             self.container_.setWindowTitle(self.db().database())
         else:
-            self.container_.setWindowTitle("Pineboo %s" % pineboolib.project.version)
+            self.container_.setWindowTitle("Pineboo %s" % project.version)
 
         # FLDiskCache.init(self)
 
@@ -390,7 +378,7 @@ class FLApplication(QtCore.QObject):
         self.readStateModule()
 
     def showMainWidget(self, w):
-
+        # FIXME: Quitar estos imports y usar pncontrolsfactory.QApplication, etc
         from pineboolib.pncontrolsfactory import QApplication, QMainWindow, QToolBar, QIcon, FLWorkSpace
 
         if not self.container_:
@@ -416,7 +404,7 @@ class FLApplication(QtCore.QObject):
             if self.db() is not None:
                 self.container_.setWindowTitle(self.db().database())
             else:
-                self.container_.setWindowTitle("Pineboo %s" % pineboolib.project.version)
+                self.container_.setWindowTitle("Pineboo %s" % project.version)
 
             return
 
@@ -846,7 +834,7 @@ class FLApplication(QtCore.QObject):
         QMessageBox.aboutQt(self.mainWidget())
 
     def aboutPineboo(self):
-        if pineboolib.project._DGI.localDesktop():
+        if project._DGI.localDesktop():
             from pineboolib.dlgabout.about_pineboo import about_pineboo
 
             about_pineboo()
@@ -901,7 +889,7 @@ class FLApplication(QtCore.QObject):
             return False
 
         for window in self.subWindowList():
-            s = window.findChild(pineboolib.pncontrolsfactory.FLFormDB)
+            s = window.findChild(pncontrolsfactory.FLFormDB)
             if s.idMDI() == id:
                 window.showNormal()
                 window.setFocus()
@@ -910,16 +898,16 @@ class FLApplication(QtCore.QObject):
         return False
 
     def openMasterForm(self, action_name, pix):
-        if action_name in pineboolib.project.actions.keys():
-            pineboolib.project.actions[action_name].openDefaultForm()
+        if action_name in project.actions.keys():
+            project.actions[action_name].openDefaultForm()
 
     @decorators.NotImplementedWarn
     def openDefaultForm(self):
         pass
 
     def execMainScript(self, action_name):
-        if action_name in pineboolib.project.actions.keys():
-            pineboolib.project.actions[action_name].execDefaultScript()
+        if action_name in project.actions.keys():
+            project.actions[action_name].execDefaultScript()
 
     @decorators.NotImplementedWarn
     def execDefaultScript(self):
@@ -932,8 +920,8 @@ class FLApplication(QtCore.QObject):
         self.p_work_space_.closeActiveWindow()
 
     def loadScriptsFromModule(self, idm):
-        if idm in pineboolib.project.modules.keys():
-            pineboolib.project.modules[idm].load()
+        if idm in project.modules.keys():
+            project.modules[idm].load()
 
     def activateModule(self, idm=None):
         if not idm:
@@ -997,10 +985,10 @@ class FLApplication(QtCore.QObject):
         empty_base()
 
     def clearProject(self):
-        pineboolib.project.actions = {}
-        pineboolib.project.areas = {}
-        pineboolib.project.modules = {}
-        pineboolib.project.tables = {}
+        project.actions = {}
+        project.areas = {}
+        project.modules = {}
+        project.tables = {}
 
     def reinitP(self):
         self.db().managerModules().finish()
@@ -1012,10 +1000,9 @@ class FLApplication(QtCore.QObject):
             self.dict_main_widgets_ = {}
 
         self.clearProject()
-        project = pineboolib.project
 
         if self.main_widget_ is None:
-            self.main_widget_ = pineboolib.project.main_form.mainWindow
+            self.main_widget_ = project.main_form.mainWindow
 
         project.main_window.initialized_mods_ = []
 
@@ -1024,7 +1011,7 @@ class FLApplication(QtCore.QObject):
         list_ = [attr for attr in dir(qsa_dict_modules) if not attr[0] == "_"]
         for name in list_:
             att = getattr(qsa_dict_modules, name)
-            if isinstance(att, pineboolib.pnapplication.DelayedObjectProxyLoader):
+            if isinstance(att, DelayedObjectProxyLoader):
                 delattr(qsa_dict_modules, name)
 
         project.run()
@@ -1067,7 +1054,7 @@ class FLApplication(QtCore.QObject):
         return self.time_user_
 
     def call(self, function, argument_list=[], object_content=None, show_exceptions=True):
-        return pineboolib.project.call(function, argument_list, object_content, show_exceptions)
+        return project.call(function, argument_list, object_content, show_exceptions)
 
     def setCaptionMainWidget(self, value):
 
@@ -1075,10 +1062,8 @@ class FLApplication(QtCore.QObject):
             self.last_text_caption_ = value
 
         # FIXME: main_form_name Belongs to loader.main; will be removed
-        if pineboolib.project.main_form_name != "eneboo_mdi":
-            self.mainWidget().setWindowTitle(
-                "Pineboo %s v%s - %s" % (self.mode_and_version_, pineboolib.project.version, self.last_text_caption_)
-            )
+        if project.main_form_name != "eneboo_mdi":
+            self.mainWidget().setWindowTitle("Pineboo %s v%s - %s" % (self.mode_and_version_, project.version, self.last_text_caption_))
 
         else:
             descript_area = self.db().managerModules().idAreaToDescription(self.db().managerModules().activeIdArea())
@@ -1205,7 +1190,7 @@ class FLApplication(QtCore.QObject):
         pass
 
     def aqAppIdle(self):
-        if pineboolib.project._DGI.localDesktop():
+        if project._DGI.localDesktop():
             from pineboolib.pncontrolsfactory import QApplication
 
             if self.wb_ or not self.project_ or QApplication.activeModalWidget() or QApplication.activePopupWidget():
@@ -1214,7 +1199,7 @@ class FLApplication(QtCore.QObject):
             self.checkAndFixTransactionLevel("Application::aqAppIdle()")
 
     def DGI(self):
-        return pineboolib.project._DGI
+        return project._DGI
 
     def startTimerIdle(self):
         if not self.timer_idle_:
@@ -1287,7 +1272,7 @@ class FLApplication(QtCore.QObject):
         return self.show_debug_
 
     def db(self):
-        return pineboolib.project.conn
+        return project.conn
 
     @decorators.NotImplementedWarn
     def classType(self, n):
@@ -1296,7 +1281,7 @@ class FLApplication(QtCore.QObject):
         return type(resolveObject(n)())
 
     # def __getattr__(self, name):
-    #    return getattr(pineboolib.project, name, None)
+    #    return getattr(project, name, None)
 
     def mainWidget(self):
         ret_ = self.main_widget_
@@ -1401,7 +1386,7 @@ class FLApplication(QtCore.QObject):
         windows_opened = []
         if self.main_widget_ is not None and self.p_work_space_ is not None:
             for w in self.p_work_space_.subWindowList():
-                s = w.findChild(pineboolib.pncontrolsfactory.FLFormDB)
+                s = w.findChild(pncontrolsfactory.FLFormDB)
                 if s is not None:
                     windows_opened.append(s.idMDI())
 
@@ -1670,13 +1655,13 @@ class FLApplication(QtCore.QObject):
         return self.createModTranslator(idM, "es") if loadDefault else None
 
     def modules(self):
-        return pineboolib.project.modules
+        return project.modules
 
     def commaSeparator(self):
         return self.comma_separator
 
     def tmp_dir(self):
-        return pineboolib.project.tmpdir
+        return project.tmpdir
 
 
 """

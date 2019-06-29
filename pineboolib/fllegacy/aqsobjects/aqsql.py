@@ -189,7 +189,9 @@ class AQSql(object):
 
             return ok
         else:
-            cur = AQSqlCursor(cur_or_table, True, conn_name)  # FIXME: Import needed
+            from .aqsqlcursor import AQSqlCursor
+
+            cur = AQSqlCursor(cur_or_table, True, conn_name)
             cur.setForwardOnly(True)
             return cur.del_(where)
 
