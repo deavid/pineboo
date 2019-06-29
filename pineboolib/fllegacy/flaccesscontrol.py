@@ -57,6 +57,7 @@ como el selector de módulos, o cada una de las ventanas principales de los mód
 """
 
 
+from typing import List
 class FLAccessControl(object):
 
     """
@@ -81,7 +82,7 @@ class FLAccessControl(object):
     """
     acosPerms_ = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name_ = ""
         self.user_ = ""
         self.perm_ = ""
@@ -91,7 +92,7 @@ class FLAccessControl(object):
     Destructor
     """
 
-    def __del__(self):
+    def __del__(self) -> None:
         if self.acosPerms_:
             self.acosPerms_.clear()
             del self.acosPerms_
@@ -102,7 +103,7 @@ class FLAccessControl(object):
     @return Cadena de texto con el nombre del objeto.
     """
 
-    def name(self):
+    def name(self) -> str:
         return self.name_
 
     """
@@ -120,7 +121,7 @@ class FLAccessControl(object):
     @return Cadena de texto que identifica el permiso a aplicar.
     """
 
-    def perm(self):
+    def perm(self) -> str:
         return self.perm_
 
     """
@@ -129,7 +130,7 @@ class FLAccessControl(object):
     @param n Nombre del objeto.
     """
 
-    def setName(self, n):
+    def setName(self, n: str) -> None:
         self.name_ = n
 
     """
@@ -147,14 +148,14 @@ class FLAccessControl(object):
     @param p Cadena de texto con el identificador del permiso.
     """
 
-    def setPerm(self, p):
+    def setPerm(self, p: str) -> None:
         self.perm_ = p
 
     """
     Limpia la regla vaciándola y liberando todos los recursos
     """
 
-    def clear(self):
+    def clear(self) -> None:
         self.name_ = ""
         self.user_ = ""
         self.perm_ = ""
@@ -259,7 +260,7 @@ class FLAccessControl(object):
     @param acos Lista de cadenas de texto con los objetos y permisos.
     """
 
-    def setAcos(self, acos):
+    def setAcos(self, acos: List[str]) -> None:
         if acos is None:
             return
 
@@ -284,7 +285,7 @@ class FLAccessControl(object):
     @return Lista de cadenas de texto con los objetos y permisos.
     """
 
-    def getAcos(self):
+    def getAcos(self) -> List[str]:
         acos = []
 
         if self.acosPerms_:

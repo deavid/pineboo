@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets
+from typing import Optional
 
 
 class QAction(QtWidgets.QAction):
@@ -8,16 +9,16 @@ class QAction(QtWidgets.QAction):
     _menuText = None
     _objectName = None
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
         super().__init__(*args)
         self.triggered.connect(self.send_activated)
         self._name = None
         self._menuText = None
 
-    def send_activated(self, b=None):
+    def send_activated(self, b: Optional[bool] = None) -> None:
         self.activated.emit()
 
-    def getName(self):
+    def getName(self) -> str:
         return self.objectName()
 
     def setName(self, n):

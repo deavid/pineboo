@@ -8,37 +8,6 @@ from pineboolib.fllegacy.flaccesscontrol import FLAccessControl
 import pineboolib
 
 
-class FLAccessControlFactory(object):
-    def create(self, type_):
-        if type_ is None:
-            return False
-
-        if type_ == "mainwindow":
-            return FLAccessControlMainWindow()
-        elif type_ == "form":
-            return FLAccessControlForm()
-        elif type_ == "table":
-            return FLAccessControlTable()
-
-        return False
-
-    def type(self, obj):
-        if obj is None:
-            print("NO OBJ")
-
-        ret_ = ""
-        from pineboolib.pncontrolsfactory import FLFormDB, QMainWindow
-
-        if isinstance(obj, QMainWindow):
-            ret_ = "mainwindow"
-        elif isinstance(obj, FLTableMetaData):
-            ret_ = "table"
-        elif isinstance(obj, FLFormDB):
-            ret_ = "form"
-
-        return ret_
-
-
 class FLAccessControlMainWindow(FLAccessControl):
     def __init__(self):
         super(FLAccessControlMainWindow, self).__init__()
@@ -175,13 +144,13 @@ class FLAccessControlForm(FLAccessControl):
 
 
 class FLAccessControlTable(FLAccessControl):
-    def __init__(self):
+    def __init__(self) -> None:
         super(FLAccessControlTable, self).__init__()
 
     def type(self):
         return "table"
 
-    def processObject(self, obj):
+    def processObject(self, obj: FLTableMetaData) -> None:
         if not obj:
             return
 
@@ -232,7 +201,7 @@ class FLAccessControlTable(FLAccessControl):
                 field.setVisible(True)
                 field.setEditable(True)
 
-    def setFromObject(self, obj):
+    def setFromObject(self, obj: FLTableMetaData) -> None:
         tm = obj
         if not tm:
             return
@@ -258,3 +227,34 @@ class FLAccessControlTable(FLAccessControl):
             if it.editable():
                 permW = "w"
             self.acosPerms_[it.name()] = "%s%s" % (permR, permW)
+
+
+class FLAccessControlFactory(object):
+    def create(self, type_: str) -> FLAccessControlTable:
+        if type_ is None:
+            return False
+
+        if type_ == "mainwindow":
+            return FLAccessControlMainWindow()
+        elif type_ == "form":
+            return FLAccessControlForm()
+        elif type_ == "table":
+            return FLAccessControlTable()
+
+        return False
+
+    def type(self, obj):
+        if obj is None:
+            print("NO OBJ")
+
+        ret_ = ""
+        from pineboolib.pncontrolsfactory import FLFormDB, QMainWindow
+
+        if isinstance(obj, QMainWindow):
+            ret_ = "mainwindow"
+        elif isinstance(obj, FLTableMetaData):
+            ret_ = "table"
+        elif isinstance(obj, FLFormDB):
+            ret_ = "form"
+
+        return ret_

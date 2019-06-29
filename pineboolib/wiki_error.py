@@ -5,7 +5,7 @@ import re
 logger = logging.getLogger(__name__)
 
 
-def wiki_error(e):
+def wiki_error(e: str) -> str:
     # FIXME: No hay un nombre mejor? Crea entradas de la wikipedia?
     from pineboolib.pncontrolsfactory import SysType as sys
     import pineboolib
@@ -20,7 +20,7 @@ def wiki_error(e):
     return text
 
 
-def process_error(error_str):
+def process_error(error_str: str) -> str:
     from pineboolib.pncontrolsfactory import SysType as sys
 
     ret = "\n=========== Wiki error =============\n\n"

@@ -4,7 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def addLoggingLevel(levelName, levelNum, methodName=None):
+def addLoggingLevel(levelName: str, levelNum: int, methodName: None = None) -> None:
     """
     Comprehensively adds a new logging level to the `logging` module and the
     currently configured logging class.

@@ -8,6 +8,7 @@ from .utils.path import _path, coalesce_path
 from typing import Optional
 
 
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 class XMLMainFormAction(XMLStruct):
     """
     Contiene Información de cada action del mainForm
@@ -150,7 +151,7 @@ class XMLAction(XMLStruct):
     @param cursor. Cursor a usar por el FLFormRecordDB
     """
 
-    def openDefaultFormRecord(self, cursor):
+    def openDefaultFormRecord(self, cursor: FLSqlCursor) -> None:
         self.logger.info("Opening default formRecord for Action %s", self.name)
         w = self.loadRecord(cursor)
         # w.init()

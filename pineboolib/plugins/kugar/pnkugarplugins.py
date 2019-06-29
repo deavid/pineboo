@@ -21,7 +21,7 @@ class PNKugarPlugins(object):
     Constructor
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         # Cargamos los parsers avalibles
         dirlist = os.listdir(filedir("plugins/kugar"))

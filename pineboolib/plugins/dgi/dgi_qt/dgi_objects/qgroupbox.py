@@ -4,6 +4,7 @@ from pineboolib.core import decorators
 from PyQt5 import Qt
 import logging
 
+from typing import Any
 logger = logging.getLogger("QGroupBox")
 
 
@@ -13,7 +14,7 @@ class QGroupBox(QtWidgets.QGroupBox):
     _line_width = 0
     presset = Qt.pyqtSignal(int)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super(QGroupBox, self).__init__(*args, **kwargs)
         from pineboolib.fllegacy.flsettings import FLSettings
 
@@ -24,15 +25,15 @@ class QGroupBox(QtWidgets.QGroupBox):
         if not settings.readBoolEntry("ebcomportamiento/spacerLegacy", False):
             self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
 
-    def setLineWidth(self, width):
+    def setLineWidth(self, width: int) -> None:
         self._line_width = width
         self._do_style()
 
-    def setTitle(self, t):
+    def setTitle(self, t: str) -> None:
         super().setTitle(t)
         self._do_style()
 
-    def _do_style(self):
+    def _do_style(self) -> None:
         self.style_str = "QGroupBox { font-weight: bold; background-color: transparent;"
         if self._line_width == 0 and not self.title():
             self.style_str += " border: none;"
@@ -55,7 +56,7 @@ class QGroupBox(QtWidgets.QGroupBox):
     def setShown(self, b):
         pass
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: Any) -> None:
         if name == "title":
             self.setTitle(str(value))
         else:

@@ -5,7 +5,7 @@ from PyQt5 import QtWidgets
 class QToolBar(QtWidgets.QToolBar):
     _label = None
 
-    def setLabel(self, l):
+    def setLabel(self, l: str) -> None:
         self._label = l
 
     def getLabel(self):

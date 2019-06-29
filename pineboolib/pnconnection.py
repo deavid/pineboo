@@ -10,14 +10,14 @@ from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
 from pineboolib.core import decorators
 from pineboolib.pncontrolsfactory import aqApp
 from pineboolib.pnsqldrivers import PNSqlDrivers
-
+from pineboolib.interfaces.iconnection import IConnection
 
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class PNConnection(QtCore.QObject):
+class PNConnection(IConnection, QtCore.QObject):
     """Wrapper for database cursors which are used to emulate FLSqlCursor."""
 
     db_name = None

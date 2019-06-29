@@ -3,10 +3,11 @@ import os.path
 
 import pineboolib
 
+from typing import Optional
 logger = logging.getLogger(__name__)
 
 
-def _dir(*x):
+def _dir(*x) -> str:
     """
     Calcula la ruta de una carpeta
     @param x. str o array con la ruta de la carpeta
@@ -15,7 +16,7 @@ def _dir(*x):
     return os.path.join(pineboolib.project.tmpdir, *x)
 
 
-def coalesce_path(*filenames):
+def coalesce_path(*filenames) -> Optional[str]:
     """
     Retorna el primer fichero existente de un grupo de ficheros
     @return ruta al primer fichero encontrado
@@ -28,7 +29,7 @@ def coalesce_path(*filenames):
     logger.error("Ninguno de los ficheros especificados ha sido encontrado en el proyecto: %s", repr(filenames), stack_info=False)
 
 
-def _path(filename, showNotFound=True):
+def _path(filename: str, showNotFound: bool = True) -> Optional[str]:
     """
     Retorna el primer fichero existente de un grupo de ficheros
     @return ruta al fichero

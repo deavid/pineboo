@@ -1,10 +1,11 @@
 import logging
 from .utils.utils_base import getTableObj
 
+from pineboolib.core.utils.utils_base import Struct
 logger = logging.getLogger("core.parsetable")
 
 
-def parseTable(nombre, contenido, encoding="UTF-8", remove_blank_text=True):
+def parseTable(nombre: str, contenido: str, encoding: str = "UTF-8", remove_blank_text: bool = True) -> Struct:
     # FIXME: parseTable is something too specific to be in utils.py
     from io import StringIO
     from xml import etree

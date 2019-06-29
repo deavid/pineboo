@@ -457,7 +457,11 @@ class FLTableMetaData(object):
                 break
 
         if field:
-            if field.d.relationM1_ and field.d.relationM1_.foreignField() == str(fFN).lower() and field.d.relationM1_.foreignTable() == str(fTN).lower():
+            if (
+                field.d.relationM1_
+                and field.d.relationM1_.foreignField() == str(fFN).lower()
+                and field.d.relationM1_.foreignTable() == str(fTN).lower()
+            ):
                 return field.d.relationM1_
 
             relationList = field.d.relationList_

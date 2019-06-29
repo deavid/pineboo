@@ -5,6 +5,9 @@ from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import format_double
 
 
+from PyQt5.QtWidgets import QAbstractItemView
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
+from typing import Optional
 class QTable(QtWidgets.QTableWidget):
 
     lineaActual = None
@@ -22,7 +25,7 @@ class QTable(QtWidgets.QTableWidget):
     AutoOneFit = 3
     sort_column_ = None
 
-    def __init__(self, parent=None, name=None):
+    def __init__(self, parent: Optional[QGroupBox] = None, name: None = None) -> None:
         super(QTable, self).__init__(parent)
         if not parent:
             self.setParent(self.parentWidget())
@@ -75,11 +78,11 @@ class QTable(QtWidgets.QTableWidget):
     def setCellAlignment(self, row, col, alig_):
         self.item(row, col).setTextAlignment(alig_)
 
-    def setNumCols(self, n):
+    def setNumCols(self, n: int) -> None:
         self.setColumnCount(n)
         self.setColumnLabels(",", ",".join(self.cols_list))
 
-    def setNumRows(self, n):
+    def setNumRows(self, n: int) -> None:
         self.setRowCount(n)
 
     def setReadOnly(self, b):
@@ -91,13 +94,13 @@ class QTable(QtWidgets.QTableWidget):
     def selectionMode(self):
         return super(QTable, self).selectionMode()
 
-    def setFocusStyle(self, m):
+    def setFocusStyle(self, m: str) -> None:
         if isinstance(m, int):
             return
         else:
             self.setStyleSheet(m)
 
-    def setColumnLabels(self, separador, lista):
+    def setColumnLabels(self, separador: str, lista: str) -> None:
         array_ = lista.split(separador)
         self.cols_list = []
         for i in range(self.columnCount()):
@@ -116,7 +119,7 @@ class QTable(QtWidgets.QTableWidget):
         self.setHorizontalHeaderLabels(self.cols_list)
         self.setRowCount(0)
 
-    def setSelectionMode(self, mode):
+    def setSelectionMode(self, mode: QAbstractItemView.SelectionMode) -> None:
         if mode == 999:
             self.setAlternatingRowColors(True)
         else:

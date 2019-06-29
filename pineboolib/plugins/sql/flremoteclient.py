@@ -97,7 +97,7 @@ class FLREMOTECLIENT(object):
     pure_python_ = True
     defaultPort_ = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.version_ = "0.6"
         self.conn_ = None
         self.name_ = "REMOTECLIENT"
@@ -118,7 +118,7 @@ class FLREMOTECLIENT(object):
     def useTimer(self):
         return True
 
-    def desktopFile(self):
+    def desktopFile(self) -> bool:
         return False
 
     def version(self):
@@ -130,10 +130,10 @@ class FLREMOTECLIENT(object):
     def isOpen(self):
         return self.open_
 
-    def pure_python(self):
+    def pure_python(self) -> bool:
         return self.pure_python_
 
-    def safe_load(self):
+    def safe_load(self) -> bool:
         return True
 
     def mobile(self):

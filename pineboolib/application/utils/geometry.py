@@ -1,7 +1,9 @@
 from pineboolib.core.settings import settings
 
 
-def saveGeometryForm(name, geo):
+from PyQt5.QtCore import QSize
+from typing import Dict, Optional, Union
+def saveGeometryForm(name: str, geo: QSize) -> None:
     """
     Guarda la geometría de una ventana
     @param name, Nombre de la ventana
@@ -13,7 +15,7 @@ def saveGeometryForm(name, geo):
     settings.set_value(name, geo)
 
 
-def loadGeometryForm(name):
+def loadGeometryForm(name: str) -> Optional[Dict[str, Union[str, int]]]:
     """
     Carga la geometría de una ventana
     @param name, Nombre de la ventana

@@ -4,12 +4,13 @@ from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
 from pineboolib.core import decorators
 
 
+from typing import Callable
 class QButtonGroup(QGroupBox):
 
     selectedId = None
     pressed = QtCore.pyqtSignal(int)
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
         super(QButtonGroup, self).__init__(*args)
         self.bg_ = QtWidgets.QButtonGroup(self)
         self.selectedId = None
@@ -21,7 +22,7 @@ class QButtonGroup(QGroupBox):
     def setSelectedId(self, id):
         self.selectedId = id
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Callable:
 
         ret_ = getattr(self.bg_, name, None)
         return ret_

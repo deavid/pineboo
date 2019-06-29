@@ -7,6 +7,7 @@ from pineboolib.core.utils import is_deployed
 from pineboolib.core.settings import config, settings
 from .dgi import load_dgi
 
+from optparse import Values
 logger = logging.getLogger(__name__)
 
 
@@ -34,7 +35,7 @@ def startup():
         sys.exit(0)
 
 
-def exec_main(options):
+def exec_main(options: Values) -> None:
     """Exec main program.
 
     Handles optionlist and help.

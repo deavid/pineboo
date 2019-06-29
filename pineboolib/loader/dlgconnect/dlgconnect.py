@@ -25,7 +25,7 @@ class DlgConnect(QtWidgets.QWidget):
     pNSqlDrivers = None
     edit_mode = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Constructor
         """
@@ -39,7 +39,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.pNSqlDrivers = PNSqlDrivers()
         self.edit_mode = False
 
-    def load(self):
+    def load(self) -> None:
         """
         Carga el form dlgconnect
         """
@@ -73,7 +73,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.loadProfiles()
         self.ui.leDescription.textChanged.connect(self.updateDBName)
 
-    def cleanProfileForm(self):
+    def cleanProfileForm(self) -> None:
         """
         Limpia el tab de creación de profiles , y rellena los datos básicos del driver SQL por defecto
         """
@@ -90,7 +90,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.ui.cbAutoLogin.setChecked(False)
         self.updatePort()
 
-    def loadProfiles(self):
+    def loadProfiles(self) -> None:
         """
         Actualiza el ComboBox de los perfiles
         """
@@ -114,7 +114,7 @@ class DlgConnect(QtWidgets.QWidget):
     """
 
     @QtCore.pyqtSlot()
-    def showOptions(self):
+    def showOptions(self) -> None:
         """
         Muestra el frame opciones
         """
@@ -136,7 +136,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.optionsShowed = not self.optionsShowed
 
     @QtCore.pyqtSlot()
-    def open(self):
+    def open(self) -> None:
         """
         Abre la conexión seleccionada
         """
@@ -345,14 +345,14 @@ class DlgConnect(QtWidgets.QWidget):
         self.edit_mode = True
 
     @QtCore.pyqtSlot(int)
-    def updatePort(self):
+    def updatePort(self) -> None:
         """
         Actualiza al puerto por defecto del driver
         """
         self.ui.lePort.setText(self.pNSqlDrivers.port(self.ui.cbDBType.currentText()))
 
     @QtCore.pyqtSlot(int)
-    def enablePassword(self, n=None):
+    def enablePassword(self, n: Optional[int] = None) -> None:
         """
         Comprueba si el perfil requiere password para login o no
         """

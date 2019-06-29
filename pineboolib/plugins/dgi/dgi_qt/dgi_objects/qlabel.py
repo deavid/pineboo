@@ -14,7 +14,7 @@ class QLabel(QtWidgets.QLabel):
             v = str(v)
         self.setText(v)
 
-    def setText(self, text):
+    def setText(self, text: str) -> None:
         if not isinstance(text, str):
             text = str(text)
         super().setText(text)

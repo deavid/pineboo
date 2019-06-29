@@ -2,10 +2,12 @@
 from PyQt5 import QtGui
 
 
+from PyQt5.QtGui import QValidator
+from typing import Tuple
 class FLDoubleValidator(QtGui.QDoubleValidator):
     _formatting = None
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
         if len(args) == 4:
             super().__init__(args[0], args[1], args[2], args[3])
             # 1 inferior
@@ -15,7 +17,7 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
         self.setNotation(self.StandardNotation)
         self._formatting = False
 
-    def validate(self, input_, pos_cursor):
+    def validate(self, input_: str, pos_cursor: int) -> Tuple[QValidator.State, str, int]:
         value_in = input_
 
         if value_in is None or self._formatting:

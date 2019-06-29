@@ -1,9 +1,11 @@
 import logging
 
+from pineboolib.plugins.dgi.dgi_qt.dgi_qt import dgi_qt
+from typing import Callable
 logger = logging.getLogger(__name__)
 
 
-def load_dgi(name, param):
+def load_dgi(name: str, param: None) -> dgi_qt:
     """Load a DGI module dynamically."""
 
     dgi_entrypoint = DGILoader.load_dgi(name)
@@ -24,7 +26,7 @@ def load_dgi(name, param):
 
 class DGILoader(object):
     @staticmethod
-    def load_dgi_qt():
+    def load_dgi_qt() -> dgi_qt:
         from pineboolib.plugins.dgi.dgi_qt import dgi_qt as dgi
 
         return dgi.dgi_qt()
@@ -54,7 +56,7 @@ class DGILoader(object):
         return dgi.dgi_server()
 
     @classmethod
-    def load_dgi(cls, name):
+    def load_dgi(cls, name: str) -> Callable:
         loader = getattr(cls, "load_dgi_%s" % name, None)
         if not loader:
             raise ValueError("Unknown DGI %s" % name)

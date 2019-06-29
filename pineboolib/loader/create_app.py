@@ -1,4 +1,7 @@
-def create_app(DGI, options):
+from PyQt5.QtWidgets import QApplication
+from optparse import Values
+from pineboolib.plugins.dgi.dgi_qt.dgi_qt import dgi_qt
+def create_app(DGI: dgi_qt, options: Values) -> QApplication:
     """Create a MainForm using the DGI or the core."""
 
     if not DGI.useMLDefault():

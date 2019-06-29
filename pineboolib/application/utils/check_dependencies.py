@@ -5,11 +5,12 @@ import traceback
 
 from pineboolib.core.utils.utils_base import version_check, is_deployed
 
+from typing import Dict
 logger = logging.getLogger("application.utils.check_dependencies")
 DEPENDENCIES_CHECKED = {}
 
 
-def check_dependencies(dict_, exit=True):
+def check_dependencies(dict_: Dict[str, str], exit: bool = True) -> bool:
     global DEPENDENCIES_CHECKED
     from importlib import import_module
 

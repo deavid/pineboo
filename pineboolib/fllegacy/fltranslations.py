@@ -138,5 +138,5 @@ Devuelve la traducción si existe
 """
 
 
-def FLTranslate(group, context, translate=True):
+def FLTranslate(group: str, context: str, translate: bool = True) -> str:
     return Qt.qApp.translate(group.encode(), context.encode()) if translate else context.encode()

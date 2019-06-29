@@ -14,6 +14,9 @@ from .module import Module
 from .file import File
 
 
+from pineboolib.interfaces.iconnection import IConnection
+
+
 class Project(object):
     """
     Esta es la clase principal del proyecto. Se puede acceder a esta con pineboolib.project desde cualquier parte del projecto
@@ -60,7 +63,7 @@ class Project(object):
         self.deleteCache = None
         self.parseProject = None
 
-    def init_conn(self, connection):
+    def init_conn(self, connection: IConnection) -> None:
         self.conn = connection
         self.apppath = filedir("..")
         self.tmpdir = config.value("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))

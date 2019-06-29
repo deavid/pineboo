@@ -2,10 +2,11 @@ import logging
 import re
 
 
+from typing import Optional
 class ProjectConfig:
     logger = logging.getLogger("loader.projectConfig")
 
-    def __init__(self, database=None, host=None, port=None, type=None, username=None, password=None, load_xml=None, connstring=None):
+    def __init__(self, database: Optional[str] = None, host: Optional[str] = None, port: Optional[str] = None, type: Optional[str] = None, username: Optional[str] = None, password: Optional[str] = None, load_xml: None = None, connstring: None = None) -> None:
         if connstring:
             username, password, type, host, port, database = self.translate_connstring(connstring)
         self.database = database

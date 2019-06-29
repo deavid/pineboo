@@ -4,7 +4,7 @@ import os.path
 from pineboolib.core.settings import config
 
 
-def cacheXPM(value):
+def cacheXPM(value: str) -> str:
     file_name = None
     if value:
         xpm_name = value[: value.find("[]")]

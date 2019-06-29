@@ -4,6 +4,9 @@ from PyQt5 import QtWidgets
 import logging
 from PyQt5.QtCore import pyqtProperty
 
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qbuttongroup import QButtonGroup
+from typing import Optional
+
 logger = logging.getLogger(__name__)
 
 
@@ -11,7 +14,7 @@ class QRadioButton(QtWidgets.QRadioButton):
 
     dg_id = None
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QButtonGroup] = None) -> None:
         super().__init__(parent)
         self.setChecked(False)
         self.dg_id = None
@@ -31,13 +34,13 @@ class QRadioButton(QtWidgets.QRadioButton):
     def isChecked(self):
         return super().isChecked()
 
-    def setChecked(self, b):
+    def setChecked(self, b: bool) -> None:
         super().setChecked(b)
 
     def getText(self):
         return super().getText()
 
-    def setText(self, t):
+    def setText(self, t: str) -> None:
         super().setText(t)
 
     checked = pyqtProperty(bool, isChecked, setChecked)

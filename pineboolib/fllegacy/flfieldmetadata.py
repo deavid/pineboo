@@ -3,10 +3,13 @@ from pineboolib.core.utils.utils_base import aqtt
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 import logging
 
+from pineboolib.interfaces import IFieldMetaData
+from typing import List, Optional, Union
+
 logger = logging.getLogger("FLFieldMetadata")
 
 
-class FLFieldMetaData(object):
+class FLFieldMetaData(IFieldMetaData):
     """
   @param n Nombre del campo
   @param a Alias del campo, utilizado en etiquetas de los formularios
@@ -37,7 +40,7 @@ class FLFieldMetaData(object):
     Check = "check"
     count_ = 0
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
 
         if len(args) == 1:
             self.inicializeFLFieldMetaData(args[0])
@@ -51,27 +54,27 @@ class FLFieldMetaData(object):
 
     def inicializeNewFLFieldMetaData(
         self,
-        n,
-        a,
-        aN,
-        isPrimaryKey,
-        t,
-        length_=0,
-        c=False,
-        v=True,
-        ed=True,
-        pI=4,
-        pD=0,
-        iNX=False,
-        uNI=False,
-        coun=False,
-        defValue=None,
-        oT=False,
-        rX=None,
-        vG=True,
-        gen=True,
-        iCK=False,
-    ):
+        n: str,
+        a: str,
+        aN: bool,
+        isPrimaryKey: bool,
+        t: str,
+        length_: int = 0,
+        c: bool = False,
+        v: bool = True,
+        ed: bool = True,
+        pI: int = 4,
+        pD: int = 0,
+        iNX: bool = False,
+        uNI: bool = False,
+        coun: bool = False,
+        defValue: Optional[str] = None,
+        oT: bool = False,
+        rX: Optional[str] = None,
+        vG: bool = True,
+        gen: bool = True,
+        iCK: bool = False,
+    ) -> None:
         self.d = FLFieldMetaDataPrivate(
             n, a, aN, isPrimaryKey, t, length_, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK
         )
@@ -90,7 +93,7 @@ class FLFieldMetaData(object):
     @return Nombre del campo
     """
 
-    def name(self):
+    def name(self) -> str:
         return self.d.fieldName_
 
     """
@@ -108,7 +111,7 @@ class FLFieldMetaData(object):
     @return Alias del campo
     """
 
-    def alias(self):
+    def alias(self) -> str:
         return aqtt(self.d.alias_)
 
     """
@@ -117,7 +120,7 @@ class FLFieldMetaData(object):
     @return TRUE si permite nulos, FALSE en caso contrario
     """
 
-    def allowNull(self):
+    def allowNull(self) -> bool:
         return self.d.allowNull_
 
     """
@@ -126,7 +129,7 @@ class FLFieldMetaData(object):
     @return TRUE si es clave primaria, FALSE en caso contrario
     """
 
-    def isPrimaryKey(self):
+    def isPrimaryKey(self) -> bool:
         return self.d.isPrimaryKey_
 
     def setIsPrimaryKey(self, b):
@@ -138,7 +141,7 @@ class FLFieldMetaData(object):
     @return TRUE si es clave compuesta, FALSE en caso contrario
     """
 
-    def isCompoundKey(self):
+    def isCompoundKey(self) -> bool:
         return self.d.isCompoundKey_
 
     """
@@ -147,7 +150,7 @@ class FLFieldMetaData(object):
     @return El tipo del campo
     """
 
-    def type(self):
+    def type(self) -> str:
         return str(self.d.type_)
 
     """
@@ -156,7 +159,7 @@ class FLFieldMetaData(object):
     @return La longitud del campo
     """
 
-    def length(self):
+    def length(self) -> int:
         return int(self.d.length_)
 
     """
@@ -183,7 +186,7 @@ class FLFieldMetaData(object):
     @return TRUE si el campo es editable, FALSE en caso contrario
     """
 
-    def editable(self):
+    def editable(self) -> bool:
         return self.d.editable_
 
     """
@@ -193,7 +196,7 @@ class FLFieldMetaData(object):
           en caso contrario
     """
 
-    def setEditable(self, ed):
+    def setEditable(self, ed: bool) -> None:
         self.d.editable_ = ed
 
     """
@@ -202,7 +205,7 @@ class FLFieldMetaData(object):
     @return TRUE si el campo es visible, FALSE en caso contrario
     """
 
-    def visible(self):
+    def visible(self) -> bool:
         return self.d.visible_
 
     """
@@ -211,14 +214,14 @@ class FLFieldMetaData(object):
     @return TRUE si el campo es visible en la rejilla de la tabla, FALSE en caso contrario
     """
 
-    def visibleGrid(self):
+    def visibleGrid(self) -> bool:
         return self.d.visibleGrid_
 
     """
     @return TRUE si el campo es generado, es decir, se incluye en las consultas
     """
 
-    def generated(self):
+    def generated(self) -> bool:
         return self.d.generated_
 
     def setGenerated(self, value):
@@ -231,7 +234,7 @@ class FLFieldMetaData(object):
          en caso contrario
     """
 
-    def setVisible(self, v):
+    def setVisible(self, v: bool) -> None:
         self.d.visible_ = v
 
     """
@@ -250,7 +253,7 @@ class FLFieldMetaData(object):
     @return El número de dígitos de la parte entera del campo
     """
 
-    def partInteger(self):
+    def partInteger(self) -> int:
         return int(self.d.partInteger_)
 
     """
@@ -259,7 +262,7 @@ class FLFieldMetaData(object):
     @return El número de dígitos de la parte decimal del campo
     """
 
-    def partDecimal(self):
+    def partDecimal(self) -> int:
         return int(self.d.partDecimal_)
 
     """
@@ -311,7 +314,7 @@ class FLFieldMetaData(object):
     @param r Objeto FlRelationMetaData con la definicion de la
          relacion a añadir """
 
-    def addRelationMD(self, r):
+    def addRelationMD(self, r: FLRelationMetaData) -> None:
 
         isRelM1 = False
         # print("FLFieldMetadata(%s).addRelationMD(card %s)" % (self.name(), r.cardinality()))
@@ -351,7 +354,7 @@ class FLFieldMetaData(object):
         muchos a uno para este campo
     """
 
-    def relationM1(self):
+    def relationM1(self) -> Optional[FLRelationMetaData]:
         return self.d.relationM1_
 
     """
@@ -379,7 +382,7 @@ class FLFieldMetaData(object):
     #    self.d.associatedFieldName_ = rName
     #    self.d.associatedFieldFilterTo_ = f
 
-    def setAssociatedField(self, r_or_name, f):
+    def setAssociatedField(self, r_or_name, f: str) -> None:
         name = r_or_name.name() if not isinstance(r_or_name, str) else r_or_name
 
         self.d.associatedFieldName_ = name
@@ -406,7 +409,7 @@ class FLFieldMetaData(object):
       según el valor del campo asociado
     """
 
-    def associatedFieldFilterTo(self):
+    def associatedFieldFilterTo(self) -> str:
         return self.d.associatedFieldFilterTo_
 
     """
@@ -417,7 +420,7 @@ class FLFieldMetaData(object):
     @return Nombre del campo asociado
     """
 
-    def associatedFieldName(self):
+    def associatedFieldName(self) -> Optional[str]:
         return self.d.associatedFieldName_
 
     """
@@ -426,7 +429,7 @@ class FLFieldMetaData(object):
     @return Valor que se asigna por defecto al campo
     """
 
-    def defaultValue(self):
+    def defaultValue(self) -> Optional[Union[str, bool]]:
         if self.d.defaultValue_ in (None, "null"):
             self.d.defaultValue_ = None
 
@@ -442,7 +445,7 @@ class FLFieldMetaData(object):
     @return TRUE si el campo se modifica fuera de transaccion, FALSE en caso contrario
     """
 
-    def outTransaction(self):
+    def outTransaction(self) -> bool:
         return self.d.outTransaction_
 
     """
@@ -452,7 +455,7 @@ class FLFieldMetaData(object):
         mascara para validar los valores introducidos en el campo
     """
 
-    def regExpValidator(self):
+    def regExpValidator(self) -> Optional[str]:
         return self.d.regExpValidator_
 
     """
@@ -461,7 +464,7 @@ class FLFieldMetaData(object):
     @return Lista de opciones del campo
     """
 
-    def optionsList(self):
+    def optionsList(self) -> List[str]:
         return self.d.optionsList_
 
     """
@@ -470,7 +473,7 @@ class FLFieldMetaData(object):
     @return Lista de opciones del campo
     """
 
-    def getIndexOptionsList(self, name):
+    def getIndexOptionsList(self, name: str) -> Optional[int]:
         if name in self.d.optionsList_:
             return self.d.optionsList_.index(name)
 
@@ -483,7 +486,7 @@ class FLFieldMetaData(object):
           separada por comas, p.e. "opcion1,opcion2,opcion3"
     """
 
-    def setOptionsList(self, ol):
+    def setOptionsList(self, ol: str) -> None:
         self.d.optionsList_ = []
         if ol.find("QT_TRANSLATE") != -1:
             for componente in ol.split(";"):
@@ -511,7 +514,7 @@ class FLFieldMetaData(object):
     Obtiene si el campo tiene lista de opciones
     """
 
-    def hasOptionsList(self):
+    def hasOptionsList(self) -> bool:
         return self.d.hasOptionsList_
 
     """
@@ -521,7 +524,7 @@ class FLFieldMetaData(object):
     def fullyCalculated(self):
         return self.d.fullyCalculated_
 
-    def setFullyCalculated(self, c):
+    def setFullyCalculated(self, c: bool) -> None:
         self.d.fullyCalculated_ = c
         if c:
             self.d.generated_ = True
@@ -533,14 +536,14 @@ class FLFieldMetaData(object):
     def trimed(self):
         return self.d.trimmed_
 
-    def setTrimed(self, t):
+    def setTrimed(self, t: bool) -> None:
         self.d.trimmed_ = t
 
     """
     Establece el objeto FLTableMetaData al que pertenece
     """
 
-    def setMetadata(self, mtd):
+    def setMetadata(self, mtd) -> None:
         self.d.mtd_ = mtd
 
     """
@@ -643,7 +646,7 @@ class FLFieldMetaData(object):
 
         # self = copy.deepcopy(other)
 
-    def formatAssignValue(self, fieldName, value, upper):
+    def formatAssignValue(self, fieldName: str, value: int, upper: bool) -> str:
         if value is None or not fieldName:
             return "1 = 1"
 
@@ -677,7 +680,7 @@ class FLFieldMetaData(object):
 
         return "%s = %s" % (fName, formatV)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.d.length_
 
 
@@ -883,7 +886,7 @@ class FLFieldMetaDataPrivate(object):
     """
     mtd_ = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
 
         self.regExpValidator_ = ""
 
@@ -899,7 +902,29 @@ class FLFieldMetaDataPrivate(object):
         self.associatedFieldName_ = None
         self.mtd_ = None
 
-    def inicialize(self, n, a, aN, iPK, t, length_, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK):
+    def inicialize(
+        self,
+        n: str,
+        a: str,
+        aN: bool,
+        iPK: bool,
+        t: str,
+        length_: int,
+        c: bool,
+        v: bool,
+        ed: bool,
+        pI: int,
+        pD: int,
+        iNX: bool,
+        uNI: bool,
+        coun: bool,
+        defValue: Optional[str],
+        oT: bool,
+        rX: Optional[str],
+        vG: bool,
+        gen: bool,
+        iCK: bool,
+    ) -> None:
         self.fieldName_ = n.lower()
         self.alias_ = a
         if c:

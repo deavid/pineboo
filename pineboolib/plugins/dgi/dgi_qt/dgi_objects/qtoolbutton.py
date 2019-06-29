@@ -3,11 +3,15 @@ from PyQt5 import QtWidgets
 from pineboolib.core import decorators
 
 
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qframe import QFrame
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget import QWidget
+from typing import Union
 class QToolButton(QtWidgets.QToolButton):
 
     groupId = None
 
-    def __init__(self, parent):
+    def __init__(self, parent: Union[QWidget, QGroupBox, QFrame]) -> None:
         super(QToolButton, self).__init__(parent)
         self.groupId = None
 

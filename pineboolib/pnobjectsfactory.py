@@ -54,7 +54,7 @@ Ejemplo de uso:
 """
 
 
-def base_model(name):
+def base_model(name: str) -> None:
     # print("Base", name)
     path = _path("%s.mtd" % name, False)
     if path:
@@ -127,7 +127,7 @@ def empty_base():
     aqApp.db().driver().declarative_base_ = None
 
 
-def load_models():
+def load_models() -> None:
     # print(1, "load_models!!")
 
     db_name = pineboolib.project.conn.DBName()

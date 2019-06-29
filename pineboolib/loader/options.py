@@ -2,7 +2,8 @@ import logging
 from optparse import OptionParser
 
 
-def parse_options():
+from optparse import Values
+def parse_options() -> Values:
     """Load and parse options."""
 
     parser = OptionParser()

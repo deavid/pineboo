@@ -1,17 +1,19 @@
 import pineboolib
 import logging
 
+from pineboolib.application.xmlaction import XMLAction
+from pineboolib.fllegacy.flaction import FLAction
 logger = logging.getLogger("application.utils.convert_flaction")
 
 
-def convertFLAction(action):
+def convertFLAction(action: FLAction) -> XMLAction:
     if action.name() in pineboolib.project.actions.keys():
         return pineboolib.project.actions[action.name()]
     else:
         return None
 
 
-def convert2FLAction(action):
+def convert2FLAction(action: XMLAction) -> FLAction:
     name = None
     if isinstance(action, str):
         name = str
