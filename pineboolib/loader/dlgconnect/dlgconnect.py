@@ -12,6 +12,8 @@ import base64
 import hashlib
 from xml.etree import ElementTree as ET
 
+from typing import Optional
+
 
 class DlgConnect(QtWidgets.QWidget):
     """
