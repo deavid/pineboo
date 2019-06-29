@@ -258,6 +258,8 @@ class PNBuffer(object):
     """
 
     def setValue(self, name, value, mark_=True):
+        import pineboolib.qsa
+
         if value is not None and not isinstance(
             value, (int, float, str, datetime.time, datetime.date, bool, pineboolib.qsa.Date, bytearray)
         ):
@@ -1151,6 +1153,7 @@ class FLSqlCursor(QtCore.QObject):
 
     def setAtomicValueBuffer(self, fN, functionName):
         from pineboolib.pncontrolsfactory import aqApp
+        import pineboolib.qsa
 
         if not self.buffer() or not fN or not self.metadata():
             return
@@ -1224,6 +1227,8 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def setValueBuffer(self, fN, v):
+        import pineboolib.qsa
+
         if not self.buffer() or not fN or not self.metadata():
             return
 
@@ -2700,6 +2705,8 @@ class FLSqlCursor(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def refreshBuffer(self):
+        import pineboolib.qsa
+
         if not self.metadata():
             return False
 

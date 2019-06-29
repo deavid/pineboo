@@ -1,10 +1,10 @@
 import os.path
+from PyQt5 import QtGui, QtCore, QtWidgets
+from pineboolib.core.utils.utils_base import filedir
 
 
 def show_splashscreen(project):
     """Show a splashscreen to inform keep the user busy while Pineboo is warming up."""
-    from PyQt5 import QtGui, QtCore, QtWidgets
-    from pineboolib.core.utils.utils_base import filedir
 
     splash_path = filedir("../share/splashscreen/splash_%s.png" % project.dbname)
     if not os.path.exists(splash_path):
