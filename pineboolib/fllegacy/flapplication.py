@@ -8,7 +8,9 @@ from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.core import decorators
 
 # import pineboolib
-from pineboolib import project, pncontrolsfactory
+from pineboolib import project
+
+# from pineboolib import pncontrolsfactory  # FIXME: Circular dependency
 from pineboolib.application.proxy import DelayedObjectProxyLoader
 
 from PyQt5.QtCore import QTimer, QEvent, QRect, QObject
@@ -164,6 +166,8 @@ class FLApplication(QtCore.QObject):
         self.aqApp = None
 
     def eventFilter(self, obj, ev):
+        from pineboolib import pncontrolsfactory
+
         if self.initializing_ or self.destroying_:
             return super().eventFilter(obj, ev)
 
@@ -248,6 +252,8 @@ class FLApplication(QtCore.QObject):
         return super().eventFilter(obj, ev)
 
     def eventLoop(self):
+        from pineboolib import pncontrolsfactory
+
         return pncontrolsfactory.QEventLoop()
 
     @decorators.NotImplementedWarn
@@ -885,6 +891,8 @@ class FLApplication(QtCore.QObject):
             w.setFocus()
 
     def existFormInMDI(self, id):
+        from pineboolib import pncontrolsfactory
+
         if id is None or not self.p_work_space_:
             return False
 
@@ -1376,6 +1384,8 @@ class FLApplication(QtCore.QObject):
             settings.writeEntry("%s/Height" % k, map.height())
 
     def writeStateModule(self):
+        from pineboolib import pncontrolsfactory
+
         settings = FLSettings()
         idm = self.db().managerModules().activeIdModule()
         if not idm:
@@ -1685,3 +1695,6 @@ class FLPopuWarn(QtWidgets.QWhatsThis):
             else:
                 aqApp.call(h, self.script_calls_[href], None)
 """
+
+
+aqApp = FLApplication()

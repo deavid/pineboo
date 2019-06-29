@@ -8,13 +8,14 @@ Esta libreria se usa para especificar estados de una función que no son final
 """
 from typing import Callable
 
+from typing import Any
 logger = logging.getLogger(__name__)
 MSG_EMITTED = {}
 CLEAN_REGEX = re.compile(r"\s*object\s+at\s+0x[0-9a-zA-Z]{6,38}", re.VERBOSE)
 MINIMUM_TIME_FOR_REPRINT = 300
 
 
-def clean_repr(x) -> str:
+def clean_repr(x: Any) -> str:
     return CLEAN_REGEX.sub("", repr(x))
 
 

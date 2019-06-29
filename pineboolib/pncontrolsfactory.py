@@ -10,7 +10,6 @@ import traceback
 from typing import Any, Callable
 
 from PyQt5 import QtCore
-from pineboolib.fllegacy.flapplication import FLApplication
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.wiki_error import wiki_error
 from pineboolib.core.utils.singleton import Singleton
@@ -534,9 +533,6 @@ def solve_connection(sender, signal, receiver, slot):
     return False
 
 
-aqApp = FLApplication()
-
-
 def GET(function_name, arguments=[], conn=None):
     if conn is None:
         conn = aqApp.db()
@@ -596,8 +592,8 @@ def print_stack(maxsize=1):
 # FIXME: No se debe usar import * !!!
 from pineboolib.packager.aqunpacker import AQUnpacker  # noqa:
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData  # noqa:
-
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
+from pineboolib.fllegacy.flapplication import aqApp  # noqa:  # FIXME: Circular dependency
 
 qsa_sys = SysType()
 reload_from_DGI()

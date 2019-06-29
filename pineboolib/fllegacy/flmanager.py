@@ -21,6 +21,9 @@ import pineboolib
 from xml import etree
 import logging
 
+from PyQt5.QtXml import QDomElement
+from pineboolib.pnconnection import PNConnection
+from typing import Optional, Union
 logger = logging.getLogger(__name__)
 
 # FIXME: This class is emulating Eneboo, but the way is set up it is a core part of Pineboo now.
@@ -50,7 +53,7 @@ class FLManager(QtCore.QObject):
     buffer_ = None
     metadataCachedFails = []
 
-    def __init__(self, db):
+    def __init__(self, db: PNConnection) -> None:
         """
         constructor
         """
@@ -65,7 +68,7 @@ class FLManager(QtCore.QObject):
         QtCore.QTimer.singleShot(100, self.init)
         self.metadataCachedFails = []
 
-    def init(self):
+    def init(self) -> None:
         """
         Acciones de inicialización.
         """
@@ -134,7 +137,7 @@ class FLManager(QtCore.QObject):
 
         del self
 
-    def metadata(self, n, quick=None):
+    def metadata(self, n: Union[str, QDomElement], quick: Optional[bool] = None) -> FLTableMetaData:
         """
         Para obtener definicion de una tabla de la base de datos, a partir de un fichero XML.
 
@@ -472,7 +475,7 @@ class FLManager(QtCore.QObject):
 
         return q
 
-    def action(self, n=None):
+    def action(self, n: Optional[str] = None) -> FLAction:
         """
         Obtiene la definición de una acción a partir de su nombre.
 
@@ -612,7 +615,7 @@ class FLManager(QtCore.QObject):
         self.cacheAction_[n] = a
         return a
 
-    def existsTable(self, n, cache=True):
+    def existsTable(self, n: str, cache: bool = True) -> bool:
         """
         Comprueba si existe la tabla especificada en la base de datos.
 
@@ -851,7 +854,7 @@ class FLManager(QtCore.QObject):
 
             return "%s%s" % (field_name, format_value)
 
-    def formatValue(self, fMD_or_type, v, upper=False):
+    def formatValue(self, fMD_or_type: str, v: Optional[Union[str, int]], upper: bool = False) -> Union[str, int]:
 
         if fMD_or_type is None:
             return None
@@ -861,7 +864,7 @@ class FLManager(QtCore.QObject):
 
         return self.db_.formatValue(fMD_or_type, v, upper)
 
-    def formatAssignValue(self, *args, **kwargs):
+    def formatAssignValue(self, *args, **kwargs) -> str:
         if args[0] is None:
             # print("FLManager.formatAssignValue(). Primer argumento vacio %s" % args[0])
             return "1 = 1"
@@ -939,7 +942,7 @@ class FLManager(QtCore.QObject):
 
             return retorno
 
-    def metadataField(self, field, v=True, ed=True):
+    def metadataField(self, field: QDomElement, v: bool = True, ed: bool = True) -> FLFieldMetaData:
         """
         Crea un objeto FLFieldMetaData a partir de un elemento XML.
 
@@ -1188,7 +1191,7 @@ class FLManager(QtCore.QObject):
 
         return f
 
-    def metadataRelation(self, relation):
+    def metadataRelation(self, relation: QDomElement) -> FLRelationMetaData:
         """
         Crea un objeto FLRelationMetaData a partir de un elemento XML.
 
@@ -1281,7 +1284,7 @@ class FLManager(QtCore.QObject):
         """
         return True
 
-    def createSystemTable(self, n):
+    def createSystemTable(self, n: str) -> bool:
         """
         Crea una tabla del sistema.
 
@@ -1388,7 +1391,7 @@ class FLManager(QtCore.QObject):
                 c.update()
             self.dictKeyMetaData_[table] = q2.value(1)
 
-    def isSystemTable(self, n):
+    def isSystemTable(self, n: str) -> bool:
         """
         Para saber si la tabla dada es una tabla de sistema.
 

@@ -7,10 +7,14 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 
+from PyQt5.QtCore import QDate
+from typing import Optional, Union, Any
+from xml.etree.ElementTree import Element, ElementTree
+
 logger = logging.getLogger(__name__)
 
 
-def auto_qt_translate_text(text):
+def auto_qt_translate_text(text: Optional[str]) -> str:
     """ función utilizada para eliminar los QT_TRANSLATE de eneboo. Esta función ahora mismo no traduce nada."""
     if not isinstance(text, str):
         text = str(text)
@@ -41,7 +45,7 @@ class Struct(object):
         Especialmente útil para bocetar clases al vuelo.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -52,7 +56,7 @@ class XMLStruct(Struct):
         que sea idéntico al xml que se pueda acceder fácilmente por propiedades.
     """
 
-    def __init__(self, xmlobj=None):
+    def __init__(self, xmlobj: Optional[Element] = None) -> None:
         self._attrs = []
         if xmlobj is not None:
             self.__name__ = xmlobj.tag
@@ -78,7 +82,7 @@ class XMLStruct(Struct):
         txtattrs = " ".join(attrs)
         return "<%s.%s %s>" % (self.__class__.__name__, self.__name__, txtattrs)
 
-    def _v(self, k, default=None):
+    def _v(self, k: str, default: None = None) -> Optional[str]:
         return getattr(self, k, default)
 
 
@@ -90,7 +94,7 @@ class DefFun:
         pero que el código se siga ejecutando. (ESTO ES PELIGROSO)
     """
 
-    def __init__(self, parent, funname, realfun=None):
+    def __init__(self, parent: Any, funname: str, realfun: None = None) -> None:
         self.parent = parent
         self.funname = funname
         self.realfun = None
@@ -269,7 +273,7 @@ def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
     return True
 
 
-def text2bool(text):
+def text2bool(text: str) -> bool:
     text = str(text).strip().lower()
     if text.startswith("t"):
         return True
@@ -296,7 +300,7 @@ def text2bool(text):
     raise ValueError("Valor booleano no comprendido '%s'" % text)
 
 
-def getTableObj(tree, root):
+def getTableObj(tree: ElementTree, root: Element) -> Struct:
     table = Struct()
     table.xmltree = tree
     table.xmlroot = root
@@ -317,12 +321,12 @@ def getTableObj(tree, root):
     return table
 
 
-def ustr(*t1):
+def ustr(*t1) -> str:
 
     return "".join([ustr1(t) for t in t1])
 
 
-def ustr1(t):
+def ustr1(t: Union[str, int]) -> str:
 
     if isinstance(t, str):
         return t
@@ -368,7 +372,7 @@ def version_normalize(v):
     return [int(x) for x in re.sub(r"(\.0+)*$", "", v).split(".")]
 
 
-def load2xml(form_path_or_str):
+def load2xml(form_path_or_str: str) -> ElementTree:
     from xml.etree import ElementTree as ET
 
     """
@@ -609,7 +613,7 @@ Convierte diferentes formatos de fecha a QDate
 """
 
 
-def convert_to_qdate(date):
+def convert_to_qdate(date: str) -> QDate:
     from pineboolib.qsa import Date
     from pineboolib.fllegacy.flutil import FLUtil
     import datetime
@@ -779,14 +783,14 @@ def create_dict(method, fun, id, arguments=[]):
     return {"method": method, "params": data, "jsonrpc": "2.0", "id": id}
 
 
-def is_deployed():
+def is_deployed() -> bool:
     """Returns True only if the code is running inside a PyInstaller bundle"""
     import sys
 
     return getattr(sys, "frozen", False)
 
 
-def get_base_dir():
+def get_base_dir() -> str:
     base_dir = os.path.dirname(__file__)
     base_dir = "%s/../.." % base_dir
 
@@ -797,7 +801,7 @@ def get_base_dir():
     return os.path.realpath(base_dir)
 
 
-def filedir(*path):
+def filedir(*path) -> str:
     """
     filedir(path1[, path2, path3 , ...])
     @param array de carpetas de la ruta

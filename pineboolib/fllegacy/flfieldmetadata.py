@@ -3,8 +3,10 @@ from pineboolib.core.utils.utils_base import aqtt
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 import logging
 
+from pineboolib.interfaces import ITableMetaData
 from pineboolib.interfaces import IFieldMetaData
 from typing import List, Optional, Union
+
 
 logger = logging.getLogger("FLFieldMetadata")
 
@@ -73,7 +75,7 @@ class FLFieldMetaData(IFieldMetaData):
         rX: Optional[str] = None,
         vG: bool = True,
         gen: bool = True,
-        iCK: bool = False,
+        iCK: bool = False
     ) -> None:
         self.d = FLFieldMetaDataPrivate(
             n, a, aN, isPrimaryKey, t, length_, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK
@@ -382,7 +384,7 @@ class FLFieldMetaData(IFieldMetaData):
     #    self.d.associatedFieldName_ = rName
     #    self.d.associatedFieldFilterTo_ = f
 
-    def setAssociatedField(self, r_or_name, f: str) -> None:
+    def setAssociatedField(self, r_or_name: Union[str, IFieldMetaData], f: str) -> None:
         name = r_or_name.name() if not isinstance(r_or_name, str) else r_or_name
 
         self.d.associatedFieldName_ = name
@@ -397,7 +399,7 @@ class FLFieldMetaData(IFieldMetaData):
       si no hay campo asociado
     """
 
-    def associatedField(self):
+    def associatedField(self) -> Optional[IFieldMetaData]:
         return self.metadata().field(self.d.associatedFieldName_)
 
     """
@@ -543,14 +545,14 @@ class FLFieldMetaData(IFieldMetaData):
     Establece el objeto FLTableMetaData al que pertenece
     """
 
-    def setMetadata(self, mtd) -> None:
+    def setMetadata(self, mtd: ITableMetaData) -> None:
         self.d.mtd_ = mtd
 
     """
     Obtiene el objeto FLTableMetaData al que pertenece
     """
 
-    def metadata(self):
+    def metadata(self) -> Optional[ITableMetaData]:
         return self.d.mtd_
 
     """
@@ -923,7 +925,7 @@ class FLFieldMetaDataPrivate(object):
         rX: Optional[str],
         vG: bool,
         gen: bool,
-        iCK: bool,
+        iCK: bool
     ) -> None:
         self.fieldName_ = n.lower()
         self.alias_ = a
