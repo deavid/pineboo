@@ -75,7 +75,7 @@ class FLFieldMetaData(IFieldMetaData):
         rX: Optional[str] = None,
         vG: bool = True,
         gen: bool = True,
-        iCK: bool = False
+        iCK: bool = False,
     ) -> None:
         self.d = FLFieldMetaDataPrivate(
             n, a, aN, isPrimaryKey, t, length_, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK
@@ -925,7 +925,7 @@ class FLFieldMetaDataPrivate(object):
         rX: Optional[str],
         vG: bool,
         gen: bool,
-        iCK: bool
+        iCK: bool,
     ) -> None:
         self.fieldName_ = n.lower()
         self.alias_ = a

@@ -155,7 +155,11 @@ class parser(object):
                 fun = getattr(conn.driver(), fun_name)
 
                 ret = fun(
-                    cursor, dict_["arguments"]["tablename"], dict_["arguments"]["where_filter"], dict_["arguments"]["fields"], dict_["arguments"]["curname"]
+                    cursor,
+                    dict_["arguments"]["tablename"],
+                    dict_["arguments"]["where_filter"],
+                    dict_["arguments"]["fields"],
+                    dict_["arguments"]["curname"],
                 )
                 return normalize_data(ret)
             except Exception:

@@ -17,7 +17,7 @@ class IFieldMetaData:
     def allowNull(self) -> bool:
         pass
 
-    def associatedField(self):
+    def associatedField(self) -> None:
         pass
 
     def associatedFieldFilterTo(self) -> str:
@@ -56,7 +56,7 @@ class IFieldMetaData:
     def length(self) -> int:
         pass
 
-    def metadata(self):
+    def metadata(self) -> None:
         pass
 
     def name(self) -> str:
@@ -77,7 +77,7 @@ class IFieldMetaData:
     def regExpValidator(self) -> Optional[str]:
         pass
 
-    def relationM1(self):
+    def relationM1(self) -> None:
         pass
 
     def setAssociatedField(self, r_or_name, f: str) -> None:

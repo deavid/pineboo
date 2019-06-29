@@ -380,7 +380,10 @@ class kut2rml(object):
             ret = int(self.pageSize_["LM"]) + int(val) * self.correccionAncho_
             # ret = val
         elif t == "Y":  # Vertical
-            # ret = int(self.pageSize_["H"]) - int(val) - int(self.pageSize_["TM"] - self.pageSize_["BM"] + self.actualVSize[str(self.pagina)])
+            # ret = (
+            #     int(self.pageSize_["H"]) - int(val) - int(self.pageSize_["TM"]
+            #     - self.pageSize_["BM"] + self.actualVSize[str(self.pagina)])
+            # )
             # ret = int(self.pageSize_["H"]) - int(val) - int(self.actualVSize[str(self.pagina)] * self.correcionAltura_)
             ret = int(self.pageSize_["H"]) - int(val) - self._parser_tools.heightCorrection(self.actualVSize[str(self.pagina)])
         return ret
@@ -405,8 +408,12 @@ class kut2rml(object):
     def pageFooter(self, xml, parent):
         frecuencia = int(self.getOption(xml, "PrintFrequency"))
         if frecuencia == 1 or self.pagina == 1:  # Siempre o si es primera pagina
-            # self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + (self.getHeight(xml) - self.pageSize_["BM"]) * self.correcionAltura_
-            self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + self._parser_tools.heightCorrection(self._parser_tools.getHeight(xml))
+            # self.actualVSize[str(self.pagina)] = (
+            #     self.maxVSize[str(self.pagina)] + (self.getHeight(xml) - self.pageSize_["BM"]) * self.correcionAltura_
+            # )
+            self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + self._parser_tools.heightCorrection(
+                self._parser_tools.getHeight(xml)
+            )
             # self.logger.warning("PAGE_FOOTER BOTTON %s" % self.actualVSize[str(self.pagina)])
             self.processXML(xml, parent)
 

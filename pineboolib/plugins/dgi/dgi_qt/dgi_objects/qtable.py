@@ -8,6 +8,8 @@ from pineboolib.core.utils.utils_base import format_double
 from PyQt5.QtWidgets import QAbstractItemView
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
 from typing import Optional
+
+
 class QTable(QtWidgets.QTableWidget):
 
     lineaActual = None

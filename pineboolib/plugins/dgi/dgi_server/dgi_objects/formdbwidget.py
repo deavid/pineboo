@@ -168,7 +168,12 @@ class FormDBWidget(QtCore.QObject):
     def __getattr__(self, name):
         from pineboolib.pncontrolsfactory import aqApp
 
-        ret_ = getattr(self.cursor_, name, None) or getattr(aqApp, name, None) or getattr(self.parent(), name, None) or getattr(self._action.script, name, None)
+        ret_ = (
+            getattr(self.cursor_, name, None)
+            or getattr(aqApp, name, None)
+            or getattr(self.parent(), name, None)
+            or getattr(self._action.script, name, None)
+        )
         if ret_:
             return ret_
         # else:

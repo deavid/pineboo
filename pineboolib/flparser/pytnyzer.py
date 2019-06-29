@@ -6,9 +6,10 @@ import os
 import os.path
 import re
 from xml import etree
+from typing import Any, Generator, Iterable, Optional, Tuple, Type, Union
 
 
-def id_translate(name):
+def id_translate(name) -> Any:
     python_keywords = [
         "and",
         "del",
@@ -84,7 +85,7 @@ cont_do_while = 0
 
 
 class ASTPythonFactory(type):
-    def __init__(cls, name, bases, dct):
+    def __init__(cls: Union["ASTPythonFactory", Type["ASTPython"]], name, bases, dct) -> None:
         global ast_class_types
         ast_class_types.append(cls)
         super(ASTPythonFactory, cls).__init__(name, bases, dct)
@@ -97,16 +98,16 @@ class ASTPython(object, metaclass=ASTPythonFactory):
     numline = 0
 
     @classmethod
-    def can_process_tag(self, tagname):
+    def can_process_tag(self, tagname) -> Any:
         return self.__name__ == tagname or tagname in self.tags
 
-    def __init__(self, elem):
+    def __init__(self, elem) -> None:
         self.elem = elem
         if self.debug_file:
             self.internal_generate = self.generate
             self.generate = self._generate
 
-    def debug(self, text):
+    def debug(self, text) -> None:
         if self.debug_file is None:
             return
         splen = ASTPython.generate_depth
@@ -120,13 +121,13 @@ class ASTPython(object, metaclass=ASTPythonFactory):
         cname = self.__class__.__name__
         self.debug_file.write("%04d%s%s: %s\n" % (ASTPython.numline, sp, cname, text.encode("UTF-8")))
 
-    def polish(self):
+    def polish(self) -> "ASTPython":
         return self
 
     def generate(self, **kwargs):
         yield "debug", "* not-known-seq * %s" % etree.ElementTree.tostring(self.elem, encoding="UTF-8")
 
-    def _generate(self, **kwargs):
+    def _generate(self, **kwargs) -> Generator[Tuple[str, str], Any, None]:
         self.debug("begin-gen")
         ASTPython.generate_depth += 1
         self.generate_depth = ASTPython.generate_depth
@@ -1539,14 +1540,14 @@ class DeclarationBlock(ASTPython):
 # ----- keep this one at the end.
 class Unknown(ASTPython):
     @classmethod
-    def can_process_tag(self, tagname):
+    def can_process_tag(self, tagname) -> bool:
         return True
 
 
 # -----------------
 
 
-def astparser_for(elem):
+def astparser_for(elem) -> Optional[ASTPython]:
     classobj = None
     for cls in ast_class_types:
         if cls.can_process_tag(elem.tag):
@@ -1557,12 +1558,12 @@ def astparser_for(elem):
     return classobj(elem)
 
 
-def parse_ast(elem):
+def parse_ast(elem) -> Any:
     elemparser = astparser_for(elem)
     return elemparser.polish()
 
 
-def file_template(ast):
+def file_template(ast: Iterable) -> Generator[Tuple[Any, Any], Any, None]:
     yield "line", "# -*- coding: utf-8 -*-"
     yield "line", "from pineboolib.qsa import *"
     # yield "line", "from pineboolib.qsaglobals import *"
@@ -1595,7 +1596,7 @@ def file_template(ast):
     yield "line", "form = None"
 
 
-def write_python_file(fobj, ast):
+def write_python_file(fobj, ast) -> None:
     indent = []
     indent_text = "    "
     last_line_for_indent = {}
@@ -1653,7 +1654,7 @@ def write_python_file(fobj, ast):
         last_dtype = dtype
 
 
-def pythonize(filename, destfilename, debugname=None):
+def pythonize(filename, destfilename, debugname=None) -> None:
     # bname = os.path.basename(filename)
     ASTPython.debug_file = open(debugname, "w") if debugname else None
     parser = etree.ElementTree.XMLParser(encoding="UTF-8")
@@ -1669,7 +1670,7 @@ def pythonize(filename, destfilename, debugname=None):
     f1.close()
 
 
-def main():
+def main() -> None:
     parser = OptionParser()
     parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
 

@@ -5,6 +5,7 @@ from PyQt5 import Qt
 import logging
 
 from typing import Any
+
 logger = logging.getLogger("QGroupBox")
 
 

@@ -646,7 +646,9 @@ class FLStylePainter(object):
                         bcolor = self.painter_.brush().color()
                         pn.setColor(bcolor)
                         self.painter_.setPen(pn)
-                        QtCore.QwtPainter.drawText(self.painter_, self.painter_.xFormDev(self.lastLabelRect_), self.curr_.textalign | self.tf_, self.text_)
+                        QtCore.QwtPainter.drawText(
+                            self.painter_, self.painter_.xFormDev(self.lastLabelRect_), self.curr_.textalign | self.tf_, self.text_
+                        )
                         pn.setColor(pcolor)
                         self.painter_.setPen(pn)
                         self.lastLabelRect_.setSize(QtCore.QSize(0, 0))
@@ -826,7 +828,9 @@ class FLStylePainter(object):
             n_segs = int(math.ceil(math.fabs(th_arc / (self.Q_PI * 0.5 + 0.001))))
 
             for i in range(n_segs):
-                pcount = self.pathArcSegment(path, pcount, xc, yc, th0 + i * th_arc / n_segs, th0 + (i + 1) * th_arc / n_segs, rx, ry, x_axis_rotation)
+                pcount = self.pathArcSegment(
+                    path, pcount, xc, yc, th0 + i * th_arc / n_segs, th0 + (i + 1) * th_arc / n_segs, rx, ry, x_axis_rotation
+                )
 
             return pcount
 

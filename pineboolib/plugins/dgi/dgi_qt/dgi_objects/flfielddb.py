@@ -179,7 +179,9 @@ class FLFieldDB(QtWidgets.QWidget):
             # print("Hay topWidget en %s", self)
         if self.DEBUG:
             if self.cursor_ and self.cursor_.d.buffer_:
-                self.logger.info("*** FLFieldDB::loaded: cursor: %r name: %r at:%r", self.cursor_, self.cursor_.curName(), self.cursor_.at())
+                self.logger.info(
+                    "*** FLFieldDB::loaded: cursor: %r name: %r at:%r", self.cursor_, self.cursor_.curName(), self.cursor_.at()
+                )
                 cur_values = [f.value for f in self.cursor_.d.buffer_.fieldList_]
                 self.logger.info("*** cursor Buffer: %r", cur_values)
             else:
@@ -457,7 +459,9 @@ class FLFieldDB(QtWidgets.QWidget):
 
         # elif isinstance(event, QtCore.QEvent.MouseButtonRelease) and
         # isinstance(obj,self.textLabelDB) and event.button() == Qt.LeftButton:
-        elif event.type() == QtCore.QEvent.MouseButtonRelease and isinstance(obj, type(self.textLabelDB)) and event.button() == Qt.LeftButton:
+        elif (
+            event.type() == QtCore.QEvent.MouseButtonRelease and isinstance(obj, type(self.textLabelDB)) and event.button() == Qt.LeftButton
+        ):
             self.emitLabelClicked()
             return True
         else:
@@ -661,7 +665,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         type_ = field.type()
-        
+
         # v = QVariant(cv)
         if field.hasOptionsList():
             idxItem = -1
@@ -790,7 +794,6 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "bool":
             if self.editor_ and v is not None:
                 self.editor_.setChecked(v)
-        
 
     """
     Obtiene el valor contenido en el campo.
@@ -1625,7 +1628,13 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.fieldRelation_,
                     self.foreignField_,
                 )
-                self.logger.trace("FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s", self.tableName_, self.fieldRelation_, curName, self.foreignField_)
+                self.logger.trace(
+                    "FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s",
+                    self.tableName_,
+                    self.fieldRelation_,
+                    curName,
+                    self.foreignField_,
+                )
             else:
                 self.logger.trace(
                     "FLFieldDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )",
@@ -1805,7 +1814,9 @@ class FLFieldDB(QtWidgets.QWidget):
 
                 if type_ == "double":
                     self.editor_.setValidator(
-                        FLDoubleValidator(((pow(10, partInteger) - 1) * -1), pow(10, partInteger) - 1, self.editor_.partDecimal, self.editor_)
+                        FLDoubleValidator(
+                            ((pow(10, partInteger) - 1) * -1), pow(10, partInteger) - 1, self.editor_.partDecimal, self.editor_
+                        )
                     )
                     self.editor_.setAlignment(Qt.AlignRight)
                 else:
@@ -2135,7 +2146,9 @@ class FLFieldDB(QtWidgets.QWidget):
             self.editor_.setFont(self.font())
             self.editor_.installEventFilter(self)
 
-            self.editor_.setMinimumWidth(self.fontMetrics().width(tMD.fieldNameToAlias(self.fieldName())) + self.fontMetrics().maxWidth() * 2)
+            self.editor_.setMinimumWidth(
+                self.fontMetrics().width(tMD.fieldNameToAlias(self.fieldName())) + self.fontMetrics().maxWidth() * 2
+            )
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(7), QtWidgets.QSizePolicy.Policy(0))
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
@@ -2202,7 +2215,9 @@ class FLFieldDB(QtWidgets.QWidget):
                 QtWidgets.QApplication.setOverrideCursor(Qt.WaitCursor)
                 if pix:
                     if not pix.save(savefilename[0]):
-                        QtWidgets.QMessageBox.warning(self, util.translate("Pineboo", "Error"), util.translate("Pineboo", "Error guardando fichero"))
+                        QtWidgets.QMessageBox.warning(
+                            self, util.translate("Pineboo", "Error"), util.translate("Pineboo", "Error guardando fichero")
+                        )
 
             QtWidgets.QApplication.restoreOverrideCursor()
 
@@ -2242,7 +2257,9 @@ class FLFieldDB(QtWidgets.QWidget):
                                 return
 
                             self.autoComFieldRelation_ = fRel.relationM1().foreignField()
-                            cur = FLSqlCursor(fRel.relationM1().foreignTable(), False, self.cursor_.db().connectionName(), None, None, self.autoComFrame_)
+                            cur = FLSqlCursor(
+                                fRel.relationM1().foreignTable(), False, self.cursor_.db().connectionName(), None, None, self.autoComFrame_
+                            )
                             tMD = cur.metadata()
                             field = tMD.field(self.autoCopmFieldName_) if tMD else field
                         else:
@@ -2254,7 +2271,9 @@ class FLFieldDB(QtWidgets.QWidget):
 
                         self.autoComFieldName_ = field.relationM1().foreignField()
                         self.autoComFieldRelation_ = None
-                        cur = FLSqlCursor(field.relationM1().foreignTable(), False, self.cursor_.db().connectionName(), None, None, self.autoComFrame_)
+                        cur = FLSqlCursor(
+                            field.relationM1().foreignTable(), False, self.cursor_.db().connectionName(), None, None, self.autoComFrame_
+                        )
                         tMD = cur.metadata()
                         field = tMD.field(self.autoComFieldName_) if tMD else field
 
@@ -2634,7 +2653,10 @@ class FLFieldDB(QtWidgets.QWidget):
         s = str(buffer.data(), "utf-8")
 
         if s.find("*dummy") > -1:
-            s = s.replace("*dummy", "%s_%s_%s" % (self.cursor().metadata().name(), self.fieldName_, QDateTime().currentDateTime().toString("ddhhmmssz")))
+            s = s.replace(
+                "*dummy",
+                "%s_%s_%s" % (self.cursor().metadata().name(), self.fieldName_, QDateTime().currentDateTime().toString("ddhhmmssz")),
+            )
         self.updateValue(s)
 
     """
@@ -2892,7 +2914,9 @@ class FLFieldDB(QtWidgets.QWidget):
                         self.editor_.setStyleSheet("background-color: #f0f0f0")
                     else:
                         if not field.allowNull() and not (field.type() == "time" or field.type() == "date"):
-                            self.editor_.setStyleSheet("background-color:%s; color:%s" % (self.notNullColor(), QtGui.QColor(Qt.black).name()))
+                            self.editor_.setStyleSheet(
+                                "background-color:%s; color:%s" % (self.notNullColor(), QtGui.QColor(Qt.black).name())
+                            )
                         else:
                             self.editor_.setStyleSheet(self.default_style)
 

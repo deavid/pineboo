@@ -281,7 +281,6 @@ class FLMYSQL_MYISAM2(object):
 
         cursor = self.conn_.cursor()
 
-
         strQry = "SELECT seq FROM flseqs WHERE tabla = '%s' AND campo ='%s'" % (table, field)
         try:
             cur_max = 0
@@ -299,7 +298,7 @@ class FLMYSQL_MYISAM2(object):
             ret = cur_max
         else:
             ret = max
-        
+
         ret += 1
         strQry = None
         if updateQry:

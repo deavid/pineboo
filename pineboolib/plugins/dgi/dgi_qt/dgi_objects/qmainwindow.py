@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore
+from typing import Any
 
 
 class QMainWindow(QtWidgets.QMainWindow):
-    def child(self, n, c=None):
+    def child(self, n, c=None) -> Any:
         ret = None
 
         if c is None:

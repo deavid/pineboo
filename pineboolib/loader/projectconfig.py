@@ -3,10 +3,22 @@ import re
 
 
 from typing import Optional
+
+
 class ProjectConfig:
     logger = logging.getLogger("loader.projectConfig")
 
-    def __init__(self, database: Optional[str] = None, host: Optional[str] = None, port: Optional[str] = None, type: Optional[str] = None, username: Optional[str] = None, password: Optional[str] = None, load_xml: None = None, connstring: None = None) -> None:
+    def __init__(
+        self,
+        database: Optional[str] = None,
+        host: Optional[str] = None,
+        port: Optional[str] = None,
+        type: Optional[str] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        load_xml: None = None,
+        connstring: None = None,
+    ) -> None:
         if connstring:
             username, password, type, host, port, database = self.translate_connstring(connstring)
         self.database = database
@@ -106,7 +118,7 @@ class ProjectConfig:
 
         if user_pass:
             user_pass = user_pass.split(":") + [None, None, None]
-            user, passwd, driver_alias = user_pass[0], user_pass[1] or passwd, user_pass[2] or driver_alias
+            user, passwd, driver_alias = (user_pass[0], user_pass[1] or passwd, user_pass[2] or driver_alias)
             if user_pass[3]:
                 raise ValueError("La cadena de usuario debe tener el formato user:pass:driver.")
 

@@ -256,7 +256,9 @@ class FLReportViewer(QObject):
             return
 
         util = FLUtil()
-        fileName = QFileDialog.getSaveFileName(self, util.translate("app", "Exportar a CSV"), "", util.translate("app", "Fichero CSV (*.csv *.txt)"))
+        fileName = QFileDialog.getSaveFileName(
+            self, util.translate("app", "Exportar a CSV"), "", util.translate("app", "Fichero CSV (*.csv *.txt)")
+        )
 
         if not fileName or fileName == "":
             return
@@ -300,7 +302,9 @@ class FLReportViewer(QObject):
             return
 
         util = FLUtil()
-        fileName = QFileDialog.getSaveFileName(self, util.translate("app", "Exportar a PDF"), "", util.translate("app", "Fichero PDF (*.pdf)"))
+        fileName = QFileDialog.getSaveFileName(
+            self, util.translate("app", "Exportar a PDF"), "", util.translate("app", "Fichero PDF (*.pdf)")
+        )
 
         if fileName[0] == "":
             return

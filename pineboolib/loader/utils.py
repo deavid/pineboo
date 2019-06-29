@@ -55,7 +55,7 @@ def addLoggingLevel(levelName: str, levelNum: int, methodName: None = None) -> N
     setattr(logging, methodName, logToRoot)
 
 
-def monkey_patch_connect():
+def monkey_patch_connect() -> None:
     """Patch Qt5 signal/event functions for tracing them.
 
     This is not stable and should be used with care

@@ -5,6 +5,7 @@ import json
 from PyQt5.QtCore import QSettings, QSize
 
 from typing import Dict, List, Optional, Union
+
 logger = logging.getLogger("core.settings")
 
 

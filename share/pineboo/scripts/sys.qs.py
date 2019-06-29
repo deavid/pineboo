@@ -452,7 +452,14 @@ class FormInternalObj(FormDBWidget):
                     if nombreEjercicio:
                         texto = ustr(u"[ ", nombreEjercicio, u" ]")
                     texto = ustr(
-                        texto, u" [ ", aqApp.db().driverNameToDriverAlias(aqApp.db().driverName()), u" ] * [ ", sys.nameBD(), u" ] * [ ", sys.nameUser(), u" ] "
+                        texto,
+                        u" [ ",
+                        aqApp.db().driverNameToDriverAlias(aqApp.db().driverName()),
+                        u" ] * [ ",
+                        sys.nameBD(),
+                        u" ] * [ ",
+                        sys.nameUser(),
+                        u" ] ",
                     )
                     aqApp.setCaptionMainWidget(texto)
 
@@ -1319,7 +1326,9 @@ def infoPopup(msg=None):
     caption = sys.translate(u"AbanQ Información")
     regExp = RegExp(u"\n")
     regExp.global_ = True
-    msgHtml = ustr(u'<img source="about.png" align="right">', u"<b><u>", caption, u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
+    msgHtml = ustr(
+        u'<img source="about.png" align="right">', u"<b><u>", caption, u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>"
+    )
     sys.popupWarn(msgHtml, [])
 
 
@@ -1339,7 +1348,9 @@ def errorPopup(msg=None):
     caption = sys.translate(u"AbanQ Error")
     regExp = RegExp(u"\n")
     regExp.global_ = True
-    msgHtml = ustr(u'<img source="remove.png" align="right">', u"<b><u>", caption, u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
+    msgHtml = ustr(
+        u'<img source="remove.png" align="right">', u"<b><u>", caption, u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>"
+    )
     sys.popupWarn(msgHtml, [])
 
 
@@ -1408,7 +1419,9 @@ def decryptFromBase64(str_=None):
 
 
 def updatePineboo():
-    MessageBox.warning(sys.translate(u"Funcionalidad no soportada aún en Pineboo."), MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, u"Pineboo")
+    MessageBox.warning(
+        sys.translate(u"Funcionalidad no soportada aún en Pineboo."), MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, u"Pineboo"
+    )
     return
 
 
@@ -1818,9 +1831,9 @@ def importFile(filePath=None, idMod=None):
 
     ok = True
     name = file.name
-    if (not AQUtil.isFLDefFile(content) and not name.endswith(u".qs") and not name.endswith(u".ar") and not name.endswith(u".svg")) or name.endswith(
-        u"untranslated.ts"
-    ):
+    if (
+        not AQUtil.isFLDefFile(content) and not name.endswith(u".qs") and not name.endswith(u".ar") and not name.endswith(u".svg")
+    ) or name.endswith(u"untranslated.ts"):
         return ok
     cur = AQSqlCursor(u"flfiles")
     cur.select(ustr(u"nombre = '", name, u"'"))
@@ -1935,7 +1948,11 @@ def disableObj(container=None, component=None):
     if not c:
         return False
     clase = (
-        "FLFieldDB" if isinstance(c, pineboolib.project._DGI.FLFieldDB) else "FLTableDB" if isinstance(c, pineboolib.project._DGI.FLTableDB) else c.className()
+        "FLFieldDB"
+        if isinstance(c, pineboolib.project._DGI.FLFieldDB)
+        else "FLTableDB"
+        if isinstance(c, pineboolib.project._DGI.FLTableDB)
+        else c.className()
     )
     if clase in ["QToolButton", "QPushButton"]:
         runObjMethod(container, component, u"setEnabled", False)
@@ -2169,7 +2186,9 @@ def search_git_updates(url=None):
     # print("***", pro.stdout)
 
     if pro.stdout.find("git pull") > -1:
-        if MessageBox.Yes != MessageBox.warning("Hay nuevas actualizaciones disponibles para Pineboo. ¿Desea actualizar?", MessageBox.No, MessageBox.Yes):
+        if MessageBox.Yes != MessageBox.warning(
+            "Hay nuevas actualizaciones disponibles para Pineboo. ¿Desea actualizar?", MessageBox.No, MessageBox.Yes
+        ):
             return
 
         pro.execute("git pull %s" % url)

@@ -20,173 +20,173 @@ class IConnection:
     name = None
     _isOpen = False
 
-    def finish(self):
+    def finish(self) -> None:
         pass
 
-    def connectionName(self):
+    def connectionName(self) -> None:
         pass
 
-    def useConn(self, name="default"):
+    def useConn(self, name="default") -> None:
         pass
 
-    def removeConn(self, name="default"):
+    def removeConn(self, name="default") -> None:
         pass
 
-    def isOpen(self):
+    def isOpen(self) -> None:
         pass
 
-    def tables(self):
+    def tables(self) -> None:
         pass
 
-    def database(self, name=None):
+    def database(self, name=None) -> None:
         pass
 
-    def DBName(self):
+    def DBName(self) -> None:
         pass
 
-    def driver(self):
+    def driver(self) -> None:
         pass
 
-    def session(self):
+    def session(self) -> None:
         pass
 
-    def engine(self):
+    def engine(self) -> None:
         pass
 
-    def declarative_base(self):
+    def declarative_base(self) -> None:
         pass
 
-    def cursor(self):
+    def cursor(self) -> None:
         pass
 
-    def conectar(self, db_name, db_host, db_port, db_userName, db_password):
+    def conectar(self, db_name, db_host, db_port, db_userName, db_password) -> None:
         pass
 
-    def driverName(self):
+    def driverName(self) -> None:
         pass
 
-    def driverAlias(self):
+    def driverAlias(self) -> None:
         pass
 
-    def driverNameToDriverAlias(self, name):
+    def driverNameToDriverAlias(self, name) -> None:
         pass
 
-    def lastError(self):
+    def lastError(self) -> None:
         pass
 
-    def host(self):
+    def host(self) -> None:
         pass
 
-    def port(self):
+    def port(self) -> None:
         pass
 
-    def user(self):
+    def user(self) -> None:
         pass
 
-    def password(self):
+    def password(self) -> None:
         pass
 
-    def seek(self, offs, whence=0):
+    def seek(self, offs, whence=0) -> None:
         pass
 
-    def manager(self):
+    def manager(self) -> None:
         pass
 
-    def md5TuplesStateTable(self, curname):
+    def md5TuplesStateTable(self, curname) -> None:
         pass
 
-    def setInteractiveGUI(self, b):
+    def setInteractiveGUI(self, b) -> None:
         pass
 
-    def setQsaExceptions(self, b):
+    def setQsaExceptions(self, b) -> None:
         pass
 
-    def db(self):
+    def db(self) -> None:
         pass
 
-    def dbAux(self):
+    def dbAux(self) -> None:
         pass
 
-    def formatValue(self, t, v, upper):
+    def formatValue(self, t, v, upper) -> None:
         pass
 
-    def formatValueLike(self, t, v, upper):
+    def formatValueLike(self, t, v, upper) -> None:
         pass
 
-    def canSavePoint(self):
+    def canSavePoint(self) -> None:
         pass
 
-    def canTransaction(self):
+    def canTransaction(self) -> None:
         pass
 
-    def doTransaction(self, cursor):
+    def doTransaction(self, cursor) -> None:
         pass
 
-    def transactionLevel(self):
+    def transactionLevel(self) -> None:
         pass
 
-    def doRollback(self, cur):
+    def doRollback(self, cur) -> None:
         pass
 
-    def interactiveGUI(self):
+    def interactiveGUI(self) -> None:
         pass
 
-    def doCommit(self, cur, notify=True):
+    def doCommit(self, cur, notify=True) -> None:
         pass
 
-    def canDetectLocks(self):
+    def canDetectLocks(self) -> None:
         pass
 
-    def commit(self):
+    def commit(self) -> None:
         pass
 
-    def managerModules(self):
+    def managerModules(self) -> None:
         pass
 
-    def canOverPartition(self):
+    def canOverPartition(self) -> None:
         pass
 
-    def savePoint(self, savePoint):
+    def savePoint(self, savePoint) -> None:
         pass
 
-    def releaseSavePoint(self, savePoint):
+    def releaseSavePoint(self, savePoint) -> None:
         pass
 
-    def Mr_Proper(self):
+    def Mr_Proper(self) -> None:
         pass
 
-    def rollbackSavePoint(self, savePoint):
+    def rollbackSavePoint(self, savePoint) -> None:
         pass
 
-    def transaction(self):
+    def transaction(self) -> None:
         pass
 
-    def commitTransaction(self):
+    def commitTransaction(self) -> None:
         pass
 
-    def rollbackTransaction(self):
+    def rollbackTransaction(self) -> None:
         pass
 
-    def nextSerialVal(self, table, field):
+    def nextSerialVal(self, table, field) -> None:
         pass
 
-    def existsTable(self, name):
+    def existsTable(self, name) -> None:
         pass
 
-    def createTable(self, tmd):
+    def createTable(self, tmd) -> None:
         pass
 
-    def mismatchedTable(self, tablename, tmd):
+    def mismatchedTable(self, tablename, tmd) -> None:
         pass
 
-    def normalizeValue(self, text):
+    def normalizeValue(self, text) -> None:
         pass
 
-    def queryUpdate(self, name, update, filter):
+    def queryUpdate(self, name, update, filter) -> None:
         pass
 
-    def execute_query(self, q):
+    def execute_query(self, q) -> None:
         pass
 
-    def alterTable(self, mtd_1, mtd_2, key, force=False):
+    def alterTable(self, mtd_1, mtd_2, key, force=False) -> None:
         pass

@@ -263,10 +263,18 @@ class FLTableDB(QtWidgets.QWidget):
                     self.fieldRelation_,
                     self.foreignField_,
                 )
-                logger.trace("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s", curName, self.foreignField_, self.tableName_, self.fieldRelation_)
+                logger.trace(
+                    "FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s",
+                    curName,
+                    self.foreignField_,
+                    self.tableName_,
+                    self.fieldRelation_,
+                )
             else:
                 logger.trace(
-                    "FLTableDB : El campo ( %s ) indicado en la propiedad foreignField no se encuentra en la tabla ( %s )", self.foreignField_, curName
+                    "FLTableDB : El campo ( %s ) indicado en la propiedad foreignField no se encuentra en la tabla ( %s )",
+                    self.foreignField_,
+                    curName,
                 )
                 pass
 
@@ -277,7 +285,13 @@ class FLTableDB(QtWidgets.QWidget):
                 rMD = FLRelationMetaData(curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, False)
                 fMD.addRelationMD(rMD)
                 if DEBUG:
-                    logger.trace("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s", self.tableName_, self.fieldRelation_, curName, self.foreignField_)
+                    logger.trace(
+                        "FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s",
+                        self.tableName_,
+                        self.fieldRelation_,
+                        curName,
+                        self.foreignField_,
+                    )
 
             else:
                 if DEBUG:
@@ -570,7 +584,9 @@ class FLTableDB(QtWidgets.QWidget):
 
     @decorators.BetaImplementation
     def aliasCheckColumn(self):
-        return self.tableRecords._model.headerData(self.tableRecords_.selectionModel().selectedColumns(), QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)
+        return self.tableRecords._model.headerData(
+            self.tableRecords_.selectionModel().selectedColumns(), QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole
+        )
 
     """
     Establece el texto de la etiqueta de encabezado para la columna de selección
@@ -695,7 +711,13 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     def eventFilter(self, obj, ev):
-        if not self.tableRecords_ or not self.lineEditSearch or not self.comboBoxFieldToSearch or not self.comboBoxFieldToSearch2 or not self.cursor():
+        if (
+            not self.tableRecords_
+            or not self.lineEditSearch
+            or not self.comboBoxFieldToSearch
+            or not self.comboBoxFieldToSearch2
+            or not self.cursor()
+        ):
             return super(FLTableDB, self).eventFilter(obj, ev)
 
         if ev.type() == QtCore.QEvent.KeyPress and isinstance(obj, FLDataTable):
@@ -704,7 +726,7 @@ class FLTableDB(QtWidgets.QWidget):
             if k.key() == QtCore.Qt.Key_F2:
                 self.comboBoxFieldToSearch.popup()
                 return True
-        
+
         if ev.type() == QtCore.QEvent.WindowUnblocked and isinstance(obj, FLDataTable):
             row = self.currentRow()
             self.refresh(True, True)
@@ -1103,7 +1125,13 @@ class FLTableDB(QtWidgets.QWidget):
 
                 cond = QComboBox(self)
                 if not type == "pixmap":
-                    condList = [util.tr("Todos"), util.tr("Igual a Valor"), util.tr("Distinto de Valor"), util.tr("Vacío"), util.tr("No Vacío")]
+                    condList = [
+                        util.tr("Todos"),
+                        util.tr("Igual a Valor"),
+                        util.tr("Distinto de Valor"),
+                        util.tr("Vacío"),
+                        util.tr("No Vacío"),
+                    ]
                     if not type == "bool":
                         condList = [
                             util.tr("Todos"),
@@ -1146,7 +1174,9 @@ class FLTableDB(QtWidgets.QWidget):
                                     if type == "uint":
                                         editor_.setValidator(FLUIntValidator(0, pow(10, partInteger) - 1, editor_))
                                     else:
-                                        editor_.setValidator(FLIntValidator(pow(10, partInteger) - 1 * (-1), pow(10, partInteger) - 1, editor_))
+                                        editor_.setValidator(
+                                            FLIntValidator(pow(10, partInteger) - 1 * (-1), pow(10, partInteger) - 1, editor_)
+                                        )
 
                                     editor_.setAlignment(Qt.AlignRight)
                                 else:
@@ -1692,7 +1722,9 @@ class FLTableDB(QtWidgets.QWidget):
 
                 self.tableRecords().cursor().model().updateColumnsCount()
                 self.tableRecords().header().reset()
-                self.tableRecords().header().swapSections(self.tableRecords().column_name_to_column_index(fieldCheck.name()), self.sortColumn_)
+                self.tableRecords().header().swapSections(
+                    self.tableRecords().column_name_to_column_index(fieldCheck.name()), self.sortColumn_
+                )
                 self.checkColumnVisible_ = True
                 self.setTableRecordsCursor()
                 self.sortColumn_ = 1
@@ -1925,7 +1957,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @QtCore.pyqtSlot(bool)
-    def deleteRecord(self, unknown = None):
+    def deleteRecord(self, unknown=None):
         w = self.sender()
         if isinstance(w, FLDataTable):
             w = None
@@ -1983,7 +2015,11 @@ class FLTableDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot(int)
     @QtCore.pyqtSlot(str)
     def putFirstCol(self, col):
-        _index = self.tableRecords_.column_name_to_column_index(col) if isinstance(col, str) else self.tableRecords_.visual_index_to_column_index(col)
+        _index = (
+            self.tableRecords_.column_name_to_column_index(col)
+            if isinstance(col, str)
+            else self.tableRecords_.visual_index_to_column_index(col)
+        )
 
         if _index is None or _index < 0:
             return False
@@ -2001,7 +2037,11 @@ class FLTableDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot(int)
     @QtCore.pyqtSlot(str)
     def putSecondCol(self, col):
-        _index = self.tableRecords_.column_name_to_column_index(col) if isinstance(col, str) else self.tableRecords_.visual_index_to_column_index(col)
+        _index = (
+            self.tableRecords_.column_name_to_column_index(col)
+            if isinstance(col, str)
+            else self.tableRecords_.visual_index_to_column_index(col)
+        )
 
         if _index is None or _index < 0:
             return False
@@ -2205,7 +2245,10 @@ class FLTableDB(QtWidgets.QWidget):
         settings = FLSettings()
         if settings.readBoolEntry("ebcomportamiento/FLTableExport2Calc", False):
             QMessageBox.information(
-                self.topWidget, self.tr("Opción deshabilitada"), self.tr("Esta opción ha sido deshabilitada por el administrador"), QtWidgets.QMessageBox.Ok
+                self.topWidget,
+                self.tr("Opción deshabilitada"),
+                self.tr("Esta opción ha sido deshabilitada por el administrador"),
+                QtWidgets.QMessageBox.Ok,
             )
             return
 
@@ -2294,7 +2337,14 @@ class FLTableDB(QtWidgets.QWidget):
                                     pix_name = "pix%s_" % id_pix
                                     id_pix += 1
                                     row.opIn(
-                                        AQOdsImage(pix_name, round((pix.width() * 2.54) / 98, 2) * 20, round((pix.height() * 2.54) / 98, 2) * 20, 0, 0, val)
+                                        AQOdsImage(
+                                            pix_name,
+                                            round((pix.width() * 2.54) / 98, 2) * 20,
+                                            round((pix.height() * 2.54) / 98, 2) * 20,
+                                            0,
+                                            0,
+                                            val,
+                                        )
                                     )
                                 else:
                                     row.coveredCell()

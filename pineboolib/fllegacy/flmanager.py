@@ -24,6 +24,7 @@ import logging
 from PyQt5.QtXml import QDomElement
 from pineboolib.pnconnection import PNConnection
 from typing import Optional, Union
+
 logger = logging.getLogger(__name__)
 
 # FIXME: This class is emulating Eneboo, but the way is set up it is a core part of Pineboo now.

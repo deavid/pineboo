@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets
+from typing import Any
 
 
 class QToolBar(QtWidgets.QToolBar):
@@ -8,7 +9,7 @@ class QToolBar(QtWidgets.QToolBar):
     def setLabel(self, l: str) -> None:
         self._label = l
 
-    def getLabel(self):
+    def getLabel(self) -> Any:
         return self._label
 
     label = property(getLabel, setLabel)

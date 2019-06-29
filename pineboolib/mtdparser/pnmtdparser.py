@@ -8,9 +8,11 @@ reserved_words = ["pass"]
 
 """
     Esta librería es un parser de mtd a model de sqlAlchemy.
-    Se crea un fichero .py y se aloja al lado del .mtd relacionado. También se puede sobrecargar con una clase personalizada para aumentar/modificar
+    Se crea un fichero .py y se aloja al lado del .mtd relacionado.
+    También se puede sobrecargar con una clase personalizada para aumentar/modificar
         las funciones disponibles. Ver pineboolib.pnobjectsfactory.py
 """
+
 
 def mtd_parse(fileobj):
     mtd_file = _dir("cache", fileobj.filekey)
@@ -177,7 +179,10 @@ def generate_model(dest_file, mtd_table):
 
         settings = FLSettings()
         if settings.readBoolEntry("application/isDebuggerMode", False):
-            logger.warning("La tabla %s no tiene definida una clave primaria. No se generará el model %s\n" % (mtd_table.name(), mtd_table.primaryKey()))
+            logger.warning(
+                "La tabla %s no tiene definida una clave primaria. No se generará el model %s\n"
+                % (mtd_table.name(), mtd_table.primaryKey())
+            )
         data = []
 
     return data

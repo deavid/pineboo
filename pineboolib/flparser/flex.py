@@ -228,7 +228,7 @@ def t_preprocessor(t):
     t.lexer.lineno += 1
 
 
-def t_error(t):
+def t_error(t) -> None:
     print("Illegal character %s" % repr(t.value[0]))
     t.lexer.skip(1)
 

@@ -4,6 +4,8 @@ from pineboolib.core import decorators
 
 
 from PyQt5.QtGui import QIcon
+
+
 class QPushButton(QtWidgets.QPushButton):
     def __init__(self, *args, **kwargs) -> None:
         super(QPushButton, self).__init__(*args, **kwargs)

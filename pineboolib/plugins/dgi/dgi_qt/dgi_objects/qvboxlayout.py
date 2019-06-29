@@ -3,7 +3,7 @@ from PyQt5 import QtWidgets
 
 
 class QVBoxLayout(QtWidgets.QVBoxLayout):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         if isinstance(parent, QtWidgets.QWidget):
             super().__init__(parent)
         else:

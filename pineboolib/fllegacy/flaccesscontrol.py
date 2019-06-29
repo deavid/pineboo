@@ -58,6 +58,9 @@ como el selector de módulos, o cada una de las ventanas principales de los mód
 
 
 from typing import List
+from typing import Any
+
+
 class FLAccessControl(object):
 
     """
@@ -112,7 +115,7 @@ class FLAccessControl(object):
     @return Cadena de texto con el nombre (login) del usuario.
     """
 
-    def user(self):
+    def user(self) -> Any:
         return self.user_
 
     """
@@ -139,7 +142,7 @@ class FLAccessControl(object):
     @param u Nombre (login) del usuario.
     """
 
-    def setUser(self, u):
+    def setUser(self, u) -> None:
         self.user_ = u
 
     """
@@ -174,7 +177,7 @@ class FLAccessControl(object):
     @return Cadena de texto que identifica al tipo de objeto general de la regla, p.e.: "table".
     """
 
-    def type(self):
+    def type(self) -> str:
         return ""
 
     """
@@ -183,7 +186,7 @@ class FLAccessControl(object):
     @param e Elemento correspondiente al nodo DOM que se utilizará para definir la regla.
     """
 
-    def set(self, e):
+    def set(self, e) -> None:
         if not e:
             return
 
@@ -224,7 +227,7 @@ class FLAccessControl(object):
     @param d Documento DOM/XML donde se insertará el nodo construido a partir de la regla de control de acceso.
     """
 
-    def get(self, d):
+    def get(self, d) -> None:
         if not self.type() or d is None:
             return
 

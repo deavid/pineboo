@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtWidgets, QtCore
+from typing import Any
 
 
 class QDialog(QtWidgets.QDialog):
-    def __init__(self, parent=None, name=None, b=None):
+    def __init__(self, parent=None, name=None, b=None) -> None:
         if isinstance(parent, int):
             parent = None
 
@@ -13,19 +14,19 @@ class QDialog(QtWidgets.QDialog):
             self.setTitle(name)
         self.setModal(True)
 
-    def child(self, name):
+    def child(self, name) -> Any:
         return self.findChild(QtWidgets.QWidget, name)
 
-    def getTitle(self):
+    def getTitle(self) -> Any:
         return self.windowTitle()
 
-    def setTitle(self, title):
+    def setTitle(self, title) -> None:
         self.setWindowTitle(title)
 
-    def getEnabled(self):
+    def getEnabled(self) -> Any:
         return self.isEnabled()
 
-    def setEnable_(self, enable_):
+    def setEnable_(self, enable_) -> None:
         self.setEnabled(enable_)
 
     @QtCore.pyqtSlot()

@@ -3,6 +3,8 @@ from optparse import OptionParser
 
 
 from optparse import Values
+
+
 def parse_options() -> Values:
     """Load and parse options."""
 

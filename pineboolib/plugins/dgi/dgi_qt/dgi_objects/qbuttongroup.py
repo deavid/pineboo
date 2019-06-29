@@ -5,6 +5,8 @@ from pineboolib.core import decorators
 
 
 from typing import Callable
+
+
 class QButtonGroup(QGroupBox):
 
     selectedId = None

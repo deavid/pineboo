@@ -1,5 +1,6 @@
 from typing import Callable
 import logging
+from typing import Any
 
 
 class DelayedObjectProxyLoader(object):
@@ -28,7 +29,7 @@ class DelayedObjectProxyLoader(object):
         self.loaded_obj = self._obj(*self._args, **self._kwargs)
         return self.loaded_obj
 
-    def __getattr__(self, name):  # Solo se lanza si no existe la propiedad.
+    def __getattr__(self, name: str) -> Any:  # Solo se lanza si no existe la propiedad.
         """
         Retorna una función buscada
         @param name. Nombre del la función buscada

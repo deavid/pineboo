@@ -6,6 +6,7 @@ import traceback
 from pineboolib.core.utils.utils_base import version_check, is_deployed
 
 from typing import Dict
+
 logger = logging.getLogger("application.utils.check_dependencies")
 DEPENDENCIES_CHECKED = {}
 

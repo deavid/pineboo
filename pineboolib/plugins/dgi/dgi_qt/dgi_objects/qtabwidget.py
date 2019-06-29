@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets
 import logging
+from typing import Any, Optional, TypeVar, Union
+
+_T0 = TypeVar("_T0")
 
 logger = logging.getLogger(__name__)
 
 
 class QTabWidget(QtWidgets.QTabWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
 
         self.Top = self.North
@@ -14,7 +17,7 @@ class QTabWidget(QtWidgets.QTabWidget):
         self.Left = self.West
         self.Right = self.East
 
-    def setTabEnabled(self, tab, enabled):
+    def setTabEnabled(self, tab, enabled) -> Any:
 
         idx = self.indexByName(tab)
         if idx is None:
@@ -22,7 +25,7 @@ class QTabWidget(QtWidgets.QTabWidget):
 
         return QtWidgets.QTabWidget.setTabEnabled(self, idx, enabled)
 
-    def showPage(self, tab):
+    def showPage(self, tab) -> Any:
 
         idx = self.indexByName(tab)
         if idx is None:
@@ -30,7 +33,7 @@ class QTabWidget(QtWidgets.QTabWidget):
 
         return QtWidgets.QTabWidget.setCurrentIndex(self, idx)
 
-    def indexByName(self, tab):
+    def indexByName(self, tab: _T0) -> Optional[Union[int, _T0]]:
 
         idx = None
         if isinstance(tab, int):
@@ -47,6 +50,6 @@ class QTabWidget(QtWidgets.QTabWidget):
             logger.error("ERROR: Tab not found:: QTabWidget, tab name = %r", tab)
         return None
 
-    def removePage(self, idx):
+    def removePage(self, idx) -> None:
         if isinstance(idx, int):
             self.removeTab(idx)

@@ -193,7 +193,10 @@ class FLStaticLoader(QtCore.QObject):
             return
 
         if QtWidgets.QMessageBox.No == QtWidgets.QMessageBox.warning(
-            None, self.tr("Borrar registro"), self.tr("El registro activo será borrado. ¿ Está seguro ?"), QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No
+            None,
+            self.tr("Borrar registro"),
+            self.tr("El registro activo será borrado. ¿ Está seguro ?"),
+            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No,
         ):
             return
 

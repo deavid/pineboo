@@ -3,7 +3,7 @@ from PyQt5 import QtWidgets
 
 
 class QHBoxLayout(QtWidgets.QHBoxLayout):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         if isinstance(parent, QtWidgets.QWidget):
             super().__init__(parent)
         else:

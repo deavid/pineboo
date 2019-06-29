@@ -1,9 +1,10 @@
 import logging
+from typing import Any
 
 logger = logging.getLogger("loader.init_project")
 
 
-def init_project(DGI, splash, options, project, mainForm, app):
+def init_project(DGI, splash, options, project, mainForm, app) -> Any:
     """Initialize the project and start it."""
     # from PyQt5 import QtCore
 

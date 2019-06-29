@@ -1,9 +1,10 @@
 import logging
+from typing import Container
 
 logger = logging.getLogger("loader.preload_actions")
 
 
-def preload_actions(project, forceload=None):
+def preload_actions(project, forceload: Container = None) -> None:
     """Preload actions for warming up the pythonizer cache.
 
     forceload: When passed an string, it filters and loads all

@@ -292,7 +292,7 @@ class JSON_Reverter(JSON_Base):
             u'name': u'report1', u'language': u'groovy', u'pageWidth': u'842', u'columnWidth': u'802',
             u'topMargin': u'20', u'rightMargin': u'20', u'bottomMargin': u'20', u'xmlns:xsi': u'http://www.w3.org/2001/XMLSchema-instance',
             u'leftMargin': u'20',
-            u'xsi:schemaLocation': u'http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd',
+            u'xsi:schemaLocation': u'http://jasperreports.sourceforge.net/jasperreports',
             u'pageHeight': u'595', u'orientation': u'Landscape'}
         CharacterDataHandler: '\n'
         CharacterDataHandler: '\t'

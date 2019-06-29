@@ -35,7 +35,9 @@ class FormInternalObj(FormDBWidget):
         listaSesiones = sys.testSessionsList(bd.text)
         if not listaSesiones or listaSesiones == "":
             MessageBox.critical(
-                util.translate("scripts", "Error al obtener la lista de sesiones para la base de datos ") + bd.text, MessageBox.Ok, MessageBox.NoButton
+                util.translate("scripts", "Error al obtener la lista de sesiones para la base de datos ") + bd.text,
+                MessageBox.Ok,
+                MessageBox.NoButton,
             )
             return
         sesiones = listaSesiones.split("**")

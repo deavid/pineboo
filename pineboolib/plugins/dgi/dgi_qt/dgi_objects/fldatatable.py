@@ -692,8 +692,8 @@ class FLDataTable(QtWidgets.QTableView):
             else:
                 return
 
-        #index = self.cursor().model().index(position, 0)
-        #if index is not None:
+        # index = self.cursor().model().index(position, 0)
+        # if index is not None:
         #    self.scrollTo(index)
 
     """

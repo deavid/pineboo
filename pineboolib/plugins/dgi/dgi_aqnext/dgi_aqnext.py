@@ -64,8 +64,9 @@ class dgi_aqnext(dgi_schema):
         return "Django"
 
     def authenticate(self, **kwargs):
-        user = kwargs["username"]  # FIXME
-        password = kwargs["password"]
+        # user = kwargs["username"]  # FIXME
+        # password = kwargs["password"]
+        pass
 
     def use_authentication(self):
         return self._use_authentication
@@ -203,7 +204,9 @@ class dgi_aqnext(dgi_schema):
             action_xml.table = action_xml.name
             action_xml.script = script_name
             pineboolib.project.actions[action_xml.name] = action_xml
-            delayed_action = DelayedObjectProxyLoader(action_xml.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (app, action_xml.name))
+            delayed_action = DelayedObjectProxyLoader(
+                action_xml.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (app, action_xml.name)
+            )
             setattr(qsa_dict_modules, "formRecord" + action_xml.name, delayed_action)
             # print("Creando **** ", getattr(qsa_dict_modules, "formRecord" + module_name))
 
@@ -549,18 +552,16 @@ class paginated_object(object):
     pass
 
 
-"""
 class pagination_class(object):
 
     count = None
     _limit = None
     _page = None
 
-    def __init__(self, data_, query = {}):
+    def __init__(self, data_, query={}):
         self.count = len(data_)
-        self._limit = 50 if not "p_l" in query.keys() or query["p_l"] == 'true' else int(query["p_l"])
-        self._page =  0 if not "p_c" in query.keys() or query["p_c"] == 'true'  else int(query["p_c"])
-
+        self._limit = 50 if "p_l" not in query.keys() or query["p_l"] == "true" else int(query["p_l"])
+        self._page = 0 if "p_c" not in query.keys() or query["p_c"] == "true" else int(query["p_c"])
 
     def get_next_offset(self):
         ret_ = None
@@ -571,9 +572,7 @@ class pagination_class(object):
             ret_ = actual
             i += 1
 
-
         return ret_
-
 
     def get_previous_offset(self):
         ret_ = None
@@ -586,4 +585,8 @@ class pagination_class(object):
             i += 1
 
         return ret_
-"""
+
+
+class mainForm(object):
+    mainWindow = None
+    MainForm = None

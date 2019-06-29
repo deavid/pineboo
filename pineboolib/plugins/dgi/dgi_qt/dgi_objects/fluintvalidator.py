@@ -4,6 +4,8 @@ from PyQt5 import QtGui
 
 from PyQt5.QtGui import QValidator
 from typing import Tuple
+
+
 class FLUIntValidator(QtGui.QIntValidator):
     _formatting = None
 

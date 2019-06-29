@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtWidgets import QLabel
+from typing import Any
 
 
 class FLPixmapView(QtWidgets.QScrollArea):
@@ -14,7 +15,7 @@ class FLPixmapView(QtWidgets.QScrollArea):
     gB_ = None
     _parent = None
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         super(FLPixmapView, self).__init__(parent)
         self.autoScaled_ = False
         self.lay_ = QtWidgets.QHBoxLayout(self)
@@ -27,7 +28,7 @@ class FLPixmapView(QtWidgets.QScrollArea):
         self.setStyleSheet("QScrollArea { border: 1px solid darkgray; border-radius: 3px; }")
         self._parent = parent
 
-    def setPixmap(self, pix):
+    def setPixmap(self, pix) -> None:
         # if not pineboolib.project._DGI.localDesktop():
         #    pineboolib.project._DGI._par.addQueque("%s_setPixmap" % self._parent.objectName(
         #    ), self._parent.cursor_.valueBuffer(self._parent.fieldName_))
@@ -41,14 +42,14 @@ class FLPixmapView(QtWidgets.QScrollArea):
         self.repaint()
         QtWidgets.QApplication.restoreOverrideCursor()
 
-    def eventFilter(self, obj, ev):
+    def eventFilter(self, obj, ev) -> Any:
 
         if isinstance(obj, QLabel) and isinstance(ev, QtGui.QResizeEvent):
             self.resizeContents()
 
         return super(FLPixmapView, self).eventFilter(obj, ev)
 
-    def resizeContents(self):
+    def resizeContents(self) -> None:
 
         if self.pixmap_.isNull():
             return
@@ -64,7 +65,7 @@ class FLPixmapView(QtWidgets.QScrollArea):
         self.pixmapView_.clear()
         self.pixmapView_.setPixmap(new_pix)
 
-    def previewUrl(self, url):
+    def previewUrl(self, url) -> None:
         u = QtCore.QUrl(url)
         if u.isLocalFile():
             path = u.path()
@@ -84,11 +85,11 @@ class FLPixmapView(QtWidgets.QScrollArea):
             if pix is not None:
                 self.setPixmap(pix)
 
-    def clear(self):
+    def clear(self) -> None:
         self.pixmapView_.clear()
 
-    def pixmap(self):
+    def pixmap(self) -> Any:
         return self.pixmap_
 
-    def setAutoScaled(self, autoScaled):
+    def setAutoScaled(self, autoScaled) -> None:
         self.autoScaled_ = autoScaled

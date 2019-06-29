@@ -3,11 +3,14 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QTreeWidgetItem, QTreeWidget, QMainWindow
 from PyQt5.QtXml import QDomDocument
 
-from pineboolib.core.settings import settings
+# from pineboolib.core.settings import settings
 from pineboolib.fllegacy.aqsobjects.aqs import AQS
-from pineboolib.pncontrolsfactory import aqApp
 from pineboolib import pncontrolsfactory
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQUtil, AQSettings
+
+# FIXME: pncontrolsfactory controls should not be imported directly.
+from pineboolib.pncontrolsfactory import aqApp
+from pineboolib.pncontrolsfactory import qsa_sys
 
 import logging
 
@@ -63,10 +66,10 @@ class MainForm(QtWidgets.QMainWindow):
 
                 return True
 
-            elif isinstance(o, pineboolib.pncontrolsfactory.FLFormDB):
+            elif isinstance(o, pncontrolsfactory.FLFormDB):
                 self.formClosed()
 
-            elif isinstance(o, pineboolib.pncontrolsfactory.QDockWidget):
+            elif isinstance(o, pncontrolsfactory.QDockWidget):
                 o.topLevelChanged.emit(False)
 
         elif isinstance(e, AQS.WindowStateChange):
@@ -81,7 +84,7 @@ class MainForm(QtWidgets.QMainWindow):
                     return True
 
         elif isinstance(e, AQS.Show):
-            if isinstance(o, pineboolib.pncontrolsfactory.FLFormDB):
+            if isinstance(o, pncontrolsfactory.FLFormDB):
                 return True
 
         return False
@@ -981,7 +984,7 @@ class DockListView(QtCore.QObject):
         if action_name == "":
             return
 
-        ac = self.ag_.findChild(pineboolib.pncontrolsfactory.QAction, action_name)
+        ac = self.ag_.findChild(pncontrolsfactory.QAction, action_name)
         if ac:
             ac.triggered.emit()
 

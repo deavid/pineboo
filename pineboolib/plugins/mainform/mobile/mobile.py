@@ -1002,7 +1002,9 @@ class DockListView(QtCore.QObject):
                 if class_name == "QActionGroup":
                     group_name = node.attribute("objectName")
                     if (
-                        group_name not in ("pinebooActionGroup") and not group_name.endswith("Actions") and not group_name.startswith(("pinebooAg"))
+                        group_name not in ("pinebooActionGroup")
+                        and not group_name.endswith("Actions")
+                        and not group_name.startswith(("pinebooAg"))
                     ) or group_name.endswith("MoreActions"):
 
                         this_item = QTreeWidgetItem(parent_item)

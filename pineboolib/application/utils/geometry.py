@@ -3,6 +3,8 @@ from pineboolib.core.settings import settings
 
 from PyQt5.QtCore import QSize
 from typing import Dict, Optional, Union
+
+
 def saveGeometryForm(name: str, geo: QSize) -> None:
     """
     Guarda la geometría de una ventana

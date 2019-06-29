@@ -2,6 +2,8 @@
 
 
 from typing import Optional
+
+
 class FLAction(object):
 
     """
@@ -123,7 +125,7 @@ class FLAction(object):
     Establece la descripción
     """
 
-    def setDescription(self, d):
+    def setDescription(self, d) -> None:
         self.description_ = d
 
     """

@@ -33,7 +33,8 @@ class FLQPSQL2(FLQPSQL):
         import pg8000
         import traceback
 
-        # conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (db_name, db_host, db_port, db_userName, db_password)
+        # conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5"
+        #                % (db_name, db_host, db_port, db_userName, db_password)
 
         try:
             self.conn_ = pg8000.connect(

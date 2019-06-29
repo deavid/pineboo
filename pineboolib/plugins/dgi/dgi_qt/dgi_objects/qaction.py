@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets
 from typing import Optional
+from typing import Any
 
 
 class QAction(QtWidgets.QAction):
@@ -21,13 +22,13 @@ class QAction(QtWidgets.QAction):
     def getName(self) -> str:
         return self.objectName()
 
-    def setName(self, n):
+    def setName(self, n) -> None:
         self.setObjectName(n)
 
-    def getMenuText(self):
+    def getMenuText(self) -> Any:
         return self._menuText
 
-    def setMenuText(self, t):
+    def setMenuText(self, t) -> None:
         self._menuText = t
 
     name = property(getName, setName)

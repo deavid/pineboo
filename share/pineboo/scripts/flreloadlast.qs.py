@@ -55,7 +55,9 @@ class FormInternalObj(FormDBWidget):
         setting = "scripts/sys/modLastModule_%s" % sys.nameBD()
         fichMod = util.readSettingEntry(setting)
         if not fichMod:
-            fichMod = FileDialog.getOpenFileName(util.translate(u"scripts", u"Módulo a cargar (*.mod)"), util.translate(u"scripts", u"Módulo a cargar"))
+            fichMod = FileDialog.getOpenFileName(
+                util.translate(u"scripts", u"Módulo a cargar (*.mod)"), util.translate(u"scripts", u"Módulo a cargar")
+            )
             if not fichMod:
                 return
             util.writeSettingEntry(setting, fichMod)
@@ -81,7 +83,9 @@ class FormInternalObj(FormDBWidget):
         if xmlModule.setContent(f):
             nodeModule = xmlModule.namedItem(u"MODULE")
             if not nodeModule:
-                MessageBox.critical(util.translate(u"scripts", u"Error en la carga del fichero xml .mod"), MessageBox.Ok, MessageBox.NoButton)
+                MessageBox.critical(
+                    util.translate(u"scripts", u"Error en la carga del fichero xml .mod"), MessageBox.Ok, MessageBox.NoButton
+                )
             modulo = nodeModule.namedItem(u"name").toElement().text()
             descripcion = nodeModule.namedItem(u"alias").toElement().text()
             area = nodeModule.namedItem(u"area").toElement().text()

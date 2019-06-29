@@ -6,7 +6,7 @@ class QCheckBox(QtWidgets.QCheckBox):
 
     _parent = None
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         self._parent = parent
         super(QCheckBox, self).__init__(parent)
 

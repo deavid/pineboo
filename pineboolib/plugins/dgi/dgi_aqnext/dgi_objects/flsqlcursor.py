@@ -57,7 +57,9 @@ class DelayedObjectProxyLoader(object):
             if key_ not in self.cursor_tree_dict.keys():
                 # rel_mtd = aqApp.db().manager().metadata(relation_table_name)
 
-                relation_mtd = FLRelationMetaData(relation_table_name, field_relation.field(), FLRelationMetaData.RELATION_1M, False, False, True)
+                relation_mtd = FLRelationMetaData(
+                    relation_table_name, field_relation.field(), FLRelationMetaData.RELATION_1M, False, False, True
+                )
                 relation_mtd.setField(relation_field_name)
 
                 if relation_table_name and relation_field_name:
@@ -291,11 +293,15 @@ class meta_model(object):
                 if key_ not in self.cursor_tree_dict.keys():
                     # rel_mtd = aqApp.db().manager().metadata(relation_table_name)
 
-                    relation_mtd = FLRelationMetaData(relation_table_name, field_relation.field(), FLRelationMetaData.RELATION_1M, False, False, True)
+                    relation_mtd = FLRelationMetaData(
+                        relation_table_name, field_relation.field(), FLRelationMetaData.RELATION_1M, False, False, True
+                    )
                     relation_mtd.setField(relation_field_name)
 
                     if relation_table_name and relation_field_name:
-                        self.cursor_tree_dict[key_] = FLSqlCursor_legacy(relation_table_name, True, self._cursor.conn(), self._cursor, relation_mtd)
+                        self.cursor_tree_dict[key_] = FLSqlCursor_legacy(
+                            relation_table_name, True, self._cursor.conn(), self._cursor, relation_mtd
+                        )
 
                 rel_cursor = self.cursor_tree_dict[key_]
                 rel_cursor.select()

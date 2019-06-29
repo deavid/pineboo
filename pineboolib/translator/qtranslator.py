@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore
 import logging
+from typing import Any, Sized, Tuple
 
 
 class QTranslator(QtCore.QObject):
     d = None
 
-    def __init__(self, parent, name=None):
+    def __init__(self, parent, name=None) -> None:
         self.logger = logging.getLogger(__name__)
         super(QTranslator, self).__init__(parent)
         if name:
@@ -14,7 +15,7 @@ class QTranslator(QtCore.QObject):
 
         self.d = QTranslatorPrivate(self)
 
-    def insert(self, message):
+    def insert(self, message) -> None:
         self.unsquezze()
         for m in self.d.messages:
             if m == message:
@@ -23,7 +24,7 @@ class QTranslator(QtCore.QObject):
 
         self.d.messages.append(message)
 
-    def unsquezze(self):
+    def unsquezze(self) -> None:
 
         if self.d.messages:
             return
@@ -40,7 +41,7 @@ class QTranslator(QtCore.QObject):
 
             self.d.messages.append(m)  # noqa: FIXME: undefined m
 
-    def elfHash(self, name):
+    def elfHash(self, name: Sized) -> int:
 
         k = None
         h = 0
@@ -60,7 +61,7 @@ class QTranslator(QtCore.QObject):
 
         return h
 
-    def squeeze(self, mode):
+    def squeeze(self, mode) -> None:
         if not self.d.messages:
             if mode == "Stripped":
                 self.unsquezze()
@@ -101,8 +102,10 @@ class QTranslator(QtCore.QObject):
             ds.writeUInt32(offsets[key].h)  # Marca
             ds.writeUInt32(offsets[key].o)  # Incremental!!
 
-        # | Init| len source  | sourceText (16 *char)         | len ctx (32) | context              | espacio | suma flag | value offset_context 32 bits | fin |
-        # | 03  | 00 00 00 10 | 00 01 00 02 00 03 00 04 00 05 | 00 00 00 08  | 51 44 69 61 6C 6F 67 | 00      | 05        | 00 00 00 00                  | 01  |
+        # | Init| len source  | sourceText (16 *char)         | len ctx (32) | context              | espacio | suma flag
+        #   | value offset_context 32 bits | fin |
+        # | 03  | 00 00 00 10 | 00 01 00 02 00 03 00 04 00 05 | 00 00 00 08  | 51 44 69 61 6C 6F 67 | 00      | 05
+        #   | 00 00 00 00                  | 01  |
 
         # Aquí creamos msg
         for msg in messages:
@@ -163,10 +166,10 @@ class QTranslator(QtCore.QObject):
 
         del messages
 
-    def clear(self):
+    def clear(self) -> None:
         pass
 
-    def save_qm(self, file_name, mode):
+    def save_qm(self, file_name, mode) -> bool:
 
         magic = [0x3C, 0xB8, 0x64, 0x18, 0xCA, 0xEF, 0x9C, 0x95, 0xCD, 0x21, 0x1C, 0xBF, 0x60, 0xA1, 0xBD, 0xDD]
 
@@ -277,7 +280,8 @@ class QTranslator(QtCore.QObject):
         while True:
             h = elfHash(source_text + comment)
 
-            r = bsearch(h, self.d.offsetArray.data(), numItems, 2 * sizeof(Q_UINT32), cmp_uint32_big if systemBigEndian else cmp_uint32_lite)
+            r = bsearch(h, self.d.offsetArray.data(), numItems, 2 * sizeof(Q_UINT32),
+             cmp_uint32_big if systemBigEndian else cmp_uint32_lite)
 
             if r != 0:
                 while r != self.d.offsetArray.data() and cmp_uint32_big(r -8, r) == 0:
@@ -319,7 +323,7 @@ class QTranslatorPrivate(QtCore.QObject):
     Hashes = 0x42
     Messages = 0x69
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         super(QTranslatorPrivate, self).__init__(parent)
 
         self.messageArray = QtCore.QByteArray()
@@ -332,7 +336,7 @@ class QTranslatorPrivate(QtCore.QObject):
         self.messages = {}
         self.oldPermissionLookup = 0
 
-    def Offset(*args):
+    def Offset(*args) -> Tuple[Any, Any]:
         h = None
         o = None
 

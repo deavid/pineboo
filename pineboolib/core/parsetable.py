@@ -2,6 +2,7 @@ import logging
 from .utils.utils_base import getTableObj
 
 from pineboolib.core.utils.utils_base import Struct
+
 logger = logging.getLogger("core.parsetable")
 
 

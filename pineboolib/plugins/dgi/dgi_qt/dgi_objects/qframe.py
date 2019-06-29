@@ -5,6 +5,8 @@ from PyQt5 import QtWidgets
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget import QWidget
 from typing import Union
+
+
 class QFrame(QtWidgets.QFrame):
     _line_width = None
 

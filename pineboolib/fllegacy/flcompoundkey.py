@@ -12,6 +12,8 @@ es decir objetos FLFieldMetaData.
 
 
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
+
+
 class FLCompoundKey(object):
 
     """

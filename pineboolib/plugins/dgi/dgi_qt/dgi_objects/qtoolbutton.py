@@ -7,6 +7,8 @@ from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qframe import QFrame
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget import QWidget
 from typing import Union
+
+
 class QToolButton(QtWidgets.QToolButton):
 
     groupId = None

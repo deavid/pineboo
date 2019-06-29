@@ -3,6 +3,8 @@ from pineboolib.core.settings import settings
 
 
 from typing import List, Optional, Union
+
+
 class FLSettings(object):
     s = settings
 
