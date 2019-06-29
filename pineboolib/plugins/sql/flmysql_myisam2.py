@@ -260,12 +260,10 @@ class FLMYSQL_MYISAM2(object):
             logger.warning("%s::beginTransaction: Database not open", self.name_)
             return None
 
-        # self.transaction()
-        #    self.setLastError("No se puede iniciar la transacción", "BEGIN WORK")
-        #    return None
+        if not self.transaction():
+            self.setLastError("No se puede iniciar la transacción", "BEGIN WORK")
+            return None
 
-        # res = None
-        # row = None
         max = 0
         cur_max = 0
         updateQry = False
@@ -283,22 +281,27 @@ class FLMYSQL_MYISAM2(object):
 
         cursor = self.conn_.cursor()
 
-        # print(1,"max de %s.%s = %s" % (table, field, max))
 
         strQry = "SELECT seq FROM flseqs WHERE tabla = '%s' AND campo ='%s'" % (table, field)
         try:
-            cur_max = cursor.execute(strQry)
+            cur_max = 0
+            cursor.execute(strQry)
+            line = cursor.fetchone()
+            if line:
+                cur_max = line[0]
         except Exception:
             logger.warning("%s:: La consulta a la base de datos ha fallado", self.name_, traceback.format_exc())
             self.rollbackTransaction()
             return
 
-        # print(2,"cur_max de %s.%s = %s" % (table, field , cur_max))
-
-        updateQry = cur_max > 0
-
+        if cur_max > 0:
+            updateQry = True
+            ret = cur_max
+        else:
+            ret = max
+        
+        ret += 1
         strQry = None
-        ret = max + 1
         if updateQry:
             if ret > cur_max:
                 strQry = "UPDATE flseqs SET seq=%s WHERE tabla = '%s' AND campo = '%s'" % (ret, table, field)
@@ -314,9 +317,9 @@ class FLMYSQL_MYISAM2(object):
 
                 return
 
-        # self.commitTransaction()
-        #    qWarning("%s:: No se puede aceptar la transacción" % self.name_)
-        #    return
+        if not self.commitTransaction():
+            qWarning("%s:: No se puede aceptar la transacción" % self.name_)
+            return None
 
         return ret
 
