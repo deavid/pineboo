@@ -483,13 +483,12 @@ class FLManager(QtCore.QObject):
         @param n Nombre de la accion
         @return Un objeto FLAction con la descripcion de la accion
         """
-        # FIXME: Urgent! This function call hangs up on some XML.
+        # FIXME: This function is really inefficient. Pineboo already parses the actions much before.
         if not n:
             return None
 
         if n in self.cacheAction_.keys():
             return self.cacheAction_[n]
-
         a = FLAction()
         util = FLUtil()
         doc = QDomDocument(n)
@@ -602,12 +601,13 @@ class FLManager(QtCore.QObject):
                                 no2 = no2.nextSibling()
                                 continue
 
-                        no2.nextSibling()
+                        no2 = no2.nextSibling()
 
                     no = no.nextSibling()
                     continue
 
             no = no.nextSibling()
+        logger.trace("action: saving cache and finishing %s", n)
 
         self.cacheAction_[n] = a
         return a
