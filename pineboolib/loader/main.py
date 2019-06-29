@@ -87,6 +87,12 @@ def exec_main(options):
     from .connection import config_dbconn, connect_to_db, DEFAULT_SQLITE_CONN
 
     configdb = config_dbconn(options)
+    
+    import pineboolib
+    
+    project = pineboolib.project  # FIXME: next time, proper singleton
+    project.setDebugLevel(options.debug_level)
+    project.init_dgi(_DGI)
 
     if not configdb and _DGI.useDesktop() and _DGI.localDesktop():
         if not _DGI.mobilePlatform():
@@ -99,11 +105,9 @@ def exec_main(options):
     if not configdb:
         raise ValueError("No connection given. Nowhere to connect. Cannot start.")
 
-    import pineboolib
+    
 
-    project = pineboolib.project  # FIXME: next time, proper singleton
-    project.setDebugLevel(options.debug_level)
-    project.init_dgi(_DGI)
+
     project.init_conn(connection=connect_to_db(configdb))
     project.no_python_cache = options.no_python_cache
 
