@@ -19,6 +19,7 @@ from jsonrpc import JSONRPCResponseManager, dispatcher
 import pineboolib
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.core import decorators
+from pineboolib import pncontrolsfactory
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +126,7 @@ class parser(object):
             cr = ac.child(control)
             if cr:
                 em = getattr(cr, emite, None)
-                if isinstance(cr, FLFieldDB):  # FIXME: import FLFieldDB
+                if isinstance(cr, pncontrolsfactory.FLFieldDB):
                     if emite == "setText":
                         cr.editor_.setText(arguments[3])
                         return True
@@ -133,7 +134,7 @@ class parser(object):
                         print("Función desconocida", emite)
                         return False
 
-                elif isinstance(cr, FLTableDB):  # FIXME: import FLFieldDB
+                elif isinstance(cr, pncontrolsfactory.FLTableDB):
                     if emite == "data":
                         print("Recoge data!!!")
 
@@ -207,7 +208,17 @@ Exportador UI a JSON
 class parserJson:
     def __init__(self):
         # TODO: se puede ampliar con propiedades y objetos de qt4
-        self.aPropsForbidden = ["images", "includehints", "layoutdefaults", "slots", "stdsetdef", "stdset", "version", "spacer", "connections"]
+        self.aPropsForbidden = [
+            "images",
+            "includehints",
+            "layoutdefaults",
+            "slots",
+            "stdsetdef",
+            "stdset",
+            "version",
+            "spacer",
+            "connections",
+        ]
         self.aObjsForbidden = [
             "geometry",
             "sizePolicy",
