@@ -431,33 +431,35 @@ def RegExp(strRE):
     @param strRE. Cadena de texto
     @return valor procesado
     """
+    is_global = False
     if strRE[-2:] == "/g":
         strRE = strRE[:-2]
+        is_global = True
+    elif strRE[-1:] == "/":
+        strRE = strRE[:-1]
 
     if strRE[:1] == "/":
         strRE = strRE[1:]
 
-    return qsaRegExp(strRE)
+    return qsaRegExp(strRE, is_global)
 
 
 class qsaRegExp(object):
+    logger = logging.getLogger("qsaRegExp")
 
-    strRE_ = None
-    result_ = None
-    is_global = None
-
-    def __init__(self, strRE):
+    def __init__(self, strRE, is_global=False):
         self.strRE_ = strRE
-        self.is_global = False
+        self.pattern = re.compile(self.strRE_)
+        self.is_global = is_global
+        self.result_ = None
 
     def search(self, text):
-        self.result_ = re.search(r"%s" % self.strRE_, text)
+        self.result_ = self.pattern.search(text)
         return self.result_
 
     def replace(self, target, new_value):
-        pattern = re.compile('r"' + self.strRE_ + '"')
         count = 1 if not self.is_global else 0
-        return pattern.sub(new_value, target, count)
+        return self.pattern.sub(new_value, target, count)
 
     def cap(self, i):
         if self.result_ is None:
@@ -466,6 +468,7 @@ class qsaRegExp(object):
         try:
             return self.result_.group(i)
         except Exception:
+            self.logger.exception("Error calling cap(%s)" % i)
             return None
 
     def get_global(self):
