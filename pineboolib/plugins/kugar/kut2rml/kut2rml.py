@@ -34,7 +34,7 @@ class kut2rml(object):
     _parser_tools = None
 
     def __init__(self):
-        from pineboolib.core.utils.utils_base import check_dependencies
+        from pineboolib.application.utils.check_dependencies import check_dependencies
 
         dict_ = {"z3c.rml": "z3c.rml"}
         check_dependencies(dict_)

@@ -412,7 +412,7 @@ class Project(object):
             file_name = file_name[len(file_name) - 2]
 
             msg = "Convirtiendo a Python . . . %s.qs %s" % (file_name, txt_)
-            self.logger.debug(msg)
+            self.logger.info(msg)
 
             # if self._splash:
             #     self._splash.showMessage(msg, QtCore.Qt.AlignLeft, QtCore.Qt.white)

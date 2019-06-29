@@ -10,6 +10,7 @@ def init_project(DGI, splash, options, project, mainForm, app):
     # if DGI.useDesktop() and DGI.localDesktop() and splash:
     #     splash.showMessage("Iniciando proyecto ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
     #     DGI.processEvents()
+
     logger.info("Iniciando proyecto ...")
 
     # Necesario para que funcione isLoadedModule ¿es este el mejor sitio?
@@ -20,6 +21,14 @@ def init_project(DGI, splash, options, project, mainForm, app):
 
     for module_name in project.modules.keys():
         project.modules[module_name].load()
+
+    if options.preload:
+        from .preload import preload_actions
+
+        preload_actions(project, options.forceload)  # FIXME: No funciona, abre una ventana y se queda colgado
+
+        logger.info("Finished preloading")
+        return
 
     if options.action:
         list = options.action.split(":")
@@ -41,14 +50,6 @@ def init_project(DGI, splash, options, project, mainForm, app):
         main_window = mainForm.mainWindow
         main_window.initScript()
         ret = 0
-
-    if options.preload:
-        import sys
-        from .preload import preload_actions
-
-        preload_actions(project, options.forceload)  # FIXME: No funciona, abre una ventana y se queda colgado
-
-        sys.exit(0)  # FIXME
 
     if mainForm is not None:
         # if DGI.localDesktop():

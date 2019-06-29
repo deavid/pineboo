@@ -195,7 +195,7 @@ class XMLAction(XMLStruct):
             scriptname = scriptname.replace(".qs", "")
             # self.logger.info("Cargando script %s de %s accion %s", scriptname, parent, self.name)
 
-        parent_ = parent
+        parent_object = parent
         if parent is None:
             parent = self
             action_ = self
@@ -215,7 +215,7 @@ class XMLAction(XMLStruct):
         parent.script = emptyscript
 
         if scriptname is None:
-            parent.script.form = parent.script.FormInternalObj(action=action_, project=self.project, parent=parent)
+            parent.script.form = parent.script.FormInternalObj(action=action_, project=self.project, parent=parent_object)
             parent.widget = parent.script.form
             parent.iface = parent.widget.iface
             return
@@ -244,7 +244,7 @@ class XMLAction(XMLStruct):
             if not os.path.isfile(script_path):
                 raise IOError
             try:
-                self.logger.info("Cargando %s : %s ", scriptname, script_path.replace(self.project.tmpdir, "tempdata"))
+                self.logger.debug("Cargando %s : %s ", scriptname, script_path.replace(self.project.tmpdir, "tempdata"))
                 parent.script = machinery.SourceFileLoader(scriptname, script_path).load_module()
             except Exception:
                 self.logger.exception("ERROR al cargar script PY para la accion %s:", action_.name)
@@ -255,16 +255,16 @@ class XMLAction(XMLStruct):
             self.logger.info("Loading script QS %s . . . ", scriptname)
             python_script_path = (script_path + ".xml.py").replace(".qs.xml.py", ".qs.py")
             try:
-                self.logger.info("Cargando %s : %s ", scriptname, python_script_path.replace(self.project.tmpdir, "tempdata"))
+                self.logger.debug("Cargando %s : %s ", scriptname, python_script_path.replace(self.project.tmpdir, "tempdata"))
                 parent.script = machinery.SourceFileLoader(scriptname, python_script_path).load_module()
             except Exception:
                 self.logger.exception("ERROR al cargar script QS para la accion %s:", action_.name)
 
-        parent.script.form = parent.script.FormInternalObj(action_, self.project, parent_)
-        if parent_:
-            parent.widget = parent.script.form
-            if getattr(parent.widget, "iface", None):
-                parent.iface = parent.widget.iface
+        parent.script.form = parent.script.FormInternalObj(action_, self.project, parent_object)
+        if parent_object:
+            parent_object.widget = parent.script.form
+            if getattr(parent_object.widget, "iface", None):
+                parent_object.iface = parent.widget.iface
 
         return
 

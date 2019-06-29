@@ -145,7 +145,10 @@ class FormDBWidget(QtWidgets.QWidget):
         from pineboolib.pncontrolsfactory import aqApp
 
         ret_ = (
-            getattr(self.cursor_, name, None) or getattr(aqApp, name, None) or getattr(self.parent(), name, None) or getattr(self.parent().script, name, None)
+            getattr(self.cursor_, name, None)
+            or getattr(aqApp, name, None)
+            or getattr(self.parent(), name, None)
+            or getattr(self.parent().script, name, None)
         )
         if ret_:
             return ret_

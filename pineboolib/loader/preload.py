@@ -14,9 +14,14 @@ def preload_actions(project, forceload=None):
     for action in project.actions:
         if forceload and action not in forceload:
             continue
-        logger.info("* * * Cargando acción %s . . . " % action)
+        logger.debug("* * * Cargando acción %s . . . " % action)
         try:
             project.actions[action].load()
         except Exception:
             logger.exception("Failure trying to load action %s", action)
-            project.conn.conn.rollback()
+            project.conn.conn.rollback()  # FIXME: Proper transaction handling using with context
+        try:
+            project.actions[action].loadRecord(None)
+        except Exception:
+            logger.exception("Failure trying to loadRecord action %s", action)
+            project.conn.conn.rollback()  # FIXME: Proper transaction handling using with context

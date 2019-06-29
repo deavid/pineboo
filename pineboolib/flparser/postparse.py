@@ -669,7 +669,7 @@ def execute(options, args):
             if not os.path.exists(filename):
                 logger.error("Fichero %r no encontrado" % filename)
                 continue
-            logger.info("Pythonizing File: %-35s . . . .        (%.1f%%)" % (bname, 100.0 * (nf + 1.0) / nfs))
+            logger.debug("Pythonizing File: %-35s . . . .        (%.1f%%)" % (bname, 100.0 * (nf + 1.0) / nfs))
             old_stderr = sys.stdout
             stream = io.StringIO()
             sys.stdout = stream
@@ -688,7 +688,7 @@ def execute(options, args):
         nfs = len(args)
         for nf, filename in enumerate(args):
             bname = os.path.basename(filename)
-            logger.info("Parsing File: %-35s . . . .        (%.1f%%)" % (bname, 100.0 * (nf + 1.0) / nfs))
+            logger.debug("Parsing File: %-35s . . . .        (%.1f%%)" % (bname, 100.0 * (nf + 1.0) / nfs))
             try:
                 filecontent = open(filename, "r", encoding="latin-1").read()
             except Exception:

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from pineboolib.core.utils.utils_base import check_dependencies, filedir, load2xml
+from pineboolib.application.utils.check_dependencies import check_dependencies
+from pineboolib.core.utils.utils_base import filedir, load2xml
 import pineboolib
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
@@ -689,7 +690,9 @@ class kut2fpdf(object):
             else:
                 if font_full_name not in self._unavalible_fonts:
                     if self.design_mode:
-                        self.logger.warning("KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica%s." % (font_full_name, font_style))
+                        self.logger.warning(
+                            "KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica%s." % (font_full_name, font_style)
+                        )
                     self._unavalible_fonts.append(font_full_name)
                 font_name = "helvetica"
 
@@ -778,10 +781,16 @@ class kut2fpdf(object):
             y = y + extra_size
 
             if self.design_mode:
-                self.write_debug(self.calculateLeftStart(orig_x), y, "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w), 6, "green")
+                self.write_debug(
+                    self.calculateLeftStart(orig_x), y, "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w), 6, "green"
+                )
                 if xml.tag == "CalculatedField":
                     self.write_debug(
-                        self.calculateLeftStart(orig_x), y, "CalculatedField:%s, Field:%s" % (xml.get("FunctionName"), xml.get("Field")), 3, "blue"
+                        self.calculateLeftStart(orig_x),
+                        y,
+                        "CalculatedField:%s, Field:%s" % (xml.get("FunctionName"), xml.get("Field")),
+                        3,
+                        "blue",
                     )
 
             self._document.text(x, y, actual_text)
@@ -880,7 +889,11 @@ class kut2fpdf(object):
 
     def write_cords_debug(self, x, y, w, h, ox, ow):
         self.write_debug(
-            x, y, "X:%s Y:%s W:%s H:%s orig_x:%s, orig_W:%s" % (round(x, 2), round(y, 2), round(w, 2), round(h, 2), round(ox, 2), round(ow, 2)), 2, "red"
+            x,
+            y,
+            "X:%s Y:%s W:%s H:%s orig_x:%s, orig_W:%s" % (round(x, 2), round(y, 2), round(w, 2), round(h, 2), round(ox, 2), round(ow, 2)),
+            2,
+            "red",
         )
 
     def write_debug(self, x, y, text, h, color=None):
@@ -981,9 +994,13 @@ class kut2fpdf(object):
 
     def draw_margins(self):
         self.draw_debug_line(0 + self._left_margin, 0, 0 + self._left_margin, self._page_size[1])  # Vertical derecha
-        self.draw_debug_line(self._page_size[0] - self._right_margin, 0, self._page_size[0] - self._right_margin, self._page_size[1])  # Vertical izquierda
+        self.draw_debug_line(
+            self._page_size[0] - self._right_margin, 0, self._page_size[0] - self._right_margin, self._page_size[1]
+        )  # Vertical izquierda
         self.draw_debug_line(0, 0 + self._top_margin, self._page_size[0], 0 + self._top_margin)  # Horizontal superior
-        self.draw_debug_line(0, self._page_size[1] - self._bottom_margin, self._page_size[0], self._page_size[1] - self._bottom_margin)  # Horizontal inferior
+        self.draw_debug_line(
+            0, self._page_size[1] - self._bottom_margin, self._page_size[0], self._page_size[1] - self._bottom_margin
+        )  # Horizontal inferior
 
     def draw_debug_line(self, X1, Y1, X2, Y2, title=None, color="GREY"):
         dash_length = 2
