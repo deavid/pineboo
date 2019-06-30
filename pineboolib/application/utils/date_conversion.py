@@ -1,5 +1,5 @@
 
-def date_dma_o_amd(f):
+def date_dma_to_amd(f):
     if not f:
         return None
 
