@@ -1681,14 +1681,14 @@ class FLPopuWarn(QtWidgets.QWhatsThis):
     def clicked(self, href):
         if href:
 
-            from pineboolib.pncontrolsfactory import aqApp
+            from pineboolib import pncontrolsfactory
 
             if href.find(":") > -1:
                 h = href.split(":")[1]
             if h.find(".") == 1:
-                aqApp.call(h.split(".")[1], self.script_calls_[href], h.split(".")[0])
+                pncontrolsfactury.aqApp.call(h.split(".")[1], self.script_calls_[href], h.split(".")[0])
             else:
-                aqApp.call(h, self.script_calls_[href], None)
+                pncontrolsfacotry.aqApp.call(h, self.script_calls_[href], None)
 """
 
 

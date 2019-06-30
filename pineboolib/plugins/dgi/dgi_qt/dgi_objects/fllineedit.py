@@ -38,7 +38,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
                 self.setAlignment(QtCore.Qt.AlignRight)
 
     def setText(self, text_, check_focus=True):
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
         text_ = str(text_)
         # if not pineboolib.project._DGI.localDesktop():
@@ -47,7 +47,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
         if check_focus:
 
             if text_ in ("", None) or self.hasFocus():
-                super(FLLineEdit, self).setText(text_)
+                super().setText(text_)
                 return
 
         ok = False
@@ -58,31 +58,31 @@ class FLLineEdit(QtWidgets.QLineEdit):
             if s[0] == "-":
                 minus = True
                 s = s[1:]
-            if aqApp.commaSeparator() == ",":
+            if pncontrolsfactory.aqApp.commaSeparator() == ",":
                 s = s.replace(".", ",")
 
-            val, ok = aqApp.localeSystem().toDouble(s)
+            val, ok = pncontrolsfactory.aqApp.localeSystem().toDouble(s)
             if ok:
-                s = aqApp.localeSystem().toString(val, "f", self.partDecimal)
+                s = pncontrolsfactory.aqApp.localeSystem().toString(val, "f", self.partDecimal)
             if minus:
                 s = "-%s" % s
 
         elif self._tipo in ("int"):
-            val, ok = aqApp.localeSystem().toInt(s)
+            val, ok = pncontrolsfactory.aqApp.localeSystem().toInt(s)
             if ok:
-                s = aqApp.localeSystem().toString(val)
+                s = pncontrolsfactory.aqApp.localeSystem().toString(val)
 
         elif self._tipo in ("uint"):
-            val, ok = aqApp.localeSystem().toUInt(s)
+            val, ok = pncontrolsfactory.aqApp.localeSystem().toUInt(s)
             if ok:
-                s = aqApp.localeSystem().toString(val)
+                s = pncontrolsfactory.aqApp.localeSystem().toString(val)
 
-        super(FLLineEdit, self).setText(s)
+        super().setText(s)
 
     def text(self):
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        text_ = super(FLLineEdit, self).text()
+        text_ = super().text()
         if text_ == "":
             return text_
 
@@ -94,7 +94,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
                 minus = True
                 text_ = text_[1:]
 
-            val, ok = aqApp.localeSystem().toDouble(text_)
+            val, ok = pncontrolsfactory.aqApp.localeSystem().toDouble(text_)
             if ok:
                 text_ = str(val)
 
@@ -102,12 +102,12 @@ class FLLineEdit(QtWidgets.QLineEdit):
                 text_ = "-%s" % text_
 
         elif self._tipo == "uint":
-            val, ok = aqApp.localeSystem().toUInt(text_)
+            val, ok = pncontrolsfactory.aqApp.localeSystem().toUInt(text_)
             if ok:
                 text_ = str(val)
 
         elif self._tipo == "int":
-            val, ok = aqApp.localeSystem().toInt(text_)
+            val, ok = pncontrolsfactory.aqApp.localeSystem().toInt(text_)
 
             if ok:
                 text_ = str(val)
@@ -119,36 +119,36 @@ class FLLineEdit(QtWidgets.QLineEdit):
 
     def focusOutEvent(self, f):
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
         if self._tipo in ("double", "int", "uint"):
             text_ = super(FLLineEdit, self).text()
 
             if self._tipo == "double":
 
-                val, ok = aqApp.localeSystem().toDouble(text_)
+                val, ok = pncontrolsfactory.aqApp.localeSystem().toDouble(text_)
 
                 if ok:
-                    text_ = aqApp.localeSystem().toString(val, "f", self.partDecimal)
-                super(FLLineEdit, self).setText(text_)
+                    text_ = pncontrolsfactory.aqApp.localeSystem().toString(val, "f", self.partDecimal)
+                super().setText(text_)
             else:
 
                 self.setText(text_)
-        super(FLLineEdit, self).focusOutEvent(f)
+        super().focusOutEvent(f)
 
     def focusInEvent(self, f):
         if self.isReadOnly():
             return
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
         if self._tipo in ("double", "int", "uint"):
             self.blockSignals(True)
             s = self.text()
             if self._tipo == "double":
                 if s != "":
-                    s = aqApp.localeSystem().toString(float(s), "f", self.partDecimal)
-                if aqApp.commaSeparator() == ",":
+                    s = pncontrolsfactory.aqApp.localeSystem().toString(float(s), "f", self.partDecimal)
+                if pncontrolsfactory.aqApp.commaSeparator() == ",":
                     s = s.replace(".", "")
                 else:
                     s = s.replace(",", "")
@@ -158,10 +158,10 @@ class FLLineEdit(QtWidgets.QLineEdit):
                 pos = 0
                 v.validate(s, pos)
 
-            super(FLLineEdit, self).setText(s)
+            super().setText(s)
             self.blockSignals(False)
 
         if self.autoSelect and not self.selectedText() and not self.isReadOnly():
             self.selectAll()
 
-        super(FLLineEdit, self).focusInEvent(f)
+        super().focusInEvent(f)

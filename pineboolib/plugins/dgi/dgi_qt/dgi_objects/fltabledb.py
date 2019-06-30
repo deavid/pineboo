@@ -920,10 +920,10 @@ class FLTableDB(QtWidgets.QWidget):
         spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.buttonsLayout.addItem(spacer)
 
-        from pineboolib.pncontrolsfactory import QComboBox
+        from pineboolib import pncontrolsfactory
 
-        self.comboBoxFieldToSearch = QComboBox()
-        self.comboBoxFieldToSearch2 = QComboBox()
+        self.comboBoxFieldToSearch = pncontrolsfactory.QComboBox()
+        self.comboBoxFieldToSearch2 = pncontrolsfactory.QComboBox()
         # self.comboBoxFieldToSearch.addItem("*")
         # self.comboBoxFieldToSearch2.addItem("*")
         self.lineEditSearch = QtWidgets.QLineEdit()
@@ -952,9 +952,8 @@ class FLTableDB(QtWidgets.QWidget):
         self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
         self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
 
-        from pineboolib.pncontrolsfactory import QTable
 
-        self.tdbFilter = QTable()
+        self.tdbFilter = pncontrolsfactory.QTable()
         filterL.addWidget(self.tdbFilter)
 
     """
@@ -1121,9 +1120,9 @@ class FLTableDB(QtWidgets.QWidget):
                 partDecimal = field.partDecimal()
                 rX = field.regExpValidator()
                 ol = field.hasOptionsList()
-                from pineboolib.pncontrolsfactory import QComboBox
+                from pineboolib import pncontrolsfactory
 
-                cond = QComboBox(self)
+                cond = pncontrolsfactory.QComboBox(self)
                 if not type == "pixmap":
                     condList = [
                         util.tr("Todos"),
@@ -1154,7 +1153,7 @@ class FLTableDB(QtWidgets.QWidget):
                     editor_ = None
                     if type in ("uint, int", "double", "string", "stringList"):
                         if ol:
-                            editor_ = QComboBox(self)
+                            editor_ = pncontrolsfactory.QComboBox(self)
                             olTranslated = []
                             olNoTranslated = field.optionsList()
                             # print(field.optionsList())
@@ -1188,14 +1187,14 @@ class FLTableDB(QtWidgets.QWidget):
                                     editor_.setAlignment(Qt.AlignLeft)
 
                     if type == "serial":
-                        editor_ = pineboolib.pncontrolsfactory.FLSpinBox()
+                        editor_ = pncontrolsfactory.FLSpinBox()
                         editor_.setMaxValue(pow(10, partInteger) - 1)
 
                     if type == "pixmap":
                         self.tdbFilter.setRowReadOnly(i, True)
 
                     if type == "date":
-                        editor_ = pineboolib.pncontrolsfactory.FLDateEdit(self, _label)
+                        editor_ = pncontrolsfactory.FLDateEdit(self, _label)
                         # editor_.setOrder(FLDateEdit.DMY) # FIXME
                         editor_.setAutoAdvance(True)
                         # editor_.setCalendarPopup(True)
@@ -1204,12 +1203,12 @@ class FLTableDB(QtWidgets.QWidget):
                         editor_.setDate(da.currentDate())
 
                     if type == "time":
-                        editor_ = pineboolib.pncontrolsfactory.FLTimeEdit(self)
+                        editor_ = pncontrolsfactory.FLTimeEdit(self)
                         timeNow = QtCore.QTime.currentTime()
                         editor_.setTime(timeNow)
 
                     if type in (FLFieldMetaData.Unlock, "bool"):
-                        editor_ = pineboolib.pncontrolsfactory.FLCheckBox(self)
+                        editor_ = pncontrolsfactory.FLCheckBox(self)
 
                     if editor_:
                         self.tdbFilter.setCellWidget(_linea, j, editor_)
@@ -1339,7 +1338,8 @@ class FLTableDB(QtWidgets.QWidget):
                     arg2 = editorOp1.value()
                     arg4 = editorOp2.value()
                 else:
-                    editorOp1 = pineboolib.pncontrolsfactory.FLSpinBox(self.tdbFilter.cellWidget(i, 2))
+                    from pineboolib import pncontrolsfactory
+                    editorOp1 = pncontrolsfactory.FLSpinBox(self.tdbFilter.cellWidget(i, 2))
                     arg2 = editorOp1.value()
 
             if type == "date":
@@ -1783,9 +1783,9 @@ class FLTableDB(QtWidgets.QWidget):
                     vars.append(field_3.name())
                     vars.append(self.orderAsc3_)
 
-                from pineboolib.pncontrolsfactory import aqApp
+                from pineboolib import project
 
-                ret = aqApp.call(function_qsa, vars, None, False)
+                ret = project.call(function_qsa, vars, None, False)
                 if not isinstance(ret, bool):
                     s = ret
                     logger.debug("functionQSA: %s %s" % (function_qsa, ret.join(", ")))
@@ -2240,15 +2240,15 @@ class FLTableDB(QtWidgets.QWidget):
         if self.cursor().sort():
             filter_ += " ORDER BY %s" % self.cursor().sort()
         cursor.select(filter_)
-        from pineboolib.pncontrolsfactory import aqApp, QMessageBox
+        from pineboolib import pncontrolsfactory
 
         settings = FLSettings()
         if settings.readBoolEntry("ebcomportamiento/FLTableExport2Calc", False):
-            QMessageBox.information(
+            pncontrolsfactory.QMessageBox.information(
                 self.topWidget,
                 self.tr("Opción deshabilitada"),
                 self.tr("Esta opción ha sido deshabilitada por el administrador"),
-                QtWidgets.QMessageBox.Ok,
+                pncontrolsfactory.QMessageBox.Ok,
             )
             return
 
@@ -2260,17 +2260,16 @@ class FLTableDB(QtWidgets.QWidget):
         if not hasattr(tdb, "cursor"):
             return
 
-        from pineboolib.pncontrolsfactory import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow, AQOdsColor, AQOdsStyle, AQOdsImage
 
         # hor_header = tdb.horizontalHeader()
-        title_style = [AQOdsStyle.Align_center, AQOdsStyle.Text_bold]
-        border_bot = AQOdsStyle.Border_bottom
-        border_right = AQOdsStyle.Border_right
-        border_left = AQOdsStyle.Border_left
-        italic = AQOdsStyle.Text_italic
-        ods_gen = AQOdsGenerator
-        spread_sheet = AQOdsSpreadSheet(ods_gen)
-        sheet = AQOdsSheet(spread_sheet, mtd.alias())
+        title_style = [pncontrolsfactory.AQOdsStyle.Align_center, pncontrolsfactory.AQOdsStyle.Text_bold]
+        border_bot = pncontrolsfactory.AQOdsStyle.Border_bottom
+        border_right = pncontrolsfactory.AQOdsStyle.Border_right
+        border_left = pncontrolsfactory.AQOdsStyle.Border_left
+        italic = pncontrolsfactory.AQOdsStyle.Text_italic
+        ods_gen = pncontrolsfactory.AQOdsGenerator
+        spread_sheet = pncontrolsfactory.AQOdsSpreadSheet(ods_gen)
+        sheet = pncontrolsfactory.AQOdsSheet(spread_sheet, mtd.alias())
         tdb_num_rows = cursor.size()
         tdb_num_cols = len(mtd.fieldNames())
 
@@ -2278,8 +2277,8 @@ class FLTableDB(QtWidgets.QWidget):
         id_pix = 0
         pd = util.createProgressDialog("Procesando", tdb_num_rows)
         util.setProgress(1)
-        row = AQOdsRow(sheet)
-        row.addBgColor(AQOdsColor(0xE7E7E7))
+        row = pncontrolsfactory.AQOdsRow(sheet)
+        row.addBgColor(pncontrolsfactory.AQOdsColor(0xE7E7E7))
         for i in range(tdb_num_cols):
             field = mtd.indexFieldObject(tdb.visual_index_to_logical_index(i))
             if field is not None and field.visibleGrid():
@@ -2300,7 +2299,7 @@ class FLTableDB(QtWidgets.QWidget):
             if pd.wasCanceled():
                 break
 
-            row = AQOdsRow(sheet)
+            row = pncontrolsfactory.AQOdsRow(sheet)
             for c in range(tdb_num_cols):
                 # idx = tdb.indexOf(c)  # Busca si la columna se ve
                 # if idx == -1:
@@ -2337,7 +2336,7 @@ class FLTableDB(QtWidgets.QWidget):
                                     pix_name = "pix%s_" % id_pix
                                     id_pix += 1
                                     row.opIn(
-                                        AQOdsImage(
+                                        pncontrolsfactory.AQOdsImage(
                                             pix_name,
                                             round((pix.width() * 2.54) / 98, 2) * 20,
                                             round((pix.height() * 2.54) / 98, 2) * 20,
@@ -2373,13 +2372,13 @@ class FLTableDB(QtWidgets.QWidget):
         spread_sheet.close()
 
         util.setProgress(tdb_num_rows)
-        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-        file_name = "%s/%s%s.ods" % (aqApp.tmp_dir(), mtd.name(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
+        pncontrolsfactory.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        file_name = "%s/%s%s.ods" % (pncontrolsfactory.aqApp.tmp_dir(), mtd.name(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
         ods_gen.generateOds(file_name)
 
-        aqApp.call("sys.openUrl", [file_name], None)
+        pncontrolsfactory.aqApp.call("sys.openUrl", [file_name], None)
 
-        QtWidgets.QApplication.restoreOverrideCursor()
+        pncontrolsfactory.QApplication.restoreOverrideCursor()
         util.destroyProgressDialog()
 
     """
@@ -2437,9 +2436,9 @@ class FLTableDB(QtWidgets.QWidget):
             msec_refresh = 200
             ret = None
             try:
-                from pineboolib.pncontrolsfactory import aqApp
+                from pineboolib import project 
 
-                ret = aqApp.call(functionQSA, vargs, None, False)
+                ret = project.call(functionQSA, vargs, None, False)
                 logger.debug("functionQSA:%s:", functionQSA)
             except Exception:
                 pass

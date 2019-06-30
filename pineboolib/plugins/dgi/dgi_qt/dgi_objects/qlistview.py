@@ -50,10 +50,10 @@ class QListView(QtWidgets.QWidget):
         self.doubleClicked.emit(item)
 
     def addItem(self, t):
-        from pineboolib.pncontrolsfactory import FLListViewItem
+        from pineboolib import pncontrolsfactory
 
         self._current_row = self._current_row + 1
-        item = FLListViewItem()
+        item = pncontrolsfactory.FLListViewItem()
         item.setEditable(False)
         item.setText(t)
 

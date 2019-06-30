@@ -19,7 +19,7 @@ from jsonrpc import JSONRPCResponseManager, dispatcher
 import pineboolib
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.core import decorators
-from pineboolib import pncontrolsfactory
+
 
 logger = logging.getLogger(__name__)
 
@@ -46,11 +46,12 @@ class parser(object):
 
     @dispatcher.add_method
     def mainWindow(*args):
-        if pineboolib.project._DGI._par._queqe:
+        from pineboolib import project
+        if project._DGI._par._queqe:
             return "queqePending"
         if not args:
             return "needArguments"
-        obj_ = getattr(pineboolib.project.main_window, "json_%s" % args[0], None)
+        obj_ = getattr(project.main_window, "json_%s" % args[0], None)
         if obj_:
             return obj_(args)
         else:
@@ -59,12 +60,13 @@ class parser(object):
 
     @dispatcher.add_method
     def mainForm(*args):
-        if pineboolib.project._DGI._par._queqe:
+        from pineboolib import project
+        if project._DGI._par._queqe:
             return "queqePending"
         if not args:
             return "needArguments"
         try:
-            obj_ = pineboolib.project._DGI.mainForm()
+            obj_ = project._DGI.mainForm()
             return obj_.json_process(args)
         except Exception:
             print(traceback.format_exc())
@@ -72,7 +74,8 @@ class parser(object):
 
     @dispatcher.add_method
     def callFunction(*args):
-        if pineboolib.project._DGI._par._queqe:
+        from pineboolib import project
+        if project._DGI._par._queqe:
             return "queqePending"
 
         fun_ = args[0]
@@ -84,7 +87,7 @@ class parser(object):
             param_ = [args[0]]
 
         try:
-            pineboolib.project.call(fun_, param_)
+            project.call(fun_, param_)
         except Exception:
             return "notFound"
         # if param_:
@@ -94,34 +97,37 @@ class parser(object):
 
     @dispatcher.add_method
     def queqe(*args):
+        from pineboolib import project
         if len(args) == 1:
             if args[0] == "clean":
-                pineboolib.project._DGI._par._queqe = {}
+                project._DGI._par._queqe = {}
                 return True
-            elif args[0] in pineboolib.project._DGI._par._queqe.keys():
+            elif args[0] in project._DGI._par._queqe.keys():
                 ret = []
-                for q in pineboolib.project._DGI._par._queqe.keys():
+                for q in project._DGI._par._queqe.keys():
                     if q.find(args[0]) > -1:
-                        ret.append(q, pineboolib.project._DGI._par._queqe[q])
-                        del pineboolib.project._DGI._par._queqe[q]
+                        ret.append(q, project._DGI._par._queqe[q])
+                        del project._DGI._par._queqe[q]
             else:
                 ret = "Not Found"
         else:
-            ret = pineboolib.project._DGI._par._queqe
-            pineboolib.project._DGI._par._queqe = {}
+            ret = project._DGI._par._queqe
+            project._DGI._par._queqe = {}
 
         return ret
 
     @dispatcher.add_method
     def action(*args):
-        if pineboolib.project._DGI._par._queqe:
+        from pineboolib import project
+        from pineboolib import pncontrolsfactory
+        if project._DGI._par._queqe:
             return "queqePending"
         arguments = args
         actionName = arguments[0]
         control = arguments[1]
         emite = arguments[2]
-        if actionName in pineboolib.project._DGI._WJS.keys():
-            ac = pineboolib.project._DGI._W[actionName]
+        if actionName in project._DGI._WJS.keys():
+            ac = project._DGI._W[actionName]
 
             cr = ac.child(control)
             if cr:
@@ -473,11 +479,11 @@ class json_mainWindow(object):
     def initModule(self, module):
         if module not in self.initialized_mods_:
             self.initialized_mods_.append(module)
-            from pineboolib.pncontrolsfactory import aqApp
+            from pineboolib import project
 
-            aqApp.call("%s.iface.init" % module, [], None, False)
+            project.call("%s.iface.init" % module, [], None, False)
 
-        mng = aqApp.db().managerModules()
+        mng = project.conn.managerModules()
         mng.setActiveIdModule(module)
 
 

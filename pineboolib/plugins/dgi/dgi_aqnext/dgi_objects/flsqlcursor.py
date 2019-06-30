@@ -145,7 +145,6 @@ class FLSqlCursor(QtCore.QObject):
 
         if stabla is not None:
             from pineboolib import project
-            # from pineboolib.pncontrolsfactory import aqApp
 
             module_name = project.conn.managerModules().idModuleOfFile("%s.mtd" % stabla)
             model_file = "models.%s.%s" % (module_name, stabla)

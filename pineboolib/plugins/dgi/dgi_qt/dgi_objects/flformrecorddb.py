@@ -104,17 +104,17 @@ class FLFormRecordDB(IFormRecordDB, FLFormDB):
 
     def __init__(self, parent_or_cursor, action, load=False):
         self.logger.trace("__init__: parent_or_cursor=%s, action=%s, load=%s", parent_or_cursor, action, load)
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
         if isinstance(action, str):
-            aqApp.db().manager().action(action)
+            pncontrolsfactory.aqApp.db().manager().action(action)
 
-        parent = aqApp.mainWidget() if isinstance(parent_or_cursor, FLSqlCursor) else parent_or_cursor
+        parent = pncontrolsfactory.aqApp.mainWidget() if isinstance(parent_or_cursor, FLSqlCursor) else parent_or_cursor
         cursor = parent_or_cursor if isinstance(parent_or_cursor, FLSqlCursor) else None
         # if not cursor:
         #    load = True
 
-        super(FLFormRecordDB, self).__init__(parent, action, load)
+        super().__init__(parent, action, load)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         if cursor:
             self.setCursor(parent_or_cursor)
@@ -546,9 +546,9 @@ class FLFormRecordDB(IFormRecordDB, FLFormDB):
                     ret_ = fun_()
                 except Exception:
                     # script_name = self.iface.__module__
-                    from pineboolib.pncontrolsfactory import aqApp, wiki_error
+                    from pineboolib import pncontrolsfactory
 
-                    aqApp.msgBoxWarning(wiki_error(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI)
+                    pncontrolsfactory.aqApp.msgBoxWarning(pncontrolsfactory.wiki_error(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI)
 
             return ret_ if isinstance(ret_, bool) else False
         return True
@@ -848,10 +848,10 @@ class FLFormRecordDB(IFormRecordDB, FLFormDB):
         super(FLFormRecordDB, self).show()
 
     def inicializeControls(self):
-        from pineboolib.pncontrolsfactory import FLFieldDB
+        from pineboolib import pncontrolsfactory
 
         for child_ in self.findChildren(QtWidgets.QWidget):
-            if isinstance(child_, FLFieldDB):
+            if isinstance(child_, pncontrolsfactory.FLFieldDB):
                 loaded = getattr(child_, "_loaded", None)
                 if loaded is False:
                     QtCore.QTimer().singleShot(0, child_.load)

@@ -1,9 +1,7 @@
 # # -*- coding: utf-8 -*-
 import logging
 from flup.server.fcgi import WSGIServer
-
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from pineboolib.pncontrolsfactory import SysType
 from pineboolib.application.utils.check_dependencies import check_dependencies
 
 import pineboolib
@@ -64,10 +62,11 @@ class parser(object):
         try:
             retorno_ = pineboolib.project.call(self._callScript, aList)
         except Exception:
+            from pineboolib import pncontrolsfactory
             logger.info(self._callScript, environ["QUERY_STRING"])
             retorno_ = (
                 """<html><head><title>Pineboo %s - FastCGI - </title></head><body><h1>Function %s not found!</h1></body></html>"""
-                % (SysType().version(), self._callScript)
+                % (pncontrolsfactory.SysType().version(), self._callScript)
             )
             pass
         logger.info("FCGI:INFO: Processing '%s' ...", environ["QUERY_STRING"])
