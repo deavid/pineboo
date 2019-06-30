@@ -64,7 +64,6 @@ class FLApplication(QtCore.QObject):
     event_loop = None
     window_menu = None
     last_text_caption_ = None
-    mode_and_version_ = None
 
     def __init__(self):
         super(FLApplication, self).__init__()
@@ -102,8 +101,6 @@ class FLApplication(QtCore.QObject):
         self.show_debug_ = True  # FIXME
         self.script_entry_function_ = None
         self.last_text_caption_ = None
-
-        self.mode_and_version_ = "Database Admin" if FLSettings().readBoolEntry("application/dbadmin_enabled", False) else "Quick"
 
         # self.fl_factory_ = FLObjectFactory() #FIXME para un futuro
         self.time_user_ = QtCore.QDateTime.currentDateTime()
@@ -1071,7 +1068,7 @@ class FLApplication(QtCore.QObject):
 
         # FIXME: main_form_name Belongs to loader.main; will be removed
         if project.main_form_name != "eneboo_mdi":
-            self.mainWidget().setWindowTitle("Pineboo %s v%s - %s" % (self.mode_and_version_, project.version, self.last_text_caption_))
+            self.mainWidget().setWindowTitle("Pineboo %s - %s" % (project.version, self.last_text_caption_))
 
         else:
             descript_area = self.db().managerModules().idAreaToDescription(self.db().managerModules().activeIdArea())
