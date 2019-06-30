@@ -24,7 +24,7 @@ class PinebooSettings(QSettings):
 
     def load_value(self, value: str) -> Union[int, Dict[str, Union[str, int]], str, bool]:
         value = json.loads(value)
-        if value is dict and "__class__" in value:
+        if isinstance(value, dict) and "__class__" in value.keys():
             classname = value["__class__"]
             if classname == "QSize":
                 return QSize(value["width"], value["height"])
