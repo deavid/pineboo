@@ -1440,9 +1440,9 @@ class FLManager(QtCore.QObject):
         #    return None
 
         tableLarge = None
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        if aqApp.singleFLLarge():
+        if pncontrolsfactory.aqApp.singleFLLarge():
             tableLarge = "fllarge"
         else:
             tableLarge = "fllarge_%s" % tableName
@@ -1493,9 +1493,9 @@ class FLManager(QtCore.QObject):
         if not refKey[0:3] == "RK@":
             return None
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        tableName = "fllarge" if aqApp.singleFLLarge() else "fllarge_" + refKey.split("@")[1]
+        tableName = "fllarge" if pncontrolsfactory.aqApp.singleFLLarge() else "fllarge_" + refKey.split("@")[1]
 
         if not self.existsTable(tableName):
             return None

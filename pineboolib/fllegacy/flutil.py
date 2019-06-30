@@ -333,9 +333,9 @@ class FLUtil(QtCore.QObject):
         @param tabla. Nombre de la tabla
         @return Lista de campos
         """
-        from pineboolib.pncontrolsfactory import aqApp
-
-        campos = aqApp.db().manager().metadata(tablename).fieldNames()
+        from pineboolib import pncontrolsfactory 
+        
+        campos = pncontrolsfactory.aqApp.db().manager().metadata(tablename).fieldNames()
         return [len(campos)] + campos
 
     def calcularDC(self, n):
@@ -387,7 +387,7 @@ class FLUtil(QtCore.QObject):
         @param  f Cadena de texto con la fecha a transformar
         @return Cadena de texto con la fecha transformada
         """
-        from pineboolib.application.utils.data_conversion import date_dma_to_amd
+        from pineboolib.application.utils.date_conversion import date_dma_to_amd
         return date_dma_to_amd(f)
 
     def dateAMDtoDMA(self, f):
@@ -398,7 +398,7 @@ class FLUtil(QtCore.QObject):
         @param  f Cadena de texto con la fecha a transformar
         @return Cadena de texto con la fecha transformada
         """
-        from pineboolib.application.utils.data_conversion import date_amd_to_dma
+        from pineboolib.application.utils.date_conversion import date_amd_to_dma
         return date_amd_to_dma(f)
 
     @decorators.BetaImplementation
@@ -905,9 +905,10 @@ class FLUtil(QtCore.QObject):
 
         @return Número redondeado
         """
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory 
+        
 
-        tmd = aqApp.db().manager().metadata(table_name)
+        tmd = pncontrolsfactory.aqApp.db().manager().metadata(table_name)
         if tmd is None:
             return 0
         fmd = tmd.field(field_name)
@@ -1072,24 +1073,25 @@ class FLUtil(QtCore.QObject):
         @param l Label del diálogo
         @param tS Número total de pasos a realizar
         """
-        from pineboolib.pncontrolsfactory import QProgressDialog, SysType
+        from pineboolib import pncontrolsfactory
 
         parent = None
         if self.__class__.progress_dialog_stack:
             parent = self.__class__.progress_dialog_stack[-1]
-        pd_widget = QProgressDialog(str(title), str(self.translate("scripts", "Cancelar")), 0, steps, parent)
+        pd_widget = pncontrolsfactory.QProgressDialog(str(title), str(self.translate("scripts", "Cancelar")), 0, steps, parent)
         pd_widget.setObjectName(id_)
         pd_widget.setWindowTitle(str(title))
         self.__class__.progress_dialog_stack.append(pd_widget)
         pd_widget.setMinimumDuration(100)
-        SysType().processEvents()
+        
+        pncontrolsfactory.SysType().processEvents()
         return pd_widget
 
     def destroyProgressDialog(self, id_="default"):
         """
         Destruye el diálogo de progreso
         """
-        from pineboolib.pncontrolsfactory import SysType
+        from pineboolib import pncontrolsfactory
 
         pd_widget = self.__class__.progress_dialog_stack[-1]
 
@@ -1102,7 +1104,7 @@ class FLUtil(QtCore.QObject):
         pd_widget.close()
         self.__class__.progress_dialog_stack.remove(pd_widget)
         # pd_widget.hide()
-        SysType().processEvents()
+        pncontrolsfactory.SysType().processEvents()
 
     def setProgress(self, step_number, id_="default"):
         """
@@ -1110,7 +1112,7 @@ class FLUtil(QtCore.QObject):
 
         @param p Grado de progreso
         """
-        from pineboolib.pncontrolsfactory import SysType
+        from pineboolib import pncontrolsfactory
 
         pd_widget = self.__class__.progress_dialog_stack[-1]
 
@@ -1121,7 +1123,7 @@ class FLUtil(QtCore.QObject):
                     break
 
         pd_widget.setValue(step_number)
-        SysType().processEvents()
+        pncontrolsfactory.SysType().processEvents()
 
     def setLabelText(self, l, id_="default"):
         """
@@ -1129,7 +1131,7 @@ class FLUtil(QtCore.QObject):
 
         @param l Etiqueta
         """
-        from pineboolib.pncontrolsfactory import SysType
+        from pineboolib import pncontrolsfactory
 
         pd_widget = self.__class__.progress_dialog_stack[-1]
 
@@ -1140,7 +1142,7 @@ class FLUtil(QtCore.QObject):
                     break
 
         pd_widget.setLabelText(str(l))
-        SysType().processEvents()
+        pncontrolsfactory.SysType().processEvents()
 
     def setTotalSteps(self, tS, id_="default"):
         """
@@ -1148,7 +1150,7 @@ class FLUtil(QtCore.QObject):
 
         @param ts Número total de pasos
         """
-        from pineboolib.pncontrolsfactory import SysType
+        from pineboolib import pncontrolsfactory
 
         pd_widget = self.__class__.progress_dialog_stack[-1]
 
@@ -1159,7 +1161,7 @@ class FLUtil(QtCore.QObject):
                     break
 
         pd_widget.setRange(0, tS)
-        SysType().processEvents()
+        pncontrolsfactory.SysType().processEvents()
 
     def domDocumentSetContent(self, doc, content):
         """
@@ -1313,9 +1315,9 @@ class FLUtil(QtCore.QObject):
         """
         Uso interno
         """
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        conn_ = aqApp.db().useConn(connName)
+        conn_ = pncontrolsfactory.aqApp.db().useConn(connName)
         cur = conn_.cursor()
         try:
             logger.warning("execSql: Ejecutando la consulta : %s", sql)
@@ -1347,9 +1349,9 @@ class FLUtil(QtCore.QObject):
         @param conn_name. Nombre de la conexión a usar
         @return id del tipo de campo
         """
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        conn = aqApp.db().useConn(conn_name)
+        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         return None if mtd is None else mtd.fieldType(fn)
@@ -1365,9 +1367,9 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return 0
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        conn = aqApp.db().useConn(conn_name)
+        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         return 0 if mtd is None else mtd.fieldLength(fn)
@@ -1383,9 +1385,9 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return fn
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        conn = aqApp.db().useConn(conn_name)
+        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         return fn if mtd is None else mtd.fieldNameToAlias(fn)
@@ -1401,9 +1403,9 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return None
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        conn = aqApp.db().useConn(conn_name)
+        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         return None if mtd is None else mtd.alias()
@@ -1421,9 +1423,9 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return an
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        conn = aqApp.db().useConn(conn_name)
+        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         return an if mtd is None else mtd.fieldAliasToName(an)
@@ -1440,9 +1442,9 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return False
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        conn = aqApp.db().useConn(conn_name)
+        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         return False if mtd is None else mtd.fieldAllowNull(fn)
@@ -1458,9 +1460,9 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return False
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        conn = aqApp.db().useConn(conn_name)
+        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         return False if mtd is None else mtd.fieldIsPrimaryKey(fn)
@@ -1476,9 +1478,9 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return False
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        conn = aqApp.db().useConn(conn_name)
+        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         if mtd is None:
@@ -1497,9 +1499,9 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return None  # return QVariant
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        conn = aqApp.db().useConn(conn_name)
+        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         if mtd is None:
@@ -1520,32 +1522,32 @@ class FLUtil(QtCore.QObject):
         @return Valor formateado
         """
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        conn = aqApp.db().useConn(conn_name)
+        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
         return conn.manager().formatValue(t, v, upper)
 
     def nameUser(self):
-        from pineboolib.pncontrolsfactory import SysType
+        from pineboolib import pncontrolsfactory
 
-        return SysType().nameUser()
+        return pncontrolsfactory.SysType().nameUser()
 
     def userGroups(self):
-        from pineboolib.pncontrolsfactory import SysType
+        from pineboolib import pncontrolsfactory
 
-        return SysType().userGroups()
+        return pncontrolsfactory.SysType().userGroups()
 
     def isInProd(self):
-        from pineboolib.pncontrolsfactory import SysType
+        from pineboolib import pncontrolsfactory
 
-        return SysType().isInProd()
+        return pncontrolsfactory.SysType().isInProd()
 
     def request(self):
-        from pineboolib.pncontrolsfactory import SysType
+        from pineboolib import pncontrolsfactory
 
-        return SysType().request()
+        return pncontrolsfactory.SysType().request()
 
     def nameBD(self):
-        from pineboolib.pncontrolsfactory import SysType
+        from pineboolib import pncontrolsfactory
 
-        return SysType().nameBD()
+        return pncontrolsfactory.SysType().nameBD()
