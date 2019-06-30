@@ -53,8 +53,7 @@ class Project(object):
         self.root = None
         self.apppath = None
         self.tmpdir = filedir("../tempdata")
-        self.parser = None
-        self.version = 0.8
+        self.parser = None           
         self.main_form_name: Optional[str] = None
         self.deleteCache = False
         self.parseProject = False
@@ -493,3 +492,10 @@ class Project(object):
         # FIXME: anti-pattern in Python. Getters for plain variables are wrong.
         raise CodeDoesNotBelongHereException("Use project.tmpdir instead, please.")
         # return self.tmpdir
+    
+    def load_version(self):
+        self.version = 0.8
+        if config.value("application/dbadmin_enabled", False):
+            self.version = "DBAdmin v%s" % self.version
+        else:
+            self.version = "Quick v%s" % self.version
