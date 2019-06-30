@@ -11,10 +11,16 @@ class QComboBox(QtWidgets.QComboBox):
     def __init__(self, parent: Optional[Union[QFrame, QGroupBox]] = None) -> None:
         super().__init__(parent)
 
-        self.setCurrentItem = self.setCurrentIndex
-
     def insertStringList(self, strl):
         self.insertItems(len(strl), strl)
 
     def setReadOnly(self, b: bool) -> None:
         super().setEditable(not b)
+
+    def getCurrentItem(self):
+        return super().currentIndex
+
+    def setCurrentItem(self, i):
+        return super().setCurrentIndex(i)
+
+    currentItem = property(getCurrentItem, setCurrentItem, None, "get/set current item index")
