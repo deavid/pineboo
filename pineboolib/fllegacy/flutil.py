@@ -387,34 +387,8 @@ class FLUtil(QtCore.QObject):
         @param  f Cadena de texto con la fecha a transformar
         @return Cadena de texto con la fecha transformada
         """
-        if not f:
-            return None
-
-        f = str(f)
-        if f.find("T") > -1:
-            f = f[: f.find("T")]
-
-        array_ = []
-        dia_ = None
-        mes_ = None
-        ano_ = None
-
-        if f.find("-") > -1:
-            array_ = f.split("-")
-        elif f.find("/") > -1:
-            array_ = f.split("/")
-
-        if array_:
-            if len(array_) == 3:
-                dia_ = array_[0]
-                mes_ = array_[1]
-                ano_ = array_[2]
-            else:
-                dia_ = f[0:2]
-                mes_ = f[2:2]
-                ano_ = f[4:4]
-
-        return "%s-%s-%s" % (ano_, mes_, dia_)
+        from pineboolib.application.utils.data_conversion import date_dma_to_amd
+        return date_dma_to_amd(f)
 
     def dateAMDtoDMA(self, f):
         """
@@ -424,33 +398,8 @@ class FLUtil(QtCore.QObject):
         @param  f Cadena de texto con la fecha a transformar
         @return Cadena de texto con la fecha transformada
         """
-        if not f:
-            return None
-
-        f = str(f)
-        if f.find("T") > -1:
-            f = f[: f.find("T")]
-
-        array_ = []
-        dia_ = None
-        mes_ = None
-        ano_ = None
-        if f.find("-") > -1:
-            array_ = f.split("-")
-        elif f.find("/") > -1:
-            array_ = f.split("/")
-
-        if array_:
-            if len(array_) == 3:
-                ano_ = array_[0]
-                mes_ = array_[1]
-                dia_ = array_[2]
-            else:
-                ano_ = f[0:4]
-                mes_ = f[4:2]
-                dia_ = f[6:2]
-
-        return "%s-%s-%s" % (dia_, mes_, ano_)
+        from pineboolib.application.utils.data_conversion import date_amd_to_dma
+        return date_amd_to_dma(f)
 
     @decorators.BetaImplementation
     def formatoMiles(self, s):
@@ -752,7 +701,7 @@ class FLUtil(QtCore.QObject):
         @param offset Numero de dias que sumar. Si es negativo resta dias
         @return Fecha con el desplazamiento de dias
         """
-        from pineboolib.qsa import Date
+        from pineboolib.application.types import Date
 
         if isinstance(fecha, str):
             fecha = Date(fecha, "yyyy-MM-dd")
@@ -770,7 +719,7 @@ class FLUtil(QtCore.QObject):
         @param offset Numero de meses que sumar. Si es negativo resta meses
         @return Fecha con el desplazamiento de meses
         """
-        from pineboolib.qsa import Date
+        from pineboolib.application.types import Date
 
         if isinstance(fecha, str):
             fecha = Date(fecha)
@@ -788,7 +737,7 @@ class FLUtil(QtCore.QObject):
         @param offset Numero de años que sumar. Si es negativo resta años
         @return Fecha con el desplazamiento de años
         """
-        from pineboolib.qsa import Date
+        from pineboolib.application.types import Date
 
         if isinstance(fecha, str):
             fecha = Date(fecha)
@@ -804,7 +753,7 @@ class FLUtil(QtCore.QObject):
         @param d2 Fecha de destino
         @return Número de días entre d1 y d2. Será negativo si d2 es anterior a d1.
         """
-        from pineboolib.qsa import Date
+        from pineboolib.application.types import Date
         from datetime import date
 
         if isinstance(d1, Date):
