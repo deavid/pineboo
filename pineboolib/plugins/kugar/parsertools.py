@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtGui import QPixmap
-from pineboolib.core.utils.utils_base import cacheXPM, load2xml
+from pineboolib.core.utils.utils_base import load2xml
+from pineboolib.application.utils.xpm import cacheXPM
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flutil import FLUtil
 import os
