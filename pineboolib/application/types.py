@@ -462,3 +462,14 @@ class Date(object):
         return Boolean. True si este objeto es menor que el comparado
         """
         return self.toString() < other.toString() if not isinstance(other, str) else other
+    
+    
+    def __eq__(self, other):
+        if str(other) == self.toString():
+            return True
+        else:
+            return False
+    
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    
