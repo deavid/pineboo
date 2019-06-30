@@ -687,7 +687,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
             del self.transactionsOpened_
 
     def doAcl(self):
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
         if not self.acTable_:
             self.acTable_ = FLAccessControlFactory().create("table")
@@ -709,7 +709,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
 
                 condTrue_ = str(QRegExp(str(self.acosCondVal_)).exactMatch(str(self.cursor_.value(self.acosCondName_))))
             elif self.acosCond_ == FLSqlCursor.Function:
-                condTrue_ = aqApp.call(self.acosCondName_, [self.cursor_]) == self.acosCondVal_
+                condTrue_ = pncontrolsfactory.aqApp.call(self.acosCondName_, [self.cursor_]) == self.acosCondVal_
 
             if condTrue_:
                 if self.acTable_.name() != self.id_:
@@ -753,11 +753,11 @@ class FLSqlCursorPrivate(QtCore.QObject):
 
     def msgBoxWarning(self, msg, throwException=False):
         if pineboolib.project._DGI.localDesktop():
-            from pineboolib.pncontrolsfactory import QMessageBox, QApplication
+            from pineboolib import pncontrolsfactory
 
             logger.warning(msg)
             if not throwException:
-                QMessageBox.warning(QApplication.activeWindow(), "Pineboo", msg)
+                pncontrolsfactory.QMessageBox.warning(pncontrolsfactory.QApplication.activeWindow(), "Pineboo", msg)
         else:
             logger.warning(msg)
 
@@ -1152,8 +1152,7 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def setAtomicValueBuffer(self, fN, functionName):
-        from pineboolib.pncontrolsfactory import aqApp
-        import pineboolib.qsa
+        from pineboolib import pncontrolsfactory
 
         if not self.buffer() or not fN or not self.metadata():
             return
@@ -1182,7 +1181,7 @@ class FLSqlCursor(QtCore.QObject):
             arglist = []
             arglist.append(fN)
             arglist.append(self.buffer().value(fN))
-            v = aqApp.call(functionName, arglist, self.context())
+            v = pncontrolsfactory.aqApp.call(functionName, arglist, self.context())
 
             q = FLSqlQuery(None, self.db().dbAux())
             ret = q.exec_(
@@ -1215,9 +1214,8 @@ class FLSqlCursor(QtCore.QObject):
                         bChCursor(fN, self)
 
             self.bufferChanged.emit(fN)
-            from pineboolib.pncontrolsfactory import SysType
 
-            SysType.processEvents(self)
+            pncontrolsfactory.SysType.processEvents(self)
 
     """
     Establece el valor de un campo del buffer con un valor.
@@ -1227,7 +1225,7 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def setValueBuffer(self, fN, v):
-        import pineboolib.qsa
+        from pineboolib import pncontrolsfactory
 
         if not self.buffer() or not fN or not self.metadata():
             return
@@ -1304,9 +1302,7 @@ class FLSqlCursor(QtCore.QObject):
                         bChCursor(fN, self)
 
             self.bufferChanged.emit(fN)
-        from pineboolib.pncontrolsfactory import SysType
-
-        SysType.processEvents(self)
+        pncontrolsfactory.SysType.processEvents(self)
 
     """
     Devuelve el valor de un campo del buffer.
@@ -1369,10 +1365,9 @@ class FLSqlCursor(QtCore.QObject):
         else:
             v = self.buffer().value(fN)
 
-        if v:
+        if v is not None:
             if type_ in ("date"):
                 from pineboolib.application.types import Date
-
                 v = Date(v)
             elif type_ == "pixmap":
                 v_large = None
@@ -1422,11 +1417,30 @@ class FLSqlCursor(QtCore.QObject):
                 v = ""
         else:
             v = self.bufferCopy().value(fN)
+        
+        if v is not None:
+            if type_ in ("date"):
+                from pineboolib.application.types import Date
+                v = Date(v)
 
-            if type_ == "pixmap":
-                vl = self.db().manager().fetchLargeValue(v)
-                if vl.isValid():
-                    return vl
+            elif type_ == "pixmap":
+                v_large = None
+                if not self.db().manager().isSystemTable(self.table()):
+
+                    v_large = self.db().manager().fetchLargeValue(v)
+
+                else:
+                    from pineboolib.core.utils.utils_base import cacheXPM
+
+                    v_large = cacheXPM(v)
+
+                if v_large:
+                    v = v_large
+        else:
+            if type_ in ("string", "stringlist", "date"):
+                v = ""
+            elif type_ in ("double", "int", "uint"):
+                v = 0
 
         return v
 
@@ -1442,20 +1456,17 @@ class FLSqlCursor(QtCore.QObject):
             return
 
         state_changes = b is not self.d.edition_
-
+        from pineboolib import pncontrolsfactory
+        
         if state_changes is not None and not self.d.edition_states_:
-            from pineboolib.pncontrolsfactory import AQBoolFlagStateList
-
-            self.d.edition_states_ = AQBoolFlagStateList()
+            self.d.edition_states_ = pncontrolsfactory.AQBoolFlagStateList()
 
         if self.d.edition_states_ is None:
             return
 
         i = self.d.edition_states_.find(m)
         if not i and state_changes is not None:
-            from pineboolib.pncontrolsfactory import AQBoolFlagState
-
-            i = AQBoolFlagState()
+            i = pncontrolsfactory.AQBoolFlagState()
             i.modifier_ = m
             i.prevValue_ = self.d.edition_
             self.d.edition_states_.append(i)
@@ -1494,20 +1505,18 @@ class FLSqlCursor(QtCore.QObject):
             return
 
         state_changes = not b == self.d.browse_
+        
+        from pineboolib import pncontrolsfactory
 
         if state_changes is not None and not self.d.browse_states_:
-            from pineboolib.pncontrolsfactory import AQBoolFlagStateList
-
-            self.d.browse_states_ = AQBoolFlagStateList()
+            self.d.browse_states_ = pncontrolsfactory.AQBoolFlagStateList()
 
         if not self.d.browse_states_:
             return
 
         i = self.d.browse_states_.find(m)
         if not i and state_changes is not None:
-            from pineboolib.pncontrolsfactory import AQBoolFlagState
-
-            i = AQBoolFlagState()
+            i = pncontrolsfactory.AQBoolFlagState()
             i.modifier_ = m
             i.prevValue_ = self.d.browse_
             self.d.browse_states_.append(i)
@@ -1665,23 +1674,23 @@ class FLSqlCursor(QtCore.QObject):
         if not self.metadata():
             return
         # util = FLUtil()
-        from pineboolib.pncontrolsfactory import QMessageBox, QApplication
+        from pineboolib import pncontrolsfactory
 
         if (not self.isValid() or self.size() <= 0) and not m == self.Insert:
             if not self.size():
-                QMessageBox.warning(QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"))
+                pncontrolsfactory.QMessageBox.warning(pncontrolsfactory.QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"))
                 return
             self.first()
 
         if m == self.Del:
-            res = QMessageBox.warning(
-                QApplication.focusWidget(),
+            res = pncontrolsfactory.QMessageBox.warning(
+                pncontrolsfactory.QApplication.focusWidget(),
                 self.tr("Aviso"),
                 self.tr("El registro activo será borrado. ¿ Está seguro ?"),
-                QMessageBox.Ok,
-                QMessageBox.No,
+                pncontrolsfactory.QMessageBox.Ok,
+                pncontrolsfactory.QMessageBox.No,
             )
-            if res == QMessageBox.No:
+            if res == pncontrolsfactory.QMessageBox.No:
                 return
 
             self.transaction()
@@ -1711,8 +1720,8 @@ class FLSqlCursor(QtCore.QObject):
             return
 
         if not self._action.formRecord():
-            QMessageBox.warning(
-                QApplication.focusWidget(),
+            pncontrolsfactory.QMessageBox.warning(
+                pncontrolsfactory.QApplication.focusWidget(),
                 self.tr("Aviso"),
                 self.tr("No hay definido ningún formulario para manejar\nregistros de esta tabla : %s" % self.curName()),
             )
@@ -2003,7 +2012,10 @@ class FLSqlCursor(QtCore.QObject):
                         q.setForwardOnly(True)
                         q.exec_()
                         if q.next():
-                            msg = msg + "\n%s : Requiere valor único, y ya hay otro registro con el valor %s" % (field, valuesFields)
+                            msg = msg + "\n%s : Requiere valor único, y ya hay otro registro con el valor %s en la tabla %s" % (field,
+                                                                                                                                 valuesFields,
+                                                                                                                                 self.metadata().name()
+                                                                                                                                )
 
                         checkedCK = True
 
@@ -3232,11 +3244,11 @@ class FLSqlCursor(QtCore.QObject):
         if not self.d.metadata_ or not self.d.buffer_:
             return
 
-        from pineboolib.pncontrolsfactory import QMessageBox, QApplication
+        from pineboolib import pncontrolsfactory
 
         if not self.isValid() or self.size() <= 0:
-            QMessageBox.warning(
-                QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"), QMessageBox.Ok
+            pncontrolsfactory.QMessageBox.warning(
+                pncontrolsfactory.QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"), pncontrolsfactory.QMessageBox.Ok
             )
             return
 
@@ -3333,21 +3345,21 @@ class FLSqlCursor(QtCore.QObject):
         if not self.activatedBufferCommited():
             return True
 
-        from pineboolib.pncontrolsfactory import QMessageBox, aqApp
+        from pineboolib import pncontrolsfactory
 
         if self.db().interactiveGUI() and self.db().canDetectLocks() and (checkLocks or self.metadata().detectLocks()):
             self.checkRisksLocks()
             if self.d.inRisksLocks_:
-                ret = QMessageBox.warning(
+                ret = pncontrolsfactory.QMessageBox.warning(
                     None,
                     "Bloqueo inminente",
                     "Los registros que va a modificar están bloqueados actualmente.\n"
                     "Si continua hay riesgo de que su conexión quede congelada hasta finalizar el bloqueo.\n"
                     "\n¿ Desa continuar aunque exista riesgo de bloqueo ?",
-                    QMessageBox.Ok,
-                    QMessageBox.No | QMessageBox.Default | QMessageBox.Escape,
+                    pncontrolsfactory.QMessageBox.Ok,
+                    pncontrolsfactory.QMessageBox.No | pncontrolsfactory.QMessageBox.Default | pncontrolsfactory.QMessageBox.Escape,
                 )
-                if ret == QMessageBox.No:
+                if ret == pncontrolsfactory.QMessageBox.No:
                     return False
 
         if not self.checkIntegrity():
@@ -3405,7 +3417,7 @@ class FLSqlCursor(QtCore.QObject):
                         return ret
 
             if functionBefore:
-                v = aqApp.call(functionBefore, [self], None, False)
+                v = pncontrolsfactory.aqApp.call(functionBefore, [self], None, False)
                 if v and not isinstance(v, bool) or v is False:
                     return False
 
@@ -3456,7 +3468,7 @@ class FLSqlCursor(QtCore.QObject):
                     self.cursorRelation().setAskForCancelChanges(True)
 
             recordDelBefore = "recordDelBefore%s" % self.metadata().name()
-            v = aqApp.call(recordDelBefore, [self], self.context(), False)
+            v = pncontrolsfactory.aqApp.call(recordDelBefore, [self], self.context(), False)
             if v and not isinstance(v, bool):
                 return False
 
@@ -3498,7 +3510,7 @@ class FLSqlCursor(QtCore.QObject):
             self.model().Delete(self)
 
             recordDelAfter = "recordDelAfter%s" % self.metadata().name()
-            v = aqApp.call(recordDelAfter, [self], self.context(), False)
+            v = pncontrolsfactory.aqApp.call(recordDelAfter, [self], self.context(), False)
 
             updated = True
 
@@ -3515,7 +3527,7 @@ class FLSqlCursor(QtCore.QObject):
                         return ret
 
             if functionAfter:
-                v = aqApp.call(functionAfter, [self], None, False)
+                v = pncontrolsfactory.aqApp.call(functionAfter, [self], None, False)
                 if v and not isinstance(v, bool) or v is False:
                     return False
 
@@ -3560,13 +3572,13 @@ class FLSqlCursor(QtCore.QObject):
         activeWidEnabled = False
         activeWid = None
         if pineboolib.project._DGI.localDesktop():
-            from pineboolib.pncontrolsfactory import QApplication
+            from pineboolib import pncontrolsfactory
 
-            activeWid = QApplication.activeModalWidget()
+            activeWid = pncontrolsfactory.QApplication.activeModalWidget()
             if not activeWid:
-                activeWid = QApplication.activePopupWidget()
+                activeWid = pncontrolsfactory.QApplication.activePopupWidget()
             if not activeWid:
-                activeWid = QApplication.activeWindow()
+                activeWid = pncontrolsfactory.QApplication.activeWindow()
 
             if activeWid:
                 activeWidEnabled = activeWid.isEnabled()
