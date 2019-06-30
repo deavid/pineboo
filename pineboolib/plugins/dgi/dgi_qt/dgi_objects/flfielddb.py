@@ -1021,9 +1021,9 @@ class FLFieldDB(QtWidgets.QWidget):
         v = None
         nulo = False
         if not fN:
-
             v = self.cursor_.valueBuffer(self.fieldName_)
             nulo = self.cursor_.bufferIsNull(self.fieldRelation_)
+            
 
             # if self.cursor_.cursorRelation():
             # print(1)
@@ -1137,17 +1137,18 @@ class FLFieldDB(QtWidgets.QWidget):
             except Exception:
                 self.logger.exception("Error al desconectar señal textChanged")
             s = None
-            if isinstance(v, int):  # Esto hace que el campo aparezca vació y evita poner el 0 por defecto en numérico
-                if v == 0:
-                    v = None
-            if v not in (None, ""):
+            if nulo and v in (None, 0.0):
+                if field.allowNull():
+                    self.editor_.setText("")
+                else:
+                    self.editor_.setText(field.defaultValue())
+            
+            else:
                 s = str(round(float(v), partDecimal))
                 if s.find(".") > -1:
                     while len(s[s.find(".") + 1 :]) < partDecimal:
                         s = "%s0" % s
                 self.editor_.setText(s)
-            elif not nulo:
-                self.editor_.setText(field.defaultValue())
 
             self.editor_.textChanged.connect(self.updateValue)
 
@@ -1185,33 +1186,20 @@ class FLFieldDB(QtWidgets.QWidget):
             if not ol:
                 self.editor_.textChanged.connect(self.updateValue)
 
-        elif type_ == "uint":
+        elif type_ in ("int","uint"):
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
             except Exception:
                 self.logger.exception("Error al desconectar señal textChanged")
-
-            if v is not None:
+            
+            
+            if nulo and v in (None, 0):
+                if field.allowNull():
+                    self.editor_.setText("")
+                else:
+                    self.editor_.setText(field.defaultValue())
+            else:   
                 self.editor_.setText(str(v))
-            elif not nulo:
-                self.editor_.setText(field.defaultValue())
-            else:
-                self.editor_.setText("")
-
-            self.editor_.textChanged.connect(self.updateValue)
-
-        elif type_ == "int":
-            try:
-                self.editor_.textChanged.disconnect(self.updateValue)
-            except Exception:
-                self.logger.exception("Error al desconectar señal textChanged")
-
-            if v is not None:
-                self.editor_.setText(str(v))
-            elif not nulo:
-                self.editor_.setText(field.defaultValue())
-            else:
-                self.editor_.setText("")
 
             self.editor_.textChanged.connect(self.updateValue)
 
