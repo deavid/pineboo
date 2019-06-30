@@ -1371,7 +1371,7 @@ class FLSqlCursor(QtCore.QObject):
 
         if v:
             if type_ in ("date"):
-                from pineboolib.qsa import Date
+                from pineboolib.application.types import Date
 
                 v = Date(v)
             elif type_ == "pixmap":
