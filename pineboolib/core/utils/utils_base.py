@@ -614,8 +614,8 @@ Convierte diferentes formatos de fecha a QDate
 
 
 def convert_to_qdate(date: str) -> QDate:
-    from pineboolib.qsa import Date
-    from pineboolib.fllegacy.flutil import FLUtil
+    from pineboolib.application.types import Date
+    from pineboolib.application.utils.date_conversion import date_amd_to_dma
     import datetime
 
     if isinstance(date, Date):
@@ -627,8 +627,7 @@ def convert_to_qdate(date: str) -> QDate:
         if "T" in date:
             date = date[: date.find("T")]
 
-        util = FLUtil()
-        date = util.dateAMDtoDMA(date) if len(date.split("-")[0]) == 4 else date
+        date = date_amd_to_dma(date) if len(date.split("-")[0]) == 4 else date
         date = QtCore.QDate.fromString(date, "dd-MM-yyyy")
 
     return date
