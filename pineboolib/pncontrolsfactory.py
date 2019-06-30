@@ -217,7 +217,6 @@ class SysType(object, metaclass=Singleton):
         return False
     
     def isDebuggerEnabled(self) -> bool:
-        print("***", config.value("application/dbadmin_enabled", False))
         return config.value("application/dbadmin_enabled", False)
 
     def isQuickBuild(self):
