@@ -13,6 +13,8 @@ from PyQt5 import QtCore
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.wiki_error import wiki_error
 from pineboolib.core.utils.singleton import Singleton
+from pineboolib.core.settings import config
+from pineboolib.core import decorators
 
 
 logger = logging.getLogger("PNControlsFactory")
@@ -195,14 +197,31 @@ class SysType(object, metaclass=Singleton):
 
         return ret_
 
-    def interactiveGUI(self):
+    def interactiveGUI(self) -> str:
         return aqApp.DGI().interactiveGUI()
 
-    def isNebulaBuild(self):
+    def isUserBuild(self) -> bool:
+        return self.version().upper().find("USER") > -1
+
+    def isDeveloperBuild(self) -> bool:
+        return self.version().upper().find("DEVELOPER") > -1
+
+    def isNebulaBuild(self) -> bool:
+        return self.version().upper().find("NEBULA") > -1
+    
+    def isDebuggerMode(self) -> bool:
+        return config.value("application/isDebuggerMode", False)
+
+    @decorators.NotImplementedWarn
+    def isCloudMode(self) -> bool: 
         return False
+    
+    def isDebuggerEnabled(self) -> bool:
+        print("***", config.value("application/dbadmin_enabled", False))
+        return config.value("application/dbadmin_enabled", False)
 
     def isQuickBuild(self):
-        return False
+        return not self.isDebuggerEnabled()
 
     def isLoadedModule(self, modulename: str) -> bool:
         return modulename in aqApp.db().managerModules().listAllIdModules()
@@ -270,21 +289,11 @@ class SysType(object, metaclass=Singleton):
     def updateAreas(self):
         aqApp.initToolBox()
 
-    def isDebuggerMode(self) -> bool:
-        from pineboolib.fllegacy.flsettings import FLSettings
-
-        return FLSettings().readBoolEntry("application/isDebuggerMode", False)
-
     def reinit(self):
         aqApp.reinit()
 
     def setCaptionMainWidget(self, t):
         aqApp.setCaptionMainWidget(t)
-
-    def isDebuggerEnabled(self) -> bool:
-        from pineboolib.fllegacy.flsettings import FLSettings
-
-        return FLSettings().readBoolEntry("application/dbadmin_enabled", False)
 
     def nameDriver(self, connName="default"):
         return aqApp.db().useConn(connName).driverName()

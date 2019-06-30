@@ -2197,24 +2197,7 @@ def search_git_updates(url=None):
         os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
 
 
-def isUserBuild():
-    return sys.version().upper().find("USER") > -1
 
-
-def isDeveloperBuild():
-    return sys.version().upper().find("DEVELOPER") > -1
-
-
-def isNebulaBuild():
-    return sys.version().upper().find("NEBULA") > -1
-
-
-def isQuickBuild():
-    return False
-
-
-def isCloudMode():
-    return False
 
 
 def qsaExceptions():
