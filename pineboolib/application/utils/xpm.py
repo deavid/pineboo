@@ -9,9 +9,9 @@ def cacheXPM(value: str) -> str:
     if value:
         xpm_name = value[: value.find("[]")]
         xpm_name = xpm_name[xpm_name.rfind(" ") + 1 :]
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import project
 
-        cache_dir = "%s/cache/%s/cacheXPM" % (aqApp.tmp_dir(), aqApp.db().DBName())
+        cache_dir = "%s/cache/%s/cacheXPM" % (project.tmpdir, project.conn.DBName())
         if not os.path.exists(cache_dir):
             os.mkdir(cache_dir)
 

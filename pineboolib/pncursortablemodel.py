@@ -317,14 +317,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             elif _type == "double":
                 if d is not None:
-                    from pineboolib.pncontrolsfactory import aqApp
+                    from pineboolib import pncontrolsfactory
 
-                    d = aqApp.localeSystem().toString(float(d), "f", field.partDecimal())
+                    d = pncontrolsfactory.aqApp.localeSystem().toString(float(d), "f", field.partDecimal())
             elif _type in ("int", "uint"):
                 if d is not None:
-                    from pineboolib.pncontrolsfactory import aqApp
+                    from pineboolib import pncontrolsfactory
 
-                    d = aqApp.localeSystem().toString(int(d))
+                    d = pncontrolsfactory.aqApp.localeSystem().toString(int(d))
 
             self.parent_view.resize_column(col, d)
 

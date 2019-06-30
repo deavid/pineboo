@@ -8,7 +8,7 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
 from pineboolib.core import decorators
-from pineboolib.pncontrolsfactory import aqApp
+from pineboolib import pncontrolsfactory
 from pineboolib.pnsqldrivers import PNSqlDrivers
 from pineboolib.interfaces.iconnection import IConnection
 
@@ -237,10 +237,10 @@ class PNConnection(IConnection, QtCore.QObject):
         settings = FLSettings()
         if self.transaction_ == 0 and self.canTransaction():
             if settings.readBoolEntry("application/isDebuggerMode", False):
-                aqApp.statusHelpMsg("Iniciando Transacción... %s" % self.transaction_)
+                pncontrolsfactory.aqApp.statusHelpMsg("Iniciando Transacción... %s" % self.transaction_)
             if self.transaction():
                 self.lastActiveCursor_ = cursor
-                aqApp.emitTransactionBegin(cursor)
+                pncontrolsfactory.aqApp.emitTransactionBegin(cursor)
 
                 if not self.canSavePoint():
                     if self.currentSavePoint_:
@@ -259,7 +259,7 @@ class PNConnection(IConnection, QtCore.QObject):
 
         else:
             if settings.readBoolEntry("application/isDebuggerMode", False):
-                aqApp.statusHelpMsg("Creando punto de salvaguarda %s" % self.transaction_)
+                pncontrolsfactory.aqApp.statusHelpMsg("Creando punto de salvaguarda %s" % self.transaction_)
             if not self.canSavePoint():
                 if self.transaction_ == 0:
                     if self.currentSavePoint_:
@@ -332,7 +332,7 @@ class PNConnection(IConnection, QtCore.QObject):
             return True
 
         if self.transaction_ == 0 and self.canTransaction():
-            aqApp.statusHelpMsg("Deshaciendo Transacción...")
+            pncontrolsfactory.aqApp.statusHelpMsg("Deshaciendo Transacción...")
             if self.rollbackTransaction():
                 self.lastActiveCursor_ = None
 
@@ -348,14 +348,14 @@ class PNConnection(IConnection, QtCore.QObject):
                 if cancel:
                     cur.select()
 
-                aqApp.emitTransactionRollback(cur)
+                pncontrolsfactory.aqApp.emitTransactionRollback(cur)
                 return True
             else:
                 logger.warning("doRollback: Fallo al intentar deshacer transacción")
                 return False
 
         else:
-            aqApp.statusHelpMsg("Restaurando punto de salvaguarda %s..." % self.transaction_)
+            pncontrolsfactory.aqApp.statusHelpMsg("Restaurando punto de salvaguarda %s..." % self.transaction_)
             if not self.canSavePoint():
                 tam_queue = len(self.queueSavePoints_)
                 for i in range(tam_queue):
@@ -415,7 +415,7 @@ class PNConnection(IConnection, QtCore.QObject):
         if self.transaction_ == 0 and self.canTransaction():
             settings = FLSettings()
             if settings.readBoolEntry("application/isDebuggerMode", False):
-                aqApp.statusHelpMsg("Terminando transacción... %s" % self.transaction_)
+                pncontrolsfactory.aqApp.statusHelpMsg("Terminando transacción... %s" % self.transaction_)
             try:
                 if self.driver().commitTransaction():
                     self.lastActiveCursor_ = None
@@ -431,7 +431,7 @@ class PNConnection(IConnection, QtCore.QObject):
                     if notify:
                         cur.d.modeAccess_ = FLSqlCursor.Browse
 
-                    aqApp.emitTransactionEnd(cur)
+                    pncontrolsfactory.aqApp.emitTransactionEnd(cur)
                     return True
 
                 else:
@@ -442,7 +442,7 @@ class PNConnection(IConnection, QtCore.QObject):
                 logger.error("doCommit: Fallo al intentar terminar transacción: %s", e)
                 return False
         else:
-            aqApp.statusHelpMsg("Liberando punto de salvaguarda %s..." % self.transaction_)
+            pncontrolsfactory.aqApp.statusHelpMsg("Liberando punto de salvaguarda %s..." % self.transaction_)
             if (self.transaction_ == 1 and self.canTransaction()) or (self.transaction_ == 0 and not self.canTransaction()):
                 if not self.canSavePoint():
                     if self.currentSavePoint_:

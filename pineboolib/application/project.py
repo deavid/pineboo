@@ -130,7 +130,6 @@ class Project(object):
             raise NotConnectedError("Cannot execute Pineboo Project without a connection in place")
 
         from pineboolib.pnobjectsfactory import load_models
-        from pineboolib.pncontrolsfactory import aqApp
 
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
@@ -306,8 +305,8 @@ class Project(object):
         # if self._splash:
         #     self._splash.showMessage("Cargando traducciones ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
         #     self._DGI.processEvents()
-
-        aqApp.loadTranslations()
+        from pineboolib import pncontrolsfactory
+        pncontrolsfactory.aqApp.loadTranslations()
 
         # FIXME: ACLs needed at this level?
         # self.acl_ = FLAccessControlLists()

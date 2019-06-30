@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.pncontrolsfactory import aqApp
-
+from pineboolib.core import decorators
 from PyQt5 import QtWidgets, Qt, QtCore
 
 import os
@@ -130,12 +129,12 @@ class FLStaticLoader(QtCore.QObject):
             n_rows = len(self.b_.dirs_)
             self.tblDirs.setNumRows(n_rows)
             row = 0
-            from pineboolib.pncontrolsfactory import FLCheckBox
+            from pineboolib import pncontrolsfactory
 
             for info in self.b_.dirs_:
                 self.tblDirs.setText(row, 0, info.path_)
 
-                chk = FLCheckBox(self.tblDirs, row)
+                chk = pncontrolsfactory.FLCheckBox(self.tblDirs, row)
                 chk.setChecked(info.active_ == "True")
                 chk.toggled.connect(self.setChecked)
                 self.tblDirs.setCellWidget(row, 1, chk)
@@ -152,13 +151,13 @@ class FLStaticLoader(QtCore.QObject):
         dir = Qt.QFileDialog.getExistingDirectory(None, self.tr("Selecciones el directorio a insertar"), dir_init)
 
         if dir:
-            from pineboolib.pncontrolsfactory import FLCheckBox
+            from pineboolib import pncontrolsfactory
 
             n_rows = self.tblDirs.numRows()
             self.tblDirs.setNumRows(n_rows + 1)
             self.tblDirs.setText(n_rows, 0, dir)
 
-            chk = FLCheckBox(self.tblDirs, n_rows)
+            chk = pncontrolsfactory.FLCheckBox(self.tblDirs, n_rows)
             chk.setChecked(True)
             chk.toggled.connect(self.setChecked)
 
@@ -262,9 +261,9 @@ class FLStaticLoader(QtCore.QObject):
                 if only_path:
                     return content_path
                 else:
-                    from pineboolib.pncontrolsfactory import aqApp
+                    from pineboo import project
 
-                    return aqApp.db().managerModules().contentFS(info.path_ + separator + n)
+                    return project.conn.managerModules().contentFS(info.path_ + separator + n)
 
         return None
 
@@ -293,10 +292,15 @@ class FLStaticLoaderWarning(QtCore.QObject):
 
         msg += "</font><br></p>"
         self.warns_.clear()
-        aqApp.popupWarn(msg)
+        from pineboolib import pncontrolsfactory
+        pncontrolfactory.aqApp.popupWarn(msg)
 
+    
+    @decorators.NotImplementedWarn
     def scriptBaseFileName(self, name):
-        scripts = aqApp.project().scripts()
+        from pineboolib import pncontrolsfactory
+        
+        scripts = pncontrolsfactory.aqApp.project().scripts()
         for it in scripts:
             if it.baseFileName() == name:
                 return it

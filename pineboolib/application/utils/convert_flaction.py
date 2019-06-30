@@ -1,4 +1,3 @@
-import pineboolib
 import logging
 
 from pineboolib.application.xmlaction import XMLAction
@@ -8,8 +7,9 @@ logger = logging.getLogger("application.utils.convert_flaction")
 
 
 def convertFLAction(action: FLAction) -> XMLAction:
-    if action.name() in pineboolib.project.actions.keys():
-        return pineboolib.project.actions[action.name()]
+    from pineboolib import project
+    if action.name() in project.actions.keys():
+        return project.actions[action.name()]
     else:
         return None
 
@@ -21,9 +21,9 @@ def convert2FLAction(action: XMLAction) -> FLAction:
     else:
         name = action.name
 
-    from pineboolib.pncontrolsfactory import aqApp
+    from pineboolib import project
 
     logger.trace("convert2FLAction: Load action from db manager")
-    action = aqApp.db().manager().action(name)
+    action = project.conn.manager().action(name)
     logger.trace("convert2FLAction: done")
     return action

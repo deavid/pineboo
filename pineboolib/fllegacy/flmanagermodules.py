@@ -11,7 +11,6 @@ from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader, AQStaticBdInfo
-from pineboolib.pncontrolsfactory import aqApp
 
 """
 Gestor de módulos.
@@ -262,18 +261,20 @@ class FLManagerModules(object):
             modId = "sys"
         else:
             modId = self.conn_.managerModules().idModuleOfFile(n)
+        
+        from pineboolib import project
 
-        if aqApp.DGI().alternative_content_cached():
-            data = aqApp.DGI().content_cached(aqApp.tmp_dir(), self.conn_.DBName(), modId, ext_, name_, shaKey)
+        if project._DGI.alternative_content_cached():
+            data = project._DGI.content_cached(project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey)
             if data is not None:
                 return data
 
         if data is None:
             """Ruta por defecto"""
-            if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (aqApp.tmp_dir(), self.conn_.DBName(), modId, ext_, name_)):
+            if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (project.tmpdir, self.conn_.DBName(), modId, ext_, name_)):
                 utf8_ = True if ext_ == "kut" else False
                 data = self.contentFS(
-                    "%s/cache/%s/%s/file.%s/%s/%s.%s" % (aqApp.tmp_dir(), self.conn_.DBName(), modId, ext_, name_, shaKey, ext_), utf8_
+                    "%s/cache/%s/%s/file.%s/%s/%s.%s" % (project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey, ext_), utf8_
                 )
 
         if data is None:
@@ -321,12 +322,12 @@ class FLManagerModules(object):
     """
 
     def createForm(self, a, connector=None, parent=None, name=None):
-        from pineboolib.pncontrolsfactory import FLFormDB
+        from pineboolib import pncontrolsfactory
 
         if not isinstance(a, FLAction):
             a = convert2FLAction(a)
 
-        return None if not a else FLFormDB(parent, a, load=True)
+        return None if not a else pncontrolsfactory.FLFormDB(parent, a, load=True)
 
     """
     Esta función es igual a la anterior, sólo se diferencia en que carga
@@ -339,7 +340,7 @@ class FLManagerModules(object):
 
     def createFormRecord(self, a, connector=None, parent_or_cursor=None, name=None):
         logger.trace("createFormRecord: init")
-        from pineboolib.pncontrolsfactory import FLFormRecordDB
+        from pineboolib import pncontrolsfactory
 
         # Falta implementar conector y name
         if not isinstance(a, FLAction):
@@ -350,7 +351,7 @@ class FLManagerModules(object):
             return None
 
         logger.trace("createFormRecord: load FormRecordDB")
-        return FLFormRecordDB(parent_or_cursor, a, load=False)
+        return pncontrolsfactory.FLFormRecordDB(parent_or_cursor, a, load=False)
 
     """
     Para establecer el módulo activo.
@@ -462,14 +463,14 @@ class FLManagerModules(object):
     """
 
     def iconModule(self, idM):
-        from pineboolib.pncontrolsfactory import QPixmap
+        from pineboolib import pncontrolsfactory
 
         pix = None
         if idM.upper() in self.dictInfoMods.keys():
             icono = cacheXPM(self.dictInfoMods[idM.upper()].icono)
-            pix = QPixmap(icono)
+            pix = pncontrolsfactory.QPixmap(icono)
 
-        return pix or QPixmap()
+        return pix or pncontrolsfactory.QPixmap()
 
     """
     Para obtener la versión de un módulo.
@@ -642,9 +643,11 @@ class FLManagerModules(object):
     def idModuleOfFile(self, n):
         if not isinstance(n, str):
             n = n.toString()
-
+        
+        from pineboolib import project
+        
         if n.endswith(".mtd"):
-            if n[: n.find(".mtd")] in aqApp.DGI().sys_mtds() or n == "flfiles.mtd":
+            if n[: n.find(".mtd")] in project._DGI.sys_mtds() or n == "flfiles.mtd":
                 return "sys"
 
         cursor = self.conn_.execute_query("SELECT idmodulo FROM flfiles WHERE nombre='%s'" % n)

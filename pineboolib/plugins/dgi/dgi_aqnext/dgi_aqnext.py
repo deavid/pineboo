@@ -45,13 +45,13 @@ class dgi_aqnext(dgi_schema):
         return super().resolveObject(self._name, name)
 
     def exec_(self):
-        from pineboolib.pncontrolsfactory import SysType, aqApp
-
-        sys = SysType()
+        from pineboolib import pncontrolsfactory
+        from pineboolib import project
+        qsa_sys = pncontrolfactory.SysType()
         logger.warning("DGI_%s se ha inicializado correctamente" % self._alias)
-        logger.warning("Driver  DB: %s", aqApp.db().driverAlias())
-        logger.warning("Usuario DB: %s", sys.nameUser())
-        logger.warning("Nombre  DB: %s", sys.nameBD())
+        logger.warning("Driver  DB: %s", project.conn.driverAlias())
+        logger.warning("Usuario DB: %s", qsa_sys.nameUser())
+        logger.warning("Nombre  DB: %s", qsa_sys.nameBD())
 
     def processEvents(self):
         return QtCore.QCoreApplication.processEvents()
@@ -75,13 +75,13 @@ class dgi_aqnext(dgi_schema):
 
     def content_cached(self, tmp_folder, db_name, module_id, file_ext, file_name, sha_key):
         from pineboolib.core.utils.utils_base import filedir
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import project
 
         data_ = None
         if module_id == "sys" and file_name in self.sys_mtds():
             path_ = filedir("./plugins/dgi/dgi_aqnext/system_files/%s/%s.%s" % (file_ext, file_name, file_ext))
             if os.path.exists(path_):
-                data_ = aqApp.db().managerModules().contentFS(path_, False)
+                data_ = project.conn.managerModules().contentFS(path_, False)
 
         return data_
 
@@ -208,9 +208,9 @@ class dgi_aqnext(dgi_schema):
 
     def load_meta_model(self, action_name, opt=None):
         import importlib
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import project
 
-        module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % action_name)
+        module_name = poject.conn.managerModules().idModuleOfFile("%s.mtd" % action_name)
         module = None
         ret_ = None
         model_file = "models.%s.%s" % (module_name, action_name)
@@ -247,9 +247,9 @@ class dgi_aqnext(dgi_schema):
             cursor = module.widget.cursor()
         else:
             logger.warning("*** DGI.get_master_cursor creando cursor %s sin action asociada ***", prefix)
-            from pineboolib.pncontrolsfactory import FLSqlCursor
+            from pineboolib import pncontrolsfactory
 
-            cursor = FLSqlCursor(prefix)
+            cursor = pncontrolsfactory.FLSqlCursor(prefix)
 
         if cursor is None:
             logger.warning("*** DGI.get_master_cursor no encuentra cursor de %s***", prefix)
@@ -514,10 +514,10 @@ class dgi_aqnext(dgi_schema):
         return response
 
     def carga_datos_custom_filter(self, table, usuario):
-        from pineboolib.pncontrolsfactory import FLSqlCursor
+        from pineboolib import pncontrolsfactory
 
         ret = {}
-        cursor = FLSqlCursor("sis_gridfilter")
+        cursor = pncontrolsfactory.FLSqlCursor("sis_gridfilter")
         cursor.select(" prefix ='%s' AND usuario ='%s'" % (table, usuario))
         if cursor.first():
             ret[cursor.valueBuffer("descripcion")] = {}

@@ -519,7 +519,7 @@ def indent(elem, level=0):
 
 def format_double(d, part_integer, part_decimal):
     # FIXME: Move commaSeparator to Pineboo internals, not aqApp
-    from pineboolib.pncontrolsfactory import aqApp
+    from pineboolib import pncontrolsfactory
 
     if d == "":
         return d
@@ -548,19 +548,19 @@ def format_double(d, part_integer, part_decimal):
     str_integer = format_int(str_integer, part_integer)
 
     # Fixme: Que pasa cuando la parte entera sobrepasa el limite, se coge el maximo valor o
-    ret_ = "%s%s%s" % (str_integer, aqApp.commaSeparator() if found_comma else "", str_decimal if part_decimal > 0 else "")
+    ret_ = "%s%s%s" % (str_integer, pncontrolsfactory.aqApp.commaSeparator() if found_comma else "", str_decimal if part_decimal > 0 else "")
     return ret_
 
 
 def format_int(value, part_intenger=None):
     # FIXME: Move commaSeparator to Pineboo internals, not aqApp
-    from pineboolib.pncontrolsfactory import aqApp
+    from pineboolib import pncontrolsfactory
 
     str_integer = value
     if value is not None:
         str_integer = "{:,d}".format(int(value))
 
-        if aqApp.commaSeparator() == ",":
+        if pncontrolsfactory.aqApp.commaSeparator() == ",":
             str_integer = str_integer.replace(",", ".")
         else:
             str_integer = str_integer.replace(".", ",")
@@ -661,9 +661,9 @@ def resolve_query(table_name, params):
     and_where = ""
     where = ""
     order_by = ""
-    from pineboolib.pncontrolsfactory import aqApp
+    from pineboolib import project
 
-    mtd = aqApp.db().manager().metadata(table_name)
+    mtd = project.conn.manager().metadata(table_name)
 
     if hasattr(params, "_iterlists"):
         q = params

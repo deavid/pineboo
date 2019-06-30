@@ -25,9 +25,9 @@ class FLAccessControlMainWindow(FLAccessControl):
         return "mainwindow"
 
     def processObject(self, obj):
-        from pineboolib.pncontrolsfactory import QMainWindow
+        from pineboolib import pncontrolsfactory
 
-        mw = QMainWindow(obj)
+        mw = pncontrolsfactory.QMainWindow(obj)
         if not mw or not self.acosPerms_:
             return
 
@@ -62,7 +62,7 @@ class FLAccessControlMainWindow(FLAccessControl):
 
 class FLAccessControlForm(FLAccessControl):
     def __init__(self):
-        super(FLAccessControlForm, self).__init__()
+        super().__init__()
         if pineboolib.project._DGI.localDesktop():
             from PyQt5.Qt import qApp
             from PyQt5 import QtGui
@@ -121,9 +121,9 @@ class FLAccessControlForm(FLAccessControl):
                     w.setDisabled(True)
 
         for it in self.acosPerms_.keys():
-            from pineboolib.pncontrolsfactory import QWidget
+            from pineboolib import pncontrolsfactory
 
-            w = fm.findChild(QWidget, it)
+            w = fm.findChild(pncontrolsfactory.QWidget, it)
             if w:
                 perm = self.acosPerms_[it]
                 if perm in ("-w", "--"):
@@ -145,7 +145,7 @@ class FLAccessControlForm(FLAccessControl):
 
 class FLAccessControlTable(FLAccessControl):
     def __init__(self) -> None:
-        super(FLAccessControlTable, self).__init__()
+        super().__init__()
 
     def type(self):
         return "table"
@@ -248,13 +248,13 @@ class FLAccessControlFactory(object):
             print("NO OBJ")
 
         ret_ = ""
-        from pineboolib.pncontrolsfactory import FLFormDB, QMainWindow
+        from pineboolib import pncontrolsfactory
 
-        if isinstance(obj, QMainWindow):
+        if isinstance(obj, pncontrolsfactory.QMainWindow):
             ret_ = "mainwindow"
         elif isinstance(obj, FLTableMetaData):
             ret_ = "table"
-        elif isinstance(obj, FLFormDB):
+        elif isinstance(obj, pncontrolsfactory.FLFormDB):
             ret_ = "form"
 
         return ret_
