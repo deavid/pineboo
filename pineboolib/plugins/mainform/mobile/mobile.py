@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from pineboolib.qsa import *
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QTreeWidgetItem
 import logging
@@ -483,7 +482,7 @@ class MainForm(QtWidgets.QMainWindow):
                 ac = QActionGroup(ag)
                 ac.setObjectName(module)
                 if sys.isQuickBuild():
-                    if ac.name == "sys":
+                    if module == "sys":
                         continue
                 actions = self.widgetActions("%s.ui" % ac.objectName(), ac)
 

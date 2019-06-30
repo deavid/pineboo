@@ -493,7 +493,7 @@ class MainForm(QtWidgets.QMainWindow):
                 ac = QActionGroup(ag)
                 ac.setObjectName(module)
                 if qsa_sys.isQuickBuild():
-                    if ac.name == "sys":
+                    if module == "sys":
                         continue
                 actions = self.widgetActions("%s.ui" % ac.objectName(), ac)
 
