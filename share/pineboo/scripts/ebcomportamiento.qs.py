@@ -113,28 +113,29 @@ class FormInternalObj(FormDBWidget):
 
     def leerValorLocal(self, valor_name):
         util = FLUtil()
+        from pineboolib.core.settings import config
         if valor_name in ("isDebuggerMode", "dbadmin_enabled"):
-            valor = settings.readBoolEntry("application/%s" % valor_name)
+            valor = config.value("application/%s" % valor_name, False)
         else:
             if valor_name in ("ebCallFunction", "maxPixImages", "kugarParser", "colorObligatorio", "kugar_temp_dir", "git_updates_repo"):
-                valor = util.readSettingEntry("ebcomportamiento/%s" % valor_name, u"")
+                valor = config.value("ebcomportamiento/%s" % valor_name, "")
                 if valor_name == "kugar_temp_dir" and valor == "":
-                    from pineboolib.pncontrolsfactory import aqApp
+                    from pineboolib import project
 
-                    valor = aqApp.tmp_dir()
+                    valor = project.tmpdir
 
             else:
-                valor = settings.readBoolEntry("ebcomportamiento/%s" % valor_name, False)
+                valor = config.value("ebcomportamiento/%s" % valor_name, False)
         return valor
 
     def grabarValorLocal(self, valor_name=None, value=None):
-
+        from pineboolib.core.settings import config
         if valor_name in ("isDebuggerMode", "dbadmin_enabled"):
-            settings.writeEntry("application/%s" % valor_name, value)
+            config.set_value("application/%s" % valor_name, value)
         else:
             if valor_name == "maxPixImages" and value is None:
                 value = 600
-            settings.writeEntry("ebcomportamiento/%s" % valor_name, value)
+            config.set_value("ebcomportamiento/%s" % valor_name, value)
 
     def initEventFilter(self):
         w = self.w_
