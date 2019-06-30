@@ -107,6 +107,7 @@ def exec_main(options: Values) -> None:
     import pineboolib
 
     project = pineboolib.project  # FIXME: next time, proper singleton
+    project.load_version()
     project.setDebugLevel(options.debug_level)
 
     project.options = options
@@ -127,6 +128,12 @@ def exec_main(options: Values) -> None:
         from .utils import monkey_patch_connect
 
         monkey_patch_connect()
+    
+    if options.enable_dbadmin:
+        config.set_value("application/dbadmin_enabled", True)
+
+    if options.enable_quick:
+        config.set_value("application/dbadmin_enabled", False)
 
     if is_deployed():
         logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -175,12 +182,6 @@ def exec_main(options: Values) -> None:
     if options.test:
         project.test()
         return
-
-    if options.enable_dbadmin:
-        config.set_value("application/dbadmin_enabled", True)
-
-    if options.enable_quick:
-        config.set_value("application/dbadmin_enabled", False)
 
     if _DGI.useDesktop():
         # FIXME: What is happening here? Why dynamic load?
