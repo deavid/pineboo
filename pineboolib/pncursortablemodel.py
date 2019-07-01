@@ -124,14 +124,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         # self.refresh()
 
     """
-    Indica si se pueden recoger mas datos del la tabla
-    @return Boolean indicado Sí o No
-    """
-
-    def canFetchMore(self, *args):
-        return self.canFetchMore
-
-    """
     Desactiva el refresco. Ej. FLSqlQuery.setForwardOnly(True)
     @param disable. True o False
     """
@@ -359,7 +351,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                         if not self.db().manager().isSystemTable(self._parent.table()):
                             d = self.db().manager().fetchLargeValue(d)
                         else:
-                            from pineboolib.core.utils.utils_base import cacheXPM
+                            from pineboolib.application.utils.xpm import cacheXPM
 
                             d = cacheXPM(d)
                         if d:

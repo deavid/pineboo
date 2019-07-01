@@ -205,8 +205,6 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
 
         if script_name is None:
             script_name = self._action.scriptForm() if self._action.table() else self._action.name()
-        
-        
 
         project.actions[self._action.name()].load_script(script_name, self)
 
@@ -228,6 +226,7 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
 
         if self._uiName:
             from pineboolib import project
+
             project.conn.managerModules().createUI(self._uiName, None, self)
 
         self._loaded = True
@@ -253,9 +252,11 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
                     self.iface.init()
                 except Exception:
                     # script_name = self.iface.__module__
-                    from pineboolib import pncontrolsfactory
+                    from pineboolib import pncontrolsfactory, project
 
-                    pncontrolsfactory.aqApp.msgBoxWarning(pncontrolsfactory.wiki_error(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI)
+                    pncontrolsfactory.aqApp.msgBoxWarning(
+                        pncontrolsfactory.wiki_error(traceback.format_exc(limit=-6, chain=False)), project._DGI
+                    )
 
             return True
 
@@ -441,7 +442,10 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
         if not path_file:
             from pineboolib import pncontrolsfactory
 
-            tmp_file = "%s/snap_shot_%s.png" % (pncontrolsfactory.aqApp.tmp_dir(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
+            tmp_file = "%s/snap_shot_%s.png" % (
+                pncontrolsfactory.aqApp.tmp_dir(),
+                QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"),
+            )
 
             ret = pncontrolsfactory.QFileDialog.getSaveFileName(None, "Pineboo", tmp_file, "PNG(*.png)")
             path_file = ret[0] if ret else None
@@ -606,10 +610,9 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
     def emitFormClosed(self):
         from pineboolib import project
 
-       
         if "fltesttest" in project.conn.managerModules().listAllIdModules():
             project.call("fltesttest.iface.recibeEvento", ("formClosed", self.actionName_), None)
-            
+
         self.formClosed.emit()
         if self.widget:
             self.widget.closed.emit()
@@ -904,7 +907,7 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
 
     def show(self):
         from pineboolib import pncontrolsfactory, project
-        
+
         module_name = getattr(project.actions[self._action.name()].mod, "module_name", None)
         if module_name:
 

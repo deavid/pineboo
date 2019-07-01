@@ -1368,6 +1368,7 @@ class FLSqlCursor(QtCore.QObject):
         if v is not None:
             if type_ in ("date"):
                 from pineboolib.application.types import Date
+
                 v = Date(v)
             elif type_ == "pixmap":
                 v_large = None
@@ -1417,10 +1418,11 @@ class FLSqlCursor(QtCore.QObject):
                 v = ""
         else:
             v = self.bufferCopy().value(fN)
-        
+
         if v is not None:
             if type_ in ("date"):
                 from pineboolib.application.types import Date
+
                 v = Date(v)
 
             elif type_ == "pixmap":
@@ -1457,7 +1459,7 @@ class FLSqlCursor(QtCore.QObject):
 
         state_changes = b is not self.d.edition_
         from pineboolib import pncontrolsfactory
-        
+
         if state_changes is not None and not self.d.edition_states_:
             self.d.edition_states_ = pncontrolsfactory.AQBoolFlagStateList()
 
@@ -1505,7 +1507,7 @@ class FLSqlCursor(QtCore.QObject):
             return
 
         state_changes = not b == self.d.browse_
-        
+
         from pineboolib import pncontrolsfactory
 
         if state_changes is not None and not self.d.browse_states_:
@@ -1678,7 +1680,9 @@ class FLSqlCursor(QtCore.QObject):
 
         if (not self.isValid() or self.size() <= 0) and not m == self.Insert:
             if not self.size():
-                pncontrolsfactory.QMessageBox.warning(pncontrolsfactory.QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"))
+                pncontrolsfactory.QMessageBox.warning(
+                    pncontrolsfactory.QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado")
+                )
                 return
             self.first()
 
@@ -2012,10 +2016,11 @@ class FLSqlCursor(QtCore.QObject):
                         q.setForwardOnly(True)
                         q.exec_()
                         if q.next():
-                            msg = msg + "\n%s : Requiere valor único, y ya hay otro registro con el valor %s en la tabla %s" % (field,
-                                                                                                                                 valuesFields,
-                                                                                                                                 self.metadata().name()
-                                                                                                                                )
+                            msg = msg + "\n%s : Requiere valor único, y ya hay otro registro con el valor %s en la tabla %s" % (
+                                field,
+                                valuesFields,
+                                self.metadata().name(),
+                            )
 
                         checkedCK = True
 
@@ -3231,7 +3236,7 @@ class FLSqlCursor(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def deleteRecord(self):
-        logger.trace("deleteRecord", self.actionName())
+        logger.trace("deleteRecord %s", self.actionName())
         self.openFormInMode(self.Del)
         # self.d._action.openDefaultFormRecord(self)
 
@@ -3248,7 +3253,10 @@ class FLSqlCursor(QtCore.QObject):
 
         if not self.isValid() or self.size() <= 0:
             pncontrolsfactory.QMessageBox.warning(
-                pncontrolsfactory.QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"), pncontrolsfactory.QMessageBox.Ok
+                pncontrolsfactory.QApplication.focusWidget(),
+                self.tr("Aviso"),
+                self.tr("No hay ningún registro seleccionado"),
+                pncontrolsfactory.QMessageBox.Ok,
             )
             return
 

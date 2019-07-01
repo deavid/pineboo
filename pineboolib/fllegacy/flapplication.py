@@ -233,7 +233,7 @@ class FLApplication(QtCore.QObject):
             if self.modules_menu:
                 me = ev
                 if me.button() == QtCore.Qt.RightButton:
-                    self.modules_menu.popup(QCursor.pos())
+                    self.modules_menu.popup(QCursor.pos())  # FIXME -- no actual class
                     return True
                 else:
                     return False
@@ -278,13 +278,19 @@ class FLApplication(QtCore.QObject):
         self.window_menu = pncontrolsfactory.QMenu(self.container_)
         self.window_menu.setObjectName("windowMenu")
 
-        self.window_cascade_action = pncontrolsfactory.QAction(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("cascada.png")), self.tr("Cascada"), self.container_)
+        self.window_cascade_action = pncontrolsfactory.QAction(
+            pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("cascada.png")), self.tr("Cascada"), self.container_
+        )
         self.window_menu.addAction(self.window_cascade_action)
 
-        self.window_tile_action = pncontrolsfactory.QAction(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("mosaico.png")), self.tr("Mosaico"), self.container_)
+        self.window_tile_action = pncontrolsfactory.QAction(
+            pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("mosaico.png")), self.tr("Mosaico"), self.container_
+        )
         self.window_menu.addAction(self.window_tile_action)
 
-        self.window_close_action = pncontrolsfactory.QAction(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("cerrar.png")), self.tr("Cerrar"), self.container_)
+        self.window_close_action = pncontrolsfactory.QAction(
+            pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("cerrar.png")), self.tr("Cerrar"), self.container_
+        )
         self.window_menu.addAction(self.window_close_action)
 
         self.modules_menu = pncontrolsfactory.QMenu(self.container_)
@@ -295,10 +301,14 @@ class FLApplication(QtCore.QObject):
         w.setObjectName("widgetContainer")
         vl = pncontrolsfactory.QVBoxLayout(w)
 
-        self.exit_button = pncontrolsfactory.QPushButton(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("exit.png")), self.tr("Salir"), w)
+        self.exit_button = pncontrolsfactory.QPushButton(
+            pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("exit.png")), self.tr("Salir"), w
+        )
         self.exit_button.setObjectName("pbSalir")
         self.exit_button.setShortcut(pncontrolsfactory.QKeySequence(self.tr("Ctrl+Q")))
-        self.exit_button.setSizePolicy(pncontrolsfactory.QSizePolicy(pncontrolsfactory.QSizePolicy.Expanding, pncontrolsfactory.QSizePolicy.Fixed))
+        self.exit_button.setSizePolicy(
+            pncontrolsfactory.QSizePolicy(pncontrolsfactory.QSizePolicy.Expanding, pncontrolsfactory.QSizePolicy.Fixed)
+        )
         self.exit_button.setFocusPolicy(QtCore.Qt.NoFocus)
         self.exit_button.setToolTip(self.tr("Salir de la aplicación (Ctrl+Q)"))
         self.exit_button.setWhatsThis(self.tr("Salir de la aplicación (Ctrl+Q)"))
@@ -400,7 +410,7 @@ class FLApplication(QtCore.QObject):
 
             if not self.container_.isActiveWindow():
                 self.container_.raise_()
-                QApplication.setActiveWindow(self.container_)
+                pncontrolsfactory.QApplication.setActiveWindow(self.container_)
 
             if self.db() is not None:
                 self.container_.setWindowTitle(self.db().database())
@@ -413,13 +423,13 @@ class FLApplication(QtCore.QObject):
             w.showNormal()
         elif not w.isVisible():
             w.show()
-            w.setFont(QApplication.font())
+            w.setFont(pncontrolsfactory.QApplication.font())
 
         if focus_w and isinstance(focus_w, pncontrolsfactory.QMainWindow) and focus_w != w:
             w.setFocus()
         if not w.isActiveWindow():
             w.raise_()
-            QApplication.setActiveWindow(w)
+            pncontrolsfactory.QApplication.setActiveWindow(w)
 
         if w:
             view_back = w.centralWidget()
@@ -506,7 +516,7 @@ class FLApplication(QtCore.QObject):
         self.modules_menu.clear()
         for item in range(self.tool_box_.count()):
             if isinstance(item, pncontrolsfactory.QToolBar):
-                item.clear()
+                item.clear()  # FIXME: item is always an int, never QToolBar
 
             self.tool_box_.removeItem(item)
             del item
@@ -779,6 +789,7 @@ class FLApplication(QtCore.QObject):
 
     def initStyles(self):
         from pineboolib.core.settings import config
+
         self.style_mapper = QtCore.QSignalMapper()
         self.style_mapper.mapped[str].connect(self.setStyle)
         style_read = config.value("application/style", None)
@@ -842,6 +853,7 @@ class FLApplication(QtCore.QObject):
 
     def statusHelpMsg(self, text):
         from pineboolib.core.settings import config
+
         if config.value("application/isDebuggerMode", False):
             logger.warning("StatusHelpMsg: %s", text)
 
@@ -1104,14 +1116,14 @@ class FLApplication(QtCore.QObject):
 
         from pineboolib import pncontrolsfactory
 
-        wi = pnconotrlsfactory.QWhatsThis
+        wi = QtWidgets.QWhatsThis
 
         if script_calls:
             if not mw:
-                self.container_ = pncontrolsfactory.QMainWindow(QApplication.desktop())
+                self.container_ = pncontrolsfactory.QMainWindow(pncontrolsfactory.QApplication.desktop())
 
             if not self.popup_warn_:
-                self.popup_warn_ = pncontrolsfactory.FLPopupWarn(mw)
+                self.popup_warn_ = FLPopupWarn(mw)  # FIXME: Empty class yet!
 
             self.popup_warn_.script_calls_ = script_calls
             wi.showText(pncontrolsfactory.QApplication.desktop().mapToGlobal(QtCore.QPoint(5, 5)), msg_warn, mw)
@@ -1197,7 +1209,12 @@ class FLApplication(QtCore.QObject):
         if project._DGI.localDesktop():
             from pineboolib import pncontrolsfactory
 
-            if self.wb_ or not self.project_ or pncontrolsfactory.QApplication.activeModalWidget() or pncontrolsfactory.QApplication.activePopupWidget():
+            if (
+                self.wb_
+                or not self.project_
+                or pncontrolsfactory.QApplication.activeModalWidget()
+                or pncontrolsfactory.QApplication.activePopupWidget()
+            ):
                 return
 
             self.checkAndFixTransactionLevel("Application::aqAppIdle()")
@@ -1331,9 +1348,12 @@ class FLApplication(QtCore.QObject):
         if not pncontrolsfactory.SysType().interactiveGUI():
             return True
 
-
         ret = pncontrolsfactory.QMessageBox.information(
-            self.mainWidget(), self.tr("Salir ..."), self.tr("¿ Quiere salir de la aplicación ?"), pncontrolsfactory.QMessageBox.Yes, pncontrolsfactory.QMessageBox.No
+            self.mainWidget(),
+            self.tr("Salir ..."),
+            self.tr("¿ Quiere salir de la aplicación ?"),
+            pncontrolsfactory.QMessageBox.Yes,
+            pncontrolsfactory.QMessageBox.No,
         )
         return ret == pncontrolsfactory.QMessageBox.Yes
 
@@ -1463,13 +1483,13 @@ class FLApplication(QtCore.QObject):
                 if w.objectName() != active_id_module:
                     w.installEventFilter(self)
                     w.show()
-                    w.setFont(QApplication.font())
+                    w.setFont(pncontrolsfactory.QApplication.font())
                     if not isinstance(w, pncontrolsfactory.QMainWindow):
                         continue
 
                     view_back = w.centralWidget()
                     if view_back is not None:
-                        self.p_work_space_ = view_back.findChild(QWidget, w.objectName())
+                        self.p_work_space_ = view_back.findChild(pncontrolsfactory.QWidget, w.objectName())
 
             if active_id_module:
                 self.container_.show()
@@ -1504,7 +1524,7 @@ class FLApplication(QtCore.QObject):
             r.setY(settings.readNumEntry("%s/Y" % k, r.y()))
             r.setWidth(settings.readNumEntry("%s/Width" % k, r.width()))
             r.setHeight(settings.readNumEntry("%s/Height" % k, r.height()))
-            desk = QApplication.desktop().availableGeometry(self.main_widget_)
+            desk = pncontrolsfactory.QApplication.desktop().availableGeometry(self.main_widget_)
             inter = desk.intersected(r)
             self.main_widget_.resize(r.size())
             if (inter.width() * inter.height()) > (r.width() * r.height() / 20):

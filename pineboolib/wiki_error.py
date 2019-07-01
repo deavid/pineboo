@@ -8,7 +8,8 @@ logger = logging.getLogger(__name__)
 def wiki_error(e: str) -> str:
     # FIXME: No hay un nombre mejor? Crea entradas de la wikipedia?
     from pineboolib import pncontrolsfactory, project
-    qsa_sys = pncontrolsfactory.Systype()
+
+    qsa_sys = pncontrolsfactory.SysType()
     e = e.replace(project.tmpdir, "...")
     e = re.sub(r"/[0-9a-f]{35,60}\.qs\.py", ".qs.py", e)
 
@@ -21,7 +22,8 @@ def wiki_error(e: str) -> str:
 
 def process_error(error_str: str) -> str:
     from pineboolib import pncontrolsfactory
-    qsa_sys = pncontrolsfactory.Systype()
+
+    qsa_sys = pncontrolsfactory.SysType()
     ret = "\n=========== Wiki error =============\n\n"
 
     if "AttributeError: 'dict' object has no attribute" in error_str:

@@ -208,14 +208,14 @@ class SysType(object, metaclass=Singleton):
 
     def isNebulaBuild(self) -> bool:
         return self.version().upper().find("NEBULA") > -1
-    
+
     def isDebuggerMode(self) -> bool:
         return config.value("application/isDebuggerMode", False)
 
     @decorators.NotImplementedWarn
-    def isCloudMode(self) -> bool: 
+    def isCloudMode(self) -> bool:
         return False
-    
+
     def isDebuggerEnabled(self) -> bool:
         return config.value("application/dbadmin_enabled", False)
 
@@ -604,4 +604,117 @@ from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
 from pineboolib.fllegacy.flapplication import aqApp  # noqa:  # FIXME: Circular dependency
 
 qsa_sys = SysType()
-reload_from_DGI()
+
+# --- create empty objects first:
+
+QComboBox = None
+QTable = None
+QLayoutWidget = None
+QToolButton = None
+QTabWidget = None
+QLabel = None
+QGroupBox = None
+QListView = None
+QPushButton = None
+QTextEdit = None
+QLineEdit = None
+QDateEdit = None
+QTimeEdit = None
+QCheckBox = None
+QWidget = None
+QtWidgets = None
+QColor = None
+QMessageBox = None
+QButtonGroup = None
+QDialog = None
+QVBoxLayout = None
+QHBoxLayout = None
+QFrame = None
+QMainWindow = None
+QSignalMapper = None
+QDomDocument = None
+QMenu = None
+QToolBar = None
+QListWidgetItem = None
+QListViewWidget = None
+QPixmap = None
+QImage = None
+QIcon = None
+QAction = None
+QActionGroup = None
+QTreeWidget = None
+QTreeWidgetItem = None
+QTreeWidgetItemIterator = None
+QDataView = None
+QProcess = None
+QByteArray = None
+QRadioButton = None
+QSpinBox = None
+QInputDialog = None
+QLineEdit = None
+QApplication = None
+qApp = None
+QStyleFactory = None
+QFontDialog = None
+QDockWidget = None
+QMdiArea = None
+QMdiSubWindow = None
+QKeySequence = None
+QSize = None
+QSizePolicy = None
+QToolBox = None
+QPainter = None
+QBrush = None
+QProgressDialog = None
+QFileDialog = None
+
+# Clases FL
+FLLineEdit = None
+FLTimeEdit = None
+FLDateEdit = None
+FLPixmapView = None
+FLDomDocument = None
+FLDomElement = None
+FLDomNode = None
+FLDomNodeList = None
+FLListViewItem = None
+FLTable = None
+FLDataTable = None
+FLCheckBox = None
+FLTextEditOutput = None
+FLSpinBox = None
+FLTableDB = None
+FLFieldDB = None
+FLFormDB = None
+FLFormRecordDB = None
+FLFormSearchDB = None
+FLDoubleValidator = None
+FLIntValidator = None
+FLUIntValidator = None
+FLCodBar = None
+FLWidget = None
+FLWorkSpace = None
+
+FormDBWidget = None
+
+# Clases QSA
+CheckBox = None
+ComboBox = None
+TextEdit = None
+LineEdit = None
+FileDialog = None
+MessageBox = None
+RadioButton = None
+Color = QColor
+Dialog = None
+Label = None
+GroupBox = None
+Process = None
+SpinBox = None
+Line = None
+NumberEdit = None
+DateEdit = None
+TimeEdit = None
+
+# Clases AQNext
+auth = None
