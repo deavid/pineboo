@@ -1348,7 +1348,7 @@ class FLSqlCursor(QtCore.QObject):
             if pK:
                 pKV = self.buffer().value(pK)
                 # q = FLSqlQuery()
-                q = FLSqlQuery(None)
+                q = FLSqlQuery()
                 sql_query = "SELECT %s FROM %s WHERE %s" % (
                     fN,
                     self.metadata().name(),
