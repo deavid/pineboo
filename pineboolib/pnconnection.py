@@ -92,7 +92,7 @@ class PNConnection(IConnection, QtCore.QObject):
         if isinstance(name, PNConnection):
             name = name.connectionName()
 
-        if name in ("default", "dbAux", "Aux", None):
+        if name in ("default", "dbAux", "Aux", None): #FIXME : if name in ("default", None): es lo correcto
             return self
 
         if name in self.connAux.keys():
