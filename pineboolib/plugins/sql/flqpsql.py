@@ -82,6 +82,9 @@ class FLQPSQL(object):
         self._dbname = db_name
         check_dependencies({"psycopg2": "python3-psycopg2", "sqlalchemy": "sqlAlchemy"})
         import psycopg2
+        from psycopg2.extras import LoggingConnection
+
+        logger = logging.getLogger(self.alias_)
 
         conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (
             db_name,
@@ -92,7 +95,8 @@ class FLQPSQL(object):
         )
 
         try:
-            self.conn_ = psycopg2.connect(conninfostr)
+            self.conn_ = psycopg2.connect(conninfostr, connection_factory=LoggingConnection)
+            self.conn_.initialize(logger)
             self.engine_ = create_engine("postgresql+psycopg2://%s:%s@%s:%s/%s" % (db_userName, db_password, db_host, db_port, db_name))
         except psycopg2.OperationalError as e:
             if pineboolib.project._splash:

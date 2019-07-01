@@ -168,7 +168,7 @@ class FLManager(QtCore.QObject):
             quick = False if util.readSettingEntry("application/dbadmin_enabled", False) else True
 
         if isinstance(n, str):
-            if not n or not self.db_.dbAux():
+            if not n:
                 return None
 
             ret = False
@@ -625,7 +625,7 @@ class FLManager(QtCore.QObject):
                     realiza una consulta a la base para obtener las tablas existentes
         @return TRUE si existe la tabla, FALSE en caso contrario
         """
-        if not self.db_ or not self.db_.dbAux() or n is None:
+        if not self.db_ or n is None:
             return False
 
         if cache and n in self.listTables_:
@@ -1329,9 +1329,6 @@ class FLManager(QtCore.QObject):
         """
         Carga en la lista de tablas los nombres de las tablas de la base de datos
         """
-        if not self.db_.dbAux():
-            return
-
         if not self.listTables_:
             self.listTables_ = []
         else:
