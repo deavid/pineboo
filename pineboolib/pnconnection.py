@@ -92,7 +92,7 @@ class PNConnection(IConnection, QtCore.QObject):
         if isinstance(name, PNConnection):
             name = name.connectionName()
 
-        if name in ("default", None):
+        if name in ("default", "dbAux", "Aux", None):
             return self
 
         if name in self.connAux.keys():
@@ -216,7 +216,7 @@ class PNConnection(IConnection, QtCore.QObject):
         return self.conn
 
     def dbAux(self):
-        return self.useConn("default")
+        return self.useConn("dbAux")
 
     def formatValue(self, t, v, upper):
         return self.driver().formatValue(t, v, upper)
