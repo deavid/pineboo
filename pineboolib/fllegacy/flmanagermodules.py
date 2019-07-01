@@ -221,7 +221,7 @@ class FLManagerModules(object):
 
     def contentCached(self, n, shaKey=None):
 
-        not_sys_table = self.conn_.dbAux() and n[0:3] != "sys" and not self.conn_.manager().isSystemTable(n)
+        not_sys_table = n[0:3] != "sys" and not self.conn_.manager().isSystemTable(n)
         if not_sys_table and self.staticBdInfo_ and self.staticBdInfo_.enabled_:
             str_ret = self.contentStatic(n)
             if str_ret:
@@ -261,7 +261,7 @@ class FLManagerModules(object):
             modId = "sys"
         else:
             modId = self.conn_.managerModules().idModuleOfFile(n)
-        
+
         from pineboolib import project
 
         if project._DGI.alternative_content_cached():
@@ -503,9 +503,6 @@ class FLManagerModules(object):
     """
 
     def shaGlobal(self):
-        if not self.conn_.dbAux():
-            return ""
-
         q = FLSqlQuery(None, self.conn_.dbAux())
         q.setForwardOnly(True)
         q.exec_("SELECT sha FROM flserial")
@@ -532,7 +529,7 @@ class FLManagerModules(object):
     """
 
     def shaOfFile(self, n):
-        if self.conn_.dbAux() and not n[:3] == "sys" and not self.conn_.manager().isSystemTable(n):
+        if not n[:3] == "sys" and not self.conn_.manager().isSystemTable(n):
             formatVal = self.conn_.manager().formatAssignValue("nombre", "string", n, True)
             q = FLSqlQuery(None, self.conn_.dbAux())
             # q.setForwardOnly(True)
@@ -564,8 +561,6 @@ class FLManagerModules(object):
     """
 
     def loadAllIdModules(self):
-        if not self.conn_.dbAux():
-            return
 
         self.listAllIdModules_ = []
         self.listAllIdModules_.append("sys")
@@ -612,8 +607,6 @@ class FLManagerModules(object):
     """
 
     def loadIdAreas(self):
-        if not self.conn_.dbAux():
-            return
 
         self.listIdAreas_ = []
         q = FLSqlQuery(None, self.conn_.dbAux())
@@ -643,9 +636,9 @@ class FLManagerModules(object):
     def idModuleOfFile(self, n):
         if not isinstance(n, str):
             n = n.toString()
-        
+
         from pineboolib import project
-        
+
         if n.endswith(".mtd"):
             if n[: n.find(".mtd")] in project._DGI.sys_mtds() or n == "flfiles.mtd":
                 return "sys"
@@ -660,9 +653,7 @@ class FLManagerModules(object):
     """
 
     def writeState(self):
-        idDB = "noDB"
-        if self.conn_.dbAux() is not None:
-            idDB = "%s%s%s%s%s" % (self.conn_.database(), self.conn_.host(), self.conn_.user(), self.conn_.driverName(), self.conn_.port())
+        idDB = "%s%s%s%s%s" % (self.conn_.database(), self.conn_.host(), self.conn_.user(), self.conn_.driverName(), self.conn_.port())
 
         settings = FLSettings()
         settings.writeEntry("Modules/activeIdModule/%s" % idDB, self.activeIdModule_)
@@ -674,9 +665,7 @@ class FLManagerModules(object):
     """
 
     def readState(self):
-        idDB = "noDB"
-        if self.conn_.dbAux() is not None:
-            idDB = "%s%s%s%s%s" % (self.conn_.database(), self.conn_.host(), self.conn_.user(), self.conn_.driverName(), self.conn_.port())
+        idDB = "%s%s%s%s%s" % (self.conn_.database(), self.conn_.host(), self.conn_.user(), self.conn_.driverName(), self.conn_.port())
 
         settings = FLSettings()
         self.activeIdModule_ = settings.readEntry("Modules/activeIdModule/%s" % idDB, None)

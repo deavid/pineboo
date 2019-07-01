@@ -44,12 +44,14 @@ class PNConnection(IConnection, QtCore.QObject):
 
         self.driverSql = PNSqlDrivers()
         self.connAux = {}
-        if name:
-            self._isOpen = False
-            self.name = name
-            return
-        else:
+        if name is None:
             self.name = "default"
+        else:
+            self.name = name
+
+        if name and name not in ("dbAux", "Aux"):
+            self._isOpen = False
+            return
 
         self.driverName_ = self.driverSql.aliasToName(driverAlias)
 
@@ -96,10 +98,6 @@ class PNConnection(IConnection, QtCore.QObject):
         if name in self.connAux.keys():
             return self.connAux[name]
 
-        name_conn = name
-        if name in ("dbAux", "Aux"):
-            name_conn = None
-
         self.connAux[name] = PNConnection(
             self.db_name,
             self.db_host,
@@ -107,7 +105,7 @@ class PNConnection(IConnection, QtCore.QObject):
             self.db_userName,
             self.db_password,
             self.driverSql.nameToAlias(self.driverName()),
-            name_conn,
+            name,
         )
         return self.connAux[name]
 
@@ -162,6 +160,8 @@ class PNConnection(IConnection, QtCore.QObject):
         self.db_port = db_port
         self.db_userName = db_userName
         self.db_password = db_password
+        if self.name:
+            self.driver().alias_ = self.driverName() + ":" + self.name
 
         return self.driver().connect(db_name, db_host, db_port, db_userName, db_password)
 
