@@ -116,7 +116,7 @@ class parsertools(object):
         p = 0 if p is None else int(p)
 
         from pineboolib import pncontrolsfactory
-        from pineooolib.application.utils.date_conversion import date_amd_to_dma
+        from pineboolib.application.utils.date_conversion import date_amd_to_dma
 
         ret_ = value
         if data_type == 2:  # Double

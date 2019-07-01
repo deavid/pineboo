@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from pineboolib.application.utils.check_dependencies import check_dependencies
 from pineboolib.core.utils.utils_base import filedir, load2xml
-from pineboolib.fllegacy.flsettings import FLSettings
 import logging
 import datetime
 import re
@@ -49,11 +48,12 @@ class kut2fpdf(object):
         self.logger = logging.getLogger("kut2fpdf")
         check_dependencies({"fpdf": "pyfpdf"})
         from pineboolib.plugins.kugar.parsertools import parsertools
+        from pineboolib.core.settings import config
 
         self._parser_tools = parsertools()
         self._avalible_fonts = []
         self._unavalible_fonts = []
-        self.design_mode = FLSettings().readBoolEntry("ebcomportamiento/kugar_debug_mode")
+        self.design_mode = config.value("ebcomportamiento/kugar_debug_mode", False)
         self._actual_data_line = None
         self._no_print_footer = False
         self.increase_section_size = 0
@@ -157,8 +157,10 @@ class kut2fpdf(object):
 
     def get_file_name(self):
         import os
+        
+        from pineboolib import project
 
-        pdf_name = aqApp.tmp_dir()
+        pdf_name = project.tmpdir
         pdf_name += "/%s_%s.pdf" % (self.name_, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
         if os.path.exists(pdf_name):
             os.remove(pdf_name)
@@ -953,7 +955,7 @@ class kut2fpdf(object):
     def draw_barcode(self, x, y, W, H, xml, text):
         if text == "None":
             return
-        from pineboolib import pncontrolsfactory, poject
+        from pineboolib import pncontrolsfactory, project
 
         file_name = project.tmpdir
         file_name += "/%s.png" % (text)
