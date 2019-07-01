@@ -5,7 +5,7 @@
 from PyQt5 import QtCore, QtWidgets
 
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.core.settings import config
 from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
 from pineboolib.core import decorators
 from pineboolib import pncontrolsfactory
@@ -234,9 +234,8 @@ class PNConnection(IConnection, QtCore.QObject):
         if not cursor or not self.db():
             return False
 
-        settings = FLSettings()
         if self.transaction_ == 0 and self.canTransaction():
-            if settings.readBoolEntry("application/isDebuggerMode", False):
+            if config.value("application/isDebuggerMode", False):
                 pncontrolsfactory.aqApp.statusHelpMsg("Iniciando Transacción... %s" % self.transaction_)
             if self.transaction():
                 self.lastActiveCursor_ = cursor
@@ -258,7 +257,7 @@ class PNConnection(IConnection, QtCore.QObject):
                 return False
 
         else:
-            if settings.readBoolEntry("application/isDebuggerMode", False):
+            if config.value("application/isDebuggerMode", False):
                 pncontrolsfactory.aqApp.statusHelpMsg("Creando punto de salvaguarda %s" % self.transaction_)
             if not self.canSavePoint():
                 if self.transaction_ == 0:
@@ -413,8 +412,7 @@ class PNConnection(IConnection, QtCore.QObject):
             return True
 
         if self.transaction_ == 0 and self.canTransaction():
-            settings = FLSettings()
-            if settings.readBoolEntry("application/isDebuggerMode", False):
+            if config.value("application/isDebuggerMode", False):
                 pncontrolsfactory.aqApp.statusHelpMsg("Terminando transacción... %s" % self.transaction_)
             try:
                 if self.driver().commitTransaction():

@@ -3345,7 +3345,7 @@ class FLSqlCursor(QtCore.QObject):
         if not self.activatedBufferCommited():
             return True
 
-        from pineboolib import pncontrolsfactory
+        from pineboolib import pncontrolsfactory, project
 
         if self.db().interactiveGUI() and self.db().canDetectLocks() and (checkLocks or self.metadata().detectLocks()):
             self.checkRisksLocks()
@@ -3382,7 +3382,7 @@ class FLSqlCursor(QtCore.QObject):
                     continue
 
                 if self.context() and hasattr(self.context(), "calculateField") and field.calculated():
-                    v = aqApp.call("calculateField", [field.name()], self.context(), False)
+                    v = project.call("calculateField", [field.name()], self.context(), False)
 
                     if v not in (True, False, None):
                         self.setValueBuffer(field.name(), v)
@@ -3393,7 +3393,7 @@ class FLSqlCursor(QtCore.QObject):
 
         idMod = self.db().managerModules().idModuleOfFile("%s.mtd" % self.metadata().name())
 
-        if pineboolib.project._DGI.use_model():
+        if project._DGI.use_model():
             model_name = "models.%s.%s_def" % (idMod, idMod)
             try:
                 model_module = importlib.import_module(model_name)
@@ -3417,7 +3417,7 @@ class FLSqlCursor(QtCore.QObject):
                         return ret
 
             if functionBefore:
-                v = pncontrolsfactory.aqApp.call(functionBefore, [self], None, False)
+                v = project.call(functionBefore, [self], None, False)
                 if v and not isinstance(v, bool) or v is False:
                     return False
 
@@ -3468,7 +3468,7 @@ class FLSqlCursor(QtCore.QObject):
                     self.cursorRelation().setAskForCancelChanges(True)
 
             recordDelBefore = "recordDelBefore%s" % self.metadata().name()
-            v = pncontrolsfactory.aqApp.call(recordDelBefore, [self], self.context(), False)
+            v = project.call(recordDelBefore, [self], self.context(), False)
             if v and not isinstance(v, bool):
                 return False
 
@@ -3510,7 +3510,7 @@ class FLSqlCursor(QtCore.QObject):
             self.model().Delete(self)
 
             recordDelAfter = "recordDelAfter%s" % self.metadata().name()
-            v = pncontrolsfactory.aqApp.call(recordDelAfter, [self], self.context(), False)
+            v = project.call(recordDelAfter, [self], self.context(), False)
 
             updated = True
 
@@ -3527,7 +3527,7 @@ class FLSqlCursor(QtCore.QObject):
                         return ret
 
             if functionAfter:
-                v = pncontrolsfactory.aqApp.call(functionAfter, [self], None, False)
+                v = project.call(functionAfter, [self], None, False)
                 if v and not isinstance(v, bool) or v is False:
                     return False
 
