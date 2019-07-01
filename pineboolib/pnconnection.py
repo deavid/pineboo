@@ -213,7 +213,7 @@ class PNConnection(IConnection, QtCore.QObject):
         pass
 
     def db(self):
-        return self.conn
+        return self
 
     def dbAux(self):
         return self.useConn("dbAux")
@@ -225,7 +225,7 @@ class PNConnection(IConnection, QtCore.QObject):
         return self.driver().formatValueLike(t, v, upper)
 
     def canSavePoint(self):
-        return self.driver().canSavePoint()
+        return self.dbAux().driver().canSavePoint()
 
     def canTransaction(self):
         return self.driver().canTransaction()
@@ -499,7 +499,7 @@ class PNConnection(IConnection, QtCore.QObject):
         if not self.db():
             return False
 
-        return self.driver().canOverPartition()
+        return self.dbAux().driver().canOverPartition()
 
     def savePoint(self, savePoint):
         if not self.db():
@@ -517,7 +517,7 @@ class PNConnection(IConnection, QtCore.QObject):
         if not self.db():
             return
 
-        self.driver().Mr_Proper()
+        self.dbAux().driver().Mr_Proper()
 
     def rollbackSavePoint(self, savePoint):
         if not self.db():
@@ -547,19 +547,19 @@ class PNConnection(IConnection, QtCore.QObject):
         if not self.db():
             return False
 
-        return self.driver().nextSerialVal(table, field)
+        return self.dbAux().driver().nextSerialVal(table, field)
 
     def existsTable(self, name):
         if not self.db():
             return False
 
-        return self.driver().existsTable(name)
+        return self.dbAux().driver().existsTable(name)
 
     def createTable(self, tmd):
         if not self.db():
             return False
 
-        sql = self.driver().sqlCreateTable(tmd)
+        sql = self.dbAux().driver().sqlCreateTable(tmd)
         if not sql:
             return False
         if self.transaction_ == 0:
@@ -568,7 +568,7 @@ class PNConnection(IConnection, QtCore.QObject):
 
         for singleSql in sql.split(";"):
             try:
-                self.driver().execute_query(singleSql)
+                self.dbAux().execute_query(singleSql)
             except Exception:
                 logger.exception("createTable: Error happened executing sql: %s...", singleSql[:80])
                 self.rollbackTransaction()
@@ -583,7 +583,7 @@ class PNConnection(IConnection, QtCore.QObject):
         if not self.db():
             return None
 
-        return self.driver().mismatchedTable(tablename, tmd, self)
+        return self.dbAux().driver().mismatchedTable(tablename, tmd, self)
 
     def normalizeValue(self, text):
         if getattr(self.driver(), "normalizeValue", None):
@@ -608,4 +608,4 @@ class PNConnection(IConnection, QtCore.QObject):
         if not self.db():
             return None
 
-        return self.driver().alterTable(mtd_1, mtd_2, key, force)
+        return self.dbAux().driver().alterTable(mtd_1, mtd_2, key, force)

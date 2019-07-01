@@ -1259,11 +1259,12 @@ class FLSqlCursor(QtCore.QObject):
             largeValue = self.db().manager().storeLargeValue(self.metadata(), vv)
             if largeValue:
                 vv = largeValue
+        
         if (
             field.outTransaction()
             and self.db().dbAux()
-            and not self.db().db() is self.db().dbAux()
-            and not self.modeAccess() == self.Insert
+            and self.db().db() is not self.db().dbAux()
+            and self.modeAccess() != self.Insert
         ):
             pK = self.metadata().primaryKey()
 
@@ -1342,13 +1343,12 @@ class FLSqlCursor(QtCore.QObject):
         if (
             field.outTransaction()
             and self.db().dbAux()
-            and not self.db().db() == self.db().dbAux()
-            and not self.modeAccess() == self.Insert
+            and self.db().db() is not self.db().dbAux()
+            and self.modeAccess() != self.Insert
         ):
             pK = self.metadata().primaryKey()
             if pK:
                 pKV = self.buffer().value(pK)
-                # q = FLSqlQuery()
                 q = FLSqlQuery(None, "dbAux")
                 sql_query = "SELECT %s FROM %s WHERE %s" % (
                     fN,
@@ -1377,7 +1377,7 @@ class FLSqlCursor(QtCore.QObject):
                     v_large = self.db().manager().fetchLargeValue(v)
 
                 else:
-                    from pineboolib.core.utils.utils_base import cacheXPM
+                    from pineboolib.application.utils.xpm import cacheXPM
 
                     v_large = cacheXPM(v)
 
