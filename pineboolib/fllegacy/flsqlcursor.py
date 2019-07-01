@@ -1272,8 +1272,7 @@ class FLSqlCursor(QtCore.QObject):
 
             if pK:
                 pKV = self.buffer().value(pK)
-                q = FLSqlQuery(None, "dbAux")
-                q.exec_(
+                self.db().execute_query(
                     "UPDATE %s SET %s = %s WHERE %s;"
                     % (
                         self.metadata().name(),
@@ -1349,7 +1348,7 @@ class FLSqlCursor(QtCore.QObject):
             if pK:
                 pKV = self.buffer().value(pK)
                 # q = FLSqlQuery()
-                q = FLSqlQuery(None, "dbAux")
+                q = FLSqlQuery(None)
                 sql_query = "SELECT %s FROM %s WHERE %s" % (
                     fN,
                     self.metadata().name(),

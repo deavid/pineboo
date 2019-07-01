@@ -216,7 +216,7 @@ class PNConnection(IConnection, QtCore.QObject):
         return self.conn
 
     def dbAux(self):
-        return self.useConn("dbAux")
+        return self.useConn("default")
 
     def formatValue(self, t, v, upper):
         return self.driver().formatValue(t, v, upper)
