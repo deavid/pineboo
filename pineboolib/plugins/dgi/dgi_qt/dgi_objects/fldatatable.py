@@ -5,7 +5,6 @@ from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
 from PyQt5.QtWidgets import QCheckBox
-import pineboolib
 
 
 class FLDataTable(QtWidgets.QTableView):
@@ -398,9 +397,9 @@ class FLDataTable(QtWidgets.QTableView):
                 return True
 
             if key_event.key() == QtCore.Qt.Key_Space:
-                from pineboolib.pncontrolsfactory import FLCheckBox
+                from pineboolib import pncontrolsfactory
 
-                chk = FLCheckBox(self.cellWidget(r, c))
+                chk = pncontrolsfactory.FLCheckBox(self.cellWidget(r, c))
                 if chk:
                     chk.animateClick()
 
@@ -484,11 +483,14 @@ class FLDataTable(QtWidgets.QTableView):
 
         db = self.cursor_.db()
         pri_key_val = self.cursor_.valueBuffer(pri_key)
-        popup = pineboolib.pncontrolsfactory.QMenu(self)
+        
+        from pineboolib import pncontrolsfactory
+        
+        popup = pncontrolsfactory.QMenu(self)
 
-        menu_frame = pineboolib.pncontrolsfactory.QWidget(self, QtCore.Qt.Popup)
+        menu_frame = pncontrolsfactory.QWidget(self, QtCore.Qt.Popup)
 
-        lay = pineboolib.pncontrolsfactory.QVBoxLayout()
+        lay = pncontrolsfactory.QVBoxLayout()
         menu_frame.setLayout(lay)
 
         tmp_pos = e.globalPos()
@@ -502,13 +504,13 @@ class FLDataTable(QtWidgets.QTableView):
                 if field is None:
                     continue
 
-                sub_popup = pineboolib.pncontrolsfactory.QMenu(self)
+                sub_popup = pncontrolsfactory.QMenu(self)
                 sub_popup.setTitle(mtd.alias())
-                sub_popup_frame = pineboolib.pncontrolsfactory.QWidget(sub_popup, QtCore.Qt.Popup)
-                lay_popup = pineboolib.pncontrolsfactory.QVBoxLayout(sub_popup)
+                sub_popup_frame = pncontrolsfactory.QWidget(sub_popup, QtCore.Qt.Popup)
+                lay_popup = pncontrolsfactory.QVBoxLayout(sub_popup)
                 sub_popup_frame.setLayout(lay_popup)
 
-                dt = pineboolib.pncontrolsfactory.FLDataTable(None, "FLDataTable", True)
+                dt = pncontrolsfactory.FLDataTable(None, "FLDataTable", True)
                 lay_popup.addWidget(dt)
 
                 dt.setFLSqlCursor(cur)

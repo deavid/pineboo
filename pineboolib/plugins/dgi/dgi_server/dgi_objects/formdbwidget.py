@@ -42,18 +42,18 @@ class FormDBWidget(QtCore.QObject):
 
     def _connect(self, sender, signal, receiver, slot):
         # print(" > > > connect:", sender, " signal ", str(signal))
-        from pineboolib.pncontrolsfactory import connect
+        from pineboolib import pncontrolsfactory
 
-        signal_slot = connect(sender, signal, receiver, slot, caller=self)
+        signal_slot = pncontrolsfactory.connect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
         self._formconnections.add(signal_slot)
 
     def _disconnect(self, sender, signal, receiver, slot):
         # print(" > > > disconnect:", self)
-        from pineboolib.pncontrolsfactory import disconnect
+        from pineboolib import pncontrolsfactory
 
-        signal_slot = disconnect(sender, signal, receiver, slot, caller=self)
+        signal_slot = pncontrolsfactory.disconnect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
 
@@ -87,9 +87,9 @@ class FormDBWidget(QtCore.QObject):
     def doCleanUp(self):
         self.clear_connections()
         if getattr(self, "iface", None) is not None:
-            from pineboolib.pncontrolsfactory import check_gc_referrers
+            from pineboolib import pncontrolsfactory
 
-            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)
+            pncontrolsfactory.check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)
             del self.iface.ctx
             del self.iface
             self._action.formrecord_widget = None
@@ -126,8 +126,8 @@ class FormDBWidget(QtCore.QObject):
             print("ERROR: Al buscar el control %r encontramos el error %r" %
                   (child_name, rte))
 
-            from pineboolib.pncontrolsfactory import print_stack
-            print_stack(8)
+            from pineboolib import pncontrolsfactory
+            pncontrolsfacotry.print_stack(8)
             import gc
             gc.collect()
             print("HINT: Objetos referenciando FormDBWidget::%r (%r) : %r" %
@@ -156,9 +156,9 @@ class FormDBWidget(QtCore.QObject):
             self.cursor_ = cursor
         else:
             if not self.cursor_:
-                from pineboolib.pncontrolsfactory import FLSqlCursor
+                from pineboolib import pncontrolsfactory
 
-                self.cursor_ = FLSqlCursor(self._action)
+                self.cursor_ = pncontrolsfactory.FLSqlCursor(self._action)
 
         return self.cursor_
 
@@ -166,11 +166,11 @@ class FormDBWidget(QtCore.QObject):
         return self.parent_
 
     def __getattr__(self, name):
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
         ret_ = (
             getattr(self.cursor_, name, None)
-            or getattr(aqApp, name, None)
+            or getattr(pncontrolsfactory.aqApp, name, None)
             or getattr(self.parent(), name, None)
             or getattr(self._action.script, name, None)
         )

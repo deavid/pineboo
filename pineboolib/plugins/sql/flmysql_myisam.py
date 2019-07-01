@@ -1,4 +1,4 @@
-from PyQt5.Qt import qWarning, QApplication, QRegExp, qApp
+from PyQt5.Qt import qWarning, QApplication, QRegExp
 from PyQt5.QtCore import QTime, QDate, QDateTime, Qt
 from PyQt5.QtXml import QDomDocument
 from PyQt5.QtWidgets import QMessageBox
@@ -161,16 +161,17 @@ class FLMYSQL_MYISAM(object):
 
         if len(v):
             if type_ == "bool":
-                from pineboolib.pncontrolsfactory import aqApp
+                from pineboolib import pncontrolsfactory
 
                 s = str(v[0]).upper()
-                if s == aqApp.tr("Sí")[0].upper():
+                if s == pncontrolsfactory.aqApp.tr("Sí")[0].upper():
                     res = "=1"
-                elif aqApp.tr("No")[0].upper():
+                elif pncontrolsfactory.aqApp.tr("No")[0].upper():
                     res = "=0"
 
             elif type_ == "date":
-                res = " LIKE '%" + FLUtil().dateDMAtoAMD(str(v)) + "'"
+                from pineboolib.application.utils.date_conversion import date_dma_to_amd
+                res = " LIKE '%" + date_dma_to_amd(str(v)) + "'"
 
             elif type_ == "time":
                 t = v.toTime()
@@ -1235,7 +1236,7 @@ class FLMYSQL_MYISAM(object):
             stream = self.db_.managerModules().contentCached("%s.mtd" % tablename)
             util = FLUtil()
             if not util.domDocumentSetContent(doc, stream):
-                print("FLManager : " + qApp.tr("Error al cargar los metadatos para la tabla") + tablename)
+                print("FLManager : " + QApplication.tr("Error al cargar los metadatos para la tabla") + tablename)
 
                 return self.recordInfo2(tablename)
 

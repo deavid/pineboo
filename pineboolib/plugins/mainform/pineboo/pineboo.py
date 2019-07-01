@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import pineboolib
 import logging
 
 from pineboolib.core.utils.utils_base import filedir, Struct
@@ -49,8 +48,8 @@ class MainForm(QMainWindow):
         MainForm.debugLevel = q
 
     def load(self):
-
-        self.ui_ = pineboolib.project.conn.managerModules().createUI(filedir("plugins/mainform/pineboo/mainform.ui"), None, self)
+        from pineboolib import project
+        self.ui_ = project.conn.managerModules().createUI(filedir("plugins/mainform/pineboo/mainform.ui"), None, self)
 
         self.w_ = self
         frameGm = self.frameGeometry()
@@ -157,10 +156,10 @@ class MainForm(QMainWindow):
             statusText = verticalName
 
         if cbPosInfo == "True":
-            from pineboolib.pncontrolsfactory import SysType
+            from pineboolib import pncontrolsfactory
 
-            sys_ = SysType()
-            statusText += "\t\t\t" + sys_.nameUser() + "@" + sys_.nameBD()
+            qsa_sys = pncontrolsfactory.SysType()
+            statusText += "\t\t\t" + qsa_sys.nameUser() + "@" + qsa_sys.nameBD()
 
         self.statusBar().showMessage(statusText)
 

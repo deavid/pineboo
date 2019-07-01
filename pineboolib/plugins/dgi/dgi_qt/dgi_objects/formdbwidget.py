@@ -1,6 +1,5 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore
-from pineboolib.pncontrolsfactory import FLFieldDB, FLTableDB
 import logging
 import weakref
 import sys
@@ -19,7 +18,7 @@ class FormDBWidget(QtWidgets.QWidget):
         if project is not None:
 
             super().__init__(parent)
-
+            
             self._module = sys.modules[self.__module__]
             self._module.connect = self._connect
             self._module.disconnect = self._disconnect
@@ -27,9 +26,9 @@ class FormDBWidget(QtWidgets.QWidget):
             self.cursor_ = None
             self.parent_ = parent or parent.parentWidget() if parent and hasattr(parent, "parentWidget") else parent
 
-            import pineboolib
+            from pineboolib import pncontrolsfactory
 
-            if isinstance(self.parent(), pineboolib.pncontrolsfactory.FLFormDB):
+            if isinstance(self.parent(), pncontrolsfactory.FLFormDB):
                 self.form = self.parent()
 
             self._formconnections = set([])
@@ -38,9 +37,9 @@ class FormDBWidget(QtWidgets.QWidget):
 
     def _connect(self, sender, signal, receiver, slot):
         # print(" > > > connect:", sender, " signal ", str(signal))
-        from pineboolib.pncontrolsfactory import connect
+        from pineboolib import pncontrolsfactory
 
-        signal_slot = connect(sender, signal, receiver, slot, caller=self)
+        signal_slot = pncontrolsfactory.connect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
 
@@ -48,9 +47,9 @@ class FormDBWidget(QtWidgets.QWidget):
 
     def _disconnect(self, sender, signal, receiver, slot):
         # print(" > > > disconnect:", self)
-        from pineboolib.pncontrolsfactory import disconnect
+        from pineboolib import pncontrolsfactory
 
-        signal_slot = disconnect(sender, signal, receiver, slot, caller=self)
+        signal_slot = pncontrolsfactory.disconnect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
 
@@ -85,9 +84,9 @@ class FormDBWidget(QtWidgets.QWidget):
     def doCleanUp(self):
         self.clear_connections()
         if getattr(self, "iface", None) is not None:
-            from pineboolib.pncontrolsfactory import check_gc_referrers
+            from pineboolib import pncontrolsfactory
 
-            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)
+            pncontrolsfactory.check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)
             del self.iface.ctx
             del self.iface
             self._action.formrecord_widget = None
@@ -110,7 +109,8 @@ class FormDBWidget(QtWidgets.QWidget):
                 ret = getattr(self.parent(), child_name, None)
 
             if ret is not None:
-                if isinstance(ret, (FLFieldDB, FLTableDB)) and hasattr(ret, "_loaded"):
+                from pineboolib import pncontrolsfactory
+                if isinstance(ret, (pncontrolsfactory.FLFieldDB, pncontrolsfactory.FLTableDB)) and hasattr(ret, "_loaded"):
                     if ret._loaded is False:
                         ret.load()
             else:
@@ -133,20 +133,20 @@ class FormDBWidget(QtWidgets.QWidget):
             self.cursor_ = cursor
         else:
             if not self.cursor_:
-                from pineboolib.pncontrolsfactory import aqApp
+                from pineboolib import project
                 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
-                action = aqApp.db().manager().action(self._action.name)
+                action = project.conn.manager().action(self._action.name)
                 self.cursor_ = FLSqlCursor(action.name())
 
         return self.cursor_
 
     def __getattr__(self, name):
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
         ret_ = (
             getattr(self.cursor_, name, None)
-            or getattr(aqApp, name, None)
+            or getattr(pncontrolsfactory.aqApp, name, None)
             or getattr(self.parent(), name, None)
             or getattr(self.parent().script, name, None)
         )

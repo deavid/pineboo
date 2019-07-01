@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-from pineboolib.pncontrolsfactory import aqApp, QMainWindow
-
 logger = logging.getLogger("mainForm_%s" % __name__)
 
 
@@ -23,14 +21,16 @@ class MainForm(QMainWindow):
 
     def initScript(self):
         from pineboolib.core.utils.utils_base import filedir
+        from pineboolib import pncontrolsfactory
 
         mw = mainWindow
         mw.createUi(filedir("plugins/mainform/eneboo_mdi/mainform.ui"))
-        aqApp.container_ = mw
-        aqApp.init()
+        pncontrolsfactory.aqApp.container_ = mw
+        pncontrolsfactory.aqApp.init()
 
     def createUi(self, ui_file):
-        mng = aqApp.db().managerModules()
+        from pineboolib import project
+        mng = project.conn.managerModules()
         self.w_ = mng.createUI(ui_file, None, self)
         self.w_.setObjectName("container")
 

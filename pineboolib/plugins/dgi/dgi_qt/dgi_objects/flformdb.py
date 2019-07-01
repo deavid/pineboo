@@ -8,7 +8,6 @@ from pineboolib.application.utils.geometry import loadGeometryForm, saveGeometry
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.core import decorators
 from pineboolib.interfaces import IFormDB
-import pineboolib
 import traceback
 
 
@@ -158,11 +157,12 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
 
         self.logger = logging.getLogger("FLFormDB")
         # self.tiempo_ini = time.time()
+        from pineboolib import project
 
         if not parent:
-            from pineboolib.pncontrolsfactory import aqApp
+            from pineboolib import pncontrolsfactory
 
-            parent = aqApp.mainWidget()
+            parent = pncontrolsfactory.aqApp.mainWidget()
 
         # if pineboolib.project._DGI.localDesktop():  # Si es local Inicializa
         #    super(QtWidgets.QWidget, self).__init__(parent)
@@ -205,10 +205,12 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
 
         if script_name is None:
             script_name = self._action.scriptForm() if self._action.table() else self._action.name()
+        
+        
 
-        pineboolib.project.actions[self._action.name()].load_script(script_name, self)
+        project.actions[self._action.name()].load_script(script_name, self)
 
-        self.iconSize = pineboolib.project._DGI.iconSize()
+        self.iconSize = project._DGI.iconSize()
         self.init_thread_script = None
         if load:
             self.load()
@@ -225,7 +227,8 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
         self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
         if self._uiName:
-            pineboolib.project.conn.managerModules().createUI(self._uiName, None, self)
+            from pineboolib import project
+            project.conn.managerModules().createUI(self._uiName, None, self)
 
         self._loaded = True
 
@@ -250,9 +253,9 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
                     self.iface.init()
                 except Exception:
                     # script_name = self.iface.__module__
-                    from pineboolib.pncontrolsfactory import aqApp, wiki_error
+                    from pineboolib import pncontrolsfactory
 
-                    aqApp.msgBoxWarning(wiki_error(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI)
+                    pncontrolsfactory.aqApp.msgBoxWarning(pncontrolsfactory.wiki_error(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI)
 
             return True
 
@@ -436,11 +439,11 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
 
     def saveSnapShot(self, path_file=None):
         if not path_file:
-            from pineboolib.pncontrolsfactory import aqApp, QFileDialog
+            from pineboolib import pncontrolsfactory
 
-            tmp_file = "%s/snap_shot_%s.png" % (aqApp.tmp_dir(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
+            tmp_file = "%s/snap_shot_%s.png" % (pncontrolsfactory.aqApp.tmp_dir(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
 
-            ret = QFileDialog.getSaveFileName(None, "Pineboo", tmp_file, "PNG(*.png)")
+            ret = pncontrolsfactory.QFileDialog.getSaveFileName(None, "Pineboo", tmp_file, "PNG(*.png)")
             path_file = ret[0] if ret else None
 
         if path_file:
@@ -590,25 +593,23 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
             QtCore.QTimer(self).singleShot(0, self.emitFormReady)
 
     def emitFormReady(self):
-        from pineboolib.pncontrolsfactory import SysType
+        from pineboolib import pncontrolsfactory, project
 
-        sys_ = SysType()
-        if sys_.isLoadedModule("fltesttest"):
-            from pineboolib.pncontrolsfactory import aqApp
+        qsa_sys = pncontrolsfactory.SysType()
+        if qsa_sys.isLoadedModule("fltesttest"):
 
-            aqApp.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)
+            project.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)
         self.formReady.emit()
 
     # protected_:
 
     def emitFormClosed(self):
-        from pineboolib.pncontrolsfactory import SysType
+        from pineboolib import project
 
-        sys_ = SysType()
-        if sys_.isLoadedModule("fltesttest"):
-            from pineboolib.pncontrolsfactory import aqApp
-
-            aqApp.call("fltesttest.iface.recibeEvento", ("formClosed", self.actionName_), None)
+       
+        if "fltesttest" in project.conn.managerModules().listAllIdModules():
+            project.call("fltesttest.iface.recibeEvento", ("formClosed", self.actionName_), None)
+            
         self.formClosed.emit()
         if self.widget:
             self.widget.closed.emit()
@@ -790,9 +791,9 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
         self._action.mainform_widget = None
         self.deleteLater()
         self._loaded = False
-        from pineboolib.pncontrolsfactory import SysType
+        from pineboolib import pncontrolsfactory
 
-        SysType().processEvents()
+        pncontrolsfactory.SysType().processEvents()
 
         # self.hide()
         try:
@@ -822,9 +823,7 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
 
             self.logger.error("El FLFormDB %s no se cerró correctamente:\n%s", self.formName(), traceback.format_exc())
 
-        from pineboolib.pncontrolsfactory import QMdiSubWindow
-
-        if isinstance(self.parent(), QMdiSubWindow):
+        if isinstance(self.parent(), pncontrolsfactory.QMdiSubWindow):
             self.parent().close()
 
     """
@@ -833,10 +832,10 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
 
     def showEvent(self, e):
         # --> Para mostrar form sin negro previo
-        from pineboolib.pncontrolsfactory import SysType
+        from pineboolib import pncontrolsfactory
 
-        sys = SysType()
-        sys.processEvents()
+        qsa_sys = pncontrolsfactory.SysType()
+        qsa_sys.processEvents()
         # <--
         if not self.loaded():
             return
@@ -856,9 +855,8 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
         size = loadGeometryForm(self.geoName())
         if size:
             self.resize(size)
-            from pineboolib.pncontrolsfactory import QMdiSubWindow
 
-            if self.parent() and isinstance(self.parent(), QMdiSubWindow):
+            if self.parent() and isinstance(self.parent(), pncontrolsfactory.QMdiSubWindow):
                 self.parent().resize(size)
                 self.parent().repaint()
 
@@ -905,17 +903,17 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
     """
 
     def show(self):
-        module_name = getattr(pineboolib.project.actions[self._action.name()].mod, "module_name", None)
+        from pineboolib import pncontrolsfactory, project
+        
+        module_name = getattr(project.actions[self._action.name()].mod, "module_name", None)
         if module_name:
-            from pineboolib.pncontrolsfactory import aqApp
 
-            if module_name in aqApp.dict_main_widgets_.keys():
-                module_window = aqApp.dict_main_widgets_[module_name]
+            if module_name in pncontrolsfactory.aqApp.dict_main_widgets_.keys():
+                module_window = pncontrolsfactory.aqApp.dict_main_widgets_[module_name]
                 mdi_area = module_window.centralWidget()
-                from pineboolib.pncontrolsfactory import QMdiArea, QMdiSubWindow
 
-                if isinstance(mdi_area, QMdiArea) and type(self).__name__ == "FLFormDB":
-                    if not isinstance(self.parent(), QMdiSubWindow):
+                if isinstance(mdi_area, pncontrolsfactory.QMdiArea) and type(self).__name__ == "FLFormDB":
+                    if not isinstance(self.parent(), pncontrolsfactory.QMdiSubWindow):
                         # size = self.size()
                         mdi_area.addSubWindow(self)
 
@@ -959,8 +957,8 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
 
     @decorators.NotImplementedWarn
     def exportToXml(self, b):
-        from pineboolib.pncontrolsfactory import AQS
+        from pineboolib import pncontrolsfactory
 
-        xml = AQS.toXml(self, True, True)
+        xml = pncontrolsfactory.AQS.toXml(self, True, True)
         print(xml.toString(2))
         pass

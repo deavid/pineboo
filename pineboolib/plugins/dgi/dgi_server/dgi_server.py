@@ -23,9 +23,9 @@ class parser_options(object):
         return "Welcome to pineboo server"
 
     def db_name(self, *args):
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
-        return aqApp.db().DBName()
+        return pncontrolsfactory.aqApp.db().DBName()
 
     def __getattr__(self, name):
         print("** parser_options no contiene", name)
@@ -67,16 +67,16 @@ class parser(object):
         dict_ = args[0]
         func_name = dict_["function"]
         arguments = dict_["arguments"]
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import project
 
-        result = aqApp.call(func_name, arguments)
+        result = project.call(func_name, arguments)
         print("Llamada remota: %s(%s) --> %s" % (func_name, ", ".join(arguments), result))
         return result
 
     @dispatcher.add_method
     def dbdata(*args):
         dict_ = args[0]
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
 
         list_fun = dict_["function"].split("__")
         fun_name = list_fun[1]
@@ -84,14 +84,14 @@ class parser(object):
         cursor = None
 
         if fun_name == "hello":
-            aqApp.db().removeConn("%s_remote_client" % id_conn)
+            project.conn.removeConn("%s_remote_client" % id_conn)
             # list_to_delete = []
             for k in list(cursor_dict.keys()):
                 if k.startswith(id_conn):
                     cursor_dict[k] = None
                     del cursor_dict[k]
 
-        conn = aqApp.db().useConn("%s_remote_client" % id_conn)
+        conn = project.conn.useConn("%s_remote_client" % id_conn)
 
         # print("--->", dict_["function"], dict_["arguments"]["cursor_id"] if "cursor_id" in dict_["arguments"] else None)
 
@@ -129,7 +129,7 @@ class parser(object):
                     dict_["arguments"]["table"],
                     dict_["arguments"]["where"],
                     cursor,
-                    aqApp.db().driver().conn_,
+                    project.conn.driver().conn_,
                 )
             except Exception:
                 print("Error refreshQuery", traceback.format_exc())

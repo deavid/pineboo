@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 from pineboolib.application.utils.check_dependencies import check_dependencies
 from pineboolib.core.utils.utils_base import filedir, load2xml
-import pineboolib
 from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib.fllegacy.flutil import FLUtil
 import logging
 import datetime
 import re
 import os
-from pineboolib.pncontrolsfactory import aqApp
 
 """
 Conversor de kuts a pyFPDF
@@ -90,8 +87,10 @@ class kut2fpdf(object):
             self.logger.exception("KUT2FPDF: Problema al procesar xml_data")
             return False
 
+        from pineboolib.fllegacy.flutil import FLUtil
         util = FLUtil()
-        if pineboolib.project._DGI.localDesktop():
+        from pineboolib import project
+        if project._DGI.localDesktop():
             util.createProgressDialog("Pineboo", len(self._xml_data))
             util.setLabelText("Creando informe ...")
 
@@ -239,7 +238,12 @@ class kut2fpdf(object):
 
         rows_array = self._xml_data.findall("Row")
         i = 0
+        
+        from pineboolib.fllegacy.flutil import FLUtil
+        from pineboolib import project
+        
         util = FLUtil()
+        
         for data in rows_array:
             self._actual_data_line = data
             level = int(data.get("level"))
@@ -270,8 +274,8 @@ class kut2fpdf(object):
             self.last_data_processed = data
 
             self.prev_level = level
-
-            if pineboolib.project._DGI.localDesktop():
+            
+            if project._DGI.localDesktop():
                 util.setProgress(i)
             i += 1
 
@@ -279,7 +283,7 @@ class kut2fpdf(object):
             for l in reversed(range(top_level + 1)):
                 self.processData("DetailFooter", data, l)
 
-        if pineboolib.project._DGI.localDesktop():
+        if project._DGI.localDesktop():
             util.destroyProgressDialog()
 
     """
@@ -535,9 +539,9 @@ class kut2fpdf(object):
                 function_name = xml.get("FunctionName")
                 try:
                     nodo = self._parser_tools.convertToNode(data_row)
-                    from pineboolib.pncontrolsfactory import aqApp
+                    from pineboolib import project
 
-                    ret_ = aqApp.call(function_name, [nodo, field_name], None, False)
+                    ret_ = project.call(function_name, [nodo, field_name], None, False)
                     if ret_ is False:
                         return
                     else:
@@ -949,15 +953,15 @@ class kut2fpdf(object):
     def draw_barcode(self, x, y, W, H, xml, text):
         if text == "None":
             return
-        from pineboolib.pncontrolsfactory import FLCodBar
+        from pineboolib import pncontrolsfactory, poject
 
-        file_name = aqApp.tmp_dir()
+        file_name = project.tmpdir
         file_name += "/%s.png" % (text)
         type = xml.get("CodBarType")
 
         if not os.path.exists(file_name):
 
-            bar_code = FLCodBar(text)  # Code128
+            bar_code = pncontrolsfactory.FLCodBar(text)  # Code128
             if type is not None:
                 type = bar_code.nameToType(type.lower())
                 bar_code.setType(type)

@@ -55,9 +55,9 @@ class parsertools(object):
     def convertToNode(self, data):
 
         # node = Node()
-        from pineboolib.pncontrolsfactory import FLDomDocument
+        from pineboolib import pncontrolsfactory
 
-        doc = FLDomDocument()
+        doc = pncontrolsfactory.FLDomDocument()
         ele = doc.createElement("element")
         for k in data.keys():
             attr_node = doc.createAttribute(k)
@@ -115,19 +115,20 @@ class parsertools(object):
 
         p = 0 if p is None else int(p)
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib import pncontrolsfactory
+        from pineooolib.application.utils.date_conversion import date_amd_to_dma
 
         ret_ = value
         if data_type == 2:  # Double
             if value in (None, "None"):
                 return
-            ret_ = aqApp.localeSystem().toString(float(value), "f", p)
+            ret_ = pncontrolsfactory.aqApp.localeSystem().toString(float(value), "f", p)
         elif data_type == 0:
             pass
         elif data_type == 3:
             if value.find("T") > -1:
                 value = value[: value.find("T")]
-            ret_ = FLUtil().dateAMDtoDMA(value)
+            ret_ = date_amd_to_dma(value)
 
         elif data_type == 5:  # Imagen
             pass
@@ -150,13 +151,13 @@ class parsertools(object):
         table_name = "fllarge"
         if ref_key is not None:
             value = None
-            from pineboolib.pncontrolsfactory import aqApp
+            from pineboolib import pncontrolsfactory
 
-            tmp_dir = aqApp.tmp_dir()
+            tmp_dir = pncontrolsfactory.aqApp.tmp_dir()
             img_file = "%s/%s.png" % (tmp_dir, ref_key)
 
             if not os.path.exists(img_file) and ref_key[0:3] == "RK@":
-                if not aqApp.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
+                if not pncontrolsfactory.aqApp.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
                     table_name += "_%s" % ref_key.split("@")[1]
 
                 q = FLSqlQuery()
