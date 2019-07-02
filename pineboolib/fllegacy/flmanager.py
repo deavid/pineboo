@@ -718,7 +718,7 @@ class FLManager(QtCore.QObject):
         @param key Clave sha1 de la vieja estructura
         @return TRUE si la modificación tuvo éxito
         """
-        return self.db_.alterTable(mtd1, mtd2, key, force)
+        return self.db_.dbAux().alterTable(mtd1, mtd2, key, force)
 
     def createTable(self, n_or_tmd):
         """
@@ -1460,7 +1460,7 @@ class FLManager(QtCore.QObject):
         sha = str(util.sha1(largeValue))
         # print("-->", tableName, sha)
         refKey = "RK@%s@%s" % (tableName, sha)
-        q = FLSqlQuery()
+        q = FLSqlQuery(None, self.db_.dbAux())
         q.setSelect("refkey")
         q.setFrom("fllarge")
         q.setWhere(" refkey = '%s'" % refKey)

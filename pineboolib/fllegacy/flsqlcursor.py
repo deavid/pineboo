@@ -2722,7 +2722,7 @@ class FLSqlCursor(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def refreshBuffer(self):
-        import pineboolib.qsa
+        from pineboolib import qsa as qsa_tree
 
         if not self.metadata():
             return False
@@ -2766,7 +2766,7 @@ class FLSqlCursor(QtCore.QObject):
                         util = FLUtil()
                         siguiente = None
                         if self._action.scriptFormRecord():
-                            context_ = getattr(pineboolib.qsa, "formRecord%s" % self._action.scriptFormRecord()[:-3]).iface
+                            context_ = getattr(qsa_tree, "formRecord%s" % self._action.scriptFormRecord()[:-3]).iface
                             function_counter = getattr(context_, "calculateCounter", None)
                             if function_counter is None:
                                 siguiente = util.nextCounter(field_name, self)
@@ -2791,7 +2791,7 @@ class FLSqlCursor(QtCore.QObject):
 
             self.primeUpdate()
 
-            if self.isLocked() and self.d.acosCondName_ is None:
+            if self.isLocked() and not self.d.acosCondName_:
                 self.d.modeAccess_ = self.Browse
 
             self.setNotGenerateds()
@@ -3590,7 +3590,8 @@ class FLSqlCursor(QtCore.QObject):
 
             if activeWid:
                 activeWidEnabled = activeWid.isEnabled()
-
+            
+            
         if self.d.modeAccess_ == self.Insert:
             if self.cursorRelation() and self.relation():
                 if self.cursorRelation().metadata() and self.cursorRelation().modeAccess() == self.Insert:

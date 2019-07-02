@@ -92,7 +92,7 @@ class PNConnection(IConnection, QtCore.QObject):
         if isinstance(name, PNConnection):
             name = name.connectionName()
 
-        if name in ("default", "dbAux", "Aux", None): #FIXME : if name in ("default", None): es lo correcto
+        if name in ("default", None): #FIXME : if name in ("default", None): es lo correcto
             return self
 
         if name in self.connAux.keys():
@@ -216,7 +216,8 @@ class PNConnection(IConnection, QtCore.QObject):
         return self
 
     def dbAux(self):
-        return self.useConn("dbAux")
+        ret = self.useConn("dbAux")
+        return ret
 
     def formatValue(self, t, v, upper):
         return self.driver().formatValue(t, v, upper)
@@ -258,7 +259,7 @@ class PNConnection(IConnection, QtCore.QObject):
 
         else:
             if config.value("application/isDebuggerMode", False):
-                pncontrolsfactory.aqApp.statusHelpMsg("Creando punto de salvaguarda %s" % self.transaction_)
+                pncontrolsfactory.aqApp.statusHelpMsg("Creando punto de salvaguarda %s:%s" % (self.name, self.transaction_))
             if not self.canSavePoint():
                 if self.transaction_ == 0:
                     if self.currentSavePoint_:
@@ -354,7 +355,7 @@ class PNConnection(IConnection, QtCore.QObject):
                 return False
 
         else:
-            pncontrolsfactory.aqApp.statusHelpMsg("Restaurando punto de salvaguarda %s..." % self.transaction_)
+            pncontrolsfactory.aqApp.statusHelpMsg("Restaurando punto de salvaguarda %s:%s..." % (self.name, self.transaction_))
             if not self.canSavePoint():
                 tam_queue = len(self.queueSavePoints_)
                 for i in range(tam_queue):
@@ -440,7 +441,7 @@ class PNConnection(IConnection, QtCore.QObject):
                 logger.error("doCommit: Fallo al intentar terminar transacción: %s", e)
                 return False
         else:
-            pncontrolsfactory.aqApp.statusHelpMsg("Liberando punto de salvaguarda %s..." % self.transaction_)
+            pncontrolsfactory.aqApp.statusHelpMsg("Liberando punto de salvaguarda %s:%s..." % (self.name, self.transaction_))
             if (self.transaction_ == 1 and self.canTransaction()) or (self.transaction_ == 0 and not self.canTransaction()):
                 if not self.canSavePoint():
                     if self.currentSavePoint_:
@@ -601,7 +602,6 @@ class PNConnection(IConnection, QtCore.QObject):
     def execute_query(self, q):
         if not self.db():
             return None
-
         return self.driver().execute_query(q)
 
     def alterTable(self, mtd_1, mtd_2, key, force=False):

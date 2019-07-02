@@ -165,7 +165,7 @@ class Project(object):
         for table in ("flareas", "flmodules", "flfiles", "flgroups", "fllarge", "flserial", "flusers", "flvar", "flmetadata"):
             self.conn.manager().createSystemTable(table)
 
-        cursor_ = self.conn.cursor()
+        cursor_ = self.conn.dbAux().cursor()
         self.areas: Dict[str, Struct] = {}
         cursor_.execute(""" SELECT idarea, descripcion FROM flareas WHERE 1 = 1""")
         for idarea, descripcion in cursor_:
@@ -234,7 +234,7 @@ class Project(object):
                 else:
                     continue
 
-            cur2 = self.conn.cursor()
+            cur2 = self.conn.dbAux().cursor()
             sql = "SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha = %s" % (
                 self.conn.driver().formatValue("string", idmodulo, False),
                 self.conn.driver().formatValue("string", nombre, False),
