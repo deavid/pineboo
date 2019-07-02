@@ -724,7 +724,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 if v is not None:
                     self.editor_.setText(v)
                 else:
-                    self.editor_.setText("")
+                    self.editor_.setText("0")
 
                 if doHome:
                     self.editor_.home(False)
@@ -748,7 +748,7 @@ class FLFieldDB(QtWidgets.QWidget):
                         s = round(float(v), field.partDecimal())
                     self.editor_.setText(str(s))
                 else:
-                    self.editor_.setText("")
+                    self.editor_.setText("0")
 
         elif type_ == "serial":
             if self.editor_:
@@ -1762,7 +1762,7 @@ class FLFieldDB(QtWidgets.QWidget):
             if self.showAlias():
                 pineboolib.project._DGI._par.addQueque("%s_setAlias" % self.objectName(), self.fieldAlias_)
 
-        if type_ == "uint" or type_ == "int" or type_ == "double" or type_ == "string":
+        if type_ in  ("uint", "int", "double", "string"):
             if ol:
                 self.editor_ = pineboolib.pncontrolsfactory.QComboBox()
                 style_ = self.editor_.styleSheet()
@@ -1806,7 +1806,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_._tipo = type_
                 self.editor_.partDecimal = partDecimal
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
-                    if not field.allowNull() and field.editable() and not (type_ == "time" or type_ == "date"):
+                    if not field.allowNull() and field.editable() and type_ not in ("time", "date"):
                         # self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
                         self.editor_.setStyleSheet("background-color:%s; color:%s" % (self.notNullColor(), QtGui.QColor(Qt.black).name()))
                     self.editor_.installEventFilter(self)
