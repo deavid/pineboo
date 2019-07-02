@@ -306,29 +306,29 @@ class SysType(object, metaclass=Singleton):
         if len(args) == 1:
             conn_db = aqApp.db().useConn(args[0])
             if not conn_db.isOpen():
-                conn_db.driverName_ = aqApp.db().driverName_
-                conn_db.driverSql = aqApp.db().driverSql
-                conn_db.conn = conn_db.conectar(
-                    aqApp.db().db_name, aqApp.db().db_host, aqApp.db().db_port, aqApp.db().db_userName, aqApp.db().db_password
-                )
-                if conn_db.conn is False:
-                    return False
+                if conn_db.driverName_ and conn_db.driverSql.loadDriver(conn_db.driverName_):
+                    conn_db.driver_ =  conn_db.driverSql.driver()  
+                    conn_db.conn = conn_db.conectar(
+                        aqApp.db().db_name, aqApp.db().db_host, aqApp.db().db_port, aqApp.db().db_userName, aqApp.db().db_password
+                    )
+                    if conn_db.conn is False:
+                        return False
 
-                conn_db._isOpen = True
+                    conn_db._isOpen = True
 
         else:
             conn_db = aqApp.db().useConn(args[6])
             if not conn_db.isOpen():
-                conn_db.driverName_ = conn_db.driverSql.aliasToName(args[0])
+                conn_db.driverName_ = conn_db.driverSql.aliasToName(args[0])                
                 if conn_db.driverName_ and conn_db.driverSql.loadDriver(conn_db.driverName_):
                     conn_db.conn = conn_db.conectar(args[1], args[4], args[5], args[2], args[3])
 
-                if conn_db.conn is False:
-                    return False
+                    if conn_db.conn is False:
+                        return False
 
-                conn_db.driver().db_ = conn_db
-                conn_db._isOpen = True
-                conn_db._dbAux = conn_db
+                    #conn_db.driver().db_ = conn_db
+                    conn_db._isOpen = True
+                    #conn_db._dbAux = conn_db
 
         return True
 

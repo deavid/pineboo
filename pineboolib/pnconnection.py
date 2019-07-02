@@ -49,12 +49,14 @@ class PNConnection(IConnection, QtCore.QObject):
             self.name = "default"
         else:
             self.name = name
+        
+        self.driverName_ = self.driverSql.aliasToName(driverAlias)
 
         if name and name not in ("dbAux", "Aux"):
             self._isOpen = False
             return
         
-        self.driverName_ = self.driverSql.aliasToName(driverAlias)
+        
 
         if self.driverName_ and self.driverSql.loadDriver(self.driverName_):
             self.driver_ =  self.driverSql.driver()  
