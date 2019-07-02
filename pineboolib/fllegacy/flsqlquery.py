@@ -468,10 +468,15 @@ class FLSqlQuery(object):
         # Fast version of self.value
         if self._fieldNameToPosDict is None:
             self._fieldNameToPosDict = dict(enumerate(self.d.fieldList_))
-        if isinstance(n, int):
-            return self._row[n]
-        else:
-            return self._row[self._fieldNameToPosDict[n]]
+        try:
+            if isinstance(n, int):
+                ret = self._row[n]
+            else:
+                ret = self._row[self._fieldNameToPosDict[n]]
+        except Exception as e:
+            logger.debug("_value_quick: Error %s, falling back to default implementation", e)
+            ret = self._value_std(n, raw)
+        return ret
 
     def _value_std(self, n, raw=False):
         # Eneboo version
