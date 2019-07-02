@@ -21,6 +21,7 @@ class FLSqlQuery(object):
     invalidTables = False
     fields_cache = None
     _is_active = False
+    _fieldNameToPosDict = None
     logger = logging.getLogger("FLSqlQuery")
 
     def __init__(self, cx=None, connection_name="default"):
@@ -463,8 +464,17 @@ class FLSqlQuery(object):
              en vez de contenido al que apunta esa referencia
     """
 
-    def value(self, n, raw=False):
+    def _value_quick(self, n, raw=False):
+        # Fast version of self.value
+        if self._fieldNameToPosDict is None:
+            self._fieldNameToPosDict = dict(enumerate(self.d.fieldList_))
+        if isinstance(n, int):
+            return self._row[n]
+        else:
+            return self._row[self._fieldNameToPosDict[n]]
 
+    def _value_std(self, n, raw=False):
+        # Eneboo version
         pos = None
         name = None
         table_name = None
@@ -569,6 +579,7 @@ class FLSqlQuery(object):
 
         return retorno
 
+    value = _value_quick  # This can be switched between _value_fast and _value_std
     """
     Indica si un campo de la consulta es nulo o no
 

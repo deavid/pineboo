@@ -26,8 +26,10 @@ def startup():
     from .options import parse_options
 
     options = parse_options()
-
-    ret = exec_main(options)
+    if options.enable_profiler:
+        ret = exec_main_with_profiler(options)
+    else:
+        ret = exec_main(options)
     # setup()
     # exec_()
     gc.collect()
@@ -36,6 +38,24 @@ def startup():
         sys.exit(ret)
     else:
         sys.exit(0)
+
+
+def exec_main_with_profiler(options):
+    import cProfile
+    import pstats
+    import io
+    from pstats import SortKey
+
+    pr = cProfile.Profile()
+    pr.enable()
+    ret = exec_main(options)
+    pr.disable()
+    s = io.StringIO()
+    sortby = SortKey.TIME
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats(40)
+    print(s.getvalue())
+    return ret
 
 
 def excepthook(type, value, tback):

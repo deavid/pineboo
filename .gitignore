@@ -19,3 +19,4 @@ test.qs.py.debug
 test.qs.xml
 monkeytype.sqlite3
 .pytype/*
+pineboolib/flparser/lextab.py

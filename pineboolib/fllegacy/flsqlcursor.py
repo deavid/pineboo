@@ -2260,6 +2260,14 @@ class FLSqlCursor(QtCore.QObject):
     def atFrom(self):
         if not self.buffer() or not self.metadata():
             return 0
+        # Faster version for this function::
+        if self.isValid():
+            pos = self.at()
+        else:
+            pos = 0
+        return pos
+        # --- the following function is awfully slow when there is a lot of data
+        # ... why we do need to do this, exactly?
 
         pKN = self.metadata().primaryKey()
         pKValue = self.valueBuffer(pKN)
@@ -2308,17 +2316,13 @@ class FLSqlCursor(QtCore.QObject):
                         pos = 0
                     return pos
 
-            # if cFilter:
-            #    sql = "%s WHERE %s" % (sql, cFilter)
-            # else:
-            #    sql = "%s WHERE 1=1" % sql
-
+            sqlWhere = "1=1"
             if field is not None:
                 sqlPriKeyValue = self.db().manager().formatAssignValue(field, pKValue, True)
+                sqlWhere = sqlPriKeyValue
                 if cFilter:
-                    sqlIn = "%s WHERE %s AND %s" % (sql, sqlPriKeyValue, cFilter)
-                else:
-                    sqlIn = "%s WHERE %s" % (sql, sqlPriKeyValue)
+                    sqlWhere += " AND %s" % cFilter
+                sqlIn = "%s WHERE %s" % (sql, sqlPriKeyValue)
                 # q.exec_(self.db(), sqlIn)
                 q.exec_(sqlIn)
                 if not q.next():
@@ -2330,6 +2334,7 @@ class FLSqlCursor(QtCore.QObject):
                     return pos
             else:
                 if cFilter:
+                    sqlWhere = cFilter
                     sql = "%s WHERE %s" % (sql, cFilter)
                 else:
                     sql = "%s WHERE 1=1" % sql
@@ -2342,17 +2347,18 @@ class FLSqlCursor(QtCore.QObject):
                 sql = "%s ORDER BY %s" % (sql, sqlOrderBy)
 
             # FIXME: solo compatible con PostgreSQL!
-            # if sqlPriKeyValue and self.db().canOverPartition():
-            #     posEqual = sqlPriKeyValue.index("=")
-            #     leftSqlPriKey = sqlPriKeyValue[0:posEqual]
-            #     # sqlRowNum = (
-            #     #     "SELECT rownum FROM ("
-            #     #     "SELECT row_number() OVER (ORDER BY %s) as rownum, %s as %s FROM %s WHERE %s ORDER BY %s) as subnumrow where"
-            #     #     % (sqlOrderBy, sqlPriKey, leftSqlPriKey, sqlFrom, sqlWhere, sqlOrderBy))
-            #     # if q.exec_(sqlRowNum) and q.next():
-            #     #     pos = int(q.value(0)) - 1
-            #     #     if pos >= 0:
-            #     #         return pos
+            if sqlPriKeyValue and self.db().canOverPartition():
+                posEqual = sqlPriKeyValue.index("=")
+                leftSqlPriKey = sqlPriKeyValue[0:posEqual]
+                sqlRowNum = (
+                    "SELECT rownum FROM ("
+                    "SELECT row_number() OVER (ORDER BY %s) as rownum FROM %s WHERE %s ORDER BY %s) as subnumrow"
+                    % (sqlOrderBy or "1", sqlFrom, sqlWhere, sqlOrderBy or "1")
+                )
+                if q.exec_(sqlRowNum) and q.next():
+                    pos = int(q.value(0)) - 1
+                    if pos >= 0:
+                        return pos
 
             found = False
             q.exec_(sql)

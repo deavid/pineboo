@@ -22,6 +22,13 @@ def parse_options() -> Values:
     )  # default a 2 para ver los logger.info, 1 no los muestra
     parser.add_option("-q", "--quiet", action="count", default=0, help="decrease verbosity level")
     parser.add_option(
+        "--profile-time",
+        action="store_true",
+        dest="enable_profiler",
+        default=False,
+        help="Write profile information about CPU load after running",
+    )
+    parser.add_option(
         "--trace-debug", action="store_true", dest="trace_debug", default=False, help="Write lots of trace information to stdout"
     )
     parser.add_option("--log-time", action="store_true", dest="log_time", default=False, help="Add timestamp to logs")
