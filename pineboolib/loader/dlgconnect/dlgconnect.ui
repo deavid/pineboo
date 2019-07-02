@@ -74,7 +74,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>../../share/icons/gtk-cancel.png</normaloff>../../share/icons/gtk-cancel.png</iconset>
+         <normaloff>../../../share/icons/gtk-cancel.png</normaloff>../../../share/icons/gtk-cancel.png</iconset>
        </property>
       </widget>
      </item>
@@ -91,7 +91,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>../../share/icons/gtk-properties.png</normaloff>../../share/icons/gtk-properties.png</iconset>
+         <normaloff>../../../share/icons/gtk-properties.png</normaloff>../../../share/icons/gtk-properties.png</iconset>
        </property>
       </widget>
      </item>
