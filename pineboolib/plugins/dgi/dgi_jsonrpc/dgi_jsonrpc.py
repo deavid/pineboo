@@ -47,6 +47,7 @@ class parser(object):
     @dispatcher.add_method
     def mainWindow(*args):
         from pineboolib import project
+
         if project._DGI._par._queqe:
             return "queqePending"
         if not args:
@@ -61,6 +62,7 @@ class parser(object):
     @dispatcher.add_method
     def mainForm(*args):
         from pineboolib import project
+
         if project._DGI._par._queqe:
             return "queqePending"
         if not args:
@@ -75,6 +77,7 @@ class parser(object):
     @dispatcher.add_method
     def callFunction(*args):
         from pineboolib import project
+
         if project._DGI._par._queqe:
             return "queqePending"
 
@@ -98,6 +101,7 @@ class parser(object):
     @dispatcher.add_method
     def queqe(*args):
         from pineboolib import project
+
         if len(args) == 1:
             if args[0] == "clean":
                 project._DGI._par._queqe = {}
@@ -120,6 +124,7 @@ class parser(object):
     def action(*args):
         from pineboolib import project
         from pineboolib import pncontrolsfactory
+
         if project._DGI._par._queqe:
             return "queqePending"
         arguments = args

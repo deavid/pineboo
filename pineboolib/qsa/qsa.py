@@ -37,11 +37,6 @@ LogText = 0
 RichText = 1
 
 
-
-
-
-
-
 def parseFloat(x):
     """
     Convierte a float un valor dado
@@ -529,9 +524,6 @@ def startTimer(time, fun):
 def killTimer(t):
     t.stop()
     t = None
-
-
-
 
 
 def debug(txt):

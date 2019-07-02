@@ -132,11 +132,9 @@ def load_models() -> None:
 
     from pineboolib import qsa as qsa_dict_modules
     from pineboolib import project
-    
 
     db_name = project.conn.DBName()
     tables = project.conn.tables()
-
 
     setattr(qsa_dict_modules, "Base", project.conn.declarative_base())
     setattr(qsa_dict_modules, "session", project.conn.session())

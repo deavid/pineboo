@@ -128,7 +128,7 @@ def exec_main(options: Values) -> None:
         from .utils import monkey_patch_connect
 
         monkey_patch_connect()
-    
+
     if options.enable_dbadmin:
         config.set_value("application/dbadmin_enabled", True)
 

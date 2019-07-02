@@ -548,7 +548,11 @@ def format_double(d, part_integer, part_decimal):
     str_integer = format_int(str_integer, part_integer)
 
     # Fixme: Que pasa cuando la parte entera sobrepasa el limite, se coge el maximo valor o
-    ret_ = "%s%s%s" % (str_integer, pncontrolsfactory.aqApp.commaSeparator() if found_comma else "", str_decimal if part_decimal > 0 else "")
+    ret_ = "%s%s%s" % (
+        str_integer,
+        pncontrolsfactory.aqApp.commaSeparator() if found_comma else "",
+        str_decimal if part_decimal > 0 else "",
+    )
     return ret_
 
 

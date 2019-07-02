@@ -1259,13 +1259,8 @@ class FLSqlCursor(QtCore.QObject):
             largeValue = self.db().manager().storeLargeValue(self.metadata(), vv)
             if largeValue:
                 vv = largeValue
-        
-        if (
-            field.outTransaction()
-            and self.db().dbAux()
-            and self.db().db() is not self.db().dbAux()
-            and self.modeAccess() != self.Insert
-        ):
+
+        if field.outTransaction() and self.db().dbAux() and self.db().db() is not self.db().dbAux() and self.modeAccess() != self.Insert:
             pK = self.metadata().primaryKey()
 
             if self.cursorRelation() and not self.modeAccess() == self.Browse:
@@ -1340,12 +1335,7 @@ class FLSqlCursor(QtCore.QObject):
         type_ = field.type()
 
         v = None
-        if (
-            field.outTransaction()
-            and self.db().dbAux()
-            and self.db().db() is not self.db().dbAux()
-            and self.modeAccess() != self.Insert
-        ):
+        if field.outTransaction() and self.db().dbAux() and self.db().db() is not self.db().dbAux() and self.modeAccess() != self.Insert:
             pK = self.metadata().primaryKey()
             if pK:
                 pKV = self.buffer().value(pK)
@@ -3590,8 +3580,7 @@ class FLSqlCursor(QtCore.QObject):
 
             if activeWid:
                 activeWidEnabled = activeWid.isEnabled()
-            
-            
+
         if self.d.modeAccess_ == self.Insert:
             if self.cursorRelation() and self.relation():
                 if self.cursorRelation().metadata() and self.cursorRelation().modeAccess() == self.Insert:

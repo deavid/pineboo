@@ -293,13 +293,13 @@ class FLStaticLoaderWarning(QtCore.QObject):
         msg += "</font><br></p>"
         self.warns_.clear()
         from pineboolib import pncontrolsfactory
+
         pncontrolfactory.aqApp.popupWarn(msg)
 
-    
     @decorators.NotImplementedWarn
     def scriptBaseFileName(self, name):
         from pineboolib import pncontrolsfactory
-        
+
         scripts = pncontrolsfactory.aqApp.project().scripts()
         for it in scripts:
             if it.baseFileName() == name:

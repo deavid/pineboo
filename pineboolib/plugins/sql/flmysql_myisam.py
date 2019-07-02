@@ -171,6 +171,7 @@ class FLMYSQL_MYISAM(object):
 
             elif type_ == "date":
                 from pineboolib.application.utils.date_conversion import date_dma_to_amd
+
                 res = " LIKE '%" + date_dma_to_amd(str(v)) + "'"
 
             elif type_ == "time":
@@ -262,7 +263,7 @@ class FLMYSQL_MYISAM(object):
             logger.warning("%s::beginTransaction: Database not open", self.name_)
             return None
 
-        #if not self.transaction():
+        # if not self.transaction():
         #    self.setLastError("No se puede iniciar la transacción", "BEGIN WORK")
         #    return None
 
@@ -318,7 +319,7 @@ class FLMYSQL_MYISAM(object):
 
                 return
 
-        #if not self.commitTransaction():
+        # if not self.commitTransaction():
         #    qWarning("%s:: No se puede aceptar la transacción" % self.name_)
         #    return None
 

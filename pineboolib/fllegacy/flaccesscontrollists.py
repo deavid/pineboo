@@ -120,9 +120,9 @@ class FLAccessControlLists(object):
 
         type = FLAccessControlFactory().type(obj)
         name = obj.objectName() if hasattr(obj, "objectName") else ""
-        
+
         from pineboolib import project
-        
+
         user = project.conn.user()
         if type == "" or name == "" or user == "":
             return

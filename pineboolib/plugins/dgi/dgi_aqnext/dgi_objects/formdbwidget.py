@@ -35,7 +35,6 @@ class FormDBWidget(QtCore.QObject):
             self.parent_ = parent
             self._cursors = {}
 
-
             self._formconnections = set([])
         self._class_init()
 
@@ -87,7 +86,9 @@ class FormDBWidget(QtCore.QObject):
         if getattr(self, "iface", None) is not None:
             from pineboolib import pncontrolsfactory
 
-            pncontrolsfactory.check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)
+            pncontrolsfactory.check_gc_referrers(
+                "FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name
+            )
             del self.iface.ctx
             del self.iface
             self._action.formrecord_widget = None
@@ -183,7 +184,7 @@ class FormDBWidget(QtCore.QObject):
         )
         if ret_:
             return ret_
-        
+
     def __iter__(self):
         self._iter_current = None
         return self

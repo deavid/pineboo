@@ -18,6 +18,7 @@ def Boolean(x=False):
 
     return ret
 
+
 class QString(str):
     """
     Clase QString para simular la original que no existe en PyQt5
@@ -34,7 +35,7 @@ class QString(str):
             return self[start:]
         else:
             return self[start : start + length]
-    
+
 
 def Function(*args):
 
@@ -262,7 +263,6 @@ class Array(object):
         self.dict_[k] = val
 
 
-
 @total_ordering
 class Date(object):
     """
@@ -462,14 +462,12 @@ class Date(object):
         return Boolean. True si este objeto es menor que el comparado
         """
         return self.toString() < other.toString() if not isinstance(other, str) else other
-    
-    
+
     def __eq__(self, other):
         if str(other) == self.toString():
             return True
         else:
             return False
-    
+
     def __ne__(self, other):
         return not self.__eq__(other)
-    

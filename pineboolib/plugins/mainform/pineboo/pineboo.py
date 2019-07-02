@@ -49,6 +49,7 @@ class MainForm(QMainWindow):
 
     def load(self):
         from pineboolib import project
+
         self.ui_ = project.conn.managerModules().createUI(filedir("plugins/mainform/pineboo/mainform.ui"), None, self)
 
         self.w_ = self

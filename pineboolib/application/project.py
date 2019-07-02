@@ -53,7 +53,7 @@ class Project(object):
         self.root = None
         self.apppath = None
         self.tmpdir = filedir("../tempdata")
-        self.parser = None           
+        self.parser = None
         self.main_form_name: Optional[str] = None
         self.deleteCache = False
         self.parseProject = False
@@ -306,6 +306,7 @@ class Project(object):
         #     self._splash.showMessage("Cargando traducciones ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
         #     self._DGI.processEvents()
         from pineboolib import pncontrolsfactory
+
         pncontrolsfactory.aqApp.loadTranslations()
 
         # FIXME: ACLs needed at this level?
@@ -491,7 +492,7 @@ class Project(object):
         # FIXME: anti-pattern in Python. Getters for plain variables are wrong.
         raise CodeDoesNotBelongHereException("Use project.tmpdir instead, please.")
         # return self.tmpdir
-    
+
     def load_version(self):
         self.version = "0.9"
         if config.value("application/dbadmin_enabled", False):

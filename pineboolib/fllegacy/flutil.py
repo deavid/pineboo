@@ -333,8 +333,8 @@ class FLUtil(QtCore.QObject):
         @param tabla. Nombre de la tabla
         @return Lista de campos
         """
-        from pineboolib import pncontrolsfactory 
-        
+        from pineboolib import pncontrolsfactory
+
         campos = pncontrolsfactory.aqApp.db().manager().metadata(tablename).fieldNames()
         return [len(campos)] + campos
 
@@ -388,6 +388,7 @@ class FLUtil(QtCore.QObject):
         @return Cadena de texto con la fecha transformada
         """
         from pineboolib.application.utils.date_conversion import date_dma_to_amd
+
         return date_dma_to_amd(f)
 
     def dateAMDtoDMA(self, f):
@@ -399,6 +400,7 @@ class FLUtil(QtCore.QObject):
         @return Cadena de texto con la fecha transformada
         """
         from pineboolib.application.utils.date_conversion import date_amd_to_dma
+
         return date_amd_to_dma(f)
 
     @decorators.BetaImplementation
@@ -905,8 +907,7 @@ class FLUtil(QtCore.QObject):
 
         @return Número redondeado
         """
-        from pineboolib import pncontrolsfactory 
-        
+        from pineboolib import pncontrolsfactory
 
         tmd = pncontrolsfactory.aqApp.db().manager().metadata(table_name)
         if tmd is None:
@@ -1083,7 +1084,7 @@ class FLUtil(QtCore.QObject):
         pd_widget.setWindowTitle(str(title))
         self.__class__.progress_dialog_stack.append(pd_widget)
         pd_widget.setMinimumDuration(100)
-        
+
         pncontrolsfactory.SysType().processEvents()
         return pd_widget
 

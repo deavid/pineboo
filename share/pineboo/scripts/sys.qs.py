@@ -2197,9 +2197,6 @@ def search_git_updates(url=None):
         os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
 
 
-
-
-
 def qsaExceptions():
     return aqApp.db().qsaExceptions()
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+
 logger = logging.getLogger("mainForm_%s" % __name__)
 
 
@@ -30,6 +31,7 @@ class MainForm(QMainWindow):
 
     def createUi(self, ui_file):
         from pineboolib import project
+
         mng = project.conn.managerModules()
         self.w_ = mng.createUI(ui_file, None, self)
         self.w_.setObjectName("container")

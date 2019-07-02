@@ -748,7 +748,7 @@ class FLFieldDB(QtWidgets.QWidget):
                         s = round(float(v), field.partDecimal())
                     self.editor_.setText(str(s))
                 else:
-                    
+
                     self.editor_.setText("")
 
         elif type_ == "serial":
@@ -1024,7 +1024,6 @@ class FLFieldDB(QtWidgets.QWidget):
         if not fN:
             v = self.cursor_.valueBuffer(self.fieldName_)
             nulo = self.cursor_.bufferIsNull(self.fieldRelation_)
-            
 
             # if self.cursor_.cursorRelation():
             # print(1)
@@ -1140,7 +1139,7 @@ class FLFieldDB(QtWidgets.QWidget):
             s = None
             if nulo and v in (None, 0):
                 dv = field.defaultValue()
-                if field.allowNull():                 
+                if field.allowNull():
                     if dv is None:
                         self.editor_.setText("")
                     else:
@@ -1149,7 +1148,6 @@ class FLFieldDB(QtWidgets.QWidget):
                     if dv is not None:
                         self.editor_.setText(dv)
 
-            
             else:
                 s = str(round(float(v), partDecimal))
                 if s.find(".") > -1:
@@ -1193,25 +1191,24 @@ class FLFieldDB(QtWidgets.QWidget):
             if not ol:
                 self.editor_.textChanged.connect(self.updateValue)
 
-        elif type_ in ("int","uint"):
+        elif type_ in ("int", "uint"):
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
             except Exception:
                 self.logger.exception("Error al desconectar señal textChanged")
-            
+
             if nulo and v in (None, 0):
                 dv = field.defaultValue()
-                if field.allowNull(): 
+                if field.allowNull():
                     if dv is None:
                         self.editor_.setText("")
                     else:
                         self.editor_.setText(dv)
-                else:   
+                else:
                     if dv is not None:
                         self.editor_.setText(dv)
             else:
                 self.editor_.setText(v)
-            
 
             self.editor_.textChanged.connect(self.updateValue)
 
@@ -1763,7 +1760,7 @@ class FLFieldDB(QtWidgets.QWidget):
             if self.showAlias():
                 pineboolib.project._DGI._par.addQueque("%s_setAlias" % self.objectName(), self.fieldAlias_)
 
-        if type_ in  ("uint", "int", "double", "string"):
+        if type_ in ("uint", "int", "double", "string"):
             if ol:
                 self.editor_ = pineboolib.pncontrolsfactory.QComboBox()
                 style_ = self.editor_.styleSheet()

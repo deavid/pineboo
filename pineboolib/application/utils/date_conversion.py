@@ -1,4 +1,3 @@
-
 def date_dma_to_amd(f):
     if not f:
         return None
@@ -29,6 +28,7 @@ def date_dma_to_amd(f):
 
     return "%s-%s-%s" % (ano_, mes_, dia_)
 
+
 def date_amd_to_dma(f):
     if not f:
         return None
@@ -57,4 +57,3 @@ def date_amd_to_dma(f):
             dia_ = f[6:2]
 
     return "%s-%s-%s" % (dia_, mes_, ano_)
-    

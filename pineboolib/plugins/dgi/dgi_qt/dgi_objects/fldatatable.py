@@ -483,9 +483,9 @@ class FLDataTable(QtWidgets.QTableView):
 
         db = self.cursor_.db()
         pri_key_val = self.cursor_.valueBuffer(pri_key)
-        
+
         from pineboolib import pncontrolsfactory
-        
+
         popup = pncontrolsfactory.QMenu(self)
 
         menu_frame = pncontrolsfactory.QWidget(self, QtCore.Qt.Popup)

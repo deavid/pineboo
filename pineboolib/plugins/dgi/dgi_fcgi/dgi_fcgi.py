@@ -63,6 +63,7 @@ class parser(object):
             retorno_ = pineboolib.project.call(self._callScript, aList)
         except Exception:
             from pineboolib import pncontrolsfactory
+
             logger.info(self._callScript, environ["QUERY_STRING"])
             retorno_ = (
                 """<html><head><title>Pineboo %s - FastCGI - </title></head><body><h1>Function %s not found!</h1></body></html>"""

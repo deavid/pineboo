@@ -62,7 +62,9 @@ class DelayedObjectProxyLoader(object):
                 relation_mtd.setField(relation_field_name)
 
                 if relation_table_name and relation_field_name:
-                    self.cursor_tree_dict[key_] = pncontrolsfactory.FLSqlCursor(relation_table_name, True, self._obj.conn(), self._obj, relation_mtd)
+                    self.cursor_tree_dict[key_] = pncontrolsfactory.FLSqlCursor(
+                        relation_table_name, True, self._obj.conn(), self._obj, relation_mtd
+                    )
 
             rel_cursor = self.cursor_tree_dict[key_]
 

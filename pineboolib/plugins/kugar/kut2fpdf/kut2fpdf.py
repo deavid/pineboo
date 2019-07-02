@@ -88,8 +88,10 @@ class kut2fpdf(object):
             return False
 
         from pineboolib.fllegacy.flutil import FLUtil
+
         util = FLUtil()
         from pineboolib import project
+
         if project._DGI.localDesktop():
             util.createProgressDialog("Pineboo", len(self._xml_data))
             util.setLabelText("Creando informe ...")
@@ -157,7 +159,7 @@ class kut2fpdf(object):
 
     def get_file_name(self):
         import os
-        
+
         from pineboolib import project
 
         pdf_name = project.tmpdir
@@ -240,12 +242,12 @@ class kut2fpdf(object):
 
         rows_array = self._xml_data.findall("Row")
         i = 0
-        
+
         from pineboolib.fllegacy.flutil import FLUtil
         from pineboolib import project
-        
+
         util = FLUtil()
-        
+
         for data in rows_array:
             self._actual_data_line = data
             level = int(data.get("level"))
@@ -276,7 +278,7 @@ class kut2fpdf(object):
             self.last_data_processed = data
 
             self.prev_level = level
-            
+
             if project._DGI.localDesktop():
                 util.setProgress(i)
             i += 1

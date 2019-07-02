@@ -295,20 +295,19 @@ class FLManagerModules(object):
     @param content Contenido del fichero.
     """
 
-    
     def setContent(self, n, idM, content):
         if not self.conn_.dbAux():
             return
-        
-        format_val = self.conn_.manager().formatAssignValue("nombre","string", n, True)
-        format_val2 = self.conn_.managere().formatAssignValue("idmodulo","string", idM, True)
-        
+
+        format_val = self.conn_.manager().formatAssignValue("nombre", "string", n, True)
+        format_val2 = self.conn_.managere().formatAssignValue("idmodulo", "string", idM, True)
+
         from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
         from pineboolib.fllegacy.flutil import FLUtil
-        
+
         cursor = FLSqlCursor("flfiles", True, self.conn_.dbAux())
         cursor.select("%s AND %s" % (format_val, format_val2))
-        
+
         if cursor.first():
             cursor.setModeAccess(cursor.Edit)
             cursor.refreshBufer()
@@ -317,12 +316,10 @@ class FLManagerModules(object):
             cursor.refreshBufer()
             cursor.setValueBuffer("nombre", n)
             cursor.setValueBuffer("idmodulo", idM)
-        
+
         cursor.setValueBuffer("contenido", content)
         cursor.setValueBuffer("sha", FLUtil().sha1(content))
         cursor.commitBuffer()
-        
-            
 
     """
     Crea un formulario a partir de su fichero de descripción.
@@ -425,21 +422,21 @@ class FLManagerModules(object):
     def listIdAreas(self):
         if self.listIdAreas_:
             return self.listIdAreas_
-        
-        ret =  []
+
+        ret = []
         if not self.conn_.dbAux():
             return ret
-        
+
         q = FLSqlQuery(None, self.conn_.dbAux())
         q.setForwardOnly(True)
         q.exec_("SELECT idarea FROM flareas WHERE idarea <> 'sys'")
         while q.next():
             ret.append(str(q.value(0)))
-        
+
         ret.append("sys")
-        
+
         return ret
-        
+
     """
     Obtiene la lista de identificadores de módulos cargados en el sistema de una area dada.
 
@@ -464,18 +461,18 @@ class FLManagerModules(object):
     def listAllIdModules(self):
         if self.listAllIdModules_:
             return self.listAllIdModules_
-        
+
         ret = []
         if not self.conn_.dbAux():
             return ret
-        
+
         ret.append("sys")
         q = FLSqlQuery(None, self.conn_.dbAux())
         q.setForwardOnly(True)
         q.exec_("SELECT idmodulo FROM flmodules WHERE idmodulo <> 'sys'")
         while q.next():
             ret.append(str(q.value(0)))
-        
+
         return ret
 
     """
@@ -557,10 +554,10 @@ class FLManagerModules(object):
     """
 
     def shaGlobal(self):
-        
+
         if not self.conn_.dbAux():
             return ""
-        
+
         q = FLSqlQuery(None, self.conn_.dbAux())
         q.setForwardOnly(True)
         q.exec_("SELECT sha FROM flserial")
@@ -728,9 +725,9 @@ class FLManagerModules(object):
     def readState(self):
         if not self.conn_.dbAux():
             return
-        
+
         db_aux = self.conn_.dbAux()
-        
+
         idDB = "%s%s%s%s%s" % (db_aux.database(), db_aux.host(), db_aux.user(), db_aux.driverName(), db_aux.port())
 
         settings = FLSettings()

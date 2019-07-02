@@ -174,6 +174,7 @@ def generate_model(dest_file, mtd_table):
 
     if not pk_found:
         from pineboolib.core.settings import config
+
         if config.value("application/isDebuggerMode", False):
             logger.warning(
                 "La tabla %s no tiene definida una clave primaria. No se generará el model %s\n"

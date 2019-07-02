@@ -323,9 +323,11 @@ class FLSqlQuery(object):
                 v = self.d.parameterDict_[pD]
 
                 if not v:
-                    from pineboolib import pncontrolsfactory 
+                    from pineboolib import pncontrolsfactory
 
-                    v = pncontrolsfactory.QInputDialog.getText(pncontrolsfactory.QApplication, "Entrada de parámetros de la consulta", pD, None, None)
+                    v = pncontrolsfactory.QInputDialog.getText(
+                        pncontrolsfactory.QApplication, "Entrada de parámetros de la consulta", pD, None, None
+                    )
 
                 res = res.replace("[%s]" % pD, "'%s'" % v)
 

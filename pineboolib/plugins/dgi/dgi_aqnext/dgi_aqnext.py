@@ -47,6 +47,7 @@ class dgi_aqnext(dgi_schema):
     def exec_(self):
         from pineboolib import pncontrolsfactory
         from pineboolib import project
+
         qsa_sys = pncontrolfactory.SysType()
         logger.warning("DGI_%s se ha inicializado correctamente" % self._alias)
         logger.warning("Driver  DB: %s", project.conn.driverAlias())

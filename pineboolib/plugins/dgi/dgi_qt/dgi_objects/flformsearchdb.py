@@ -344,7 +344,7 @@ class FLFormSearchDB(FLFormDB):
         self.accepted_ = True
         self.saveGeometry()
         self.hide()
-        
+
         from pineboolib import pncontrolsfactory
 
         if isinstance(self.parent(), pncontrolsfactory.QMdiSubWindow):

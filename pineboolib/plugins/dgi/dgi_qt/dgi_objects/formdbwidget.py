@@ -18,7 +18,7 @@ class FormDBWidget(QtWidgets.QWidget):
         if project is not None:
 
             super().__init__(parent)
-            
+
             self._module = sys.modules[self.__module__]
             self._module.connect = self._connect
             self._module.disconnect = self._disconnect
@@ -86,7 +86,9 @@ class FormDBWidget(QtWidgets.QWidget):
         if getattr(self, "iface", None) is not None:
             from pineboolib import pncontrolsfactory
 
-            pncontrolsfactory.check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)
+            pncontrolsfactory.check_gc_referrers(
+                "FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name
+            )
             del self.iface.ctx
             del self.iface
             self._action.formrecord_widget = None
@@ -110,6 +112,7 @@ class FormDBWidget(QtWidgets.QWidget):
 
             if ret is not None:
                 from pineboolib import pncontrolsfactory
+
                 if isinstance(ret, (pncontrolsfactory.FLFieldDB, pncontrolsfactory.FLTableDB)) and hasattr(ret, "_loaded"):
                     if ret._loaded is False:
                         ret.load()

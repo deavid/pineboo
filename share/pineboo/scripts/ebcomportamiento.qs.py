@@ -114,6 +114,7 @@ class FormInternalObj(FormDBWidget):
     def leerValorLocal(self, valor_name):
         util = FLUtil()
         from pineboolib.core.settings import config
+
         if valor_name in ("isDebuggerMode", "dbadmin_enabled"):
             valor = config.value("application/%s" % valor_name, False)
         else:
@@ -130,6 +131,7 @@ class FormInternalObj(FormDBWidget):
 
     def grabarValorLocal(self, valor_name=None, value=None):
         from pineboolib.core.settings import config
+
         if valor_name in ("isDebuggerMode", "dbadmin_enabled"):
             config.set_value("application/%s" % valor_name, value)
         else:

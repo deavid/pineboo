@@ -8,6 +8,7 @@ logger = logging.getLogger("application.utils.convert_flaction")
 
 def convertFLAction(action: FLAction) -> XMLAction:
     from pineboolib import project
+
     if action.name() in project.actions.keys():
         return project.actions[action.name()]
     else:

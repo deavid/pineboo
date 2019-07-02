@@ -952,7 +952,6 @@ class FLTableDB(QtWidgets.QWidget):
         self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
         self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
 
-
         self.tdbFilter = pncontrolsfactory.QTable()
         filterL.addWidget(self.tdbFilter)
 
@@ -1339,6 +1338,7 @@ class FLTableDB(QtWidgets.QWidget):
                     arg4 = editorOp2.value()
                 else:
                     from pineboolib import pncontrolsfactory
+
                     editorOp1 = pncontrolsfactory.FLSpinBox(self.tdbFilter.cellWidget(i, 2))
                     arg2 = editorOp1.value()
 
@@ -2260,7 +2260,6 @@ class FLTableDB(QtWidgets.QWidget):
         if not hasattr(tdb, "cursor"):
             return
 
-
         # hor_header = tdb.horizontalHeader()
         title_style = [pncontrolsfactory.AQOdsStyle.Align_center, pncontrolsfactory.AQOdsStyle.Text_bold]
         border_bot = pncontrolsfactory.AQOdsStyle.Border_bottom
@@ -2373,7 +2372,11 @@ class FLTableDB(QtWidgets.QWidget):
 
         util.setProgress(tdb_num_rows)
         pncontrolsfactory.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-        file_name = "%s/%s%s.ods" % (pncontrolsfactory.aqApp.tmp_dir(), mtd.name(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
+        file_name = "%s/%s%s.ods" % (
+            pncontrolsfactory.aqApp.tmp_dir(),
+            mtd.name(),
+            QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"),
+        )
         ods_gen.generateOds(file_name)
 
         pncontrolsfactory.aqApp.call("sys.openUrl", [file_name], None)
@@ -2436,7 +2439,7 @@ class FLTableDB(QtWidgets.QWidget):
             msec_refresh = 200
             ret = None
             try:
-                from pineboolib import project 
+                from pineboolib import project
 
                 ret = project.call(functionQSA, vargs, None, False)
                 logger.debug("functionQSA:%s:", functionQSA)

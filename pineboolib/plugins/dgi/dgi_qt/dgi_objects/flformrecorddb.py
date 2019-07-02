@@ -548,7 +548,9 @@ class FLFormRecordDB(IFormRecordDB, FLFormDB):
                     # script_name = self.iface.__module__
                     from pineboolib import pncontrolsfactory
 
-                    pncontrolsfactory.aqApp.msgBoxWarning(pncontrolsfactory.wiki_error(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI)
+                    pncontrolsfactory.aqApp.msgBoxWarning(
+                        pncontrolsfactory.wiki_error(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI
+                    )
 
             return ret_ if isinstance(ret_, bool) else False
         return True
