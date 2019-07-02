@@ -748,14 +748,15 @@ class FLFieldDB(QtWidgets.QWidget):
                         s = round(float(v), field.partDecimal())
                     self.editor_.setText(str(s))
                 else:
-                    self.editor_.setText("0")
+                    
+                    self.editor_.setText("")
 
         elif type_ == "serial":
             if self.editor_:
                 if v is not None:
                     self.editor_.setText(str(v))
                 else:
-                    self.editor_.setText("0")
+                    self.editor_.setText("")
 
         elif type_ == "pixmap":
             if self.editorImg_:

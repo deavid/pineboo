@@ -528,6 +528,8 @@ class FLSqlQuery(object):
                     retorno = ""
                 elif mtd_field.type() == "bytearray":
                     retorno = bytearray()
+            elif name and name.find("SUM(") > -1:
+                retorno = 0
         else:
 
             if isinstance(retorno, str):  # str
