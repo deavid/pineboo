@@ -1,8 +1,7 @@
 from pineboolib.core import decorators
+from pineboolib.core.settings import config
 import pineboolib
-import datetime
 import logging
-
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +22,7 @@ class FLSqlQuery(object):
     _is_active = False
     _fieldNameToPosDict = None
     logger = logging.getLogger("FLSqlQuery")
+    value = None
 
     def __init__(self, cx=None, connection_name="default"):
         # super(FLSqlQuery, self).__init__()
@@ -48,6 +48,13 @@ class FLSqlQuery(object):
 
         if retornoQry:
             self.d = retornoQry.d
+        
+        self.value = self._value_quick
+        
+        if config.value("ebcomportamiento/std_query", False):
+            self.value = self._value_std
+        
+        
 
     def __del__(self):
         try:
@@ -548,7 +555,7 @@ class FLSqlQuery(object):
             elif name and name.find("SUM(") > -1:
                 retorno = 0
         else:
-
+            import datetime
             if isinstance(retorno, str):  # str
                 if mtd_field is not None:
                     if mtd_field.type() == "date":
@@ -584,7 +591,6 @@ class FLSqlQuery(object):
 
         return retorno
 
-    value = _value_quick  # This can be switched between _value_fast and _value_std
     """
     Indica si un campo de la consulta es nulo o no
 

@@ -509,6 +509,14 @@
                                                 <string>Forzar modo Mobile.</string>
                                             </property>
                                         </widget>
+                                        <widget class="QCheckBox">
+                                            <property name="name">
+                                                <cstring>cb_std_query</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Usar modo tradicional FLSqlQuery.Value.(Lento pero más seguro)</string>
+                                            </property>
+                                        </widget>
                                     </vbox>
                                 </widget>
                                 <widget class="QGroupBox">
