@@ -2,6 +2,7 @@
 
 import logging
 import importlib
+import sys
 
 from pineboolib.core.utils.singleton import Singleton
 
@@ -51,11 +52,16 @@ class PNSqlDrivers(object, metaclass=Singleton):
     """
 
     def loadDriver(self, driver_name):
+        
         if driver_name is None:
             logger.info("Seleccionado driver por defecto %s", self.defaultDriverName)
             driver_name = self.defaultDriverName
-
-        module_ = importlib.import_module("pineboolib.plugins.sql.%s" % driver_name.lower())
+        
+        module_path = "pineboolib.plugins.sql.%s" % driver_name.lower()
+        if module_path in sys.modules:
+            module_ = importlib.reload(sys.modules[module_path])
+        else:
+            module_ = importlib.import_module(module_path)
         self.driver_ = getattr(module_, driver_name.upper())()
 
         if self.driver():

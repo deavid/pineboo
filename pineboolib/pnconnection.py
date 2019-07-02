@@ -38,6 +38,7 @@ class PNConnection(IConnection, QtCore.QObject):
     _dbAux = None
     name = None
     _isOpen = False
+    driver_ = None
 
     def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name=None):
         super(PNConnection, self).__init__()
@@ -52,11 +53,11 @@ class PNConnection(IConnection, QtCore.QObject):
         if name and name not in ("dbAux", "Aux"):
             self._isOpen = False
             return
-
+        
         self.driverName_ = self.driverSql.aliasToName(driverAlias)
 
         if self.driverName_ and self.driverSql.loadDriver(self.driverName_):
-
+            self.driver_ =  self.driverSql.driver()  
             self.conn = self.conectar(db_name, db_host, db_port, db_userName, db_password)
             if self.conn is False:
                 return
@@ -92,7 +93,7 @@ class PNConnection(IConnection, QtCore.QObject):
         if isinstance(name, PNConnection):
             name = name.connectionName()
 
-        if name in ("default", None, "dbAux", "Aux"):  # FIXME : if name in ("default", None): es lo correcto
+        if name in ("default", None):
             return self
 
         if name in self.connAux.keys():
@@ -139,7 +140,7 @@ class PNConnection(IConnection, QtCore.QObject):
             return self.db_name
 
     def driver(self):
-        return self.driverSql.driver()
+        return self.driver_
 
     def session(self):
         return self.driver().session()
