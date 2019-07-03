@@ -244,7 +244,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         # w = self.w_
         self.w_.eventFilterFunction = "aqAppScript.mainWindow_.eventFilter"
-        if not pncontrolsfactory.self.qsa_sys.isNebulaBuild():
+        if not pncontrolsfactory.qsa_sys.isNebulaBuild():
             self.w_.allow_events = [pncontrolsfactory.AQS.ContextMenu, pncontrolsfactory.AQS.Close]
         else:
             self.w_.allow_events = [pncontrolsfactory.AQS.ContextMenu, pncontrolsfactory.AQS.Close, pncontrolsfactory.AQS.WindowStatechange]
@@ -611,15 +611,15 @@ class MainForm(QtWidgets.QMainWindow):
 
     def initDocks(self):
 
-        self.dck_mar_ = DockListView(self.w_, "pinebooDockMarks", pncontrolsfactory.self.qsa_sys.translate("Marcadores"))
+        self.dck_mar_ = DockListView(self.w_, "pinebooDockMarks", pncontrolsfactory.qsa_sys.translate("Marcadores"))
         self.w_.addDockWidget(pncontrolsfactory.AQS.DockLeft, self.dck_mar_.w_)
-        self.dck_rec_ = DockListView(self.w_, "pinebooDoctkRecent", pncontrolsfactory.self.qsa_sys.translate("Recientes"))
+        self.dck_rec_ = DockListView(self.w_, "pinebooDoctkRecent", pncontrolsfactory.qsa_sys.translate("Recientes"))
         self.w_.addDockWidget(pncontrolsfactory.AQS.DockLeft, self.dck_rec_.w_)
-        self.dck_mod_ = DockListView(self.w_, "pinebooDockModules", pncontrolsfactory.self.qsa_sys.translate("Módulos"))
+        self.dck_mod_ = DockListView(self.w_, "pinebooDockModules", pncontrolsfactory.qsa_sys.translate("Módulos"))
         self.w_.addDockWidget(pncontrolsfactory.AQS.DockLeft, self.dck_mod_.w_)
 
         windowMenu = self.w_.findChild(QtWidgets.QMenu, "windowMenu")
-        sub_menu = windowMenu.addMenu(pncontrolsfactory.self.qsa_sys.translate("&Vistas"))
+        sub_menu = windowMenu.addMenu(pncontrolsfactory.qsa_sys.translate("&Vistas"))
 
         docks = self.w_.findChildren(DockListView)
         for dock in docks:

@@ -10,7 +10,7 @@ from PyQt5 import QtCore
 
 from pineboolib.core import decorators
 
-from pineboolib import project, qsa
+from pineboolib import project
 
 from pineboolib.application import types
 from pineboolib.application.utils.xpm import cacheXPM
@@ -23,7 +23,6 @@ from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
-from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQBoolFlagStateList, AQBoolFlagState
 
 
 logger = logging.getLogger(__name__)
@@ -1163,6 +1162,7 @@ class FLSqlCursor(QtCore.QObject):
 
     def setAtomicValueBuffer(self, fN, functionName):
         from pineboolib import pncontrolsfactory
+        from pineboolib import qsa  # FIXME: Should not import QSA at all
 
         if not self.buffer() or not fN or not self.metadata():
             return
@@ -1236,6 +1236,7 @@ class FLSqlCursor(QtCore.QObject):
 
     def setValueBuffer(self, fN, v):
         from pineboolib import pncontrolsfactory
+        from pineboolib import qsa  # FIXME: Should not import QSA at all
 
         if not self.buffer() or not fN or not self.metadata():
             return
@@ -1449,6 +1450,8 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def setEdition(self, b, m=None):
+        from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQBoolFlagStateList, AQBoolFlagState  # FIXME: Should not depend on AQS
+
         if m is None:
             self.d.edition_ = b
             return
@@ -1497,6 +1500,8 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def setBrowse(self, b, m=None):
+        from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQBoolFlagStateList, AQBoolFlagState  # FIXME: Should not depend on AQS
+
         if not m:
             self.d.browse_ = b
             return
