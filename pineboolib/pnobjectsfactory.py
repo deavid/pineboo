@@ -62,6 +62,8 @@ def base_model(name: str) -> Any:
         path = "%s_model.py" % path[:-4]
         if os.path.exists(path):
             try:
+                # FIXME: load_module is deprecated!
+                # https://docs.python.org/3/library/importlib.html#importlib.machinery.SourceFileLoader.load_module
                 return machinery.SourceFileLoader(name, path).load_module() if path else None
             except Exception as exc:
                 logger.warning("Error recargando model base:\n%s\n%s", exc, traceback.format_exc())
@@ -125,6 +127,7 @@ def load_model(nombre):
 def empty_base():
     from pineboolib import project
 
+    # FIXME: Not a good idea to delete from other module
     del project.conn.driver().declarative_base_
     project.conn.driver().declarative_base_ = None
 

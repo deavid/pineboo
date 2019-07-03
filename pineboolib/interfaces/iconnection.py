@@ -1,3 +1,6 @@
+from typing import Any, List
+
+
 class IConnection:
     """Interface for database cursors which are used to emulate FLSqlCursor."""
 
@@ -35,25 +38,25 @@ class IConnection:
     def isOpen(self) -> None:
         pass
 
-    def tables(self) -> None:
+    def tables(self) -> List[str]:
         pass
 
     def database(self, name=None) -> None:
         pass
 
-    def DBName(self) -> None:
+    def DBName(self) -> str:
         pass
 
-    def driver(self) -> None:
+    def driver(self) -> Any:
         pass
 
-    def session(self) -> None:
+    def session(self) -> Any:
         pass
 
-    def engine(self) -> None:
+    def engine(self) -> Any:
         pass
 
-    def declarative_base(self) -> None:
+    def declarative_base(self) -> Any:
         pass
 
     def cursor(self) -> None:
