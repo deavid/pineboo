@@ -40,7 +40,7 @@ def startup():
         sys.exit(0)
 
 
-def exec_main_with_profiler(options):
+def exec_main_with_profiler(options) -> int:
     import cProfile
     import pstats
     import io
@@ -96,7 +96,7 @@ def setup_gui(app: QtCore.QCoreApplication, options: Values):
     app.setFont(font)
 
 
-def exec_main(options: Values) -> None:
+def exec_main(options: Values) -> int:
     """Exec main program.
 
     Handles optionlist and help.
@@ -172,8 +172,7 @@ def exec_main(options: Values) -> None:
     if not _DGI.useMLDefault():
         # When a particular DGI doesn't want the standard init, we stop loading here
         # and let it take control of the remaining pieces.
-        _DGI.alternativeMain(options)
-        return
+        return _DGI.alternativeMain(options)
 
     from .connection import config_dbconn, connect_to_db, DEFAULT_SQLITE_CONN
 
@@ -200,8 +199,7 @@ def exec_main(options: Values) -> None:
     project.no_python_cache = options.no_python_cache
 
     if options.test:
-        project.test()
-        return
+        return project.test()
 
     if _DGI.useDesktop():
         # FIXME: What is happening here? Why dynamic load?
@@ -228,7 +226,9 @@ def exec_main(options: Values) -> None:
     project.run()
     if project.conn.conn is False:
         logger.warning("No connection was provided. Aborting Pineboo load.")
-    else:
-        from .init_project import init_project
+        return -99
 
-        init_project(_DGI, splash, options, project, project.main_form if _DGI.useDesktop() else None, project.app)
+    from .init_project import init_project
+
+    ret = init_project(_DGI, splash, options, project, project.main_form if _DGI.useDesktop() else None, project.app)
+    return ret
