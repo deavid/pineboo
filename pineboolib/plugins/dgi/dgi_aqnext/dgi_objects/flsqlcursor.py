@@ -3,7 +3,9 @@ import logging
 import os
 from PyQt5 import QtCore
 from pineboolib import pncontrolsfactory
+from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 
+# FIXME: This module uses pncontrolsfactory to access objects in fllegacy. Please avoid doing that.
 logger = logging.getLogger(__name__)
 
 
@@ -300,7 +302,7 @@ class meta_model(object):
                     relation_mtd.setField(relation_field_name)
 
                     if relation_table_name and relation_field_name:
-                        self.cursor_tree_dict[key_] = FLSqlCursor_legacy(
+                        self.cursor_tree_dict[key_] = pncontrolsfactory.FLSqlCursor(
                             relation_table_name, True, self._cursor.conn(), self._cursor, relation_mtd
                         )
 

@@ -4,7 +4,6 @@ from PyQt5 import QtCore
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
-import pineboolib
 import logging
 
 logger = logging.getLogger(__name__)
@@ -157,7 +156,7 @@ class FLAccessControlLists(object):
         q.setFrom("flacs")
         q.setWhere("idacl='%s'" % idacl)
         q.setOrderBy("prioridad DESC, tipo")
-        q.setForwarOnly(True)
+        q.setForwardOnly(True)
 
         if q.exec_():
             step = 0
@@ -216,7 +215,7 @@ class FLAccessControlLists(object):
             qAcos.setSelect("nombre,permiso")
             qAcos.setFrom("flacos")
             qAcos.setWhere("idac ='%s'" % q.value(0))
-            qAcos.setForwardOnly()
+            qAcos.setForwardOnly(True)
 
             acos = []
 

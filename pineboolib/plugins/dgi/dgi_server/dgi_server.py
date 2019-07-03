@@ -76,7 +76,7 @@ class parser(object):
     @dispatcher.add_method
     def dbdata(*args):
         dict_ = args[0]
-        from pineboolib import pncontrolsfactory
+        from pineboolib import project
 
         list_fun = dict_["function"].split("__")
         fun_name = list_fun[1]

@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtGui import QPixmap
-from pineboolib.core.utils.utils_base import load2xml
-from pineboolib.application.utils.xpm import cacheXPM
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.fllegacy.flutil import FLUtil
 import os
 import sys
 import logging
 import datetime
 import fnmatch
+from typing import List
+
+from PyQt5.QtGui import QPixmap
+from pineboolib.core.utils.utils_base import load2xml
+from pineboolib.application.utils.xpm import cacheXPM
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 
 
 """
@@ -271,7 +272,7 @@ class parsertools(object):
     """
 
     def find_font(self, font_name, font_style):
-        fonts_folders = []
+        fonts_folders: List[str] = []
         if sys.platform.find("win") > -1:
             windir = os.environ.get("WINDIR")
             fonts_folders = [os.path.join(windir, "fonts")]
@@ -336,10 +337,10 @@ class parsertools(object):
         return None
 
     def calculate_sum(self, field_name, line, xml_list, level):
-        val = 0
+        val = 0.0
         for l in xml_list:
             if int(l.get("level")) <= int(level):
-                val = 0
+                val = 0.0
                 continue
             val += float(l.get(field_name))
             if l is line:

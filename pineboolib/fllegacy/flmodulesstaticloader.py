@@ -261,7 +261,7 @@ class FLStaticLoader(QtCore.QObject):
                 if only_path:
                     return content_path
                 else:
-                    from pineboo import project
+                    from pineboolib import project
 
                     return project.conn.managerModules().contentFS(info.path_ + separator + n)
 
@@ -277,7 +277,7 @@ class FLStaticLoaderWarning(QtCore.QObject):
     paths_ = None
 
     def __init__(self):
-        super(FLStaticLoaderWarning).__init__()
+        super().__init__()
         self.warns_ = []
         self.paths_ = []
 
@@ -294,7 +294,7 @@ class FLStaticLoaderWarning(QtCore.QObject):
         self.warns_.clear()
         from pineboolib import pncontrolsfactory
 
-        pncontrolfactory.aqApp.popupWarn(msg)
+        pncontrolsfactory.aqApp.popupWarn(msg)
 
     @decorators.NotImplementedWarn
     def scriptBaseFileName(self, name):

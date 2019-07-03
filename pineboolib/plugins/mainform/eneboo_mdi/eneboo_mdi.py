@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from PyQt5.QtWidgets import QMainWindow
 
 logger = logging.getLogger("mainForm_%s" % __name__)
 
@@ -11,8 +12,9 @@ class MainForm(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        from pineboolib import pncontrolsfactory
 
-        aqApp.main_widget_ = self
+        pncontrolsfactory.aqApp.main_widget_ = self
         self.is_closing_ = False
         self.mdi_enable_ = True
 

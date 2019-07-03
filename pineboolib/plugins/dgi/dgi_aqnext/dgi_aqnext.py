@@ -3,9 +3,8 @@ import collections
 import traceback
 import inspect
 import logging
-import sys
 import os
-
+from typing import List, Dict, Any
 from PyQt5 import QtCore
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
@@ -48,7 +47,7 @@ class dgi_aqnext(dgi_schema):
         from pineboolib import pncontrolsfactory
         from pineboolib import project
 
-        qsa_sys = pncontrolfactory.SysType()
+        qsa_sys = pncontrolsfactory.SysType()
         logger.warning("DGI_%s se ha inicializado correctamente" % self._alias)
         logger.warning("Driver  DB: %s", project.conn.driverAlias())
         logger.warning("Usuario DB: %s", qsa_sys.nameUser())
@@ -211,7 +210,7 @@ class dgi_aqnext(dgi_schema):
         import importlib
         from pineboolib import project
 
-        module_name = poject.conn.managerModules().idModuleOfFile("%s.mtd" % action_name)
+        module_name = project.conn.managerModules().idModuleOfFile("%s.mtd" % action_name)
         module = None
         ret_ = None
         model_file = "models.%s.%s" % (module_name, action_name)
@@ -300,7 +299,7 @@ class dgi_aqnext(dgi_schema):
                 print("FIXME:: populate_with_params", k, params[k])
 
     def cursor2json(self, cursor, template=None):
-        ret_ = []
+        ret_: List[Dict[str, Any]] = []
         if not cursor.modeAccess() == cursor.Insert:
             if not cursor.isValid():
                 logger.warning("Cursor inválido/vacío en %s", cursor.curName())
@@ -354,17 +353,17 @@ class dgi_aqnext(dgi_schema):
             #     serializer._declared_fields.update(
             #         {field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])}
             #     )
-            if size_ == 1:
-                ret_ = dict_
-                break
-            else:
-                ret_.append(dict_)
 
             if cursor.next():
                 pass
             i += 1
+
         # pineboolib.project.show_time("Fin cursor2json %s %s %s" % (cursor.curName(), meta_model, cursor.filter()))
-        return ret_
+        if len(ret_) == 1:
+            # FIXME: Avoid changing the type "automagically", as the caller can get confused.
+            return ret_[0]
+        else:
+            return ret_
 
     def getYBschema(self, cursor, template=None):
         """Permite obtener definicion de schema de uso interno de YEBOYEBO"""
@@ -374,8 +373,8 @@ class dgi_aqnext(dgi_schema):
 
         meta_model = cursor.meta_model()
 
-        dict = collections.OrderedDict()
-        meta = collections.OrderedDict()
+        dict: Dict = collections.OrderedDict()
+        meta: Dict = collections.OrderedDict()
 
         if mtd is None:
             return dict, meta
@@ -517,7 +516,7 @@ class dgi_aqnext(dgi_schema):
     def carga_datos_custom_filter(self, table, usuario):
         from pineboolib import pncontrolsfactory
 
-        ret = {}
+        ret: Dict[str, Dict[str, Any]] = {}
         cursor = pncontrolsfactory.FLSqlCursor("sis_gridfilter")
         cursor.select(" prefix ='%s' AND usuario ='%s'" % (table, usuario))
         if cursor.first():
@@ -532,21 +531,17 @@ class dgi_aqnext(dgi_schema):
 
         if isinstance(data, list):
             for t in data:
-                o = collections.OrderedDict()
-                for key in t.keys():
-                    o[key] = t[key]
+                o = {key: t[key] for key in t.keys()}
                 ret_.append(o)
         else:
-            o = collections.OrderedDict()
-            for key in data.keys():
-                o[key] = data[key]
+            o = {key: t[key] for key in data.keys()}
             ret_.append(o)
 
         return ret_
 
 
 class paginated_object(object):
-    pass
+    data: Dict
 
 
 class pagination_class(object):

@@ -4,8 +4,6 @@ import logging
 import sys
 import re
 
-from PyQt5 import QtCore
-
 from xmljson import yahoo as xml2json
 from xml.etree.ElementTree import fromstring
 from json import dumps
@@ -16,7 +14,6 @@ from werkzeug.serving import run_simple
 
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
-import pineboolib
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.core import decorators
 
@@ -110,7 +107,7 @@ class parser(object):
                 ret = []
                 for q in project._DGI._par._queqe.keys():
                     if q.find(args[0]) > -1:
-                        ret.append(q, project._DGI._par._queqe[q])
+                        ret.append((q, project._DGI._par._queqe[q]))
                         del project._DGI._par._queqe[q]
             else:
                 ret = "Not Found"
@@ -424,7 +421,7 @@ class json_mainWindow(object):
         self._toolBarActions.append(name)
 
     def addToJson(self, xml):
-        _json = xml2json.data(fromstring(etree.tostring(xml, pretty_print=True)))
+        _json = xml2json.data(fromstring(etree.ElementTree.tostring(xml)))
         _jsonStr = dumps(_json, sort_keys=True, indent=2)
         return _jsonStr
 

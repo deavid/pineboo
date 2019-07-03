@@ -1,9 +1,19 @@
 # -*- coding: utf-8 -*-
+import weakref
+import copy
+import datetime
+import logging
+import importlib
+from typing import Any
+
 from PyQt5 import QtCore
 
-
-import pineboolib
 from pineboolib.core import decorators
+
+from pineboolib import project, qsa
+
+from pineboolib.application import types
+from pineboolib.application.utils.xpm import cacheXPM
 
 from pineboolib.pncursortablemodel import PNCursorTableModel
 
@@ -13,19 +23,22 @@ from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
+from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQBoolFlagStateList, AQBoolFlagState
 
-
-import weakref
-import copy
-import datetime
-import logging
-import importlib
 
 logger = logging.getLogger(__name__)
 
 
 class Struct(object):
-    pass
+    tablename: Any
+    name: str
+    query_table: Any
+    value: Any
+    metadata: Any
+    type_: Any
+    modified: Any
+    originalValue: Any
+    generated: Any
 
 
 # ###############################################################################
@@ -258,11 +271,7 @@ class PNBuffer(object):
     """
 
     def setValue(self, name, value, mark_=True):
-        import pineboolib.qsa
-
-        if value is not None and not isinstance(
-            value, (int, float, str, datetime.time, datetime.date, bool, pineboolib.qsa.Date, bytearray)
-        ):
+        if value is not None and not isinstance(value, (int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray)):
             raise ValueError("No se admite el tipo %r , en setValue(%s,%r)" % (type(value), name, value))
 
         field = self.field(name)
@@ -289,7 +298,7 @@ class PNBuffer(object):
 
         elif field.type_ == "time":
             if value is not None:
-                if isinstance(value, pineboolib.qsa.Date):
+                if isinstance(value, types.Date):
                     value = value.toString()
                 elif isinstance(value, datetime.timedelta):
                     value = str(value)
@@ -297,7 +306,7 @@ class PNBuffer(object):
                 value = value[value.find("T") + 1 :]
 
         elif field.type_ == "date":
-            if isinstance(value, pineboolib.qsa.Date):
+            if isinstance(value, types.Date):
                 value = value.toString()
 
             if isinstance(value, str):
@@ -707,7 +716,8 @@ class FLSqlCursorPrivate(QtCore.QObject):
             elif self.acosCond_ == FLSqlCursor.RegExp:
                 from PyQt5.Qt import QRegExp
 
-                condTrue_ = str(QRegExp(str(self.acosCondVal_)).exactMatch(str(self.cursor_.value(self.acosCondName_))))
+                # FIXME: What is happenning here? bool(str(Regexp)) ??
+                condTrue_ = bool(str(QRegExp(str(self.acosCondVal_)).exactMatch(str(self.cursor_.value(self.acosCondName_)))))
             elif self.acosCond_ == FLSqlCursor.Function:
                 condTrue_ = pncontrolsfactory.aqApp.call(self.acosCondName_, [self.cursor_]) == self.acosCondVal_
 
@@ -752,7 +762,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
         return need
 
     def msgBoxWarning(self, msg, throwException=False):
-        if pineboolib.project._DGI.localDesktop():
+        if project._DGI.localDesktop():
             from pineboolib import pncontrolsfactory
 
             logger.warning(msg)
@@ -838,7 +848,7 @@ class FLSqlCursor(QtCore.QObject):
         name_action = None
         self.setActivatedBufferChanged(True)
         self.setActivatedBufferCommited(True)
-        ext_cursor = getattr(pineboolib.project._DGI, "FLSqlCursor", None)
+        ext_cursor = getattr(project._DGI, "FLSqlCursor", None)
         if ext_cursor is not None:
             self.ext_cursor = ext_cursor(self, name)
         else:
@@ -852,7 +862,7 @@ class FLSqlCursor(QtCore.QObject):
         else:
             name_action = name
 
-        act_ = pineboolib.project.conn.manager().action(name_action)
+        act_ = project.conn.manager().action(name_action)
         # self.actionName_ = name.name
         # name = name.table
         # else:
@@ -864,15 +874,15 @@ class FLSqlCursor(QtCore.QObject):
         self.d.nameCursor_ = "%s_%s" % (act_.name(), QtCore.QDateTime.currentDateTime().toString("dd.MM.yyyyThh:mm:ss.zzz"))
 
         if connectionName_or_db is None:
-            self.d.db_ = pineboolib.project.conn
+            self.d.db_ = project.conn
         # elif isinstance(connectionName_or_db, QString) or
         # isinstance(connectionName_or_db, str):
         elif isinstance(connectionName_or_db, str):
-            self.d.db_ = pineboolib.project.conn.useConn(connectionName_or_db)
+            self.d.db_ = project.conn.useConn(connectionName_or_db)
         else:
             self.d.db_ = connectionName_or_db
 
-        # for module in pineboolib.project.modules:
+        # for module in project.modules:
         #    for action in module.actions:
         #        if action.name == name:
         #            self.d.action_ = action
@@ -911,7 +921,7 @@ class FLSqlCursor(QtCore.QObject):
         if not self.metadata():
             return
 
-        # if pineboolib.project._DGI.use_model():
+        # if project._DGI.use_model():
         #    self.build_cursor_tree_dict()
 
         self.d.isQuery_ = self.metadata().isQuery()
@@ -949,7 +959,7 @@ class FLSqlCursor(QtCore.QObject):
                 pass
             cR.newBuffer.connect(self.clearPersistentFilter)
             if (
-                pineboolib.project._DGI.use_model() and cR.meta_model()
+                project._DGI.use_model() and cR.meta_model()
             ):  # Si el cursor_relation tiene un model asociado , este cursor carga el propio también
                 self.assoc_model()
 
@@ -1202,12 +1212,12 @@ class FLSqlCursor(QtCore.QObject):
 
         self.buffer().setValue(fN, v)
         if self.activatedBufferChanged():
-            if pineboolib.project._DGI.use_model() and self.meta_model():
+            if project._DGI.use_model() and self.meta_model():
                 bch_model = getattr(self.meta_model(), "bChCursor", None)
                 if bch_model and bch_model(fN, self) is False:
                     return
 
-                script = getattr(pineboolib.qsa, "formRecord%s" % self.action(), None)
+                script = getattr(qsa, "formRecord%s" % self.action(), None)
                 if script is not None:
                     bChCursor = getattr(script.iface, "bChCursor", None)
                     if bChCursor:
@@ -1286,12 +1296,12 @@ class FLSqlCursor(QtCore.QObject):
 
         # logger.trace("(%s)bufferChanged.emit(%s)" % (self.curName(),fN))
         if self.activatedBufferChanged():
-            if pineboolib.project._DGI.use_model() and self.meta_model():
+            if project._DGI.use_model() and self.meta_model():
                 bch_model = getattr(self.meta_model(), "bChCursor", None)
                 if bch_model and bch_model(fN, self) is False:
                     return
 
-                script = getattr(pineboolib.qsa, "formRecord%s" % self.action(), None)
+                script = getattr(qsa, "formRecord%s" % self.action(), None)
                 if script is not None:
                     bChCursor = getattr(script.iface, "bChCursor", None)
                     if bChCursor:
@@ -1309,7 +1319,7 @@ class FLSqlCursor(QtCore.QObject):
     def valueBuffer(self, fN):
         fN = str(fN)
 
-        if pineboolib.project._DGI.use_model():
+        if project._DGI.use_model():
             if fN == "pk":
                 # logger.warning("¡¡¡¡ OJO Cambiado fieldname PK!!", stack_info = True)
                 fN = self.primaryKey()
@@ -1400,7 +1410,7 @@ class FLSqlCursor(QtCore.QObject):
             return None
 
         type_ = field.type()
-        v = None
+        v: Any = None
         if self.bufferCopy().isNull(fN):
             if type_ in ("double", "int", "uint"):
                 v = 0
@@ -1418,12 +1428,8 @@ class FLSqlCursor(QtCore.QObject):
             elif type_ == "pixmap":
                 v_large = None
                 if not self.db().manager().isSystemTable(self.table()):
-
                     v_large = self.db().manager().fetchLargeValue(v)
-
                 else:
-                    from pineboolib.core.utils.utils_base import cacheXPM
-
                     v_large = cacheXPM(v)
 
                 if v_large:
@@ -1448,17 +1454,16 @@ class FLSqlCursor(QtCore.QObject):
             return
 
         state_changes = b is not self.d.edition_
-        from pineboolib import pncontrolsfactory
 
         if state_changes is not None and not self.d.edition_states_:
-            self.d.edition_states_ = pncontrolsfactory.AQBoolFlagStateList()
+            self.d.edition_states_ = AQBoolFlagStateList()
 
         if self.d.edition_states_ is None:
             return
 
         i = self.d.edition_states_.find(m)
         if not i and state_changes is not None:
-            i = pncontrolsfactory.AQBoolFlagState()
+            i = AQBoolFlagState()
             i.modifier_ = m
             i.prevValue_ = self.d.edition_
             self.d.edition_states_.append(i)
@@ -1498,17 +1503,15 @@ class FLSqlCursor(QtCore.QObject):
 
         state_changes = not b == self.d.browse_
 
-        from pineboolib import pncontrolsfactory
-
         if state_changes is not None and not self.d.browse_states_:
-            self.d.browse_states_ = pncontrolsfactory.AQBoolFlagStateList()
+            self.d.browse_states_ = AQBoolFlagStateList()
 
         if not self.d.browse_states_:
             return
 
         i = self.d.browse_states_.find(m)
         if not i and state_changes is not None:
-            i = pncontrolsfactory.AQBoolFlagState()
+            i = AQBoolFlagState()
             i.modifier_ = m
             i.prevValue_ = self.d.browse_
             self.d.browse_states_.append(i)
@@ -1535,7 +1538,7 @@ class FLSqlCursor(QtCore.QObject):
             self.d.browse_states_.erase(i)
 
     def meta_model(self):
-        return self._meta_model if pineboolib.project._DGI.use_model() else None
+        return self._meta_model if project._DGI.use_model() else None
 
     """
     Establece el contexto de ejecución de scripts, este puede ser del master o del form_record
@@ -1725,7 +1728,7 @@ class FLSqlCursor(QtCore.QObject):
             if m != self.Insert:
                 self.updateBufferCopy()
 
-            pineboolib.project.actions[self._action.name()].openDefaultFormRecord(self)
+            project.actions[self._action.name()].openDefaultFormRecord(self)
 
             # if m != self.Insert and self.refreshBuffer():
             #     self.updateBufferCopy()
@@ -1958,7 +1961,7 @@ class FLSqlCursor(QtCore.QObject):
                         q.setFrom(tMD.name())
                         q.setWhere(self.db().manager().formatAssignValue(r.foreignField(), field, s, True))
                         q.setForwardOnly(True)
-                        logger.debug("SQL linea = %s conn name = %s", q.sql(), str(pineboolib.project.conn.connectionName()))
+                        logger.debug("SQL linea = %s conn name = %s", q.sql(), str(project.conn.connectionName()))
                         q.exec_()
                         if not q.next():
                             # msg = msg + "\n" + self.metadata().name() + ":" + field.alias() +
@@ -2348,8 +2351,8 @@ class FLSqlCursor(QtCore.QObject):
 
             # FIXME: solo compatible con PostgreSQL!
             if sqlPriKeyValue and self.db().canOverPartition():
-                posEqual = sqlPriKeyValue.index("=")
-                leftSqlPriKey = sqlPriKeyValue[0:posEqual]
+                # posEqual = sqlPriKeyValue.index("=")
+                # leftSqlPriKey = sqlPriKeyValue[0:posEqual]
                 sqlRowNum = (
                     "SELECT rownum FROM ("
                     "SELECT row_number() OVER (ORDER BY %s) as rownum FROM %s WHERE %s ORDER BY %s) as subnumrow"
@@ -2815,7 +2818,7 @@ class FLSqlCursor(QtCore.QObject):
         else:
             logger.error("refreshBuffer(). No hay definido modeAccess()")
 
-        # if pineboolib.project._DGI.use_model() and self.meta_model():
+        # if project._DGI.use_model() and self.meta_model():
         #    self.populate_meta_model()
 
         return True
@@ -3029,7 +3032,7 @@ class FLSqlCursor(QtCore.QObject):
                 )
                 self.rollbackOpened(-1, msg)
         else:
-            if not pineboolib.project._DGI.use_model():
+            if not project._DGI.use_model():
                 logger.warning("Se está eliminando un cursor Huerfano (%s)", self)
 
         self.destroyed.emit()
@@ -3393,7 +3396,7 @@ class FLSqlCursor(QtCore.QObject):
 
         functionBefore = None
         functionAfter = None
-        model_module = None
+        model_module: Any = None
 
         idMod = self.db().managerModules().idModuleOfFile("%s.mtd" % self.metadata().name())
 
@@ -3575,7 +3578,7 @@ class FLSqlCursor(QtCore.QObject):
         ok = True
         activeWidEnabled = False
         activeWid = None
-        if pineboolib.project._DGI.localDesktop():
+        if project._DGI.localDesktop():
             from pineboolib import pncontrolsfactory
 
             activeWid = pncontrolsfactory.QApplication.activeModalWidget()
@@ -3818,7 +3821,7 @@ class FLSqlCursor(QtCore.QObject):
         if curConnName == connName:
             return
 
-        newDB = pineboolib.project.conn.database(connName)
+        newDB = project.conn.database(connName)
         if curConnName == newDB.connectionName():
             return
 

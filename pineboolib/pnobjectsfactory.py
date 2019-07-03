@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import pineboolib
 from pineboolib.application.utils.path import _path
 from pineboolib.core.utils.utils_base import filedir
 from importlib import machinery
@@ -11,6 +10,8 @@ import traceback
 import sys
 import os
 import logging
+
+from typing import Any
 
 logger = logging.getLogger("PNControlsFactory")
 
@@ -54,7 +55,7 @@ Ejemplo de uso:
 """
 
 
-def base_model(name: str) -> None:
+def base_model(name: str) -> Any:
     # print("Base", name)
     path = _path("%s.mtd" % name, False)
     if path:

@@ -1,3 +1,6 @@
+import os
+import os.path
+from typing import Any, Optional, Dict
 from pineboolib.core.utils.utils_base import StructMyDict
 from functools import total_ordering
 
@@ -62,10 +65,13 @@ function anon(%s) {
     from pineboolib.flparser import postparse
     from pineboolib.flparser.pytnyzer import write_python_file
 
+    from pineboolib import pncontrolsfactory  # FIXME: This import is not allowed in this file
+
     prog = flscriptparse.parse(qs_source)
     tree_data = flscriptparse.calctree(prog, alias_mode=0)
     ast = postparse.post_parse(tree_data)
-    dest_filename = "%s/anon.py" % aqApp.tmp_dir()
+
+    dest_filename = "%s/anon.py" % pncontrolsfactory.aqApp.tmp_dir()  # FIXME: Find another simpler way of getting tmp_dir
     # f1 = io.StringIO()
     if os.path.exists(dest_filename):
         os.remove(dest_filename)
@@ -84,7 +90,7 @@ function anon(%s) {
     return mod.FormInternalObj().anon
 
 
-def Object(x: None = None) -> StructMyDict:
+def Object(x: Optional[Dict[str, Any]] = None) -> StructMyDict:
     """
     Objeto tipo object
     """
@@ -110,7 +116,7 @@ class Array(object):
     Objeto tipo Array
     """
 
-    dict_ = None
+    dict_: Dict[Any, Any] = None
     key_ = None
     names_ = None
     pos_iter = None
@@ -137,7 +143,7 @@ class Array(object):
             for f in args:
                 self.__setitem__(f, f)
         else:
-            self.dict_ = args
+            self.dict_ = collections.OrderedDict(enumerate(args))
 
     def __iter__(self):
         """

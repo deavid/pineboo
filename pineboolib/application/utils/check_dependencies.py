@@ -24,25 +24,29 @@ def check_dependencies(dict_: Dict[str, str], exit: bool = True) -> bool:
         try:
             if key != "Python":
                 mod_ = import_module(key)
-            if key == "ply":
-                version_check(key, mod_.__version__, "3.9")
-            if key == "Python":
+                version = getattr(mod_, "__version__", None)
+            else:
+                mod_ = None
+                version = None
                 version_check(key, sys.version[: sys.version.find("(")], "3.6")
                 mod_ver = sys.version[: sys.version.find("(")]
+            if key == "ply":
+                version_check(key, version, "3.9")
             elif key == "Pillow":
-                version_check(key, mod_.__version__, "5.1.0")
+                version_check(key, version, "5.1.0")
             elif key == "fpdf":
-                version_check(key, mod_.__version__, "1.7.3")
+                version_check(key, version, "1.7.3")
             elif key == "odf":
                 from odf import namespaces
 
                 mod_ver = namespaces.__version__
             elif key == "PyQt5.QtCore":
-                version_check("PyQt5", mod_.QT_VERSION_STR, "5.11")
-                mod_ver = mod_.QT_VERSION_STR
+                version = getattr(mod_, "QT_VERSION_STR", None)
+                version_check("PyQt5", version, "5.11")
+                mod_ver = version
 
             if mod_ver is None:
-                mod_ver = getattr(mod_, "__version__", None) or getattr(mod_, "version", "???")
+                mod_ver = version or getattr(mod_, "version", "???")
 
             # settings = FLSettings()
             # if settings.readBoolEntry("application/isDebuggerMode", False):
@@ -67,7 +71,9 @@ def check_dependencies(dict_: Dict[str, str], exit: bool = True) -> bool:
                 if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
                     from pineboolib import pncontrolsfactory
 
-                    pncontrolsfactory.QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, QMessageBox.Ok)
+                    pncontrolsfactory.QMessageBox.warning(
+                        None, "Pineboo - Dependencias Incumplidas -", msg, pncontrolsfactory.QMessageBox.Ok
+                    )
 
             if not is_deployed():
                 sys.exit(32)

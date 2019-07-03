@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+import logging
+from typing import List
 from pineboolib.core.utils.utils_base import _dir
 from pineboolib import project
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,6 @@ def mtd_parse(fileobj):
 
 
 def generate_model(dest_file, mtd_table):
-    from pineboolib import pncontrolsfactory
 
     data = []
     pk_found = False
@@ -56,7 +56,7 @@ def generate_model(dest_file, mtd_table):
     data.append("    __tablename__ = '%s'" % mtd_table.name())
     data.append("")
 
-    validator_list = []
+    validator_list: List[str] = []
 
     data.append("")
     data.append("# --- Fields ---> ")

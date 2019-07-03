@@ -5,18 +5,17 @@ import re
 import math
 import logging
 
-
 from PyQt5 import QtCore
 
 # FLObjects
-from pineboolib.core.utils.utils_base import ustr, filedir
-from pineboolib.pncontrolsfactory import FLUtil, qsa_sys, aqApp, QInputDialog, QLineEdit
-
-# from pineboolib.pnobjectsfactory import load_model, Calculated
-
 from pineboolib.core import decorators
+from pineboolib.core.utils.utils_base import ustr, filedir
 
 from pineboolib.application import types
+
+# from pineboolib.pnobjectsfactory import load_model, Calculated
+from pineboolib.pncontrolsfactory import FLUtil, qsa_sys, QInputDialog, QLineEdit
+
 
 Boolean = types.Boolean
 QString = types.QString

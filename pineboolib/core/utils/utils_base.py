@@ -45,6 +45,9 @@ class Struct(object):
         Especialmente útil para bocetar clases al vuelo.
     """
 
+    xmltree: Any
+    xmlroot: Any
+
     def __init__(self, **kwargs) -> None:
         for k, v in kwargs.items():
             setattr(self, k, v)

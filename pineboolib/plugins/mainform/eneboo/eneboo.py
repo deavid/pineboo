@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QTreeWidgetItem, QTreeWidget, QMainWindow
+from PyQt5.QtWidgets import QTreeWidgetItem, QTreeWidget, QMainWindow, QActionGroup, QMenu, QAction
 from PyQt5.QtXml import QDomDocument
 
 # from pineboolib.core.settings import settings
@@ -36,15 +36,12 @@ class MainForm(QtWidgets.QMainWindow):
         super(MainForm, self).__init__()
 
         self.ui_ = None
-
-        from pineboolib import pncontrolsfactory
+        self.qsa_sys = pncontrolsfactory.SysType()
 
         pncontrolsfactory.aqApp.main_widget_ = self
 
     def eventFilter(self, o, e):
-        from pineboolib import pncontrolsfactory
 
-        qsa_sys = pncontrolsfactory.SysType()
         if isinstance(e, pncontrolsfactory.AQS.ContextMenu):
             if o == getattr(self.dck_mod_, "w_", None):
                 return self.addMarkFromItem(self.dck_mod_.lw_.currentItem(), e.globalPos())
@@ -74,7 +71,7 @@ class MainForm(QtWidgets.QMainWindow):
                 o.topLevelChanged.emit(False)
 
         elif isinstance(e, pncontrolsfactory.AQS.WindowStateChange):
-            if qsa_sys.isNebulaBuild() and o == self.w_:
+            if self.qsa_sys.isNebulaBuild() and o == self.w_:
                 if self.w_.minimized():
                     self.w_.showNormal()
                     self.w_.showFullScreen()
@@ -98,7 +95,6 @@ class MainForm(QtWidgets.QMainWindow):
         self.w_.setObjectName("container")
 
     def exit(self):
-        from pineboolib import pncontrolsfactory
 
         res = pncontrolsfactory.QMessageBox.information(
             self.w_, "Pineboo", "¿ Quiere salir de la aplicación ?", pncontrolsfactory.QMessageBox.Yes, pncontrolsfactory.QMessageBox.No
@@ -161,17 +157,13 @@ class MainForm(QtWidgets.QMainWindow):
         settings = AQSettings()
         key = "MainWindow/"
 
-        from pineboolib import pncontrolsfactory
-
-        qsa_sys = pncontrolsfactory.SysType()
-
-        if not qsa_sys.isNebulaBuild():
+        if not self.qsa_sys.isNebulaBuild():
             maximized = settings.readBoolEntry("%smaximized" % key)
 
             if not maximized:
                 x = settings.readNumEntry("%sx" % key)
                 y = settings.readNumEntry("%sy" % key)
-                if qsa_sys.osName() == "MACX" and y < 20:
+                if self.qsa_sys.osName() == "MACX" and y < 20:
                     y = 20
                 w.move(x, y)
                 w.resize(settings.readNumEntry("%swidth" % key, w.width()), settings.readNumEntry("%sheight" % key, w.height()))
@@ -179,7 +171,6 @@ class MainForm(QtWidgets.QMainWindow):
                 w.showMaximized()
         else:
             w.showFullScreen()
-            from pineboolib import pncontrolsfactory
 
             pncontrolsfactory.aqApp.setProxyDesktop(w)
 
@@ -250,11 +241,10 @@ class MainForm(QtWidgets.QMainWindow):
         self.initEventFilter()
 
     def initEventFilter(self):
-        from pineboolib import pncontrolsfactory
 
         # w = self.w_
         self.w_.eventFilterFunction = "aqAppScript.mainWindow_.eventFilter"
-        if not pncontrolsfactory.qsa_sys.isNebulaBuild():
+        if not pncontrolsfactory.self.qsa_sys.isNebulaBuild():
             self.w_.allow_events = [pncontrolsfactory.AQS.ContextMenu, pncontrolsfactory.AQS.Close]
         else:
             self.w_.allow_events = [pncontrolsfactory.AQS.ContextMenu, pncontrolsfactory.AQS.Close, pncontrolsfactory.AQS.WindowStatechange]
@@ -266,8 +256,6 @@ class MainForm(QtWidgets.QMainWindow):
         self.dck_mar_.w_.installEventFilter(self)
 
     def initModule(self, module):
-
-        from pineboolib import pncontrolsfactory
 
         if module in self.main_widgets_:
             mwi = self.main_widgets_[module]
@@ -312,8 +300,6 @@ class MainForm(QtWidgets.QMainWindow):
             if tw.widget(i).action().name() == action_name:
                 tw.widget(i).close()
 
-        from pineboolib import pncontrolsfactory
-
         fm = pncontrolsfactory.AQFormDB(action_name, tw, None)
         fm.setMainWidget()
         if not fm.mainWidget():
@@ -332,8 +318,6 @@ class MainForm(QtWidgets.QMainWindow):
     def addRecent(self, action):
         if not action:
             return
-
-        from pineboolib import pncontrolsfactory
 
         if not self.ag_rec_:
             self.ag_rec_ = pncontrolsfactory.QActionGroup(self.w_)
@@ -395,7 +379,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         popMenu = QMenu()
         popMenu.move(pos)
-        popMenu.addAction(qsa_sys.translate("Añadir Marcadores"))
+        popMenu.addAction(self.qsa_sys.translate("Añadir Marcadores"))
         res = popMenu.exec_()
         if res:
             ac = self.ag_menu_.findChild(QtWidgets.QAction, item.text(1))
@@ -413,7 +397,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         popMenu = QMenu()
         popMenu.move(pos)
-        popMenu.addAction(qsa_sys.translate("Eliminar Marcador"))
+        popMenu.addAction(self.qsa_sys.translate("Eliminar Marcador"))
         res = popMenu.exec_()
         if res:
             ac = self.ag_mar_.findChild(QtWidgets.QAction, item.text(1))
@@ -425,7 +409,6 @@ class MainForm(QtWidgets.QMainWindow):
         return True
 
     def updateMenu(self, action_group, parent):
-        from pineboolib import pncontrolsfactory
 
         object_list = action_group.children()
         for obj_ in object_list:
@@ -465,8 +448,6 @@ class MainForm(QtWidgets.QMainWindow):
         pinebooMenu.clear()
         self.updateMenu(self.ag_menu_, pinebooMenu)
 
-        from pineboolib import pncontrolsfactory
-
         pncontrolsfactory.aqApp.setMainWidget(self.w_)
         self.dck_mod_.update(self.ag_menu_)
         self.dck_rec_.update(self.ag_rec_)
@@ -495,20 +476,16 @@ class MainForm(QtWidgets.QMainWindow):
             self.ag_menu_.deleteLater()
             self.ag_menu_ = None
 
-        from pineboolib import pncontrolsfactory
-
-        qsa_sys = pncontrolsfactory.SysType()
-
         self.ag_menu_ = pncontrolsfactory.QActionGroup(self.w_)
         self.ag_menu_.setObjectName("pinebooActionGroup")
         ac_name = pncontrolsfactory.QAction(self.ag_menu_)
         ac_name.setObjectName("pinebooActionGroup_actiongroup_name")
-        ac_name.setText(qsa_sys.translate("Menú"))
+        ac_name.setText(self.qsa_sys.translate("Menú"))
 
         mng = pncontrolsfactory.aqApp.db().managerModules()
         areas = mng.listIdAreas()
         for area in areas:
-            if not qsa_sys.isDebuggerEnabled() and area == "sys":
+            if not self.qsa_sys.isDebuggerEnabled() and area == "sys":
                 break
             ag = pncontrolsfactory.QActionGroup(self.ag_menu_)
             ag.setObjectName(area)
@@ -519,11 +496,11 @@ class MainForm(QtWidgets.QMainWindow):
 
             modules = mng.listIdModules(ag.objectName())
             for module in modules:
-                if module == "sys" and qsa_sys.isUserBuild():
+                if module == "sys" and self.qsa_sys.isUserBuild():
                     continue
                 ac = pncontrolsfactory.QActionGroup(ag)
                 ac.setObjectName(module)
-                if qsa_sys.isQuickBuild():
+                if self.qsa_sys.isQuickBuild():
                     if module == "sys":
                         continue
                 actions = self.widgetActions("%s.ui" % ac.objectName(), ac)
@@ -542,31 +519,31 @@ class MainForm(QtWidgets.QMainWindow):
                 ac_action.triggered.connect(self.act_sig_map_.map)
                 self.act_sig_map_.setMapping(ac_action, "triggered():initModule():%s_actiongroup_name" % ac.objectName())
                 if ac.objectName() == "sys" and ag.objectName() == "sys":
-                    if qsa_sys.isDebuggerMode():
+                    if self.qsa_sys.isDebuggerMode():
                         staticLoad = pncontrolsfactory.QAction(ag)
                         staticLoad.setObjectName("staticLoaderSetupAction")
-                        staticLoad.setText(qsa_sys.translate("Configurar carga estática"))
+                        staticLoad.setText(self.qsa_sys.translate("Configurar carga estática"))
                         staticLoad.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("folder_update.png")))
                         staticLoad.triggered.connect(self.act_sig_map_.map)
                         self.act_sig_map_.setMapping(staticLoad, "triggered():staticLoaderSetup():%s" % staticLoad.objectName())
 
                         reInit = pncontrolsfactory.QAction(ag)
                         reInit.setObjectName("reinitAction")
-                        reInit.setText(qsa_sys.translate("Recargar scripts"))
+                        reInit.setText(self.qsa_sys.translate("Recargar scripts"))
                         reInit.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("reload.png")))
                         reInit.triggered.connect(self.act_sig_map_.map)
                         self.act_sig_map_.setMapping(reInit, "triggered():reinit():%s" % reInit.objectName())
 
         shConsole = pncontrolsfactory.QAction(self.ag_menu_)
         shConsole.setObjectName("shConsoleAction")
-        shConsole.setText(qsa_sys.translate("Mostrar Consola de mensajes"))
+        shConsole.setText(self.qsa_sys.translate("Mostrar Consola de mensajes"))
         shConsole.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("consola.png")))
         shConsole.triggered.connect(self.act_sig_map_.map)
         self.act_sig_map_.setMapping(shConsole, "triggered():shConsole():%s" % shConsole.objectName())
 
         exit = pncontrolsfactory.QAction(self.ag_menu_)
         exit.setObjectName("exitAction")
-        exit.setText(qsa_sys.translate("&Salir"))
+        exit.setText(self.qsa_sys.translate("&Salir"))
         exit.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("exit.png")))
         exit.triggered.connect(self.act_sig_map_.map)
         self.act_sig_map_.setMapping(exit, "triggered():exit():%s" % exit.objectName())
@@ -583,7 +560,7 @@ class MainForm(QtWidgets.QMainWindow):
         tb.setIconSet(self.iconset16x16(AQS.Pixmap_fromMineSource("file_close.png")))
         tb.clicked.connect(self.removeCurrentPage)
         tw.setCornerWidget(tb, AQS.TopRight)
-        AQS.toolTip_add(tb, qsa_sys.translate("Cerrar pestaña"))
+        AQS.toolTip_add(tb, self.qsa_sys.translate("Cerrar pestaña"))
         tb.hide()
         """
 
@@ -612,7 +589,6 @@ class MainForm(QtWidgets.QMainWindow):
         # font.triggered.connect(aqApp.chooseFont)
 
         style = self.w_.findChild(QtWidgets.QMenu, "style")
-        from pineboolib import pncontrolsfactory
 
         pncontrolsfactory.aqApp.initStyles()
         style.setIcon(self.iconSet16x16(AQS.Pixmap_fromMineSource("estilo.png")))
@@ -627,24 +603,23 @@ class MainForm(QtWidgets.QMainWindow):
             tL.setText(texto)
 
         if AQUtil.sqlSelect("flsettings", "valor", "flkey='PosInfo'") == "True":
-            text_ = "%s@%s" % (qsa_sys.nameUser(), qsa_sys.nameBD())
-            if qsa_sys.osName() == "MACX":
+            text_ = "%s@%s" % (self.qsa_sys.nameUser(), self.qsa_sys.nameBD())
+            if self.qsa_sys.osName() == "MACX":
                 text_ += "     "
 
             tL2.setText(text_)
 
     def initDocks(self):
-        from pineboolib import pncontrolsfactory
 
-        self.dck_mar_ = DockListView(self.w_, "pinebooDockMarks", pncontrolsfactory.qsa_sys.translate("Marcadores"))
+        self.dck_mar_ = DockListView(self.w_, "pinebooDockMarks", pncontrolsfactory.self.qsa_sys.translate("Marcadores"))
         self.w_.addDockWidget(pncontrolsfactory.AQS.DockLeft, self.dck_mar_.w_)
-        self.dck_rec_ = DockListView(self.w_, "pinebooDoctkRecent", pncontrolsfactory.qsa_sys.translate("Recientes"))
+        self.dck_rec_ = DockListView(self.w_, "pinebooDoctkRecent", pncontrolsfactory.self.qsa_sys.translate("Recientes"))
         self.w_.addDockWidget(pncontrolsfactory.AQS.DockLeft, self.dck_rec_.w_)
-        self.dck_mod_ = DockListView(self.w_, "pinebooDockModules", pncontrolsfactory.qsa_sys.translate("Módulos"))
+        self.dck_mod_ = DockListView(self.w_, "pinebooDockModules", pncontrolsfactory.self.qsa_sys.translate("Módulos"))
         self.w_.addDockWidget(pncontrolsfactory.AQS.DockLeft, self.dck_mod_.w_)
 
         windowMenu = self.w_.findChild(QtWidgets.QMenu, "windowMenu")
-        sub_menu = windowMenu.addMenu(pncontrolsfactory.qsa_sys.translate("&Vistas"))
+        sub_menu = windowMenu.addMenu(pncontrolsfactory.self.qsa_sys.translate("&Vistas"))
 
         docks = self.w_.findChildren(DockListView)
         for dock in docks:
@@ -658,7 +633,6 @@ class MainForm(QtWidgets.QMainWindow):
             # dock.w_.Close.connect(ac.setChecked)
 
     def cloneAction(self, act, parent):
-        from pineboolib import pncontrolsfactory
 
         ac = pncontrolsfactory.QAction(parent)
         ac.setObjectName(act.objectName())
@@ -696,9 +670,6 @@ class MainForm(QtWidgets.QMainWindow):
             i += 1
 
     def widgetActions(self, ui_file, parent):
-        from pineboolib import pncontrolsfactory
-
-        qsa_sys = pncontrolsfactory.SysType()
 
         mng = pncontrolsfactory.aqApp.db().managerModules()
         doc = QDomDocument()
@@ -718,7 +689,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         w.setObjectName(parent.objectName())
         pncontrolsfactory.aqApp.setMainWidget(w)
-        # if (qsa_sys.isNebulaBuild()):
+        # if (self.qsa_sys.isNebulaBuild()):
         #    w.show()
 
         w.hide()
@@ -729,7 +700,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         ag = pncontrolsfactory.QActionGroup(parent)
         ag.setObjectName("%sActions" % parent.objectName())
-        # ag.menuText = ag.text = qsa_sys.translate("Acciones")
+        # ag.menuText = ag.text = self.qsa_sys.translate("Acciones")
         if not reduced:
             bars = root.namedItem("toolbars").toElement()
             self.addActions(bars, ag, w)
@@ -746,7 +717,7 @@ class MainForm(QtWidgets.QMainWindow):
                 menu_ag.setObjectName("%sMore" % ag.objectName())
                 menu_ag_name = pncontrolsfactory.QAction(menu_ag)
                 menu_ag_name.setObjectName("%s_actiongroup_name" % ag.objectName())
-                menu_ag_name.setText(qsa_sys.translate("Más"))
+                menu_ag_name.setText(self.qsa_sys.translate("Más"))
                 menu_ag_name.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("plus.png")))
 
             i = 0
@@ -765,7 +736,7 @@ class MainForm(QtWidgets.QMainWindow):
 
                 sub_menu_ag_name = pncontrolsfactory.QAction(sub_menu_ag)
                 sub_menu_ag_name.setObjectName("%s_actiongroup_name" % sub_menu_ag.objectName())
-                sub_menu_ag_name.setText(qsa_sys.toUnicode(itn.attribute("text"), "UTF-8"))
+                sub_menu_ag_name.setText(self.qsa_sys.toUnicode(itn.attribute("text"), "UTF-8"))
                 self.addActions(itn, sub_menu_ag, w)
                 i += 1
 
@@ -826,7 +797,6 @@ class MainForm(QtWidgets.QMainWindow):
         mw.readState()
 
     def reinitSript(self):
-        from pineboolib import pncontrolsfactory
 
         main_wid = pncontrolsfactory.aqApp.mainWidget() if mainWindow.w_ is None else mainWindow.w_
         if main_wid is None or main_wid.objectName() != "container":
@@ -849,7 +819,7 @@ class MainForm(QtWidgets.QMainWindow):
         # ok = True
         ac = mw.ag_menu_.findChild(QtWidgets.QAction, sgt[2])
         if ac is None:
-            debug("triggerAction: Action not Found: %s" % signature)
+            logger.debug("triggerAction: Action not Found: %s" % signature)
             return
 
         signal = sgt[0]
@@ -857,12 +827,8 @@ class MainForm(QtWidgets.QMainWindow):
             if not ac.isVisible() or not ac.isEnabled():
                 return
         else:
-            debug("triggerAction: Unhandled signal: %s" % signature)
+            logger.debug("triggerAction: Unhandled signal: %s" % signature)
             return
-
-        from pineboolib import pncontrolsfactory
-
-        qsa_sys = pncontrolsfactory.SysType()
 
         fn_ = sgt[1]
         if fn_ == "initModule()":
@@ -877,28 +843,28 @@ class MainForm(QtWidgets.QMainWindow):
             mw.addRecent(ac)
 
         elif fn_ == "loadModules()":
-            qsa_sys.loadModules()
+            self.qsa_sys.loadModules()
 
         elif fn_ == "exportModules()":
-            qsa_sys.exportModules()
+            self.qsa_sys.exportModules()
 
         elif fn_ == "importModules()":
-            qsa_sys.importModules()
+            self.qsa_sys.importModules()
 
         elif fn_ == "updatePineboo()":
-            qsa_sys.updatePineboo()
+            self.qsa_sys.updatePineboo()
 
         elif fn_ == "dumpDatabase()":
-            qsa_sys.dumpDatabase()
+            self.qsa_sys.dumpDatabase()
 
         elif fn_ == "staticLoaderSetup()":
             pncontrolsfactory.aqApp.staticLoaderSetup()
 
         elif fn_ == "reinit()":
-            qsa_sys.reinit()
+            self.qsa_sys.reinit()
 
         elif fn_ == "mrProper()":
-            qsa_sys.Mr_Proper()
+            self.qsa_sys.Mr_Proper()
 
         elif fn_ == "shConsole()":
             pncontrolsfactory.aqApp.showConsole()
@@ -907,7 +873,7 @@ class MainForm(QtWidgets.QMainWindow):
             self.close()
 
         else:
-            debug("tiggerAction: Unhandled slot : %s" % signature)
+            logger.debug("tiggerAction: Unhandled slot : %s" % signature)
 
     # def load(self):
     #    from pineboolib.core.utils.utils_base import filedir
@@ -930,11 +896,11 @@ class DockListView(QtCore.QObject):
     set_visible = QtCore.pyqtSignal(bool)
     Close = QtCore.pyqtSignal(bool)
 
-    def __init__(self, parent, name, title):
-        if parent is None:
-            return
+    def __init__(self, parent=None, name="", title=""):
 
         super(DockListView, self).__init__(parent)
+        if parent is None:
+            return
 
         self.w_ = QtWidgets.QDockWidget(name, parent)
         self.w_.setObjectName("%sListView" % name)
@@ -1042,7 +1008,6 @@ class DockListView(QtCore.QObject):
             return
 
         self.lw_.clear()
-        from pineboolib import pncontrolsfactory
 
         self.buildListView(self.lw_, pncontrolsfactory.AQS.toXml(self.ag_), self.ag_, reverse)
 

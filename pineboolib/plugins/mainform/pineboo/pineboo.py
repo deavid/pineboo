@@ -6,7 +6,7 @@ import logging
 from pineboolib.core.utils.utils_base import filedir, Struct
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLUtil import FLUtil
-
+from pineboolib import project
 
 from PyQt5.QtWidgets import (
     QToolButton,
@@ -117,22 +117,22 @@ class MainForm(QMainWindow):
         #                 QtCore.QSize(256, 256))
         # self.setWindowIcon(app_icon)
         self.setWindowIcon(QtGui.QIcon("share/icons/pineboo-logo-16.png"))
-        self.actionAcercaQt.triggered.connect(pineboolib.project.aboutQt)
-        self.actionAcercaPineboo.triggered.connect(pineboolib.project.aboutPineboo)
+        self.actionAcercaQt.triggered.connect(project.aboutQt)
+        self.actionAcercaPineboo.triggered.connect(project.aboutPineboo)
         self.actionFavoritos.triggered.connect(self.changeStateDockFavoritos)
         self.dockFavoritos.visibilityChanged.connect(self.changeStateActionFavoritos)
         self.actionModulos.triggered.connect(self.changeStateDockAreas)
         self.dockAreasTab.visibilityChanged.connect(self.changeStateActionAreas)
-        self.actionTipografia.triggered.connect(pineboolib.project.chooseFont)
+        self.actionTipografia.triggered.connect(project.chooseFont)
         self.menuPineboo.addSeparator()
         # self.actionEstilo.triggered.connect(pineboolib.main.styleDialog)
         # pineboolib.pnapplication.initStyle(self.configMenu)
         self.setWindowTitle("Pineboo")
 
         logger.info("Módulos y pestañas ...")
-        for k, area in sorted(pineboolib.project.areas.items()):
+        for k, area in sorted(project.areas.items()):
             self.loadArea(area)
-        for k, module in sorted(pineboolib.project.modules.items()):
+        for k, module in sorted(project.modules.items()):
             self.loadModule(module)
 
         # Cargando Area desarrollo si procede ...
@@ -291,10 +291,10 @@ class MainForm(QMainWindow):
             sett_.writeEntry("application/mainForm/mainFormSize", self.size())
 
     def addToMenuPineboo(self, ac, mod):
-        # print(mod.name, ac.name, pineboolib.project.areas[mod.areaid].descripcion)
+        # print(mod.name, ac.name, project.areas[mod.areaid].descripcion)
         # Comprueba si el area ya se ha creado
         if mod.areaid not in self.mPAreas.keys():
-            areaM = self.menuPineboo.addMenu(QtGui.QIcon("share/icons/gtk-open.png"), pineboolib.project.areas[mod.areaid].descripcion)
+            areaM = self.menuPineboo.addMenu(QtGui.QIcon("share/icons/gtk-open.png"), project.areas[mod.areaid].descripcion)
             self.mPAreas[mod.areaid] = areaM
         else:
             areaM = self.mPAreas[mod.areaid]
@@ -322,7 +322,7 @@ class MainForm(QMainWindow):
         tabsOpened_ = sett_.readListEntry("application/mainForm/tabsOpened")
         if tabsOpened_:
             for t in tabsOpened_:
-                for k, module in sorted(pineboolib.project.modules.items()):
+                for k, module in sorted(project.modules.items()):
                     if hasattr(module, "mainform"):
                         if t in module.mainform.actions:
                             module.mainform.actions[t].run()
