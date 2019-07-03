@@ -23,6 +23,7 @@ class FLSqlQuery(object):
     _fieldNameToPosDict = None
     logger = logging.getLogger("FLSqlQuery")
     value = None
+    sql_inspector = None
 
     def __init__(self, cx=None, connection_name="default"):
         # super(FLSqlQuery, self).__init__()
@@ -40,6 +41,7 @@ class FLSqlQuery(object):
         self.d.fieldList_ = []
         self.fields_cache = {}
         self._is_active = False
+        self.sql_inspector = None
         # self.d.fieldMetaDataList_ = {}
 
         retornoQry = None
@@ -48,13 +50,11 @@ class FLSqlQuery(object):
 
         if retornoQry:
             self.d = retornoQry.d
-        
+
         self.value = self._value_quick
-        
+
         if config.value("ebcomportamiento/std_query", False):
             self.value = self._value_std
-        
-        
 
     def __del__(self):
         try:
@@ -79,6 +79,11 @@ class FLSqlQuery(object):
             sql = self.sql()
         if not sql:
             return False
+
+        from pineboolib.application.utils import sql_tools
+
+        del self.sql_inspector
+        self.sql_inspector = sql_tools.sql_inspector(sql.lower())
 
         sql = self.db().driver().fix_query(sql)
 
@@ -307,7 +312,11 @@ class FLSqlQuery(object):
         elif not self.d.where_:
             res = "SELECT %s FROM %s" % (self.d.select_, self.d.from_)
         else:
-            res = "SELECT %s FROM %s WHERE %s" % (self.d.select_, self.d.from_, self.d.where_)
+            res = "SELECT %s FROM %s WHERE %s" % (
+                self.d.select_,
+                self.d.from_,
+                self.d.where_,
+            )
 
         if self.d.groupDict_ and not self.d.orderBy_:
             res = res + " ORDER BY "
@@ -334,7 +343,11 @@ class FLSqlQuery(object):
                     from pineboolib import pncontrolsfactory
 
                     v = pncontrolsfactory.QInputDialog.getText(
-                        pncontrolsfactory.QApplication, "Entrada de parámetros de la consulta", pD, None, None
+                        pncontrolsfactory.QApplication,
+                        "Entrada de parámetros de la consulta",
+                        pD,
+                        None,
+                        None,
                     )
 
                 res = res.replace("[%s]" % pD, "'%s'" % v)
@@ -417,7 +430,9 @@ class FLSqlQuery(object):
 
     def showDebug(self):
         if not self.isActive():
-            logger.warning("DEBUG : La consulta no está activa : No se ha ejecutado exec() o la sentencia SQL no es válida")
+            logger.warning(
+                "DEBUG : La consulta no está activa : No se ha ejecutado exec() o la sentencia SQL no es válida"
+            )
 
         logger.warning("DEBUG : Nombre de la consulta : %s", self.d.name_)
         logger.warning("DEBUG : Niveles de agrupamiento :")
@@ -481,10 +496,34 @@ class FLSqlQuery(object):
             else:
                 ret = self._row[self._fieldNameToPosDict[n]]
         except Exception as e:
-            logger.debug("_value_quick: Error %s, falling back to default implementation", e)
+            logger.debug(
+                "_value_quick: Error %s, falling back to default implementation", e
+            )
             ret = self._value_std(n, raw)
         return ret
 
+    def _value_std(self, n, raw=False):
+        if n is None:
+            self.logger.trace("value::invalid use with n=None.", stack_info=True)
+            return None
+
+        pos = n
+        if isinstance(n, str):
+            pos = self.sql_inspector.fieldNameToPos(n)
+
+        ret = self._row[pos]
+
+        if ret in (None, "None"):
+            ret = self.sql_inspector.resolve_empty_value(pos)
+        else:
+            try:
+                ret = self.sql_inspector.resolve_value(pos, ret, raw)
+            except Exception:
+                self.logger.exception("value::error retrieving row position %s", pos)
+
+        return ret
+
+    """
     def _value_std(self, n, raw=False):
         # Eneboo version
         pos = None
@@ -518,9 +557,15 @@ class FLSqlQuery(object):
                         tables_list = tl.split(",")
 
                     for t in tables_list:
-                        mtd = self.d.db_.manager().metadata(t, True) if t.find("=") == -1 else None
+                        mtd = (
+                            self.d.db_.manager().metadata(t, True)
+                            if t.find("=") == -1
+                            else None
+                        )
                         name_fixed = name
-                        if name_fixed.upper().startswith("SUM(") or name_fixed.upper().startswith("COUNT("):
+                        if name_fixed.upper().startswith(
+                            "SUM("
+                        ) or name_fixed.upper().startswith("COUNT("):
                             name_fixed = name_fixed.replace(")", "")
                             name_fixed = name_fixed.replace("SUM(", "")
                             name_fixed = name_fixed.replace("COUNT(", "")
@@ -531,7 +576,11 @@ class FLSqlQuery(object):
                             break
 
                 if field_name is not None:
-                    mtd_field = self.d.db_.manager().metadata(table_name, False).field(field_name)
+                    mtd_field = (
+                        self.d.db_.manager()
+                        .metadata(table_name, False)
+                        .field(field_name)
+                    )
                     self.fields_cache[name] = mtd_field
 
         else:
@@ -556,6 +605,7 @@ class FLSqlQuery(object):
                 retorno = 0
         else:
             import datetime
+
             if isinstance(retorno, str):  # str
                 if mtd_field is not None:
                     if mtd_field.type() == "date":
@@ -563,7 +613,9 @@ class FLSqlQuery(object):
 
                     elif mtd_field.type() == "pixmap":
                         if not raw:
-                            if not self.d.db_.manager().isSystemTable(mtd_field.metadata().name()):
+                            if not self.d.db_.manager().isSystemTable(
+                                mtd_field.metadata().name()
+                            ):
                                 raw = True
                         if raw:
                             retorno = self.d.db_.manager().fetchLargeValue(retorno)
@@ -590,7 +642,7 @@ class FLSqlQuery(object):
                 retorno = float(retorno)
 
         return retorno
-
+    """
     """
     Indica si un campo de la consulta es nulo o no
 
@@ -667,7 +719,10 @@ class FLSqlQuery(object):
         self.d.tablesList_ = []
         tl = tl.replace(" ", "")
         for tabla in tl.split(","):
-            if not pineboolib.project.conn.manager().existsTable(tabla) and len(tl.split(",")) >= 1:
+            if (
+                not pineboolib.project.conn.manager().existsTable(tabla)
+                and len(tl.split(",")) >= 1
+            ):
                 self.invalidTablesList = True
 
             self.d.tablesList_.append(tabla)
