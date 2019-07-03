@@ -124,9 +124,8 @@ def exec_main(options: Values) -> int:
     # FIXME: This function should not initialize the program
 
     # TODO: Refactorizar función en otras más pequeñas
-    import pineboolib
+    from pineboolib import project  # FIXME: next time, proper singleton
 
-    project = pineboolib.project  # FIXME: next time, proper singleton
     project.load_version()
     project.setDebugLevel(options.debug_level)
 
