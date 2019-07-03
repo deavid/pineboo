@@ -1259,7 +1259,7 @@ class FLSqlCursor(QtCore.QObject):
             largeValue = self.db().manager().storeLargeValue(self.metadata(), vv)
             if largeValue:
                 vv = largeValue
-        
+
         if field.outTransaction() and self.db().db() is not self.db().dbAux() and self.modeAccess() != self.Insert:
             pK = self.metadata().primaryKey()
 

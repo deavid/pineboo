@@ -48,13 +48,11 @@ class FLSqlQuery(object):
 
         if retornoQry:
             self.d = retornoQry.d
-        
+
         self.value = self._value_quick
-        
+
         if config.value("ebcomportamiento/std_query", False):
             self.value = self._value_std
-        
-        
 
     def __del__(self):
         try:
@@ -556,6 +554,7 @@ class FLSqlQuery(object):
                 retorno = 0
         else:
             import datetime
+
             if isinstance(retorno, str):  # str
                 if mtd_field is not None:
                     if mtd_field.type() == "date":
