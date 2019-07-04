@@ -45,6 +45,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     _driver_sql = None
     _size = None
     sql_str = None
+    _initialized = None
     """
     Constructor
     @param conn. Objeto PNConnection
@@ -121,6 +122,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self._disable_refresh = False
 
         self._cursor_db = self.db().cursor()
+        self._initialized = None
         # self.refresh()
 
     """
@@ -594,6 +596,19 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def refresh(self):
+        if self._initialized is None and self.parent_view:  # Si es el primer refresh y estoy conectado a un FLDatatable()
+            self._initialized = True
+            timer = QtCore.QTimer()
+            timer.singleShot(50, self.refresh)
+            return
+
+        if self._initialized:  # Si estoy inicializando y no me ha enviado un sender, cancelo el refesh
+            obj = self.sender()
+            if not obj:
+                return
+
+        self._initialized = False
+
         if self._disable_refresh and self.rows > 0:
             return
 
