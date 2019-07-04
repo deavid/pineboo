@@ -270,7 +270,7 @@ class Project(object):
                 # from pineboolib.mtdparser.pnmtdparser import mtd_parse
                 # mtd_parse(fileobj)
 
-            if self.parseProject and nombre.endswith(".qs") and settings.readBoolEntry("application/isDebuggerMode", False):
+            if self.parseProject and nombre.endswith(".qs") and settings.value("application/isDebuggerMode", False):
                 # if self._splash:
                 #    self._splash.showMessage("Convirtiendo %s ( %d/ ??) ..." %
                 #                             (nombre, pos_qs), QtCore.Qt.AlignLeft, QtCore.Qt.white)
