@@ -1,7 +1,8 @@
+import logging
+import pineboolib
 from pineboolib.core import decorators
 from pineboolib.core.settings import config
-import pineboolib
-import logging
+from pineboolib.application.utils import sql_tools
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class FLSqlQuery(object):
     _fieldNameToPosDict = None
     logger = logging.getLogger("FLSqlQuery")
     value = None
-    sql_inspector = None
+    _sql_inspector = None
 
     def __init__(self, cx=None, connection_name="default"):
         # super(FLSqlQuery, self).__init__()
@@ -41,7 +42,7 @@ class FLSqlQuery(object):
         self.d.fieldList_ = []
         self.fields_cache = {}
         self._is_active = False
-        self.sql_inspector = None
+        self._sql_inspector = None
         # self.d.fieldMetaDataList_ = {}
 
         retornoQry = None
@@ -67,6 +68,13 @@ class FLSqlQuery(object):
 
         self.countRefQuery = self.countRefQuery - 1
 
+    @property
+    def sql_inspector(self):
+        if self._sql_inspector is None:
+            sql = self.sql()
+            self._sql_inspector = sql_tools.sql_inspector(sql.lower())
+        return self._sql_inspector
+
     """
     Ejecuta la consulta
     """
@@ -80,10 +88,7 @@ class FLSqlQuery(object):
         if not sql:
             return False
 
-        from pineboolib.application.utils import sql_tools
-
-        del self.sql_inspector
-        self.sql_inspector = sql_tools.sql_inspector(sql.lower())
+        self._sql_inspector = sql_tools.sql_inspector(sql.lower())
 
         sql = self.db().driver().fix_query(sql)
 
@@ -312,11 +317,7 @@ class FLSqlQuery(object):
         elif not self.d.where_:
             res = "SELECT %s FROM %s" % (self.d.select_, self.d.from_)
         else:
-            res = "SELECT %s FROM %s WHERE %s" % (
-                self.d.select_,
-                self.d.from_,
-                self.d.where_,
-            )
+            res = "SELECT %s FROM %s WHERE %s" % (self.d.select_, self.d.from_, self.d.where_)
 
         if self.d.groupDict_ and not self.d.orderBy_:
             res = res + " ORDER BY "
@@ -343,11 +344,7 @@ class FLSqlQuery(object):
                     from pineboolib import pncontrolsfactory
 
                     v = pncontrolsfactory.QInputDialog.getText(
-                        pncontrolsfactory.QApplication,
-                        "Entrada de parámetros de la consulta",
-                        pD,
-                        None,
-                        None,
+                        pncontrolsfactory.QApplication, "Entrada de parámetros de la consulta", pD, None, None
                     )
 
                 res = res.replace("[%s]" % pD, "'%s'" % v)
@@ -430,9 +427,7 @@ class FLSqlQuery(object):
 
     def showDebug(self):
         if not self.isActive():
-            logger.warning(
-                "DEBUG : La consulta no está activa : No se ha ejecutado exec() o la sentencia SQL no es válida"
-            )
+            logger.warning("DEBUG : La consulta no está activa : No se ha ejecutado exec() o la sentencia SQL no es válida")
 
         logger.warning("DEBUG : Nombre de la consulta : %s", self.d.name_)
         logger.warning("DEBUG : Niveles de agrupamiento :")
@@ -496,9 +491,7 @@ class FLSqlQuery(object):
             else:
                 ret = self._row[self._fieldNameToPosDict[n]]
         except Exception as e:
-            logger.debug(
-                "_value_quick: Error %s, falling back to default implementation", e
-            )
+            logger.debug("_value_quick: Error %s, falling back to default implementation", e)
             ret = self._value_std(n, raw)
         return ret
 
@@ -689,7 +682,7 @@ class FLSqlQuery(object):
     """
 
     def fieldNameToPos(self, name):
-        return self.sql_inspector.fieldNameToPos(nanme)
+        return self.sql_inspector.fieldNameToPos(name)
         # i = 0
         # for field in self.d.fieldList_:
         #    if field.lower() == n.lower():
@@ -722,10 +715,7 @@ class FLSqlQuery(object):
         self.d.tablesList_ = []
         tl = tl.replace(" ", "")
         for tabla in tl.split(","):
-            if (
-                not pineboolib.project.conn.manager().existsTable(tabla)
-                and len(tl.split(",")) >= 1
-            ):
+            if not pineboolib.project.conn.manager().existsTable(tabla) and len(tl.split(",")) >= 1:
                 self.invalidTablesList = True
 
             self.d.tablesList_.append(tabla)
