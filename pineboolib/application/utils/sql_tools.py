@@ -52,9 +52,7 @@ class sql_inspector(object):
                     table_name = self._alias[table_name]
                     return self.fieldNameToPos("%s.%s" % (table_name, field_name))
 
-        raise Exception(
-            "No se encuentra el campo %s el la query (%s)" % (name, self._sql)
-        )
+        raise Exception("No se encuentra el campo %s el la query (%s)" % (name, self._sql))
 
     def posToFieldName(self, pos):
 
@@ -82,7 +80,7 @@ class sql_inspector(object):
             tablas = []
             self._alias = {}
             jump = 0
-            next_is_alias = None
+            # next_is_alias = None
             prev_ = ""
             last_was_table = False
             for t in tl:

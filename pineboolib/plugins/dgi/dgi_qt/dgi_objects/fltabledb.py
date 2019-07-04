@@ -255,7 +255,7 @@ class FLTableDB(QtWidgets.QWidget):
 
                 rMD = FLRelationMetaData(self.tableName_, self.fieldRelation_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
                 fMD.addRelationMD(rMD)
-                logger.trace(
+                logger.warning(
                     "FLTableDB : La relación entre la tabla del formulario %s y esta tabla %s de este campo no existe, "
                     "pero sin embargo se han indicado los campos de relación( %s, %s )",
                     curName,
@@ -271,7 +271,7 @@ class FLTableDB(QtWidgets.QWidget):
                     self.fieldRelation_,
                 )
             else:
-                logger.trace(
+                logger.warning(
                     "FLTableDB : El campo ( %s ) indicado en la propiedad foreignField no se encuentra en la tabla ( %s )",
                     self.foreignField_,
                     curName,
@@ -295,7 +295,7 @@ class FLTableDB(QtWidgets.QWidget):
 
             else:
                 if DEBUG:
-                    logger.trace(
+                    logger.warning(
                         "FLTableDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )",
                         self.fieldRelation_,
                         self.tableName_,
@@ -1693,7 +1693,7 @@ class FLTableDB(QtWidgets.QWidget):
                 if fieldCheck is None:
                     self.fieldNameCheckColumn_ = "%s_check_column" % tMD.name()
 
-                    if self.fieldNameCheckColumn_ not in tMD.fieldNames():
+                    if self.fieldNameCheckColumn_ not in tMD.fieldsNames():
                         fieldCheck = FLFieldMetaData(
                             self.fieldNameCheckColumn_,
                             self.tr(self.aliasCheckColumn_),
@@ -1769,7 +1769,7 @@ class FLTableDB(QtWidgets.QWidget):
                     s.append(field_3.name() + " ASC" if self.orderAsc3_ else " DESC")
 
                 id_mod = self.cursor().db().managerModules().idModuleOfFile("%s.mtd" % self.cursor().metadata().name())
-                function_qsa = "%s.tabeDB_setSort_%s" % (id_mod, self.cursor().metadata().name())
+                function_qsa = "%s.tableDB_setSort_%s" % (id_mod, self.cursor().metadata().name())
 
                 vars = []
                 vars.append(s)
@@ -2270,7 +2270,7 @@ class FLTableDB(QtWidgets.QWidget):
         spread_sheet = pncontrolsfactory.AQOdsSpreadSheet(ods_gen)
         sheet = pncontrolsfactory.AQOdsSheet(spread_sheet, mtd.alias())
         tdb_num_rows = cursor.size()
-        tdb_num_cols = len(mtd.fieldNames())
+        tdb_num_cols = len(mtd.fieldsNames())
 
         util = FLUtil()
         id_pix = 0
