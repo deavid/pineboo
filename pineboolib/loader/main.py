@@ -212,16 +212,19 @@ def exec_main(options: Values) -> int:
         project.main_window = project.main_form.mainWindow
         project.main_form.MainForm.setDebugLevel(options.debug_level)
 
+    project.message_manager().send("splash", "show")
     # Cargando spashscreen
+
     # Create and display the splash screen
     # if _DGI.localDesktop() and not options.action:
     #     splash = show_splashscreen(project)
     #     _DGI.processEvents()
     # else:
     #     splash = None
-    splash = None
+    # splash = None
 
-    project._splash = splash
+    # project._splash = splash
+
     project.run()
     if project.conn.conn is False:
         logger.warning("No connection was provided. Aborting Pineboo load.")
@@ -229,5 +232,5 @@ def exec_main(options: Values) -> int:
 
     from .init_project import init_project
 
-    ret = init_project(_DGI, splash, options, project, project.main_form if _DGI.useDesktop() else None, project.app)
+    ret = init_project(_DGI, options, project, project.main_form if _DGI.useDesktop() else None, project.app)
     return ret

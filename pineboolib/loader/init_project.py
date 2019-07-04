@@ -4,7 +4,7 @@ from typing import Any
 logger = logging.getLogger("loader.init_project")
 
 
-def init_project(DGI, splash, options, project, mainForm, app) -> Any:
+def init_project(DGI, options, project, mainForm, app) -> Any:
     """Initialize the project and start it."""
     # from PyQt5 import QtCore
 
@@ -42,9 +42,7 @@ def init_project(DGI, splash, options, project, mainForm, app) -> Any:
         else:
             raise ValueError("Action name %s not found" % options.action)
 
-    # if DGI.localDesktop() and splash:
-    #     splash.showMessage("Creando interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-    #     DGI.processEvents()
+    project.message_manager().send("splash", "showMessage", "Creando interface ...")
 
     if mainForm is not None:
         logger.info("Creando interfaz ...")
@@ -53,18 +51,12 @@ def init_project(DGI, splash, options, project, mainForm, app) -> Any:
         ret = 0
 
     if mainForm is not None:
-        # if DGI.localDesktop():
-        #     splash.showMessage("Abriendo interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-        #     DGI.processEvents()
+        project.message_manager().send("splash", "showMessage", "Abriendo interfaz ...")
 
         logger.info("Abriendo interfaz ...")
         main_window.show()
-        # if DGI.localDesktop():
-        #     splash.showMessage("Listo ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-        #     DGI.processEvents()
-        #     # main_window.w_.activateWindow()
-        # QtCore.QTimer.singleShot(1000, splash.hide)
-
+        project.message_manager().send("splash", "showMessage", "Listo ...")
+        project.message_manager().send("splash", "hide")
     if objaction:
         project.openDefaultForm(objaction.form())
 

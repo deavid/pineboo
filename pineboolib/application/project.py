@@ -42,6 +42,7 @@ class Project(object):
     sql_drivers_manager = None
     timer_ = None
     no_python_cache = False  # TODO: Fill this one instead
+    _msg_mng = None
 
     def __init__(self) -> None:
         """
@@ -82,7 +83,11 @@ class Project(object):
     def init_dgi(self, DGI: dgi_schema) -> None:
         """Load and associate the defined DGI onto this project"""
         # FIXME: Actually, DGI should be loaded here, or kind of.
+        from pineboolib.core.message_manager import manager
+
         self._DGI = DGI
+
+        self._msg_mng = manager(DGI)
 
         self.main_form_name = "eneboo"  # FIXME: Belongs to loader.main .. or dgi-qt5
         if config.value("ebcomportamiento/mdi_mode"):
@@ -135,9 +140,8 @@ class Project(object):
         # Preparar temporal
 
         if self.deleteCache and os.path.exists(_dir("cache/%s" % self.conn.DBName())):
-            # if self._splash:
-            #     # FIXME: Add progress communication method.
-            #     self._splash.showMessage("Borrando caché ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+
+            self.message_manager().send("splash", "showMessage", "Borrando caché ...")
             self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", _dir("cache/%s" % self.conn.DBName()))
             for root, dirs, files in os.walk(_dir("cache/%s" % self.conn.DBName()), topdown=False):
                 for name in files:
@@ -254,9 +258,7 @@ class Project(object):
                         for f in files:
                             os.remove(os.path.join(root, f))
 
-                # if settings.value("application/isDebuggerMode", False):
-                #     if self._splash:
-                #         self._splash.showMessage("Volcando a caché %s..." % nombre, QtCore.Qt.AlignLeft, QtCore.Qt.white)
+                self.message_manager().send("splash", "showMessage", "Volcando a caché %s..." % nombre)
 
                 if contenido and not os.path.exists(file_name):
                     f2 = open(file_name, "wb")
@@ -271,9 +273,7 @@ class Project(object):
                 # mtd_parse(fileobj)
 
             if self.parseProject and nombre.endswith(".qs") and settings.value("application/isDebuggerMode", False):
-                # if self._splash:
-                #    self._splash.showMessage("Convirtiendo %s ( %d/ ??) ..." %
-                #                             (nombre, pos_qs), QtCore.Qt.AlignLeft, QtCore.Qt.white)
+                self.message_manager().send("splash", "showMessage", "Convirtiendo %s ( %d/ ??) ..." % (nombre, pos_qs))
                 if os.path.exists(file_name):
 
                     self.parseScript(file_name, "(%d de %d)" % (p, size_))
@@ -294,17 +294,11 @@ class Project(object):
                     if self.parseProject and nombre.endswith(".qs"):
                         self.parseScript(_dir(root, nombre))
 
-        # FIXME:
-        # if self._splash:
-        #     self._splash.showMessage("Cargando objetos ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-        #     self._DGI.processEvents()
+        self.message_manager().send("splash", "showMessage", "Cargando objetos ...")
 
         load_models()
 
-        # FIXME:
-        # if self._splash:
-        #     self._splash.showMessage("Cargando traducciones ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-        #     self._DGI.processEvents()
+        self.message_manager().send("splash", "showMessage", "Cargando traducciones ...")
         from pineboolib import pncontrolsfactory
 
         pncontrolsfactory.aqApp.loadTranslations()
@@ -499,3 +493,6 @@ class Project(object):
             self.version = "DBAdmin v%s" % self.version
         else:
             self.version = "Quick v%s" % self.version
+
+    def message_manager(self):
+        return self._msg_mng

@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 class dgi_qt(dgi_schema):
 
     pnqt3ui = None
+    splash = None
 
     def __init__(self):
         super(dgi_qt, self).__init__()  # desktopEnabled y mlDefault a True
@@ -25,8 +26,10 @@ class dgi_qt(dgi_schema):
         self._alias = "Qt5"
 
         from pineboolib.plugins.dgi.dgi_qt import dgi_qt3ui
+        from .dgi_objects.splash_screen import splashscreen
 
         self.pnqt3ui = dgi_qt3ui
+        self.splash = splashscreen()
 
     def __getattr__(self, name):
 
