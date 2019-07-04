@@ -34,20 +34,27 @@ class sql_inspector(object):
         return self._table_names
 
     def field_names(self):
-        return self._field_names
+        ret = []
+        if self._field_names:
+            ret = list(self._field_names.keys())
+        return ret
 
     def fieldNameToPos(self, name):
 
-        if name in self._field_names:
-            return self._field_names.index(name)
+        if name in self._field_names.keys():
+            return self._field_names[name]
         else:
             raise Exception(
-                "No se encuentra el campo %s el la query (%s)"
-                % (name, self._table_names)
+                "No se encuentra el campo %s el la query (%s)" % (name, self._sql)
             )
 
-    def field_type_from_position(self, position):
-        pass
+    def posToFieldName(self, pos):
+
+        for k, v in self._field_names:
+            if v == pos:
+                return k
+
+        return False
 
     def _resolve_fields(self, sql):
         list_sql = sql.split(" ")
@@ -138,23 +145,11 @@ class sql_inspector(object):
 
             self._create_mtd_fields(fl_finish, tablas)
 
-            if not self.mtd_fields():
-                if len(fl_finish):
-                    self._posible_float = True
-                else:
-                    logger.warn(
-                        "La consulta % no se ha procesado correctamente. Campos: %s, Alias: %s, Tablas: %s",
-                        sql,
-                        fl_finish,
-                        alias,
-                        tablas,
-                    )
-
     def resolve_empty_value(self, pos):
         if not self.mtd_fields():
             return None
 
-        mtd = self._mtd_fields[self.field_names()[pos]]
+        mtd = self._mtd_fields[pos]
 
         type_ = mtd.type()
         ret_ = None
@@ -178,12 +173,9 @@ class sql_inspector(object):
     def resolve_value(self, pos, value, raw=False):
 
         if not self.mtd_fields():
-            if self._posible_float:
-                return float(value)
-            else:
-                return value
+            return value
 
-        mtd = self._mtd_fields[self.field_names()[pos]]
+        mtd = self._mtd_fields[pos]
         type_ = mtd.type()
 
         ret_ = value
@@ -220,10 +212,10 @@ class sql_inspector(object):
         self._mtd_fields = {}
         self._invalid_tables = []
         self._table_names = list(tables_list)
-        self._field_names = []
+        self._field_names = {k: n for n, k in enumerate(fields_list)}
 
-        for field_name_org in list(fields_list):
-            self._field_names.append(field_name_org)
+        for number_, field_name_org in enumerate(list(fields_list)):
+            # self._field_names.append(field_name_org)
             field_name = field_name_org
             for table_name in list(tables_list):
                 mtd_table = project.conn.manager().metadata(table_name)
@@ -240,7 +232,7 @@ class sql_inspector(object):
                             field_name = field_name[field_name.find(".") + 1 :]
                     mtd_field = mtd_table.field(field_name)
                     if mtd_field is not None:
-                        self._mtd_fields[field_name_org] = mtd_field
+                        self._mtd_fields[number_] = mtd_field
                     # fields_list.remove(field_name_org)
             else:
                 if table_name not in self._invalid_tables:

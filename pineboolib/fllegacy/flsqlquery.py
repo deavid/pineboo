@@ -380,7 +380,7 @@ class FLSqlQuery(object):
     """
 
     def fieldList(self):
-        return self.d.fieldList_
+        return self.sql_inspector.field_names()
 
     """
     Asigna un diccionario de parámetros, al diccionario de parámetros de la consulta.
@@ -656,9 +656,9 @@ class FLSqlQuery(object):
     def isNull(self, n):
         i = n
         if isinstance(n, str):
-            i = self.self.fieldNameToPos(n)
+            i = self.fieldNameToPos(n)
 
-        return self._row[i] is None
+        return self._row[i] in (None, "None")
 
     """
     Devuelve el nombre de campo, dada su posicion en la consulta.
@@ -670,15 +670,16 @@ class FLSqlQuery(object):
     """
 
     def posToFieldName(self, p):
+        return self.sql_inspector.posToFieldName(p)
         # if p < 0 or p >= len(self.d.fieldList_):
         #    return None
-        ret_ = None
-        try:
-            ret_ = self.d.fieldList_[p]
-        except Exception:
-            pass
+        # ret_ = None
+        # try:
+        #    ret_ = self.d.fieldList_[p]
+        # except Exception:
+        #    pass
 
-        return ret_
+        # return ret_
 
     """
     Devuelve la posición de una campo en la consulta, dado su nombre.
@@ -687,16 +688,17 @@ class FLSqlQuery(object):
     @return Posicion del campo en la consulta. Si no existe el campo devuelve -1
     """
 
-    def fieldNameToPos(self, n):
+    def fieldNameToPos(self, name):
+        return self.sql_inspector.fieldNameToPos(nanme)
         # i = 0
         # for field in self.d.fieldList_:
         #    if field.lower() == n.lower():
         #        return i
         #    i = i + 1
-        if n in self.d.fieldList_:
-            return self.d.fieldList_.index(n)
-        else:
-            return False
+        # if n in self.d.fieldList_:
+        #    return self.d.fieldList_.index(n)
+        # else:
+        #    return False
 
     """
     Para obtener la lista de nombres de las tablas de la consulta.
@@ -706,7 +708,8 @@ class FLSqlQuery(object):
     """
 
     def tablesList(self):
-        return self.d.tablesList_
+        # return self.d.tablesList_
+        return self.sql_inspector.table_names()
 
     """
     Establece la lista de nombres de las tablas de la consulta
