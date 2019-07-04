@@ -66,6 +66,9 @@ class sql_inspector(object):
         list_sql = sql.split(" ")
 
         if list_sql[0] == "select":
+            if "from" not in list_sql:
+                return
+
             index_from = list_sql.index("from")
             fl = list_sql[1:index_from][0]
             if "where" in list_sql:
