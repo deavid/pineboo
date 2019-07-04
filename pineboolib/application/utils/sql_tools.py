@@ -13,6 +13,7 @@ class sql_inspector(object):
     _invalid_fields = None
     _posible_float = None
     _sql = None
+    _alias = None
 
     def __init__(self, sql_text):
 
@@ -44,9 +45,17 @@ class sql_inspector(object):
         if name in self._field_names.keys():
             return self._field_names[name]
         else:
-            raise Exception(
-                "No se encuentra el campo %s el la query (%s)" % (name, self._sql)
-            )
+            if name.find(".") > -1:
+                table_name = name[0 : name.find(".")]
+                field_name = name[name.find(".") + 1 :]
+                if table_name in self._alias.keys():
+                    table_name = self._alias[table_name]
+                    return self.fieldNameToPos("%s.%s" % (table_name, field_name))
+                else:
+                    raise Exception(
+                        "No se encuentra el campo %s el la query (%s)"
+                        % (name, self._sql)
+                    )
 
     def posToFieldName(self, pos):
 
@@ -72,7 +81,7 @@ class sql_inspector(object):
             fl = fl.split(",")
 
             tablas = []
-            alias = {}
+            self._alias = {}
             jump = 0
             next_is_alias = None
             prev_ = ""
@@ -114,7 +123,7 @@ class sql_inspector(object):
                 #    continue
                 else:
                     if last_was_table:
-                        alias[t] = prev_
+                        self._alias[t] = prev_
                         last_was_table = False
                     else:
                         tablas.append(t)
@@ -138,8 +147,8 @@ class sql_inspector(object):
                     else:
                         a = a_
 
-                    if a in alias.keys():
-                        field_name = "%s.%s" % (a_.replace(a, alias[a]), f_)
+                    if a in self._alias.keys():
+                        field_name = "%s.%s" % (a_.replace(a, self._alias[a]), f_)
 
                 fl_finish.append(field_name)
 
