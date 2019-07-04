@@ -21,6 +21,19 @@ class QComboBox(QtWidgets.QComboBox):
         return super().currentIndex
 
     def setCurrentItem(self, i):
-        return super().setCurrentIndex(i)
+        pos = None
+        if isinstance(i, str):
+            pos = 0
+            size_ = self.model().rowCount()
+            for n in range(size_):
+                item = self.model().index(n, 0)
+                if item.data() == i:
+                    pos = n
+                    break
+
+        else:
+            pos = i
+
+        return super().setCurrentIndex(pos)
 
     currentItem = property(getCurrentItem, setCurrentItem, None, "get/set current item index")
