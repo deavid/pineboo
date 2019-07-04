@@ -596,6 +596,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def refresh(self):
+
         if self._initialized is None and self.parent_view:  # Si es el primer refresh y estoy conectado a un FLDatatable()
             self._initialized = True
             timer = QtCore.QTimer()
@@ -628,7 +629,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             if not where_filter:
                 where_filter = wfilter
             elif wfilter not in where_filter:
-                where_filter += " AND " + wfilter
+                if where_filter not in wfilter:
+                    where_filter += " AND " + wfilter
         if not where_filter:
             where_filter = "1 = 1"
 
