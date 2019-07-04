@@ -80,7 +80,7 @@ class sql_inspector(object):
             tablas = []
             self._alias = {}
             jump = 0
-            next_is_alias = None
+            # next_is_alias = None
             prev_ = ""
             last_was_table = False
             for t in tl:

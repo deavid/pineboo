@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QTreeWidgetItem, QTreeWidget, QMainWindow, QActionGroup, QMenu, QAction
+from PyQt5.QtWidgets import QTreeWidgetItem, QTreeWidget, QMainWindow, QActionGroup, QMenu
 from PyQt5.QtXml import QDomDocument
 
 # from pineboolib.core.settings import settings
