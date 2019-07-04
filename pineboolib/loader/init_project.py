@@ -42,7 +42,7 @@ def init_project(DGI, options, project, mainForm, app) -> Any:
         else:
             raise ValueError("Action name %s not found" % options.action)
 
-    project.message_manager().send("splash", "showMessage", "Creando interface ...")
+    project.message_manager().send("splash", "showMessage", ["Creando interface ..."])
 
     if mainForm is not None:
         logger.info("Creando interfaz ...")
@@ -51,11 +51,11 @@ def init_project(DGI, options, project, mainForm, app) -> Any:
         ret = 0
 
     if mainForm is not None:
-        project.message_manager().send("splash", "showMessage", "Abriendo interfaz ...")
+        project.message_manager().send("splash", "showMessage", ["Abriendo interfaz ..."])
 
         logger.info("Abriendo interfaz ...")
         main_window.show()
-        project.message_manager().send("splash", "showMessage", "Listo ...")
+        project.message_manager().send("splash", "showMessage", ["Listo ..."])
         project.message_manager().send("splash", "hide")
     if objaction:
         project.openDefaultForm(objaction.form())

@@ -19,6 +19,7 @@ class dgi_qt(dgi_schema):
 
     pnqt3ui = None
     splash = None
+    progress_dialog_mng = None
 
     def __init__(self):
         super(dgi_qt, self).__init__()  # desktopEnabled y mlDefault a True
@@ -27,9 +28,11 @@ class dgi_qt(dgi_schema):
 
         from pineboolib.plugins.dgi.dgi_qt import dgi_qt3ui
         from .dgi_objects.splash_screen import splashscreen
+        from .dgi_objects.progress_dialog_manager import progress_dialog_manager
 
         self.pnqt3ui = dgi_qt3ui
         self.splash = splashscreen()
+        self.progress_dialog_manager = progress_dialog_manager()
 
     def __getattr__(self, name):
 

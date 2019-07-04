@@ -12,20 +12,18 @@ class manager(object):
 
     def send(self, type_, function_=None, data_=None):
         obj_ = getattr(self._dgi, type_, None)
+        ret_ = None
         if obj_:
-            attr_ = getattr(obj_, function_, None)
-            if attr_ is not None:
-                if data_ is not None:
-                    attr_(data_)
-                else:
-                    attr_()
+            if function_ is not None:
+                attr_ = getattr(obj_, function_, None)
+            else:
+                attr_ = obj_
+            if not data_:
+                ret_ = attr_()
+            else:
+                ret_ = attr_(*data_)
 
             self._dgi.processEvents()
 
-        print("**", type_, function_, data_)
-
-    # if DGI.localDesktop():
-    #     splash.showMessage("Listo ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-    #     DGI.processEvents()
-    #     # main_window.w_.activateWindow()
-    # QtCore.QTimer.singleShot(1000, splash.hide)
+        if ret_ is not None:
+            return ret_

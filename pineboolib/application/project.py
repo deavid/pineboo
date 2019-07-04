@@ -141,7 +141,7 @@ class Project(object):
 
         if self.deleteCache and os.path.exists(_dir("cache/%s" % self.conn.DBName())):
 
-            self.message_manager().send("splash", "showMessage", "Borrando caché ...")
+            self.message_manager().send("splash", "showMessage", ["Borrando caché ..."])
             self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", _dir("cache/%s" % self.conn.DBName()))
             for root, dirs, files in os.walk(_dir("cache/%s" % self.conn.DBName()), topdown=False):
                 for name in files:
@@ -258,7 +258,7 @@ class Project(object):
                         for f in files:
                             os.remove(os.path.join(root, f))
 
-                self.message_manager().send("splash", "showMessage", "Volcando a caché %s..." % nombre)
+                self.message_manager().send("splash", "showMessage", ["Volcando a caché %s..." % nombre])
 
                 if contenido and not os.path.exists(file_name):
                     f2 = open(file_name, "wb")
@@ -273,7 +273,7 @@ class Project(object):
                 # mtd_parse(fileobj)
 
             if self.parseProject and nombre.endswith(".qs") and settings.value("application/isDebuggerMode", False):
-                self.message_manager().send("splash", "showMessage", "Convirtiendo %s ( %d/ ??) ..." % (nombre, pos_qs))
+                self.message_manager().send("splash", "showMessage", ["Convirtiendo %s ( %d/ ??) ..." % (nombre, pos_qs)])
                 if os.path.exists(file_name):
 
                     self.parseScript(file_name, "(%d de %d)" % (p, size_))
@@ -294,11 +294,11 @@ class Project(object):
                     if self.parseProject and nombre.endswith(".qs"):
                         self.parseScript(_dir(root, nombre))
 
-        self.message_manager().send("splash", "showMessage", "Cargando objetos ...")
+        self.message_manager().send("splash", "showMessage", ["Cargando objetos ..."])
 
         load_models()
 
-        self.message_manager().send("splash", "showMessage", "Cargando traducciones ...")
+        self.message_manager().send("splash", "showMessage", ["Cargando traducciones ..."])
         from pineboolib import pncontrolsfactory
 
         pncontrolsfactory.aqApp.loadTranslations()

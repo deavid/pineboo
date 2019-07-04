@@ -27,7 +27,6 @@ class FLUtil(QtCore.QObject):
     @author InfoSiAL S.L.
     """
 
-    progress_dialog_stack = []
     vecUnidades = [
         "",
         "uno",
@@ -1074,38 +1073,18 @@ class FLUtil(QtCore.QObject):
         @param l Label del diálogo
         @param tS Número total de pasos a realizar
         """
-        from pineboolib import pncontrolsfactory
+        from pineboolib import project
 
-        parent = None
-        if self.__class__.progress_dialog_stack:
-            parent = self.__class__.progress_dialog_stack[-1]
-        pd_widget = pncontrolsfactory.QProgressDialog(str(title), str(self.translate("scripts", "Cancelar")), 0, steps, parent)
-        pd_widget.setObjectName(id_)
-        pd_widget.setWindowTitle(str(title))
-        self.__class__.progress_dialog_stack.append(pd_widget)
-        pd_widget.setMinimumDuration(100)
-
-        pncontrolsfactory.SysType().processEvents()
-        return pd_widget
+        return project.message_manager().send("progress_dialog_manager", "Create", [title, steps, id_])
 
     def destroyProgressDialog(self, id_="default"):
         """
         Destruye el diálogo de progreso
         """
-        from pineboolib import pncontrolsfactory
 
-        pd_widget = self.__class__.progress_dialog_stack[-1]
+        from pineboolib import project
 
-        if id_ != "default":
-            for w in self.__class__.progress_dialog_stack:
-                if w.objectName() == id_:
-                    pd_widget = w
-                    break
-
-        pd_widget.close()
-        self.__class__.progress_dialog_stack.remove(pd_widget)
-        # pd_widget.hide()
-        pncontrolsfactory.SysType().processEvents()
+        project.message_manager().send("progress_dialog_manager", "Destroy", [id_])
 
     def setProgress(self, step_number, id_="default"):
         """
@@ -1113,18 +1092,10 @@ class FLUtil(QtCore.QObject):
 
         @param p Grado de progreso
         """
-        from pineboolib import pncontrolsfactory
 
-        pd_widget = self.__class__.progress_dialog_stack[-1]
+        from pineboolib import project
 
-        if id_ != "default":
-            for w in self.__class__.progress_dialog_stack:
-                if w.objectName() == id_:
-                    pd_widget = w
-                    break
-
-        pd_widget.setValue(step_number)
-        pncontrolsfactory.SysType().processEvents()
+        project.message_manager().send("progress_dialog_manager", "setProgress", [step_number, id_])
 
     def setLabelText(self, l, id_="default"):
         """
@@ -1132,18 +1103,10 @@ class FLUtil(QtCore.QObject):
 
         @param l Etiqueta
         """
-        from pineboolib import pncontrolsfactory
 
-        pd_widget = self.__class__.progress_dialog_stack[-1]
+        from pineboolib import project
 
-        if id_ != "default":
-            for w in self.__class__.progress_dialog_stack:
-                if w.objectName() == id_:
-                    pd_widget = w
-                    break
-
-        pd_widget.setLabelText(str(l))
-        pncontrolsfactory.SysType().processEvents()
+        project.message_manager().send("progress_dialog_manager", "setLabelText", [l, id_])
 
     def setTotalSteps(self, tS, id_="default"):
         """
@@ -1151,18 +1114,10 @@ class FLUtil(QtCore.QObject):
 
         @param ts Número total de pasos
         """
-        from pineboolib import pncontrolsfactory
 
-        pd_widget = self.__class__.progress_dialog_stack[-1]
+        from pineboolib import project
 
-        if id_ != "default":
-            for w in self.__class__.progress_dialog_stack:
-                if w.objectName() == id_:
-                    pd_widget = w
-                    break
-
-        pd_widget.setRange(0, tS)
-        pncontrolsfactory.SysType().processEvents()
+        project.message_manager().send("progress_dialog_manager", "setTotalSteps", [tS, id_])
 
     def domDocumentSetContent(self, doc, content):
         """

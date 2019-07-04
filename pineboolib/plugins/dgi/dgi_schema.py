@@ -157,3 +157,6 @@ class dgi_schema(object):
 
     def use_alternative_credentials(self):
         return False
+
+    def debug(self, txt):
+        logger.warning("---> %s" % txt)

@@ -2270,7 +2270,7 @@ class FLTableDB(QtWidgets.QWidget):
         spread_sheet = pncontrolsfactory.AQOdsSpreadSheet(ods_gen)
         sheet = pncontrolsfactory.AQOdsSheet(spread_sheet, mtd.alias())
         tdb_num_rows = cursor.size()
-        tdb_num_cols = len(mtd.fieldsNames())
+        tdb_num_cols = len(mtd.fieldNames())
 
         util = FLUtil()
         id_pix = 0

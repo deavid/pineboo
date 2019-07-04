@@ -13,6 +13,7 @@ from pineboolib.core.utils.utils_base import ustr, filedir
 
 from pineboolib.application import types
 
+
 # from pineboolib.pnobjectsfactory import load_model, Calculated
 from pineboolib.pncontrolsfactory import FLUtil, qsa_sys, QInputDialog, QLineEdit
 
@@ -530,7 +531,9 @@ def debug(txt):
     Mensajes debug en qsa
     @param txt. Mensaje.
     """
-    logger.warning("---> " + ustr(txt))
+    from pineboolib import project
+
+    project.message_manager().send("debug", None, [ustr(txt)])
 
 
 # Usadas solo por import *
