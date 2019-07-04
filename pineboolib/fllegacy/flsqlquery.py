@@ -71,6 +71,7 @@ class FLSqlQuery(object):
     @property
     def sql_inspector(self):
         if self._sql_inspector is None:
+            self.logger.warning("sql_inspector: Query has not executed yet", stack_info=True)
             sql = self.sql()
             self._sql_inspector = sql_tools.sql_inspector(sql.lower())
         return self._sql_inspector
@@ -377,7 +378,10 @@ class FLSqlQuery(object):
     """
 
     def fieldList(self):
-        return self.sql_inspector.field_names()
+        if self.d.fieldList_:
+            return self.d.fieldList_
+        else:
+            return self.sql_inspector.field_names()
 
     """
     Asigna un diccionario de parámetros, al diccionario de parámetros de la consulta.
@@ -701,8 +705,10 @@ class FLSqlQuery(object):
     """
 
     def tablesList(self):
-        # return self.d.tablesList_
-        return self.sql_inspector.table_names()
+        if self.d.tablesList_:
+            return self.d.tablesList_
+        else:
+            return self.sql_inspector.table_names()
 
     """
     Establece la lista de nombres de las tablas de la consulta
