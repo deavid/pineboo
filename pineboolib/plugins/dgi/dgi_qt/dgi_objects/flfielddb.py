@@ -825,11 +825,31 @@ class FLFieldDB(QtWidgets.QWidget):
             if type_ == "double" or type_ == "int" or type_ == "uint":
                 return 0
 
-        if type_ == "double" or type_ == "int" or type_ == "uint" or type_ == "string" or type_ == "stringlist":
+        if type_ in ("string", "stringlist"):
             if self.editor_:
                 ed_ = self.editor_
                 if isinstance(ed_, pineboolib.pncontrolsfactory.FLLineEdit):
                     v = ed_.text()
+
+        if type_ in ("int", "uint"):
+            if self.editor_:
+                ed_ = self.editor_
+                if isinstance(ed_, pineboolib.pncontrolsfactory.FLLineEdit):
+                    v = ed_.text()
+                    if v == "":
+                        v = 0
+                    else:
+                        v = int(v)
+
+        if type_ == "double":
+            if self.editor_:
+                ed_ = self.editor_
+                if isinstance(ed_, pineboolib.pncontrolsfactory.FLLineEdit):
+                    v = ed_.text()
+                    if v == "":
+                        v = 0.00
+                    else:
+                        v = float(v)
 
         elif type_ == "serial":
             if self.editor_:
