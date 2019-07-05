@@ -88,13 +88,15 @@ class ASTPythonBase(object):
     def can_process_tag(self, tagname) -> Any:
         return False
 
+    def polish(self) -> "ASTPythonBase":
+        return self
 
-class ASTPythonFactory(type):
+
+class ASTPythonFactory(ASTPythonBase, type):
     ast_class_types: List[Type[ASTPythonBase]] = []
 
     def __init__(cls, name, bases, dct) -> None:
-        if isinstance(cls, ASTPythonBase):
-            ASTPythonFactory.ast_class_types.append(cls)
+        ASTPythonFactory.ast_class_types.append(cls)
         super().__init__(name, bases, dct)
 
 
@@ -127,9 +129,6 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
             sp = " " * splen
         cname = self.__class__.__name__
         self.debug_file.write("%04d%s%s: %s\n" % (ASTPython.numline, sp, cname, text.encode("UTF-8")))
-
-    def polish(self) -> "ASTPython":
-        return self
 
     def generate(self, **kwargs):
         yield "debug", "* not-known-seq * %s" % ElementTree.tostring(self.elem, encoding="UTF-8")
