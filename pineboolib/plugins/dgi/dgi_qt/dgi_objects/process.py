@@ -83,11 +83,17 @@ class Process(QtCore.QProcess):
 
         encoding = sys.getfilesystemencoding()
         pro = QtCore.QProcess()
+        from pineboolib.application import types
+
+        if isinstance(comando, types.Array):
+            comando = str(comando)
+
         if isinstance(comando, str):
             comando = comando.split(" ")
 
         programa = comando[0]
         argumentos = comando[1:]
+        print("**", programa, argumentos)
         pro.setProgram(programa)
         pro.setArguments(argumentos)
         pro.start()
