@@ -6,7 +6,7 @@ import os
 import os.path
 import re
 from xml.etree import ElementTree
-from typing import Any, Generator, Optional, Tuple, Type, List
+from typing import Any, Generator, Optional, Tuple, Type, List, Dict
 
 
 def id_translate(name) -> Any:
@@ -84,6 +84,11 @@ cont_do_while = 0
 
 
 class ASTPythonBase(object):
+    elem = None
+
+    def __init__(self, elem) -> None:
+        self.elem = elem
+
     @classmethod
     def can_process_tag(self, tagname) -> Any:
         return False
@@ -92,12 +97,16 @@ class ASTPythonBase(object):
         return self
 
 
-class ASTPythonFactory(ASTPythonBase, type):
+class ASTPythonFactory(type):
     ast_class_types: List[Type[ASTPythonBase]] = []
 
-    def __init__(cls, name, bases, dct) -> None:
+    def __init__(self, name, bases, dct) -> None:
+        if issubclass(self, ASTPythonBase):
+            ASTPythonFactory.register_type(self)
+
+    @staticmethod
+    def register_type(cls):
         ASTPythonFactory.ast_class_types.append(cls)
-        super().__init__(name, bases, dct)
 
 
 class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
@@ -110,8 +119,11 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
     def can_process_tag(self, tagname) -> Any:
         return self.__name__ == tagname or tagname in self.tags
 
+    def generate(self, **kwargs):
+        yield "debug", "* not-known-seq * %s" % ElementTree.tostring(self.elem, encoding="UTF-8")
+
     def __init__(self, elem) -> None:
-        self.elem = elem
+        super().__init__(elem)
         self.internal_generate = self.generate
         if self.debug_file:
             self.generate = self._generate
@@ -129,9 +141,6 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
             sp = " " * splen
         cname = self.__class__.__name__
         self.debug_file.write("%04d%s%s: %s\n" % (ASTPython.numline, sp, cname, text.encode("UTF-8")))
-
-    def generate(self, **kwargs):
-        yield "debug", "* not-known-seq * %s" % ElementTree.tostring(self.elem, encoding="UTF-8")
 
     def _generate(self, **kwargs) -> Generator[Tuple[str, str], Any, None]:
         self.debug("begin-gen")
@@ -1553,15 +1562,11 @@ class Unknown(ASTPython):
 # -----------------
 
 
-def astparser_for(elem) -> Optional[ASTPython]:
-    classobj = None
+def astparser_for(elem) -> Optional[ASTPythonBase]:
     for cls in ASTPythonFactory.ast_class_types:
         if cls.can_process_tag(elem.tag):
-            classobj = cls
-            break
-    if classobj is None:
-        return None
-    return classobj(elem)
+            return cls(elem)
+    return None
 
 
 def parse_ast(elem) -> Any:
@@ -1603,9 +1608,9 @@ def file_template(ast: Any) -> Generator[Tuple[Any, Any], Any, None]:
 
 
 def write_python_file(fobj, ast) -> None:
-    indent = []
+    indent: List[str] = []
     indent_text = "    "
-    last_line_for_indent = {}
+    last_line_for_indent: Dict[int, int] = {}
     numline = 0
     ASTPython.numline = 1
     last_dtype = None
