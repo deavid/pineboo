@@ -912,7 +912,7 @@ class FLUtil(QtCore.QObject):
         if tmd is None:
             return 0
         fmd = tmd.field(field_name)
-        return self.buildNumber(value, "float", fmd.partDecimal()) if fmd is not None else 0
+        return float(self.buildNumber(value, "float", fmd.partDecimal())) if fmd is not None else 0
 
     def sqlSelect(self, f, s, w, tL=None, size=0, connName="default"):
         """
