@@ -506,7 +506,7 @@ class FLSqlQuery(object):
 
         pos = n
         if isinstance(n, str):
-            pos = self.sql_inspector.fieldNameToPos(n)
+            pos = self.sql_inspector.fieldNameToPos(n.lower())
 
         ret = self._row[pos]
 
@@ -686,7 +686,7 @@ class FLSqlQuery(object):
     """
 
     def fieldNameToPos(self, name):
-        return self.sql_inspector.fieldNameToPos(name)
+        return self.sql_inspector.fieldNameToPos(name.lower())
         # i = 0
         # for field in self.d.fieldList_:
         #    if field.lower() == n.lower():
