@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtGui
-from typing import Any, Tuple, TypeVar
-
-_T0 = TypeVar("_T0")
-_T1 = TypeVar("_T1")
+from typing import Any, Tuple
 
 
 class FLIntValidator(QtGui.QIntValidator):
@@ -13,7 +10,7 @@ class FLIntValidator(QtGui.QIntValidator):
         super().__init__(args[0], args[1], args[2])
         self._formatting = False
 
-    def validate(self, input_: _T0, pos_cursor: _T1) -> Tuple[Any, Any, Any]:
+    def validate(self, input_, pos_cursor) -> Tuple[Any, Any, Any]:
 
         if not input_ or self._formatting:
             return (self.Acceptable, input_, pos_cursor)

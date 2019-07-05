@@ -2,110 +2,113 @@ from typing import List, Optional, Union
 
 
 class IFieldMetaData:
+    """Abastract class for FieldMetaData.
+    """
+
     def __init__(self, *args, **kwargs) -> None:
-        pass
+        return
 
     def __len__(self) -> int:
-        pass
+        return 0
 
     def addRelationMD(self, r) -> None:
-        pass
+        return
 
     def alias(self) -> str:
-        pass
+        return ""
 
     def allowNull(self) -> bool:
-        pass
+        return False
 
     def associatedField(self) -> None:
-        pass
+        return
 
     def associatedFieldFilterTo(self) -> str:
-        pass
+        return ""
 
     def associatedFieldName(self) -> Optional[str]:
-        pass
+        return None
 
     def defaultValue(self) -> Optional[Union[str, bool]]:
-        pass
+        return None
 
     def editable(self) -> bool:
-        pass
+        return False
 
     def formatAssignValue(self, fieldName: str, value: int, upper: bool) -> str:
-        pass
+        return ""
 
     def generated(self) -> bool:
-        pass
+        return False
 
     def getIndexOptionsList(self, name: str) -> Optional[int]:
-        pass
+        return None
 
     def hasOptionsList(self) -> bool:
-        pass
+        return False
 
     def inicializeNewFLFieldMetaData(self, *args, **kwargs) -> None:
-        pass
+        return
 
     def isCompoundKey(self) -> bool:
-        pass
+        return False
 
     def isPrimaryKey(self) -> bool:
-        pass
+        return False
 
     def length(self) -> int:
-        pass
+        return 0
 
     def metadata(self) -> None:
-        pass
+        return
 
     def name(self) -> str:
-        pass
+        return ""
 
     def optionsList(self) -> List[str]:
-        pass
+        return []
 
     def outTransaction(self) -> bool:
-        pass
+        return False
 
     def partDecimal(self) -> int:
-        pass
+        return 0
 
     def partInteger(self) -> int:
-        pass
+        return 0
 
     def regExpValidator(self) -> Optional[str]:
-        pass
+        return None
 
     def relationM1(self) -> None:
-        pass
+        return
 
     def setAssociatedField(self, r_or_name, f: str) -> None:
-        pass
+        return
 
     def setEditable(self, ed: bool) -> None:
-        pass
+        return
 
     def setFullyCalculated(self, c: bool) -> None:
-        pass
+        return
 
     def setMetadata(self, mtd) -> None:
-        pass
+        return
 
     def setOptionsList(self, ol: str) -> None:
-        pass
+        return
 
     def setTrimed(self, t: bool) -> None:
-        pass
+        return
 
     def setVisible(self, v: bool) -> None:
-        pass
+        return
 
     def type(self) -> str:
-        pass
+        return ""
 
     def visible(self) -> bool:
-        pass
+        return False
 
     def visibleGrid(self) -> bool:
-        pass
+        return False

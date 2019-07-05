@@ -17,9 +17,13 @@ class PinebooSettings(QSettings):
         application = "Pineboo" + name
         super().__init__(format, scope, organization, application)
 
+    @staticmethod
+    def dump_qsize(value: QSize) -> Dict:
+        return {"__class__": "QSize", "width": value.width(), "height": value.height()}
+
     def dump_value(self, value: Union[QSize, str, bool, int, List[str]]) -> str:
         if isinstance(value, QSize):
-            value = {"__class__": "QSize", "width": value.width(), "height": value.height()}
+            value = self.dump_qsize(value)
         return json.dumps(value)
 
     def load_value(self, value: str) -> Union[int, Dict[str, Union[str, int]], str, bool]:
