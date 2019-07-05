@@ -28,11 +28,11 @@ class dgi_qt(dgi_schema):
 
         from pineboolib.plugins.dgi.dgi_qt import dgi_qt3ui
         from .dgi_objects.splash_screen import splashscreen
-        from .dgi_objects.progress_dialog_manager import progress_dialog_manager
+        from .dgi_objects.progress_dialog_manager import ProgressDialogManager
 
         self.pnqt3ui = dgi_qt3ui
         self.splash = splashscreen()
-        self.progress_dialog_manager = progress_dialog_manager()
+        self.progress_dialog_manager = ProgressDialogManager()
 
     def __getattr__(self, name):
 

@@ -1075,7 +1075,7 @@ class FLUtil(QtCore.QObject):
         """
         from pineboolib import project
 
-        return project.message_manager().send("progress_dialog_manager", "Create", [title, steps, id_])
+        return project.message_manager().send("progress_dialog_manager", "create", [title, steps, id_])
 
     def destroyProgressDialog(self, id_="default"):
         """
@@ -1084,7 +1084,7 @@ class FLUtil(QtCore.QObject):
 
         from pineboolib import project
 
-        project.message_manager().send("progress_dialog_manager", "Destroy", [id_])
+        project.message_manager().send("progress_dialog_manager", "destroy", [id_])
 
     def setProgress(self, step_number, id_="default"):
         """
