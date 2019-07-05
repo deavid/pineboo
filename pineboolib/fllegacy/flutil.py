@@ -819,7 +819,7 @@ class FLUtil(QtCore.QObject):
             ret = float(ret)
         return ret
         """
-        return ret
+        return str(ret)
 
     def readSettingEntry(self, key, def_=u""):
         """
