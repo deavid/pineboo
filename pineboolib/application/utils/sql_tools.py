@@ -122,7 +122,7 @@ class sql_inspector(object):
                     prev_ = t
                     last_was_table = False
 
-                elif t in ("left", "join", "right"):
+                elif t in ("left", "join", "right", "inner"):
                     prev_ = t
                     last_was_table = False
                     continue
