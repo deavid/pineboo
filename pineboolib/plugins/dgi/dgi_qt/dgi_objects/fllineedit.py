@@ -21,8 +21,10 @@ class FLLineEdit(QtWidgets.QLineEdit):
     def __init__(self, parent, name=None):
         super(FLLineEdit, self).__init__(parent)
         self._name = name
-        if isinstance(parent.fieldName_, str):
-            self._fieldName = parent.fieldName_
+        if hasattr(parent, "fieldName_"):
+            if isinstance(parent.fieldName_, str):
+                self._fieldName = parent.fieldName_
+
             self._tipo = parent.cursor_.metadata().field(self._fieldName).type()
             self.partDecimal = 0
             self.autoSelect = True
