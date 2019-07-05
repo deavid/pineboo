@@ -1154,8 +1154,6 @@ class FLTableDB(QtWidgets.QWidget):
                             editor_ = pncontrolsfactory.QComboBox(self)
                             olTranslated = []
                             olNoTranslated = field.optionsList()
-                            # print(field.optionsList())
-                            # countOl = olNoTranslated.count()
                             for z in olNoTranslated:
                                 olTranslated.append(util.translate("Metadata", z))
 
