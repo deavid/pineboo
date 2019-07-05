@@ -1767,11 +1767,11 @@ class FLTableDB(QtWidgets.QWidget):
                 field_3 = self.tableRecords_.visual_index_to_field(self.sortColumn3_)
 
                 if field_1 is not None:
-                    s.append(field_1.name() + " ASC" if self.orderAsc_ else " DESC")
+                    s.append("%s %s" % (field_1.name(), "ASC" if self.orderAsc_ else "DESC"))
                 if field_2 is not None:
-                    s.append(field_2.name() + " ASC" if self.orderAsc2_ else " DESC")
+                    s.append("%s %s" % (field_2.name(), "ASC" if self.orderAsc_ else "DESC"))
                 if field_3 is not None:
-                    s.append(field_3.name() + " ASC" if self.orderAsc3_ else " DESC")
+                    s.append("%s %s" % (field_3.name(), "ASC" if self.orderAsc_ else "DESC"))
 
                 id_mod = self.cursor().db().managerModules().idModuleOfFile("%s.mtd" % self.cursor().metadata().name())
                 function_qsa = "%s.tableDB_setSort_%s" % (id_mod, self.cursor().metadata().name())
