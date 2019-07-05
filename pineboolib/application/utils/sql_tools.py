@@ -67,18 +67,31 @@ class sql_inspector(object):
 
         if list_sql[0] == "select":
             if "from" not in list_sql:
-                return
+                return  # Se entiende que es una consulta especial
 
             index_from = list_sql.index("from")
-            fl = list_sql[1:index_from][0]
+            fl = []
+            fields_list = list_sql[1:index_from]
+            for field in fields_list:
+                field = field.replace(" ", "")
+                if field.find(",") > -1:
+                    field = field.split(",")
+                    fl = fl + field
+                else:
+                    fl.append(field)
+
+            fields_list = fl
+            fl = []
+            for f in list(fields_list):
+                if f == "":
+                    continue
+                fl.append(f)
+
             if "where" in list_sql:
                 index_where = list_sql.index("where")
                 tl = list_sql[index_from + 1 : index_where]
             else:
                 tl = list_sql[index_from + 1 :]
-
-            fl = fl.replace(" ", "")
-            fl = fl.split(",")
 
             tablas = []
             self._alias = {}
@@ -158,6 +171,10 @@ class sql_inspector(object):
         if not self.mtd_fields():
             return None
 
+        if pos not in self._mtd_fields.keys():
+            logger.warning("SQL_TOOLS : No se encuentra la posición %s", pos)
+            return None
+
         mtd = self._mtd_fields[pos]
 
         type_ = mtd.type()
@@ -184,7 +201,12 @@ class sql_inspector(object):
         if not self.mtd_fields():
             return value
 
+        if pos not in self._mtd_fields.keys():
+            logger.warning("SQL_TOOLS : No se encuentra la posición %s", pos)
+            return None
+
         mtd = self._mtd_fields[pos]
+
         type_ = mtd.type()
 
         ret_ = value
