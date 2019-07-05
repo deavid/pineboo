@@ -685,6 +685,7 @@ class With(ASTPython):
         "refreshBuffer",
         "setNull",
         "setUnLock",
+        "child",
     ]
 
     def generate(self, **kwargs):
@@ -716,6 +717,8 @@ class With(ASTPython):
             for t in self.python_keywords:
                 if obj_1.startswith(t):
                     obj_1 = "%s.%s" % (" ".join(var_expr), obj_1)
+                elif obj_1.startswith("connect(%s" % t):
+                    obj_1 = obj_1.replace("connect(%s" % t, "connect(%s.%s" % (" ".join(var_expr), t))
                 elif obj_1.find(".") == -1 and obj_1.find(t) > -1:
                     obj_1 = obj_1.replace(t, "%s.%s" % (" ".join(var_expr), t))
 
