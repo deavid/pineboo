@@ -506,7 +506,11 @@ class File(QtCore.QFile):
         Borra el fichero dado
         @return Boolean . True si se ha borrado el fichero, si no False.
         """
-        return super().remove()
+        if isinstance(self, str):
+            file = File(self)
+            file.remove()
+        else:
+            return super().remove()
 
     name = property(getName)
 
