@@ -13,7 +13,7 @@ def check_mobile_mode() -> bool:
 
     cfg_mobile = config.value(u"ebcomportamiento/mobileMode", None)
     if cfg_mobile is not None:
-        return cfg_mobile
+        return bool(cfg_mobile)
 
     try:
         import PyQt5.QtAndroidExtras  # noqa   # FIXME

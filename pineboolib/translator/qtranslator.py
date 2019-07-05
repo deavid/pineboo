@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore
 import logging
-from typing import Any, Sized, Tuple
+from typing import Any, Sized, Tuple, List
 
 
 class QTranslator(QtCore.QObject):
@@ -80,7 +80,7 @@ class QTranslator(QtCore.QObject):
 
         messages = []
         offsets = {}
-        contexts = []
+        contexts: List[Any] = []
 
         for m in self.d.messages:
 
@@ -333,7 +333,7 @@ class QTranslatorPrivate(QtCore.QObject):
         self.unmapPointer = 0
         self.unmapLength = 0
 
-        self.messages = {}
+        self.messages = []
         self.oldPermissionLookup = 0
 
     def Offset(*args) -> Tuple[Any, Any]:

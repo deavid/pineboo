@@ -3,67 +3,67 @@ from typing import List, Optional
 
 class ITableMetaData:
     def __init__(self, n: str, a: Optional[str], q: Optional[str]) -> None:
-        pass
+        return
 
     def addFieldMD(self, f) -> None:
-        pass
+        return
 
     def field(self, fN: Optional[str]):
-        pass
+        return
 
     def fieldIsIndex(self, field_name: Optional[str]) -> int:
-        pass
+        return -1
 
     def fieldList(self, prefix_table: bool):
-        pass
+        return
 
     def fieldListOfCompoundKey(self, fN: str) -> None:
-        pass
+        return
 
     def fieldNameToAlias(self, fN: str) -> str:
-        pass
+        return ""
 
     def fieldNames(self) -> List[str]:
-        pass
+        return []
 
     def fieldNamesUnlock(self) -> List[str]:
-        pass
+        return []
 
     def inCache(self) -> bool:
-        pass
+        return False
 
     def indexFieldObject(self, position: int, show_exception: bool):
-        pass
+        return
 
     def indexPos(self, field_name: Optional[str]) -> int:
-        pass
+        return 0
 
     def inicializeNewFLTableMetaData(self, n: str, a: str, q: Optional[str]) -> None:
-        pass
+        return
 
     def isQuery(self) -> bool:
-        pass
+        return False
 
     def name(self) -> str:
-        pass
+        return ""
 
     def primaryKey(self, prefixTable: bool) -> str:
-        pass
+        return ""
 
     def query(self) -> str:
-        pass
+        return ""
 
     def relation(self, fN: str, fFN: str, fTN: str):
-        pass
+        return
 
     def setCompoundKey(self, cK) -> None:
-        pass
+        return
 
     def setConcurWarn(self, b: bool) -> None:
-        pass
+        return
 
     def setDetectLocks(self, b: bool) -> None:
-        pass
+        return
 
     def setFTSFunction(self, ftsfun: None) -> None:
-        pass
+        return

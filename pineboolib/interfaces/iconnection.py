@@ -24,172 +24,172 @@ class IConnection:
     _isOpen = False
 
     def finish(self) -> None:
-        pass
+        return
 
     def connectionName(self) -> None:
-        pass
+        return
 
     def useConn(self, name="default") -> None:
-        pass
+        return
 
     def removeConn(self, name="default") -> None:
-        pass
+        return
 
     def isOpen(self) -> None:
-        pass
+        return
 
     def tables(self) -> List[str]:
-        pass
+        return []
 
     def database(self, name=None) -> None:
-        pass
+        return
 
     def DBName(self) -> str:
-        pass
+        return ""
 
     def driver(self) -> Any:
-        pass
+        return None
 
     def session(self) -> Any:
-        pass
+        return None
 
     def engine(self) -> Any:
-        pass
+        return None
 
     def declarative_base(self) -> Any:
-        pass
+        return None
 
     def cursor(self) -> None:
-        pass
+        return
 
-    def conectar(self, db_name, db_host, db_port, db_userName, db_password) -> None:
-        pass
+    def conectar(self, db_name, db_host, db_port, db_userName, db_returnword) -> None:
+        return
 
     def driverName(self) -> None:
-        pass
+        return
 
     def driverAlias(self) -> None:
-        pass
+        return
 
     def driverNameToDriverAlias(self, name) -> None:
-        pass
+        return
 
     def lastError(self) -> None:
-        pass
+        return
 
     def host(self) -> None:
-        pass
+        return
 
     def port(self) -> None:
-        pass
+        return
 
     def user(self) -> None:
-        pass
+        return
 
-    def password(self) -> None:
-        pass
+    def returnword(self) -> None:
+        return
 
     def seek(self, offs, whence=0) -> None:
-        pass
+        return
 
     def manager(self) -> None:
-        pass
+        return
 
     def md5TuplesStateTable(self, curname) -> None:
-        pass
+        return
 
     def setInteractiveGUI(self, b) -> None:
-        pass
+        return
 
     def setQsaExceptions(self, b) -> None:
-        pass
+        return
 
     def db(self) -> None:
-        pass
+        return
 
     def dbAux(self) -> None:
-        pass
+        return
 
     def formatValue(self, t, v, upper) -> None:
-        pass
+        return
 
     def formatValueLike(self, t, v, upper) -> None:
-        pass
+        return
 
     def canSavePoint(self) -> None:
-        pass
+        return
 
     def canTransaction(self) -> None:
-        pass
+        return
 
     def doTransaction(self, cursor) -> None:
-        pass
+        return
 
     def transactionLevel(self) -> None:
-        pass
+        return
 
     def doRollback(self, cur) -> None:
-        pass
+        return
 
     def interactiveGUI(self) -> None:
-        pass
+        return
 
     def doCommit(self, cur, notify=True) -> None:
-        pass
+        return
 
     def canDetectLocks(self) -> None:
-        pass
+        return
 
     def commit(self) -> None:
-        pass
+        return
 
     def managerModules(self) -> None:
-        pass
+        return
 
     def canOverPartition(self) -> None:
-        pass
+        return
 
     def savePoint(self, savePoint) -> None:
-        pass
+        return
 
     def releaseSavePoint(self, savePoint) -> None:
-        pass
+        return
 
     def Mr_Proper(self) -> None:
-        pass
+        return
 
     def rollbackSavePoint(self, savePoint) -> None:
-        pass
+        return
 
     def transaction(self) -> None:
-        pass
+        return
 
     def commitTransaction(self) -> None:
-        pass
+        return
 
     def rollbackTransaction(self) -> None:
-        pass
+        return
 
     def nextSerialVal(self, table, field) -> None:
-        pass
+        return
 
     def existsTable(self, name) -> None:
-        pass
+        return
 
     def createTable(self, tmd) -> None:
-        pass
+        return
 
     def mismatchedTable(self, tablename, tmd) -> None:
-        pass
+        return
 
     def normalizeValue(self, text) -> None:
-        pass
+        return
 
     def queryUpdate(self, name, update, filter) -> None:
-        pass
+        return
 
     def execute_query(self, q) -> None:
-        pass
+        return
 
     def alterTable(self, mtd_1, mtd_2, key, force=False) -> None:
-        pass
+        return
