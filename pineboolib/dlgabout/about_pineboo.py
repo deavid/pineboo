@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtWidgets import QWidget, QApplication
-from pineboolib.core.utils.utils_base import DEPENDENCIES_CHECKED
+from pineboolib.application.utils.check_dependencies import DEPENDENCIES_CHECKED
 from PyQt5 import QtCore
 
 
