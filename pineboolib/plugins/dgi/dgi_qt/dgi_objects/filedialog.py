@@ -5,14 +5,17 @@ from typing import Any
 
 
 class FileDialog(object):
+    @staticmethod
     def getOpenFileName(*args) -> Any:
         obj = QFileDialog.getOpenFileName(QApplication.activeWindow(), *args)
         return obj[0] if obj is not None else None
 
+    @staticmethod
     def getSaveFileName(filter: str = None, title="Pineboo") -> Any:
         ret = QFileDialog.getSaveFileName(QApplication.activeWindow(), title, os.getenv("HOME"), filter)
         return ret[0] if ret else None
 
+    @staticmethod
     def getExistingDirectory(basedir: str = None, title="Pineboo") -> Any:
         dir_ = basedir if basedir and os.path.exists(basedir) else "%s/" % os.getenv("HOME")
         ret = QFileDialog.getExistingDirectory(QApplication.activeWindow(), title, dir_, QFileDialog.ShowDirsOnly)
