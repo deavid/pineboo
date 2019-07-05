@@ -1,12 +1,10 @@
-class progress_dialog_manager(object):
+class ProgressDialogManager(object):
     progress_dialog_stack = None
 
     def __init__(self):
         self.progress_dialog_stack = []
 
-    # FIXME: PEP8: should be called "def create". Use snake_python for naming
-    # https://en.wikipedia.org/wiki/Naming_convention_(programming)#Python_and_Ruby
-    def Create(self, title, steps, id_):
+    def create(self, title, steps, id_):
 
         # FIXME: We shouldn't load from DGI -> pncontrolsfactory.
         from pineboolib import pncontrolsfactory
@@ -25,7 +23,7 @@ class progress_dialog_manager(object):
 
         return pd_widget
 
-    def Destroy(self, id_):
+    def destroy(self, id_):
         pd_widget = self.progress_dialog_stack[-1]
 
         if id_ != "default":
