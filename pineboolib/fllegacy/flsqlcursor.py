@@ -1079,7 +1079,13 @@ class FLSqlCursor(QtCore.QObject):
 
                 settings = FLSettings()
                 if settings.readBoolEntry("application/isDebuggerMode", False):
-                    logger.warning("Se hace setAction sobre un cursor con la misma table %s", action.table())
+                    logger.warning(
+                        "Se hace setAction sobre un cursor con la misma table %s\nAction anterior: %s\nAction nueva: %s",
+                        action.table(),
+                        self._action.name(),
+                        action.name(),
+                    )
+                self._action = action
                 return
 
             if self.action() is not None:
