@@ -246,10 +246,10 @@ class AbanQDbDumper(object):
     def dumpDatabase(self):
         driver = self.db_.driverName()
         typeBd = 0
-        if driver.startswith(u"FLQPSQL"):
+        if driver.find("PSQL") > -1:
             typeBd = 1
         else:
-            if driver.startswith(u"FLQMYSQL"):
+            if driver.find("MYSQL") > -1:
                 typeBd = 2
 
         if typeBd == 0:
