@@ -4,13 +4,13 @@
 """
 from PyQt5 import QtCore, QtWidgets
 
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.core.settings import config
-from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
 from pineboolib.core import decorators
-from pineboolib import pncontrolsfactory
-from pineboolib.pnsqldrivers import PNSqlDrivers
 from pineboolib.interfaces.iconnection import IConnection
+from pineboolib.pnsqldrivers import PNSqlDrivers
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
+from pineboolib import pncontrolsfactory
 
 import logging
 

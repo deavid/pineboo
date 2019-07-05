@@ -1295,10 +1295,10 @@ class FLTableDB(QtWidgets.QWidget):
                 qry = self.cursor().db().manager().query(self.cursor().metadata().query(), self.cursor())
 
                 if qry:
-                    list = qry.fieldList()
+                    list_ = qry.fieldList()
 
                     qField = None
-                    for qField in list:
+                    for qField in list_:
                         if qField.endswith(".%s" % fieldName):
                             break
 
@@ -1791,11 +1791,12 @@ class FLTableDB(QtWidgets.QWidget):
                 from pineboolib import project
 
                 ret = project.call(function_qsa, vars, None, False)
-                if not isinstance(ret, bool):
-                    s = ret
-                    logger.debug("functionQSA: %s %s" % (function_qsa, ret.join(", ")))
-                else:
-                    logger.debug("functionQSA: %s -> NULL" % (function_qsa))
+                logger.debug("functionQSA: %s -> %r" % (function_qsa, ret))
+                if ret and not isinstance(ret, bool):
+                    if isinstance(ret, str):
+                        ret = [ret]
+                    if isinstance(ret, list):
+                        s = ret
 
                 self.tableRecords_.setSort(s)
 
