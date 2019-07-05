@@ -2,23 +2,15 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
-
 from pineboolib.core import decorators
-from pineboolib.core.utils.utils_base import DefFun, filedir
-
-
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldatatable import FLDataTable
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformsearchdb import FLFormSearchDB
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformrecorddb import FLFormRecordDB
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldoublevalidator import FLDoubleValidator
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fluintvalidator import FLUIntValidator
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flintvalidator import FLIntValidator
+
 
 import pineboolib
 import logging
@@ -126,6 +118,8 @@ class FLTableDB(QtWidgets.QWidget):
         self.tabFilter = QtWidgets.QFrame()  # contiene filtros
         self.functionGetColor_ = None
 
+        from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
+
         while not isinstance(self.topWidget, FLFormDB):
             self.topWidget = self.topWidget.parentWidget()
             if not self.topWidget:
@@ -134,8 +128,8 @@ class FLTableDB(QtWidgets.QWidget):
         self._loaded = False
         self.createFLTableDBWidget()
 
-    def __getattr__(self, name):
-        return DefFun(self, name)
+    # def __getattr__(self, name):
+    #    return DefFun(self, name)
 
     def load(self):
 
@@ -800,6 +794,9 @@ class FLTableDB(QtWidgets.QWidget):
                 return
 
         self.tableRecords()
+
+        from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformrecorddb import FLFormRecordDB
+
         if not self.cursorAux:
             if not self.initSearch_:
                 self.refresh(True, True)
@@ -838,6 +835,8 @@ class FLTableDB(QtWidgets.QWidget):
         #    del tmd
 
     def createFLTableDBWidget(self):
+        from pineboolib.core.utils.utils_base import filedir
+
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHeightForWidth(True)
 
@@ -1165,13 +1164,19 @@ class FLTableDB(QtWidgets.QWidget):
                             editor_ = pineboolib.pncontrolsfactory.FLLineEdit(self)
 
                             if type == "double":
+                                from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldoublevalidator import FLDoubleValidator
+
                                 editor_.setValidator(FLDoubleValidator(0, pow(10, partInteger) - 1, partDecimal, editor_))
                                 editor_.setAlignment(Qt.AlignRight)
                             else:
                                 if type in ("uint", "int"):
                                     if type == "uint":
+                                        from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fluintvalidator import FLUIntValidator
+
                                         editor_.setValidator(FLUIntValidator(0, pow(10, partInteger) - 1, editor_))
                                     else:
+                                        from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flintvalidator import FLIntValidator
+
                                         editor_.setValidator(
                                             FLIntValidator(pow(10, partInteger) - 1 * (-1), pow(10, partInteger) - 1, editor_)
                                         )
@@ -2364,6 +2369,7 @@ class FLTableDB(QtWidgets.QWidget):
             row.close()
             if not r % 4:
                 util.setProgress(r)
+
             cursor.next()
 
         # cur.seek(cur_row)
