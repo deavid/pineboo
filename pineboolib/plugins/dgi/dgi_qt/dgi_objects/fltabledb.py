@@ -1149,7 +1149,7 @@ class FLTableDB(QtWidgets.QWidget):
                 j = 2
                 while j < 5:
                     editor_ = None
-                    if type in ("uint, int", "double", "string", "stringList"):
+                    if type in ("uint", "int", "double", "string", "stringlist"):
                         if ol:
                             editor_ = pncontrolsfactory.QComboBox(self)
                             olTranslated = []
@@ -1195,13 +1195,14 @@ class FLTableDB(QtWidgets.QWidget):
                         editor_.setMaxValue(pow(10, partInteger) - 1)
 
                     if type == "pixmap":
+                        editor_ = pineboolib.pncontrolsfactory.FLLineEdit(self)
                         self.tdbFilter.setRowReadOnly(i, True)
 
                     if type == "date":
                         editor_ = pncontrolsfactory.FLDateEdit(self, _label)
-                        # editor_.setOrder(FLDateEdit.DMY) # FIXME
+                        editor_.setOrder(pncontrolsfactory.FLDateEdit.DMY)
                         editor_.setAutoAdvance(True)
-                        # editor_.setCalendarPopup(True)
+                        editor_.setCalendarPopup(True)
                         editor_.setSeparator("-")
                         da = QtCore.QDate()
                         editor_.setDate(da.currentDate())
