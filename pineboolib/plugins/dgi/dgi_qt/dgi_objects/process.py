@@ -93,7 +93,6 @@ class Process(QtCore.QProcess):
 
         programa = comando[0]
         argumentos = comando[1:]
-        print("**", programa, argumentos)
         pro.setProgram(programa)
         pro.setArguments(argumentos)
         pro.start()
