@@ -1112,8 +1112,8 @@ class FLTableDB(QtWidgets.QWidget):
 
                 self.tdbFilter.setText(_linea, 0, _label)
 
-                type = field.type()
-                len = field.length()
+                type_ = field.type()
+                len_ = field.length()
                 partInteger = field.partInteger()
                 partDecimal = field.partDecimal()
                 rX = field.regExpValidator()
@@ -1121,7 +1121,7 @@ class FLTableDB(QtWidgets.QWidget):
                 from pineboolib import pncontrolsfactory
 
                 cond = pncontrolsfactory.QComboBox(self)
-                if not type == "pixmap":
+                if not type_ == "pixmap":
                     condList = [
                         util.tr("Todos"),
                         util.tr("Igual a Valor"),
@@ -1129,7 +1129,7 @@ class FLTableDB(QtWidgets.QWidget):
                         util.tr("Vacío"),
                         util.tr("No Vacío"),
                     ]
-                    if not type == "bool":
+                    if not type_ == "bool":
                         condList = [
                             util.tr("Todos"),
                             util.tr("Igual a Valor"),
@@ -1149,7 +1149,7 @@ class FLTableDB(QtWidgets.QWidget):
                 j = 2
                 while j < 5:
                     editor_ = None
-                    if type in ("uint", "int", "double", "string", "stringlist"):
+                    if type_ in ("uint", "int", "double", "string", "stringlist"):
                         if ol:
                             editor_ = pncontrolsfactory.QComboBox(self)
                             olTranslated = []
@@ -1161,14 +1161,14 @@ class FLTableDB(QtWidgets.QWidget):
                         else:
                             editor_ = pineboolib.pncontrolsfactory.FLLineEdit(self)
 
-                            if type == "double":
+                            if type_ == "double":
                                 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldoublevalidator import FLDoubleValidator
 
                                 editor_.setValidator(FLDoubleValidator(0, pow(10, partInteger) - 1, partDecimal, editor_))
                                 editor_.setAlignment(Qt.AlignRight)
                             else:
-                                if type in ("uint", "int"):
-                                    if type == "uint":
+                                if type_ in ("uint", "int"):
+                                    if type_ == "uint":
                                         from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fluintvalidator import FLUIntValidator
 
                                         editor_.setValidator(FLUIntValidator(0, pow(10, partInteger) - 1, editor_))
@@ -1181,22 +1181,22 @@ class FLTableDB(QtWidgets.QWidget):
 
                                     editor_.setAlignment(Qt.AlignRight)
                                 else:
-                                    if len > 0:
-                                        editor_.setMaxLength(len)
+                                    if len_ > 0:
+                                        editor_.setMaxLength(len_)
                                         if rX:
                                             editor_.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp(rX), editor_))
 
                                     editor_.setAlignment(Qt.AlignLeft)
 
-                    if type == "serial":
+                    if type_ == "serial":
                         editor_ = pncontrolsfactory.FLSpinBox()
                         editor_.setMaxValue(pow(10, partInteger) - 1)
 
-                    if type == "pixmap":
+                    if type_ == "pixmap":
                         editor_ = pineboolib.pncontrolsfactory.FLLineEdit(self)
                         self.tdbFilter.setRowReadOnly(i, True)
 
-                    if type == "date":
+                    if type_ == "date":
                         editor_ = pncontrolsfactory.FLDateEdit(self, _label)
                         editor_.setOrder(pncontrolsfactory.FLDateEdit.DMY)
                         editor_.setAutoAdvance(True)
@@ -1205,12 +1205,12 @@ class FLTableDB(QtWidgets.QWidget):
                         da = QtCore.QDate()
                         editor_.setDate(da.currentDate())
 
-                    if type == "time":
+                    if type_ == "time":
                         editor_ = pncontrolsfactory.FLTimeEdit(self)
                         timeNow = QtCore.QTime.currentTime()
                         editor_.setTime(timeNow)
 
-                    if type in (FLFieldMetaData.Unlock, "bool"):
+                    if type_ in (FLFieldMetaData.Unlock, "bool"):
                         editor_ = pncontrolsfactory.FLCheckBox(self)
 
                     if editor_:
@@ -1401,7 +1401,6 @@ class FLTableDB(QtWidgets.QWidget):
 
             where += condValue
 
-        print("where-devuelto", where)
         return where
 
     """
