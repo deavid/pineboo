@@ -42,6 +42,12 @@ def init_project(DGI, options, project, mainForm, app) -> Any:
         else:
             raise ValueError("Action name %s not found" % options.action)
 
+    from pineboolib.core.settings import settings
+
+    call_function = settings.value("application/callFunction", None)
+    if call_function:
+        project.call(call_function, [])
+
     project.message_manager().send("splash", "showMessage", ["Creando interface ..."])
 
     if mainForm is not None:
