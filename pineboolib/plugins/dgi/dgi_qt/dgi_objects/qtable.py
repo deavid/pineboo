@@ -175,13 +175,21 @@ class QTable(QtWidgets.QTableWidget):
             else:
                 new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
 
+    def setCellWidget(self, row, col, obj):
+        super().setCellWidget(row, col, obj)
+
+        widget = self.cellWidget(row, col)
+        if widget is not None:
+            if row in self.read_only_rows or col in self.read_only_cols:
+                widget.setEnabled(False)
+
     def adjustColumn(self, k):
         self.horizontalHeader().setSectionResizeMode(k, QtWidgets.QHeaderView.ResizeToContents)
 
     def setRowReadOnly(self, row, b):
         if b:
             if row in self.read_only_rows:
-                pass
+                return
             else:
                 self.read_only_rows.append(row)
         else:
@@ -200,7 +208,7 @@ class QTable(QtWidgets.QTableWidget):
     def setColumnReadOnly(self, col, b):
         if b:
             if col in self.read_only_cols:
-                pass
+                return
             else:
                 self.read_only_cols.append(col)
         else:
