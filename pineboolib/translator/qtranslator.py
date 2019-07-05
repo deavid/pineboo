@@ -39,7 +39,7 @@ class QTranslator(QtCore.QObject):
             if s.__hash__() == 0:
                 break
 
-            self.d.messages.append(m)  # noqa: FIXME: undefined m
+            # self.d.messages.append(m)  # noqa: FIXME: undefined m
 
     def elfHash(self, name: Sized) -> int:
 
@@ -333,7 +333,7 @@ class QTranslatorPrivate(QtCore.QObject):
         self.unmapPointer = 0
         self.unmapLength = 0
 
-        self.messages = []
+        self.messages: List[Any] = []
         self.oldPermissionLookup = 0
 
     def Offset(*args) -> Tuple[Any, Any]:
@@ -352,5 +352,6 @@ class QTranslatorPrivate(QtCore.QObject):
 
 
 class obj_(object):
+    k = 0
     h = 0
     o = 0

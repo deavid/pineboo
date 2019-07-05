@@ -1,3 +1,5 @@
+# pytype: skip-file
+# type: ignore
 import os
 import os.path
 from optparse import OptionParser
