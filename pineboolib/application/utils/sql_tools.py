@@ -171,13 +171,16 @@ class sql_inspector(object):
         if not self.mtd_fields():
             return None
 
+        type_ = "double"
         if pos not in self._mtd_fields.keys():
-            logger.warning("SQL_TOOLS : No se encuentra la posición %s", pos)
-            return None
+            if pos not in self._field_names.values():
+                logger.warning("SQL_TOOLS : resolve_empty_value : No se encuentra la posición %s", pos)
+                return None
+        else:
+            mtd = self._mtd_fields[pos]
+            if mtd is not None:
+                type_ = mtd.type()
 
-        mtd = self._mtd_fields[pos]
-
-        type_ = mtd.type()
         ret_ = None
         if type_ in ("double", "int", "uint", "serial"):
             ret_ = 0
@@ -201,13 +204,16 @@ class sql_inspector(object):
         if not self.mtd_fields():
             return value
 
+        type_ = "double"
         if pos not in self._mtd_fields.keys():
-            logger.warning("SQL_TOOLS : No se encuentra la posición %s", pos)
-            return None
-
-        mtd = self._mtd_fields[pos]
-
-        type_ = mtd.type()
+            if pos not in self._field_names.values():
+                print(pos, self._field_names)
+                logger.warning("SQL_TOOLS : resolve_value : No se encuentra la posición %s", pos)
+                return None
+        else:
+            mtd = self._mtd_fields[pos]
+            if mtd is not None:
+                type_ = mtd.type()
 
         ret_ = value
         if type_ in ("string", "stringlist"):
