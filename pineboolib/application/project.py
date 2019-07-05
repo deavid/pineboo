@@ -83,11 +83,11 @@ class Project(object):
     def init_dgi(self, DGI: dgi_schema) -> None:
         """Load and associate the defined DGI onto this project"""
         # FIXME: Actually, DGI should be loaded here, or kind of.
-        from pineboolib.core.message_manager import manager
+        from pineboolib.core.message_manager import Manager
 
         self._DGI = DGI
 
-        self._msg_mng = manager(DGI)
+        self._msg_mng = Manager(DGI)
 
         self.main_form_name = "eneboo"  # FIXME: Belongs to loader.main .. or dgi-qt5
         if config.value("ebcomportamiento/mdi_mode"):

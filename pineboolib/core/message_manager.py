@@ -3,7 +3,7 @@ Crea una conexión con el interface adecuado del DGI usado para mostrar mensajes
 """
 
 
-class manager(object):
+class Manager(object):
 
     _dgi = None
 

@@ -2809,6 +2809,9 @@ class FLSqlCursor(QtCore.QObject):
                 self.d.modeAccess_ = self.Browse
                 return False
 
+            if not self.buffer():
+                self.d.buffer_ = PNBuffer(self)
+
             if self.buffer():
 
                 # self.buffer().primeDelete()
