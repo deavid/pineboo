@@ -1,4 +1,3 @@
-import os.path
 from PyQt5 import QtGui, QtCore, QtWidgets
 from pineboolib.core.utils.utils_base import filedir
 

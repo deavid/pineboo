@@ -4,11 +4,16 @@ class progress_dialog_manager(object):
     def __init__(self):
         self.progress_dialog_stack = []
 
+    # FIXME: PEP8: should be called "def create". Use snake_python for naming
+    # https://en.wikipedia.org/wiki/Naming_convention_(programming)#Python_and_Ruby
     def Create(self, title, steps, id_):
+
+        # FIXME: We shouldn't load from DGI -> pncontrolsfactory.
         from pineboolib import pncontrolsfactory
 
-        if self.progress_dialog_stack:
-            parent = self.progress_dialog_stack[-1]
+        # FIXME: parent unused. Do we want to use it for creating QProgressDialog?
+        # if self.progress_dialog_stack:
+        #    parent = self.progress_dialog_stack[-1]
 
         pd_widget = pncontrolsfactory.QProgressDialog(
             str(title), str(pncontrolsfactory.QApplication.translate("scripts", "Cancelar")), 0, steps
