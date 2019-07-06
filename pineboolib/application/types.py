@@ -387,6 +387,9 @@ class Date(object):
 
         return self
 
+    getDate = getDay
+    setDate = setDay
+
     def getHours(self):
         """
         Retorna horas
@@ -457,7 +460,7 @@ class Date(object):
 
     @classmethod
     def parse(cls, value):
-        return QtCore.QDate.fromString(value, "yyyy-MM-dd")
+        return Date(value, "yyyy-MM-dd")
 
     def __str__(self):
         return self.toString()
