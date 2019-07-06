@@ -29,6 +29,7 @@ class Project(object):
     conn: IConnection = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
     options: Values = None
+    modules: Dict[str, Module]
 
     # _initModules = None
     main_form: Any = None  # FIXME: How is this used? Which type?
@@ -99,6 +100,11 @@ class Project(object):
         if not self._DGI.localDesktop():
             # FIXME: Maybe it is a good idea to call this regardless of localDesktop
             self._DGI.extraProjectInit()
+
+    def load_modules(self) -> None:
+        for module_name, mod_obj in self.modules.items():
+            mod_obj.load()
+            self.tables.update(mod_obj.tables)
 
     def setDebugLevel(self, q: int) -> None:
         """

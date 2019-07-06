@@ -32,7 +32,6 @@ class Module(object):
         self.files: Dict[str, File] = {}
         self.tables: Dict[str, Struct] = {}
         self.loaded = False
-        self.path = self.project.path
 
     def add_project_file(self, fileobj: File) -> None:
         """Añade ficheros al array que controla que ficehros tengo.
@@ -79,7 +78,6 @@ class Module(object):
             except ValueError as e:
                 self.logger.warning("No se pudo procesar. Se ignora tabla %s/%s (%s) ", self.name, name, e)
             self.tables[name] = tableObj
-            self.project.tables[name] = tableObj  # FIXME: Tables belong to project or module?
 
         self.loaded = True
         return True
