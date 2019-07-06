@@ -1,4 +1,3 @@
-from builtins import str
 import xml.parsers.expat
 from optparse import OptionParser
 import re
@@ -65,7 +64,7 @@ def unmap(lines: Iterable) -> List[__builtin__.str]:
     runmap = re.compile(r"^(?P<depth>/*)(?P<tagname>\w+)(?P<attrs>&[^\(]+)*(?P<txt>\(.+\))?$")
     # depthlevel
     # tagname
-    elementpool = []
+    elementpool: List[str] = []
     text = []
     for line in lines:
         line = line.strip()
@@ -78,7 +77,7 @@ def unmap(lines: Iterable) -> List[__builtin__.str]:
             break
 
         depth = len(rg1.group("depth"))
-        tagname = str(rg1.group("tagname"))
+        tagname = rg1.group("tagname")
         t_attrs = rg1.group("attrs")
         attrs = []
         if t_attrs:
@@ -105,7 +104,7 @@ def unmap(lines: Iterable) -> List[__builtin__.str]:
                     txtattrs += ' %s="%s"' % (k, v)
 
             if txt:
-                txt = txt.encode("utf-8")
+                # txt = txt.encode("utf-8")
                 txt = txt.replace("&", "&amp;")
                 txt = txt.replace("<", "&lt;")
             else:
@@ -158,7 +157,7 @@ def main() -> None:
             fhandler = open(fname)
             fw = open(fname + ".map", "w")
             reset()
-            p.ParseFile(fhandler)
+            p.ParseFile(fhandler)  # type: ignore
             for t in lstelements:
                 elems = t.split("/")
                 lbox = []

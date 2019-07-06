@@ -1,4 +1,6 @@
 from typing import Any, List
+from .imanager import IManager
+from .icursor import ICursor
 
 
 class IConnection:
@@ -59,8 +61,8 @@ class IConnection:
     def declarative_base(self) -> Any:
         return None
 
-    def cursor(self) -> None:
-        return
+    def cursor(self) -> ICursor:
+        return ICursor()
 
     def conectar(self, db_name, db_host, db_port, db_userName, db_returnword) -> None:
         return
@@ -92,8 +94,8 @@ class IConnection:
     def seek(self, offs, whence=0) -> None:
         return
 
-    def manager(self) -> None:
-        return
+    def manager(self) -> IManager:
+        return IManager()
 
     def md5TuplesStateTable(self, curname) -> None:
         return
@@ -104,11 +106,11 @@ class IConnection:
     def setQsaExceptions(self, b) -> None:
         return
 
-    def db(self) -> None:
-        return
+    def db(self) -> "IConnection":
+        return self
 
-    def dbAux(self) -> None:
-        return
+    def dbAux(self) -> "IConnection":
+        return self
 
     def formatValue(self, t, v, upper) -> None:
         return

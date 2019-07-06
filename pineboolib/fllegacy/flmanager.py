@@ -20,6 +20,7 @@ import pineboolib
 
 from xml import etree
 from pineboolib import logging
+from pineboolib.interfaces import IManager
 
 from PyQt5.QtXml import QDomElement
 from pineboolib.pnconnection import PNConnection
@@ -31,7 +32,7 @@ logger = logging.getLogger(__name__)
 # ... we should probably create our own one. Not this one.
 
 
-class FLManager(QtCore.QObject):
+class FLManager(QtCore.QObject, IManager):
     """
     Esta clase sirve como administrador de la base de datos.
 
@@ -138,7 +139,7 @@ class FLManager(QtCore.QObject):
 
         del self
 
-    def metadata(self, n: Union[str, QDomElement], quick: Optional[bool] = None) -> FLTableMetaData:
+    def metadata(self, n: Union[str, QDomElement], quick: Optional[bool] = None) -> Optional[FLTableMetaData]:
         """
         Para obtener definicion de una tabla de la base de datos, a partir de un fichero XML.
 
@@ -389,7 +390,7 @@ class FLManager(QtCore.QObject):
                                     fmtdAux.setIsPrimaryKey(False)
                                     fmtdAux.setEditable(False)
 
-                                newRef = not isForeignKey
+                                # newRef = not isForeignKey
                                 fmtdAuxName = fmtdAux.name().lower()
                                 if fmtdAuxName.find(".") == -1:
                                     # fieldsAux = tmd.fieldNames().split(",")
@@ -399,10 +400,11 @@ class FLManager(QtCore.QObject):
                                             fmtdAux = FLFieldMetaData(fmtdAux)
 
                                         fmtdAux.setName("%s.%s" % (table, field))
-                                        newRef = False
+                                        # newRef = False
 
-                                if newRef:
-                                    fmtdAux.ref()
+                                # FIXME: ref() does not exist. Probably a C++ quirk from Qt to reference counting.
+                                # if newRef:
+                                #    fmtdAux.ref()
 
                                 tmd.addFieldMD(fmtdAux)
 
@@ -446,20 +448,25 @@ class FLManager(QtCore.QObject):
         q = FLSqlQuery(parent, self.db_.connectionName())
 
         root_ = etree.ElementTree.fromstring(qry_)
-        q.setSelect(root_.find("select").text.replace(" ", "").replace("\n", "").replace("\t", "").replace("\r", ""))
-        q.setFrom(root_.find("from").text.strip(" \t\n\r"))
+        elem_select: etree.ElementTree.Element = root_.find("select")
+        elem_from: etree.ElementTree.Element = root_.find("from")
+
+        if elem_select:
+            q.setSelect(elem_select.text.replace(" ", "").replace("\n", "").replace("\t", "").replace("\r", ""))
+        if elem_from:
+            q.setFrom(elem_from.text.strip(" \t\n\r"))
 
         for where in root_.iter("where"):
             q.setWhere(where.text.strip(" \t\n\r"))
 
-        q.setTablesList(root_.find("tables").text.strip(" \t\n\r"))
+        elem_tables: etree.ElementTree.Element = root_.find("tables")
+        if elem_tables:
+            q.setTablesList(elem_tables.text.strip(" \t\n\r"))
 
-        orderBy_ = None
-        try:
-            orderBy_ = root_.find("order").text.strip(" \t\n\r")
+        elem_order = root_.find("order")
+        if elem_order:
+            orderBy_ = elem_order.text.strip(" \t\n\r")
             q.setOrderBy(orderBy_)
-        except Exception:
-            pass
 
         groupXml_ = root_.findall("group")
 
@@ -469,14 +476,16 @@ class FLManager(QtCore.QObject):
         i = 0
         while i < len(groupXml_):
             gr = groupXml_[i]
-            if float(gr.find("level").text.strip(" \t\n\r")) == i:
+            elem_level = gr.find("level")
+            elem_field = gr.find("field")
+            if elem_field and elem_level and float(elem_level.text.strip(" \t\n\r")) == i:
                 # print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
-                q.addGroup(FLGroupByQuery(i, gr.find("field").text.strip(" \t\n\r")))
+                q.addGroup(FLGroupByQuery(i, elem_field.text.strip(" \t\n\r")))
                 i = i + 1
 
         return q
 
-    def action(self, n: Optional[str] = None) -> FLAction:
+    def action(self, n: str) -> FLAction:
         """
         Obtiene la definición de una acción a partir de su nombre.
 
@@ -488,9 +497,6 @@ class FLManager(QtCore.QObject):
         @return Un objeto FLAction con la descripcion de la accion
         """
         # FIXME: This function is really inefficient. Pineboo already parses the actions much before.
-        if not n:
-            return None
-
         if n in self.cacheAction_.keys():
             return self.cacheAction_[n]
         a = FLAction()
@@ -820,8 +826,8 @@ class FLManager(QtCore.QObject):
 
                     if itFieldName == fieldName:
                         break
-
-                qry.deleteLater()
+                # FIXME: deleteLater() is a C++ internal to clear the memory later. Not used in Python
+                # qry.deleteLater()
 
             return self.formatAssignValueLike("%s.%s" % (prefixTable, fieldName), args[0].type(), args[1], args[2])
 
@@ -855,10 +861,11 @@ class FLManager(QtCore.QObject):
 
             return "%s%s" % (field_name, format_value)
 
-    def formatValue(self, fMD_or_type: str, v: Optional[Union[str, int]], upper: bool = False) -> Union[str, int]:
+    def formatValue(self, fMD_or_type: str, v: Optional[Union[str, int]], upper: bool = False) -> str:
+        # FIXME: This function sometimes returns integers!
 
-        if fMD_or_type is None:
-            return None
+        if not fMD_or_type:
+            raise ValueError("fMD_or_type is required")
 
         if not isinstance(fMD_or_type, str):
             return self.formatValue(fMD_or_type.type(), v, upper)
@@ -959,8 +966,8 @@ class FLManager(QtCore.QObject):
         @param ed Valor utilizado por defecto para la propiedad editable
         @return Objeto FLFieldMetaData que contiene la descripción del campo
         """
-        if field is None:
-            return None
+        if not field:
+            raise ValueError("field is required")
 
         util = FLUtil()
 
@@ -1204,8 +1211,8 @@ class FLManager(QtCore.QObject):
         @param relation Elemento XML con la descripción de la relación
         @return Objeto FLRelationMetaData que contiene la descripción de la relación
         """
-        if relation is None:
-            return False
+        if not relation:
+            raise ValueError("relation is required")
 
         fT = ""
         fF = ""
@@ -1319,9 +1326,13 @@ class FLManager(QtCore.QObject):
                     docElem = doc.documentElement()
 
                     mtd = self.createTable(self.metadata(docElem, True))
-                    return mtd
-
-                f.close()
+                    if mtd:
+                        return True
+                    else:
+                        return False
+                # FIXME: f.close() is closing an unknown object. it is a file?
+                # ... also, close, but we have return inside the loop.
+                # f.close()
 
         return False
 

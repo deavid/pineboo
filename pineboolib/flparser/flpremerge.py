@@ -10,7 +10,7 @@ import re
 from typing import List, Dict
 
 
-class processedFile(object):
+class processedFile:
     def __init__(self, filename, debug=False):
         self.debug = debug
         # Carga literal de la lista de hashes, pk: (startbyte, endbyte) = csvrow

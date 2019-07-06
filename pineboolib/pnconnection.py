@@ -195,6 +195,7 @@ class PNConnection(IConnection, QtCore.QObject):
 
     def manager(self):
         if not self._manager:
+            # FIXME: Should not load from FL*
             from pineboolib.fllegacy.flmanager import FLManager
 
             self._manager = FLManager(self)

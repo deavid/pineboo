@@ -21,20 +21,16 @@ NOTSET = 0
 
 class Logger(logging.Logger):
     def message(self, message, *args, **kwargs):
-        if self.isEnabledFor(MESSAGE):
-            self._log(MESSAGE, message, args, **kwargs)
+        self.log(MESSAGE, message, args, **kwargs)
 
     def hint(self, message, *args, **kwargs):
-        if self.isEnabledFor(HINT):
-            self._log(HINT, message, args, **kwargs)
+        self.log(HINT, message, args, **kwargs)
 
     def notice(self, message, *args, **kwargs):
-        if self.isEnabledFor(NOTICE):
-            self._log(NOTICE, message, args, **kwargs)
+        self.log(NOTICE, message, args, **kwargs)
 
     def trace(self, message, *args, **kwargs):
-        if self.isEnabledFor(TRACE):
-            self._log(TRACE, message, args, **kwargs)
+        self.log(TRACE, message, args, **kwargs)
 
 
 logging.Logger.manager.loggerClass = Logger  # type: ignore

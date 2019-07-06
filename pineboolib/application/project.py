@@ -26,7 +26,7 @@ class Project(object):
 
     logger = logging.getLogger("main.Project")
     app: QtCore.QCoreApplication = None
-    conn = None  # Almacena la conexión principal a la base de datos
+    conn: IConnection = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
     options: Values = None
 

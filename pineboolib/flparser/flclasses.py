@@ -1,7 +1,5 @@
-from typing import Any, Sized
+from typing import Any
 
-# from builtins import str
-# from builtins import object
 debug = 0
 
 
@@ -9,6 +7,7 @@ class cBase(object):
     def __init__(self):
         self.type = ("Unknown", "Unknown")
         self.codedepth = 0
+        self.name = "<NoName>"
 
     def setSubtype(self, newsubtype) -> None:
         x, y = self.type
@@ -224,7 +223,7 @@ class cBaseList(cBase):
 
 
 class cBaseListInline(cBaseList):
-    def __init__(self, separator: Sized = ", ") -> None:
+    def __init__(self, separator: str = ", ") -> None:
         cBaseList.__init__(self)
         self.separator = separator
 
