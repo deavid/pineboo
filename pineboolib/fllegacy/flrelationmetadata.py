@@ -128,9 +128,11 @@ class FLRelationMetaData:
         return self.d.checkIn_
 
     @decorators.BetaImplementation
-    def copy(self, *other):
+    def copy(self, other):
         if other == self:
             return
+        if not isinstance(other, FLRelationMetaData):
+            raise ValueError("FLRelationMetaData::copy requires an instance to a FLRelationMetaData class")
         self.d.field_ = other.d.field_
         self.d.foreignTable_ = other.d.foreignTable_
         self.d.foreignField_ = other.d.foreignField_
@@ -180,7 +182,7 @@ class FLRelationMetaDataPrivate:
 
     def __init__(self, *args, **kwargs) -> None:
         if len(args) == 0:
-            self.inicializeFromFLRelationMetaDataPrivate()
+            self.inicializeFLRelationMetaDataPrivate()
         else:
             self.inicializeNewFLRelationMetaDataPrivate(args[0], args[1], args[2], args[3], args[4], args[5])
 

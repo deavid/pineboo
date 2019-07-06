@@ -2,7 +2,7 @@
 
 # Completada Si
 from pineboolib.core import decorators
-from pineboolib import fllegacy
+from . import flsqlcursor
 
 
 """
@@ -250,7 +250,7 @@ class FLSqlSavePoint:
         cursor_ = opInf.cursor
         owner = False
         if not cursor_:
-            cursor_ = fllegacy.FLSqlCursor.FLSqlCursor(opInf.name)
+            cursor_ = flsqlcursor.FLSqlCursor.FLSqlCursor(opInf.name)
             cursor_.setForwardOnly(True)
             owner = True
 
@@ -281,7 +281,7 @@ class FLSqlSavePoint:
         cursor_ = opInf.cursor
         owner = False
         if not cursor_:
-            cursor_ = fllegacy.FLSqlCursor.FLSqlCursor(opInf.name)
+            cursor_ = flsqlcursor.FLSqlCursor.FLSqlCursor(opInf.name)
             cursor_.setForwardOnly(True)
             owner = True
 
@@ -312,7 +312,7 @@ class FLSqlSavePoint:
         cursor_ = opInf.cursor
         owner = False
         if not cursor_:
-            cursor_ = fllegacy.FLSqlCursor.FLSqlCursor(opInf.name)
+            cursor_ = flsqlcursor.FLSqlCursor.FLSqlCursor(opInf.name)
             cursor_.setForwardOnly(True)
             owner = True
 

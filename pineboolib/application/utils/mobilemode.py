@@ -16,7 +16,7 @@ def check_mobile_mode() -> bool:
         return bool(cfg_mobile)
 
     try:
-        import PyQt5.QtAndroidExtras  # noqa   # FIXME
+        import PyQt5.QtAndroidExtras  # type: ignore  # noqa   # FIXME
 
         return True
     except ImportError:
