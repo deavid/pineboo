@@ -6,17 +6,12 @@ class ProgressDialogManager(object):
 
     def create(self, title, steps, id_):
 
-        # FIXME: We shouldn't load from DGI -> pncontrolsfactory.
-        from pineboolib import pncontrolsfactory
+        from pineboolib import project
+        from PyQt5 import QtCore
 
-        # FIXME: parent unused. Do we want to use it for creating QProgressDialog?
-        # if self.progress_dialog_stack:
-        #    parent = self.progress_dialog_stack[-1]
-
-        pd_widget = pncontrolsfactory.QProgressDialog(
-            str(title), str(pncontrolsfactory.QApplication.translate("scripts", "Cancelar")), 0, steps
-        )
+        pd_widget = project._DGI.QProgressDialog(str(title), str(project._DGI.QApplication.translate("scripts", "Cancelar")), 0, steps)
         pd_widget.setObjectName(id_)
+        pd_widget.setWindowModality(QtCore.Qt.WindowModal)
         pd_widget.setWindowTitle(str(title))
         self.progress_dialog_stack.append(pd_widget)
         pd_widget.setMinimumDuration(100)
