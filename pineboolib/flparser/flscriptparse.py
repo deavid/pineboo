@@ -1,7 +1,3 @@
-from builtins import input
-from builtins import str
-from builtins import range
-
 # -----------------------------------------------------------------------------
 # flscriptparse.py
 #
@@ -15,22 +11,10 @@ import hashlib
 import re
 import ply.yacc as yacc
 import ply.lex as lex
+from typing import Any, Dict
+from . import flex
 
-try:
-    from pineboolib.flparser import flex
-
-    # from pineboolib.flparser.flclasses import *
-except ImportError:
-    import flex
-
-    # from flclasses import *
-
-try:
-    import pineboolib
-
-    tempDir = pineboolib.project.tmpdir or "/tmp"
-except (ImportError, AttributeError):
-    tempDir = "/tmp"
+tempDir = "/tmp"
 
 # Get the token map
 tokens = flex.tokens
@@ -142,7 +126,7 @@ def p_parse(token):
 
 last_ok_token = None
 error_count = 0
-last_error_token = None
+last_error_token: Any = None
 last_error_line = -1
 ok_count = 0
 
@@ -168,9 +152,10 @@ def p_error(t):
                     for tokname, tokln, tokdata in seen_tokens[-32:]:
                         if tokln == t.lineno:
                             print(tokname, tokdata)
-                    print(repr(last_ok_token[0]))
-                    for s in last_ok_token.slice[:]:
-                        print(">>>", s.lineno, repr(s), pprint.pformat(s.value, depth=3))
+                    if last_ok_token:
+                        print(repr(last_ok_token[0]))
+                        for s in last_ok_token.slice[:]:
+                            print(">>>", s.lineno, repr(s), pprint.pformat(s.value, depth=3))
                 last_error_line = t.lineno
             elif abs(last_error_line - t.lineno) > 1 and ok_count > 1:
                 last_error_line = t.lineno
@@ -564,7 +549,7 @@ parser = yacc.yacc(method="LALR", debug=0, optimize=1, write_tables=1, debugfile
 
 # profile.run("yacc.yacc(method='LALR')")
 
-global input_data
+input_data = ""
 
 
 def print_context(token):
@@ -624,7 +609,7 @@ def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
     has_data = 0
     has_objects = 0
     contentlist = []
-
+    ctype_alias: Dict[str, str]
     if alias_mode == 0:
         ctype_alias = {}
     elif alias_mode == 1:
@@ -756,7 +741,7 @@ def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):
                 txtinline = "".join([line.strip() for line in tlines])
 
                 # if len(tlines)>1:
-                txthash = hashlib.sha1(txtinline).hexdigest()[:16]
+                txthash = hashlib.sha1(txtinline.encode("utf8")).hexdigest()[:16]
                 # hashes.append(("depth:",depth,"hash:",txthash,"element:",ctype+":"+tname))
                 hashes.append((txthash, ctype + ":" + tname + "(%d)" % len(txtinline)))
                 ranges.append([depth, txthash] + trange + [ctype + ":" + tname, len(txtinline)])

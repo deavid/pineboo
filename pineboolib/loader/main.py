@@ -3,7 +3,7 @@ import sys
 import traceback
 from pineboolib import logging
 
-from pineboolib.core.utils import is_deployed
+from pineboolib.core.utils.utils_base import is_deployed
 from pineboolib.core.settings import config, settings
 from .dgi import load_dgi
 
@@ -44,7 +44,7 @@ def exec_main_with_profiler(options) -> int:
     import cProfile
     import pstats
     import io
-    from pstats import SortKey
+    from pstats import SortKey  # type: ignore
 
     pr = cProfile.Profile()
     pr.enable()

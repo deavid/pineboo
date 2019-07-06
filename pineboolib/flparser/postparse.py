@@ -1,6 +1,4 @@
 #!/usr/bin/python3
-from builtins import str
-from builtins import object
 from optparse import OptionParser
 import os
 import os.path
@@ -8,12 +6,9 @@ import sys
 import imp
 from xml.etree import ElementTree
 from xml.dom import minidom
-from pineboolib import logging
+import logging
 
-try:
-    from . import flscriptparse
-except ImportError:
-    import flscriptparse
+from . import flscriptparse
 
 logger = logging.getLogger("flparser.postparse")
 
@@ -577,17 +572,7 @@ def parseArgs(argv):
 
 
 def main():
-    from pineboolib import logging
-
     log_format = "%(asctime)s - %(levelname)s: %(name)s: %(message)s"
-
-    # FIXME: Logging configuration is not part of options parsing.
-    from pineboolib.loader.utils import addLoggingLevel
-
-    addLoggingLevel("TRACE", logging.DEBUG - 5)
-    addLoggingLevel("NOTICE", logging.INFO - 5)
-    addLoggingLevel("HINT", logging.INFO - 2)
-    addLoggingLevel("MESSAGE", logging.WARN - 5)
 
     logging.basicConfig(format=log_format, level=0)
 

@@ -1,13 +1,12 @@
 from typing import Any, Callable, Dict, Mapping, Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import pineboolib.fllegacy.flaction.FLAction
-    import pineboolib.pnconnection.PNConnection
-    import pineboolib.fllegacy.flaction.FLAction
-    import pineboolib.fllegacy.fltablemetadata.FLTableMetaData
-    import pineboolib.fllegacy.flfieldmetadata.FLFieldMetaData
-    import pineboolib.fllegacy.flrelationmetadata.FLRelationMetaData
-    import pineboolib.fllegacy.flsqlquery.FLSqlQuery
+    import pineboolib.pnconnection
+    import pineboolib.fllegacy.flaction
+    import pineboolib.fllegacy.fltablemetadata
+    import pineboolib.fllegacy.flfieldmetadata
+    import pineboolib.fllegacy.flrelationmetadata
+    import pineboolib.fllegacy.flsqlquery
 
 
 class IManager(object):

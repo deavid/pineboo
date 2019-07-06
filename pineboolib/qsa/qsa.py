@@ -15,8 +15,7 @@ from pineboolib.application import types
 
 
 # from pineboolib.pnobjectsfactory import load_model, Calculated
-from pineboolib.pncontrolsfactory import FLUtil, qsa_sys, QInputDialog, QLineEdit
-
+from pineboolib.pncontrolsfactory import FLUtil, qsa_sys
 
 Boolean = types.Boolean
 QString = types.QString
@@ -105,48 +104,6 @@ def isNaN(x):
         return False
     except ValueError:
         return True
-
-
-class Input(object):
-    """
-    Dialogo de entrada de datos
-    """
-
-    @classmethod
-    def getText(cls, question, prevtxt="", title="Pineboo"):
-        """
-        Recoge texto
-        @param question. Label del diálogo.
-        @param prevtxt. Valor inicial a especificar en el campo
-        @param title. Título del diálogo
-        @return cadena de texto recogida
-        """
-        text, ok = QInputDialog.getText(None, title, question, QLineEdit.Normal, prevtxt)
-        if not ok:
-            return None
-        return text
-
-    @classmethod
-    def getNumber(cls, question, value, part_decimal, title="Pineboo"):
-        text, ok = QInputDialog.getText(None, title, question, QLineEdit.Normal, str(round(float(value), part_decimal)))
-        if not ok:
-            return None
-        return float(text)
-
-    @classmethod
-    def getItem(cls, question, items_list=[], title="Pineboo", editable=True):
-        """
-        Recoge Item
-        @param question. Label del diálogo.
-        @param item_list. Lista de items.
-        @param title. Título del diálogo.
-        @return item, Item seleccionado.
-        """
-
-        text, ok = QInputDialog.getItem(None, title, question, items_list, 0, editable)
-        if not ok:
-            return None
-        return text
 
 
 def qsa_length(obj):
@@ -549,4 +506,5 @@ from pineboolib.fllegacy.flnetwork import FLNetwork  # noqa
 from pineboolib.fllegacy.flreportviewer import FLReportViewer  # noqa
 from pineboolib.fllegacy.flvar import FLVar  # noqa
 from pineboolib.core.utils.utils_base import ustr, ustr1, filedir  # noqa
+from .input import Input  # noqa
 from pineboolib.pncontrolsfactory import *  # noqa

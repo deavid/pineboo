@@ -3,7 +3,7 @@
 It allows MyPy/PyType to properly keep track of the new message types
 """
 import logging
-
+from logging import basicConfig  # noqa: F401
 
 CRITICAL = 50
 FATAL = CRITICAL

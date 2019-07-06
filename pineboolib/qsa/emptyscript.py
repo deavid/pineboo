@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pineboolib.qsa import *
+from .qsa import FormDBWidget, Object
 
 
 class interna(object):

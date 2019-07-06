@@ -1,11 +1,6 @@
 #!/usr/bin/python
-try:
-    from json import dumps as json_dumps
-    from json import loads as json_loads
-except ImportError:
-    from json import write as json_dumps
-    from json import read as json_loads
-
+from json import dumps as json_dumps
+from json import loads as json_loads
 
 import xml.parsers.expat
 from optparse import OptionParser
