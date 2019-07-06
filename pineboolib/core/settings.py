@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from pineboolib import logging
 import json
+from pineboolib import logging
 
 from PyQt5.QtCore import QSettings, QSize
 

@@ -6,9 +6,7 @@ from pineboolib import logging
 """
 Esta libreria se usa para especificar estados de una función que no son final
 """
-from typing import Callable
-
-from typing import Any
+from typing import Callable, Any
 
 logger = logging.getLogger(__name__)
 MSG_EMITTED = {}

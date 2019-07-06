@@ -2,6 +2,7 @@
 
 from PyQt5 import QtCore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qdateedit import QDateEdit
+from pineboolib.application.utils.date_conversion import convert_to_qdate
 
 
 class FLDateEdit(QDateEdit):
@@ -23,9 +24,6 @@ class FLDateEdit(QDateEdit):
         return super(FLDateEdit, self).date
 
     def setDate(self, d=None):
-
-        from pineboolib.core.utils.utils_base import convert_to_qdate
-
         if d in (None, "NAN", ""):
             date = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
         else:

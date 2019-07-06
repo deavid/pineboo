@@ -1,3 +1,7 @@
+from PyQt5.QtCore import QDate
+from PyQt5 import QtCore
+
+
 def date_dma_to_amd(f):
     if not f:
         return None
@@ -57,3 +61,26 @@ def date_amd_to_dma(f):
             dia_ = f[6:2]
 
     return "%s-%s-%s" % (dia_, mes_, ano_)
+
+
+def convert_to_qdate(date: str) -> QDate:
+    """Convierte diferentes formatos de fecha a QDate
+    @param date: Fecha a convertir
+    @return QDate con el valor de la fecha dada
+    """
+    from pineboolib.application.types import Date
+    import datetime
+
+    if isinstance(date, Date):
+        date = date.date_  # str
+    elif isinstance(date, datetime.date):
+        date = str(date)
+
+    if isinstance(date, str):
+        if "T" in date:
+            date = date[: date.find("T")]
+
+        date = date_amd_to_dma(date) if len(date.split("-")[0]) == 4 else date
+        date = QtCore.QDate.fromString(date, "dd-MM-yyyy")
+
+    return date

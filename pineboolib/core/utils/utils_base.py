@@ -7,11 +7,13 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 
-from PyQt5.QtCore import QDate
-from typing import Optional, Union, Any
+from typing import Optional, Union, Any, List, Dict
 from xml.etree.ElementTree import Element, ElementTree
 
 logger = logging.getLogger(__name__)
+
+# FIXME: Move commaSeparator to Pineboo internals, not aqApp
+decimal_separator = ","  # FIXME: Locale dependent. ES: "," EN: "."
 
 
 def auto_qt_translate_text(text: Optional[str]) -> str:
@@ -47,6 +49,12 @@ class Struct(object):
 
     xmltree: Any
     xmlroot: Any
+    tablename: str
+    name: str
+    query_table: str
+    fields: List[str]
+    pk: List[str]
+    fields_idx: Dict[str, int]
 
     def __init__(self, **kwargs) -> None:
         for k, v in kwargs.items():
@@ -60,15 +68,16 @@ class XMLStruct(Struct):
     """
 
     def __init__(self, xmlobj: Optional[Element] = None) -> None:
-        self._attrs = []
+        self._attrs: List[str] = []
         if xmlobj is not None:
             self.__name__ = xmlobj.tag
             for child in xmlobj:
                 if child.tag == "property":
                     # Se importa aquí para evitar error de importación cíclica.
-                    from pineboolib.pnqt3ui import loadProperty
-
-                    key, text = loadProperty(child)
+                    raise Exception("FIXME: No property support")
+                    # FIXME: Esto es del DGI QT:
+                    # from pineboolib.pnqt3ui import loadProperty
+                    # key, text = loadProperty(child)
                 else:
                     text = aqtt(child.text)
                     key = child.tag
@@ -375,7 +384,7 @@ def version_normalize(v):
     return [int(x) for x in re.sub(r"(\.0+)*$", "", v).split(".")]
 
 
-def load2xml(form_path_or_str: str) -> ElementTree:
+def load2xml(form_path_or_str: str) -> Element:
     from xml.etree import ElementTree as ET
 
     """
@@ -404,7 +413,7 @@ def load2xml(form_path_or_str: str) -> ElementTree:
             form_path_or_str = parse_for_duplicates(form_path_or_str)
             ret = ET.fromstring(form_path_or_str, parser)
         else:
-            ret = ET.parse(form_path_or_str, parser) if os.path.exists(form_path_or_str) else None
+            ret = ET.parse(form_path_or_str, parser).getroot() if os.path.exists(form_path_or_str) else None
     except Exception:
         try:
             parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
@@ -416,7 +425,7 @@ def load2xml(form_path_or_str: str) -> ElementTree:
                 form_path_or_str = parse_for_duplicates(form_path_or_str)
                 ret = ET.fromstring(form_path_or_str, parser)
             else:
-                ret = ET.parse(form_path_or_str, parser) if os.path.exists(form_path_or_str) else None
+                ret = ET.parse(form_path_or_str, parser).getroot() if os.path.exists(form_path_or_str) else None
             # logger.exception("Formulario %r se cargó con codificación ISO (UTF8 falló)", form_path)
         except Exception:
             logger.exception("Error cargando UI después de intentar con UTF8 e ISO \n%s", form_path_or_str)
@@ -435,7 +444,7 @@ def parse_for_duplicates(text):
     for section_orig in text.split(">"):
         # print("section", section)
         duplicate_ = False
-        attr_list = []
+        attr_list: List[str] = []
 
         # print("--->", section_orig)
         ret2_ = ""
@@ -521,9 +530,6 @@ def indent(elem, level=0):
 
 
 def format_double(d, part_integer, part_decimal):
-    # FIXME: Move commaSeparator to Pineboo internals, not aqApp
-    from pineboolib import pncontrolsfactory
-
     if d == "":
         return d
     # import locale
@@ -551,23 +557,16 @@ def format_double(d, part_integer, part_decimal):
     str_integer = format_int(str_integer, part_integer)
 
     # Fixme: Que pasa cuando la parte entera sobrepasa el limite, se coge el maximo valor o
-    ret_ = "%s%s%s" % (
-        str_integer,
-        pncontrolsfactory.aqApp.commaSeparator() if found_comma else "",
-        str_decimal if part_decimal > 0 else "",
-    )
+    ret_ = "%s%s%s" % (str_integer, decimal_separator if found_comma else "", str_decimal if part_decimal > 0 else "")
     return ret_
 
 
 def format_int(value, part_intenger=None):
-    # FIXME: Move commaSeparator to Pineboo internals, not aqApp
-    from pineboolib import pncontrolsfactory
-
     str_integer = value
     if value is not None:
         str_integer = "{:,d}".format(int(value))
 
-        if pncontrolsfactory.aqApp.commaSeparator() == ",":
+        if decimal_separator == ",":
             str_integer = str_integer.replace(",", ".")
         else:
             str_integer = str_integer.replace(".", ",")
@@ -613,177 +612,6 @@ def unformat_number(new_str, old_str, type_):
     return ret_
 
 
-"""
-Convierte diferentes formatos de fecha a QDate
-@param date: Fecha a convertir
-@return QDate con el valor de la fecha dada
-"""
-
-
-def convert_to_qdate(date: str) -> QDate:
-    from pineboolib.application.types import Date
-    from pineboolib.application.utils.date_conversion import date_amd_to_dma
-    import datetime
-
-    if isinstance(date, Date):
-        date = date.date_  # str
-    elif isinstance(date, datetime.date):
-        date = str(date)
-
-    if isinstance(date, str):
-        if "T" in date:
-            date = date[: date.find("T")]
-
-        date = date_amd_to_dma(date) if len(date.split("-")[0]) == 4 else date
-        date = QtCore.QDate.fromString(date, "dd-MM-yyyy")
-
-    return date
-
-
-def resolve_pagination(query):
-    init = 0
-    limit = 0
-    for k in query.keys():
-        if k.startswith("p_"):
-            if k.endswith("l"):
-                limit = query[k]
-            elif k.endswith("o"):
-                init = query[k]
-
-                # if query[k] == "true":
-                #    page = 0
-                # else:
-                #    page = int(query[k])
-
-    ret = (None, "50")
-    if limit != 0:
-        # init = page * limit
-        ret = (init, limit)
-
-    return ret
-
-
-def resolve_query(table_name, params):
-    or_where = ""
-    and_where = ""
-    where = ""
-    order_by = ""
-    from pineboolib import project
-
-    mtd = project.conn.manager().metadata(table_name)
-
-    if hasattr(params, "_iterlists"):
-        q = params
-        params = {k: q.getlist(k) if len(q.getlist(k)) > 1 else v for k, v in q.items()}
-
-    for p in params:
-        if p.startswith("q_"):
-            or_where += " OR " if len(or_where) else ""
-            or_where += resolve_where_params(p, params[p], mtd)
-        elif p.startswith("s_"):
-            and_where += " AND " if len(and_where) else ""
-            and_where += resolve_where_params(p, params[p], mtd)
-        elif p.startswith("o_"):
-            order_by += resolve_order_params(p, params[p])
-
-    if and_where != "":
-        where += str(and_where)
-    if or_where != "":
-        where += " AND (" + str(or_where) + ")" if len(where) else str(or_where)
-    if order_by:
-        order_by = order_by.strip()[:-1]
-
-    where = "1=1" if not len(where) else where
-
-    return where, order_by
-
-
-def resolve_order_params(key, valor):
-    if valor.startswith("-"):
-        valor = valor[1:] + " DESC, "
-    else:
-        valor += ", "
-
-    return valor
-
-
-def resolve_where_params(key, valor, mtd_table):
-    list_params = key.split("__")
-    campo = "_".join(list_params[0].split("_")[1:])
-    tipo = list_params[1]
-    where = ""
-    if campo == "pk":
-        return "1=1"
-
-    if tipo.endswith("[]"):
-        tipo = tipo[:-2]
-
-    if valor is None:
-        return "%s = ''" % campo
-
-    field = mtd_table.field(campo)
-    if field is not None:
-        field_type = field.type()
-    else:
-        logger.warning("pineboolib.utils.resolve_where_params No se encuentra el campo %s en la tabla %s.", campo, mtd_table.name())
-        return ""
-    # valor = aqApp.db().manager().formatValue(field_type , valor, False)
-
-    if field_type in ["bool", "unlock"]:
-        valor = "True" if valor == "true" else "False"
-
-    if tipo == "contains":
-        where = campo + " LIKE '%" + valor + "%'"
-    elif tipo == "icontains":
-        where = "UPPER(CAST(" + campo + " AS TEXT)) LIKE UPPER('%" + valor + "%')"
-    elif tipo == "exact":
-        where = campo + " = '" + valor + "'"
-    elif tipo == "iexact":
-        where = "UPPER(CAST(" + campo + " AS TEXT)) = UPPER('" + valor + "')"
-    elif tipo == "startswith":
-        where = campo + " LIKE '" + valor + "%'"
-    elif tipo == "istartswith":
-        where = campo + " ILIKE '" + valor + "%'"
-    elif tipo == "endswith":
-        where = campo + " LIKE '%" + valor + "'"
-    elif tipo == "iendswith":
-        where = campo + " ILIKE '%" + valor + "'"
-    elif tipo == "lt":
-        where = campo + " < '" + valor + "'"
-    elif tipo == "lte":
-        where = campo + " <= '" + valor + "'"
-    elif tipo == "gt":
-        where = campo + " > '" + valor + "'"
-    elif tipo == "gte":
-        where = campo + " >= '" + valor + "'"
-    elif tipo == "ne":
-        where = campo + " <> '" + valor + "'"
-    elif tipo == "in":
-        where = campo + " IN ('" + "', '".join(valor) + "')"
-
-    return where
-
-
-def get_tipo_aqnext(tipo):
-    tipo_ = 3
-    # subtipo_ = None
-
-    if tipo in ["int", "uint", "serial"]:
-        tipo_ = 16
-    elif tipo in ["string", "stringlist", "pixmap", "counter"]:
-        tipo_ = 3
-    elif tipo in ["double"]:
-        tipo_ = 19
-    elif tipo in ["bool", "unlock"]:
-        tipo_ = 18
-    elif tipo in ["date"]:
-        tipo_ = 26
-    elif tipo in ["time"]:
-        tipo_ = 27
-
-    return tipo_
-
-
 def create_dict(method, fun, id, arguments=[]):
     data = [{"function": fun, "arguments": arguments, "id": id}]
     return {"method": method, "params": data, "jsonrpc": "2.0", "id": id}
@@ -791,8 +619,6 @@ def create_dict(method, fun, id, arguments=[]):
 
 def is_deployed() -> bool:
     """Returns True only if the code is running inside a PyInstaller bundle"""
-    import sys
-
     return getattr(sys, "frozen", False)
 
 

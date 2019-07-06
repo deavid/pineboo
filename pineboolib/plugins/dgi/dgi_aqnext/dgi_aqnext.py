@@ -8,7 +8,8 @@ from typing import List, Dict, Any
 from PyQt5 import QtCore
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-import pineboolib
+from pineboolib.application.utils import sql_tools
+from pineboolib import project
 
 logger = logging.getLogger(__name__)
 
@@ -109,12 +110,12 @@ class dgi_aqnext(dgi_schema):
             legacy_path = "%s/legacy/%s/%s.py" % (folder_, module_id, name_)
             print("**** Buscando en path", legacy_path)
             if os.path.exists(legacy_path):
-                data = pineboolib.project.conn.managerModules().contentFS(legacy_path, True)
+                data = project.conn.managerModules().contentFS(legacy_path, True)
         else:
             if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (tmp_dir, db_name, module_id, ext_, name_)):
                 if ext_ == "kut":
                     utf8_ = True
-                data = pineboolib.project.conn.managerModules().contentFS(
+                data = project.conn.managerModules().contentFS(
                     "%s/cache/%s/%s/file.%s/%s/%s.%s" % (tmp_dir, db_name, module_id, ext_, name_, sha_key, ext_), utf8_
                 )
 
@@ -164,17 +165,17 @@ class dgi_aqnext(dgi_schema):
 
             # Se crea el script
             setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % app))
-            pineboolib.project.actions[action.name] = action
+            project.actions[action.name] = action
             if prefix == "":
                 return
 
         action_xml = XMLAction()
         action_xml.name = module_name
 
-        if "%s_legacy" in action_xml.name not in pineboolib.project.actions.keys():
-            if action_xml.name in pineboolib.project.actions.keys():
-                pineboolib.project.actions["%s_legacy" % action_xml.name] = pineboolib.project.actions[action_xml.name]
-                del pineboolib.project.actions[action_xml.name]
+        if "%s_legacy" in action_xml.name not in project.actions.keys():
+            if action_xml.name in project.actions.keys():
+                project.actions["%s_legacy" % action_xml.name] = project.actions[action_xml.name]
+                del project.actions[action_xml.name]
 
         if prefix == "form":
             if hasattr(qsa_dict_modules, "form" + action_xml.name):
@@ -185,7 +186,7 @@ class dgi_aqnext(dgi_schema):
 
             action_xml.table = action_xml.name
             action_xml.scriptform = script_name
-            pineboolib.project.actions[action_xml.name] = action_xml
+            project.actions[action_xml.name] = action_xml
             delayed_action = DelayedObjectProxyLoader(action_xml.load, name="QSA.Module.%s.Action.form%s" % (app, action_xml.name))
             # print("Creando", "form" + module_name)
             setattr(qsa_dict_modules, "form" + action_xml.name, delayed_action)
@@ -199,7 +200,7 @@ class dgi_aqnext(dgi_schema):
 
             action_xml.table = action_xml.name
             action_xml.script = script_name
-            pineboolib.project.actions[action_xml.name] = action_xml
+            project.actions[action_xml.name] = action_xml
             delayed_action = DelayedObjectProxyLoader(
                 action_xml.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (app, action_xml.name)
             )
@@ -310,7 +311,7 @@ class dgi_aqnext(dgi_schema):
 
         meta_model = cursor.meta_model()
 
-        # pineboolib.project.init_time()
+        # project.init_time()
         size_ = cursor.size()
         pk = cursor.primaryKey()
         fields_list = cursor.metadata().fieldList()
@@ -358,7 +359,7 @@ class dgi_aqnext(dgi_schema):
                 pass
             i += 1
 
-        # pineboolib.project.show_time("Fin cursor2json %s %s %s" % (cursor.curName(), meta_model, cursor.filter()))
+        # project.show_time("Fin cursor2json %s %s %s" % (cursor.curName(), meta_model, cursor.filter()))
         if len(ret_) == 1:
             # FIXME: Avoid changing the type "automagically", as the caller can get confused.
             return ret_[0]
@@ -405,7 +406,7 @@ class dgi_aqnext(dgi_schema):
             dict[key]["field"] = False
 
             dict[key]["visible"] = False if key in ["pk", "desc"] else True
-            dict[key]["tipo"] = pineboolib.utils.get_tipo_aqnext(field.type())
+            dict[key]["tipo"] = sql_tools.get_tipo_aqnext(field.type())
             if field.type() == "stringlist":
                 dict[key]["subtipo"] = 6
 
@@ -468,10 +469,10 @@ class dgi_aqnext(dgi_schema):
         # retorna una lista con objetos del modelo
         cursor_master = self.get_master_cursor(prefix)
         list_objects = []
-        where, order_by = pineboolib.utils.resolve_query(prefix, params)
+        where, order_by = sql_tools.resolve_query(prefix, params)
         where_filter = "%s ORDER BY %s" % (where, order_by) if len(order_by) else where
 
-        first_reg, limit_reg = pineboolib.utils.resolve_pagination(params)
+        first_reg, limit_reg = sql_tools.resolve_pagination(params)
         if first_reg:
             where_filter += " OFFSET %s" % first_reg
 
@@ -503,7 +504,7 @@ class dgi_aqnext(dgi_schema):
         response.data["data"] = data_list
 
         # pagination = pagination_class(data_list, params)
-        first_reg, limit_reg = pineboolib.utils.resolve_pagination(params)
+        first_reg, limit_reg = sql_tools.resolve_pagination(params)
 
         response.data["PAG"] = {
             "NO": "%s" % (int(limit_reg) + int(first_reg)) if first_reg else 0,

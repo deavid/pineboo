@@ -276,3 +276,147 @@ class sql_inspector(object):
                 if table_name not in self._invalid_tables:
                     self._invalid_tables.append(table_name)
                     # tables_list.remove(table_name)
+
+
+def resolve_query(table_name, params):
+    or_where = ""
+    and_where = ""
+    where = ""
+    order_by = ""
+    from pineboolib import project
+
+    mtd = project.conn.manager().metadata(table_name)
+
+    if hasattr(params, "_iterlists"):
+        q = params
+        params = {k: q.getlist(k) if len(q.getlist(k)) > 1 else v for k, v in q.items()}
+
+    for p in params:
+        if p.startswith("q_"):
+            or_where += " OR " if len(or_where) else ""
+            or_where += resolve_where_params(p, params[p], mtd)
+        elif p.startswith("s_"):
+            and_where += " AND " if len(and_where) else ""
+            and_where += resolve_where_params(p, params[p], mtd)
+        elif p.startswith("o_"):
+            order_by += resolve_order_params(p, params[p])
+
+    if and_where != "":
+        where += str(and_where)
+    if or_where != "":
+        where += " AND (" + str(or_where) + ")" if len(where) else str(or_where)
+    if order_by:
+        order_by = order_by.strip()[:-1]
+
+    where = "1=1" if not len(where) else where
+
+    return where, order_by
+
+
+def resolve_order_params(key, valor):
+    if valor.startswith("-"):
+        valor = valor[1:] + " DESC, "
+    else:
+        valor += ", "
+
+    return valor
+
+
+def resolve_where_params(key, valor, mtd_table):
+    list_params = key.split("__")
+    campo = "_".join(list_params[0].split("_")[1:])
+    tipo = list_params[1]
+    where = ""
+    if campo == "pk":
+        return "1=1"
+
+    if tipo.endswith("[]"):
+        tipo = tipo[:-2]
+
+    if valor is None:
+        return "%s = ''" % campo
+
+    field = mtd_table.field(campo)
+    if field is not None:
+        field_type = field.type()
+    else:
+        logger.warning("pineboolib.utils.resolve_where_params No se encuentra el campo %s en la tabla %s.", campo, mtd_table.name())
+        return ""
+    # valor = aqApp.db().manager().formatValue(field_type , valor, False)
+
+    if field_type in ["bool", "unlock"]:
+        valor = "True" if valor == "true" else "False"
+
+    if tipo == "contains":
+        where = campo + " LIKE '%" + valor + "%'"
+    elif tipo == "icontains":
+        where = "UPPER(CAST(" + campo + " AS TEXT)) LIKE UPPER('%" + valor + "%')"
+    elif tipo == "exact":
+        where = campo + " = '" + valor + "'"
+    elif tipo == "iexact":
+        where = "UPPER(CAST(" + campo + " AS TEXT)) = UPPER('" + valor + "')"
+    elif tipo == "startswith":
+        where = campo + " LIKE '" + valor + "%'"
+    elif tipo == "istartswith":
+        where = campo + " ILIKE '" + valor + "%'"
+    elif tipo == "endswith":
+        where = campo + " LIKE '%" + valor + "'"
+    elif tipo == "iendswith":
+        where = campo + " ILIKE '%" + valor + "'"
+    elif tipo == "lt":
+        where = campo + " < '" + valor + "'"
+    elif tipo == "lte":
+        where = campo + " <= '" + valor + "'"
+    elif tipo == "gt":
+        where = campo + " > '" + valor + "'"
+    elif tipo == "gte":
+        where = campo + " >= '" + valor + "'"
+    elif tipo == "ne":
+        where = campo + " <> '" + valor + "'"
+    elif tipo == "in":
+        where = campo + " IN ('" + "', '".join(valor) + "')"
+
+    return where
+
+
+def resolve_pagination(query):
+    init = 0
+    limit = 0
+    for k in query.keys():
+        if k.startswith("p_"):
+            if k.endswith("l"):
+                limit = query[k]
+            elif k.endswith("o"):
+                init = query[k]
+
+                # if query[k] == "true":
+                #    page = 0
+                # else:
+                #    page = int(query[k])
+
+    ret = (None, "50")
+    if limit != 0:
+        # init = page * limit
+        ret = (init, limit)
+
+    return ret
+
+
+def get_tipo_aqnext(tipo):
+    tipo_ = 3
+    # subtipo_ = None
+
+    if tipo in ["int", "uint", "serial"]:
+        tipo_ = 16
+    elif tipo in ["string", "stringlist", "pixmap", "counter"]:
+        tipo_ = 3
+    elif tipo in ["double"]:
+        tipo_ = 19
+    elif tipo in ["bool", "unlock"]:
+        tipo_ = 18
+    elif tipo in ["date"]:
+        tipo_ = 26
+    elif tipo in ["time"]:
+        tipo_ = 27
+
+    return tipo_
