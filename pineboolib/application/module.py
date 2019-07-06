@@ -6,7 +6,7 @@ from .utils.path import _path
 
 # For types only:
 from .file import File
-from typing import Dict, Any
+from typing import Dict
 from pineboolib.core.utils.utils_base import Struct
 
 
@@ -16,7 +16,7 @@ class Module(object):
 
     logger = logging.getLogger("application.Module")
 
-    def __init__(self, areaid: str, name: str, description: str, icon: str, project: Any = None) -> None:
+    def __init__(self, areaid: str, name: str, description: str, icon: str) -> None:
         """Constructor
         @param areaid. Identificador de area.
         @param name. Nombre del módulo
@@ -24,7 +24,6 @@ class Module(object):
         @param icon. Icono del módulo
         """
 
-        self.project = project  # application.Project
         self.areaid = areaid
         self.name = name
         self.description = description  # En python2 era .decode(UTF-8)

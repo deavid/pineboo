@@ -194,14 +194,14 @@ class Project(object):
         self.modules: Dict[str, Module] = {}
         for idarea, idmodulo, descripcion, icono in cursor_:
             icono = cacheXPM(icono)
-            self.modules[idmodulo] = Module(idarea, idmodulo, descripcion, icono, project=self)
+            self.modules[idmodulo] = Module(idarea, idmodulo, descripcion, icono)
 
         file_object = open(filedir("..", "share", "pineboo", "sys.xpm"), "r")
         icono = file_object.read()
         file_object.close()
         # icono = clearXPM(icono)
 
-        self.modules["sys"] = Module("sys", "sys", "Administración", icono, project=self)
+        self.modules["sys"] = Module("sys", "sys", "Administración", icono)
 
         cursor_.execute(""" SELECT idmodulo, nombre, sha FROM flfiles WHERE NOT sha = '' ORDER BY idmodulo, nombre """)
 
