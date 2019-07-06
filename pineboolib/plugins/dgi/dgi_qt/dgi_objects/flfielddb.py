@@ -863,6 +863,10 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "date":
             if self.editor_:
                 v = self.editor_.date
+                if v:
+                    from pineboolib.application.types import Date
+
+                    v = Date(v)
 
         elif type_ == "time":
             if self.editor_:
