@@ -57,8 +57,8 @@ class XMLAction(XMLStruct):
         self.mainscript = self._v("mainscript")  # script_form
         self.formrecord = self._v("formrecord")  # form_record
         self.scriptformrecord = self._v("scriptformrecord")  # scriptformrecord
-        self.mainform_widget = None
-        self.formrecord_widget = None
+        self.mainform_widget: IFormDB = None
+        self.formrecord_widget: IFormDB = None
         self._loaded = False
 
     """
@@ -81,8 +81,8 @@ class XMLAction(XMLStruct):
             else:
                 # self.script = getattr(self, "script", None)
                 # if isinstance(self.script, str) or self.script is None:
-                self.load_script(self.scriptformrecord, None)
-                self.formrecord_widget = self.script.form
+                script = self.load_script(self.scriptformrecord, None)
+                self.formrecord_widget = script.form
                 self.formrecord_widget.widget = self.formrecord_widget
                 self.formrecord_widget.iface = self.formrecord_widget.widget.iface
                 self.formrecord_widget._loaded = True
@@ -107,11 +107,11 @@ class XMLAction(XMLStruct):
                 self.mainform_widget.widget.doCleanUp()
             self.logger.debug("Loading action %s . . . ", self.name)
             if self.project._DGI.useDesktop() and hasattr(self.project.main_window, "w_"):
-                self.mainform_widget = self.project.conn.managerModules().createForm(self, None, self.project.main_window.w_, None)
+                self.mainform_widget = self.project.conn.managerModules().createForm(action=self, parent=self.project.main_window.w_)
             else:
                 self.scriptform = getattr(self, "scriptform", None)
-                self.load_script(self.scriptform, None)
-                self.mainform_widget = self.script.form  # FormDBWidget FIXME: Add interface for types
+                script = self.load_script(self.scriptform, None)
+                self.mainform_widget = script.form  # FormDBWidget FIXME: Add interface for types
                 self.mainform_widget.widget = self.mainform_widget
                 self.mainform_widget.iface = self.mainform_widget.widget.iface
                 self.mainform_widget._loaded = True
@@ -175,9 +175,9 @@ class XMLAction(XMLStruct):
     def execDefaultScript(self):
         self.logger.info("Executing default script for Action %s", self.name)
         self.scriptform = getattr(self, "scriptform", None)
-        self.load_script(self.scriptform, None)
+        script = self.load_script(self.scriptform, None)
 
-        self.mainform_widget = self.script.form
+        self.mainform_widget = script.form
         if self.mainform_widget.iface:
             self.mainform_widget.iface.main()
         else:
@@ -189,7 +189,7 @@ class XMLAction(XMLStruct):
     @param parent. Objecto al que carga el script, si no se especifica es a self.script
     """
 
-    def load_script(self, scriptname: str, parent: Optional[IFormDB] = None) -> IFormDB:
+    def load_script(self, scriptname: str, parent: Optional[IFormDB] = None) -> Any:  # returns loaded script
         # FIXME: Parent logic is broken. We're loading scripts to two completely different objects.
         from importlib import machinery
 
@@ -199,7 +199,6 @@ class XMLAction(XMLStruct):
 
         parent_object = parent
         if parent is None:
-            parent = self
             action_ = self
         else:
             action_ = parent._action if hasattr(parent, "_action") else self
@@ -214,13 +213,13 @@ class XMLAction(XMLStruct):
         # primero default, luego sobreescribimos
         from pineboolib.qsa import emptyscript
 
-        parent.script = emptyscript
+        script_loaded = emptyscript
 
         if scriptname is None:
-            parent.script.form = parent.script.FormInternalObj(action=action_, project=self.project, parent=parent_object)
-            parent.widget = parent.script.form
+            script_loaded.form = script_loaded.FormInternalObj(action=action_, project=self.project, parent=parent_object)
+            parent.widget = script_loaded.form
             parent.iface = parent.widget.iface
-            return parent
+            return script_loaded
 
         script_path_py = self.project._DGI.alternative_script_path("%s.py" % scriptname)
 
@@ -247,7 +246,7 @@ class XMLAction(XMLStruct):
                 raise IOError
             try:
                 self.logger.debug("Cargando %s : %s ", scriptname, script_path.replace(self.project.tmpdir, "tempdata"))
-                parent.script = machinery.SourceFileLoader(scriptname, script_path).load_module()
+                script_loaded = machinery.SourceFileLoader(scriptname, script_path).load_module()
             except Exception:
                 self.logger.exception("ERROR al cargar script PY para la accion %s:", action_.name)
 
@@ -258,17 +257,17 @@ class XMLAction(XMLStruct):
             python_script_path = (script_path + ".xml.py").replace(".qs.xml.py", ".qs.py")
             try:
                 self.logger.debug("Cargando %s : %s ", scriptname, python_script_path.replace(self.project.tmpdir, "tempdata"))
-                parent.script = machinery.SourceFileLoader(scriptname, python_script_path).load_module()
+                script_loaded = machinery.SourceFileLoader(scriptname, python_script_path).load_module()
             except Exception:
                 self.logger.exception("ERROR al cargar script QS para la accion %s:", action_.name)
 
-        parent.script.form = parent.script.FormInternalObj(action_, self.project, parent_object)
+        script_loaded.form = script_loaded.FormInternalObj(action_, self.project, parent_object)
         if parent_object:
-            parent_object.widget = parent.script.form
+            parent_object.widget = script_loaded.form
             if getattr(parent_object.widget, "iface", None):
                 parent_object.iface = parent.widget.iface
 
-        return parent
+        return script_loaded
 
     def unknownSlot(self):
         self.logger.error("Executing unknown script for Action %s", self.name)

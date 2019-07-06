@@ -5,12 +5,15 @@ from pineboolib import logging
 import pineboolib
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
+from pineboolib.application.xmlaction import XMLAction
 from pineboolib.application.utils.xpm import cacheXPM
 from pineboolib.application.utils.convert_flaction import convert2FLAction
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader, AQStaticBdInfo
+
+from typing import Union
 
 """
 Gestor de módulos.
@@ -343,13 +346,15 @@ class FLManagerModules(object):
     @return QWidget correspondiente al formulario construido.
     """
 
-    def createForm(self, a, connector=None, parent=None, name=None):
+    def createForm(self, action: Union[FLAction, XMLAction], connector=None, parent=None, name=None):
         from pineboolib import pncontrolsfactory
 
-        if not isinstance(a, FLAction):
-            a = convert2FLAction(a)
+        if not isinstance(action, FLAction):
+            action = convert2FLAction(action)
 
-        return None if not a else pncontrolsfactory.FLFormDB(parent, a, load=True)
+        if not action:
+            raise Exception
+        return pncontrolsfactory.FLFormDB(parent, action, load=True)
 
     """
     Esta función es igual a la anterior, sólo se diferencia en que carga

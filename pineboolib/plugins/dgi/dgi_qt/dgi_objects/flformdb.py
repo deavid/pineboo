@@ -200,13 +200,12 @@ class FLFormDB(IFormDB, QtWidgets.QDialog):
 
         self.idMDI_ = self._action.name()
 
-        self.script = None
-        self.iface = None
-
         if script_name is None:
             script_name = self._action.scriptForm() if self._action.table() else self._action.name()
 
-        project.actions[self._action.name()].load_script(script_name, self)
+        self.script = project.actions[self._action.name()].load_script(script_name, self)
+        self.widget = self.script.form
+        self.iface = self.widget.iface
 
         self.iconSize = project._DGI.iconSize()
         self.init_thread_script = None
