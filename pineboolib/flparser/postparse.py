@@ -9,6 +9,7 @@ from xml.dom import minidom
 import logging
 
 from . import flscriptparse
+from typing import List, Type, Optional
 
 logger = logging.getLogger("flparser.postparse")
 
@@ -51,18 +52,40 @@ def getxmltagname(tagname):
     return "Unknown.%s" % tagname
 
 
-xml_class_types = []
+class TagObjectBase:
+    tags = []
+
+    @classmethod
+    def can_process_tag(cls, tagname):
+        return tagname in cls.tags
+
+    def __init__(self, tagname):
+        self.astname = tagname
+
+    def add_subelem(self, argn, subelem):
+        pass
+
+    def add_value(self, argn, vtype, value):
+        pass
+
+    def add_other(self, argn, vtype, data):
+        pass
+
+
+xml_class_types: List[Type[TagObjectBase]] = []
 
 
 class TagObjectFactory(type):
     def __init__(cls, name, bases, dct):
         global xml_class_types
-        xml_class_types.append(cls)
-        super(TagObjectFactory, cls).__init__(name, bases, dct)
+        if issubclass(cls, TagObjectBase):
+            xml_class_types.append(cls)
+        else:
+            raise Exception("This metaclass must be used as a subclass of TagObjectBase")
+        super().__init__(name, bases, dct)
 
 
-class TagObject(object, metaclass=TagObjectFactory):
-    tags = []
+class TagObject(TagObjectBase, metaclass=TagObjectFactory):
     set_child_argn = False
     name_is_first_id = False
     debug_other = True
@@ -75,12 +98,8 @@ class TagObject(object, metaclass=TagObjectFactory):
     def tagname(self, tagname):
         return self.__name__
 
-    @classmethod
-    def can_process_tag(self, tagname):
-        return tagname in self.tags
-
     def __init__(self, tagname):
-        self.astname = tagname
+        super().__init__(tagname)
         self.xml = ElementTree.Element(self.tagname(tagname))
         self.xmlname = None
         self.subelems = []
@@ -487,7 +506,7 @@ class Unknown(TagObject):
 # -----------------
 
 
-def create_xml(tagname):
+def create_xml(tagname) -> Optional[TagObject]:
     classobj = None
     for cls in xml_class_types:
         if cls.can_process_tag(tagname):
@@ -495,11 +514,14 @@ def create_xml(tagname):
             break
     if classobj is None:
         return None
-    return classobj(tagname)
+    if issubclass(classobj, TagObject):
+        return classobj(tagname)
+    else:
+        raise ValueError("Unexpected class %s" % classobj)
 
 
 def parse_unknown(tagname, treedata):
-    xmlelem = create_xml(tagname)
+    xmlelem: TagObject = create_xml(tagname)
     i = 0
     for k, v in treedata["content"]:
         if type(v) is dict:

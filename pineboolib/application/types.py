@@ -387,9 +387,6 @@ class Date(object):
 
         return self
 
-    getDate = getDay
-    setDate = setDay
-
     def getHours(self):
         """
         Retorna horas
@@ -417,6 +414,9 @@ class Date(object):
         @return milisegundos
         """
         return self.time_.msec()
+
+    getDate = getDay
+    # setDate = setDay
 
     def setDate(self, date):
         """

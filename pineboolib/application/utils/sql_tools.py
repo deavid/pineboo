@@ -1,4 +1,5 @@
 from pineboolib import logging
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -181,7 +182,7 @@ class sql_inspector(object):
             if mtd is not None:
                 type_ = mtd.type()
 
-        ret_ = None
+        ret_: Any = None
         if type_ in ("double", "int", "uint", "serial"):
             ret_ = 0
         elif type_ in ("string", "stringlist", "pixmap"):

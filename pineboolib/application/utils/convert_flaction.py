@@ -1,12 +1,15 @@
 from pineboolib import logging
 
-from pineboolib.application.xmlaction import XMLAction
-from pineboolib.fllegacy.flaction import FLAction
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.application.xmlaction import XMLAction
+    from pineboolib.fllegacy.flaction import FLAction
 
 logger = logging.getLogger("application.utils.convert_flaction")
 
 
-def convertFLAction(action: FLAction) -> XMLAction:
+def convertFLAction(action: "FLAction") -> "XMLAction":
     from pineboolib import project
 
     if action.name() not in project.actions.keys():
@@ -14,7 +17,7 @@ def convertFLAction(action: FLAction) -> XMLAction:
     return project.actions[action.name()]
 
 
-def convert2FLAction(action: XMLAction) -> FLAction:
+def convert2FLAction(action: "XMLAction") -> "FLAction":
     name = None
     if isinstance(action, str):
         name = str
