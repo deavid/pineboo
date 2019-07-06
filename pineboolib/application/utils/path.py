@@ -23,9 +23,14 @@ def coalesce_path(*filenames) -> Optional[str]:
     @return ruta al primer fichero encontrado
     """
     for filename in filenames:
-        if filename and filename in pineboolib.project.files:
+        if filename is None:
+            # When the caller specifies None as the last item means that its OK to return None
+            return None
+        if filename in pineboolib.project.files:
             return pineboolib.project.files[filename].path()
-    logger.error("Ninguno de los ficheros especificados ha sido encontrado en el proyecto: %s", repr(filenames), stack_info=False)
+    logger.error(
+        "coalesce_path: Ninguno de los ficheros especificados ha sido encontrado en el proyecto: %s", repr(filenames), stack_info=False
+    )
     return None
 
 

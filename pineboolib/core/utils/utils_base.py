@@ -2,6 +2,7 @@
 import os
 import re
 import sys
+import io
 from PyQt5 import QtCore  # type: ignore
 from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir  # type: ignore
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest  # type: ignore
@@ -319,7 +320,7 @@ def getTableObj(tree: ElementTree, root: Element) -> Struct:
     elem_query = table.xmlroot.find("query")
     query_name = elem_query and one(elem_query.text, None)
     elem_name = table.xmlroot.find("name")
-    if not elem_name:
+    if elem_name is None:
         raise ValueError("XML Tag for <name> not found!")
     name = elem_name.text
     table.tablename = name
@@ -386,7 +387,7 @@ def version_normalize(v):
     return [int(x) for x in re.sub(r"(\.0+)*$", "", v).split(".")]
 
 
-def load2xml(form_path_or_str: str) -> Element:
+def load2xml(form_path_or_str: str) -> ElementTree:
     from xml.etree import ElementTree as ET
 
     """
@@ -406,30 +407,24 @@ def load2xml(form_path_or_str: str) -> Element:
             return super(xml_parser, self).close()
     """
 
+    file_ptr: io.StringIO = None
     if (
         form_path_or_str.find("KugarTemplate") > -1
         or form_path_or_str.find("DOCTYPE KugarData") > -1
         or form_path_or_str.find("DOCTYPE svg") > -1
     ):
         form_path_or_str = parse_for_duplicates(form_path_or_str)
-        load_from_string = True
+        file_ptr = io.StringIO(form_path_or_str)
     elif not os.path.exists(form_path_or_str):
         raise Exception("File %s not found" % form_path_or_str[:200])
 
     try:
         parser = ET.XMLParser(html=0)
-        if load_from_string:
-            form_path_or_str = parse_for_duplicates(form_path_or_str)
-            return ET.fromstring(form_path_or_str, parser)
-        else:
-            return ET.parse(form_path_or_str, parser).getroot() if os.path.exists(form_path_or_str) else None
+        return ET.parse(file_ptr or form_path_or_str, parser)
     except Exception:
         try:
             parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
-            if load_from_string:
-                return ET.fromstring(form_path_or_str, parser)
-            else:
-                return ET.parse(form_path_or_str, parser).getroot()
+            return ET.parse(file_ptr or form_path_or_str, parser)
         except Exception:
             logger.exception("Error cargando UI después de intentar con UTF8 e ISO \n%s", form_path_or_str)
             raise

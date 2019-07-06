@@ -18,7 +18,7 @@ from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flutil import FLUtil
 import pineboolib
 
-from xml import etree
+from xml import etree  # type: ignore
 from pineboolib import logging
 from pineboolib.interfaces import IManager
 
@@ -448,23 +448,23 @@ class FLManager(QtCore.QObject, IManager):
         q = FLSqlQuery(parent, self.db_.connectionName())
 
         root_ = etree.ElementTree.fromstring(qry_)
-        elem_select: etree.ElementTree.Element = root_.find("select")
-        elem_from: etree.ElementTree.Element = root_.find("from")
+        elem_select = root_.find("select")
+        elem_from = root_.find("from")
 
-        if elem_select:
+        if elem_select is not None:
             q.setSelect(elem_select.text.replace(" ", "").replace("\n", "").replace("\t", "").replace("\r", ""))
-        if elem_from:
+        if elem_from is not None:
             q.setFrom(elem_from.text.strip(" \t\n\r"))
 
         for where in root_.iter("where"):
             q.setWhere(where.text.strip(" \t\n\r"))
 
-        elem_tables: etree.ElementTree.Element = root_.find("tables")
-        if elem_tables:
+        elem_tables = root_.find("tables")
+        if elem_tables is not None:
             q.setTablesList(elem_tables.text.strip(" \t\n\r"))
 
         elem_order = root_.find("order")
-        if elem_order:
+        if elem_order is not None:
             orderBy_ = elem_order.text.strip(" \t\n\r")
             q.setOrderBy(orderBy_)
 

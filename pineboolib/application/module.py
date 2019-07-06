@@ -73,10 +73,10 @@ class Module(object):
             except UnicodeDecodeError as e:
                 self.logger.error("Error al leer el fichero %s %s", tablefile, e)
                 continue
-            tableObj = parseTable(name, contenido)
-            if tableObj is None:
-                self.logger.warning("No se pudo procesar. Se ignora tabla %s/%s ", self.name, name)
-                continue
+            try:
+                tableObj = parseTable(name, contenido)
+            except ValueError as e:
+                self.logger.warning("No se pudo procesar. Se ignora tabla %s/%s (%s) ", self.name, name, e)
             self.tables[name] = tableObj
             self.project.tables[name] = tableObj  # FIXME: Tables belong to project or module?
 
