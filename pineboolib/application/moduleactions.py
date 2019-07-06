@@ -3,8 +3,9 @@ from pineboolib import logging
 from pineboolib.core.exceptions import ForbiddenError
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.xmlaction import XMLAction
-from .module import Module
 from .proxy import DelayedObjectProxyLoader
+
+from typing import Any
 
 
 class ModuleActions(object):
@@ -15,7 +16,7 @@ class ModuleActions(object):
 
     logger = logging.getLogger("main.ModuleActions")
 
-    def __init__(self, module: Module, path: str, modulename: str) -> None:
+    def __init__(self, module: Any, path: str, modulename: str) -> None:
         """Constructor
         @param module. Identificador del módulo
         @param path. Ruta del módulo
@@ -24,7 +25,7 @@ class ModuleActions(object):
         from pineboolib import project  # FIXME
 
         self.project = project
-        self.mod = module
+        self.mod = module  # application.Module
         self.path = path
         self.module_name = modulename
         if not self.path:
