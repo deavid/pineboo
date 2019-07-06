@@ -30,16 +30,16 @@ class ICursor:
         pass
 
     def fetch(self) -> List[List[Any]]:
-        pass
+        return []
 
     def __iter__(self) -> Generator[List[Any], None, None]:
-        pass
+        yield []
 
     def fetchone(self) -> List[Any]:
-        pass
+        return []
 
     def fetchall(self) -> List[Any]:
-        pass
+        return []
 
     def scroll(value, mode="relative") -> Any:
         pass
