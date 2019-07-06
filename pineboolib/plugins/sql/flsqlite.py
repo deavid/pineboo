@@ -319,7 +319,7 @@ class FLSQLITE(object):
             q = self.fix_query(q)
             cursor.execute(q)
         except Exception:
-            self.logger.error("SQL3Driver:: No se pudo ejecutar la query %s", q)
+            self.logger.error("SQL3Driver:: No se pudo ejecutar la query %s" % q, q)
             self.setLastError("%s::No se pudo ejecutar la query.\n%s" % (__name__, q), q)
 
         return cursor

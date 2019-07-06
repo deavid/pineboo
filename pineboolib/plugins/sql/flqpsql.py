@@ -1419,7 +1419,7 @@ class FLQPSQL(object):
             q = self.fix_query(q)
             cursor.execute(q)
         except Exception:
-            self.setLastError("No se puedo ejecutar la siguiente query", q)
-            qWarning("PSQLDriver:: No se puedo ejecutar la siguiente query %s % q\n %s" % (q, traceback.format_exc()))
+            self.setLastError("No se puedo ejecutar la siguiente query %s" % q, q)
+            qWarning("PSQLDriver:: No se puedo ejecutar la siguiente query %s\n %s" % (q, traceback.format_exc()))
 
         return cursor
