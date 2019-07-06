@@ -2,7 +2,7 @@ import os
 import time
 from typing import List, Optional, Union, Any, Dict
 
-from pineboolib import logging
+from pineboolib.core.utils.logging import logging
 from pineboolib.core.exceptions import CodeDoesNotBelongHereException, NotConnectedError
 from pineboolib.core.utils.utils_base import filedir, Struct
 from pineboolib.core.settings import config, settings
@@ -100,11 +100,6 @@ class Project(object):
             # FIXME: Maybe it is a good idea to call this regardless of localDesktop
             self._DGI.extraProjectInit()
 
-        from pineboolib import pncontrolsfactory
-
-        # FIXME: Find a saner way to do this
-        pncontrolsfactory.reload_from_DGI()
-
     def setDebugLevel(self, q: int) -> None:
         """
         Especifica el nivel de debug de la aplicación
@@ -193,14 +188,14 @@ class Project(object):
         self.modules: Dict[str, Module] = {}
         for idarea, idmodulo, descripcion, icono in cursor_:
             icono = cacheXPM(icono)
-            self.modules[idmodulo] = Module(idarea, idmodulo, descripcion, icono)
+            self.modules[idmodulo] = Module(idarea, idmodulo, descripcion, icono, project=self)
 
         file_object = open(filedir("..", "share", "pineboo", "sys.xpm"), "r")
         icono = file_object.read()
         file_object.close()
         # icono = clearXPM(icono)
 
-        self.modules["sys"] = Module("sys", "sys", "Administración", icono)
+        self.modules["sys"] = Module("sys", "sys", "Administración", icono, project=self)
 
         cursor_.execute(""" SELECT idmodulo, nombre, sha FROM flfiles WHERE NOT sha = '' ORDER BY idmodulo, nombre """)
 
@@ -305,9 +300,10 @@ class Project(object):
         load_models()
 
         self.message_manager().send("splash", "showMessage", ["Cargando traducciones ..."])
-        from pineboolib import pncontrolsfactory
-
-        pncontrolsfactory.aqApp.loadTranslations()
+        # FIXME: Can we call this outside of this class?
+        # from pineboolib import pncontrolsfactory
+        #
+        # pncontrolsfactory.aqApp.loadTranslations()
 
         # FIXME: ACLs needed at this level?
         # self.acl_ = FLAccessControlLists()

@@ -179,6 +179,11 @@ def exec_main(options: Values) -> int:
 
     project.init_dgi(_DGI)
 
+    from pineboolib import pncontrolsfactory
+
+    # FIXME: Find a saner way to do this
+    pncontrolsfactory.reload_from_DGI()
+
     if not configdb and _DGI.useDesktop() and _DGI.localDesktop():
         if not _DGI.mobilePlatform():
             from .conn_dialog import show_connection_dialog

@@ -1,12 +1,12 @@
 import os.path
-from pineboolib import logging
+from pineboolib.core.utils.logging import logging
 
 from pineboolib.core.parsetable import parseTable
 from .utils.path import _path
 
 # For types only:
 from .file import File
-from typing import Dict
+from typing import Dict, Any
 from pineboolib.core.utils.utils_base import Struct
 
 
@@ -16,16 +16,15 @@ class Module(object):
 
     logger = logging.getLogger("application.Module")
 
-    def __init__(self, areaid: str, name: str, description: str, icon: str) -> None:
+    def __init__(self, areaid: str, name: str, description: str, icon: str, project: Any = None) -> None:
         """Constructor
         @param areaid. Identificador de area.
         @param name. Nombre del módulo
         @param description. Descripción del módulo
         @param icon. Icono del módulo
         """
-        from pineboolib import project  # FIXME
 
-        self.project = project
+        self.project = project  # application.Project
         self.areaid = areaid
         self.name = name
         self.description = description  # En python2 era .decode(UTF-8)

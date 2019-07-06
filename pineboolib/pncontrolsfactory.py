@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import inspect
 import pineboolib
-from pineboolib import logging
+from pineboolib.core.utils.logging import logging
 import weakref
 import re
 import os
