@@ -5,7 +5,7 @@ from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.xmlaction import XMLAction
 from .proxy import DelayedObjectProxyLoader
 
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 
 class ModuleActions(object):
@@ -22,9 +22,13 @@ class ModuleActions(object):
         @param path. Ruta del módulo
         @param modulename. Nombre del módulo
         """
-        from pineboolib import project  # FIXME
+        if TYPE_CHECKING:
+            # To avoid circular dependency on pytype
+            self.project = module
+        else:
+            from pineboolib import project  # FIXME
 
-        self.project = project
+            self.project = project
         self.mod = module  # application.Module
         self.path = path
         self.module_name = modulename
@@ -35,7 +39,10 @@ class ModuleActions(object):
         """Carga las actions del módulo en el projecto
         """
         # Ojo: Almacena un arbol con los módulos cargados
-        from pineboolib import qsa as qsa_dict_modules
+        if TYPE_CHECKING:
+            qsa_dict_modules = self.mod
+        else:
+            from pineboolib import qsa as qsa_dict_modules
 
         self.tree = load2xml(self.path)
         self.root = self.tree.getroot()

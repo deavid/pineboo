@@ -50,11 +50,13 @@ class XMLAction(XMLStruct):
         self.project = project
         self.form = self._v("form")
         self.name = self._v("name")
+        # FIXME: script gets replaced later with the QSA file! (either script or scriptformrecord)
         self.script = self._v("script")  # script_form_record
         self.table = self._v("table")
         self.mainform = self._v("mainform")
         self.mainscript = self._v("mainscript")  # script_form
         self.formrecord = self._v("formrecord")  # form_record
+        self.scriptformrecord = self._v("scriptformrecord")  # scriptformrecord
         self.mainform_widget = None
         self.formrecord_widget = None
         self._loaded = False
@@ -109,7 +111,7 @@ class XMLAction(XMLStruct):
             else:
                 self.scriptform = getattr(self, "scriptform", None)
                 self.load_script(self.scriptform, None)
-                self.mainform_widget = self.script.form
+                self.mainform_widget = self.script.form  # FormDBWidget FIXME: Add interface for types
                 self.mainform_widget.widget = self.mainform_widget
                 self.mainform_widget.iface = self.mainform_widget.widget.iface
                 self.mainform_widget._loaded = True
