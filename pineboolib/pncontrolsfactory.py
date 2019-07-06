@@ -210,14 +210,14 @@ class SysType(object, metaclass=Singleton):
         return self.version().upper().find("NEBULA") > -1
 
     def isDebuggerMode(self) -> bool:
-        return config.value("application/isDebuggerMode", False)
+        return bool(config.value("application/isDebuggerMode", False))
 
     @decorators.NotImplementedWarn
     def isCloudMode(self) -> bool:
         return False
 
     def isDebuggerEnabled(self) -> bool:
-        return config.value("application/dbadmin_enabled", False)
+        return bool(config.value("application/dbadmin_enabled", False))
 
     def isQuickBuild(self):
         return not self.isDebuggerEnabled()

@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtCore import QSize
-
-
-from pineboolib.core.utils.utils_base import filedir, indent
-from pineboolib.fllegacy.flsettings import FLSettings
-
 import os
 import base64
 import hashlib
 from xml.etree import ElementTree as ET
+
+from PyQt5 import QtWidgets, QtCore  # type: ignore
+from PyQt5.QtWidgets import QMessageBox  # type: ignore
+from PyQt5.QtCore import QSize  # type: ignore
+
+from pineboolib.core.utils.utils_base import filedir, indent
+from pineboolib.fllegacy.flsettings import FLSettings  # FIXME: Use pineboolib.core.settings
 
 from typing import Optional
 

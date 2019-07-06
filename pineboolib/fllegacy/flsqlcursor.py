@@ -24,6 +24,7 @@ from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
 
+from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
 
 logger = logging.getLogger(__name__)
 
@@ -788,22 +789,22 @@ class FLSqlCursor(QtCore.QObject):
     Insertar, en este modo el buffer se prepara para crear un nuevo registro
     """
 
-    Insert = 0
+    Insert = CursorAccessMode.Insert
 
     """
     Edición, en este modo el buffer se prepara para editar el registro activo
     """
-    Edit = 1
+    Edit = CursorAccessMode.Edit
 
     """
     Borrar, en este modo el buffer se prepara para borrar el registro activo
     """
-    Del = 2
+    Del = CursorAccessMode.Del
 
     """
     Navegacion, en este modo solo se puede visualizar el buffer
     """
-    Browse = 3
+    Browse = CursorAccessMode.Browse
 
     """
     evalua un valor fijo

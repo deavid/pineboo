@@ -7,10 +7,9 @@ from PyQt5 import QtCore, QtWidgets
 from pineboolib.core.settings import config
 from pineboolib.core import decorators
 from pineboolib.interfaces.iconnection import IConnection
-from pineboolib.pnsqldrivers import PNSqlDrivers
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
 from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
-from pineboolib import pncontrolsfactory
+from pineboolib import pncontrolsfactory  # FIXME: Don't import pncontrolsfactory in this file. Manage without DGI.
 
 from pineboolib import logging
 
@@ -31,7 +30,7 @@ class PNConnection(IConnection, QtCore.QObject):
     transaction_ = None
     _managerModules = None
     _manager = None
-    currentSavePoint_ = None
+    currentSavePoint_: FLSqlSavePoint = None  # FIXME: Should use something from pineboolib.application
     stackSavePoints_ = None
     queueSavePoints_ = None
     interactiveGUI_ = None
@@ -41,6 +40,8 @@ class PNConnection(IConnection, QtCore.QObject):
     driver_ = None
 
     def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name=None):
+        from pineboolib.pnsqldrivers import PNSqlDrivers
+
         super(PNConnection, self).__init__()
 
         self.driverSql = PNSqlDrivers()
@@ -298,7 +299,7 @@ class PNConnection(IConnection, QtCore.QObject):
         cancel = False
         if (
             self.interactiveGUI()
-            and cur.d.modeAccess_ in (FLSqlCursor.Insert, FLSqlCursor.Edit)
+            and cur.d.modeAccess_ in (CursorAccessMode.Insert, CursorAccessMode.Edit)
             and cur.isModifiedBuffer()
             and cur.d.askForCancelChanges_
         ):
@@ -346,7 +347,7 @@ class PNConnection(IConnection, QtCore.QObject):
                     self.stackSavePoints_.clear()
                     self.queueSavePoints_.clear()
 
-                cur.d.modeAccess_ = FLSqlCursor.Browse
+                cur.d.modeAccess_ = CursorAccessMode.Browse
                 if cancel:
                     cur.select()
 
@@ -388,7 +389,7 @@ class PNConnection(IConnection, QtCore.QObject):
             else:
                 self.rollbackSavePoint(self.transaction_)
 
-            cur.d.modeAccess_ = FLSqlCursor.Browse
+            cur.d.modeAccess_ = CursorAccessMode.Browse
             return True
 
     def interactiveGUI(self):
@@ -430,7 +431,7 @@ class PNConnection(IConnection, QtCore.QObject):
                         self.queueSavePoints_.clear()
 
                     if notify:
-                        cur.d.modeAccess_ = FLSqlCursor.Browse
+                        cur.d.modeAccess_ = CursorAccessMode.Browse
 
                     pncontrolsfactory.aqApp.emitTransactionEnd(cur)
                     return True
@@ -455,7 +456,7 @@ class PNConnection(IConnection, QtCore.QObject):
                 else:
                     self.releaseSavePoint(self.transaction_)
                 if notify:
-                    cur.d.modeAccess_ = FLSqlCursor.Browse
+                    cur.d.modeAccess_ = CursorAccessMode.Browse
 
                 return True
             if not self.canSavePoint():
@@ -474,7 +475,7 @@ class PNConnection(IConnection, QtCore.QObject):
                 self.releaseSavePoint(self.transaction_)
 
             if notify:
-                cur.d.modeAccess_ = FLSqlCursor.Browse
+                cur.d.modeAccess_ = CursorAccessMode.Browse
 
             return True
 
