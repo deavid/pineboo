@@ -2,7 +2,7 @@
 import weakref
 import copy
 import datetime
-import logging
+from pineboolib import logging
 import importlib
 from typing import Any
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtXml, QtCore
-import logging
+from pineboolib import logging
 
 
 class metaTranslator(object):

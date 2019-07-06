@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, Qt
 from os.path import basename
-import logging
+from pineboolib import logging
 
 import smtplib
 

@@ -1,4 +1,4 @@
-import logging
+from pineboolib import logging
 
 from pineboolib.application.xmlaction import XMLAction
 from pineboolib.fllegacy.flaction import FLAction

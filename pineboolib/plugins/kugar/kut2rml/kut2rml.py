@@ -4,7 +4,7 @@ from xml.etree.ElementTree import Element, SubElement
 from PyQt5.QtGui import QColor
 from pineboolib.core.utils.utils_base import filedir
 import pineboolib
-import logging
+from pineboolib import logging
 import traceback
 import datetime
 

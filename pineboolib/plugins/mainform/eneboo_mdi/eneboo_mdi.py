@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import logging
+from pineboolib import logging
 from PyQt5.QtWidgets import QMainWindow
 
 logger = logging.getLogger("mainForm_%s" % __name__)

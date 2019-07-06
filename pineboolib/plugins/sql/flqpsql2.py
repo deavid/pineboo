@@ -1,4 +1,4 @@
-import logging
+from pineboolib import logging
 from pineboolib.application.utils.check_dependencies import check_dependencies
 from sqlalchemy import create_engine
 

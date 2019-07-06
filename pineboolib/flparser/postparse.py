@@ -8,7 +8,7 @@ import sys
 import imp
 from xml.etree import ElementTree
 from xml.dom import minidom
-import logging
+from pineboolib import logging
 
 try:
     from . import flscriptparse
@@ -577,7 +577,7 @@ def parseArgs(argv):
 
 
 def main():
-    import logging
+    from pineboolib import logging
 
     log_format = "%(asctime)s - %(levelname)s: %(name)s: %(message)s"
 

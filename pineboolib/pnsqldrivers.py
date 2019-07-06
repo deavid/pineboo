@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import logging
+from pineboolib import logging
 import importlib
 import sys
 

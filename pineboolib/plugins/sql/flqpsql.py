@@ -14,7 +14,7 @@ from sqlalchemy import create_engine
 
 import traceback
 import pineboolib
-import logging
+from pineboolib import logging
 
 
 logger = logging.getLogger(__name__)

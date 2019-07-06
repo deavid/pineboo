@@ -14,7 +14,7 @@ from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flstylepainter import FLStylePainter
 from pineboolib.fllegacy.flreportengine import FLReportEngine
-import logging
+from pineboolib import logging
 
 
 AQ_USRHOME = "."  # FIXME

@@ -5,7 +5,7 @@ from pineboolib.fllegacy.flsettings import FLSettings
 from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
 import pineboolib
 
-import logging
+from pineboolib import logging
 
 
 class FLReportEngine(object):

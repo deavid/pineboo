@@ -4,7 +4,7 @@ from PyQt5 import QtCore
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
-import logging
+from pineboolib import logging
 
 logger = logging.getLogger(__name__)
 

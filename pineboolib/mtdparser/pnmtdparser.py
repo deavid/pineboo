@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import logging
+from pineboolib import logging
 from typing import List
 from pineboolib.core.utils.utils_base import _dir
 from pineboolib import project

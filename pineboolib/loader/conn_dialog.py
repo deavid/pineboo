@@ -1,4 +1,4 @@
-import logging
+from pineboolib import logging
 
 from PyQt5.QtWidgets import QApplication
 from pineboolib.loader.projectconfig import ProjectConfig

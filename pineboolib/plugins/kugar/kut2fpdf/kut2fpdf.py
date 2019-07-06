@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib.application.utils.check_dependencies import check_dependencies
 from pineboolib.core.utils.utils_base import filedir, load2xml
-import logging
+from pineboolib import logging
 import datetime
 import re
 import os

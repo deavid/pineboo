@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pineboolib.application.utils.check_dependencies import check_dependencies
-import logging
+from pineboolib import logging
 
 from pineboolib.plugins.kugar.kut2fpdf.kut2fpdf import kut2fpdf
 

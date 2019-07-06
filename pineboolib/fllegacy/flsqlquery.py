@@ -1,4 +1,4 @@
-import logging
+from pineboolib import logging
 import pineboolib
 from pineboolib.core import decorators
 from pineboolib.core.settings import config

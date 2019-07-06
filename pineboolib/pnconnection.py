@@ -12,7 +12,7 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
 from pineboolib import pncontrolsfactory
 
-import logging
+from pineboolib import logging
 
 logger = logging.getLogger(__name__)
 

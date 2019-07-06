@@ -1,13 +1,11 @@
-import logging
+from pineboolib import logging
 import os.path
 
 from pineboolib.core.utils.utils_base import XMLStruct
 from pineboolib.interfaces import IFormDB, IFormRecordDB
 from .utils.path import _path, coalesce_path
 
-from typing import Optional
-
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from typing import Optional, Any
 
 
 class XMLMainFormAction(XMLStruct):
@@ -151,8 +149,8 @@ class XMLAction(XMLStruct):
     Abre el FLFormRecordDB por defecto
     @param cursor. Cursor a usar por el FLFormRecordDB
     """
-
-    def openDefaultFormRecord(self, cursor: FLSqlCursor) -> None:
+    # FIXME: cursor is FLSqlCursor but should be something core, not "FL". Also, an interface
+    def openDefaultFormRecord(self, cursor: Any) -> None:
         self.logger.info("Opening default formRecord for Action %s", self.name)
         w = self.loadRecord(cursor)
         # w.init()
@@ -189,7 +187,7 @@ class XMLAction(XMLStruct):
     @param parent. Objecto al que carga el script, si no se especifica es a self.script
     """
 
-    def load_script(self, scriptname: str, parent: Optional[IFormDB] = None) -> None:
+    def load_script(self, scriptname: str, parent: Optional[IFormDB] = None) -> IFormDB:
         # FIXME: Parent logic is broken. We're loading scripts to two completely different objects.
         from importlib import machinery
 
@@ -220,7 +218,7 @@ class XMLAction(XMLStruct):
             parent.script.form = parent.script.FormInternalObj(action=action_, project=self.project, parent=parent_object)
             parent.widget = parent.script.form
             parent.iface = parent.widget.iface
-            return
+            return parent
 
         script_path_py = self.project._DGI.alternative_script_path("%s.py" % scriptname)
 
@@ -268,7 +266,7 @@ class XMLAction(XMLStruct):
             if getattr(parent_object.widget, "iface", None):
                 parent_object.iface = parent.widget.iface
 
-        return
+        return parent
 
     def unknownSlot(self):
         self.logger.error("Executing unknown script for Action %s", self.name)

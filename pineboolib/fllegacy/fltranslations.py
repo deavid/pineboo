@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-import logging
+from pineboolib import logging
 
 from PyQt5 import QtCore, Qt
 

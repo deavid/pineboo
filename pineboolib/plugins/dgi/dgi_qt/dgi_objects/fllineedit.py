@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets
-import logging
+from pineboolib import logging
 
 
 class FLLineEdit(QtWidgets.QLineEdit):

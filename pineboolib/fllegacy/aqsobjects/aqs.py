@@ -6,7 +6,7 @@ from PyQt5 import QtGui
 
 from pineboolib.core.utils.utils_base import filedir
 
-import logging
+from pineboolib import logging
 from PyQt5.QtXml import QDomDocument
 
 logger = logging.getLogger("AQS")

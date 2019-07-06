@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib.qsa import *
 import ast
-import logging
+from pineboolib import logging
 
 logger = logging.getLogger(__name__)
 

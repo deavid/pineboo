@@ -9,7 +9,7 @@ import importlib
 import traceback
 import sys
 import os
-import logging
+from pineboolib import logging
 
 from typing import Any
 

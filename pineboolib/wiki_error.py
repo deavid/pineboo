@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import logging
+from pineboolib import logging
 import re
 
 logger = logging.getLogger(__name__)

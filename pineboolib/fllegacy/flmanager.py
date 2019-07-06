@@ -19,7 +19,7 @@ from pineboolib.fllegacy.flutil import FLUtil
 import pineboolib
 
 from xml import etree
-import logging
+from pineboolib import logging
 
 from PyQt5.QtXml import QDomElement
 from pineboolib.pnconnection import PNConnection

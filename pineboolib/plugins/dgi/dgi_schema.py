@@ -2,7 +2,7 @@
 from pineboolib.application.utils.mobilemode import is_mobile_mode
 from importlib import import_module
 
-import logging
+from pineboolib import logging
 
 logger = logging.getLogger(__name__)
 

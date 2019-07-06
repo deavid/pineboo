@@ -5,7 +5,7 @@ from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
 from PyQt5.QtWidgets import QCheckBox
-import logging
+from pineboolib import logging
 
 logger = logging.getLogger(__name__)
 

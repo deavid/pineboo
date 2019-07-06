@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-import logging
+from pineboolib import logging
 
 import pineboolib
 from pineboolib.core import decorators

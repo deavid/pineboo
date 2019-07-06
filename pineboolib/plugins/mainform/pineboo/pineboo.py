@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import logging
+from pineboolib import logging
 
 from pineboolib.core.utils.utils_base import filedir, Struct
 from pineboolib.fllegacy.FLSettings import FLSettings

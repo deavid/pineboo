@@ -1,6 +1,6 @@
 # # -*- coding: utf-8 -*-
 import traceback
-import logging
+from pineboolib import logging
 import inspect
 import datetime
 

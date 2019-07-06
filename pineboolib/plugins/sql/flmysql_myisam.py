@@ -13,7 +13,7 @@ from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flutil import FLUtil
 import pineboolib
 import traceback
-import logging
+from pineboolib import logging
 
 logger = logging.getLogger(__name__)
 

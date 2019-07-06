@@ -8,7 +8,7 @@ from pineboolib.fllegacy.aqsobjects.aqs import AQS
 from pineboolib import pncontrolsfactory
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQUtil, AQSettings
 
-import logging
+from pineboolib import logging
 
 
 logger = logging.getLogger("mainForm_%s" % __name__)

@@ -1,4 +1,4 @@
-import logging
+from pineboolib import logging
 import os.path
 
 import pineboolib

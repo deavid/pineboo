@@ -11,7 +11,7 @@ from sqlalchemy import create_engine
 
 import traceback
 import os
-import logging
+from pineboolib import logging
 
 
 class FLSQLITE(object):

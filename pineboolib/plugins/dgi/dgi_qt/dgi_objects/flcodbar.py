@@ -5,7 +5,7 @@ from PyQt5.QtGui import QPixmap, QColor
 from pineboolib.core.utils.utils_base import load2xml
 from PyQt5.QtSvg import QSvgRenderer
 
-import logging
+from pineboolib import logging
 import barcode
 
 logger = logging.getLogger(__name__)

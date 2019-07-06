@@ -2,7 +2,7 @@
 import platform
 import hashlib
 import datetime
-import logging
+from pineboolib import logging
 
 from PyQt5 import QtCore
 

@@ -1,5 +1,5 @@
 import os.path
-import logging
+from pineboolib import logging
 
 from pineboolib.core.parsetable import parseTable
 from .utils.path import _path

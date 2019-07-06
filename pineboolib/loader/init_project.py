@@ -1,4 +1,4 @@
-import logging
+from pineboolib import logging
 from typing import Any
 
 logger = logging.getLogger("loader.init_project")

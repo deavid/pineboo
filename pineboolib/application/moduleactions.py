@@ -1,4 +1,4 @@
-import logging
+from pineboolib import logging
 
 from pineboolib.core.exceptions import ForbiddenError
 from pineboolib.core.utils.utils_base import load2xml

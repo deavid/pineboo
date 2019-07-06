@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import logging
+from pineboolib import logging
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QToolButton

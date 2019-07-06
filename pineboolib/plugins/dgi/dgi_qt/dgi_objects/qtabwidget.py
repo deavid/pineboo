@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets
-import logging
+from pineboolib import logging
 from typing import Any, Optional, TypeVar, Union
 
 _T0 = TypeVar("_T0")

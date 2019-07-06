@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore
-import logging
+from pineboolib import logging
 from typing import Any, Sized, Tuple, List
 
 

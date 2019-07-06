@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-import logging
+from pineboolib import logging
 import datetime
 import fnmatch
 from typing import List

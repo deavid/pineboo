@@ -5,7 +5,7 @@ from pineboolib.core import decorators
 from PyQt5 import QtWidgets, Qt, QtCore
 
 import os
-import logging
+from pineboolib import logging
 
 
 logger = logging.getLogger(__name__)

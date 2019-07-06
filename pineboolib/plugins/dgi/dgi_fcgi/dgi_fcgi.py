@@ -1,5 +1,5 @@
 # # -*- coding: utf-8 -*-
-import logging
+from pineboolib import logging
 from flup.server.fcgi import WSGIServer
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.application.utils.check_dependencies import check_dependencies

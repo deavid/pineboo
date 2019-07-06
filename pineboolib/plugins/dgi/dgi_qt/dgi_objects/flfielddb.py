@@ -19,7 +19,7 @@ from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldoublevalidator import FLDouble
 
 import datetime
 import pineboolib
-import logging
+from pineboolib import logging
 
 logger = logging.getLogger(__name__)
 

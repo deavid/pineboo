@@ -10,7 +10,7 @@ from pineboolib.application.utils.check_dependencies import check_dependencies
 # from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
 import pineboolib
-import logging
+from pineboolib import logging
 import json
 
 

@@ -1,6 +1,6 @@
 import pineboolib
 import sys
-import logging
+from pineboolib import logging
 import traceback
 
 from pineboolib.core.utils.utils_base import version_check, is_deployed

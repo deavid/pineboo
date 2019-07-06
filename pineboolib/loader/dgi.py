@@ -1,4 +1,4 @@
-import logging
+from pineboolib import logging
 
 from pineboolib.plugins.dgi.dgi_qt.dgi_qt import dgi_qt
 from typing import Callable

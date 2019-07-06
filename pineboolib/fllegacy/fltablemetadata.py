@@ -3,7 +3,7 @@ from pineboolib.core import decorators
 
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
-import logging
+from pineboolib import logging
 import copy
 
 

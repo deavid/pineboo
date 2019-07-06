@@ -1,4 +1,4 @@
-import logging
+from pineboolib import logging
 from typing import Container
 
 logger = logging.getLogger("loader.preload_actions")

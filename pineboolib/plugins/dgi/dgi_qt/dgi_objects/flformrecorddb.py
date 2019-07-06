@@ -12,7 +12,7 @@ from pineboolib.interfaces import IFormRecordDB
 import pineboolib
 
 import traceback
-import logging
+from pineboolib import logging
 
 DEBUG = False
 

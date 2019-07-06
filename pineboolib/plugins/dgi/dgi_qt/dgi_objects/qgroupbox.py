@@ -2,7 +2,7 @@
 from PyQt5 import QtWidgets
 from pineboolib.core import decorators
 from PyQt5 import Qt
-import logging
+from pineboolib import logging
 
 from typing import Any
 

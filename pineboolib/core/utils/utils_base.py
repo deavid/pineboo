@@ -1,8 +1,8 @@
 # # -*- coding: utf-8 -*-
 import os
 import re
-import logging
 import sys
+from . import logging
 from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest

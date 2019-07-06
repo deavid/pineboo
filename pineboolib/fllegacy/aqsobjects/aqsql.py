@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pineboolib
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-import logging
+from pineboolib import logging
 
 
 logger = logging.getLogger(__name__)

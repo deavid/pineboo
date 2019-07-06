@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtWidgets
-import logging
+from pineboolib import logging
 from PyQt5.QtCore import pyqtProperty
 
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qbuttongroup import QButtonGroup

@@ -13,7 +13,7 @@ from pineboolib.fllegacy.flutil import FLUtil
 import pineboolib
 import traceback
 
-import logging
+from pineboolib import logging
 from PyQt5.QtCore import QTime, QDate, QDateTime, Qt
 
 logger = logging.getLogger(__name__)

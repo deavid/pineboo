@@ -3,7 +3,7 @@
 from PyQt5 import Qt
 from pineboolib.core import decorators
 import pineboolib
-import logging
+from pineboolib import logging
 
 logger = logging.getLogger("FLListViewItem")
 

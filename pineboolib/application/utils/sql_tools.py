@@ -1,4 +1,4 @@
-import logging
+from pineboolib import logging
 
 logger = logging.getLogger(__name__)
 

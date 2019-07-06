@@ -1,5 +1,5 @@
 from typing import Callable
-import logging
+from pineboolib import logging
 from typing import Any
 
 

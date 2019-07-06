@@ -13,7 +13,7 @@ from pineboolib.fllegacy.flsettings import FLSettings
 
 
 import pineboolib
-import logging
+from pineboolib import logging
 from PyQt5.QtGui import QPixmap
 
 logger = logging.getLogger(__name__)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib.core.utils.utils_base import aqtt
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
-import logging
+from pineboolib import logging
 
 from pineboolib.interfaces import ITableMetaData
 from pineboolib.interfaces import IFieldMetaData

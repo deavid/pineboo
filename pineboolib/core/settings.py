@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import logging
+from pineboolib import logging
 import json
 
 from PyQt5.QtCore import QSettings, QSize

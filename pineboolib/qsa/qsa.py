@@ -3,7 +3,7 @@
 import os
 import re
 import math
-import logging
+from pineboolib import logging
 
 from PyQt5 import QtCore
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib.core.utils.utils_base import filedir
 import os
-import logging
+from pineboolib import logging
 import importlib
 
 logger = logging.getLogger(__name__)

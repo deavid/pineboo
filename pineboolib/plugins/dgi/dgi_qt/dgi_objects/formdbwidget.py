@@ -1,6 +1,6 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore
-import logging
+from pineboolib import logging
 import weakref
 import sys
 

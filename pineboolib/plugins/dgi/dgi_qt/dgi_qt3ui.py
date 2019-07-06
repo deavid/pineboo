@@ -4,7 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from xml.etree import ElementTree as ET
 from binascii import unhexlify
-import logging
+from pineboolib import logging
 import zlib
 from PyQt5.QtCore import QObject
 from pineboolib.core.utils.utils_base import load2xml

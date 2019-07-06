@@ -1,8 +1,8 @@
 import os
 import time
-import logging
 from typing import List, Optional, Union, Any, Dict
 
+from pineboolib import logging
 from pineboolib.core.exceptions import CodeDoesNotBelongHereException, NotConnectedError
 from pineboolib.core.utils.utils_base import filedir, Struct
 from pineboolib.core.settings import config, settings
@@ -15,8 +15,8 @@ from .module import Module
 from .file import File
 from optparse import Values
 
-
 from pineboolib.interfaces.iconnection import IConnection
+from .xmlaction import XMLAction
 
 
 class Project(object):
@@ -59,7 +59,7 @@ class Project(object):
         self.deleteCache = False
         self.parseProject = False
         self.translator_: List[Any] = []  # FIXME: Add proper type
-        self.actions: Dict[Any, Any] = {}  # FIXME: Add proper type
+        self.actions: Dict[Any, XMLAction] = {}  # FIXME: Add proper type
         self.tables: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.files: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.apppath = None
@@ -366,9 +366,8 @@ class Project(object):
                     object_context = mW.iface
 
             elif aFunction[1] == "widget":
-                fR = None
-                funAction.load_script(aFunction[0], fR)
-                object_context = fR.iface  # FIXME: Don't expect passing fR by reference. It is None.
+                fR = funAction.load_script(aFunction[0], None)
+                object_context = fR.iface
             else:
                 return False
 

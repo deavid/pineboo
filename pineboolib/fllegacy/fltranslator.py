@@ -6,7 +6,7 @@ from pineboolib.fllegacy.fltranslations import FLTranslations
 from pineboolib.fllegacy.flsettings import FLSettings
 
 from PyQt5.Qt import QTranslator
-import logging
+from pineboolib import logging
 
 
 class FLTranslator(QTranslator):

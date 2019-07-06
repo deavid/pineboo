@@ -1,7 +1,7 @@
 import gc
 import sys
 import traceback
-import logging
+from pineboolib import logging
 
 from pineboolib.core.utils import is_deployed
 from pineboolib.core.settings import config, settings

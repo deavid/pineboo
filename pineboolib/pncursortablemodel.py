@@ -1,7 +1,7 @@
 # # -*- coding: utf-8 -*-
 import math
 import threading
-import logging
+from pineboolib import logging
 import time
 import itertools
 import locale
