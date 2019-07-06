@@ -19,9 +19,7 @@ def init_project(DGI, options, project, mainForm, app) -> Any:
     project.conn.managerModules().loadAllIdModules()
 
     objaction = None
-
-    for module_name in project.modules.keys():
-        project.modules[module_name].load()
+    project.load_modules()
 
     if options.preload:
         from .preload import preload_actions
