@@ -35,7 +35,7 @@ edición de registros definidos en los metadatos
 """
 
 
-class FLFormRecordDB(IFormRecordDB, FLFormDB):
+class FLFormRecordDB(FLFormDB, IFormRecordDB):
 
     logger = logging.getLogger("dgi_qt.FLFormRecordDB")
     """

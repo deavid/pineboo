@@ -1,2 +1,5 @@
 class IFormDB(object):
-    pass
+    _action: object
+
+    def show(self) -> None:
+        pass

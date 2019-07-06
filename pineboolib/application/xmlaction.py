@@ -1,4 +1,4 @@
-from pineboolib import logging
+from pineboolib.core.utils.logging import logging
 import os.path
 
 from pineboolib.core.utils.utils_base import XMLStruct
@@ -204,14 +204,14 @@ class XMLAction(XMLStruct):
             action_ = parent._action if hasattr(parent, "_action") else self
 
         # import aqui para evitar dependencia ciclica
-        from pineboolib.application.utils.convert_flaction import convertFLAction
+        from pineboolib.application.utils.convert_flaction import convertFLAction  # type: ignore
 
         if not isinstance(action_, XMLAction):
             action_ = convertFLAction(action_)
 
         python_script_path = None
         # primero default, luego sobreescribimos
-        from pineboolib.qsa import emptyscript
+        from pineboolib.qsa import emptyscript  # type: ignore
 
         script_loaded = emptyscript
 
@@ -246,7 +246,8 @@ class XMLAction(XMLStruct):
                 raise IOError
             try:
                 self.logger.debug("Cargando %s : %s ", scriptname, script_path.replace(self.project.tmpdir, "tempdata"))
-                script_loaded = machinery.SourceFileLoader(scriptname, script_path).load_module()
+                loader = machinery.SourceFileLoader(scriptname, script_path)
+                script_loaded = loader.load_module()  # type: ignore
             except Exception:
                 self.logger.exception("ERROR al cargar script PY para la accion %s:", action_.name)
 
@@ -257,7 +258,8 @@ class XMLAction(XMLStruct):
             python_script_path = (script_path + ".xml.py").replace(".qs.xml.py", ".qs.py")
             try:
                 self.logger.debug("Cargando %s : %s ", scriptname, python_script_path.replace(self.project.tmpdir, "tempdata"))
-                script_loaded = machinery.SourceFileLoader(scriptname, python_script_path).load_module()
+                loader = machinery.SourceFileLoader(scriptname, python_script_path)
+                script_loaded = loader.load_module()  # type: ignore
             except Exception:
                 self.logger.exception("ERROR al cargar script QS para la accion %s:", action_.name)
 

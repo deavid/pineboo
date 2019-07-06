@@ -226,11 +226,13 @@ class FLStaticLoader(QtCore.QObject):
         if info:
             info.active_ = on
 
+    @staticmethod
     def setup(b):
         diag_setup = FLStaticLoader(b)
         if QtWidgets.QDialog.Accepted == diag_setup.ui_.exec_():
             b.writeSettings()
 
+    @staticmethod
     def content(n, b, only_path=False):
         global warn_
         b.readSettings()
