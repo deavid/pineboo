@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 import re
-from pineboolib import logging
+from .utils import logging
 
 """
 Esta libreria se usa para especificar estados de una función que no son final

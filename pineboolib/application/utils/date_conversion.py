@@ -1,3 +1,4 @@
+from typing import List
 from PyQt5.QtCore import QDate
 from PyQt5 import QtCore
 
@@ -10,7 +11,7 @@ def date_dma_to_amd(f):
     if f.find("T") > -1:
         f = f[: f.find("T")]
 
-    array_ = []
+    array_: List[str] = []
     dia_ = None
     mes_ = None
     ano_ = None
@@ -41,7 +42,7 @@ def date_amd_to_dma(f):
     if f.find("T") > -1:
         f = f[: f.find("T")]
 
-    array_ = []
+    array_: List[str] = []
     dia_ = None
     mes_ = None
     ano_ = None

@@ -1,7 +1,5 @@
-from pineboolib import logging
-from .utils.utils_base import getTableObj
-
-from pineboolib.core.utils.utils_base import Struct
+from .utils import logging
+from .utils.utils_base import getTableObj, Struct
 
 logger = logging.getLogger("core.parsetable")
 
@@ -16,7 +14,7 @@ def parseTable(nombre: str, contenido: str, encoding: str = "UTF-8", remove_blan
         tree = etree.ElementTree.parse(file_alike)
     except Exception:
         logger.exception("Error al procesar tabla: %s", nombre)
-        return None
+        raise
 
     root = tree.getroot()
     obj_name = root.find("name")
@@ -25,10 +23,10 @@ def parseTable(nombre: str, contenido: str, encoding: str = "UTF-8", remove_blan
         if query.text != nombre:
             logger.warning(
                 "WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)"
-                % (obj_name.text, nombre)
+                % (query.text, nombre)
             )
             query.text = nombre
-    elif obj_name.text != nombre:
+    elif obj_name and obj_name.text != nombre:
         logger.warning(
             "WARN: Nombre de tabla %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de tabla)"
             % (obj_name.text, nombre)

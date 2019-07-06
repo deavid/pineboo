@@ -2,13 +2,13 @@
 import os
 import re
 import sys
-from . import logging
-from PyQt5 import QtCore
-from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
+from PyQt5 import QtCore  # type: ignore
+from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir  # type: ignore
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest  # type: ignore
 
 from typing import Optional, Union, Any, List, Dict
 from xml.etree.ElementTree import Element, ElementTree
+from . import logging
 
 logger = logging.getLogger(__name__)
 
@@ -316,10 +316,12 @@ def getTableObj(tree: ElementTree, root: Element) -> Struct:
     table = Struct()
     table.xmltree = tree
     table.xmlroot = root
-    query_name = None
-    if table.xmlroot.find("query"):
-        query_name = one(table.xmlroot.find("query").text, None)
-    name = table.xmlroot.find("name").text
+    elem_query = table.xmlroot.find("query")
+    query_name = elem_query and one(elem_query.text, None)
+    elem_name = table.xmlroot.find("name")
+    if not elem_name:
+        raise ValueError("XML Tag for <name> not found!")
+    name = elem_name.text
     table.tablename = name
     if query_name:
         table.name = query_name
@@ -403,35 +405,34 @@ def load2xml(form_path_or_str: str) -> Element:
         def close(self):
             return super(xml_parser, self).close()
     """
+
+    if (
+        form_path_or_str.find("KugarTemplate") > -1
+        or form_path_or_str.find("DOCTYPE KugarData") > -1
+        or form_path_or_str.find("DOCTYPE svg") > -1
+    ):
+        form_path_or_str = parse_for_duplicates(form_path_or_str)
+        load_from_string = True
+    elif not os.path.exists(form_path_or_str):
+        raise Exception("File %s not found" % form_path_or_str[:200])
+
     try:
         parser = ET.XMLParser(html=0)
-        if (
-            form_path_or_str.find("KugarTemplate") > -1
-            or form_path_or_str.find("DOCTYPE KugarData") > -1
-            or form_path_or_str.find("DOCTYPE svg") > -1
-        ):
+        if load_from_string:
             form_path_or_str = parse_for_duplicates(form_path_or_str)
-            ret = ET.fromstring(form_path_or_str, parser)
+            return ET.fromstring(form_path_or_str, parser)
         else:
-            ret = ET.parse(form_path_or_str, parser).getroot() if os.path.exists(form_path_or_str) else None
+            return ET.parse(form_path_or_str, parser).getroot() if os.path.exists(form_path_or_str) else None
     except Exception:
         try:
             parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
-            if (
-                form_path_or_str.find("KugarTemplate") > -1
-                or form_path_or_str.find("DOCTYPE KugarData") > -1
-                or form_path_or_str.find("DOCTYPE svg") > -1
-            ):
-                form_path_or_str = parse_for_duplicates(form_path_or_str)
-                ret = ET.fromstring(form_path_or_str, parser)
+            if load_from_string:
+                return ET.fromstring(form_path_or_str, parser)
             else:
-                ret = ET.parse(form_path_or_str, parser).getroot() if os.path.exists(form_path_or_str) else None
-            # logger.exception("Formulario %r se cargó con codificación ISO (UTF8 falló)", form_path)
+                return ET.parse(form_path_or_str, parser).getroot()
         except Exception:
             logger.exception("Error cargando UI después de intentar con UTF8 e ISO \n%s", form_path_or_str)
-            ret = None
-
-    return ret
+            raise
 
 
 def parse_for_duplicates(text):

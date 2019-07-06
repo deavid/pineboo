@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import json
-from pineboolib import logging
+from .utils import logging
 
-from PyQt5.QtCore import QSettings, QSize
+from PyQt5.QtCore import QSettings, QSize  # type: ignore
 
 from typing import Dict, List, Optional, Union
 
