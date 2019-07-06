@@ -8,7 +8,52 @@ from PyQt5.QtCore import Qt  # type: ignore
 from pineboolib.core import decorators
 
 
+class FLPicturePrivate(QtCore.QObject):
+    @decorators.BetaImplementation
+    def __init__(self, *args):
+        super(FLPicture.FLPicturePrivate, self).__init__()
+
+        self.pic_ = QtGui.QPicture()
+        self.pte_ = QtGui.QPainter()
+        self.ownerPic_ = True
+        self.ownerPte_ = True
+        self.endPte_ = True
+
+    @decorators.BetaImplementation
+    def begin(self):
+        if not self.pte_.isActive():
+            return self.pte_.begin(self.pic_)
+        return False
+
+    @decorators.BetaImplementation
+    def play(self, painter):
+        if self.pic_:
+            return self.pic_.play(painter)
+        return False
+
+    @decorators.BetaImplementation
+    def end(self):
+        if self.ownerPte_ and self.pte_.isActive():
+            return self.pte_.end()
+        elif not self.ownerPte_ and self.pte_.isActive() and self.endPte_:
+            return self.pte_.end()
+        return False
+
+    @decorators.BetaImplementation
+    def setPainter(self, pt):
+        if self.pic_ and pt:
+            if self.pte_:
+                self.end()
+                if self.ownerPte_:
+                    del self.pte_
+            self.pte_ = pt
+            self.ownerPte_ = False
+            self.endPte_ = not self.pte_.isActive()
+
+
 class FLPicture(QObject):
+    d_: FLPicturePrivate = None
+
     class FLPenStyle(Enum):
         NoPen = 0
         SolidLine = 1
@@ -83,57 +128,13 @@ class FLPicture(QObject):
         AlignHorizontal_Mask = Qt.AlignHorizontal_Mask
         AlignVertical_Mask = Qt.AlignVertical_Mask
 
-    class FLPicturePrivate(QtCore.QObject):
-        @decorators.BetaImplementation
-        def __init__(self, *args):
-            super(FLPicture.FLPicturePrivate, self).__init__()
-
-            self.pic_ = QtGui.QPicture()
-            self.pte_ = QtGui.QPainter()
-            self.ownerPic_ = True
-            self.ownerPte_ = True
-            self.endPte_ = True
-
-        @decorators.BetaImplementation
-        def begin(self):
-            if not self.pte_.isActive():
-                return self.pte_.begin(self.pic_)
-            return False
-
-        @decorators.BetaImplementation
-        def play(self, painter):
-            if self.pic_:
-                return self.pic_.play(painter)
-            return False
-
-        @decorators.BetaImplementation
-        def end(self):
-            if self.ownerPte_ and self.pte_.isActive():
-                return self.pte_.end()
-            elif not self.ownerPte_ and self.pte_.isActive() and self.endPte_:
-                return self.pte_.end()
-            return False
-
-        @decorators.BetaImplementation
-        def setPainter(self, pt):
-            if self.pic_ and pt:
-                if self.pte_:
-                    self.end()
-                    if self.ownerPte_:
-                        del self.pte_
-                self.pte_ = pt
-                self.ownerPte_ = False
-                self.endPte_ = not self.pte_.isActive()
-
     @decorators.BetaImplementation
     def __init__(self, *args):
-        self.d_ = 0
-
         if len(args) and isinstance(args[0], FLPicture):
             super(FLPicture, self).__init__()
             otherPic = args[0]
             if otherPic and otherPic != self and otherPic.d_ and otherPic.d_.pic_:
-                self.d_ = self.FLPicturePrivate()
+                self.d_ = FLPicturePrivate()
                 self.d_.pic_ = otherPic.d_.pic_
 
         elif len(args) and isinstance(args[0], QtGui.QPicture):
@@ -153,7 +154,7 @@ class FLPicture(QObject):
     @decorators.BetaImplementation
     def PIC_NEW_D(self):
         if not self.d_:
-            self.d_ = self.FLPicturePrivate()
+            self.d_ = FLPicturePrivate()
 
     @decorators.BetaImplementation
     def PIC_CHK_D(self):

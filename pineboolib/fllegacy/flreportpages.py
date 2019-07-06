@@ -4,12 +4,13 @@ from PyQt5 import QtCore  # type: ignore
 
 from pineboolib.core import decorators
 
-from pineboolib.fllegacy.FLPicture import FLPicture
+from pineboolib.fllegacy.flpicture import FLPicture
 
-from pineboolib.fllegacy.kugar.mpagecollection import MPageCollection
+# FIXME: Module not found
+# from pineboolib.fllegacy.kugar.mpagecollection import MPageCollection
 
 
-class FLReportPages(MPageCollection):
+class FLReportPages(object):
     class PageOrientation(Enum):
         Portrait = 0
         Landscape = 1
@@ -52,7 +53,7 @@ class FLReportPages(MPageCollection):
     @decorators.BetaImplementation
     def __init__(self):
         super(FLReportPages, self).__init__()
-        self.pages_ = MPageCollection(0)
+        self.pages_ = None  # MPageCollection(0) # FIXME
 
     @decorators.BetaImplementation
     def pageCollection(self):
@@ -60,8 +61,8 @@ class FLReportPages(MPageCollection):
 
     @decorators.BetaImplementation
     def setPageCollection(self, pages):
-        if self.pages_:
-            self.pages_.deleteLater()
+        # if self.pages_:
+        #     self.pages_.deleteLater()
 
         # if pages:
         #    self.insertChild(pages)

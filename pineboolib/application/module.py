@@ -6,6 +6,8 @@ from .utils.path import _path
 
 # For types only:
 from .file import File
+from typing import Dict
+from pineboolib.core.utils.utils_base import Struct
 
 
 class Module(object):
@@ -28,8 +30,8 @@ class Module(object):
         self.name = name
         self.description = description  # En python2 era .decode(UTF-8)
         self.icon = icon
-        self.files = {}
-        self.tables = {}
+        self.files: Dict[str, File] = {}
+        self.tables: Dict[str, Struct] = {}
         self.loaded = False
         self.path = self.project.path
 
