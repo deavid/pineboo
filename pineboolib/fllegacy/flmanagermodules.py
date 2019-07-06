@@ -763,7 +763,7 @@ class FLManagerModules(object):
                 self.dictKeyFiles[n] = sha
 
                 if n.endswith(".mtd"):
-                    from PyQt5.QtXml import QDomDocument
+                    from PyQt5.QtXml import QDomDocument  # type: ignore
 
                     doc = QDomDocument(n)
                     if util.domDocumentSetContent(doc, str_ret):

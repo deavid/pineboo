@@ -8,7 +8,7 @@ from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib import project
 
-from PyQt5.QtWidgets import (
+from PyQt5.QtWidgets import (  # type: ignore
     QToolButton,
     QToolBox,
     QLayout,
@@ -21,8 +21,8 @@ from PyQt5.QtWidgets import (
     QTabWidget,
     QDockWidget,
 )
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore, QtGui  # type: ignore
+from PyQt5.QtCore import Qt  # type: ignore
 
 logger = logging.getLogger(__name__)
 

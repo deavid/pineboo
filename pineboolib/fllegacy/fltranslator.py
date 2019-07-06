@@ -5,7 +5,7 @@ from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.fltranslations import FLTranslations
 from pineboolib.fllegacy.flsettings import FLSettings
 
-from PyQt5.Qt import QTranslator
+from PyQt5.Qt import QTranslator  # type: ignore
 from pineboolib import logging
 
 

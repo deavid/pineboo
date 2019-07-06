@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from pineboolib import logging
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QTreeWidgetItem, QActionGroup, QMenu, QAction, QIcon, QMainWindow, QTreeWidget
-from PyQt5.QtCore import QSignalMapper
-from PyQt5.QtXml import QDomDocument
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5 import QtWidgets, QtCore  # type: ignore
+from PyQt5.QtWidgets import QTreeWidgetItem, QActionGroup, QMenu, QAction, QIcon, QMainWindow, QTreeWidget  # type: ignore
+from PyQt5.QtCore import QSignalMapper  # type: ignore
+from PyQt5.QtXml import QDomDocument  # type: ignore
+from PyQt5.QtGui import QPixmap, QImage  # type: ignore
 from pineboolib import pncontrolsfactory
 from pineboolib.fllegacy.aqsobjects.aqs import AQS
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQUtil, AQSettings

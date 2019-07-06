@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
 
 from xml.etree import ElementTree as ET
 from binascii import unhexlify
 from pineboolib import logging
 import zlib
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject  # type: ignore
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib import pncontrolsfactory
 from pineboolib import project

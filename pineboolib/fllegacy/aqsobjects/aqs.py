@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication
-from PyQt5 import QtCore
-from PyQt5 import QtGui
+from PyQt5.QtGui import QPixmap  # type: ignore
+from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication  # type: ignore
+from PyQt5 import QtCore  # type: ignore
+from PyQt5 import QtGui  # type: ignore
 
 from pineboolib.core.utils.utils_base import filedir
 
 from pineboolib import logging
-from PyQt5.QtXml import QDomDocument
+from PyQt5.QtXml import QDomDocument  # type: ignore
 
 logger = logging.getLogger("AQS")
 
@@ -46,8 +46,8 @@ class AQS(object):
     """
 
     def ColorDialog_getColor(self, color=None, parent=None, name=None):
-        from PyQt5.QtWidgets import QColorDialog
-        from PyQt5.QtGui import QColor
+        from PyQt5.QtWidgets import QColorDialog  # type: ignore
+        from PyQt5.QtGui import QColor  # type: ignore
 
         if color is None:
             color = QColor.black()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt, QDateTime
+from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
+from PyQt5.QtCore import Qt, QDateTime  # type: ignore
 
 from pineboolib.core import decorators
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor

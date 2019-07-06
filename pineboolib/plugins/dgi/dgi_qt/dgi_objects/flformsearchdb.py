@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from pineboolib import logging
 
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QToolButton
-from PyQt5.Qt import QKeySequence
+from PyQt5 import QtCore, QtWidgets  # type: ignore
+from PyQt5.QtWidgets import QToolButton  # type: ignore
+from PyQt5.Qt import QKeySequence  # type: ignore
 
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, Qt
+from PyQt5 import QtCore, Qt  # type: ignore
 from os.path import basename
 from pineboolib import logging
 

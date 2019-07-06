@@ -5,7 +5,7 @@ import pineboolib
 
 from importlib import import_module
 
-from PyQt5 import QtWidgets, QtCore, QtGui, Qt, QtXml
+from PyQt5 import QtWidgets, QtCore, QtGui, Qt, QtXml  # type: ignore
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.core.utils.utils_base import filedir, load2xml
@@ -53,7 +53,7 @@ class dgi_qt(dgi_schema):
         return cls
 
     def msgBoxWarning(self, t):
-        from PyQt5.QtWidgets import qApp
+        from PyQt5.QtWidgets import qApp  # type: ignore
 
         parent = qApp.focusWidget().parent() if hasattr(qApp.focusWidget(), "parent") else qApp.focusWidget()
         self.MessageBox.warning(t, self.MessageBox.Ok, self.MessageBox.NoButton, self.MessageBox.NoButton, "Pineboo", parent)
@@ -91,7 +91,7 @@ class dgi_qt(dgi_schema):
         if UIVersion < "4.0":
             self.pnqt3ui.loadUi(form_path, w_)
         else:
-            from PyQt5 import uic
+            from PyQt5 import uic  # type: ignore
 
             qtWidgetPlugings = filedir("./plugins/qtwidgetsplugins")
             if qtWidgetPlugings not in uic.widgetPluginPath:

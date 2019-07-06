@@ -9,7 +9,7 @@ import traceback
 
 from typing import Any, Callable
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.wiki_error import wiki_error
 from pineboolib.core.utils.singleton import Singleton

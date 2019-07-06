@@ -2,7 +2,7 @@
 import os
 from pineboolib import logging
 
-from PyQt5 import QtCore, Qt
+from PyQt5 import QtCore, Qt  # type: ignore
 
 
 """

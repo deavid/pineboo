@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget  # type: ignore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qlineedit import QLineEdit
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qlabel import QLabel
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qhboxlayout import QHBoxLayout
-from PyQt5.Qt import QDoubleValidator
+from PyQt5.Qt import QDoubleValidator  # type: ignore
 
 
 class NumberEdit(QWidget):

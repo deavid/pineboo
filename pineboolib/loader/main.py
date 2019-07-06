@@ -7,7 +7,7 @@ from pineboolib.core.utils.utils_base import is_deployed
 from pineboolib.core.settings import config, settings
 from .dgi import load_dgi
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 
 from optparse import Values
 
@@ -65,7 +65,7 @@ def excepthook(type, value, tback):
 def setup_gui(app: QtCore.QCoreApplication, options: Values):
     from pineboolib.core.utils.utils_base import filedir
     from pineboolib.application.utils.mobilemode import is_mobile_mode
-    from PyQt5 import QtGui
+    from PyQt5 import QtGui  # type: ignore
 
     noto_fonts = ["NotoSans-BoldItalic.ttf", "NotoSans-Bold.ttf", "NotoSans-Italic.ttf", "NotoSans-Regular.ttf"]
     for fontfile in noto_fonts:
@@ -131,7 +131,7 @@ def exec_main(options: Values) -> int:
 
     project.options = options
     if options.enable_gui:
-        from PyQt5 import QtWidgets
+        from PyQt5 import QtWidgets  # type: ignore
 
         project.app = QtWidgets.QApplication(sys.argv)
         project.app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)

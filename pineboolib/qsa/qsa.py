@@ -5,7 +5,7 @@ import re
 import math
 from pineboolib import logging
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 
 # FLObjects
 from pineboolib.core import decorators
@@ -296,7 +296,7 @@ class File(QtCore.QFile):
     mode = None
     path = None
 
-    from PyQt5.Qt import QIODevice
+    from PyQt5.Qt import QIODevice  # type: ignore
 
     ReadOnly = QIODevice.ReadOnly
     WriteOnly = QIODevice.WriteOnly

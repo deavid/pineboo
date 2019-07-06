@@ -3,7 +3,7 @@
 from pineboolib.qsa import *
 import pineboolib
 from pineboolib.core.utils.utils_base import filedir
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 
 settings = AQSettings()
 

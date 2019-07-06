@@ -2,8 +2,8 @@ from pineboolib import logging
 from pineboolib.application.utils.check_dependencies import check_dependencies
 from sqlalchemy import create_engine
 
-from PyQt5.Qt import qWarning
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.Qt import qWarning  # type: ignore
+from PyQt5.QtWidgets import QMessageBox  # type: ignore
 
 from pineboolib.plugins.sql.flqpsql import FLQPSQL
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from pineboolib import logging
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow  # type: ignore
 
 logger = logging.getLogger("mainForm_%s" % __name__)
 

@@ -2,7 +2,7 @@
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.core import decorators
-from PyQt5 import QtWidgets, Qt, QtCore
+from PyQt5 import QtWidgets, Qt, QtCore  # type: ignore
 
 import os
 from pineboolib import logging

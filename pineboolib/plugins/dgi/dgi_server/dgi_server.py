@@ -4,7 +4,7 @@ from pineboolib import logging
 import inspect
 import datetime
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple

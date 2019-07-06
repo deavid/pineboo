@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib import logging
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets  # type: ignore
 
 from pineboolib.fllegacy.fltranslator import FLTranslator
 from pineboolib.fllegacy.flsettings import FLSettings
@@ -13,7 +13,7 @@ from pineboolib import project
 # from pineboolib import pncontrolsfactory  # FIXME: Circular dependency
 from pineboolib.application.proxy import DelayedObjectProxyLoader
 
-from PyQt5.QtCore import QTimer, QEvent, QRect, QObject
+from PyQt5.QtCore import QTimer, QEvent, QRect, QObject  # type: ignore
 
 
 logger = logging.getLogger("FLApplication")

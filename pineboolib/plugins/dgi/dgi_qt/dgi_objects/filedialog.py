@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtWidgets import QFileDialog, QApplication
+from PyQt5.QtWidgets import QFileDialog, QApplication  # type: ignore
 import os
 from typing import Any
 

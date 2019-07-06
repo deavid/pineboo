@@ -1,7 +1,7 @@
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qdialog import QDialog
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qpushbutton import QPushButton
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qtabwidget import QTabWidget
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets  # type: ignore
 
 
 class Dialog(QDialog):

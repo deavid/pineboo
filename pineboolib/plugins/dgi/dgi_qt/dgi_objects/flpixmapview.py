@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtWidgets import QLabel
+from PyQt5 import QtCore, QtWidgets, QtGui  # type: ignore
+from PyQt5.QtWidgets import QLabel  # type: ignore
 from typing import Any
 
 

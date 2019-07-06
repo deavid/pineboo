@@ -1,4 +1,4 @@
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtGui, QtCore, QtWidgets  # type: ignore
 from pineboolib.core.utils.utils_base import filedir
 
 

@@ -9,7 +9,7 @@ from pineboolib.core.settings import config, settings
 from pineboolib.interfaces.dgi_schema import dgi_schema
 
 # from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists # FIXME: Not allowed yet
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 
 from .module import Module
 from .file import File

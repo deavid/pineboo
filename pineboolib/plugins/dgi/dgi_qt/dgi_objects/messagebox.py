@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtWidgets import QMessageBox, QApplication
+from PyQt5.QtWidgets import QMessageBox, QApplication  # type: ignore
 import pineboolib
 from pineboolib import logging
 

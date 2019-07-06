@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib import logging
 import os
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 from pineboolib import pncontrolsfactory
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 

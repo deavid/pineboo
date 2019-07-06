@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtGui
+from PyQt5 import QtGui  # type: ignore
 
 
-from PyQt5.QtGui import QValidator
+from PyQt5.QtGui import QValidator  # type: ignore
 from typing import Tuple
 
 

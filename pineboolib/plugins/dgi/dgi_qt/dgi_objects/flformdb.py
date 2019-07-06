@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib import logging
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import QKeySequence
+from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
+from PyQt5.Qt import QKeySequence  # type: ignore
 
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.application.utils.geometry import loadGeometryForm, saveGeometryForm

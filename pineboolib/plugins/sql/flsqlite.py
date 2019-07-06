@@ -1,5 +1,5 @@
-from PyQt5.Qt import QDomDocument, QDateTime, QProgressDialog, QDate, QRegExp, QApplication
-from PyQt5.QtCore import QTime, Qt
+from PyQt5.Qt import QDomDocument, QDateTime, QProgressDialog, QDate, QRegExp, QApplication  # type: ignore
+from PyQt5.QtCore import QTime, Qt  # type: ignore
 from pineboolib.core.utils.utils_base import auto_qt_translate_text
 from pineboolib.application.utils.check_dependencies import check_dependencies
 

@@ -6,7 +6,7 @@ logger = logging.getLogger("loader.init_project")
 
 def init_project(DGI, options, project, mainForm, app) -> Any:
     """Initialize the project and start it."""
-    # from PyQt5 import QtCore
+    # from PyQt5 import QtCore  # type: ignore
 
     # if DGI.useDesktop() and DGI.localDesktop() and splash:
     #     splash.showMessage("Iniciando proyecto ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)

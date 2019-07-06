@@ -4,7 +4,7 @@ import hashlib
 import datetime
 from pineboolib import logging
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 
 import pineboolib
 from pineboolib.core import decorators

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui  # type: ignore
 from pineboolib.core import decorators
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal  # type: ignore
 
 
 class QListView(QtWidgets.QWidget):

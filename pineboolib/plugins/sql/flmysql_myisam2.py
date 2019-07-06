@@ -1,6 +1,6 @@
-from PyQt5.Qt import qWarning, QApplication, QRegExp
-from PyQt5.QtXml import QDomDocument
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.Qt import qWarning, QApplication, QRegExp  # type: ignore
+from PyQt5.QtXml import QDomDocument  # type: ignore
+from PyQt5.QtWidgets import QMessageBox  # type: ignore
 
 from pineboolib.core.utils.utils_base import auto_qt_translate_text
 from pineboolib.application.utils.check_dependencies import check_dependencies
@@ -14,7 +14,7 @@ import pineboolib
 import traceback
 
 from pineboolib import logging
-from PyQt5.QtCore import QTime, QDate, QDateTime, Qt
+from PyQt5.QtCore import QTime, QDate, QDateTime, Qt  # type: ignore
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,7 @@ import itertools
 import locale
 from datetime import date
 
-from PyQt5 import QtCore, QtGui, QtWidgets, Qt
+from PyQt5 import QtCore, QtGui, QtWidgets, Qt  # type: ignore
 
 import pineboolib
 from pineboolib.core.utils.utils_base import filedir

@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QInputDialog, QLineEdit
+from PyQt5.QtWidgets import QInputDialog, QLineEdit  # type: ignore
 
 
 class Input(object):

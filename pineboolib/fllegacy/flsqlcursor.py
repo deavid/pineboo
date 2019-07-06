@@ -6,7 +6,7 @@ from pineboolib import logging
 import importlib
 from typing import Any
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 
 from pineboolib.core import decorators
 
@@ -714,7 +714,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
             if self.acosCond_ == FLSqlCursor.Value:
                 condTrue_ = self.cursor_.value(self.acosCondName_) == self.acosCondVal_
             elif self.acosCond_ == FLSqlCursor.RegExp:
-                from PyQt5.Qt import QRegExp
+                from PyQt5.Qt import QRegExp  # type: ignore
 
                 # FIXME: What is happenning here? bool(str(Regexp)) ??
                 condTrue_ = bool(str(QRegExp(str(self.acosCondVal_)).exactMatch(str(self.cursor_.value(self.acosCondName_)))))

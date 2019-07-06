@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from xml import etree
 from xml.etree.ElementTree import Element, SubElement
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor  # type: ignore
 from pineboolib.core.utils.utils_base import filedir
 import pineboolib
 from pineboolib import logging

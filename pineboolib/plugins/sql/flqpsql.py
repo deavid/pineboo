@@ -1,6 +1,6 @@
-from PyQt5.QtCore import QTime, QDate, QDateTime, Qt
-from PyQt5.Qt import qWarning, QDomDocument, QRegExp
-from PyQt5.QtWidgets import QMessageBox, QProgressDialog
+from PyQt5.QtCore import QTime, QDate, QDateTime, Qt  # type: ignore
+from PyQt5.Qt import qWarning, QDomDocument, QRegExp  # type: ignore
+from PyQt5.QtWidgets import QMessageBox, QProgressDialog  # type: ignore
 
 from pineboolib.core.utils.utils_base import text2bool, auto_qt_translate_text
 from pineboolib.application.utils.check_dependencies import check_dependencies

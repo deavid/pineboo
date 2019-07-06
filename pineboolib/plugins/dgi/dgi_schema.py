@@ -91,7 +91,7 @@ class dgi_schema(object):
         return "Pineboo"
 
     def processEvents(self):
-        from PyQt5 import QtWidgets
+        from PyQt5 import QtWidgets  # type: ignore
 
         QtWidgets.qApp.processEvents()
 
@@ -114,7 +114,7 @@ class dgi_schema(object):
         return getattr(sys, "frozen", False)
 
     def iconSize(self):
-        from PyQt5 import QtCore
+        from PyQt5 import QtCore  # type: ignore
 
         size = QtCore.QSize(22, 22)
         # if self.mobilePlatform():

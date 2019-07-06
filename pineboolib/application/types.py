@@ -4,7 +4,7 @@ from typing import Any, Optional, Dict
 from pineboolib.core.utils.utils_base import StructMyDict
 from functools import total_ordering
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 
 from pineboolib import logging
 

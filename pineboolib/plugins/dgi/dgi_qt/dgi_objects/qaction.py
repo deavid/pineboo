@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets  # type: ignore
 from typing import Optional
 from typing import Any
 

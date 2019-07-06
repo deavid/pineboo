@@ -9,7 +9,7 @@ def monkey_patch_connect() -> None:
 
     This is not stable and should be used with care
     """
-    from PyQt5 import QtCore
+    from PyQt5 import QtCore  # type: ignore
 
     logger.warning("--trace-signals es experimental. Tiene problemas de memoria y falla en llamadas con un argumento (False)")
     logger.warning("... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa.")

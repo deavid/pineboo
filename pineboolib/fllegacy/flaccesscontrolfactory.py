@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 
 from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
 from pineboolib.fllegacy.flaccesscontrol import FLAccessControl
@@ -64,8 +64,8 @@ class FLAccessControlForm(FLAccessControl):
     def __init__(self):
         super().__init__()
         if pineboolib.project._DGI.localDesktop():
-            from PyQt5.Qt import qApp
-            from PyQt5 import QtGui
+            from PyQt5.Qt import qApp  # type: ignore
+            from PyQt5 import QtGui  # type: ignore
 
             self.pal = QtGui.QPalette()
             bg = QtGui.QColor(qApp.palette().color(QtGui.QPalette.Active, QtGui.QPalette.Background))

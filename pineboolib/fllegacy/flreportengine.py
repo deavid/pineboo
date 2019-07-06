@@ -1,4 +1,4 @@
-from PyQt5 import QtXml
+from PyQt5 import QtXml  # type: ignore
 
 from pineboolib.core import decorators
 from pineboolib.fllegacy.flsettings import FLSettings

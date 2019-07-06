@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QTreeWidgetItem, QTreeWidget, QMainWindow, QActionGroup, QMenu
-from PyQt5.QtXml import QDomDocument
+from PyQt5 import QtWidgets, QtCore, QtGui  # type: ignore
+from PyQt5.QtWidgets import QTreeWidgetItem, QTreeWidget, QMainWindow, QActionGroup, QMenu  # type: ignore
+from PyQt5.QtXml import QDomDocument  # type: ignore
 
 # from pineboolib.core.settings import settings
 from pineboolib.fllegacy.aqsobjects.aqs import AQS

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import QKeySequence
+from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
+from PyQt5.Qt import QKeySequence  # type: ignore
 
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
 from pineboolib.core import decorators

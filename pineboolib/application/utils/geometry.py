@@ -1,7 +1,7 @@
 from pineboolib.core.settings import settings
 
 
-from PyQt5.QtCore import QSize
+from PyQt5.QtCore import QSize  # type: ignore
 from typing import Dict, Optional, Union
 
 

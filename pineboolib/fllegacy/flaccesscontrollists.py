@@ -1,5 +1,5 @@
-from PyQt5.QtXml import QDomDocument
-from PyQt5 import QtCore
+from PyQt5.QtXml import QDomDocument  # type: ignore
+from PyQt5 import QtCore  # type: ignore
 
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery

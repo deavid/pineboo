@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtXml, QtCore
+from PyQt5 import QtXml, QtCore  # type: ignore
 from pineboolib import logging
 
 

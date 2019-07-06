@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets  # type: ignore
 from pineboolib.core import decorators
-from PyQt5 import Qt
+from PyQt5 import Qt  # type: ignore
 from pineboolib import logging
 
 from typing import Any

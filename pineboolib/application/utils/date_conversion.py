@@ -1,6 +1,6 @@
 from typing import List
-from PyQt5.QtCore import QDate
-from PyQt5 import QtCore
+from PyQt5.QtCore import QDate  # type: ignore
+from PyQt5 import QtCore  # type: ignore
 
 
 def date_dma_to_amd(f):

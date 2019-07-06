@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, QtWidgets, Qt
+from PyQt5 import QtCore, QtWidgets, Qt  # type: ignore
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
-from PyQt5.QtWidgets import QCheckBox
+from PyQt5.QtWidgets import QCheckBox  # type: ignore
 from pineboolib import logging
 
 logger = logging.getLogger(__name__)

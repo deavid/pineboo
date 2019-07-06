@@ -1,6 +1,6 @@
 from pineboolib import logging
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication  # type: ignore
 from pineboolib.loader.projectconfig import ProjectConfig
 
 logger = logging.getLogger("loader.conn_dialog")

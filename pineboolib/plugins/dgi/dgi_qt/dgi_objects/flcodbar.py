@@ -1,9 +1,9 @@
 # # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, Qt
-from PyQt5.Qt import QRectF
-from PyQt5.QtGui import QPixmap, QColor
+from PyQt5 import QtCore, Qt  # type: ignore
+from PyQt5.Qt import QRectF  # type: ignore
+from PyQt5.QtGui import QPixmap, QColor  # type: ignore
 from pineboolib.core.utils.utils_base import load2xml
-from PyQt5.QtSvg import QSvgRenderer
+from PyQt5.QtSvg import QSvgRenderer  # type: ignore
 
 from pineboolib import logging
 import barcode

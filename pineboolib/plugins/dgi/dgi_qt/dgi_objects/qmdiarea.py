@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtWidgets import QMdiArea
-from PyQt5 import QtCore
+from PyQt5.QtWidgets import QMdiArea  # type: ignore
+from PyQt5 import QtCore  # type: ignore
 
 
 class QMdiArea(QMdiArea):

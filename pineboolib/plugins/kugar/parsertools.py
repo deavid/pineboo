@@ -6,7 +6,7 @@ import datetime
 import fnmatch
 from typing import List
 
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap  # type: ignore
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.utils.xpm import cacheXPM
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery

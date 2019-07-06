@@ -1,8 +1,8 @@
-from PyQt5 import QtWidgets
-from PyQt5 import QtCore
-from PyQt5 import QtXml
-from PyQt5.QtCore import Qt, QObject
-from PyQt5.Qt import QFileDialog, QMessageBox
+from PyQt5 import QtWidgets  # type: ignore
+from PyQt5 import QtCore  # type: ignore
+from PyQt5 import QtXml  # type: ignore
+from PyQt5.QtCore import Qt, QObject  # type: ignore
+from PyQt5.Qt import QFileDialog, QMessageBox  # type: ignore
 
 from pineboolib.core import decorators
 import pineboolib

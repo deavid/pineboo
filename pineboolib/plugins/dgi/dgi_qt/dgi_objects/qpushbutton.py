@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets  # type: ignore
 from pineboolib.core import decorators
 
 
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon  # type: ignore
 
 
 class QPushButton(QtWidgets.QPushButton):

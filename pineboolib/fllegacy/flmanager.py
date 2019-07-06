@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore
-from PyQt5.QtXml import QDomDocument
+from PyQt5 import QtCore  # type: ignore
+from PyQt5.QtXml import QDomDocument  # type: ignore
 
 
 from pineboolib.core import decorators
@@ -22,7 +22,7 @@ from xml import etree  # type: ignore
 from pineboolib import logging
 from pineboolib.interfaces import IManager
 
-from PyQt5.QtXml import QDomElement
+from PyQt5.QtXml import QDomElement  # type: ignore
 from pineboolib.pnconnection import PNConnection
 from typing import Optional, Union
 

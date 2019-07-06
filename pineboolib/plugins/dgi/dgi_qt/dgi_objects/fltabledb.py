@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
+from PyQt5.QtCore import Qt  # type: ignore
 from pineboolib.core import decorators
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldatatable import FLDataTable
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
@@ -14,7 +14,7 @@ from pineboolib.fllegacy.flsettings import FLSettings
 
 import pineboolib
 from pineboolib import logging
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap  # type: ignore
 
 logger = logging.getLogger(__name__)
 DEBUG = False

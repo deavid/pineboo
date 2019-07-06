@@ -1,6 +1,6 @@
 from enum import Enum
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 
 from pineboolib.core import decorators
 
