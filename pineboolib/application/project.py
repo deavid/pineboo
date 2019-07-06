@@ -128,6 +128,12 @@ class Project(object):
         """
         from .utils.path import _dir
 
+        if self.actions:
+            del self.actions
+
+        if self.tables:
+            del self.tables
+
         self.actions = {}
         self.tables = {}
 
