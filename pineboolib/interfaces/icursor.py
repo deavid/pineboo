@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Any, Generator
 
 
 class ICursor:
@@ -32,7 +32,7 @@ class ICursor:
     def fetch(self) -> List[List[Any]]:
         pass
 
-    def __iter__(self) -> List[List[Any]]:
+    def __iter__(self) -> Generator[List[Any], None, None]:
         pass
 
     def fetchone(self) -> List[Any]:
