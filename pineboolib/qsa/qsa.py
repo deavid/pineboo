@@ -65,7 +65,8 @@ def parseFloat(x):
             ret = int(ret)
 
         return ret
-    except Exception as e:
+    except Exception:
+        logger.exception("parseFloat: Error converting %s to float", x)
         return x
 
 

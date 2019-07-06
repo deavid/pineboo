@@ -1062,8 +1062,8 @@ class FLTableDB(QtWidgets.QWidget):
 
             field = None
             editor_ = None
-            type = None
-            len = None
+            # type = None
+            # len = None
             partInteger = None
             partDecimal = None
             rX = None
