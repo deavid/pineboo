@@ -303,9 +303,9 @@ class PNConnection(IConnection, QtCore.QObject):
             and cur.isModifiedBuffer()
             and cur.d.askForCancelChanges_
         ):
-            import pineboolib
+            from pineboolib.application import project
 
-            if pineboolib.project._DGI.localDesktop():
+            if project._DGI.localDesktop():
                 res = QtWidgets.QMessageBox.information(
                     QtWidgets.QApplication.activeWindow(),
                     "Cancelar Cambios",

@@ -430,11 +430,13 @@ class FLFieldDB(QtWidgets.QWidget):
             if self._process_autocomplete_events(event):
                 return True
 
-            if isinstance(obj, pineboolib.pncontrolsfactory.FLLineEdit):
+            from pineboolib import pncontrolsfactory
+
+            if isinstance(obj, pncontrolsfactory.FLLineEdit):
                 if k.key() == Qt.Key_F4:
                     self.keyF4Pressed.emit()
                     return True
-            elif isinstance(obj, pineboolib.pncontrolsfactory.QTextEdit):
+            elif isinstance(obj, pncontrolsfactory.QTextEdit):
                 if k.key() == Qt.Key_F4:
                     self.keyF4Pressed.emit()
                     return True
