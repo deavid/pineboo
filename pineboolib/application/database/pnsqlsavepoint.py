@@ -264,13 +264,10 @@ class PNSqlSavePoint:
             ok = cursor_.select(opInf.primaryKey + "='" + valuePrimaryKey + "'")
             if ok and cursor_.next():
                 cursor_.primeDelete()
-                del cursor_
 
         if not owner:
             cursor_.select(opInf.filter, opInf.sort)
             cursor_.seek(opInf.at)
-        else:
-            del cursor_
 
     """
     Deshace una operacion de editar.

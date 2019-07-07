@@ -12,7 +12,7 @@ from .pnsqlsavepoint import PNSqlSavePoint
 from pineboolib import pncontrolsfactory  # FIXME: Don't import pncontrolsfactory in this file. Manage without DGI.
 
 from pineboolib import logging
-from typing import Dict
+from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +31,9 @@ class PNConnection(QtCore.QObject, IConnection):
     transaction_ = None
     _managerModules = None
     _manager = None
-    currentSavePoint_: PNSqlSavePoint = None  # FIXME: Should use something from pineboolib.application
-    stackSavePoints_ = None
-    queueSavePoints_ = None
+    currentSavePoint_: Optional[PNSqlSavePoint] = None
+    stackSavePoints_: List[PNSqlSavePoint] = None
+    queueSavePoints_: List[PNSqlSavePoint] = None
     interactiveGUI_ = None
     _dbAux = None
     name = None
@@ -44,7 +44,7 @@ class PNConnection(QtCore.QObject, IConnection):
         from .pnsqldrivers import PNSqlDrivers
 
         super(PNConnection, self).__init__()
-
+        self.currentSavePoint_: Optional[PNSqlSavePoint] = None
         self.driverSql = PNSqlDrivers()
         self.connAux = {}
         if name is None:
@@ -369,7 +369,7 @@ class PNConnection(QtCore.QObject, IConnection):
             if not self.canSavePoint():
                 tam_queue = len(self.queueSavePoints_)
                 for i in range(tam_queue):
-                    temp_save_point = self.queueSavePoints_.dequeue()
+                    temp_save_point = self.queueSavePoints_.pop()
                     temp_id = temp_save_point.id()
 
                     if temp_id > self.transaction_ or self.transaction_ == 0:
@@ -378,9 +378,8 @@ class PNConnection(QtCore.QObject, IConnection):
                     else:
                         self.queueSavePoints_.append(temp_save_point)
 
-                if self.currentSavePoint_:
+                if self.currentSavePoint_ is not None:
                     self.currentSavePoint_.undo()
-                    del self.currentSavePoint_
                     self.currentSavePoint_ = None
                     if self.stackSavePoints_:
                         self.currentSavePoint_ = self.stackSavePoints_.pop()
@@ -469,7 +468,7 @@ class PNConnection(QtCore.QObject, IConnection):
             if not self.canSavePoint():
                 tam_queue = len(self.queueSavePoints_)
                 for i in range(tam_queue):
-                    temp_save_point = self.queueSavePoints_.dequeue()
+                    temp_save_point = self.queueSavePoints_.pop()
                     temp_save_point.setId(self.transaction_ - 1)
                     self.queueSavePoints_.append(temp_save_point)
 

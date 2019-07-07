@@ -466,9 +466,8 @@ class PNSqlQuery(object):
 
         linea = ""
 
-        while next():
-            for it in self.d.fieldList_:
-                linea += "__%s" % self.value(it)
+        for it in self.d.fieldList_:
+            linea += "__%s" % self.value(it)
 
         logger.warning(linea)
 

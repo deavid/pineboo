@@ -57,8 +57,7 @@ como el selector de módulos, o cada una de las ventanas principales de los mód
 """
 
 
-from typing import List
-from typing import Any
+from typing import List, Dict, Any
 
 
 class FLAccessControl(object):
@@ -83,7 +82,7 @@ class FLAccessControl(object):
     correspondencia entre el nombre del ACO (utilizado como clave de búsqueda)
     y el permiso a aplicar.
     """
-    acosPerms_ = None
+    acosPerms_: Dict[str, str] = None
 
     def __init__(self) -> None:
         self.name_ = ""
