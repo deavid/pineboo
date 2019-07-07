@@ -14,7 +14,7 @@ from pineboolib.application import project
 from pineboolib.application.proxy import DelayedObjectProxyLoader
 
 from PyQt5.QtCore import QTimer, QEvent, QRect, QObject  # type: ignore
-from Pyqt5.QtGui import QCursor  # type: ignore
+from PyQt5.QtGui import QCursor  # type: ignore
 
 logger = logging.getLogger("FLApplication")
 
