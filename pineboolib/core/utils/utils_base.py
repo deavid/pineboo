@@ -4,6 +4,7 @@ import re
 import sys
 import io
 from PyQt5 import QtCore  # type: ignore
+from PyQt5.QtGui import QPixmap  # type: ignore
 from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir  # type: ignore
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest  # type: ignore
 
@@ -648,3 +649,9 @@ def download_files():
     copy_dir_recursive(":/share", filedir("../share"))
     if not os.path.exists(filedir("../tempdata")):
         os.mkdir(filedir("../tempdata"))
+
+
+def pixmap_fromMimeSource(name):
+
+    file_name = filedir("../share/icons", name)
+    return QPixmap(file_name) if os.path.exists(file_name) else None

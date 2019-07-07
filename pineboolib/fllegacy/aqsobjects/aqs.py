@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os.path
+
 from PyQt5.QtGui import QPixmap  # type: ignore
 from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication  # type: ignore
 from PyQt5 import QtCore  # type: ignore
@@ -121,12 +123,11 @@ class AQS(object):
     @return QPixmap
     """
 
-    @classmethod
-    def pixmap_fromMimeSource(self, name):
-        import os
+    @staticmethod
+    def pixmap_fromMimeSource(name):
+        from pineboolib.core.utils.utils_base import pixmap_fromMimeSource
 
-        file_name = filedir("../share/icons", name)
-        return QPixmap(file_name) if os.path.exists(file_name) else None
+        return pixmap_fromMimeSource(name)
 
     Pixmap_fromMineSource = pixmap_fromMimeSource
 

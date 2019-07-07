@@ -218,7 +218,7 @@ class FLSmtpClient(QtCore.QObject):
         return self.auth_method_
 
     def startSend(self):
-        from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQS
+        from pineboolib.core.utils.utils_base import pixmap_fromMimeSource
         from pineboolib.fllegacy.flsettings import FLSettings
         from pineboolib.application import project
 
@@ -253,7 +253,7 @@ class FLSmtpClient(QtCore.QObject):
             logo = FLSettings().readEntry("email/mailLogo", "%s/logo_mail.png" % project.tmpdir)
             if not QtCore.QFile.exists(logo):
                 logo = "%s/logo.png" % project.tmpdir
-                Qt.QPixmap(AQS.Pixmap_fromMineSource("pineboo-logo.png")).save(logo, "PNG")
+                Qt.QPixmap(pixmap_fromMimeSource("pineboo-logo.png")).save(logo, "PNG")
 
             fp = open(logo, "rb")
             logo_part = MIMEImage(fp.read())

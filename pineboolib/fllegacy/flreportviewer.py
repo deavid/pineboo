@@ -1,3 +1,5 @@
+from typing import Dict
+
 from PyQt5 import QtWidgets  # type: ignore
 from PyQt5 import QtCore  # type: ignore
 from PyQt5 import QtXml  # type: ignore
@@ -44,7 +46,7 @@ class FLReportViewer(QObject):
         self.slotsExportedDisabled_ = False
         self.printing_ = False
         self.embedInParent_ = True if parent and embedInParent else False
-        self.ui_ = {}
+        self.ui_: Dict[str, QtCore.QObject] = {}
 
         self.Display = 1
         self.Append = 1
@@ -116,12 +118,6 @@ class FLReportViewer(QObject):
 
         sender = self.sender()
         noSigDestroy = not (sender and sender == self.rptEngine_)
-
-        if self.rptEngine_:
-            self.rptEngine_.destroyed.disconnect(self.setReportEngine)
-            if noSigDestroy and self.rptEngine_.parent() == self:
-                self.rptEngine_.deleteLater()
-                self.rptEngine_ = 0
 
         self.rptEngine_ = r
         if self.rptEngine_:
@@ -271,7 +267,7 @@ class FLReportViewer(QObject):
         q = QtCore.QMessageBox.question(
             self,
             util.translate("app", "Sobreescribir {}").format(fileName),
-            util.translate(self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+            util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
             util.translate("app", "&Sí"),
             util.translate("app", "&No"),
             "",
@@ -354,7 +350,7 @@ class FLReportViewer(QObject):
         q = QtCore.QMessageBox.question(
             self,
             util.translate("app", "Sobreescribir {}").format(fileName),
-            util.translate(self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+            util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
             util.translate("app", "&Sí"),
             util.translate("app", "&No"),
             "",
@@ -411,10 +407,10 @@ class FLReportViewer(QObject):
         if self.report_:
             fileName = QtCore.QFileDialog.getSaveFileName(
                 "",
-                util.translate(self, "app", "Fichero SVG (*.svg)"),
+                util.translate("app", "Fichero SVG (*.svg)"),
                 self,
-                util.translate(self, "app", "Guardar en SVG"),
-                util.translate(self, "app", "Guardar en SVG"),
+                util.translate("app", "Guardar en SVG"),
+                util.translate("app", "Guardar en SVG"),
             )
 
             if not fileName or fileName == "":
@@ -425,10 +421,10 @@ class FLReportViewer(QObject):
 
             q = QtCore.QMessageBox.question(
                 self,
-                util.translate(self, "app", "Sobreescribir {}").format(fileName),
-                util.translate(self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
-                util.translate(self, "app", "&Sí"),
-                util.translate(self, "app", "&No"),
+                util.translate("app", "Sobreescribir {}").format(fileName),
+                util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+                util.translate("app", "&Sí"),
+                util.translate("app", "&No"),
                 "",
                 0,
                 1,
@@ -468,10 +464,10 @@ class FLReportViewer(QObject):
         util = FLUtil()
         fileName = QtCore.QFileDialog.getOpenFileName(
             "",
-            util.translate(self, "app", "Fichero SVG (*.svg)"),
+            util.translate("app", "Fichero SVG (*.svg)"),
             self,
-            util.translate(self, "app", "Cargar estilo SVG"),
-            util.translate(self, "app", "Cargar estilo SVG"),
+            util.translate("app", "Cargar estilo SVG"),
+            util.translate("app", "Cargar estilo SVG"),
         )
 
         if not fileName or fileName == "":
@@ -551,13 +547,13 @@ class FLReportViewer(QObject):
                 return False
 
             self.rptEngine_.setFLReportTemplate(t)
-            self.rptEngine_.setStyleName(style)
+            self.setStyleName(style)
             return True
         else:
             self.template_ = t
             self.styleName_ = style
             if self.rptEngine_ and self.rptEngine_.setFLReportTemplate(t):
-                # self.rptEngine_.setStyleName(style)
+                # self.setStyleName(style)
                 self.xmlTemplate_ = self.rptEngine_.rptXmlTemplate()
                 return True
 
