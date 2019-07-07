@@ -1,7 +1,6 @@
 from PyQt5 import QtXml  # type: ignore
 
 from pineboolib.core import decorators
-from pineboolib.fllegacy.flsettings import FLSettings
 from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
 
 from pineboolib import logging
@@ -167,7 +166,9 @@ class FLReportEngine(object):
         self.d_.template_ = t
 
         if not self.d_.qry_:
-            mgr = pineboolib.project.conn.managerModules()
+            from pineboolib.application import project
+
+            mgr = project.conn.managerModules()
 
         else:
             mgr = self.d_.qry_.db().managerModules()

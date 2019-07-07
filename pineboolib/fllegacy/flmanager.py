@@ -480,7 +480,8 @@ class FLManager(QtCore.QObject, IManager):
             if elem_field and elem_level and float(elem_level.text.strip(" \t\n\r")) == i:
                 # print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
                 q.addGroup(PNGroupByQuery(i, elem_field.text.strip(" \t\n\r")))
-                i = i + 1
+
+            i = i + 1
 
         return q
 
