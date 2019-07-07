@@ -878,9 +878,11 @@ class FLUtil(QtCore.QObject):
         @return Indicador de si la escritura del settings se realiza correctamente
         """
         # result = False
+        from pineboolib.application import project
+
         where = "flkey = '%s'" % key
         found = self.readDBSettingEntry(key)
-        cursor = pineboolib.project.conn.cursor()
+        cursor = project.conn.cursor()
         if found is None:
             sql = "INSERT INTO flsettings (flkey, valor) VALUES ('%s', '%s')" % (key, value)
         else:

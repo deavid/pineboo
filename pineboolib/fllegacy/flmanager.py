@@ -87,7 +87,7 @@ class FLManager(QtCore.QObject, IManager):
         """
         if not q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'"):
 
-            if pineboolib.project.conn.driver().cascadeSupport():
+            if project.conn.driver().cascadeSupport():
                 q.exec_("DROP TABLE flsettings CASCADE")
             else:
                 q.exec_("DROP TABLE flsettings")
@@ -107,7 +107,7 @@ class FLManager(QtCore.QObject, IManager):
         q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'")
         if not q.next():
 
-            if pineboolib.project.conn.driver().cascadeSupport():
+            if project.conn.driver().cascadeSupport():
                 q.exec_("DROP TABLE flmetadata CASCADE")
             else:
                 q.exec_("DROP TABLE flmetadata")
@@ -211,7 +211,7 @@ class FLManager(QtCore.QObject, IManager):
                 if not ret.isQuery() and not self.existsTable(n):
                     self.createTable(ret)
 
-                # acl = pineboolib.project.acl()
+                # acl = project.acl()
                 acl = None  # FIXME: Add ACL later
 
                 # if ret.fieldNamesUnlock():
@@ -409,7 +409,7 @@ class FLManager(QtCore.QObject, IManager):
 
                     del qry
 
-            # acl = pineboolib.project.acl()
+            # acl = project.acl()
             acl = None  # FIXME: Add ACL later
             if acl:
                 acl.process(tmd)

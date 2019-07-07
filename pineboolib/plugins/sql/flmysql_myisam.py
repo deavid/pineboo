@@ -1,3 +1,6 @@
+import traceback
+from typing import List, Dict
+
 from PyQt5.Qt import qWarning, QApplication, QRegExp  # type: ignore
 from PyQt5.QtCore import QTime, QDate, QDateTime, Qt  # type: ignore
 from PyQt5.QtXml import QDomDocument  # type: ignore
@@ -11,8 +14,7 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 
 from pineboolib.fllegacy.flutil import FLUtil
-import pineboolib
-import traceback
+from pineboolib.application import project
 from pineboolib import logging
 
 logger = logging.getLogger(__name__)
@@ -50,7 +52,7 @@ class FLMYSQL_MYISAM(object):
         self.mobile_ = False
         self.pure_python_ = False
         self.defaultPort_ = 3306
-        self.rowsFetched = {}
+        self.rowsFetched: Dict[str, int] = {}
         self.active_create_index = True
         self.db_ = None
         self.engine_ = None
@@ -88,7 +90,7 @@ class FLMYSQL_MYISAM(object):
             self.conn_ = MySQLdb.connect(db_host, db_userName, db_password, db_name)
             self.engine_ = create_engine("mysql+mysqldb://%s:%s@%s:%s/%s" % (db_userName, db_password, db_host, db_port, db_name))
         except MySQLdb.OperationalError as e:
-            pineboolib.project._splash.hide()
+            project._splash.hide()
             if "Unknown database" in str(e):
                 ret = QMessageBox.warning(
                     None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No
@@ -102,7 +104,7 @@ class FLMYSQL_MYISAM(object):
                         try:
                             cursor.execute("CREATE DATABASE %s" % db_name)
                         except Exception:
-                            print("ERROR: FLPSQL.connect", traceback.format_exc())
+                            logger.exception("ERROR: FLPSQL.connect")
                             cursor.execute("ROLLBACK")
                             cursor.close()
                             return False
@@ -216,7 +218,7 @@ class FLMYSQL_MYISAM(object):
 
         elif type_ in ("uint", "int", "double", "serial"):
             if s == "Null":
-                s = 0
+                s = "0"
             else:
                 s = v
 
@@ -247,7 +249,7 @@ class FLMYSQL_MYISAM(object):
         return True
 
     def tables(self, type_name=None):
-        tl = []
+        tl: List[str] = []
         if not self.isOpen():
             return tl
 
@@ -613,8 +615,8 @@ class FLMYSQL_MYISAM(object):
         self.active_create_index = False
 
         rx = QRegExp("^.*\\d{6,9}$")
-        if rx in self.tables() is not False:
-            listOldBks = rx in self.tables()
+        if rx in self.tables():
+            listOldBks = self.tables()[rx]
         else:
             listOldBks = []
 
@@ -1176,7 +1178,7 @@ class FLMYSQL_MYISAM(object):
                 # print("****", tipo_, field)
             else:
                 if len_.find(",") > -1:
-                    precision_ = len_[len_.find(",") :]
+                    precision_ = int(len_[len_.find(",") :])
                     len_ = len_[: len_.find(",")]
 
             len_ = int(len_)

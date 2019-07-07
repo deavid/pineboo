@@ -3,8 +3,8 @@ from xml import etree
 from xml.etree.ElementTree import Element, SubElement
 from PyQt5.QtGui import QColor  # type: ignore
 from pineboolib.core.utils.utils_base import filedir
-import pineboolib
-from pineboolib import logging
+from pineboolib.application import project
+from pineboolib import logging, is_deployed
 import traceback
 import datetime
 
@@ -42,7 +42,7 @@ class kut2rml(object):
         self.correccionAncho_ = 0.927
 
     def parse(self, name, kut, dataString):
-        if pineboolib.is_deployed():
+        if is_deployed():
             self.logger.error("Reportlab not available for Bundles")
             return None
 
@@ -80,7 +80,7 @@ class kut2rml(object):
         # print(etree.ElementTree.tostring(self.rml_))
         res_ = etree.ElementTree.tostring(self.rml_)
         res_ = '<!DOCTYPE document SYSTEM "rml_1_0.dtd">%s' % res_.decode("utf-8")
-        pdfname = pineboolib.project.tmpdir
+        pdfname = project.tmpdir
         pdfname += "/%s.pdf" % datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         pPDF = parsePDF()
         pPDF.parse(res_, pdfname)
@@ -167,7 +167,7 @@ class kut2rml(object):
                 fN = xml.get("FunctionName")
                 try:
                     nodo = self._parser_tools.convertToNode(data)
-                    text = str(pineboolib.project.call(fN, [nodo]))
+                    text = str(project.call(fN, [nodo]))
                 except Exception:
                     print(traceback.format_exc())
                     return
@@ -321,13 +321,13 @@ class kut2rml(object):
                     x = x
 
                 if HAlig == 1:  # Centrado
-                    x = x + (W / 2)  # Falla un poco revisar
+                    x = x + (W // 2)  # Falla un poco revisar
 
                 if HAlig == 2:  # Derecha
                     x = x + W
 
                 if VAlig == 1:  # Centrado
-                    y = y + H + (Alto_ / 2) + (Alto_ / 4) - (H / 8)
+                    y = y + H + (Alto_ // 2) + (Alto_ // 4) - (H // 8)
 
             if obj.tag == "image":
                 x = x
@@ -340,7 +340,7 @@ class kut2rml(object):
                     x = x
 
                 if VAlig == 1:  # Centrado
-                    y = y - (H / 8)
+                    y = y - (H // 8)
 
         obj.set("x", str(self.getCord("X", x)))
         obj.set("y", str(self.getCord("Y", self._parser_tools.heightCorrection(y))))
@@ -510,7 +510,7 @@ class parsePDF(object):
     logger = logging.getLogger("parsePDF")
 
     def parse(self, xml, filename):
-        if pineboolib.is_deployed():
+        if is_deployed():
             self.logger.error("RML2PDF not available on Bundles")
             return
 

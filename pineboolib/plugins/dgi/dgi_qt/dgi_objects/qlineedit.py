@@ -20,18 +20,18 @@ class QLineEdit(QtWidgets.QLineEdit):
         if name:
             # self.setText(text)
             self.setObjectName(name)
-        # if not pineboolib.project._DGI.localDesktop():
-        #    pineboolib.project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QLineEdit")
+        # if not project._DGI.localDesktop():
+        #    project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QLineEdit")
 
     def getText(self):
         return super(QLineEdit, self).text()
 
-    def setText(self, v: float) -> None:
+    def setText(self, v) -> None:
         if not isinstance(v, str):
             v = str(v)
         super(QLineEdit, self).setText(v)
-        # if not pineboolib.project._DGI.localDesktop():
-        #    pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), v)
+        # if not project._DGI.localDesktop():
+        #    project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), v)
 
     text = property(getText, setText)
 

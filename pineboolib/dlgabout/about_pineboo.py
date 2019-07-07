@@ -12,14 +12,14 @@ class about_pineboo(QWidget):
         self.load()
 
     def load(self):
-        import pineboolib
+        from pineboolib.application import project
         from pineboolib.fllegacy.flmanagermodules import FLManagerModules
         from pineboolib.core.utils.utils_base import filedir
 
         mng_mod = FLManagerModules()
 
         dlg_ = filedir("dlgabout/about_pineboo.ui")
-        version_ = pineboolib.project.version
+        version_ = project.version
         self.ui = mng_mod.createUI(dlg_, None, self)  # FIXME: Letting FL* to create Pineboo interface?
         self.ui.lbl_version.setText("Pineboo v%s" % str(version_))
         self.ui.btn_close.clicked.connect(self.ui.close)

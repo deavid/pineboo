@@ -43,8 +43,8 @@ class FLLineEdit(QtWidgets.QLineEdit):
         from pineboolib import pncontrolsfactory
 
         text_ = str(text_)
-        # if not pineboolib.project._DGI.localDesktop():
-        #    pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text_)
+        # if not project._DGI.localDesktop():
+        #    project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text_)
         # else:
         if check_focus:
 

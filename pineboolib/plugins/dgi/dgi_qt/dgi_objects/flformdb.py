@@ -165,7 +165,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
             parent = pncontrolsfactory.aqApp.mainWidget()
 
-        # if pineboolib.project._DGI.localDesktop():  # Si es local Inicializa
+        # if project._DGI.localDesktop():  # Si es local Inicializa
         #    super(QtWidgets.QWidget, self).__init__(parent)
         super(QtWidgets.QWidget, self).__init__(parent)
 
@@ -196,7 +196,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
         # if not getattr(self._action, "alias", None):
         #    qWarning("FLFormDB::Cargando un action XML")
-        # elif pineboolib.project._DGI.localDesktop():
+        # elif project._DGI.localDesktop():
         # self.setWindowTitle(self._action.alias)
 
         self.idMDI_ = self._action.name()
@@ -252,11 +252,11 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
                     self.iface.init()
                 except Exception:
                     # script_name = self.iface.__module__
-                    from pineboolib import pncontrolsfactory, error_manager
+                    from pineboolib import pncontrolsfactory
+                    from pineboolib.error_manager import error_manager
+                    from pineboolib.application import project
 
-                    pncontrolsfactory.aqApp.msgBoxWarning(
-                        error_manager(traceback.format_exc(limit=-6, chain=False)), pncontrolsfactory.aqApp.DGI()
-                    )
+                    pncontrolsfactory.aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
 
             return True
 
@@ -373,7 +373,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         if not w:
             if not self.cursor_:
                 self.setMainWidget(
-                    pineboolib.project.conn.managerModules().createForm(self.action_, self))
+                    project.conn.managerModules().createForm(self.action_, self))
                 return
             else:
                 self.setMainWidget(self.cursor_.db().managerModules(
@@ -382,7 +382,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         elif isinstance(w, str):
             if not self.cursor_:
                 self.setMainWidget(
-                    pineboolib.project.conn.managerModules().createUI(self.action_, self))
+                    project.conn.managerModules().createUI(self.action_, self))
                 return
             else:
                 self.setMainWidget(self.cursor_.db().managerModules(
@@ -625,7 +625,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     """
 
     def initForm(self):
-        # acl = pineboolib.project.acl()
+        # acl = project.acl()
         acl = None  # FIXME: Add ACL later
         if acl:
             acl.process(self)
@@ -648,7 +648,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
                 self.cursor_.setMainFilter(v, False)
 
             # if self._loaded and not self.__class__.__name__ == "FLFormRecordDB":
-            # pineboolib.project.conn.managerModules().loadFLTableDBs(self)
+            # project.conn.managerModules().loadFLTableDBs(self)
 
             if self._action.description() not in ("", None):
                 self.setWhatsThis(self._action.description())

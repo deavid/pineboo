@@ -168,7 +168,7 @@ class FLAccessControlLists(object):
                 self.makeRule(q, doc)
                 progress.setProgress(++step)
 
-            from pineboolib.appication import project
+            from pineboolib.application import project
 
             project.conn.managerModules().setContent("acl.xml", "sys", doc.toString())
 

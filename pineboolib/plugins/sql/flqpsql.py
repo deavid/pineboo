@@ -1,3 +1,4 @@
+from typing import List, Dict, Any
 from PyQt5.QtCore import QTime, QDate, QDateTime, Qt  # type: ignore
 from PyQt5.Qt import qWarning, QDomDocument, QRegExp  # type: ignore
 from PyQt5.QtWidgets import QMessageBox, QProgressDialog  # type: ignore
@@ -13,7 +14,7 @@ from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from sqlalchemy import create_engine
 
 import traceback
-import pineboolib
+from pineboolib.application import project
 from pineboolib import logging
 
 
@@ -99,10 +100,10 @@ class FLQPSQL(object):
             self.conn_.initialize(logger)
             self.engine_ = create_engine("postgresql+psycopg2://%s:%s@%s:%s/%s" % (db_userName, db_password, db_host, db_port, db_name))
         except psycopg2.OperationalError as e:
-            if pineboolib.project._splash:
-                pineboolib.project._splash.hide()
+            if project._splash:
+                project._splash.hide()
 
-            if not pineboolib.project._DGI.localDesktop():
+            if not project._DGI.localDesktop():
                 return False
 
             if "does not exist" in str(e) or "no existe" in str(e):
@@ -240,7 +241,7 @@ class FLQPSQL(object):
 
         elif type_ in ("uint", "int", "double", "serial"):
             if s == "Null":
-                s = 0
+                s = "0"
             else:
                 s = v
 
@@ -412,7 +413,7 @@ class FLQPSQL(object):
             logger.trace("Detalle:", stack_info=True)
 
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
-        ret_ = []
+        ret_: List[str] = []
         try:
             ret_ = cursor.fetchall()
         except Exception as e:
@@ -705,7 +706,7 @@ class FLQPSQL(object):
         return ret
 
     def tables(self, typeName=None):
-        tl = []
+        tl: List[str] = []
         if not self.isOpen():
             return tl
 
@@ -827,7 +828,7 @@ class FLQPSQL(object):
         newBufferInfo = self.recordInfo2(newMTD.name())
         oldFieldsList = {}
         newFieldsList = {}
-        defValues = {}
+        defValues: Dict[str, Any] = {}
         v = None
 
         for newField in fieldList:
@@ -1049,7 +1050,7 @@ class FLQPSQL(object):
                         "FLManager : "
                         + util.translate(
                             "application", "En método alterTable, no se ha podido borrar el índice %1_%2_key de la tabla antigua."
-                        ).arg(oldMTD.name(), oldField.name())
+                        ).arg(oldMTD.name(), oldField)
                     )
                     self.db_.dbAux().rollback()
                     if oldMTD and not oldMTD == newMTD:
@@ -1276,8 +1277,8 @@ class FLQPSQL(object):
         steps = 0
 
         rx = QRegExp("^.*\\d{6,9}$")
-        if rx in self.tables() is not False:
-            listOldBks = rx in self.tables()
+        if rx in self.tables():
+            listOldBks = self.tables()[rx]
         else:
             listOldBks = []
 

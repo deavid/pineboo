@@ -220,7 +220,7 @@ class FLSmtpClient(QtCore.QObject):
     def startSend(self):
         from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQS
         from pineboolib.fllegacy.flsettings import FLSettings
-        import pineboolib
+        from pineboolib.application import project
 
         self.sendStarted.emit()
         self.sendTotalSteps.emit(len(self.attachments_) + 3)
@@ -250,9 +250,9 @@ class FLSmtpClient(QtCore.QObject):
         self.sendStepNumber.emit(step)
         # Adjuntar logo
         if FLSettings().readBoolEntry("email/sendMailLogo", True):
-            logo = FLSettings().readEntry("email/mailLogo", "%s/logo_mail.png" % pineboolib.project.tmpdir)
+            logo = FLSettings().readEntry("email/mailLogo", "%s/logo_mail.png" % project.tmpdir)
             if not QtCore.QFile.exists(logo):
-                logo = "%s/logo.png" % pineboolib.project.tmpdir
+                logo = "%s/logo.png" % project.tmpdir
                 Qt.QPixmap(AQS.Pixmap_fromMineSource("pineboo-logo.png")).save(logo, "PNG")
 
             fp = open(logo, "rb")

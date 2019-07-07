@@ -13,8 +13,8 @@ class QTextEdit(QtWidgets.QTextEdit):
 
     def setText(self, text):
         super(QTextEdit, self).setText(text)
-        # if not pineboolib.project._DGI.localDesktop():
-        #    pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text)
+        # if not project._DGI.localDesktop():
+        #    project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text)
 
     def getText(self):
         return super(QTextEdit, self).toPlainText()

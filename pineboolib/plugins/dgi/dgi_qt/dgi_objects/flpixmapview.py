@@ -29,8 +29,8 @@ class FLPixmapView(QtWidgets.QScrollArea):
         self._parent = parent
 
     def setPixmap(self, pix) -> None:
-        # if not pineboolib.project._DGI.localDesktop():
-        #    pineboolib.project._DGI._par.addQueque("%s_setPixmap" % self._parent.objectName(
+        # if not project._DGI.localDesktop():
+        #    project._DGI._par.addQueque("%s_setPixmap" % self._parent.objectName(
         #    ), self._parent.cursor_.valueBuffer(self._parent.fieldName_))
         #    return
 

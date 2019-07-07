@@ -2,7 +2,9 @@
 
 from pineboolib.qsa import *
 from pineboolib.core.utils.utils_base import filedir
+from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings
 from PyQt5 import QtCore  # type: ignore
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.formdbwidget import FormDBWidget
 
 settings = AQSettings()
 
@@ -48,9 +50,7 @@ class FormInternalObj(FormDBWidget):
         w.child(u"cbParseProject").checked = self.leerValorLocal("parseProject")
         w.child(u"cbActionsMenuRed").checked = self.leerValorLocal("ActionsMenuRed")
         w.child(u"cbKugarParser").addItems(project.kugarPlugin.listAvalibles())
-        w.child(u"cbKugarParser").setCurrentText(
-            self.leerValorLocal("kugarParser") if not "" else pineboolib.project.kugarPlugin.defaultParser()
-        )
+        w.child(u"cbKugarParser").setCurrentText(self.leerValorLocal("kugarParser") if not "" else project.kugarPlugin.defaultParser())
         w.child(u"cbSpacerLegacy").checked = self.leerValorLocal("spacerLegacy")
         w.child(u"cbParseModulesOnLoad").checked = self.leerValorLocal("parseModulesOnLoad")
         w.child(u"cb_traducciones").checked = self.leerValorLocal("translations_from_qm")
@@ -205,7 +205,7 @@ class FormInternalObj(FormDBWidget):
         new_dir = FileDialog.getExistingDirectory(old_dir)
         if new_dir and new_dir is not old_dir:
             self.w_.child("le_kut_temporales").text = new_dir
-            pineboolib.project.tmpdir = new_dir
+            project.tmpdir = new_dir
 
     def fixPath(self, ruta=None):
         rutaFixed = ""

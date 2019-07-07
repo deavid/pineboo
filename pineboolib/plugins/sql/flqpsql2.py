@@ -42,15 +42,15 @@ class FLQPSQL2(FLQPSQL):
             )
             self.engine_ = create_engine("postgresql+pg8000://%s:%s@%s:%s/%s" % (db_userName, db_password, db_host, db_port, db_name))
         except Exception as e:
-            import pineboolib
+            from pineboolib.application import project
 
-            if not pineboolib.project._DGI.localDesktop():
+            if not project._DGI.localDesktop():
                 if repr(traceback.format_exc()).find("the database system is starting up") > -1:
                     raise
 
                 return False
 
-            pineboolib.project._splash.hide()
+            project._splash.hide()
             if repr(traceback.format_exc()).find("does not exist") > -1:
                 ret = QMessageBox.warning(
                     None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No

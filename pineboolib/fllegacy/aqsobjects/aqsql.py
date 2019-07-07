@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import pineboolib
+from pineboolib.application import project
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib import logging
 from typing import Union
@@ -25,7 +25,7 @@ class AQSql(object):
     """
 
     def database(self, connection_name="default"):
-        return pineboolib.project.conn.useConn(connection_name)
+        return project.conn.useConn(connection_name)
 
     """
     Actualiza un conjunto de registros de un cursor con nuevos valores

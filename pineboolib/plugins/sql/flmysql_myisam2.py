@@ -1,3 +1,4 @@
+from typing import Dict, List
 from PyQt5.Qt import qWarning, QApplication, QRegExp  # type: ignore
 from PyQt5.QtXml import QDomDocument  # type: ignore
 from PyQt5.QtWidgets import QMessageBox  # type: ignore
@@ -10,7 +11,7 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 
 from pineboolib.fllegacy.flutil import FLUtil
-import pineboolib
+from pineboolib.application import project
 import traceback
 
 from pineboolib import logging
@@ -51,7 +52,7 @@ class FLMYSQL_MYISAM2(object):
         self.mobile_ = True
         self.pure_python_ = True
         self.defaultPort_ = 3306
-        self.rowsFetched = {}
+        self.rowsFetched: Dict[str, int] = {}
         self.active_create_index = True
         self.db_ = None
         self.engine_ = None
@@ -89,7 +90,7 @@ class FLMYSQL_MYISAM2(object):
             self.conn_ = pymysql.connect(host=db_host, user=db_userName, password=db_password, db=db_name, charset="utf8", autocommit=True)
             self.engine_ = create_engine("mysql+mysqldb://%s:%s@%s:%s/%s" % (db_userName, db_password, db_host, db_port, db_name))
         except pymysql.Error as e:
-            pineboolib.project._splash.hide()
+            project._splash.hide()
             if "Unknown database" in str(e):
                 ret = QMessageBox.warning(
                     None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No
@@ -215,7 +216,7 @@ class FLMYSQL_MYISAM2(object):
 
         elif type_ in ("uint", "int", "double", "serial"):
             if s == "Null":
-                s = 0
+                s = "0"
             else:
                 s = v
 
@@ -246,7 +247,7 @@ class FLMYSQL_MYISAM2(object):
         return True
 
     def tables(self, type_name=None):
-        tl = []
+        tl: List[str] = []
         if not self.isOpen():
             return tl
 
@@ -619,8 +620,8 @@ class FLMYSQL_MYISAM2(object):
         self.active_create_index = False
 
         rx = QRegExp("^.*\\d{6,9}$")
-        if rx in self.tables() is not False:
-            listOldBks = rx in self.tables()
+        if rx in self.tables():
+            listOldBks = self.tables()[rx]
         else:
             listOldBks = []
 
@@ -939,9 +940,9 @@ class FLMYSQL_MYISAM2(object):
             return self.alterTable2(mtd1, mtd2, key, True)
 
         if not ok:
-            import pymysql
+            from pymysql.cursors import DictCursor
 
-            oldCursor = self.conn_.cursor(pymysql.cursors.DictCursor)
+            oldCursor = self.conn_.cursor(DictCursor)
             # print("Lanzando!!", "SELECT * FROM %s WHERE 1 = 1" % (renameOld))
             oldCursor.execute("SELECT * FROM %s WHERE 1 = 1" % (renameOld))
             result_set = oldCursor.fetchall()
@@ -1182,7 +1183,7 @@ class FLMYSQL_MYISAM2(object):
                 # print("****", tipo_, field)
             else:
                 if len_.find(",") > -1:
-                    precision_ = len_[len_.find(",") :]
+                    precision_ = int(len_[len_.find(",") :])
                     len_ = len_[: len_.find(",")]
 
             len_ = int(len_)

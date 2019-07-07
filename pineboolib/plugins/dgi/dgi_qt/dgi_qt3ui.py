@@ -412,9 +412,9 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
 
                 loadWidget(c, new_widget, parent, origWidget)
                 # path = c.find("./property[@name='name']/cstring").text
-                # if not pineboolib.project._DGI.localDesktop():
+                # if not project._DGI.localDesktop():
                 #    origWidget.ui_[path] = new_widget
-                # if pineboolib.project._DGI.localDesktop():
+                # if project._DGI.localDesktop():
                 #    new_widget.show()
                 if mode == "box":
                     try:
@@ -659,7 +659,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         f.setItalic(False)
         new_widget.setFont(f)
 
-    # if not pineboolib.project._DGI.localDesktop():
+    # if not project._DGI.localDesktop():
     #    if nwidget is not None and origWidget.objectName() not in origWidget.ui_:
     #        origWidget.ui_[origWidget.objectName()] = nwidget
 

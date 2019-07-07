@@ -9,7 +9,6 @@ from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.interfaces import IFormRecordDB
-import pineboolib
 
 import traceback
 from pineboolib import logging
@@ -194,7 +193,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
 
         else:
             self.setCaptionWidget("No hay metadatos")
-        # acl = pineboolib.project.acl()
+        # acl = project.acl()
         acl = None  # FIXME: Add ACL later
         if acl:
             acl.process(self)
@@ -503,7 +502,6 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
             return True
 
         if self.cursor_.modeAccess() == FLSqlCursor.Edit and mtd.concurWarn():
-            colFields = []
             colFields = self.cursor_.concurrencyFields()
 
             if colFields:
@@ -546,11 +544,11 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
                     ret_ = fun_()
                 except Exception:
                     # script_name = self.iface.__module__
-                    from pineboolib import pncontrolsfactory, error_manager
+                    from pineboolib import pncontrolsfactory
+                    from pineboolib.error_manager import error_manager
+                    from pineboolib.application import project
 
-                    pncontrolsfactory.aqApp.msgBoxWarning(
-                        error_manager(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI
-                    )
+                    pncontrolsfactory.aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
 
             return ret_ if isinstance(ret_, bool) else False
         return True

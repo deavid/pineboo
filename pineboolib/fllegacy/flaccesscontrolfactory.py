@@ -5,7 +5,7 @@ from PyQt5 import QtCore  # type: ignore
 from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
 from pineboolib.fllegacy.flaccesscontrol import FLAccessControl
 
-import pineboolib
+from pineboolib.application import project
 
 
 class FLAccessControlMainWindow(FLAccessControl):
@@ -59,7 +59,7 @@ class FLAccessControlMainWindow(FLAccessControl):
 class FLAccessControlForm(FLAccessControl):
     def __init__(self):
         super().__init__()
-        if pineboolib.project._DGI.localDesktop():
+        if project._DGI.localDesktop():
             from PyQt5.Qt import qApp  # type: ignore
             from PyQt5 import QtGui  # type: ignore
 
@@ -123,7 +123,7 @@ class FLAccessControlForm(FLAccessControl):
             if w:
                 perm = self.acosPerms_[it]
                 if perm in ("-w", "--"):
-                    if pineboolib.project._DGI.localDesktop():
+                    if project._DGI.localDesktop():
                         w.setPalette(self.pal)
                     w.setDisabled(True)
                     w.hide()

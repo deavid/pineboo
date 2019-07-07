@@ -5,8 +5,6 @@ from PyQt5.QtCore import Qt, QObject  # type: ignore
 from PyQt5.Qt import QFileDialog, QMessageBox  # type: ignore
 
 from pineboolib.core import decorators
-import pineboolib
-
 
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flpicture import FLPicture
@@ -171,6 +169,8 @@ class FLReportViewer(QObject):
 
     @decorators.BetaImplementation
     def closeEvent(self, e):
+        from pineboolib.application import project
+
         if self.printing_:
             return
 
@@ -180,7 +180,7 @@ class FLReportViewer(QObject):
 
         if not self.embedInParent_:
             geo = QtCore.QRect(self.x(), self.y(), self.width(), self.height())
-            pineboolib.project.saveGeometryForm(self.name(), geo)
+            project.saveGeometryForm(self.name(), geo)
 
         if self.loop_ and not self.embedInParent_:
             self.loop_ = False

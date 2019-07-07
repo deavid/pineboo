@@ -18,8 +18,8 @@ class QDateEdit(QtWidgets.QDateEdit):
         self.setSeparator("-")
         self._parent = parent
         self.date_ = super(QDateEdit, self).date().toString(QtCore.Qt.ISODate)
-        # if not pineboolib.project._DGI.localDesktop():
-        #    pineboolib.project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QDateEdit")
+        # if not project._DGI.localDesktop():
+        #    project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QDateEdit")
 
     def getDate(self):
         ret = super(QDateEdit, self).date().toString(QtCore.Qt.ISODate)
@@ -37,8 +37,8 @@ class QDateEdit(QtWidgets.QDateEdit):
 
         date = QtCore.QDate.fromString(v[:10], "yyyy-MM-dd")
         super(QDateEdit, self).setDate(date)
-        # if not pineboolib.project._DGI.localDesktop():
-        #    pineboolib.project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), "QDateEdit")
+        # if not project._DGI.localDesktop():
+        #    project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), "QDateEdit")
 
     date = property(getDate, setDate)
 

@@ -15,9 +15,9 @@ class QCheckBox(QtWidgets.QCheckBox):
         return self.isChecked()
 
     @checked.setter
-    def checked(self, b):
+    def setChecked(self, b):
         if isinstance(b, str):
             b = b == "true"
         super(QCheckBox, self).setChecked(b)
-        # if not pineboolib.project._DGI.localDesktop():
-        #    pineboolib.project._DGI._par.addQueque("%s_setChecked" % self._parent.objectName(), b)
+        # if not project._DGI.localDesktop():
+        #    project._DGI._par.addQueque("%s_setChecked" % self._parent.objectName(), b)

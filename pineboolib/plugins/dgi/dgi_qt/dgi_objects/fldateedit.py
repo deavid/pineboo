@@ -30,8 +30,8 @@ class FLDateEdit(QDateEdit):
             date = convert_to_qdate(d)
 
         super(FLDateEdit, self).setDate(date)
-        # if not pineboolib.project._DGI.localDesktop():
-        #    pineboolib.project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), date.toString())
+        # if not project._DGI.localDesktop():
+        #    project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), date.toString())
         # else:
         self.setStyleSheet("color: black")
 

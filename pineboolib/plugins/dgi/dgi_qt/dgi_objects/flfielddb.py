@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 
 from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
 from PyQt5.QtCore import Qt, QDateTime  # type: ignore
@@ -16,9 +17,9 @@ from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fluintvalidator import FLUIntValidator
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flintvalidator import FLIntValidator
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldoublevalidator import FLDoubleValidator
-
-import datetime
 from pineboolib import logging
+from pineboolib import pncontrolsfactory
+from pineboolib.application import project
 
 logger = logging.getLogger(__name__)
 
@@ -336,13 +337,13 @@ class FLFieldDB(QtWidgets.QWidget):
     def setTextFormat(self, f):
         self.textFormat_ = f
         ted = self.editor_
-        if isinstance(ted, pineboolib.pncontrolsfactory.QTextEdit):
+        if isinstance(ted, pncontrolsfactory.QTextEdit):
             ted.setTextFormat(self.textFormat_)
 
     def textFormat(self):
         """@return El formato del texto."""
         ted = self.editor_
-        if isinstance(ted, pineboolib.pncontrolsfactory.QTextEdit):
+        if isinstance(ted, pncontrolsfactory.QTextEdit):
             return ted.textFormat()
         return self.textFormat_
 
@@ -352,7 +353,7 @@ class FLFieldDB(QtWidgets.QWidget):
         @param m Modo (Normal, NoEcho, Password)
         """
         led = self.editor_
-        if isinstance(led, pineboolib.pncontrolsfactory.QLineEdit):
+        if isinstance(led, pncontrolsfactory.QLineEdit):
             led.setEchoMode(m)
 
     def echoMode(self):
@@ -361,10 +362,10 @@ class FLFieldDB(QtWidgets.QWidget):
         @return El mode de "echo" (Normal, NoEcho, Password)
         """
         led = self.editor_
-        if isinstance(led, pineboolib.pncontrolsfactory.QLineEdit):
+        if isinstance(led, pncontrolsfactory.QLineEdit):
             return led.echoMode()
 
-        return pineboolib.pncontrolsfactory.QLineEdit.Normal
+        return pncontrolsfactory.QLineEdit.Normal
 
     def _process_autocomplete_events(self, event):
         timerActive = False
@@ -1483,7 +1484,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "pixmap":
             if not self.editorImg_:
-                self.editorImg_ = pineboolib.pncontrolsfactory.FLPixmapView(self)
+                self.editorImg_ = pncontrolsfactory.FLPixmapView(self)
                 self.editorImg_.setFocusPolicy(QtCore.Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
                 self.editorImg_.setMaximumSize(147, 24)
@@ -1568,11 +1569,11 @@ class FLFieldDB(QtWidgets.QWidget):
         if self.tableName_ and not self.foreignField_ and not self.fieldRelation_:
             self.cursorBackup_ = self.cursor_
             if self.cursor_:
-                self.cursor_ = FLSqlCursor(self.tableName_, True, pineboolib.project.conn.db().connectionName(), None, None, self)
+                self.cursor_ = FLSqlCursor(self.tableName_, True, project.conn.db().connectionName(), None, None, self)
             else:
                 if not self.topWidget_:
                     return
-                self.cursor_ = FLSqlCursor(self.tableName_, True, pineboolib.project.conn.database().connectionName(), None, None, self)
+                self.cursor_ = FLSqlCursor(self.tableName_, True, project.conn.database().connectionName(), None, None, self)
             self.cursor_.setModeAccess(FLSqlCursor.Browse)
             if self.showed:
                 try:
@@ -2266,8 +2267,8 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         if not self.autoComFrame_ and self.cursor():
-            self.autoComFrame_ = pineboolib.pncontrolsfactory.QWidget(self, Qt.Popup)
-            lay = pineboolib.pncontrolsfactory.QVBoxLayout()
+            self.autoComFrame_ = pncontrolsfactory.QWidget(self, Qt.Popup)
+            lay = pncontrolsfactory.QVBoxLayout()
             self.autoComFrame_.setLayout(lay)
             self.autoComFrame_.setWindowTitle("autoComFrame")
             # self.autoComFrame_->setFrameStyle(QFrame::PopupPanel | QFrame::Raised);
@@ -2279,7 +2280,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 field = tMD.field(self.fieldName_) if tMD else None
 
                 if field:
-                    self.autoComPopup_ = pineboolib.pncontrolsfactory.FLDataTable(None, "autoComPopup", True)
+                    self.autoComPopup_ = pncontrolsfactory.FLDataTable(None, "autoComPopup", True)
                     lay.addWidget(self.autoComPopup_)
                     cur = None
 
@@ -2390,7 +2391,7 @@ class FLFieldDB(QtWidgets.QWidget):
         if not cur or not cur.isValid():
             return
 
-        if isinstance(self.sender(), pineboolib.pncontrolsfactory.FLDataTable):
+        if isinstance(self.sender(), pncontrolsfactory.FLDataTable):
             self.setValue(cur.valueBuffer(self.autoComFieldName_))
             self.autoComFrame_.hide()
             # ifdef Q_OS_WIN32
@@ -2399,7 +2400,7 @@ class FLFieldDB(QtWidgets.QWidget):
             # if (autoComPopup_)
             #    autoComPopup_->releaseKeyboard();
             # endif
-        elif isinstance(self.editor_, pineboolib.pncontrolsfactory.QTextEdit):
+        elif isinstance(self.editor_, pncontrolsfactory.QTextEdit):
             self.setValue(self.autoComFieldName_)
         else:
             ed = self.editor_
@@ -2978,7 +2979,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     for w in self.children():
                         if not w.testAttribute(Qt.WA_ForceDisabled):
                             le = w
-                            if isinstance(le, pineboolib.pncontrolsfactory.QLineEdit):
+                            if isinstance(le, pncontrolsfactory.QLineEdit):
                                 allowNull = True
                                 tMD = self.cursor_.metadata()
                                 if tMD:
@@ -3013,7 +3014,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
                     if self.children():
                         for w in self.children():
-                            if isinstance(w, pineboolib.pncontrolsfactory.QLineEdit):
+                            if isinstance(w, pncontrolsfactory.QLineEdit):
                                 le = w
                                 if le:
                                     le.setDisabled(False)
@@ -3022,7 +3023,7 @@ class FLFieldDB(QtWidgets.QWidget):
                                     le.setFocusPolicy(Qt.NoFocus)
                                     continue
 
-                            if isinstance(w, pineboolib.pncontrolsfactory.QTextEdit):
+                            if isinstance(w, pncontrolsfactory.QTextEdit):
                                 te = w
                                 te.setDisabled(False)
                                 te.setReadOnly(True)

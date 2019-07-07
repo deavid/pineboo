@@ -877,7 +877,7 @@ class MainForm(QtWidgets.QMainWindow):
 
     # def load(self):
     #    from pineboolib.core.utils.utils_base import filedir
-    #    self.ui_ = pineboolib.project.conn.managerModules().createUI(filedir('plugins/mainform/eneboo/mainform.ui'), None, self)
+    #    self.ui_ = project.conn.managerModules().createUI(filedir('plugins/mainform/eneboo/mainform.ui'), None, self)
 
     @classmethod
     def setDebugLevel(self, q):

@@ -4,7 +4,7 @@ from flup.server.fcgi import WSGIServer
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.application.utils.check_dependencies import check_dependencies
 
-import pineboolib
+from pineboolib.application import project
 
 
 logger = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ class parser(object):
         start_response("200 OK", [("Content-Type", "text/html")])
         aList = environ["QUERY_STRING"]
         try:
-            retorno_ = pineboolib.project.call(self._callScript, aList)
+            retorno_ = project.call(self._callScript, aList)
         except Exception:
             from pineboolib import pncontrolsfactory
 
