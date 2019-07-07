@@ -852,7 +852,12 @@ class FLDataTable(QtWidgets.QTableView):
         return self.header().visualIndex(c)
 
     def visual_index_to_field(self, pos_):
-        return self.model().metadata().indexFieldObject(self.visual_index_to_column_index(pos_))
+        mtd = self.model().metadata().indexFieldObject(self.logical_index_to_visual_index(self.visual_index_to_column_index(pos_)))
+        if mtd is not None:
+            if not mtd.visibleGrid():
+                raise ValueError("Se ha devuelto el field %s.%s que no es visible en el grid" % (mtd.metadata().name(), mtd.name()))
+
+            return mtd
 
     def currentRow(self):
         """
