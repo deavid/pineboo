@@ -65,7 +65,6 @@ class Project(object):
         self.tables: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.files: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.apppath = None
-        self.tmpdir = None
         self.kugarPlugin = None
         self.deleteCache = None
         self.parseProject = None

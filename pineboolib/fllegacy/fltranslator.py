@@ -99,14 +99,18 @@ class FLTranslator(QTranslator):
 
             root_ = load2xml(file_name)
             for context in root_.findall("context"):
-                context_dict_key = context.find("name").text
+                name_elem = context.find("name")
+                if name_elem is None:
+                    self.logger.warning("load_ts: <name> not found, skipping")
+                    continue
+                context_dict_key = name_elem.text
                 if context_dict_key not in self.ts_translation_contexts.keys():
                     self.ts_translation_contexts[context_dict_key] = {}
                 for message in context.findall("message"):
-                    # translation = getattr(message, "translation", None)
-                    translation_text = message.find("translation").text
-                    if translation_text is not None:
-                        source_text = message.find("source").text
+                    translation_elem, source_elem = message.find("translation"), message.find("source")
+                    translation_text = translation_elem is not None and translation_elem.text
+                    source_text = source_elem is not None and source_elem.text
+                    if translation_text and source_text:
                         self.ts_translation_contexts[context_dict_key][source_text] = translation_text
 
             return True

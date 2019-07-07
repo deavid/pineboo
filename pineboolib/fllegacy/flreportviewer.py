@@ -165,7 +165,7 @@ class FLReportViewer(QObject):
 
     @decorators.BetaImplementation
     def closeEvent(self, e):
-        from pineboolib.application import project
+        from pineboolib.application.utils.geometry import saveGeometryForm
 
         if self.printing_:
             return
@@ -176,7 +176,7 @@ class FLReportViewer(QObject):
 
         if not self.embedInParent_:
             geo = QtCore.QRect(self.x(), self.y(), self.width(), self.height())
-            project.saveGeometryForm(self.name(), geo)
+            saveGeometryForm(self.name(), geo)
 
         if self.loop_ and not self.embedInParent_:
             self.loop_ = False

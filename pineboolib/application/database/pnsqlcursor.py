@@ -8,6 +8,7 @@ from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
 from pineboolib.application.database.pnsqlquery import PNSqlQuery
 from pineboolib.application import project
 from pineboolib.application.utils.xpm import cacheXPM
+from pineboolib.application.database.utils import nextCounter
 from pineboolib.core import decorators
 from pineboolib import logging
 
@@ -15,7 +16,6 @@ from .pnbuffer import PNBuffer
 from .pncursortablemodel import PNCursorTableModel
 
 # FIXME: Removde dependency: Should not import from fllegacy.*
-from pineboolib.fllegacy.flutil import FLUtil  # FIXME: Removde dependency
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData  # FIXME: Removde dependency
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  # FIXME: Removde dependency
 
@@ -863,7 +863,7 @@ class PNSqlCursor(QtCore.QObject):
                     % (metadata.name(), fN, manager.formatValue(type_, vv), manager.formatAssignValue(metadata.field(pK), pKV))
                 )
             else:
-                FLUtil.tr("FLSqlCursor : No se puede actualizar el campo fuera de transaccion, porque no existe clave primaria")
+                logger.warning("FLSqlCursor : No se puede actualizar el campo fuera de transaccion, porque no existe clave primaria")
 
         else:
             buffer.setValue(fN, vv)
@@ -985,7 +985,7 @@ class PNSqlCursor(QtCore.QObject):
 
         field = self.metadata().field(fN)
         if field is None:
-            FLUtil.tr("FLSqlCursor::valueBufferCopy() : No existe el campo ") + self.metadata().name() + ":" + fN
+            logger.warning("FLSqlCursor::valueBufferCopy() : No existe el campo ") + self.metadata().name() + ":" + fN
             return None
 
         type_ = field.type()
@@ -1254,7 +1254,6 @@ class PNSqlCursor(QtCore.QObject):
     def openFormInMode(self, m, cont=True):
         if not self.metadata():
             return
-        # util = FLUtil()
         from pineboolib import pncontrolsfactory
 
         if (not self.isValid() or self.size() <= 0) and not m == self.Insert:
@@ -1443,9 +1442,6 @@ class PNSqlCursor(QtCore.QObject):
                 fMD = field.associatedField()
                 if fMD and s is not None:
                     if not field.relationM1():
-                        # msg = msg + "\n" + (FLUtil.tr(
-                        #       "FLSqlCursor : Error en metadatos, el campo %1 tiene un campo asociado pero no existe relación muchos a uno"
-                        #       ).arg(self.metadata().name()) + ":" + fiName)
                         msg = (
                             msg + "\n" + "FLSqlCursor : Error en metadatos, el campo %s tiene un campo asociado pero no existe "
                             "relación muchos a uno:%s" % (self.metadata().name(), fiName)
@@ -1492,7 +1488,6 @@ class PNSqlCursor(QtCore.QObject):
                             continue
 
                 if self.buffer().isNull(fiName) and not field.allowNull() and not field.type() == FLFieldMetaData.Serial:
-                    # msg = msg + "\n" + self.metadata().name() + ":" + field.alias() + FLUtil.tr(" : No puede ser nulo")
                     msg = msg + "\n" + self.metadata().name() + ":" + field.alias() + " : No puede ser nulo"
 
                 if field.isUnique():
@@ -1556,8 +1551,6 @@ class PNSqlCursor(QtCore.QObject):
                         logger.debug("SQL linea = %s conn name = %s", q.sql(), str(project.conn.connectionName()))
                         q.exec_()
                         if not q.next():
-                            # msg = msg + "\n" + self.metadata().name() + ":" + field.alias() +
-                            #           FLUtil.tr(" : El valor %1 no existe en la tabla %2").arg(str(s), r.foreignTable())
                             msg = (
                                 msg
                                 + "\n"
@@ -1672,8 +1665,6 @@ class PNSqlCursor(QtCore.QObject):
                         q.setForwardOnly(True)
                         q.exec_()
                         if q.next():
-                            # msg = msg + "\n" + self.metadata().name() + ":" + field.alias() +
-                            #           FLUtil.tr(" : Con el valor %1 hay registros en la tabla %2:%3").arg(str(s), mtd.name(), mtd.alias())
                             msg = (
                                 msg
                                 + "\n"
@@ -1711,10 +1702,8 @@ class PNSqlCursor(QtCore.QObject):
         if msg:
             if showError:
                 if self.d.modeAccess_ == self.Insert or self.d.modeAccess_ == self.Edit:
-                    # self.d.msgBoxWarning(FLUtil.tr("No se puede validad el registro actual:\n") + msg)
                     self.d.msgBoxWarning("No se puede validad el registro actual:\n" + msg)
                 elif self.d.modeAccess_ == self.Del:
-                    # self.d.msgBoxWarning(FLUtil.tr("No se puede borrar registro:\n") + msg)
                     self.d.msgBoxWarning("No se puede borrar registro:\n" + msg)
             return False
         return True
@@ -2362,17 +2351,16 @@ class PNSqlCursor(QtCore.QObject):
                         self.buffer().setValue(field_name, val)
 
                     if field.isCounter():
-                        util = FLUtil()
                         siguiente = None
                         if self._action.scriptFormRecord():
                             context_ = getattr(qsa_tree, "formRecord%s" % self._action.scriptFormRecord()[:-3]).iface
                             function_counter = getattr(context_, "calculateCounter", None)
                             if function_counter is None:
-                                siguiente = util.nextCounter(field_name, self)
+                                siguiente = nextCounter(field_name, self)
                             else:
                                 siguiente = function_counter()
                         else:
-                            siguiente = util.nextCounter(field_name, self)
+                            siguiente = nextCounter(field_name, self)
 
                         if siguiente:
                             self.buffer().setValue(field_name, siguiente)
@@ -3442,14 +3430,11 @@ class PNSqlCursor(QtCore.QObject):
                 t = self.name()
 
             msg = (
-                FLUtil.tr(
-                    "Se han detectado transacciones no finalizadas en la última operación.\n"
-                    "Se van a cancelar las transacciones pendientes.\n"
-                    "Los últimos datos introducidos no han sido guardados, por favor\n"
-                    "revise sus últimas acciones y repita las operaciones que no\n"
-                    "se han guardado.\n"
-                )
-                + "SqlCursor::changeConnection: %s\n" % t
+                "Se han detectado transacciones no finalizadas en la última operación.\n"
+                "Se van a cancelar las transacciones pendientes.\n"
+                "Los últimos datos introducidos no han sido guardados, por favor\n"
+                "revise sus últimas acciones y repita las operaciones que no\n"
+                "se han guardado.\n" + "SqlCursor::changeConnection: %s\n" % t
             )
             self.rollbackOpened(-1, msg)
 
