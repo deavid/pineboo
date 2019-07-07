@@ -77,12 +77,12 @@ class kut2fpdf(object):
     def parse(self, name, kut, data, report=None, flags=[]):
 
         try:
-            self._xml = self._parser_tools.loadKut(kut)
+            self._xml = self._parser_tools.loadKut(kut).getroot()
         except Exception:
             self.logger.exception("KUT2FPDF: Problema al procesar %s.kut", name)
             return False
         try:
-            self._xml_data = load2xml(data)
+            self._xml_data = load2xml(data).getroot()
         except Exception:
             self.logger.exception("KUT2FPDF: Problema al procesar xml_data")
             return False
@@ -298,6 +298,7 @@ class kut2fpdf(object):
     """
 
     def processData(self, section_name, data, data_level):
+        print("processData", section_name, data, data_level)
         self.actual_data_level = data_level
         listDF = self._xml.findall(section_name)
         # data_size = len(listDF)
@@ -307,6 +308,8 @@ class kut2fpdf(object):
             show = True
             if draw_if:
                 show = data.get(draw_if)
+
+            print("**", dF.get("Level"), data_level)
 
             if dF.get("Level") == str(data_level) and show not in ("None", "False"):
 
