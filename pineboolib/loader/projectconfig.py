@@ -62,18 +62,23 @@ class ProjectConfig:
                 self.logger.warning("No se puede cargar un profile con contraseña por consola")
                 return False
 
-        from pineboolib.pnsqldrivers import PNSqlDrivers
+        from pineboolib.application.database.pnsqldrivers import PNSqlDrivers
 
         sql_drivers_manager = PNSqlDrivers()
-
-        self.database = root.find("database-name").text
+        dbname_elem = root.find("database-name")
+        if not dbname_elem:
+            raise ValueError("database-name not found")
+        self.database = dbname_elem.text
         for db in root.findall("database-server"):
-            self.host = db.find("host").text
-            self.port = db.find("port").text
-            self.type = db.find("type").text
+            host_elem, port_elem, type_elem = db.find("host"), db.find("port"), db.find("type")
+            if host_elem is None or port_elem is None or type_elem is None:
+                raise ValueError("host, port and type are required")
+            self.host = host_elem.text
+            self.port = port_elem.text
+            self.type = type_elem.text
             # FIXME: Move this to project, or to the connection handler.
             if self.type not in sql_drivers_manager.aliasList():
-                self.logger.warning("Esta versión de pineboo no soporta el driver '%s'" % self.dbserver.type)
+                self.logger.warning("Esta versión de pineboo no soporta el driver '%s'" % self.type)
                 self.database = None
                 return False
 
