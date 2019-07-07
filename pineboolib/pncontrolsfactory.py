@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import inspect
-import pineboolib
-from pineboolib.core.utils.logging import logging
 import weakref
 import re
 import os
@@ -10,11 +8,14 @@ import traceback
 from typing import Any, Callable
 
 from PyQt5 import QtCore  # type: ignore
-from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.wiki_error import wiki_error
 from pineboolib.core.utils.singleton import Singleton
 from pineboolib.core.settings import config
 from pineboolib.core import decorators
+from pineboolib.core.utils.logging import logging
+import pineboolib.utils
+from pineboolib.wiki_error import wiki_error
+from pineboolib import project
+from pineboolib.fllegacy.flutil import FLUtil
 
 
 logger = logging.getLogger("PNControlsFactory")
@@ -39,13 +40,13 @@ class ObjectNotFoundDGINotLoaded(object):
 
 
 def resolveObject(name: str) -> Any:
-    if not pineboolib.project._DGI:
+    if not project._DGI:
         return ObjectNotFoundDGINotLoaded
-    obj_ = getattr(pineboolib.project._DGI, name, None)
+    obj_ = getattr(project._DGI, name, None)
     if obj_:
         return obj_
 
-    logger.warning("resolveObject: class <%s> not found in dgi <%s>", name, pineboolib.project._DGI.alias().lower())
+    logger.warning("resolveObject: class <%s> not found in dgi <%s>", name, project._DGI.alias().lower())
     return ObjectNotFoundInCurrentDGI
 
 
@@ -256,20 +257,20 @@ class SysType(object, metaclass=Singleton):
 
     def __getattr__(self, fun_: str) -> Callable:
         if self.sys_widget is None:
-            if "sys" in pineboolib.project.actions:
-                self.sys_widget = pineboolib.project.actions["sys"].load().widget
+            if "sys" in project.actions:
+                self.sys_widget = project.actions["sys"].load().widget
             else:
                 logger.warn("No action found for 'sys'")
         return getattr(self.sys_widget, fun_, None)
 
     def installACL(self, idacl):
-        # acl_ = pineboolib.project.acl()
+        # acl_ = project.acl()
         acl_ = None  # FIXME: Add ACL later
         if acl_:
             acl_.installACL(idacl)
 
     def version(self) -> str:
-        return str(pineboolib.project.version)
+        return str(project.version)
 
     def processEvents(self) -> None:
         return aqApp.DGI().processEvents()
@@ -421,7 +422,7 @@ def slot_done(fn, signal, sender, caller):
                 res = fn(*args[0:args_num])
         except Exception:
             # script_name = caller.__module__ if caller is not None else "????"
-            aqApp.msgBoxWarning(wiki_error(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI)
+            aqApp.msgBoxWarning(wiki_error(traceback.format_exc(limit=-6, chain=False)), project._DGI)
 
         if caller is not None:
             try:

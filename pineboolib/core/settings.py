@@ -4,7 +4,7 @@ from .utils import logging
 
 from PyQt5.QtCore import QSettings, QSize  # type: ignore
 
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Any, Union
 
 logger = logging.getLogger("core.settings")
 
@@ -26,7 +26,7 @@ class PinebooSettings(QSettings):
             value = self.dump_qsize(value)
         return json.dumps(value)
 
-    def load_value(self, value: str) -> Union[int, Dict[str, Union[str, int]], str, bool]:
+    def load_value(self, value: str) -> Any:
         value = json.loads(value)
         if isinstance(value, dict) and "__class__" in value.keys():
             classname = value["__class__"]
@@ -36,7 +36,7 @@ class PinebooSettings(QSettings):
                 raise ValueError("Unknown classname %r" % classname)
         return value
 
-    def value(self, key: str, default: Optional[Union[str, bool]] = None) -> Optional[Union[str, bool, Dict[str, Union[str, int]], int]]:
+    def value(self, key: str, default: Any = None) -> Any:
         value = super().value(key, None)
         if value is None:
             return default
