@@ -67,7 +67,7 @@ class parser(object):
         dict_ = args[0]
         func_name = dict_["function"]
         arguments = dict_["arguments"]
-        from pineboolib import project
+        from pineboolib.application import project
 
         result = project.call(func_name, arguments)
         print("Llamada remota: %s(%s) --> %s" % (func_name, ", ".join(arguments), result))
@@ -76,7 +76,7 @@ class parser(object):
     @dispatcher.add_method
     def dbdata(*args):
         dict_ = args[0]
-        from pineboolib import project
+        from pineboolib.application import project
 
         list_fun = dict_["function"].split("__")
         fun_name = list_fun[1]

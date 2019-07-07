@@ -2,7 +2,6 @@
 
 # Completada Si
 from pineboolib.core import decorators
-from . import flsqlcursor
 
 
 """
@@ -112,7 +111,7 @@ class opInfo:
     """
 
 
-class FLSqlSavePoint:
+class PNSqlSavePoint:
 
     """
     Pila para almacenar informacion de las operaciones.
@@ -247,10 +246,13 @@ class FLSqlSavePoint:
 
     @decorators.BetaImplementation
     def undoInsert(self, opInf):
+
         cursor_ = opInf.cursor
         owner = False
         if not cursor_:
-            cursor_ = flsqlcursor.FLSqlCursor.FLSqlCursor(opInf.name)
+            from . import pnsqlcursor
+
+            cursor_ = pnsqlcursor.PNSqlCursor(opInf.name)
             cursor_.setForwardOnly(True)
             owner = True
 
@@ -280,8 +282,11 @@ class FLSqlSavePoint:
     def undoEdit(self, opInf):
         cursor_ = opInf.cursor
         owner = False
+
         if not cursor_:
-            cursor_ = flsqlcursor.FLSqlCursor.FLSqlCursor(opInf.name)
+            from . import pnsqlcursor
+
+            cursor_ = pnsqlcursor.PNSqlCursor(opInf.name)
             cursor_.setForwardOnly(True)
             owner = True
 
@@ -312,7 +317,9 @@ class FLSqlSavePoint:
         cursor_ = opInf.cursor
         owner = False
         if not cursor_:
-            cursor_ = flsqlcursor.FLSqlCursor.FLSqlCursor(opInf.name)
+            from . import pnsqlcursor
+
+            cursor_ = pnsqlcursor.PNSqlCursor(opInf.name)
             cursor_.setForwardOnly(True)
             owner = True
 

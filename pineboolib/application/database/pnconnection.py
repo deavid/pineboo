@@ -8,7 +8,7 @@ from pineboolib.core.settings import config
 from pineboolib.core import decorators
 from pineboolib.interfaces.iconnection import IConnection
 from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
-from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
+from .pnsqlsavepoint import PNSqlSavePoint
 from pineboolib import pncontrolsfactory  # FIXME: Don't import pncontrolsfactory in this file. Manage without DGI.
 
 from pineboolib import logging
@@ -31,7 +31,7 @@ class PNConnection(QtCore.QObject, IConnection):
     transaction_ = None
     _managerModules = None
     _manager = None
-    currentSavePoint_: FLSqlSavePoint = None  # FIXME: Should use something from pineboolib.application
+    currentSavePoint_: PNSqlSavePoint = None  # FIXME: Should use something from pineboolib.application
     stackSavePoints_ = None
     queueSavePoints_ = None
     interactiveGUI_ = None
@@ -41,7 +41,7 @@ class PNConnection(QtCore.QObject, IConnection):
     driver_ = None
 
     def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name=None):
-        from pineboolib.pnsqldrivers import PNSqlDrivers
+        from .pnsqldrivers import PNSqlDrivers
 
         super(PNConnection, self).__init__()
 
@@ -285,7 +285,7 @@ class PNConnection(QtCore.QObject, IConnection):
                     else:
                         self.stackSavePoints_.append(self.currentSavePoint_)
 
-                self.currentSavePoint_ = FLSqlSavePoint(self.transaction_)
+                self.currentSavePoint_ = PNSqlSavePoint(self.transaction_)
             else:
                 self.savePoint(self.transaction_)
 
@@ -310,9 +310,9 @@ class PNConnection(QtCore.QObject, IConnection):
             and cur.isModifiedBuffer()
             and cur.d.askForCancelChanges_
         ):
-            import pineboolib
+            from pineboolib.application import project
 
-            if pineboolib.project._DGI.localDesktop():
+            if project._DGI.localDesktop():
                 res = QtWidgets.QMessageBox.information(
                     QtWidgets.QApplication.activeWindow(),
                     "Cancelar Cambios",

@@ -12,7 +12,6 @@ from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsettings import FLSettings
 
 
-import pineboolib
 from pineboolib import logging
 from PyQt5.QtGui import QPixmap  # type: ignore
 
@@ -113,7 +112,9 @@ class FLTableDB(QtWidgets.QWidget):
         self.checkColumnVisible_ = False
         self.tdbFilterLastWhere_ = None
         self.filter_ = None
-        self.iconSize = pineboolib.project._DGI.iconSize()
+        from pineboolib.application import project
+
+        self.iconSize = project._DGI.iconSize()
         self.tabControlLayout = QtWidgets.QHBoxLayout()
         self.tabFilter = QtWidgets.QFrame()  # contiene filtros
         self.functionGetColor_ = None
@@ -1159,7 +1160,7 @@ class FLTableDB(QtWidgets.QWidget):
 
                             editor_.insertStringList(olTranslated)
                         else:
-                            editor_ = pineboolib.pncontrolsfactory.FLLineEdit(self)
+                            editor_ = pncontrolsfactory.FLLineEdit(self)
 
                             if type_ == "double":
                                 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldoublevalidator import FLDoubleValidator
@@ -1193,7 +1194,7 @@ class FLTableDB(QtWidgets.QWidget):
                         editor_.setMaxValue(pow(10, partInteger) - 1)
 
                     if type_ == "pixmap":
-                        editor_ = pineboolib.pncontrolsfactory.FLLineEdit(self)
+                        editor_ = pncontrolsfactory.FLLineEdit(self)
                         self.tdbFilter.setRowReadOnly(i, True)
 
                     if type_ == "date":
@@ -1786,7 +1787,7 @@ class FLTableDB(QtWidgets.QWidget):
                     vars.append(field_3.name())
                     vars.append(self.orderAsc3_)
 
-                from pineboolib import project
+                from pineboolib.application import project
 
                 ret = project.call(function_qsa, vars, None, False)
                 logger.debug("functionQSA: %s -> %r" % (function_qsa, ret))
@@ -2444,7 +2445,7 @@ class FLTableDB(QtWidgets.QWidget):
             msec_refresh = 200
             ret = None
             try:
-                from pineboolib import project
+                from pineboolib.application import project
 
                 ret = project.call(functionQSA, vargs, None, False)
                 logger.debug("functionQSA:%s:", functionQSA)

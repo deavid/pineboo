@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from pineboolib.qsa import *
-import pineboolib
 from pineboolib.core.utils.utils_base import filedir
 from PyQt5 import QtCore  # type: ignore
 
@@ -31,6 +30,7 @@ class FormInternalObj(FormDBWidget):
 
     def cargarConfiguracion(self):
         w = self.w_
+        from pineboolib.application import project
 
         w.child(u"cbFLTableDC").checked = self.leerValorLocal("FLTableDoubleClick")
         w.child(u"cbFLTableSC").checked = self.leerValorLocal("FLTableShortCut")
@@ -47,7 +47,7 @@ class FormInternalObj(FormDBWidget):
         w.child(u"cbDeleteCache").checked = self.leerValorLocal("deleteCache")
         w.child(u"cbParseProject").checked = self.leerValorLocal("parseProject")
         w.child(u"cbActionsMenuRed").checked = self.leerValorLocal("ActionsMenuRed")
-        w.child(u"cbKugarParser").addItems(pineboolib.project.kugarPlugin.listAvalibles())
+        w.child(u"cbKugarParser").addItems(project.kugarPlugin.listAvalibles())
         w.child(u"cbKugarParser").setCurrentText(
             self.leerValorLocal("kugarParser") if not "" else pineboolib.project.kugarPlugin.defaultParser()
         )

@@ -154,7 +154,9 @@ class FLReportViewer(QObject):
         #    return
         if hasattr(self.rptViewer_.rptEngine_, "parser_"):
             pdf_file = self.rptViewer_.rptEngine_.parser_.get_file_name()
-            pineboolib.project.call("sys.openUrl", [pdf_file], None, True)
+            from pineboolib.application import project
+
+            project.call("sys.openUrl", [pdf_file], None, True)
         # self.eventloop.exec_()
 
         # if self.embedInParent_:

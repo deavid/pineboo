@@ -88,7 +88,7 @@ class MainForm(QtWidgets.QMainWindow):
         return False
 
     def createUi(self, ui_file):
-        from pineboolib import project
+        from pineboolib.application import project
 
         mng = project.conn.managerModules()
         self.w_ = mng.createUI(ui_file, None, self)
@@ -108,7 +108,7 @@ class MainForm(QtWidgets.QMainWindow):
         return doExit
 
     def writeState(self):
-        from pineboolib import project
+        from pineboolib.application import project
 
         w = self.w_
         self.dck_mod_.writeState()
@@ -178,7 +178,7 @@ class MainForm(QtWidgets.QMainWindow):
 
     def loadTabs(self):
         if self.ag_menu_:
-            from pineboolib import project
+            from pineboolib.application import project
 
             settings = AQSettings()
             key = "MainWindow/%s/" % project.conn.database()

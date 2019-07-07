@@ -6,7 +6,7 @@ from pineboolib import logging
 from pineboolib.core.utils.utils_base import filedir, Struct
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib import project
+from pineboolib.application import project
 
 from PyQt5.QtWidgets import (  # type: ignore
     QToolButton,
@@ -48,7 +48,7 @@ class MainForm(QMainWindow):
         MainForm.debugLevel = q
 
     def load(self):
-        from pineboolib import project
+        from pineboolib.application import project
 
         self.ui_ = project.conn.managerModules().createUI(filedir("plugins/mainform/pineboo/mainform.ui"), None, self)
 

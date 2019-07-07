@@ -32,7 +32,7 @@ class MainForm(QMainWindow):
         pncontrolsfactory.aqApp.init()
 
     def createUi(self, ui_file):
-        from pineboolib import project
+        from pineboolib.application import project
 
         mng = project.conn.managerModules()
         self.w_ = mng.createUI(ui_file, None, self)

@@ -158,7 +158,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
         self.logger = logging.getLogger("FLFormDB")
         # self.tiempo_ini = time.time()
-        from pineboolib import project
+        from pineboolib.application import project
 
         if not parent:
             from pineboolib import pncontrolsfactory
@@ -225,7 +225,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
         if self._uiName:
-            from pineboolib import project
+            from pineboolib.application import project
 
             project.conn.managerModules().createUI(self._uiName, None, self)
 
@@ -252,10 +252,10 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
                     self.iface.init()
                 except Exception:
                     # script_name = self.iface.__module__
-                    from pineboolib import pncontrolsfactory, project
+                    from pineboolib import pncontrolsfactory, error_manager
 
                     pncontrolsfactory.aqApp.msgBoxWarning(
-                        pncontrolsfactory.wiki_error(traceback.format_exc(limit=-6, chain=False)), project._DGI
+                        error_manager(traceback.format_exc(limit=-6, chain=False)), pncontrolsfactory.aqApp.DGI()
                     )
 
             return True
@@ -597,18 +597,18 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
             QtCore.QTimer(self).singleShot(0, self.emitFormReady)
 
     def emitFormReady(self):
-        from pineboolib import pncontrolsfactory, project
+        from pineboolib import pncontrolsfactory
 
         qsa_sys = pncontrolsfactory.SysType()
         if qsa_sys.isLoadedModule("fltesttest"):
 
-            project.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)
+            pncontrolsfactory.aqApp.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)
         self.formReady.emit()
 
     # protected_:
 
     def emitFormClosed(self):
-        from pineboolib import project
+        from pineboolib.application import project
 
         if "fltesttest" in project.conn.managerModules().listAllIdModules():
             project.call("fltesttest.iface.recibeEvento", ("formClosed", self.actionName_), None)
@@ -906,7 +906,8 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     """
 
     def show(self):
-        from pineboolib import pncontrolsfactory, project
+        from pineboolib import pncontrolsfactory
+        from pineboolib.application import project
 
         module_name = getattr(project.actions[self._action.name()].mod, "module_name", None)
         if module_name:

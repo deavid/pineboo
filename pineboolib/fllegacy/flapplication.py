@@ -8,7 +8,7 @@ from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.core import decorators
 
 # import pineboolib
-from pineboolib import project
+from pineboolib.application import project
 
 # from pineboolib import pncontrolsfactory  # FIXME: Circular dependency
 from pineboolib.application.proxy import DelayedObjectProxyLoader

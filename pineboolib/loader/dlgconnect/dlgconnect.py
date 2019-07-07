@@ -35,7 +35,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.minSize = QSize(350, 140)
         self.maxSize = QSize(350, 495)
         self.profile_dir = FLSettings().readEntry("ebcomportamiento/profiles_folder", filedir("../profiles"))
-        from pineboolib.pnsqldrivers import PNSqlDrivers
+        from pineboolib.application.database.pnsqldrivers import PNSqlDrivers
 
         self.pNSqlDrivers = PNSqlDrivers()
         self.edit_mode = False

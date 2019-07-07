@@ -2,7 +2,6 @@
 import os
 from pineboolib import logging
 
-import pineboolib
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.application.xmlaction import XMLAction
@@ -265,7 +264,7 @@ class FLManagerModules(object):
         else:
             modId = self.conn_.managerModules().idModuleOfFile(n)
 
-        from pineboolib import project
+        from pineboolib.application import project
 
         if project._DGI.alternative_content_cached():
             data = project._DGI.content_cached(project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey)
@@ -335,7 +334,9 @@ class FLManagerModules(object):
     """
 
     def createUI(self, n, connector=None, parent=None, name=None):
-        return pineboolib.project._DGI.createUI(n, connector, parent, name)
+        from pineboolib.application import project
+
+        return project._DGI.createUI(n, connector, parent, name)
 
     """
     Crea el formulario maestro de una acción a partir de su fichero de descripción.
@@ -697,7 +698,7 @@ class FLManagerModules(object):
         if not isinstance(n, str):
             n = n.toString()
 
-        from pineboolib import project
+        from pineboolib.application import project
 
         if n.endswith(".mtd"):
             if n[: n.find(".mtd")] in project._DGI.sys_mtds() or n == "flfiles.mtd":

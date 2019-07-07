@@ -224,7 +224,7 @@ class sql_inspector(object):
         elif type_ in ("int", "uint", "serial"):
             ret_ = int(ret_)
         elif type_ == "pixmap":
-            from pineboolib import project
+            from pineboolib.application import project
 
             if raw or not project.conn.manager().isSystemTable(mtd.metadata().name()):
                 ret_ = project.conn.manager().fetchLargeValue(ret_)
@@ -243,7 +243,7 @@ class sql_inspector(object):
         return ret_
 
     def _create_mtd_fields(self, fields_list, tables_list):
-        from pineboolib import project
+        from pineboolib.application import project
 
         _filter = ["sum(", "max(", "distint("]
 
@@ -283,7 +283,7 @@ def resolve_query(table_name, params):
     and_where = ""
     where = ""
     order_by = ""
-    from pineboolib import project
+    from pineboolib.application import project
 
     mtd = project.conn.manager().metadata(table_name)
 

@@ -18,7 +18,7 @@ def config_dbconn(options):
 
 
 def connect_to_db(config):
-    from pineboolib.pnconnection import PNConnection
+    from pineboolib.application.database.pnconnection import PNConnection
 
     connection = PNConnection(config.database, config.host, config.port, config.username, config.password, config.type)
     return connection
