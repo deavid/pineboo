@@ -12,7 +12,6 @@ from pineboolib.core.utils.singleton import Singleton
 from pineboolib.core.settings import config
 from pineboolib.core import decorators
 from pineboolib.core.utils.logging import logging
-from pineboolib.wiki_error import wiki_error
 from pineboolib.application import project
 from pineboolib.fllegacy.flutil import FLUtil
 
@@ -420,8 +419,10 @@ def slot_done(fn, signal, sender, caller):
             else:
                 res = fn(*args[0:args_num])
         except Exception:
+            from pineboolib.error_manager import error_manager
+
             # script_name = caller.__module__ if caller is not None else "????"
-            aqApp.msgBoxWarning(wiki_error(traceback.format_exc(limit=-6, chain=False)), project._DGI)
+            aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
 
         if caller is not None:
             try:

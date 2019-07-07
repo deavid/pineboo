@@ -5,8 +5,7 @@ import re
 logger = logging.getLogger(__name__)
 
 
-def wiki_error(e: str) -> str:
-    # FIXME: No hay un nombre mejor? Crea entradas de la wikipedia?
+def error_manager(e: str) -> str:
     from pineboolib import pncontrolsfactory
     from pineboolib.application import project
 

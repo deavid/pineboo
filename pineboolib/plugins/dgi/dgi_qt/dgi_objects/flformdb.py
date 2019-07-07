@@ -252,10 +252,10 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
                     self.iface.init()
                 except Exception:
                     # script_name = self.iface.__module__
-                    from pineboolib import pncontrolsfactory
+                    from pineboolib import pncontrolsfactory, error_manager
 
                     pncontrolsfactory.aqApp.msgBoxWarning(
-                        pncontrolsfactory.wiki_error(traceback.format_exc(limit=-6, chain=False)), pncontrolsfactory.aqApp.DGI()
+                        error_manager(traceback.format_exc(limit=-6, chain=False)), pncontrolsfactory.aqApp.DGI()
                     )
 
             return True

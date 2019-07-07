@@ -546,10 +546,10 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
                     ret_ = fun_()
                 except Exception:
                     # script_name = self.iface.__module__
-                    from pineboolib import pncontrolsfactory
+                    from pineboolib import pncontrolsfactory, error_manager
 
                     pncontrolsfactory.aqApp.msgBoxWarning(
-                        pncontrolsfactory.wiki_error(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI
+                        error_manager(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI
                     )
 
             return ret_ if isinstance(ret_, bool) else False
