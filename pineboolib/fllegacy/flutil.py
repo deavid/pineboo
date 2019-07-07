@@ -2,14 +2,15 @@
 import platform
 import hashlib
 import datetime
-from pineboolib import logging
+
 
 from PyQt5 import QtCore  # type: ignore
 
-import pineboolib
-from pineboolib.core import decorators
+
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.core import decorators
+from pineboolib import logging
 
 logger = logging.getLogger(__name__)
 
@@ -1073,7 +1074,7 @@ class FLUtil(QtCore.QObject):
         @param l Label del diálogo
         @param tS Número total de pasos a realizar
         """
-        from pineboolib import project
+        from pineboolib.application import project
 
         return project.message_manager().send("progress_dialog_manager", "create", [title, steps, id_])
 
@@ -1082,7 +1083,7 @@ class FLUtil(QtCore.QObject):
         Destruye el diálogo de progreso
         """
 
-        from pineboolib import project
+        from pineboolib.application import project
 
         project.message_manager().send("progress_dialog_manager", "destroy", [id_])
 
@@ -1093,7 +1094,7 @@ class FLUtil(QtCore.QObject):
         @param p Grado de progreso
         """
 
-        from pineboolib import project
+        from pineboolib.application import project
 
         project.message_manager().send("progress_dialog_manager", "setProgress", [step_number, id_])
 
@@ -1104,7 +1105,7 @@ class FLUtil(QtCore.QObject):
         @param l Etiqueta
         """
 
-        from pineboolib import project
+        from pineboolib.application import project
 
         project.message_manager().send("progress_dialog_manager", "setLabelText", [l, id_])
 
@@ -1115,7 +1116,7 @@ class FLUtil(QtCore.QObject):
         @param ts Número total de pasos
         """
 
-        from pineboolib import project
+        from pineboolib.application import project
 
         project.message_manager().send("progress_dialog_manager", "setTotalSteps", [tS, id_])
 

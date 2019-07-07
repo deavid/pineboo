@@ -90,7 +90,7 @@ class kut2fpdf(object):
         from pineboolib.fllegacy.flutil import FLUtil
 
         util = FLUtil()
-        from pineboolib import project
+        from pineboolib.application import project
 
         if project._DGI.localDesktop():
             util.createProgressDialog("Pineboo", len(self._xml_data))
@@ -160,7 +160,7 @@ class kut2fpdf(object):
     def get_file_name(self):
         import os
 
-        from pineboolib import project
+        from pineboolib.application import project
 
         pdf_name = project.tmpdir
         pdf_name += "/%s_%s.pdf" % (self.name_, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
@@ -244,7 +244,7 @@ class kut2fpdf(object):
         i = 0
 
         from pineboolib.fllegacy.flutil import FLUtil
-        from pineboolib import project
+        from pineboolib.application import project
 
         util = FLUtil()
 
@@ -543,7 +543,7 @@ class kut2fpdf(object):
                 function_name = xml.get("FunctionName")
                 try:
                     nodo = self._parser_tools.convertToNode(data_row)
-                    from pineboolib import project
+                    from pineboolib.application import project
 
                     ret_ = project.call(function_name, [nodo, field_name], None, False)
                     if ret_ is False:

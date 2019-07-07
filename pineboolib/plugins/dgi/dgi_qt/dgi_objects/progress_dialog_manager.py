@@ -6,7 +6,7 @@ class ProgressDialogManager(object):
 
     def create(self, title, steps, id_):
 
-        from pineboolib import project
+        from pineboolib.application import project
         from PyQt5 import QtCore  # type: ignore
 
         pd_widget = project._DGI.QProgressDialog(str(title), str(project._DGI.QApplication.translate("scripts", "Cancelar")), 0, steps)

@@ -2,7 +2,7 @@
 from pineboolib import logging
 from typing import List
 from pineboolib.core.utils.utils_base import _dir
-from pineboolib import project
+from pineboolib.application import project
 
 logger = logging.getLogger(__name__)
 

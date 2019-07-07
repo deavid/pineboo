@@ -9,7 +9,7 @@ import zlib
 from PyQt5.QtCore import QObject  # type: ignore
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib import pncontrolsfactory
-from pineboolib import project
+from pineboolib.application import project
 
 ICONS = {}
 root = None

@@ -41,7 +41,7 @@ class dgi_schema(object):
         return self._alias
 
     def create_app(self):
-        from pineboolib import project
+        from pineboolib.application import project
 
         return project.app
 

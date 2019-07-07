@@ -43,7 +43,7 @@ class parser(object):
 
     @dispatcher.add_method
     def mainWindow(*args):
-        from pineboolib import project
+        from pineboolib.application import project
 
         if project._DGI._par._queqe:
             return "queqePending"
@@ -58,7 +58,7 @@ class parser(object):
 
     @dispatcher.add_method
     def mainForm(*args):
-        from pineboolib import project
+        from pineboolib.application import project
 
         if project._DGI._par._queqe:
             return "queqePending"
@@ -73,7 +73,7 @@ class parser(object):
 
     @dispatcher.add_method
     def callFunction(*args):
-        from pineboolib import project
+        from pineboolib.application import project
 
         if project._DGI._par._queqe:
             return "queqePending"
@@ -97,7 +97,7 @@ class parser(object):
 
     @dispatcher.add_method
     def queqe(*args):
-        from pineboolib import project
+        from pineboolib.application import project
 
         if len(args) == 1:
             if args[0] == "clean":
@@ -119,7 +119,7 @@ class parser(object):
 
     @dispatcher.add_method
     def action(*args):
-        from pineboolib import project
+        from pineboolib.application import project
         from pineboolib import pncontrolsfactory
 
         if project._DGI._par._queqe:
@@ -481,7 +481,7 @@ class json_mainWindow(object):
     def initModule(self, module):
         if module not in self.initialized_mods_:
             self.initialized_mods_.append(module)
-            from pineboolib import project
+            from pineboolib.application import project
 
             project.call("%s.iface.init" % module, [], None, False)
 

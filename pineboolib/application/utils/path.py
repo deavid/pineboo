@@ -1,8 +1,5 @@
 from pineboolib import logging
 import os.path
-
-import pineboolib
-
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -14,7 +11,9 @@ def _dir(*x) -> str:
     @param x. str o array con la ruta de la carpeta
     @return str con ruta absoluta a una carpeta
     """
-    return os.path.join(pineboolib.project.tmpdir, *x)
+    from pineboolib.application import project
+
+    return os.path.join(project.tmpdir, *x)
 
 
 def coalesce_path(*filenames) -> Optional[str]:
@@ -26,8 +25,11 @@ def coalesce_path(*filenames) -> Optional[str]:
         if filename is None:
             # When the caller specifies None as the last item means that its OK to return None
             return None
-        if filename in pineboolib.project.files:
-            return pineboolib.project.files[filename].path()
+        from pineboolib.application import project
+
+        if filename in project.files:
+
+            return project.files[filename].path()
     logger.error(
         "coalesce_path: Ninguno de los ficheros especificados ha sido encontrado en el proyecto: %s", repr(filenames), stack_info=False
     )
@@ -39,8 +41,10 @@ def _path(filename: str, showNotFound: bool = True) -> Optional[str]:
     Retorna el primer fichero existente de un grupo de ficheros
     @return ruta al fichero
     """
-    if filename not in pineboolib.project.files:
+    from pineboolib.application import project
+
+    if filename not in project.files:
         if showNotFound:
             logger.error("Fichero %s no encontrado en el proyecto.", filename, stack_info=False)
         return None
-    return pineboolib.project.files[filename].path()
+    return project.files[filename].path()

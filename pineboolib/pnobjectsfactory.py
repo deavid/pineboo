@@ -89,7 +89,7 @@ def load_model(nombre):
     #    mod = base_model(nombre)
     #    if mod:
     #        setattr(qsa_dict_modules, model_name, mod)
-    from pineboolib import project
+    from pineboolib.application import project
 
     db_name = project.conn.DBName()
 
@@ -125,7 +125,7 @@ def load_model(nombre):
 
 
 def empty_base():
-    from pineboolib import project
+    from pineboolib.application import project
 
     # FIXME: Not a good idea to delete from other module
     del project.conn.driver().declarative_base_
@@ -135,7 +135,7 @@ def empty_base():
 def load_models() -> None:
 
     from pineboolib import qsa as qsa_dict_modules
-    from pineboolib import project
+    from pineboolib.application import project
 
     db_name = project.conn.DBName()
     tables = project.conn.tables()

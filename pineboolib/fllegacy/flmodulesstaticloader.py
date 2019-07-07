@@ -263,7 +263,7 @@ class FLStaticLoader(QtCore.QObject):
                 if only_path:
                     return content_path
                 else:
-                    from pineboolib import project
+                    from pineboolib.application import project
 
                     return project.conn.managerModules().contentFS(info.path_ + separator + n)
 

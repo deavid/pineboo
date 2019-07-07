@@ -16,7 +16,6 @@ from pineboolib.fllegacy.flsqlquery import FLSqlQuery, FLGroupByQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flutil import FLUtil
-import pineboolib
 
 from xml import etree  # type: ignore
 from pineboolib import logging
@@ -1407,8 +1406,9 @@ class FLManager(QtCore.QObject, IManager):
         @param n Nombre de la tabla.
         @return TRUE si es una tabla de sistema
         """
+        from pineboolib.application import project
 
-        if n in pineboolib.project._DGI.sys_mtds():
+        if n in project._DGI.sys_mtds():
             return True
 
         if n[0:2] != "fl":

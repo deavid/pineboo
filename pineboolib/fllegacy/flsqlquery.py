@@ -1,8 +1,8 @@
 from pineboolib import logging
-import pineboolib
 from pineboolib.core import decorators
 from pineboolib.core.settings import config
 from pineboolib.application.utils import sql_tools
+from pineboolib.application import project
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class FLSqlQuery(object):
         # super(FLSqlQuery, self).__init__()
 
         self.d = FLSqlQueryPrivate(cx)
-        self.d.db_ = pineboolib.project.conn.useConn(connection_name)
+        self.d.db_ = project.conn.useConn(connection_name)
 
         self.countRefQuery = self.countRefQuery + 1
         self._row = None
@@ -47,7 +47,7 @@ class FLSqlQuery(object):
 
         retornoQry = None
         if cx:
-            retornoQry = pineboolib.project.conn.manager().query(cx, self)
+            retornoQry = project.conn.manager().query(cx, self)
 
         if retornoQry:
             self.d = retornoQry.d
@@ -721,7 +721,7 @@ class FLSqlQuery(object):
         self.d.tablesList_ = []
         tl = tl.replace(" ", "")
         for tabla in tl.split(","):
-            if not pineboolib.project.conn.manager().existsTable(tabla) and len(tl.split(",")) >= 1:
+            if not project.conn.manager().existsTable(tabla) and len(tl.split(",")) >= 1:
                 self.invalidTablesList = True
 
             self.d.tablesList_.append(tabla)

@@ -493,7 +493,7 @@ def debug(txt):
     Mensajes debug en qsa
     @param txt. Mensaje.
     """
-    from pineboolib import project
+    from pineboolib.application import project
 
     project.message_manager().send("debug", None, [ustr(txt)])
 

@@ -10,7 +10,7 @@ logger = logging.getLogger("application.utils.convert_flaction")
 
 
 def convertFLAction(action: "FLAction") -> "XMLAction":
-    from pineboolib import project
+    from pineboolib.application import project
 
     if action.name() not in project.actions.keys():
         raise KeyError("Action %s not loaded in current project" % action.name())
@@ -24,7 +24,7 @@ def convert2FLAction(action: "XMLAction") -> "FLAction":
     else:
         name = action.name
 
-    from pineboolib import project
+    from pineboolib.application import project
 
     logger.trace("convert2FLAction: Load action from db manager")
     action = project.conn.manager().action(name)

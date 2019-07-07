@@ -68,7 +68,7 @@ class FLAccessControlLists(object):
 
         util = FLUtil()
         if aclXml is None:
-            from pineboolib import project
+            from pineboolib.application import project
 
             aclXml = project.conn.managerModules().content("acl.xml")
 
@@ -120,7 +120,7 @@ class FLAccessControlLists(object):
         type = FLAccessControlFactory().type(obj)
         name = obj.objectName() if hasattr(obj, "objectName") else ""
 
-        from pineboolib import project
+        from pineboolib.application import project
 
         user = project.conn.user()
         if type == "" or name == "" or user == "":
@@ -168,7 +168,7 @@ class FLAccessControlLists(object):
                 self.makeRule(q, doc)
                 progress.setProgress(++step)
 
-            from pineboolib import project
+            from pineboolib.appication import project
 
             project.conn.managerModules().setContent("acl.xml", "sys", doc.toString())
 

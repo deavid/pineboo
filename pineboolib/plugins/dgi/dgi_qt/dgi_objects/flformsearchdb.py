@@ -55,7 +55,8 @@ class FLFormSearchDB(FLFormDB):
             self.logger.warning("Se ha llamado a FLFormSearchDB sin name_or_cursor")
             return
 
-        from pineboolib import pncontrolsfactory, project
+        from pineboolib import pncontrolsfactory
+        from pineboolib.application import project
 
         parent = parent or pncontrolsfactory.aqApp.mainWidget()
         if isinstance(name_or_cursor, str):

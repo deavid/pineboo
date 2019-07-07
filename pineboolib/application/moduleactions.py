@@ -26,7 +26,7 @@ class ModuleActions(object):
             # To avoid circular dependency on pytype
             self.project = module
         else:
-            from pineboolib import project  # FIXME
+            from pineboolib.application import project  # FIXME?
 
             self.project = project
         self.mod = module  # application.Module

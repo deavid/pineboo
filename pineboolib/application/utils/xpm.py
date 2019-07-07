@@ -9,7 +9,7 @@ def cacheXPM(value: str) -> str:
         raise ValueError("Expected a value")
     xpm_name = value[: value.find("[]")]
     xpm_name = xpm_name[xpm_name.rfind(" ") + 1 :]
-    from pineboolib import project
+    from pineboolib.application import project
 
     cache_dir = "%s/cache/%s/cacheXPM" % (project.tmpdir, project.conn.DBName())
     if not os.path.exists(cache_dir):

@@ -12,8 +12,6 @@ from pineboolib.fllegacy.aqsobjects.aqods import AQOdsGenerator, AQOdsSpreadShee
 from pineboolib.fllegacy.aqsobjects.aqods import AQOdsColor, AQOdsStyle, AQOdsImage  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqboolflagstate import AQBoolFlagState, AQBoolFlagStateList  # noqa: F401
 
-import pineboolib
-
 AQUtil = AQUtil_class()
 AQS = AQS_class()
 
@@ -23,9 +21,10 @@ FLFormDB
 
 
 def AQFormDB(action_name, parent, other):
-    ac_flaction = pineboolib.project.conn.manager().action(action_name)
     from pineboolib.application.utils.convert_flaction import convertFLAction
+    from pineboolib.application import project
 
+    ac_flaction = project.conn.manager().action(action_name)
     ac_xml = convertFLAction(ac_flaction)
     ac_xml.load()
     return ac_xml.mainform_widget

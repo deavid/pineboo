@@ -29,7 +29,7 @@ class File(object):
         else:
             self.name, self.ext = os.path.splitext(filename)
 
-        from pineboolib import project
+        from pineboolib.application import project
 
         db_name = project.conn.DBName()  # FIXME: Wait, no.
         db_name = db_name or "not-known"  # FIXME: publish data in another way. Also, why File should be aware of the Database?

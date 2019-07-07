@@ -10,9 +10,7 @@ from PyQt5 import QtCore  # type: ignore
 
 from pineboolib.core import decorators
 
-from pineboolib import project
-
-from pineboolib.application import types
+from pineboolib.application import types, project
 from pineboolib.application.utils.xpm import cacheXPM
 
 from pineboolib.pncursortablemodel import PNCursorTableModel
@@ -1304,6 +1302,7 @@ class FLSqlCursor(QtCore.QObject):
 
         # logger.trace("(%s)bufferChanged.emit(%s)" % (self.curName(),fN))
         if self.activatedBufferChanged():
+
             if project._DGI.use_model() and self.meta_model():
                 bch_model = getattr(self.meta_model(), "bChCursor", None)
                 if bch_model and bch_model(fN, self) is False:
@@ -3047,6 +3046,7 @@ class FLSqlCursor(QtCore.QObject):
                 )
                 self.rollbackOpened(-1, msg)
         else:
+
             if not project._DGI.use_model():
                 logger.warning("Se está eliminando un cursor Huerfano (%s)", self)
 
@@ -3367,7 +3367,7 @@ class FLSqlCursor(QtCore.QObject):
         if not self.activatedBufferCommited():
             return True
 
-        from pineboolib import pncontrolsfactory, project
+        from pineboolib import pncontrolsfactory
 
         if self.db().interactiveGUI() and self.db().canDetectLocks() and (checkLocks or self.metadata().detectLocks()):
             self.checkRisksLocks()
@@ -3593,6 +3593,7 @@ class FLSqlCursor(QtCore.QObject):
         ok = True
         activeWidEnabled = False
         activeWid = None
+
         if project._DGI.localDesktop():
             from pineboolib import pncontrolsfactory
 

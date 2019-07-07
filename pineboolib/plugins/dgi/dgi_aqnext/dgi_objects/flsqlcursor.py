@@ -148,7 +148,7 @@ class FLSqlCursor(QtCore.QObject):
         self.show_debug = False
 
         if stabla is not None:
-            from pineboolib import project
+            from pineboolib.application import project
 
             module_name = project.conn.managerModules().idModuleOfFile("%s.mtd" % stabla)
             model_file = "models.%s.%s" % (module_name, stabla)
@@ -246,7 +246,7 @@ class FLSqlCursor(QtCore.QObject):
         return FLAux.obtener_modelo(stabla)
 
     def assoc_model(self, module_name=None):
-        from pineboolib import project
+        from pineboolib.application import project
 
         cursor = self.parent_cursor
         # mtd = cursor.metadata()
