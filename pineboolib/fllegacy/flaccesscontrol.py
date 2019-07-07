@@ -299,5 +299,8 @@ class FLAccessControl(object):
 
         return acos
 
+    def processObject(self, o):
+        raise ValueError("Cannot access base class")
+
 
 # endif

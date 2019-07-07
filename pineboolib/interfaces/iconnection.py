@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Dict, Optional
 from .imanager import IManager
 from .icursor import ICursor
 
@@ -61,8 +61,14 @@ class IConnection:
     def declarative_base(self) -> Any:
         return None
 
+    def dictDatabases(self) -> Dict[str, "IConnection"]:
+        return {}
+
     def cursor(self) -> ICursor:
         return ICursor()
+
+    def lastActiveCursor(self) -> Optional[ICursor]:
+        return None
 
     def conectar(self, db_name, db_host, db_port, db_userName, db_returnword) -> None:
         return
@@ -145,7 +151,7 @@ class IConnection:
     def commit(self) -> None:
         return
 
-    def managerModules(self) -> None:
+    def managerModules(self) -> Any:
         return
 
     def canOverPartition(self) -> None:
