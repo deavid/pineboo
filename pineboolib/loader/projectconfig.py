@@ -66,7 +66,7 @@ class ProjectConfig:
 
         sql_drivers_manager = PNSqlDrivers()
         dbname_elem = root.find("database-name")
-        if not dbname_elem:
+        if dbname_elem is None:
             raise ValueError("database-name not found")
         self.database = dbname_elem.text
         for db in root.findall("database-server"):
