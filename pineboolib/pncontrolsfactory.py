@@ -12,7 +12,6 @@ from pineboolib.core.utils.singleton import Singleton
 from pineboolib.core.settings import config
 from pineboolib.core import decorators
 from pineboolib.core.utils.logging import logging
-import pineboolib.utils
 from pineboolib.wiki_error import wiki_error
 from pineboolib import project
 from pineboolib.fllegacy.flutil import FLUtil

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pineboolib.pnobjectsfactory import FormDBWidget
+from pineboolib.pncontrolsfactory import FormDBWidget
 from pineboolib.application.types import Object
 
 
