@@ -400,7 +400,8 @@ class FLFieldMetaData(IFieldMetaData):
     """
 
     def associatedField(self) -> Optional[IFieldMetaData]:
-        return self.metadata().field(self.d.associatedFieldName_)
+        mtd = self.metadata()
+        return mtd and mtd.field(self.d.associatedFieldName_)
 
     """
     Devuelve el nombre del campo que hay que filtrar según el campo asociado.

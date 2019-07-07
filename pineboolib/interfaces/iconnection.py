@@ -67,7 +67,7 @@ class IConnection:
     def cursor(self) -> ICursor:
         return ICursor()
 
-    def lastActiveCursor(self) -> Optional[ICursor]:
+    def lastActiveCursor(self) -> Optional[Any]:  # returns FLSqlCuror
         return None
 
     def conectar(self, db_name, db_host, db_port, db_userName, db_returnword) -> None:
