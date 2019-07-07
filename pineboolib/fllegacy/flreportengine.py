@@ -3,7 +3,6 @@ from PyQt5 import QtXml  # type: ignore
 from pineboolib.core import decorators
 from pineboolib.fllegacy.flsettings import FLSettings
 from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
-import pineboolib
 
 from pineboolib import logging
 
@@ -102,8 +101,11 @@ class FLReportEngine(object):
         self.relDpi_ = 78.0
         self.rd = None
         self.logger = logging.getLogger("FLReportEngine")
-        parserName = FLSettings().readEntry("ebcomportamiento/kugarParser", pineboolib.project.kugarPlugin.defaultParser())
-        self.parser_ = pineboolib.project.kugarPlugin.loadParser(parserName)
+        from pineboolib.application import project
+        from pineboolib.core.settings import config
+
+        parserName = config.value("ebcomportamiento/kugarParser", project.kugarPlugin.defaultParser())
+        self.parser_ = project.kugarPlugin.loadParser(parserName)
 
     def rptXmlData(self):
         return self.rd

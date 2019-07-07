@@ -12,7 +12,7 @@ from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery, FLGroupByQuery
+from pineboolib.application.database.pnsqlquery import PNSqlQuery, PNGroupByQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flutil import FLUtil
@@ -22,7 +22,7 @@ from pineboolib import logging
 from pineboolib.interfaces import IManager
 
 from PyQt5.QtXml import QDomElement  # type: ignore
-from pineboolib.pnconnection import PNConnection
+from pineboolib.application.database.pnconnection import PNConnection
 from typing import Optional, Union
 
 logger = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ class FLManager(QtCore.QObject, IManager):
         if not self.db_.dbAux():
             return
 
-        # q = FLSqlQuery(None, self.db_.dbAux())
+        # q = PNSqlQuery(None, self.db_.dbAux())
         # q.setForwardOnly(True)
 
         self.createSystemTable("flsettings")
@@ -444,7 +444,7 @@ class FLManager(QtCore.QObject, IManager):
         #    remove_blank_text=True,
         # )
 
-        q = FLSqlQuery(parent, self.db_.connectionName())
+        q = PNSqlQuery(parent, self.db_.connectionName())
 
         root_ = etree.ElementTree.fromstring(qry_)
         elem_select = root_.find("select")
@@ -479,7 +479,7 @@ class FLManager(QtCore.QObject, IManager):
             elem_field = gr.find("field")
             if elem_field and elem_level and float(elem_level.text.strip(" \t\n\r")) == i:
                 # print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
-                q.addGroup(FLGroupByQuery(i, elem_field.text.strip(" \t\n\r")))
+                q.addGroup(PNGroupByQuery(i, elem_field.text.strip(" \t\n\r")))
                 i = i + 1
 
         return q
@@ -812,7 +812,7 @@ class FLManager(QtCore.QObject, IManager):
 
             fieldName = args[0].name()
             if mtd.isQuery() and fieldName.find(".") == -1:
-                qry = FLSqlQuery(mtd.query())
+                qry = PNSqlQuery(mtd.query())
 
                 if qry:
                     fL = qry.fieldList()
@@ -1371,14 +1371,14 @@ class FLManager(QtCore.QObject, IManager):
         self.db_.managerModules().loadAllIdModules()
         self.db_.managerModules().loadIdAreas()
 
-        q = FLSqlQuery(None, self.db_.dbAux())
+        q = PNSqlQuery(None, self.db_.dbAux())
         q.exec_("SELECT tabla,xml FROM flmetadata")
         while q.next():
             self.dictKeyMetaData_[str(q.value(0))] = str(q.value(1))
 
         c = FLSqlCursor("flmetadata", True, self.db_.dbAux())
 
-        q2 = FLSqlQuery(None, self.db_.dbAux())
+        q2 = PNSqlQuery(None, self.db_.dbAux())
         q2.exec_("SELECT nombre,sha FROM flfiles WHERE nombre LIKE '%.mtd' and nombre not like '%%alteredtable%'")
         while q2.next():
             table = str(q2.value(0))
@@ -1471,7 +1471,7 @@ class FLManager(QtCore.QObject, IManager):
         sha = str(util.sha1(largeValue))
         # print("-->", tableName, sha)
         refKey = "RK@%s@%s" % (tableName, sha)
-        q = FLSqlQuery(None, self.db_.dbAux())
+        q = PNSqlQuery(None, self.db_.dbAux())
         q.setSelect("refkey")
         q.setFrom("fllarge")
         q.setWhere(" refkey = '%s'" % refKey)
@@ -1508,7 +1508,7 @@ class FLManager(QtCore.QObject, IManager):
         if not self.existsTable(tableName):
             return None
 
-        q = FLSqlQuery()
+        q = PNSqlQuery()
         q.setSelect("contenido")
         q.setFrom(tableName)
         q.setWhere(" refkey = '%s'" % refKey)
