@@ -2,7 +2,7 @@
 import pineboolib
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib import logging
-
+from typing import Union
 
 logger = logging.getLogger(__name__)
 """
@@ -24,7 +24,7 @@ class AQSql(object):
     @return La base de datos correspondiente al nombre de conexion indicado
     """
 
-    def database(connection_name="default"):
+    def database(self, connection_name="default"):
         return pineboolib.project.conn.useConn(connection_name)
 
     """
@@ -45,7 +45,7 @@ class AQSql(object):
     }
     """
 
-    def update(table_or_cursor, fields, values, where="", conn=None):
+    def update(self, table_or_cursor: Union[str, FLSqlCursor], fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
             cur = FLSqlCursor(table_or_cursor, conn)
@@ -101,7 +101,7 @@ class AQSql(object):
             }
     """
 
-    def insert(table_or_cursor, fields, values, where="", conn=None):
+    def insert(self, table_or_cursor: Union[str, FLSqlCursor], fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
             cur = FLSqlCursor(table_or_cursor, conn)
@@ -150,7 +150,7 @@ class AQSql(object):
         }
     """
 
-    def del_(self, cur_or_table, where="", conn_name="default"):
+    def del_(self, cur_or_table: Union[str, FLSqlCursor], where="", conn_name="default"):
 
         if not isinstance(cur_or_table, str):
             cur = cur_or_table
@@ -158,10 +158,7 @@ class AQSql(object):
                 return False
 
             if not cur.metadata():
-                from pineboolib.fllegacy.flutil import FLUtil
-
-                util = FLUtil()
-                logger.warning(util.translate("No hay metadatos para '%s%s'"), cur.curName(), cur.db())
+                logger.warning("No hay metadatos para '%s%s'" % (cur.curName(), cur.db()))
                 return False
 
             if not cur.select(where):

@@ -39,12 +39,10 @@ class FLAccessControlMainWindow(FLAccessControl):
             while not ito.current() == 0:
                 a = ito.current()
                 ++ito
-                if self.acosPerm_[a.name()]:
+                if self.acosPerms_[a.name()]:
                     continue
                 if self.perm_ == "-w" or self.perm_ == "--":
                     a.setVisible(False)
-
-            del l
 
         it = QtCore.QDictIterator(self.acosPerms_)
         for i in range(len(it.current())):
@@ -55,9 +53,7 @@ class FLAccessControlMainWindow(FLAccessControl):
                     a.setVisible(False)
 
     def setFromObject(self, object):
-        from pineboolib.fllegacy.flutil import FLUtil
-
-        print("FLAccessControlMainWindow::setFromObject %s" % FLUtil.translate(self, "app", "No implementado todavía."))
+        print("FLAccessControlMainWindow::setFromObject %s" % "No implementado todavía.")
 
 
 class FLAccessControlForm(FLAccessControl):
@@ -230,9 +226,9 @@ class FLAccessControlTable(FLAccessControl):
 
 
 class FLAccessControlFactory(object):
-    def create(self, type_: str) -> FLAccessControlTable:
+    def create(self, type_: str) -> FLAccessControl:
         if type_ is None:
-            return False
+            raise ValueError("type_ must be set")
 
         if type_ == "mainwindow":
             return FLAccessControlMainWindow()
@@ -241,7 +237,7 @@ class FLAccessControlFactory(object):
         elif type_ == "table":
             return FLAccessControlTable()
 
-        return False
+        raise ValueError("type_ %r unknown" % type_)
 
     def type(self, obj):
         if obj is None:

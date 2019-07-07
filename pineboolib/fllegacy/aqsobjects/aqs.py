@@ -132,7 +132,7 @@ class AQS(object):
 
     @classmethod
     def sha1(self, byte_array):
-        from pineboolib.pncontrolsfacory import QByteArray
+        from pineboolib.pncontrolsfactory import QByteArray
 
         ba = QByteArray(byte_array)
         return ba.sha1()
