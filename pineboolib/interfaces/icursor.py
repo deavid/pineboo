@@ -2,6 +2,8 @@ from typing import List, Any, Generator
 
 
 class ICursor:
+    """Database internal cursor. Follows Python DBAPI for cursors. Do not confuse with FLSqlCuror"""
+
     description: List
     closed: bool
     connection: Any
