@@ -477,7 +477,7 @@ class FLManager(QtCore.QObject, IManager):
             gr = groupXml_[i]
             elem_level = gr.find("level")
             elem_field = gr.find("field")
-            if elem_field and elem_level and float(elem_level.text.strip(" \t\n\r")) == i:
+            if elem_field is not None and elem_level is not None and float(elem_level.text.strip(" \t\n\r")) == i:
                 # print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
                 q.addGroup(PNGroupByQuery(i, elem_field.text.strip(" \t\n\r")))
 

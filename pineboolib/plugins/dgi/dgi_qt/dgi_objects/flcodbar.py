@@ -307,7 +307,7 @@ class FLCodBar(object):
             bar_ = barC("000000000000")
 
         svg = bar_.render(render_options)
-        xml_svg = load2xml(svg.decode("utf-8"))
+        xml_svg = load2xml(svg.decode("utf-8")).getroot()
         svg_w = 3.779 * float(xml_svg.get("width")[0:6])
         svg_h = 3.779 * float(xml_svg.get("height")[0:6])
         self.p = QPixmap(svg_w, svg_h)

@@ -957,7 +957,8 @@ class kut2fpdf(object):
     def draw_barcode(self, x, y, W, H, xml, text):
         if text == "None":
             return
-        from pineboolib import pncontrolsfactory, project
+        from pineboolib import pncontrolsfactory
+        from pineboolib.application import project
 
         file_name = project.tmpdir
         file_name += "/%s.png" % (text)
