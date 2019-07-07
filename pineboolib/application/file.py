@@ -12,7 +12,9 @@ class File(object):
 
     logger = logging.getLogger("application.File")
 
-    def __init__(self, module: str, filename: str, sha: Optional[str] = None, basedir: Optional[str] = None) -> None:
+    def __init__(
+        self, module: str, filename: str, sha: Optional[str] = None, basedir: Optional[str] = None, db_name: Optional[str] = None
+    ) -> None:
         """
         Constructor
         @param module. Identificador del módulo propietario
@@ -29,10 +31,6 @@ class File(object):
         else:
             self.name, self.ext = os.path.splitext(filename)
 
-        from pineboolib.application import project
-
-        db_name = project.conn.DBName()  # FIXME: Wait, no.
-        db_name = db_name or "not-known"  # FIXME: publish data in another way. Also, why File should be aware of the Database?
         if self.sha:
             self.filekey = "%s/%s/file%s/%s/%s%s" % (db_name, module, self.ext, self.name, sha, self.ext)
         else:

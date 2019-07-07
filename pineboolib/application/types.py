@@ -86,7 +86,9 @@ function anon(%s) {
         mod = importlib.reload(python_sys.modules[module_path])
     else:
         mod = importlib.import_module(module_path)
-    return mod.FormInternalObj().anon
+    forminternalobj = getattr(mod, "FormInternalObj", None)
+
+    return getattr(forminternalobj(), "anon", None)
 
 
 def Object(x: Optional[Dict[str, Any]] = None) -> StructMyDict:

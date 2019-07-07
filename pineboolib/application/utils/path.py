@@ -11,7 +11,7 @@ def _dir(*x) -> str:
     @param x. str o array con la ruta de la carpeta
     @return str con ruta absoluta a una carpeta
     """
-    from pineboolib.application import project
+    from pineboolib.application import project  # type: ignore
 
     return os.path.join(project.tmpdir, *x)
 

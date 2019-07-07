@@ -1,10 +1,9 @@
-import pineboolib
 import sys
 from pineboolib import logging
 import traceback
 
 from pineboolib.core.utils.utils_base import version_check, is_deployed
-
+from pineboolib.application import project
 from typing import Dict
 
 logger = logging.getLogger("application.utils.check_dependencies")
@@ -67,13 +66,10 @@ def check_dependencies(dict_: Dict[str, str], exit: bool = True) -> bool:
                 msg += "\n\n\n Use pip3 install -i https://test.pypi.org/simple/ pyfpdf==1.7.3"
 
         if exit:
-            if getattr(pineboolib.project, "_DGI", None):
-                if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
-                    from pineboolib import pncontrolsfactory
+            if project._DGI.useDesktop() and project._DGI.localDesktop():
+                from pineboolib import pncontrolsfactory
 
-                    pncontrolsfactory.QMessageBox.warning(
-                        None, "Pineboo - Dependencias Incumplidas -", msg, pncontrolsfactory.QMessageBox.Ok
-                    )
+                pncontrolsfactory.QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, pncontrolsfactory.QMessageBox.Ok)
 
             if not is_deployed():
                 sys.exit(32)

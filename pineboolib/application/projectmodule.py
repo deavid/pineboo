@@ -1,22 +1,23 @@
 import os
 import time
 from typing import List, Optional, Union, Any, Dict
-
-from pineboolib.core.utils.logging import logging
-from pineboolib.core.exceptions import CodeDoesNotBelongHereException, NotConnectedError
-from pineboolib.core.utils.utils_base import filedir, Struct
-from pineboolib.core.settings import config, settings
-from pineboolib.interfaces.dgi_schema import dgi_schema
+from optparse import Values
 
 # from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists # FIXME: Not allowed yet
 from PyQt5 import QtCore  # type: ignore
 
-from .module import Module
-from .file import File
-from optparse import Values
-
+from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils.utils_base import filedir, Struct
+from pineboolib.core.exceptions import CodeDoesNotBelongHereException, NotConnectedError
+from pineboolib.core.settings import config, settings
+from pineboolib.interfaces.dgi_schema import dgi_schema
 from pineboolib.interfaces.iconnection import IConnection
-from .xmlaction import XMLAction
+
+from pineboolib.application.module import Module
+from pineboolib.application.file import File
+from pineboolib.application.xmlaction import XMLAction
+from pineboolib.application.utils.xpm import cacheXPM
+from pineboolib.application.utils.path import _dir
 
 
 class Project(object):
@@ -127,7 +128,6 @@ class Project(object):
     def run(self) -> bool:
         """Arranca el proyecto. Conecta a la BD y carga los datos
         """
-        from .utils.path import _dir
 
         if self.actions:
             del self.actions
@@ -189,7 +189,6 @@ class Project(object):
             """ SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = %s """
             % self.conn.driver().formatValue("bool", "True", False)
         )
-        from .utils.xpm import cacheXPM
 
         self.modules: Dict[str, Module] = {}
         for idarea, idmodulo, descripcion, icono in cursor_:
@@ -222,7 +221,7 @@ class Project(object):
             p = p + 1
             if idmodulo not in self.modules:
                 continue  # I
-            fileobj = File(idmodulo, nombre, sha)
+            fileobj = File(idmodulo, nombre, sha, db_name=self.conn.DBName())
             if nombre in self.files:
                 self.logger.warning("run: file %s already loaded, overwritting..." % nombre)
             self.files[nombre] = fileobj
@@ -295,7 +294,7 @@ class Project(object):
         for root, dirs, files in os.walk(filedir("..", "share", "pineboo")):
             for nombre in files:
                 if root.find("modulos") == -1:
-                    fileobj = File(idmodulo, nombre, basedir=root)
+                    fileobj = File(idmodulo, nombre, basedir=root, db_name=self.conn.DBName())
                     self.files[nombre] = fileobj
                     self.modules[idmodulo].add_project_file(fileobj)
                     if self.parseProject and nombre.endswith(".qs"):
