@@ -852,7 +852,7 @@ class FLDataTable(QtWidgets.QTableView):
         return self.header().visualIndex(c)
 
     def visual_index_to_field(self, pos_):
-        return self.model().metadata().indexFieldObject(self.visual_index_to_logical_index(pos_))
+        return self.model().metadata().indexFieldObject(self.visual_index_to_column_index(pos_))
 
     def currentRow(self):
         """
