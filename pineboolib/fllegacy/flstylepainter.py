@@ -6,7 +6,7 @@ from PyQt5 import QtCore  # type: ignore
 from PyQt5 import QtXml  # type: ignore
 from PyQt5.QtCore import Qt  # type: ignore
 from pineboolib.core import decorators
-import pineboolib
+from pineboolib.application import project
 
 
 class FLStylePainter(object):
@@ -158,7 +158,7 @@ class FLStylePainter(object):
                 errColumn = None
 
                 if self.styleName_.lower().startswith("abanq:"):
-                    content = pineboolib.project.conn.managerModules().contentCached(self.styleName_[6:])
+                    content = project.conn.managerModules().contentCached(self.styleName_[6:])
                     if not self.doc_.setContent(content, errMsg, errLine, errColumn):
                         return
                 elif self.styleName_.lower().startswith("file:"):
@@ -631,7 +631,7 @@ class FLStylePainter(object):
                 if t != svge:
                     self.transStack_ = backStack
             elif t == pe:
-                self.drawPath(attr.namedItem("d".nodeValue()))
+                self.drawPath(attr.namedItem("d").nodeValue())
             elif t == tse or t == te:
                 if elm == te or isSectionDraw:
                     if self.relDpi_ != 1.0:
@@ -927,7 +927,7 @@ class FLStylePainter(object):
                         y = 2 * y - controlY if cont else y
                         quad.setPoint(1, int(x), int(y))
                         quad.setPoint(2, int(x), int(y))
-                    for j in range(numArgs / 2):
+                    for j in range(numArgs // 2):
                         x = arg[2 * j] + offsetX
                         y = arg[2 * j + 1] + offsetY
                         quad.setPoint(j + 4 - numArgs / 2, int(x), int(y))

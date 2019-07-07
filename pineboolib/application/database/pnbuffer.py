@@ -1,7 +1,9 @@
 from typing import Any
 from pineboolib import logging
 from pineboolib.application import types
-import copy, datetime
+import copy
+import datetime
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +107,7 @@ class PNBuffer(object):
     """
 
     def primeDelete(self):
-        for field in self.fieldList():
+        for field in self.fieldList_:
             self.setNull(field.name)
 
     """
@@ -138,7 +140,7 @@ class PNBuffer(object):
     """
 
     def isGenerated(self, name):
-        return self.field(name).generated
+        return self._field(name).generated
 
         """
     Setea que es generado un campo.
@@ -149,7 +151,7 @@ class PNBuffer(object):
     def setGenerated(self, f, value):
         if not isinstance(f, str) and not isinstance(f, int):
             f = f.name()
-        self.field(f).generated = value
+        self._field(f).generated = value
 
     """
     Setea todos los valores a None y marca field.modified a True
@@ -197,7 +199,7 @@ class PNBuffer(object):
     """
 
     def value(self, n):
-        field = self.field(n)
+        field = self._field(n)
         v = field.value
 
         if field.value is not None:
@@ -243,9 +245,10 @@ class PNBuffer(object):
         field = self.field(name)
 
         if field is None:
+            logger.warning("setValue: no such field %s", name)
             return False
 
-        elif field.type_ == "double" and value not in ("", "-", None):
+        elif field.type_ == "double" and value and value not in ("", "-"):
             if isinstance(value, str) and value.find(":") > -1:
                 # Convertimos a horas
                 list_ = value.split(":")
@@ -301,7 +304,7 @@ class PNBuffer(object):
 
     def hasChanged(self, name, value):
 
-        field = self.field(name)
+        field = self._field(name)
 
         if value is None and field.value is None:
             return False
@@ -398,7 +401,13 @@ class PNBuffer(object):
     def fieldsList(self):
         return self.fieldList_
 
-    def field(self, n):
+    def field(self, n) -> Optional[Struct]:
+        try:
+            return self._field(n)
+        except KeyError:
+            return None
+
+    def _field(self, n) -> Struct:
         if isinstance(n, str):
             for f in self.fieldsList():
                 if f.name.lower() == n.lower():
@@ -411,4 +420,4 @@ class PNBuffer(object):
 
                 i = i + 1
 
-        return None
+        raise KeyError("Field not found <%s>" % n)

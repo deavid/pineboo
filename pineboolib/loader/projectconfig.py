@@ -83,12 +83,15 @@ class ProjectConfig:
                 return False
 
         for credentials in root.findall("database-credentials"):
-            self.username = credentials.find("username").text
-            ps = credentials.find("password").text
-            if ps:
+            username_elem, password_elem = credentials.find("username"), credentials.find("password")
+            if username_elem is None:
+                self.username = ""
+            else:
+                self.username = username_elem.text
+            if password_elem is not None and password_elem.text:
                 import base64
 
-                self.password = base64.b64decode(ps).decode()
+                self.password = base64.b64decode(password_elem.text).decode()
             else:
                 self.password = ""
 
