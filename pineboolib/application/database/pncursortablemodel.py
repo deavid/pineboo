@@ -206,6 +206,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def data(self, index, role):
+        from pineboolib import pncontrolsfactory
+
         row = index.row()
         col = index.column()
         field = self.metadata().indexFieldObject(col)
@@ -286,14 +288,15 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             elif _type == "date":
                 # Si es str lo paso a datetime.date
-                if isinstance(d, str):
+                if d and isinstance(d, str):
                     if len(d.split("-")[0]) == 4:
                         d = FLUtil().dateAMDtoDMA(d)
 
-                    list_ = d.split("-")
-                    d = date(int(list_[2]), int(list_[1]), int(list_[0]))
+                    if d:
+                        list_ = d.split("-")
+                        d = date(int(list_[2]), int(list_[1]), int(list_[0]))
 
-                if d:
+                if d and isinstance(d, date):
                     # Cogemos el locale para presentar lo mejor posible la fecha
                     try:
                         locale.setlocale(locale.LC_TIME, "")
@@ -311,13 +314,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             elif _type == "double":
                 if d is not None:
-                    from pineboolib import pncontrolsfactory
-
                     d = pncontrolsfactory.aqApp.localeSystem().toString(float(d), "f", field.partDecimal())
             elif _type in ("int", "uint"):
                 if d is not None:
-                    from pineboolib import pncontrolsfactory
-
                     d = pncontrolsfactory.aqApp.localeSystem().toString(int(d))
 
             self.parent_view.resize_column(col, d)
@@ -882,7 +881,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     def setValue(self, row, fieldname, value):
         # Reimplementación para que todo pase por el método genérico.
-        self.setValuesDict(self, row, {fieldname: value})
+        self.setValuesDict(row, {fieldname: value})
 
     """
     Crea una nueva linea en el tableModel
