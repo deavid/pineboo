@@ -5,7 +5,7 @@ from pineboolib import logging
 
 from pineboolib.interfaces import ITableMetaData
 from pineboolib.interfaces import IFieldMetaData
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Any
 
 
 logger = logging.getLogger("FLFieldMetadata")
@@ -399,7 +399,7 @@ class FLFieldMetaData(IFieldMetaData):
       si no hay campo asociado
     """
 
-    def associatedField(self) -> Optional[IFieldMetaData]:
+    def associatedField(self) -> Optional[ITableMetaData]:
         mtd = self.metadata()
         return mtd and mtd.field(self.d.associatedFieldName_)
 
@@ -501,7 +501,7 @@ class FLFieldMetaData(IFieldMetaData):
         if len(self.d.optionsList_) > 0:
             self.d.hasOptionsList_ = True
         else:
-            self.d.hasOptionList_ = False
+            self.d.hasOptionsList_ = False
 
     """
     Obtiene si el campo es de tipo Check
@@ -658,7 +658,7 @@ class FLFieldMetaData(IFieldMetaData):
         if self.type() in ("string, time, date, pixmap"):
             isText = True
 
-        formatV = None
+        formatV: Any = None
 
         if isText:
             formatV = "'%s'" % value
@@ -960,7 +960,7 @@ class FLFieldMetaDataPrivate(object):
         self.fullyCalculated_ = False
         self.trimmed_ = False
 
-        if self.type_ == -1:
+        if self.type_ is None:
             if self.partDecimal_ > 0:
                 self.type_ = "double"
             elif self.length_ > 0:

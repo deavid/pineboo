@@ -4,8 +4,8 @@ import sys
 from pineboolib import logging
 
 from pineboolib.core.utils.utils_base import filedir, Struct
-from pineboolib.fllegacy.FLSettings import FLSettings
-from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.application import project
 
 from PyQt5.QtWidgets import (  # type: ignore

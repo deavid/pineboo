@@ -6,17 +6,19 @@ import sys
 from typing import Dict, Any
 
 from PyQt5 import QtCore  # type: ignore
-
-from pineboolib.qsa import Array, AQSignalMapper, connect, QDialog, QVBoxLayout, AQS, QProgressBar
-from pineboolib.qsa import QUrlOperator, QByteArray, Object, aqApp, Dir, QLabel, QFrame, QHBoxLayout
+from PyQt5.QtWidgets import QProgressBar  # type: ignore
+from PyQt5.QtCore import QTextStream  # type: ignore
+from pineboolib.qsa import Array, connect, QDialog, QVBoxLayout, AQS
+from pineboolib.qsa import QByteArray, Object, aqApp, Dir, QLabel, QFrame, QHBoxLayout
 from pineboolib.qsa import QTextEdit, QPushButton, parseString, ustr, TextEdit, Date, FileDialog
-from pineboolib.qsa import debug, QProcess, File, AQSettings, QFile, QTextStream, AQSqlQuery
+from pineboolib.qsa import debug, QProcess, File, AQSettings, QFile, AQSqlQuery
 from pineboolib.qsa import System, AQUtil, AQSql, FLSqlQuery, FLUtil, FormDBWidget, Function
 from pineboolib.qsa import Dialog, FLSqlCursor, QDomDocument, AQUnpacker, MessageBox, FLVar
 from pineboolib.qsa import AQSqlCursor, RegExp, QCheckBox, QString, String, GroupBox, CheckBox
-from pineboolib.qsa import util, decorators, wiki_error, Process, filedir, QSqlSelectCursor
+from pineboolib.qsa import util, decorators, Process, filedir
 from pineboolib.application import project
 from pineboolib import logging, qsa
+from pineboolib.error_manager import error_manager
 from pineboolib.pncontrolsfactory import SysType
 
 qsa_sys = SysType()
@@ -41,7 +43,7 @@ class AQGlobalFunctions(object):
 
     def mapConnect(self, obj=None, signal=None, functionName=None):
         c = self.count_ % 100
-        sigMap = AQSignalMapper(obj)
+        sigMap = QtCore.QSignalMapper(obj)
         self.mappers_[c] = sigMap
 
         def _():
@@ -77,11 +79,13 @@ class AbanQUpdater(object):
         self.prBar_.setTotalSteps(100)
         lay.addWidget(self.prBar_)
         self.data_ = u""
-        self.urlOp_ = QUrlOperator(qsa_sys.decryptFromBase64(u"lKvF+hkDxk2dS6hrf0jVURL4EceyJIFPeigGw6lZAU/3ovk/v0iZfhklru4Q6t6M"))
-        connect(self.urlOp_, u"finished(QNetworkOperation*)", self, u"transferFinished()")
-        connect(self.urlOp_, u"dataTransferProgress(int,int,QNetworkOperation*)", self, u"transferProgress()")
-        connect(self.urlOp_, u"data(const QByteArray&,QNetworkOperation*)", self, u"transferData()")
-        self.urlOp_.get(qsa_sys.decryptFromBase64(u"wYZ6GifNhk4W+qnjzToiKooKL24mrW5bt0+RS6hQzW0="))
+        # FIXME: QUrlOperator does not exist. see https://www.trinitydesktop.org/docs/qt4/porting4.html#qurloperator
+        # ... anyway, this seems intended to download a copy of AbanQ. Not needed. We could delete the whole class
+        # self.urlOp_ = QUrlOperator(qsa_sys.decryptFromBase64(u"lKvF+hkDxk2dS6hrf0jVURL4EceyJIFPeigGw6lZAU/3ovk/v0iZfhklru4Q6t6M"))
+        # connect(self.urlOp_, u"finished(QNetworkOperation*)", self, u"transferFinished()")
+        # connect(self.urlOp_, u"dataTransferProgress(int,int,QNetworkOperation*)", self, u"transferProgress()")
+        # connect(self.urlOp_, u"data(const QByteArray&,QNetworkOperation*)", self, u"transferData()")
+        # self.urlOp_.get(qsa_sys.decryptFromBase64(u"wYZ6GifNhk4W+qnjzToiKooKL24mrW5bt0+RS6hQzW0="))
 
     def transferFinished(self, netOp=None):
         self.state_ = netOp.state()
@@ -2115,7 +2119,7 @@ def runTransaction(f=None, oParam=None):
         if errorMsg:
             warnMsgBox(ustr(errorMsg, u": ", parseString(e)))
         else:
-            warnMsgBox(wiki_error(e))
+            warnMsgBox(error_manager(e))
 
         return False
 
@@ -2216,13 +2220,15 @@ def qsaExceptions():
 
 
 def serverTime():
-    db = aqApp.db().db()
-    sql = u"select current_time"
-    ahora = None
-    q = QSqlSelectCursor(sql, db)
-    if q.isActive() and q.next():
-        ahora = q.value(0)
-    return ahora
+    # FIXME: QSqlSelectCursor is not defined. Was an internal of Qt3.3
+    return None
+    # db = aqApp.db().db()
+    # sql = u"select current_time"
+    # ahora = None
+    # q = QSqlSelectCursor(sql, db)
+    # if q.isActive() and q.next():
+    #     ahora = q.value(0)
+    # return ahora
 
 
 def localChanges():

@@ -1,8 +1,8 @@
+from typing import List
 from PyQt5 import QtXml  # type: ignore
+from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # type: ignore # FIXME
 
 from pineboolib.core import decorators
-from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
-
 from pineboolib import logging
 
 
@@ -10,6 +10,7 @@ class FLReportEngine(object):
 
     parser_ = None
     report_ = None
+    rt: str = ""  # KUGAR *.kut template data as a string
 
     class FLReportEnginePrivate(object):
         def __init__(self, q):
@@ -19,8 +20,9 @@ class FLReportEngine(object):
             self.q_ = q
             self.template_ = ""
 
-            self.qDoubleFieldList_ = []
-            self.qImgFields_ = []
+            self.qFieldList_: List[str] = []
+            self.qDoubleFieldList_: List[str] = []
+            self.qImgFields_: List[str] = []
             self.report_ = None
 
         def addRowToReportData(self, l):
@@ -204,8 +206,8 @@ class FLReportEngine(object):
     def exportToOds(self, pages):
         if not pages or not pages.pageCollection():
             return
-
-        super(FLReportEngine, self).exportToOds(pages.pageCollection())
+        # FIXME: exportToOds not defined in superclass
+        # super(FLReportEngine, self).exportToOds(pages.pageCollection())
 
     def renderReport(self, init_row=0, init_col=0, flags=False, pages=None):
         if self.rt and self.rt.find("KugarTemplate") > -1:
@@ -267,7 +269,8 @@ class FLReportEngine(object):
                 tempattr = attr.namedItem("Template")
                 tempname = tempattr.nodeValue() or None
                 if tempname is not None:
-                    self.preferedTemplate.emit(tempname)
+                    # FIXME: We need to add a signal:
+                    # self.preferedTemplate.emit(tempname)
                     break
             n = n.nextSibling()
 

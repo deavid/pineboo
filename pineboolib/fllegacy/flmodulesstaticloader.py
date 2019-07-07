@@ -19,8 +19,8 @@ class AQStaticDirInfo(object):
     def __init__(self, *args):
 
         if len(args) == 1:
-            self.active_ = args[0][len(args) - 1]
-            self.path_ = args[1 : len(args) - 1]
+            self.active_ = args[0]
+            self.path_ = ""
         else:
             self.active_ = args[0]
             self.path_ = args[1]
@@ -74,7 +74,7 @@ class AQStaticBdInfo(object):
             if info.active_:
                 active_dirs.append(info.path_)
 
-        settings.writeEntry("%sdirs" % self.key_, dirs)
+        settings.writeEntryList("%sdirs" % self.key_, dirs)
         settings.writeEntry("%sactiveDirs" % self.key_, ",".join(active_dirs))
 
 
@@ -82,18 +82,11 @@ warn_ = []
 
 
 class FLStaticLoader(QtCore.QObject):
-
-    ui_ = None
-    b_ = None
-
-    def __init__(self, b):
+    def __init__(self, b, ui):
 
         super(FLStaticLoader, self).__init__()
 
-        from pineboolib.fllegacy.flmanagermodules import FLManagerModules
-        from pineboolib.core.utils.utils_base import filedir
-
-        self.ui_ = FLManagerModules().createUI(filedir("../share/pineboo/forms/FLStaticLoaderUI.ui"))
+        self.ui_ = ui
         self.b_ = b
         self.pixOn.setVisible(False)
         self.tblDirs.verticalHeader().setVisible(False)
@@ -227,8 +220,8 @@ class FLStaticLoader(QtCore.QObject):
             info.active_ = on
 
     @staticmethod
-    def setup(b):
-        diag_setup = FLStaticLoader(b)
+    def setup(b, ui):
+        diag_setup = FLStaticLoader(b, ui)
         if QtWidgets.QDialog.Accepted == diag_setup.ui_.exec_():
             b.writeSettings()
 

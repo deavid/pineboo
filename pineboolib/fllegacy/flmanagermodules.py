@@ -12,7 +12,7 @@ from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader, AQStaticBdInfo
 
-from typing import Union
+from typing import Union, List
 
 """
 Gestor de módulos.
@@ -429,7 +429,7 @@ class FLManagerModules(object):
         if self.listIdAreas_:
             return self.listIdAreas_
 
-        ret = []
+        ret: List[str] = []
         if not self.conn_.dbAux():
             return ret
 
@@ -468,7 +468,7 @@ class FLManagerModules(object):
         if self.listAllIdModules_:
             return self.listAllIdModules_
 
-        ret = []
+        ret: List[str] = []
         if not self.conn_.dbAux():
             return ret
 
@@ -756,7 +756,7 @@ class FLManagerModules(object):
 
         str_ret = FLStaticLoader.content(n, self.staticBdInfo_)
         if str_ret:
-            from pineboolib.fllegacy.FLUtil import FLUtil
+            from pineboolib.fllegacy.flutil import FLUtil
 
             util = FLUtil()
             sha = util.sha1(str_ret)
@@ -793,4 +793,5 @@ class FLManagerModules(object):
     """
 
     def staticLoaderSetup(self):
-        FLStaticLoader.setup(self.staticBdInfo_)
+        ui = FLManagerModules().createUI(filedir("../share/pineboo/forms/FLStaticLoaderUI.ui"))
+        FLStaticLoader.setup(self.staticBdInfo_, ui)
