@@ -516,7 +516,7 @@ class PNSqlQuery(object):
             try:
                 ret = self.sql_inspector.resolve_value(pos, ret, raw)
             except Exception:
-                self.logger.exception("value::error retrieving row position %s", pos)
+                logger.exception("value::error retrieving row position %s", pos)
 
         return ret
 
