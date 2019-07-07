@@ -20,6 +20,9 @@ class sql_inspector(object):
 
         self._mtd_fields = {}
         self._posible_float = False
+        sql_text = sql_text.replace("\n", " ")
+        sql_text = sql_text.replace("\t", " ")
+        sql_text = sql_text.strip()
         self._sql = sql_text
         if sql_text.startswith("show"):
             return
@@ -123,7 +126,7 @@ class sql_inspector(object):
                     prev_ = t
                     last_was_table = False
 
-                elif t in ("left", "join", "right", "inner"):
+                elif t in ("left", "join", "right", "inner", "outer"):
                     prev_ = t
                     last_was_table = False
                     continue
