@@ -12,11 +12,12 @@ from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
 from pineboolib import pncontrolsfactory  # FIXME: Don't import pncontrolsfactory in this file. Manage without DGI.
 
 from pineboolib import logging
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 
 
-class PNConnection(IConnection, QtCore.QObject):
+class PNConnection(QtCore.QObject, IConnection):
     """Wrapper for database cursors which are used to emulate FLSqlCursor."""
 
     db_name = None
@@ -110,6 +111,9 @@ class PNConnection(IConnection, QtCore.QObject):
             name,
         )
         return self.connAux[name]
+
+    def dictDatabases(self) -> Dict[str, IConnection]:
+        return self.connAux
 
     def removeConn(self, name="default"):
         try:
@@ -233,6 +237,9 @@ class PNConnection(IConnection, QtCore.QObject):
 
     def canTransaction(self):
         return self.driver().canTransaction()
+
+    def lastActiveCursor(self):
+        return self.lastActiveCursor_
 
     def doTransaction(self, cursor):
         if not cursor or not self.db():

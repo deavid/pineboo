@@ -14,17 +14,15 @@ from pineboolib import project
 from pineboolib.application.proxy import DelayedObjectProxyLoader
 
 from PyQt5.QtCore import QTimer, QEvent, QRect, QObject  # type: ignore
-
+from Pyqt5.QtGui import QCursor  # type: ignore
 
 logger = logging.getLogger("FLApplication")
 
 
-class QCursor:
-    "FIXME!!!"
-
-
-class FLPopupWarn:
-    "FIXME!!!"
+class FLPopupWarn(QtCore.QObject):
+    # FIXME: Incomplete class!
+    def __init__(self, mainwindow):
+        self.mainWindow = mainwindow
 
 
 class FLApplication(QtCore.QObject):
@@ -233,7 +231,7 @@ class FLApplication(QtCore.QObject):
             if self.modules_menu:
                 me = ev
                 if me.button() == QtCore.Qt.RightButton:
-                    self.modules_menu.popup(QCursor.pos())  # FIXME -- no actual class
+                    self.modules_menu.popup(QCursor.pos())
                     return True
                 else:
                     return False
@@ -491,7 +489,7 @@ class FLApplication(QtCore.QObject):
             save_.append(font_[0].italic())
 
             sett_ = FLSettings()
-            sett_.writeEntry("application/font", save_)
+            sett_.writeEntryList("application/font", save_)
 
     def showStyles(self):
         if not self.style:
@@ -514,12 +512,12 @@ class FLApplication(QtCore.QObject):
             return
 
         self.modules_menu.clear()
-        for item in range(self.tool_box_.count()):
+        for n in reversed(range(self.tool_box_.count())):
+            item = self.tool_box_widget(n)
             if isinstance(item, pncontrolsfactory.QToolBar):
-                item.clear()  # FIXME: item is always an int, never QToolBar
+                item.clear()
 
             self.tool_box_.removeItem(item)
-            del item
 
         for tb in self.mdi_toolbuttons:
             self.mdi_toolbuttons.remove(tb)
@@ -1258,7 +1256,7 @@ class FLApplication(QtCore.QObject):
             return
 
         roll_back_done = False
-        for it in dict_db:
+        for it in dict_db.values():
             if it.transactionLevel() <= 0:
                 continue
             roll_back_done = True
@@ -1285,7 +1283,8 @@ class FLApplication(QtCore.QObject):
 
             msg += self.tr("Contexto: %1\n").arg(ctx)
 
-        self.msgBoxWarning(msg)
+        # FIXME: Missing _gui parameter
+        # self.msgBoxWarning(msg)
         logger.warning("%s\n", msg)
 
     @decorators.NotImplementedWarn
