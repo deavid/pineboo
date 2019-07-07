@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import weakref
 import importlib
-from typing import Any
+from typing import Any, Optional
 
 from PyQt5 import QtCore  # type: ignore
 from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
 from pineboolib.application.database.pnsqlquery import PNSqlQuery
-from pineboolib.application import types, project
+from pineboolib.application import project
 from pineboolib.application.utils.xpm import cacheXPM
 from pineboolib.core import decorators
 from pineboolib import logging
@@ -14,10 +14,10 @@ from pineboolib import logging
 from .pnbuffer import PNBuffer
 from .pncursortablemodel import PNCursorTableModel
 
-
-from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
-from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
+# FIXME: Removde dependency: Should not import from fllegacy.*
+from pineboolib.fllegacy.flutil import FLUtil  # FIXME: Removde dependency
+from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData  # FIXME: Removde dependency
+from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  # FIXME: Removde dependency
 
 
 logger = logging.getLogger(__name__)
@@ -481,14 +481,14 @@ class PNSqlCursor(QtCore.QObject):
             self.d.relation_ = r
         else:
             self.d.relation_ = None
-
-        if not self.metadata():
+        metadata = self.metadata()
+        if not metadata:
             return
 
         # if project._DGI.use_model():
         #    self.build_cursor_tree_dict()
 
-        self.d.isQuery_ = self.metadata().isQuery()
+        self.d.isQuery_ = metadata.isQuery()
         if (name[len(name) - 3 :]) == "sys" or self.db().manager().isSystemTable(name):
             self.d.isSysTable_ = True
         else:
@@ -503,7 +503,7 @@ class PNSqlCursor(QtCore.QObject):
         #         self.qry.deleteLater()
         # else:
         #     self.setName(self.metadata().name(), autopopulate)
-        self.setName(self.metadata().name(), autopopulate)
+        self.setName(metadata.name(), autopopulate)
 
         self.d.modeAccess_ = self.Browse
         if cR and r:
@@ -730,17 +730,19 @@ class PNSqlCursor(QtCore.QObject):
     @param functionName Nombre de la función a invocar del script
     """
 
-    def setAtomicValueBuffer(self, fN, functionName):
+    def setAtomicValueBuffer(self, fN, functionName) -> None:
         from pineboolib import pncontrolsfactory
         from pineboolib import qsa  # FIXME: Should not import QSA at all
 
-        if not self.buffer() or not fN or not self.metadata():
+        metadata = self.metadata()
+        buffer = self.buffer()
+        if not buffer or not fN or not metadata:
             return
 
-        field = self.metadata().field(fN)
+        field = metadata.field(fN)
 
         if field is None:
-            logger.warning("setAtomicValueBuffer(): No existe el campo %s:%s", self.metadata().name(), fN)
+            logger.warning("setAtomicValueBuffer(): No existe el campo %s:%s", metadata.name(), fN)
             return
 
         if not self.db().dbAux():
@@ -748,29 +750,29 @@ class PNSqlCursor(QtCore.QObject):
 
         type = field.type()
         # fltype = FLFieldMetaData.FlDecodeType(type)
-        pK = self.metadata().primaryKey()
+        pK = metadata.primaryKey()
         v = None
 
         if self.cursorRelation() and self.modeAccess() == self.Browse:
             self.cursorRelation().commit(False)
 
         if pK and self.db().db() is not self.db().dbAux():
-            pKV = self.buffer().value(pK)
+            pKV = buffer.value(pK)
             self.db().dbAux().transaction()
 
             arglist = []
             arglist.append(fN)
-            arglist.append(self.buffer().value(fN))
+            arglist.append(buffer.value(fN))
             v = pncontrolsfactory.aqApp.call(functionName, arglist, self.context())
 
             q = PNSqlQuery(None, self.db().dbAux())
             ret = q.exec_(
                 "UPDATE  %s SET %s = %s WHERE %s"
                 % (
-                    self.metadata().name(),
+                    metadata.name(),
                     fN,
                     self.db().manager().formatValue(type, v),
-                    self.db().manager().formatAssignValue(self.metadata().field(pK), pKV),
+                    self.db().manager().formatAssignValue(metadata.field(pK), pKV),
                 )
             )
             if ret:
@@ -780,7 +782,7 @@ class PNSqlCursor(QtCore.QObject):
         else:
             logger.warning("No se puede actualizar el campo de forma atómica, porque no existe clave primaria")
 
-        self.buffer().setValue(fN, v)
+        buffer.setValue(fN, v)
         if self.activatedBufferChanged():
             if project._DGI.use_model() and self.meta_model():
                 bch_model = getattr(self.meta_model(), "bChCursor", None)
@@ -808,17 +810,23 @@ class PNSqlCursor(QtCore.QObject):
         from pineboolib import pncontrolsfactory
         from pineboolib import qsa  # FIXME: Should not import QSA at all
 
-        if not self.buffer() or not fN or not self.metadata():
+        buffer, metadata = self.buffer(), self.metadata()
+        if not buffer or not fN or not metadata:
+            logger.warning("setValueBuffer(): No buffer, or no fieldName, or no metadata found")
             return
 
-        field = self.metadata().field(fN)
+        field = metadata.field(fN)
         if field is None:
             logger.warning("setValueBuffer(): No existe el campo %s:%s", self.curName(), fN)
             return
+        db = self.db()
+        manager = db and db.manager()
+        if db is None or manager is None:
+            raise Exception("no db or no manager")
 
         type_ = field.type()
 
-        if not self.buffer().hasChanged(fN, v):
+        if not buffer.hasChanged(fN, v):
             return
 
         # if not self.buffer():  # Si no lo pongo malo....
@@ -835,35 +843,30 @@ class PNSqlCursor(QtCore.QObject):
         # fltype = field.flDecodeType(type_)
         vv = v
 
-        if vv and type_ == "pixmap" and not self.db().manager().isSystemTable(self.table()):
-            vv = self.db().normalizeValue(vv)
-            largeValue = self.db().manager().storeLargeValue(self.metadata(), vv)
+        if vv and type_ == "pixmap" and not manager.isSystemTable(self.table()):
+            vv = db.normalizeValue(vv)
+            largeValue = manager.storeLargeValue(self.metadata(), vv)
             if largeValue:
                 vv = largeValue
 
-        if field.outTransaction() and self.db().db() is not self.db().dbAux() and self.modeAccess() != self.Insert:
-            pK = self.metadata().primaryKey()
+        if field.outTransaction() and db.db() is not db.dbAux() and self.modeAccess() != self.Insert:
+            pK = metadata.primaryKey()
 
             if self.cursorRelation() and self.modeAccess() != self.Browse:
                 self.cursorRelation().commit(False)
 
             if pK:
-                pKV = self.buffer().value(pK)
+                pKV = buffer.value(pK)
                 q = PNSqlQuery(None, "dbAux")
                 q.exec_(
                     "UPDATE %s SET %s = %s WHERE %s;"
-                    % (
-                        self.metadata().name(),
-                        fN,
-                        self.db().manager().formatValue(type_, vv),
-                        self.db().manager().formatAssignValue(self.metadata().field(pK), pKV),
-                    )
+                    % (metadata.name(), fN, manager.formatValue(type_, vv), manager.formatAssignValue(metadata.field(pK), pKV))
                 )
             else:
                 FLUtil.tr("FLSqlCursor : No se puede actualizar el campo fuera de transaccion, porque no existe clave primaria")
 
         else:
-            self.buffer().setValue(fN, vv)
+            buffer.setValue(fN, vv)
 
         # logger.trace("(%s)bufferChanged.emit(%s)" % (self.curName(),fN))
         if self.activatedBufferChanged():
@@ -919,6 +922,8 @@ class PNSqlCursor(QtCore.QObject):
         v = None
         if field.outTransaction() and self.db().db() is not self.db().dbAux() and self.modeAccess() != self.Insert:
             pK = self.metadata().primaryKey()
+            if not self.buffer():
+                return None
             if pK:
                 pKV = self.buffer().value(pK)
                 q = PNSqlQuery(None, "dbAux")
@@ -935,6 +940,8 @@ class PNSqlCursor(QtCore.QObject):
                 logger.warning("No se puede obtener el campo fuera de transacción porque no existe clave primaria")
 
         else:
+            if not self.buffer():
+                return None
             v = self.buffer().value(fN)
 
         if v is not None:
@@ -982,14 +989,17 @@ class PNSqlCursor(QtCore.QObject):
             return None
 
         type_ = field.type()
+        bufferCopy = self.bufferCopy()
+        if not bufferCopy:
+            raise Exception("no bufferCopy")
         v: Any = None
-        if self.bufferCopy().isNull(fN):
+        if bufferCopy.isNull(fN):
             if type_ in ("double", "int", "uint"):
                 v = 0
             elif type_ == "string":
                 v = ""
         else:
-            v = self.bufferCopy().value(fN)
+            v = bufferCopy.value(fN)
 
         if v is not None:
             if type_ in ("date"):
@@ -1310,7 +1320,10 @@ class PNSqlCursor(QtCore.QObject):
             #     self.updateBufferCopy()
 
     def isNull(self, fN):
-        return self.buffer().isNull(fN)
+        buffer = self.buffer()
+        if not buffer:
+            raise Exception("No buffer set")
+        return buffer.isNull(fN)
 
     """
     Copia el contenido del FLSqlCursor::buffer_ actual en FLSqlCursor::bufferCopy_.
@@ -1326,9 +1339,12 @@ class PNSqlCursor(QtCore.QObject):
         if self.d.bufferCopy_:
             del self.d.bufferCopy_
 
-        self.d.bufferCopy_ = PNBuffer(self)
-        for field in self.buffer().fieldsList():
-            self.bufferCopy().setValue(field.name, self.buffer().value(field.name), False)
+        buffer = self.d.bufferCopy_ = PNBuffer(self)
+        bufferCopy = self.bufferCopy()
+        if bufferCopy is None:
+            raise Exception("No buffercopy")
+        for field in buffer.fieldsList():
+            bufferCopy.setValue(field.name, buffer.value(field.name), False)
 
     """
     Indica si el contenido actual del buffer difiere de la copia guardada.
@@ -1721,14 +1737,15 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def setUnLock(self, fN, v):
-        if not self.metadata() or not self.modeAccess() == self.Browse:
+        metadata = self.metadata()
+        if not metadata or not self.modeAccess() == self.Browse:
             return
-        if not self.metadata().field(fN).type() == FLFieldMetaData.Unlock:
+        if not metadata.field(fN).type() == FLFieldMetaData.Unlock:
             logger.warning("setUnLock sólo permite modificar campos del tipo Unlock")
             return
-        self.d.buffer_ = self.primeUpdate()
+        buffer = self.d.buffer_ = self.primeUpdate()
         self.setModeAccess(self.Edit)
-        self.buffer().setValue(fN, v)
+        buffer.setValue(fN, v)
         self.update()
         self.refreshBuffer()
 
@@ -1758,11 +1775,10 @@ class PNSqlCursor(QtCore.QObject):
 
         return ret_
 
-    """
-    Devuelve el contenido del buffer
-    """
-
-    def buffer(self):
+    def buffer(self) -> Optional[PNBuffer]:
+        """
+        Devuelve el contenido del buffer
+        """
         if self.d.buffer_:
             return self.d.buffer_
         else:
@@ -1995,8 +2011,11 @@ class PNSqlCursor(QtCore.QObject):
         mid = None
         comp = None
         midVal = None
+        metadata = self.metadata()
+        if not metadata:
+            raise Exception("Metadata is not set")
 
-        if fN in self.metadata().fieldNames():
+        if fN in metadata.fieldNames():
             while ini <= fin:
                 mid = int((ini + fin) / 2)
                 midVal = str(self.model().value(mid, fN))
@@ -2140,8 +2159,11 @@ class PNSqlCursor(QtCore.QObject):
             return False
 
         i = 0
+        buffer = self.buffer()
+        if not buffer:
+            raise Exception("Buffer not set")
         while i <= self.model().rowCount():
-            if self.model().value(i, self.buffer().pK()) == value:
+            if self.model().value(i, buffer.pK()) == value:
                 return self.move(i)
 
             i = i + 1
@@ -2264,17 +2286,19 @@ class PNSqlCursor(QtCore.QObject):
                     self.cursorRelation().setValueBuffer(self.relation().foreignField(), v)
 
     def primeInsert(self):
-        if not self.buffer():
-            self.d.buffer_ = PNBuffer(self)
+        buffer = self.buffer()
+        if not buffer:
+            buffer = self.d.buffer_ = PNBuffer(self)
 
-        self.buffer().primeInsert()
+        buffer.primeInsert()
 
     def primeUpdate(self):
-        if not self.buffer():
-            self.d.buffer_ = PNBuffer(self)
+        buffer = self.buffer()
+        if not buffer:
+            buffer = self.d.buffer_ = PNBuffer(self)
 
-        self.buffer().primeUpdate(self.at())
-        return self.buffer()
+        buffer.primeUpdate(self.at())
+        return buffer
 
     def editBuffer(self, b=None):
         # if not self.buffer():
@@ -3462,9 +3486,10 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def setNotGenerateds(self):
-        if self.metadata() and self.d.isQuery_ and self.buffer():
+        buffer = self.buffer()
+        if self.metadata() and self.d.isQuery_ and buffer:
             for f in self.metadata().fieldList():
-                self.buffer().setGenerated(f, False)
+                buffer.setGenerated(f, False)
 
     """
     Uso interno
@@ -3501,14 +3526,17 @@ class PNSqlCursor(QtCore.QObject):
     def update(self, notify=True):
         logger.trace("PNSqlCursor.update --- BEGIN")
         if self.modeAccess() == PNSqlCursor.Edit:
+            buffer = self.buffer()
+            if not buffer:
+                raise Exception("Buffer is not set. Cannot update")
             # solo los campos modified
-            lista = self.buffer().modifiedFields()
-            self.buffer().setNoModifiedFields()
+            lista = buffer.modifiedFields()
+            buffer.setNoModifiedFields()
             # TODO: pKVaue debe ser el valueBufferCopy, es decir, el antiguo. Para
             # .. soportar updates de PKey, que, aunque inapropiados deberían funcionar.
-            pKValue = self.buffer().value(self.buffer().pK())
+            pKValue = buffer.value(self.buffer().pK())
 
-            dict_update = dict([(fieldName, self.buffer().value(fieldName)) for fieldName in lista])
+            dict_update = dict([(fieldName, buffer.value(fieldName)) for fieldName in lista])
             try:
                 update_successful = self.model().updateValuesDB(pKValue, dict_update)
             except Exception:
@@ -3569,10 +3597,11 @@ class PNSqlCursor(QtCore.QObject):
             return self.metadata().primaryKey()
 
     def fieldType(self, field_name=None):
-        ret_ = None
-        if field_name:
-            ret_ = self.metadata().fieldType(field_name)
-        return ret_
+        metadata = self.metadata()
+        if field_name and metadata:
+            return metadata.fieldType(field_name)
+        else:
+            return None
 
     def __getattr__(self, name):
         """Busca en el DGI, si procede"""

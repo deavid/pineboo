@@ -302,5 +302,8 @@ class FLAccessControl(object):
     def processObject(self, o):
         raise ValueError("Cannot access base class")
 
+    def setFromObject(self, obj: object) -> None:
+        raise ValueError("Cannot access base class")
+
 
 # endif
