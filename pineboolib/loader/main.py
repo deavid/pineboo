@@ -183,6 +183,9 @@ def exec_main(options: Values) -> int:
 
     # FIXME: Find a saner way to do this
     pncontrolsfactory.reload_from_DGI()
+    from pineboolib.fllegacy.flapplication import aqApp
+
+    pncontrolsfactory.aqApp = aqApp
 
     if not configdb and _DGI.useDesktop() and _DGI.localDesktop():
         if not _DGI.mobilePlatform():

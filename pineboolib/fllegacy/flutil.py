@@ -760,156 +760,34 @@ class FLUtil(QtCore.QObject):
         return float(self.buildNumber(value, "float", fmd.partDecimal())) if fmd is not None else 0
 
     def sqlSelect(self, f, s, w, tL=None, size=0, connName="default"):
-        """
-        Ejecuta una query de tipo select, devolviendo los resultados del primer registro encontrado
+        from pineboolib.application.database.utils import sqlSelect
 
-        @param f: Sentencia from de la query
-        @param s: Sentencia select de la query, que será el nombre del campo a devolver
-        @param w: Sentencia where de la query
-        @param tL: Sentencia tableslist de la query. Necesario cuando en la sentencia from se incluya más de una tabla
-        @param size: Número de líneas encontradas. (-1 si hay error)
-        @param connName Nombre de la conexion
-        @return Valor resultante de la query o falso si no encuentra nada.
-        """
-        if w is None or w == "":
-            return False
-
-        q = FLSqlQuery(None, connName)
-        if tL:
-            q.setTablesList(tL)
-        else:
-            q.setTablesList(f)
-
-        q.setSelect(s)
-        q.setFrom(f)
-        q.setWhere(w)
-        # q.setForwardOnly(True)
-        if not q.exec_():
-            return False
-
-        if q.next():
-            valor = q.value(0)
-            # if isinstance(valor, datetime.date):
-            #    valor = str(valor)
-            return valor
-
-        return False
+        return sqlSelect(f, s, w, tL, size, connName)
 
     def quickSqlSelect(self, f, s, w, connName="default"):
-        """
-        Versión rápida de sqlSelect. Ejecuta directamente la consulta sin realizar comprobaciones.
-        Usar con precaución.
-        """
-        if not w:
-            sql = "select " + s + " from " + f
-        else:
-            sql = "select " + s + " from " + f + " where " + w
+        from pineboolib.application.database.utils import quickSqlSelect
 
-        q = FLSqlQuery(None, connName)
-        if not q.exec_(sql):
-            return False
-
-        return q.value(0) if q.first() else False
+        return quickSqlSelect(f, s, w, connName)
 
     def sqlInsert(self, t, fL, vL, connName="default"):
-        """
-        Realiza la inserción de un registro en una tabla mediante un objeto FLSqlCursor
+        from pineboolib.application.database.utils import sqlInsert
 
-        @param t Nombre de la tabla
-        @param fL Lista separada con comas de los nombres de los campos
-        @param vL Lista separada con comas de los valores correspondientes
-        @param connName Nombre de la conexion
-        @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
-        """
-        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-
-        fL = fL.split(",") if isinstance(fL, str) else fL
-        vL = vL.split(",") if isinstance(vL, str) else vL
-
-        if not len(fL) == len(vL):
-            return False
-
-        c = FLSqlCursor(t, True, connName)
-        c.setModeAccess(FLSqlCursor.Insert)
-        c.refreshBuffer()
-
-        i = 0
-        for f in fL:
-            if vL[i] is None:
-                c.bufferSetNull(f)
-            else:
-                c.setValueBuffer(f, vL[i])
-
-            i = i + 1
-
-        return c.commitBuffer()
+        return sqlInsert(t, fL, vL, connName)
 
     def sqlUpdate(self, t, fL, vL, w, connName="default"):
-        """
-        Realiza la modificación de uno o más registros en una tabla mediante un objeto FLSqlCursor
+        from pineboolib.application.database.utils import sqlUpdate
 
-        @param t Nombre de la tabla
-        @param fL Lista separada con comas de los nombres de los campos
-        @param vL Lista separada con comas de los valores correspondientes
-        @param w Sentencia where para identificar los registros a editar.
-        @param connName Nombre de la conexion
-        @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
-        """
-        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-
-        c = FLSqlCursor(t, True, connName)
-        c.select(w)
-        c.setForwardOnly(True)
-        while c.next():
-
-            c.setModeAccess(FLSqlCursor.Edit)
-            c.refreshBuffer()
-
-            if isinstance(fL, list):
-                i = 0
-                for f in fL:
-                    c.setValueBuffer(f, vL[i])
-                    i = i + 1
-            else:
-                c.setValueBuffer(fL, vL)
-
-            if not c.commitBuffer():
-                return False
-
-        return True
+        return sqlUpdate(t, fL, vL, w, connName)
 
     def sqlDelete(self, t, w, connName="default"):
-        """
-        Borra uno o más registros en una tabla mediante un objeto FLSqlCursor
+        from pineboolib.application.database.utils import sqlDelete
 
-        @param t Nombre de la tabla
-        @param w Sentencia where para identificar los registros a borrar.
-        @param connName Nombre de la conexion
-        @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
-        """
-        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-
-        c = FLSqlCursor(t, True, connName)
-
-        # if not c.select(w):
-        #     return False
-        c.select(w)
-        c.setForwardOnly(True)
-
-        while c.next():
-            c.setModeAccess(FLSqlCursor.Del)
-            c.refreshBuffer()
-            if not c.commitBuffer():
-                return False
-
-        return True
+        return sqlDelete(t, w, connName)
 
     def quickSqlDelete(self, t, w, connName="default"):
-        """
-        Versión rápida de sqlDelete. Ejecuta directamente la consulta sin realizar comprobaciones y sin disparar señales de commits.
-        Usar con precaución.
-        """
-        self.execSql("DELETE FROM %s WHERE %s" % (t, w))
+        from pineboolib.application.database.utils import quickSqlDelete
+
+        return quickSqlDelete(t, w, connName)
 
     def createProgressDialog(self, title, steps, id_="default"):
         """
@@ -1111,24 +989,6 @@ class FLUtil(QtCore.QObject):
                     break
 
         return files_found
-
-    def execSql(self, sql, connName="default"):
-        """
-        Uso interno
-        """
-        from pineboolib import pncontrolsfactory
-
-        conn_ = pncontrolsfactory.aqApp.db().useConn(connName)
-        cur = conn_.cursor()
-        try:
-            logger.warning("execSql: Ejecutando la consulta : %s", sql)
-            # sql = conn_.db().driver().fix_query(sql)
-            cur.execute(sql)
-            conn_.conn.commit()
-            return True
-        except Exception as exc:
-            logger.exception("execSql: Error al ejecutar la consulta SQL: %s %s", sql, exc)
-            return False
 
     @decorators.NotImplementedWarn
     def savePixmap(self, data, filename, format_):

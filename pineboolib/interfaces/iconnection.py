@@ -118,11 +118,11 @@ class IConnection:
     def dbAux(self) -> "IConnection":
         return self
 
-    def formatValue(self, t, v, upper) -> None:
-        return
+    def formatValue(self, t, v, upper) -> str:
+        return ""
 
-    def formatValueLike(self, t, v, upper) -> None:
-        return
+    def formatValueLike(self, t, v, upper) -> str:
+        return ""
 
     def canSavePoint(self) -> None:
         return

@@ -11,17 +11,17 @@ from PyQt5 import QtCore, QtGui, QtWidgets, Qt  # type: ignore
 
 import pineboolib
 from pineboolib.core.utils.utils_base import filedir
-from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.application.utils.date_conversion import date_amd_to_dma
+
 
 DEBUG = False
 
 
-"""
-Esta clase es el enlace entre FLSqlCursor y el SGBD
-"""
-
-
 class PNCursorTableModel(QtCore.QAbstractTableModel):
+    """
+    Esta clase es el enlace entre FLSqlCursor y el SGBD
+    """
+
     logger = logging.getLogger("CursorTableModel")
     rows = 15
     cols = 5
@@ -290,7 +290,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 # Si es str lo paso a datetime.date
                 if d and isinstance(d, str):
                     if len(d.split("-")[0]) == 4:
-                        d = FLUtil().dateAMDtoDMA(d)
+                        d = date_amd_to_dma(d)
 
                     if d:
                         list_ = d.split("-")
@@ -1058,9 +1058,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def size(self):
+        from pineboolib.application.database.utils import sqlSelect
+
         size = self.cursorDB().rowcount
         if size == 0:  # Cada vez que hacemos refresh se limpia
-            util = FLUtil()
             if self.metadata():
                 from_ = self.db().manager().query(self.metadata().query()).from_() if self.metadata().isQuery() else self.metadata().name()
                 where_ = (
@@ -1073,9 +1074,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 #     if self.where_filter.find("ORDER BY") > -1
                 #     else " %s GROUP BY %s" % (self.where_filter, self.metadata().primaryKey())
                 # )
-                size = util.sqlSelect(from_, "COUNT(%s)" % self.metadata().primaryKey(), where_)
+                size = sqlSelect(from_, "COUNT(%s)" % self.metadata().primaryKey(), where_)
             else:
-                size = util.sqlSelect(self._parent.curName(), "COUNT(*)", "1=1")
+                size = sqlSelect(self._parent.curName(), "COUNT(*)", "1=1")
 
             if isinstance(self._size, bool):
                 size = 0

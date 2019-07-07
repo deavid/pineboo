@@ -5,9 +5,10 @@ import re
 import os
 import traceback
 
-from typing import Any, Callable
+from typing import Any, Callable, List
 
 from PyQt5 import QtCore  # type: ignore
+from pineboolib.core.utils.utils_base import create_dict
 from pineboolib.core.utils.singleton import Singleton
 from pineboolib.core.settings import config
 from pineboolib.core import decorators
@@ -54,7 +55,7 @@ def reload_from_DGI():
     global QLineEdit, QDateEdit, QTimeEdit, QCheckBox, QWidget, QtWidgets, QColor, QMessageBox, QButtonGroup, QDialog
     global QVBoxLayout, QHBoxLayout, QFrame, QMainWindow, QSignalMapper, QDomDocument, QMenu, QToolBar, QListWidgetItem, QListViewWidget
     global QPixmap, QImage, QIcon, QAction, QActionGroup, QTreeWidget, QTreeWidgetItem, QTreeWidgetItemIterator, QDataView
-    global QProcess, QByteArray, QRadioButton, QSpinBox, QInputDialog, QLineEdit, QApplication, qApp, QStyleFactory, QFontDialog
+    global QProcess, QByteArray, QRadioButton, QSpinBox, QInputDialog, QApplication, qApp, QStyleFactory, QFontDialog
     global QDockWidget, QMdiArea, QMdiSubWindow, QKeySequence, QSize, QSizePolicy, QToolBox, QPainter, QBrush, QProgressDialog, QFileDialog
     # Clases FL
     global FLLineEdit, FLTimeEdit, FLDateEdit, FLPixmapView, FLDomDocument, FLDomElement
@@ -111,7 +112,6 @@ def reload_from_DGI():
     QRadioButton = resolveObject("QRadioButton")
     QSpinBox = resolveObject("FLSpinBox")
     QInputDialog = resolveObject("QInputDialog")
-    QLineEdit = resolveObject("QLineEdit")
     QApplication = resolveObject("QApplication")
     qApp = resolveObject("qApp")
     QStyleFactory = resolveObject("QStyleFactory")
@@ -189,15 +189,15 @@ class SysType(object, metaclass=Singleton):
 
     def nameUser(self) -> str:
         ret_ = None
-        if aqApp.DGI().use_alternative_credentials():
-            ret_ = aqApp.DGI().get_nameuser()
+        if project.DGI_.use_alternative_credentials():
+            ret_ = project.DGI_.get_nameuser()
         else:
-            ret_ = aqApp.db().user()
+            ret_ = project.conn.user()
 
         return ret_
 
     def interactiveGUI(self) -> str:
-        return aqApp.DGI().interactiveGUI()
+        return project.DGI_.interactiveGUI()
 
     def isUserBuild(self) -> bool:
         return self.version().upper().find("USER") > -1
@@ -222,7 +222,7 @@ class SysType(object, metaclass=Singleton):
         return not self.isDebuggerEnabled()
 
     def isLoadedModule(self, modulename: str) -> bool:
-        return modulename in aqApp.db().managerModules().listAllIdModules()
+        return modulename in project.conn.managerModules().listAllIdModules()
 
     def translate(self, *args) -> str:
         util = FLUtil()
@@ -237,7 +237,7 @@ class SysType(object, metaclass=Singleton):
         return util.getOS()
 
     def nameBD(self):
-        return aqApp.db().DBName()
+        return project.conn.DBName()
 
     def toUnicode(self, val: str, format: str) -> str:
         return val.encode(format).decode("utf-8", "replace")
@@ -246,7 +246,7 @@ class SysType(object, metaclass=Singleton):
         return val.encode("utf-8").decode(format, "replace")
 
     def Mr_Proper(self):
-        aqApp.db().Mr_Proper()
+        project.conn.Mr_Proper()
 
     def installPrefix(self):
         from pineboolib.core.utils.utils_base import filedir
@@ -271,7 +271,7 @@ class SysType(object, metaclass=Singleton):
         return str(project.version)
 
     def processEvents(self) -> None:
-        return aqApp.DGI().processEvents()
+        return project.DGI_.processEvents()
 
     def write(self, encode_, dir_, contenido):
         import codecs
@@ -282,33 +282,39 @@ class SysType(object, metaclass=Singleton):
         f.close()
 
     def cleanupMetaData(self, connName="default"):
-        aqApp.db().useConn(connName).manager().cleanupMetaData()
+        project.conn.useConn(connName).manager().cleanupMetaData()
 
     def updateAreas(self):
+        from pineboolib.fllegacy.flapplication import aqApp
+
         aqApp.initToolBox()
 
     def reinit(self):
+        from pineboolib.fllegacy.flapplication import aqApp
+
         aqApp.reinit()
 
     def setCaptionMainWidget(self, t):
+        from pineboolib.fllegacy.flapplication import aqApp
+
         aqApp.setCaptionMainWidget(t)
 
     def nameDriver(self, connName="default"):
-        return aqApp.db().useConn(connName).driverName()
+        return project.conn.useConn(connName).driverName()
 
     def nameHost(self, connName="default"):
-        return aqApp.db().useConn(connName).host()
+        return project.conn.useConn(connName).host()
 
     def addDatabase(self, *args):
         # def addDatabase(self, driver_name = None, db_name = None, db_user_name = None,
         #                 db_password = None, db_host = None, db_port = None, connName="default"):
         if len(args) == 1:
-            conn_db = aqApp.db().useConn(args[0])
+            conn_db = project.conn.useConn(args[0])
             if not conn_db.isOpen():
                 if conn_db.driverName_ and conn_db.driverSql.loadDriver(conn_db.driverName_):
                     conn_db.driver_ = conn_db.driverSql.driver()
                     conn_db.conn = conn_db.conectar(
-                        aqApp.db().db_name, aqApp.db().db_host, aqApp.db().db_port, aqApp.db().db_userName, aqApp.db().db_password
+                        project.conn.db_name, project.conn.db_host, project.conn.db_port, project.conn.db_userName, project.conn.db_password
                     )
                     if conn_db.conn is False:
                         return False
@@ -316,7 +322,7 @@ class SysType(object, metaclass=Singleton):
                     conn_db._isOpen = True
 
         else:
-            conn_db = aqApp.db().useConn(args[6])
+            conn_db = project.conn.useConn(args[6])
             if not conn_db.isOpen():
                 conn_db.driverName_ = conn_db.driverSql.aliasToName(args[0])
                 if conn_db.driverName_ and conn_db.driverSql.loadDriver(conn_db.driverName_):
@@ -332,9 +338,11 @@ class SysType(object, metaclass=Singleton):
         return True
 
     def removeDatabase(self, connName="default"):
-        return aqApp.db().useConn(connName).removeConn(connName)
+        return project.conn.useConn(connName).removeConn(connName)
 
     def idSession(self):
+        from pineboolib.fllegacy.flapplication import aqApp
+
         return aqApp.timeUser().toString(QtCore.Qt.ISODate)
 
 
@@ -410,7 +418,7 @@ def slot_done(fn, signal, sender, caller):
         # Este parche es para evitar que las conexiones de un clicked de error de cantidad de argumentos.
         # En Eneboo se esperaba que signal no contenga argumentos
         if signal.signal == "2clicked(bool)":
-            args = []
+            args = tuple()
 
         args_num = get_expected_args_num(fn)
         try:
@@ -419,10 +427,7 @@ def slot_done(fn, signal, sender, caller):
             else:
                 res = fn(*args[0:args_num])
         except Exception:
-            from pineboolib.error_manager import error_manager
-
-            # script_name = caller.__module__ if caller is not None else "????"
-            aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
+            logger.exception("Error trying to create a connection")
 
         if caller is not None:
             try:
@@ -544,9 +549,9 @@ def solve_connection(sender, signal, receiver, slot):
 
 def GET(function_name, arguments=[], conn=None):
     if conn is None:
-        conn = aqApp.db()
+        conn = project.conn
     if hasattr(conn.driver(), "send_to_server"):
-        return conn.driver().send_to_server(pineboolib.utils.create_dict("call_function", function_name, conn.driver().id_, arguments))
+        return conn.driver().send_to_server(create_dict("call_function", function_name, conn.driver().id_, arguments))
     else:
         return "Funcionalidad no soportada"
 
@@ -570,7 +575,7 @@ def check_gc_referrers(typename, w_obj, name):
         # print("HINT: Objetos referenciando %r::%r (%r) :" % (typename, obj, name))
         for ref in gc.get_referrers(obj):
             if isinstance(ref, dict):
-                x = []
+                x: List[str] = []
                 for k, v in ref.items():
                     if v is obj:
                         k = "(**)" + k
@@ -602,8 +607,8 @@ def print_stack(maxsize=1):
 from pineboolib.packager.aqunpacker import AQUnpacker  # noqa:
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData  # noqa:
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
-from pineboolib.fllegacy.flapplication import aqApp  # noqa:  # FIXME: Circular dependency
 
+# aqApp -- imported from loader.main after reload_from_DGI() call, as it is a cyclic dependency
 qsa_sys = SysType()
 
 # --- create empty objects first:
@@ -652,7 +657,6 @@ QByteArray = ObjectNotFoundDGINotLoaded
 QRadioButton = ObjectNotFoundDGINotLoaded
 QSpinBox = ObjectNotFoundDGINotLoaded
 QInputDialog = ObjectNotFoundDGINotLoaded
-QLineEdit = ObjectNotFoundDGINotLoaded
 QApplication = ObjectNotFoundDGINotLoaded
 qApp = ObjectNotFoundDGINotLoaded
 QStyleFactory = ObjectNotFoundDGINotLoaded

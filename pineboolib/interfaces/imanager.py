@@ -28,7 +28,7 @@ class IManager(object):
         return None
 
     def action(self, n: str) -> "pineboolib.fllegacy.flaction.FLAction":
-        return None
+        raise Exception("must be implemented")
 
     def alterTable(self, mtd1=..., mtd2=..., key=..., force=...) -> Any:
         return None
@@ -82,10 +82,10 @@ class IManager(object):
         return None
 
     def metadataField(self, field, v: bool = False, ed: bool = False) -> "pineboolib.fllegacy.flfieldmetadata.FLFieldMetaData":
-        return None
+        raise Exception("must be implemented")
 
     def metadataRelation(self, relation) -> "pineboolib.fllegacy.flrelationmetadata.FLRelationMetaData":
-        return None
+        raise Exception("must be implemented")
 
     def query(self, n, parent=...) -> Optional["pineboolib.fllegacy.flsqlquery.FLSqlQuery"]:
         return None

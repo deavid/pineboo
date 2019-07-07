@@ -22,7 +22,7 @@ from pineboolib import logging
 from pineboolib.interfaces import IManager
 
 from PyQt5.QtXml import QDomElement  # type: ignore
-from pineboolib.application.database.pnconnection import PNConnection
+from pineboolib.interfaces.iconnection import IConnection
 from typing import Optional, Union
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class FLManager(QtCore.QObject, IManager):
     buffer_ = None
     metadataCachedFails = []
 
-    def __init__(self, db: PNConnection) -> None:
+    def __init__(self, db: IConnection) -> None:
         """
         constructor
         """
@@ -991,7 +991,7 @@ class FLManager(QtCore.QObject, IManager):
         fullCalc = False
         trimm = False
 
-        t = -1
+        t: str = None
         length = 0
         pI = 4
         pD = 0
@@ -1449,9 +1449,9 @@ class FLManager(QtCore.QObject, IManager):
         #    return None
 
         tableLarge = None
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flapplication import aqApp
 
-        if pncontrolsfactory.aqApp.singleFLLarge():
+        if aqApp.singleFLLarge():
             tableLarge = "fllarge"
         else:
             tableLarge = "fllarge_%s" % tableName
@@ -1502,9 +1502,9 @@ class FLManager(QtCore.QObject, IManager):
         if not refKey[0:3] == "RK@":
             return None
 
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flapplication import aqApp
 
-        tableName = "fllarge" if pncontrolsfactory.aqApp.singleFLLarge() else "fllarge_" + refKey.split("@")[1]
+        tableName = "fllarge" if aqApp.singleFLLarge() else "fllarge_" + refKey.split("@")[1]
 
         if not self.existsTable(tableName):
             return None
