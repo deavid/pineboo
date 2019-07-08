@@ -45,18 +45,18 @@ class XMLAction(XMLStruct):
         Constructor
         """
         super(XMLAction, self).__init__(*args, **kwargs)
-        if not project:
-            raise ValueError("XMLActions must belong to a project")
         self.project = project
+        if not self.project:
+            raise ValueError("XMLActions must belong to a project")
         self.form = self._v("form")
         self.name = self._v("name")
-        # FIXME: script gets replaced later with the QSA file! (either script or scriptformrecord)
-        self.script = self._v("script")  # script_form_record
+        self.description = self._v("description")
+        self.scriptform = self._v("scriptform")
         self.table = self._v("table")
         self.mainform = self._v("mainform")
-        self.mainscript = self._v("mainscript")  # script_form
-        self.formrecord = self._v("formrecord")  # form_record
-        self.scriptformrecord = self._v("scriptformrecord")  # scriptformrecord
+        self.mainscript = self._v("mainscript")
+        self.formrecord = self._v("formrecord")
+        self.scriptformrecord = self._v("scriptformrecord")
         self.mainform_widget: IFormDB = None
         self.formrecord_widget: IFormDB = None
         self._loaded = False
@@ -109,7 +109,6 @@ class XMLAction(XMLStruct):
             if self.project._DGI.useDesktop() and hasattr(self.project.main_window, "w_"):
                 self.mainform_widget = self.project.conn.managerModules().createForm(action=self, parent=self.project.main_window.w_)
             else:
-                self.scriptform = getattr(self, "scriptform", None)
                 script = self.load_script(self.scriptform, None)
                 self.mainform_widget = script.form  # FormDBWidget FIXME: Add interface for types
                 self.mainform_widget.widget = self.mainform_widget
@@ -174,7 +173,6 @@ class XMLAction(XMLStruct):
 
     def execDefaultScript(self):
         self.logger.info("Executing default script for Action %s", self.name)
-        self.scriptform = getattr(self, "scriptform", None)
         script = self.load_script(self.scriptform, None)
 
         self.mainform_widget = script.form

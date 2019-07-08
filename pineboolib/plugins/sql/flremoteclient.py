@@ -1,3 +1,5 @@
+import json
+
 # from PyQt5.QtCore import QTime, QDate, QDateTime  # type: ignore
 # from PyQt5.Qt import qWarning, QDomDocument, QRegExp  # type: ignore
 # from PyQt5.QtWidgets import QMessageBox, QProgressDialog  # type: ignore
@@ -9,9 +11,8 @@ from pineboolib.application.utils.check_dependencies import check_dependencies
 # from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 # from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
-import pineboolib
 from pineboolib import logging
-import json
+from pineboolib.core.utils.utils_base import create_dict
 
 
 logger = logging.getLogger(__name__)
@@ -144,7 +145,7 @@ class FLREMOTECLIENT(object):
 
     def create_dict(self, fun, data=[]):
         fun = "%s__%s" % (self.id_, fun)
-        return pineboolib.utils.create_dict("dbdata", fun, self.id_, data)
+        return create_dict("dbdata", fun, self.id_, data)
 
     def send_to_server(self, js):
         import requests
