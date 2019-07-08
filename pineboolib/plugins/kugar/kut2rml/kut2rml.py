@@ -47,9 +47,9 @@ class kut2rml(object):
             return None
 
         from reportlab.pdfbase import pdfmetrics
-        from pineboolib.plugins.kugar.parsertools import parsertools
+        from pineboolib.plugins.kugar.parsertools import KParserTools
 
-        self._parser_tools = parsertools()
+        self._parser_tools = KParserTools()
 
         try:
             self.xmlK_ = self._parser_tools.loadKut(kut)

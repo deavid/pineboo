@@ -18,7 +18,7 @@ Esta clase ofrece algunas funciones comunes de los diferentes parser de kut.
 """
 
 
-class parsertools(object):
+class KParserTools(object):
     _fix_altura = None
 
     def __init__(self):

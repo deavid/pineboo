@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-from pineboolib.application.utils.check_dependencies import check_dependencies
-from pineboolib.core.utils.utils_base import filedir, load2xml
-from pineboolib import logging
 import datetime
 import re
 import os
+from typing import List
+from xml.etree.ElementTree import Element
+
+from pineboolib import logging
+from pineboolib.core.utils.utils_base import filedir, load2xml
+from pineboolib.application.utils.check_dependencies import check_dependencies
 
 """
 Conversor de kuts a pyFPDF
@@ -15,8 +18,8 @@ class kut2fpdf(object):
 
     _document = None  # Aquí se irán guardando los datos del documento
     logger = None
-    _xml = None
-    _xml_data = None
+    _xml: Element = None
+    _xml_data: Element = None
     _page_orientation = None
     _page_size = None
     _bottom_margin = None
@@ -47,10 +50,10 @@ class kut2fpdf(object):
 
         self.logger = logging.getLogger("kut2fpdf")
         check_dependencies({"fpdf": "pyfpdf"})
-        from pineboolib.plugins.kugar.parsertools import parsertools
+        from pineboolib.plugins.kugar.parsertools import KParserTools
         from pineboolib.core.settings import config
 
-        self._parser_tools = parsertools()
+        self._parser_tools = KParserTools()
         self._avalible_fonts = []
         self._unavalible_fonts = []
         self.design_mode = config.value("ebcomportamiento/kugar_debug_mode", False)
@@ -329,7 +332,7 @@ class kut2fpdf(object):
                         heightCalculated += self._parser_tools.getHeight(addFooter)
 
                     pageFooter = self._xml.get("PageFooter")
-                    if pageFooter:
+                    if pageFooter is not None and isinstance(pageFooter, Element):
                         if self._document.page_no() == 1 or pageFooter.get("PrintFrecuency") == "1":
                             heightCalculated += self._parser_tools.getHeight(pageFooter)
 
@@ -510,7 +513,7 @@ class kut2fpdf(object):
     def processText(self, xml, data_row=None, fix_height=True, section_name=None):
         is_image = False
         is_barcode = False
-        text = xml.get("Text")
+        text: str = xml.get("Text")
         # borderColor = xml.get("BorderColor")
         field_name = xml.get("Field")
 
@@ -578,7 +581,7 @@ class kut2fpdf(object):
             if int(res_) == 0:
                 return
 
-        if text is not None and text.startswith(filedir("../tempdata")):
+        if text is not None and isinstance(text, str) and text.startswith(filedir("../tempdata")):
             is_image = True
 
         # negValueColor = xml.get("NegValueColor")
@@ -719,7 +722,7 @@ class kut2fpdf(object):
         result_section_size = 0
         # Miramos si el texto sobrepasa el ancho
 
-        array_text = []
+        array_text: List[str] = []
         array_n = []
         text_lines = []
         if txt.find("\n") > -1:
@@ -942,7 +945,7 @@ class kut2fpdf(object):
     @param file_name. Nombr del fichero de tempdata a usar
     """
 
-    def draw_image(self, x, y, W, H, xml, file_name):
+    def draw_image(self, x: int, y: int, W: int, H: int, xml, file_name: str):
         import os
 
         if not file_name.lower().endswith(".png"):
@@ -954,7 +957,7 @@ class kut2fpdf(object):
 
             self._document.image(file_name, x, y, W, H, "PNG")
 
-    def draw_barcode(self, x, y, W, H, xml, text):
+    def draw_barcode(self, x: int, y: int, W: int, H: int, xml, text: str):
         if text == "None":
             return
         from pineboolib import pncontrolsfactory
