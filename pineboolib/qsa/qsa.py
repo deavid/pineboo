@@ -85,7 +85,15 @@ def parseInt(x):
     @param x. Valor a convertir
     @return Valor convertido
     """
-    return int(x) if x is not None else 0
+    ret_ = 0
+    if isinstance(x, str) and x.find(",") > -1:
+        x = x.replace(",", ".")
+
+    if x is not None:
+        x = float(x)
+        ret_ = int(x)
+
+    return ret_
 
 
 def isNaN(x):
