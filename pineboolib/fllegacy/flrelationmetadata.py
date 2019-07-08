@@ -49,7 +49,7 @@ class FLRelationMetaData:
     destructor
     """
 
-    def __del__(self):
+    def __del__(self) -> None:
         --self.count_
         del self.d
 

@@ -16,6 +16,11 @@ from sqlalchemy import create_engine
 import traceback
 from pineboolib.application import project
 from pineboolib import logging
+import protocols
+from typing import Iterable, Mapping, Optional, Sized, TypeVar, Union
+
+_T0 = TypeVar("_T0")
+_T1 = TypeVar("_T1")
 
 
 logger = logging.getLogger(__name__)
@@ -51,34 +56,34 @@ class FLQPSQL(object):
         self.session_ = None
         self.declarative_base_ = None
 
-    def useThreads(self):
+    def useThreads(self) -> bool:
         return True
 
-    def useTimer(self):
+    def useTimer(self) -> bool:
         return False
 
-    def version(self):
+    def version(self) -> str:
         return self.version_
 
-    def driverName(self):
+    def driverName(self) -> str:
         return self.name_
 
-    def isOpen(self):
+    def isOpen(self) -> bool:
         return self.open_
 
-    def pure_python(self):
+    def pure_python(self) -> bool:
         return self.pure_python_
 
-    def safe_load(self):
+    def safe_load(self) -> Any:
         return check_dependencies({"psycopg2": "python3-psycopg2", "sqlalchemy": "sqlAlchemy"}, False)
 
-    def mobile(self):
+    def mobile(self) -> bool:
         return self.mobile_
 
-    def DBName(self):
+    def DBName(self) -> Any:
         return self._dbname
 
-    def connect(self, db_name, db_host, db_port, db_userName, db_password):
+    def connect(self, db_name, db_host, db_port, db_userName, db_password) -> Any:
         self._dbname = db_name
         check_dependencies({"psycopg2": "python3-psycopg2", "sqlalchemy": "sqlAlchemy"})
         import psycopg2
@@ -158,10 +163,10 @@ class FLQPSQL(object):
 
         return self.conn_
 
-    def engine(self):
+    def engine(self) -> Any:
         return self.engine_
 
-    def session(self):
+    def session(self) -> Any:
         if self.session_ is None:
             from sqlalchemy.orm import sessionmaker
 
@@ -175,7 +180,7 @@ class FLQPSQL(object):
 
         return self.session_
 
-    def declarative_base(self):
+    def declarative_base(self) -> Any:
         if self.declarative_base_ is None:
             from sqlalchemy.ext.declarative import declarative_base
 
@@ -183,7 +188,7 @@ class FLQPSQL(object):
 
         return self.declarative_base_
 
-    def formatValueLike(self, type_, v, upper):
+    def formatValueLike(self, type_, v: Mapping[int, Any], upper) -> str:
         util = FLUtil()
         res = "IS NULL"
 
@@ -210,7 +215,7 @@ class FLQPSQL(object):
 
         return res
 
-    def formatValue(self, type_, v, upper):
+    def formatValue(self, type_, v: _T1, upper) -> Union[bool, str, _T1]:
 
         util = FLUtil()
 
@@ -268,10 +273,10 @@ class FLQPSQL(object):
         # print ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
         return s
 
-    def canOverPartition(self):
+    def canOverPartition(self) -> bool:
         return True
 
-    def nextSerialVal(self, table, field):
+    def nextSerialVal(self, table: str, field: str) -> Any:
         q = FLSqlQuery()
         q.setSelect(u"nextval('" + table + "_" + field + "_seq')")
         q.setFrom("")
@@ -284,7 +289,7 @@ class FLQPSQL(object):
         else:
             return None
 
-    def savePoint(self, n):
+    def savePoint(self, n) -> bool:
         if not self.isOpen():
             qWarning("PSQLDriver::savePoint: Database not open")
             return False
@@ -299,13 +304,13 @@ class FLQPSQL(object):
 
         return True
 
-    def canSavePoint(self):
+    def canSavePoint(self) -> bool:
         return True
 
-    def canTransaction(self):
+    def canTransaction(self) -> bool:
         return True
 
-    def rollbackSavePoint(self, n):
+    def rollbackSavePoint(self, n) -> bool:
         if not self.isOpen():
             qWarning("PSQLDriver::rollbackSavePoint: Database not open")
             return False
@@ -322,13 +327,13 @@ class FLQPSQL(object):
 
         return True
 
-    def setLastError(self, text, command):
+    def setLastError(self, text, command) -> None:
         self.lastError_ = "%s (%s)" % (text, command)
 
-    def lastError(self):
+    def lastError(self) -> str:
         return self.lastError_
 
-    def commitTransaction(self):
+    def commitTransaction(self) -> bool:
         if not self.isOpen():
             qWarning("PSQLDriver::commitTransaction: Database not open")
 
@@ -342,7 +347,7 @@ class FLQPSQL(object):
 
         return True
 
-    def rollbackTransaction(self):
+    def rollbackTransaction(self) -> bool:
         if not self.isOpen():
             qWarning("PSQLDriver::rollbackTransaction: Database not open")
 
@@ -356,7 +361,7 @@ class FLQPSQL(object):
 
         return True
 
-    def transaction(self):
+    def transaction(self) -> bool:
         if not self.isOpen():
             qWarning("PSQLDriver::transaction: Database not open")
 
@@ -370,7 +375,7 @@ class FLQPSQL(object):
 
         return True
 
-    def releaseSavePoint(self, n):
+    def releaseSavePoint(self, n) -> bool:
 
         if not self.isOpen():
             qWarning("PSQLDriver::releaseSavePoint: Database not open")
@@ -387,13 +392,13 @@ class FLQPSQL(object):
 
         return True
 
-    def setType(self, type_, leng=None):
+    def setType(self, type_, leng=None) -> str:
         if leng:
             return "::%s(%s)" % (type_, leng)
         else:
             return "::%s" % type_
 
-    def refreshQuery(self, curname, fields, table, where, cursor, conn):
+    def refreshQuery(self, curname, fields, table, where, cursor, conn) -> None:
         sql = "DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s " % (curname, fields, table, where)
         try:
             cursor.execute(sql)
@@ -402,7 +407,7 @@ class FLQPSQL(object):
             logger.info("SQL: %s", sql)
             logger.trace("Detalle:", stack_info=True)
 
-    def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
+    def refreshFetch(self, number, curname, table, cursor, fields, where_filter) -> None:
         sql = "FETCH %d FROM %s" % (number, curname)
         try:
             cursor.execute(sql)
@@ -411,7 +416,7 @@ class FLQPSQL(object):
             logger.info("SQL: %s", sql)
             logger.trace("Detalle:", stack_info=True)
 
-    def fetchAll(self, cursor, tablename, where_filter, fields, curname):
+    def fetchAll(self, cursor, tablename, where_filter, fields, curname) -> Any:
         ret_: List[str] = []
         try:
             ret_ = cursor.fetchall()
@@ -422,7 +427,7 @@ class FLQPSQL(object):
 
         return ret_
 
-    def existsTable(self, name):
+    def existsTable(self, name) -> bool:
         if not self.isOpen():
             return False
 
@@ -435,7 +440,7 @@ class FLQPSQL(object):
         del t
         return ok
 
-    def sqlCreateTable(self, tmd):
+    def sqlCreateTable(self, tmd) -> Optional[str]:
         util = FLUtil()
         if not tmd:
             return None
@@ -534,7 +539,7 @@ class FLQPSQL(object):
 
         return sql
 
-    def mismatchedTable(self, table1, tmd_or_table2, db_=None):
+    def mismatchedTable(self, table1: protocols.SupportsLower, tmd_or_table2: str, db_=None) -> bool:
         if db_ is None:
             db_ = self.db_
 
@@ -617,7 +622,7 @@ class FLQPSQL(object):
 
         return info
 
-    def decodeSqlType(self, type_):
+    def decodeSqlType(self, type_: _T0) -> Union[str, _T0]:
         ret = type_
 
         if type_ == 16:
@@ -637,7 +642,7 @@ class FLQPSQL(object):
 
         return ret
 
-    def recordInfo(self, tablename_or_query):
+    def recordInfo(self, tablename_or_query: str) -> Optional[List[list]]:
         if not self.isOpen():
             return None
 
@@ -681,7 +686,7 @@ class FLQPSQL(object):
 
         return info
 
-    def notEqualsFields(self, field1, field2):
+    def notEqualsFields(self, field1: Mapping[int, Any], field2: Mapping[int, Any]) -> bool:
         ret = False
         try:
             if not field1[2] == field2[2] and not field2[6]:
@@ -704,7 +709,7 @@ class FLQPSQL(object):
 
         return ret
 
-    def tables(self, typeName=None):
+    def tables(self, typeName=None) -> List[str]:
         tl: List[str] = []
         if not self.isOpen():
             return tl
@@ -729,10 +734,10 @@ class FLQPSQL(object):
         del t
         return tl
 
-    def normalizeValue(self, text):
+    def normalizeValue(self, text) -> Optional[str]:
         return None if text is None else str(text).replace("'", "''")
 
-    def hasCheckColumn(self, mtd):
+    def hasCheckColumn(self, mtd) -> bool:
         fieldList = mtd.fieldList()
         if not fieldList:
             return False
@@ -743,24 +748,24 @@ class FLQPSQL(object):
 
         return False
 
-    def constraintExists(self, name):
+    def constraintExists(self, name) -> bool:
         sql = "SELECT constraint_name FROM information_schema.table_constraints where constraint_name='%s'" % name
 
         q = FLSqlQuery(None, self.db_.dbAux())
 
         return q.exec_(sql) and q.size() > 0
 
-    def queryUpdate(self, name, update, filter):
+    def queryUpdate(self, name, update, filter) -> str:
         return """UPDATE %s SET %s WHERE %s RETURNING *""" % (name, update, filter)
 
-    def alterTable(self, mtd1, mtd2=None, key=None, force=False):
+    def alterTable(self, mtd1, mtd2=None, key: Sized = None, force=False) -> Any:
 
         if mtd2 is None:
             return self.alterTable3(mtd1)
         else:
             return self.alterTable2(mtd1, mtd2, key, force)
 
-    def alterTable3(self, newMTD):
+    def alterTable3(self, newMTD) -> bool:
         if self.hasCheckColumn(newMTD):
             return False
 
@@ -915,7 +920,7 @@ class FLQPSQL(object):
             q.exec_("DROP TABLE %s CASCADE" % renameOld)
         return True
 
-    def alterTable2(self, mtd1, mtd2, key, force=False):
+    def alterTable2(self, mtd1, mtd2, key: Sized, force=False) -> bool:
         # logger.warning("alterTable2 FIXME::Me quedo colgado al hacer createTable --> existTable")
         util = FLUtil()
 
@@ -1233,7 +1238,7 @@ class FLQPSQL(object):
 
         return True
 
-    def insertMulti(self, table_name, records):
+    def insertMulti(self, table_name, records: Iterable) -> bool:
 
         if not records:
             return False
@@ -1267,7 +1272,7 @@ class FLQPSQL(object):
 
         return True
 
-    def Mr_Proper(self):
+    def Mr_Proper(self) -> None:
         util = FLUtil()
         self.db_.dbAux().transaction()
 
@@ -1398,20 +1403,20 @@ class FLQPSQL(object):
 
         util.destroyProgressDialog()
 
-    def cascadeSupport(self):
+    def cascadeSupport(self) -> bool:
         return True
 
-    def canDetectLocks(self):
+    def canDetectLocks(self) -> bool:
         return True
 
-    def fix_query(self, query):
+    def fix_query(self, query: _T0) -> _T0:
         # ret_ = query.replace(";", "")
         return query
 
-    def desktopFile(self):
+    def desktopFile(self) -> bool:
         return False
 
-    def execute_query(self, q):
+    def execute_query(self, q) -> Any:
 
         if not self.isOpen():
             qWarning("PSQLDriver::execute_query. DB is closed")

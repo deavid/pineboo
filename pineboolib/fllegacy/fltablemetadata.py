@@ -5,7 +5,11 @@ from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
 from pineboolib import logging
 import copy
+import protocols
+from typing import Any, Optional, List, TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from pineboolib.fllegacy import flfieldmetadata
 
 """
 Mantiene la definicion de una tabla.
@@ -33,7 +37,7 @@ class FLTableMetaData(object):
     @param q (Opcional) Nombre de la consulta de la que define sus metadatos
     """
 
-    def __init__(self, n, a=None, q=None):
+    def __init__(self, n, a=None, q=None) -> None:
         super(FLTableMetaData, self).__init__()
         # tmp = None
 
@@ -46,16 +50,16 @@ class FLTableMetaData(object):
         else:
             self.inicializeNewFLTableMetaData(n, a, q)
 
-    def inicializeFLTableMetaData(self, other):
+    def inicializeFLTableMetaData(self, other) -> None:
         self.d = FLTableMetaDataPrivate()
         self.d.fieldNames_ = []
         self.copy(other)
 
-    def inicializeNewFLTableMetaData(self, n, a, q=None):
+    def inicializeNewFLTableMetaData(self, n, a, q=None) -> None:
         self.d = FLTableMetaDataPrivate(n, a, q)
         self.d.fieldNames_ = []
 
-    def inicializeFLTableMetaDataP(self, name):
+    def inicializeFLTableMetaDataP(self, name) -> None:
         self.d = FLTableMetaDataPrivate(name)
         self.d.compoundKey_ = FLCompoundKey()
         self.d.fieldNames_ = []
@@ -84,7 +88,7 @@ class FLTableMetaData(object):
     destructor
     """
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.d = None
 
     """
@@ -93,7 +97,7 @@ class FLTableMetaData(object):
     @return El nombre de la tabla que se describe
     """
 
-    def name(self):
+    def name(self) -> Any:
         return self.d.name_
 
     """
@@ -102,7 +106,7 @@ class FLTableMetaData(object):
     @param n Nombre de la tabla
     """
 
-    def setName(self, n):
+    def setName(self, n) -> None:
         # QObject::setName(n);
         self.d.name_ = n
 
@@ -112,7 +116,7 @@ class FLTableMetaData(object):
     @param a Alias
     """
 
-    def setAlias(self, a):
+    def setAlias(self, a) -> None:
         self.d.alias_ = a
 
     """
@@ -121,14 +125,14 @@ class FLTableMetaData(object):
     @param q Nombre de la consulta
     """
 
-    def setQuery(self, q):
+    def setQuery(self, q) -> None:
         self.d.query_ = q
 
     """
     Obtiene el alias asociado a la tabla
     """
 
-    def alias(self):
+    def alias(self) -> Any:
         return self.d.alias_
 
     """
@@ -140,14 +144,14 @@ class FLTableMetaData(object):
     cuando esta referencie a varias tablas.
     """
 
-    def query(self):
+    def query(self) -> Any:
         return self.d.query_
 
     """
     Obtiene si define los metadatos de una consulta
     """
 
-    def isQuery(self):
+    def isQuery(self) -> bool:
         return True if self.d.query_ else False
 
     """
@@ -156,7 +160,7 @@ class FLTableMetaData(object):
     @param f Objeto FLFieldMetaData con la descripción del campo a añadir
     """
 
-    def addFieldMD(self, f):
+    def addFieldMD(self, f: "flfieldmetadata.FLFieldMetaData") -> None:
         if f is None:
             return
         if not f.metadata():
@@ -175,7 +179,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo a eliminar
     """
 
-    def removeFieldMD(self, fN):
+    def removeFieldMD(self, fN: protocols.SupportsLower) -> None:
         if fN is None:
             return
 
@@ -188,7 +192,7 @@ class FLTableMetaData(object):
     @param cK Objeto FLCompoundKey con la descripción de la clave compuesta
     """
 
-    def setCompoundKey(self, cK):
+    def setCompoundKey(self, cK) -> None:
         self.d.compoundKey_ = cK
 
     """
@@ -197,7 +201,7 @@ class FLTableMetaData(object):
     @param prefixTable Si es TRUE se añade un prefijo con el nombre de la tabla; nombretabla.nombrecampo
     """
 
-    def primaryKey(self, prefixTable=False):
+    def primaryKey(self, prefixTable=False) -> Any:
         if not self.d.primaryKey_:
             return None
 
@@ -215,7 +219,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldNameToAlias(self, fN):
+    def fieldNameToAlias(self, fN: protocols.SupportsLower) -> Any:
 
         if not fN:
             return fN
@@ -232,7 +236,7 @@ class FLTableMetaData(object):
     @param aN Nombre del alias del campo
     """
 
-    def fieldAliasToName(self, aN):
+    def fieldAliasToName(self, aN: protocols.SupportsLower) -> Any:
 
         if not aN:
             return aN
@@ -249,7 +253,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldType(self, fN):
+    def fieldType(self, fN) -> Optional[int]:
         if not fN:
             return None
         fN = str(fN)
@@ -293,7 +297,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldIsPrimaryKey(self, fN):
+    def fieldIsPrimaryKey(self, fN) -> Any:
         if not fN:
             return None
         fN = str(fN)
@@ -309,7 +313,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldIsIndex(self, field_name=None):
+    def fieldIsIndex(self, field_name=None) -> Any:
 
         if field_name in self.fieldNames():
             return self.fieldNames().index(field_name)
@@ -324,7 +328,7 @@ class FLTableMetaData(object):
     @author Andrés Otón Urbano (baxas@eresmas.com)
     """
 
-    def fieldIsCounter(self, fN):
+    def fieldIsCounter(self, fN: protocols.SupportsLower) -> Any:
         if fN.isEmpty():
             return False
 
@@ -346,7 +350,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldAllowNull(self, fN):
+    def fieldAllowNull(self, fN: protocols.SupportsLower) -> Any:
         if fN.isEmpty():
             return False
 
@@ -368,7 +372,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldIsUnique(self, fN):
+    def fieldIsUnique(self, fN: protocols.SupportsLower) -> Any:
         if fN.isEmpty():
             return False
 
@@ -394,7 +398,7 @@ class FLTableMetaData(object):
       vacia sin el campo no está relacionado
     """
 
-    def fieldTableM1(self, fN):
+    def fieldTableM1(self, fN: protocols.SupportsLower) -> Any:
         if not fN:
             return False
 
@@ -419,7 +423,7 @@ class FLTableMetaData(object):
     @return El nombre del campo foráneo relacionado con el indicado
     """
 
-    def fieldForeignFieldM1(self, fN):
+    def fieldForeignFieldM1(self, fN: protocols.SupportsLower) -> Any:
         if not fN:
             return False
 
@@ -445,7 +449,7 @@ class FLTableMetaData(object):
       cuando esta exista. Si no existe devuelve False
     """
 
-    def relation(self, fN, fFN, fTN):
+    def relation(self, fN: protocols.SupportsLower, fFN, fTN) -> Any:
         if not fN:
             return False
 
@@ -479,7 +483,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldLength(self, fN):
+    def fieldLength(self, fN: protocols.SupportsLower) -> Any:
         if not fN:
             return
 
@@ -495,7 +499,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldPartInteger(self, fN):
+    def fieldPartInteger(self, fN: protocols.SupportsLower) -> Any:
         if not fN:
             return
 
@@ -511,7 +515,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldPartDecimal(self, fN):
+    def fieldPartDecimal(self, fN: protocols.SupportsLower) -> Any:
         if not fN:
             return
 
@@ -527,7 +531,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldCalculated(self, fN):
+    def fieldCalculated(self, fN: protocols.SupportsLower) -> Any:
         if not fN:
             return
 
@@ -543,7 +547,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldVisible(self, fN):
+    def fieldVisible(self, fN: protocols.SupportsLower) -> None:
 
         if not fN:
             return
@@ -560,7 +564,7 @@ class FLTableMetaData(object):
     @return Un objeto FLFieldMetaData con lainformación o metadatos de un campo dado
     """
 
-    def field(self, fN):
+    def field(self, fN: protocols.SupportsLower) -> Any:
         if not fN:
             return
 
@@ -583,11 +587,10 @@ class FLTableMetaData(object):
     @return Cadena de caracteres con los nombres de los campos separados por comas
     """
 
-    def fieldList(self, prefix_table=False):
+    def fieldList(self) -> Any:
+        return self.d.fieldList_
 
-        if not prefix_table:
-            return self.d.fieldList_
-
+    def fieldListArray(self, prefix_table=False) -> List[str]:
         listado = []
         cadena = "%s." % self.name() if prefix_table else ""
 
@@ -600,7 +603,7 @@ class FLTableMetaData(object):
     #    #print("FiledList count", len(self.d.fieldList_))
     #    return self.d.fieldList_
 
-    def indexPos(self, field_name=None):
+    def indexPos(self, field_name=None) -> Any:
         return self.fieldIsIndex(field_name)
 
     """
@@ -613,7 +616,7 @@ class FLTableMetaData(object):
       que el campo consultado no pertenezca a ninguna clave compuesta devuelve 0
     """
 
-    def fieldListOfCompoundKey(self, fN):
+    def fieldListOfCompoundKey(self, fN) -> Any:
         if self.d.compoundKey_:
             if self.d.compoundKey_.hasField(fN):
                 return self.d.compoundKey_.fieldList()
@@ -626,28 +629,28 @@ class FLTableMetaData(object):
     se han añadido con el método addFieldMD() o addFieldName()
     """
 
-    def fieldNames(self):
+    def fieldNames(self) -> Any:
         return self.d.fieldNames_
 
     """
     Lista de nombres de campos de la tabla que son del tipo FLFieldMetaData::Unlock
     """
 
-    def fieldNamesUnlock(self):
+    def fieldNamesUnlock(self) -> Any:
         return self.d.fieldNamesUnlock_
 
     """
     @return El indicador FLTableMetaData::concurWarn_
     """
 
-    def concurWarn(self):
+    def concurWarn(self) -> Any:
         return self.d.concurWarn_
 
     """
     Establece el indicador FLTableMetaData::concurWarn_
     """
 
-    def setConcurWarn(self, b=True):
+    def setConcurWarn(self, b=True) -> None:
         self.d.concurWarn_ = b
 
     """
@@ -662,40 +665,40 @@ class FLTableMetaData(object):
     Establece el indicador FLTableMetaData::detectLocks_
     """
 
-    def setDetectLocks(self, b=True):
+    def setDetectLocks(self, b=True) -> None:
         self.d.detectLocks_ = b
 
     """
     Establece el nombre de función a llamar para Full Text Search
     """
 
-    def FTSFunction(self):
+    def FTSFunction(self) -> Any:
         return self.d.ftsfun_
 
-    def setFTSFunction(self, ftsfun):
+    def setFTSFunction(self, ftsfun) -> None:
         self.d.ftsfun_ = ftsfun
 
     """
     Indica si lo metadatos están en caché (FLManager::cacheMetaData_)
     """
 
-    def inCache(self):
+    def inCache(self) -> Any:
         return self.d and self.d.inCache_
 
     """
     Establece si lo metadatos están en caché (FLManager::cacheMetaData_)
     """
 
-    def setInCache(self, b=True):
+    def setInCache(self, b=True) -> None:
         self.d.inCache_ = b
 
-    def copy(self, other):
+    def copy(self, other) -> None:
         if other == self:
             return
 
         self.d = copy.copy(other.d)
 
-    def indexFieldObject(self, position, show_exception=True):
+    def indexFieldObject(self, position, show_exception=True) -> Any:
         i = 0
         ret = None
         for field in self.d.fieldList_:
@@ -792,7 +795,7 @@ class FLTableMetaDataPrivate:
 
     count_ = 0
 
-    def __init__(self, n=None, a=None, q=None):
+    def __init__(self, n: protocols.SupportsLower = None, a=None, q=None) -> None:
         self.fieldList_ = []
         self.fieldNamesUnlock_ = []
         self.aliasFieldMap_ = {}
@@ -806,11 +809,11 @@ class FLTableMetaDataPrivate:
             self.inicializeNewFLTableMetaDataPrivate(n, a, q)
         self.count_ = self.count_ + 1
 
-    def inicializeFLTableMetaDataPrivate(self):
+    def inicializeFLTableMetaDataPrivate(self) -> None:
         self.compoundKey_ = None
         self.inCache = False
 
-    def inicializeNewFLTableMetaDataPrivate(self, n, a, q=None):
+    def inicializeNewFLTableMetaDataPrivate(self, n: protocols.SupportsLower, a, q=None) -> None:
         self.name_ = n.lower()
         self.alias_ = a
         self.compoundKey_ = 0
@@ -819,7 +822,7 @@ class FLTableMetaDataPrivate:
         self.detectLocks_ = False
         self.inCache_ = False
 
-    def inicializeFLTableMetaDataPrivateS(self, name):
+    def inicializeFLTableMetaDataPrivateS(self, name) -> None:
         self.name_ = str(name)
         self.alias_ = self.name_
 
@@ -829,7 +832,7 @@ class FLTableMetaDataPrivate:
     @param n Nombre del campo
     """
 
-    def addFieldName(self, n):
+    def addFieldName(self, n: protocols.SupportsLower) -> None:
         self.fieldNames_.append(n.lower())
 
     """
@@ -838,7 +841,7 @@ class FLTableMetaDataPrivate:
     @param n Nombre del campo
     """
 
-    def removeFieldName(self, n):
+    def removeFieldName(self, n) -> None:
 
         if self.fieldNames_:
             oldFN = self.fieldNames_
@@ -853,7 +856,7 @@ class FLTableMetaDataPrivate:
     @param  f   Campo objeto cuyo alias se desea formatear
     """
 
-    def formatAlias(self, f=None):
+    def formatAlias(self, f=None) -> None:
         if f is None:
             return
 
@@ -874,7 +877,7 @@ class FLTableMetaDataPrivate:
     Limpia la lista de definiciones de campos
     """
 
-    def clearFieldList(self):
+    def clearFieldList(self) -> None:
         self.fieldList_ = []
         self.fieldNames_ = []
 

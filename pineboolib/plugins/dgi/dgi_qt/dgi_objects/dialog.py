@@ -2,6 +2,7 @@ from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qdialog import QDialog
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qpushbutton import QPushButton
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qtabwidget import QTabWidget
 from PyQt5 import QtCore, QtWidgets  # type: ignore
+from typing import Any
 
 
 class Dialog(QDialog):
@@ -13,7 +14,7 @@ class Dialog(QDialog):
     cancelButton = None
     _tab = None
 
-    def __init__(self, title=None, f=None, desc=None):
+    def __init__(self, title=None, f=None, desc=None) -> None:
         # FIXME: f no lo uso , es qt.windowsflg
         super(Dialog, self).__init__()
         if title:
@@ -35,10 +36,10 @@ class Dialog(QDialog):
         self.oKButtonText = None
         self.cancelButtonText = None
 
-    def add(self, _object):
+    def add(self, _object) -> None:
         self._layout.addWidget(_object)
 
-    def exec_(self):
+    def exec_(self) -> Any:
         if self.okButtonText:
             self.okButton.setText(str(self.okButtonText))
         if self.cancelButtonText:
@@ -47,12 +48,12 @@ class Dialog(QDialog):
 
         return super(Dialog, self).exec_()
 
-    def newTab(self, name):
+    def newTab(self, name) -> None:
         if self._tab.isHidden():
             self._tab.show()
         self._tab.addTab(QtWidgets.QWidget(), str(name))
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         if name == "caption":
             name = self.setWindowTitle
 

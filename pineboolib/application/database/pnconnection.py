@@ -4,16 +4,21 @@
 """
 from PyQt5 import QtCore, QtWidgets  # type: ignore
 
+from pineboolib.core.utils.logging import logging
 from pineboolib.core.settings import config
 from pineboolib.core import decorators
 from pineboolib.interfaces.iconnection import IConnection
 from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
+from pineboolib.interfaces.iapicursor import IApiCursor
 from .pnsqlsavepoint import PNSqlSavePoint
 from . import db_signals
-from pineboolib.core.utils.logging import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any, TYPE_CHECKING
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from pineboolib.fllegacy import flmanager
+    from pineboolib.fllegacy import flmanagermodules
 
 
 class PNConnection(QtCore.QObject, IConnection):
@@ -25,7 +30,6 @@ class PNConnection(QtCore.QObject, IConnection):
     db_userName = None
     db_password = None
     conn = None
-    connAux = None
     driverSql = None
     transaction_ = None
     _managerModules = None
@@ -35,17 +39,16 @@ class PNConnection(QtCore.QObject, IConnection):
     queueSavePoints_: List[PNSqlSavePoint] = None
     interactiveGUI_ = None
     _dbAux = None
-    name = None
     _isOpen = False
     driver_ = None
 
-    def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name=None):
+    def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name=None) -> None:
         from .pnsqldrivers import PNSqlDrivers
 
         super(PNConnection, self).__init__()
         self.currentSavePoint_: Optional[PNSqlSavePoint] = None
         self.driverSql = PNSqlDrivers()
-        self.connAux = {}
+        self.connAux: Dict[str, "PNConnection"] = {}
         if name is None:
             self.name = "default"
         else:
@@ -82,39 +85,40 @@ class PNConnection(QtCore.QObject, IConnection):
     def finish(self):
         pass
 
-    def connectionName(self):
+    def connectionName(self) -> Any:
         """Get the current connection name for this cursor."""
         return self.name
 
-    def useConn(self, name="default"):
+    def useConn(self, name="default") -> IConnection:
         """Select another connection which can be not the default one.
 
         Permite seleccionar una conexion que no es la default, Si no existe la crea
         """
-        if isinstance(name, PNConnection):
+        if isinstance(name, IConnection):
             name = name.connectionName()
 
         if name in ("default", None):
             return self
 
-        if name in self.connAux.keys():
-            return self.connAux[name]
+        connection: IConnection = self.connAux.get(name, None)
 
-        self.connAux[name] = PNConnection(
-            self.db_name,
-            self.db_host,
-            self.db_port,
-            self.db_userName,
-            self.db_password,
-            self.driverSql.nameToAlias(self.driverName()),
-            name,
-        )
-        return self.connAux[name]
+        if connection is None:
+            connection = PNConnection(
+                self.db_name,
+                self.db_host,
+                self.db_port,
+                self.db_userName,
+                self.db_password,
+                self.driverSql.nameToAlias(self.driverName()),
+                name,
+            )
+            self.connAux[name] = connection
+        return connection
 
     def dictDatabases(self) -> Dict[str, IConnection]:
         return self.connAux
 
-    def removeConn(self, name="default"):
+    def removeConn(self, name="default") -> bool:
         try:
             self.useConn(name).conn.close()
             self.connAux[name] = None
@@ -124,19 +128,19 @@ class PNConnection(QtCore.QObject, IConnection):
 
         return True
 
-    def isOpen(self):
+    def isOpen(self) -> bool:
         return self._isOpen
 
-    def tables(self):
+    def tables(self) -> Any:
         return self.driver().tables()
 
-    def database(self, name=None):
+    def database(self, name=None) -> IConnection:
         if name is None:
-            return self.DBName()
+            return self
 
         return self.useConn(name)
 
-    def DBName(self):
+    def DBName(self) -> str:
         try:
             return self.driver().DBName()
         except Exception as e:
@@ -155,10 +159,10 @@ class PNConnection(QtCore.QObject, IConnection):
     def declarative_base(self):
         return self.driver().declarative_base()
 
-    def cursor(self):
+    def cursor(self) -> IApiCursor:
         return self.conn.cursor()
 
-    def conectar(self, db_name, db_host, db_port, db_userName, db_password):
+    def conectar(self, db_name, db_host, db_port, db_userName, db_password) -> Any:
 
         self.db_name = db_name
         self.db_host = db_host
@@ -170,34 +174,34 @@ class PNConnection(QtCore.QObject, IConnection):
 
         return self.driver().connect(db_name, db_host, db_port, db_userName, db_password)
 
-    def driverName(self):
+    def driverName(self) -> Any:
         return self.driver().driverName()
 
-    def driverAlias(self):
+    def driverAlias(self) -> Any:
         return self.driver().alias_
 
-    def driverNameToDriverAlias(self, name):
+    def driverNameToDriverAlias(self, name) -> Any:
         return self.driverSql.nameToAlias(name)
 
-    def lastError(self):
+    def lastError(self) -> Any:
         return self.driver().lastError()
 
-    def host(self):
+    def host(self) -> Any:
         return self.db_host
 
-    def port(self):
+    def port(self) -> Any:
         return self.db_port
 
-    def user(self):
+    def user(self) -> Any:
         return self.db_userName
 
-    def password(self):
+    def password(self) -> Any:
         return self.db_password
 
-    def seek(self, offs, whence=0):
+    def seek(self, offs, whence=0) -> Any:
         return self.conn.seek(offs, whence)
 
-    def manager(self):
+    def manager(self) -> "flmanager.FLManager":
         if not self._manager:
             # FIXME: Should not load from FL*
             from pineboolib.fllegacy.flmanager import FLManager
@@ -218,29 +222,28 @@ class PNConnection(QtCore.QObject, IConnection):
     def setQsaExceptions(self, b):
         pass
 
-    def db(self):
+    def db(self) -> IConnection:
         return self
 
-    def dbAux(self):
-        ret = self.useConn("dbAux")
-        return ret
+    def dbAux(self) -> IConnection:
+        return self.useConn("dbAux")
 
-    def formatValue(self, t, v, upper):
+    def formatValue(self, t, v, upper) -> Any:
         return self.driver().formatValue(t, v, upper)
 
-    def formatValueLike(self, t, v, upper):
+    def formatValueLike(self, t, v, upper) -> Any:
         return self.driver().formatValueLike(t, v, upper)
 
-    def canSavePoint(self):
+    def canSavePoint(self) -> Any:
         return self.dbAux().driver().canSavePoint()
 
-    def canTransaction(self):
+    def canTransaction(self) -> Any:
         return self.driver().canTransaction()
 
     def lastActiveCursor(self):
         return self.lastActiveCursor_
 
-    def doTransaction(self, cursor):
+    def doTransaction(self, cursor) -> bool:
         if not cursor or not self.db():
             return False
 
@@ -299,10 +302,10 @@ class PNConnection(QtCore.QObject, IConnection):
                 cursor.d.transactionsOpened_.append(self.transaction_)
             return True
 
-    def transactionLevel(self):
+    def transactionLevel(self) -> int:
         return self.transaction_
 
-    def doRollback(self, cur):
+    def doRollback(self, cur) -> bool:
         if not cur or not self.conn:
             return False
 
@@ -406,10 +409,10 @@ class PNConnection(QtCore.QObject, IConnection):
             cur.d.modeAccess_ = CursorAccessMode.Browse
             return True
 
-    def interactiveGUI(self):
+    def interactiveGUI(self) -> bool:
         return self.interactiveGUI_
 
-    def doCommit(self, cur, notify=True):
+    def doCommit(self, cur, notify=True) -> bool:
         if not cur and not self.db():
             return False
 
@@ -497,19 +500,19 @@ class PNConnection(QtCore.QObject, IConnection):
 
             return True
 
-    def canDetectLocks(self):
+    def canDetectLocks(self) -> Any:
         if not self.db():
             return False
 
         return self.driver().canDetectLocks()
 
-    def commit(self):
+    def commit(self) -> Any:
         if not self.db():
             return False
 
         return self.driver().commitTransaction()
 
-    def managerModules(self):
+    def managerModules(self) -> "flmanagermodules.FLManagerModules":
         if not self._managerModules:
             from pineboolib.fllegacy.flmanagermodules import FLManagerModules
 
@@ -517,19 +520,19 @@ class PNConnection(QtCore.QObject, IConnection):
 
         return self._managerModules
 
-    def canOverPartition(self):
+    def canOverPartition(self) -> Any:
         if not self.db():
             return False
 
         return self.dbAux().driver().canOverPartition()
 
-    def savePoint(self, savePoint):
+    def savePoint(self, savePoint) -> Any:
         if not self.db():
             return False
 
         return self.driver().savePoint(savePoint)
 
-    def releaseSavePoint(self, savePoint):
+    def releaseSavePoint(self, savePoint) -> Any:
         if not self.db():
             return False
 
@@ -541,43 +544,43 @@ class PNConnection(QtCore.QObject, IConnection):
 
         self.dbAux().driver().Mr_Proper()
 
-    def rollbackSavePoint(self, savePoint):
+    def rollbackSavePoint(self, savePoint) -> Any:
         if not self.db():
             return False
 
         return self.driver().rollbackSavePoint(savePoint)
 
-    def transaction(self):
+    def transaction(self) -> Any:
         if not self.db():
             return False
 
         return self.driver().transaction()
 
-    def commitTransaction(self):
+    def commitTransaction(self) -> Any:
         if not self.db():
             return False
 
         return self.driver().commitTransaction()
 
-    def rollbackTransaction(self):
+    def rollbackTransaction(self) -> Any:
         if not self.db():
             return False
 
         return self.driver().rollbackTransaction()
 
-    def nextSerialVal(self, table, field):
+    def nextSerialVal(self, table, field) -> Any:
         if not self.db():
             return False
 
         return self.dbAux().driver().nextSerialVal(table, field)
 
-    def existsTable(self, name):
+    def existsTable(self, name) -> Any:
         if not self.db():
             return False
 
         return self.dbAux().driver().existsTable(name)
 
-    def createTable(self, tmd):
+    def createTable(self, tmd) -> bool:
         if not self.db():
             return False
 
@@ -601,31 +604,31 @@ class PNConnection(QtCore.QObject, IConnection):
 
         return True
 
-    def mismatchedTable(self, tablename, tmd):
+    def mismatchedTable(self, tablename, tmd) -> Any:
         if not self.db():
             return None
 
         return self.dbAux().driver().mismatchedTable(tablename, tmd, self)
 
-    def normalizeValue(self, text):
+    def normalizeValue(self, text) -> Any:
         if getattr(self.driver(), "normalizeValue", None):
             return self.driver().normalizeValue(text)
 
         logger.warning("PNConnection: El driver %s no dispone de normalizeValue(text)", self.driverName())
         return text
 
-    def queryUpdate(self, name, update, filter):
+    def queryUpdate(self, name, update, filter) -> Any:
         if not self.db():
             return None
 
         return self.driver().queryUpdate(name, update, filter)
 
-    def execute_query(self, q):
+    def execute_query(self, q) -> Any:
         if not self.db():
             return None
         return self.driver().execute_query(q)
 
-    def alterTable(self, mtd_1, mtd_2, key, force=False):
+    def alterTable(self, mtd_1, mtd_2, key, force=False) -> Any:
         if not self.db():
             return None
 

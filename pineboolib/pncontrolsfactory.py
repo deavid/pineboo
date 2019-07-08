@@ -42,7 +42,7 @@ def resolveObject(name: str) -> Any:
     return ObjectNotFoundInCurrentDGI
 
 
-def reload_from_DGI():
+def reload_from_DGI() -> None:
     # Clases Qt
     global QComboBox, QTable, QLayoutWidget, QToolButton, QTabWidget, QLabel, QGroupBox, QListView, QPushButton, QTextEdit
     global QLineEdit, QDateEdit, QTimeEdit, QCheckBox, QWidget, QtWidgets, QColor, QMessageBox, QButtonGroup, QDialog
@@ -176,10 +176,10 @@ def reload_from_DGI():
 
 
 class System_class(object):
-    def setenv(self, name, val):
+    def setenv(self, name, val) -> None:
         os.environ[name] = val
 
-    def getenv(self, name):
+    def getenv(self, name) -> str:
         ret_ = ""
         if name in os.environ.keys():
             ret_ = os.environ[name]
@@ -193,7 +193,7 @@ System = System_class()
 class ProxySlot:
     PROXY_FUNCTIONS = {}
 
-    def __init__(self, remote_fn, receiver, slot):
+    def __init__(self, remote_fn: types.MethodType, receiver, slot) -> None:
         self.key = "%r.%r->%r" % (remote_fn, receiver, slot)
         if self.key not in self.PROXY_FUNCTIONS:
             weak_fn = weakref.WeakMethod(remote_fn)
@@ -201,11 +201,11 @@ class ProxySlot:
             self.PROXY_FUNCTIONS[self.key] = proxy_fn(weak_fn, weak_receiver, slot)
         self.proxy_function = self.PROXY_FUNCTIONS[self.key]
 
-    def getProxyFn(self):
+    def getProxyFn(self) -> Callable:
         return self.proxy_function
 
 
-def get_expected_args_num(inspected_function):
+def get_expected_args_num(inspected_function) -> int:
     expected_args = inspect.getargspec(inspected_function)[0]
     args_num = len(expected_args)
 
@@ -215,12 +215,12 @@ def get_expected_args_num(inspected_function):
     return args_num
 
 
-def get_expected_kwargs(inspected_function):
+def get_expected_kwargs(inspected_function) -> bool:
     expected_kwargs = inspect.getargspec(inspected_function)[2]
     return True if expected_kwargs else False
 
 
-def proxy_fn(wf, wr, slot):
+def proxy_fn(wf, wr, slot) -> Callable:
     def fn(*args, **kwargs):
         f = wf()
         if not f:
@@ -239,7 +239,7 @@ def proxy_fn(wf, wr, slot):
     return fn
 
 
-def slot_done(fn, signal, sender, caller):
+def slot_done(fn, signal, sender, caller) -> Callable:
     def new_fn(*args, **kwargs):
 
         res = False
@@ -316,7 +316,9 @@ def disconnect(sender, signal, receiver, slot, caller=None) -> Optional[Tuple[An
     return signal_slot
 
 
-def solve_connection(sender, signal, receiver, slot):
+def solve_connection(
+    sender, signal: Union[protocols.SupportsReplace, Container], receiver, slot: Union[str, protocols.SupportsEndswith, Mapping[slice, Any]]
+) -> Optional[Union[bool, Tuple[Any, Any]]]:
     if sender is None:
         logger.error("Connect Error:: %s %s %s %s", sender, signal, receiver, slot)
         return False
@@ -376,7 +378,7 @@ def solve_connection(sender, signal, receiver, slot):
     return False
 
 
-def GET(function_name, arguments=[], conn=None):
+def GET(function_name, arguments=[], conn=None) -> Any:
     if conn is None:
         conn = project.conn
     if hasattr(conn.driver(), "send_to_server"):
@@ -385,7 +387,7 @@ def GET(function_name, arguments=[], conn=None):
         return "Funcionalidad no soportada"
 
 
-def check_gc_referrers(typename, w_obj, name):
+def check_gc_referrers(typename, w_obj: Callable, name) -> None:
     import threading
     import time
 
@@ -419,14 +421,14 @@ def check_gc_referrers(typename, w_obj, name):
 
 
 class QEventLoop(QtCore.QEventLoop):
-    def exitLoop(self):
+    def exitLoop(self) -> None:
         super().exit()
 
-    def enterLoop(self):
+    def enterLoop(self) -> None:
         super().exec_()
 
 
-def print_stack(maxsize=1):
+def print_stack(maxsize=1) -> None:
     for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
         print(tb.rstrip())
 
@@ -436,6 +438,14 @@ def print_stack(maxsize=1):
 from pineboolib.packager.aqunpacker import AQUnpacker  # noqa:
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData  # noqa:
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
+import protocols
+import types
+from typing import Callable, Container, Mapping, TypeVar, Union
+
+_T0 = TypeVar("_T0")
+_T1 = TypeVar("_T1")
+_T2 = TypeVar("_T2")
+_T3 = TypeVar("_T3")
 
 # aqApp -- imported from loader.main after reload_from_DGI() call, as it is a cyclic dependency
 

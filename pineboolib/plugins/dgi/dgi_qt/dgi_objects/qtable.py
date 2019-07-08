@@ -8,6 +8,11 @@ from pineboolib.core.utils.utils_base import format_double
 from PyQt5.QtWidgets import QAbstractItemView  # type: ignore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
 from typing import Optional
+from typing import Any, TypeVar
+
+_T0 = TypeVar("_T0")
+
+_T0 = TypeVar("_T0")
 
 
 class QTable(QtWidgets.QTableWidget):
@@ -45,19 +50,19 @@ class QTable(QtWidgets.QTableWidget):
         self.resize_policy = 0  # Default
         self.sort_column_ = None
 
-    def currentChanged_(self, current_row, current_column, previous_row, previous_column):
+    def currentChanged_(self, current_row, current_column, previous_row, previous_column) -> None:
         if current_row > -1 and current_column > -1:
             self.CurrentChanged.emit(current_row, current_column)
             pass
 
-    def doubleClicked_(self, f, c):
+    def doubleClicked_(self, f, c) -> None:
         self.doubleClicked.emit(f, c)
 
     @decorators.NotImplementedWarn
     def setResizePolicy(self, pol):
         self.resize_policy = pol
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         if name == "Multi":
             return self.MultiSelection
         elif name == "SpreadSheet":
@@ -66,18 +71,18 @@ class QTable(QtWidgets.QTableWidget):
             print("FIXME:QTable:", name)
             return getattr(QtCore.Qt, name, None)
 
-    def valueChanged_(self, item=None):
+    def valueChanged_(self, item=None) -> None:
 
         if item and self.text(item.row(), item.column()) != "":
             self.valueChanged.emit(item.row(), item.column())
 
-    def numRows(self):
+    def numRows(self) -> Any:
         return self.rowCount()
 
-    def numCols(self):
+    def numCols(self) -> Any:
         return self.columnCount()
 
-    def setCellAlignment(self, row, col, alig_):
+    def setCellAlignment(self, row, col, alig_) -> None:
         self.item(row, col).setTextAlignment(alig_)
 
     def setNumCols(self, n: int) -> None:
@@ -87,13 +92,13 @@ class QTable(QtWidgets.QTableWidget):
     def setNumRows(self, n: int) -> None:
         self.setRowCount(n)
 
-    def setReadOnly(self, b):
+    def setReadOnly(self, b) -> None:
         if b:
             self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         else:
             self.setEditTriggers(QtWidgets.QAbstractItemView.AllEditTriggers)
 
-    def selectionMode(self):
+    def selectionMode(self) -> Any:
         return super(QTable, self).selectionMode()
 
     def setFocusStyle(self, m: str) -> None:
@@ -110,11 +115,11 @@ class QTable(QtWidgets.QTableWidget):
                 self.cols_list.append(array_[i])
         self.setHorizontalHeaderLabels(self.cols_list)
 
-    def setRowLabels(self, separator, lista):
+    def setRowLabels(self, separator, lista) -> None:
         array_ = lista.split(separator)
         self.setVerticalHeaderLabels(array_)
 
-    def clear(self):
+    def clear(self) -> None:
         super().clear()
         for i in range(self.rowCount()):
             self.removeRow(i)
@@ -127,27 +132,27 @@ class QTable(QtWidgets.QTableWidget):
         else:
             super().setSelectionMode(mode)
 
-    def setColumnStrechable(self, col, b):
+    def setColumnStrechable(self, col, b) -> None:
         if b:
             self.horizontalHeader().setSectionResizeMode(col, Qt.QHeaderView.Stretch)
         else:
             self.horizontalHeader().setSectionResizeMode(col, Qt.QHeaderView.AdjustToContents)
 
-    def setHeaderLabel(self, l):
+    def setHeaderLabel(self, l) -> None:
         self.cols_list.append(l)
         self.setColumnLabels(",", ",".join(self.cols_list))
 
-    def insertRows(self, numero, n=1):
+    def insertRows(self, numero, n: int = 1) -> None:
         for r in range(n):
             self.insertRow(numero)
 
-    def text(self, row, col):
+    def text(self, row, col) -> Any:
         if row is None:
             return
 
         return self.item(row, col).text() if self.item(row, col) else None
 
-    def setText(self, row, col, value):
+    def setText(self, row, col, value) -> None:
         prev_item = self.item(row, col)
         if prev_item:
             bg_color = prev_item.background()
@@ -175,7 +180,7 @@ class QTable(QtWidgets.QTableWidget):
             else:
                 new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
 
-    def setCellWidget(self, row, col, obj):
+    def setCellWidget(self, row, col, obj) -> None:
         super().setCellWidget(row, col, obj)
 
         widget = self.cellWidget(row, col)
@@ -183,10 +188,10 @@ class QTable(QtWidgets.QTableWidget):
             if row in self.read_only_rows or col in self.read_only_cols:
                 widget.setEnabled(False)
 
-    def adjustColumn(self, k):
+    def adjustColumn(self, k) -> None:
         self.horizontalHeader().setSectionResizeMode(k, QtWidgets.QHeaderView.ResizeToContents)
 
-    def setRowReadOnly(self, row, b):
+    def setRowReadOnly(self, row, b) -> None:
         if b:
             if row in self.read_only_rows:
                 return
@@ -205,7 +210,7 @@ class QTable(QtWidgets.QTableWidget):
                     QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
                 )
 
-    def setColumnReadOnly(self, col, b):
+    def setColumnReadOnly(self, col, b) -> None:
         if b:
             if col in self.read_only_cols:
                 return
@@ -228,16 +233,16 @@ class QTable(QtWidgets.QTableWidget):
     def setLeftMargin(self, n):
         pass
 
-    def setCellBackgroundColor(self, row, col, color):
+    def setCellBackgroundColor(self, row, col, color) -> None:
         item = self.item(row, col)
 
         if item is not None and color:
             item.setBackground(color)
 
-    def getSorting(self):
+    def getSorting(self) -> Any:
         return self.sort_column_
 
-    def setSorting(self, col):
+    def setSorting(self, col) -> None:
         if not super().isSortingEnabled():
             super().setSortingEnabled(True)
         super().sortByColumn(col, QtCore.Qt.AscendingOrder)
@@ -245,5 +250,5 @@ class QTable(QtWidgets.QTableWidget):
 
     sorting = property(getSorting, setSorting)
 
-    def editCell(self, row, col):
+    def editCell(self, row, col) -> None:
         self.editItem(self.item(row, col))

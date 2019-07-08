@@ -9,6 +9,7 @@ from pineboolib.core import decorators
 from pineboolib.application import project
 
 from pineboolib.core.utils.logging import logging
+from typing import Any
 
 logger = logging.getLogger("fllegacy.systype")
 
@@ -50,7 +51,7 @@ class SysType(object, metaclass=Singleton):
     def isDebuggerEnabled(self) -> bool:
         return bool(config.value("application/dbadmin_enabled", False))
 
-    def isQuickBuild(self):
+    def isQuickBuild(self) -> bool:
         return not self.isDebuggerEnabled()
 
     def isLoadedModule(self, modulename: str) -> bool:
@@ -84,19 +85,19 @@ class SysType(object, metaclass=Singleton):
         else:
             return platform.system()
 
-    def nameBD(self):
+    def nameBD(self) -> Any:
         return project.conn.DBName()
 
     def toUnicode(self, val: str, format: str) -> str:
         return val.encode(format).decode("utf-8", "replace")
 
-    def fromUnicode(self, val, format):
+    def fromUnicode(self, val, format) -> Any:
         return val.encode("utf-8").decode(format, "replace")
 
-    def Mr_Proper(self):
+    def Mr_Proper(self) -> None:
         project.conn.Mr_Proper()
 
-    def installPrefix(self):
+    def installPrefix(self) -> str:
         from pineboolib.core.utils.utils_base import filedir
 
         return filedir("..")
@@ -109,7 +110,7 @@ class SysType(object, metaclass=Singleton):
                 logger.warn("No action found for 'sys'")
         return getattr(self.sys_widget, fun_, None)
 
-    def installACL(self, idacl):
+    def installACL(self, idacl) -> None:
         # acl_ = project.acl()
         acl_ = None  # FIXME: Add ACL later
         if acl_:
@@ -121,7 +122,7 @@ class SysType(object, metaclass=Singleton):
     def processEvents(self) -> None:
         return project._DGI.processEvents()
 
-    def write(self, encode_, dir_, contenido):
+    def write(self, encode_: str, dir_: str, contenido: str) -> None:
         import codecs
 
         f = codecs.open(dir_, encoding=encode_, mode="w+")
@@ -129,31 +130,31 @@ class SysType(object, metaclass=Singleton):
         f.seek(0)
         f.close()
 
-    def cleanupMetaData(self, connName="default"):
+    def cleanupMetaData(self, connName="default") -> None:
         project.conn.useConn(connName).manager().cleanupMetaData()
 
-    def updateAreas(self):
+    def updateAreas(self) -> None:
         from pineboolib.fllegacy.flapplication import aqApp
 
         aqApp.initToolBox()
 
-    def reinit(self):
+    def reinit(self) -> None:
         from pineboolib.fllegacy.flapplication import aqApp
 
         aqApp.reinit()
 
-    def setCaptionMainWidget(self, t):
+    def setCaptionMainWidget(self, t) -> None:
         from pineboolib.fllegacy.flapplication import aqApp
 
         aqApp.setCaptionMainWidget(t)
 
-    def nameDriver(self, connName="default"):
+    def nameDriver(self, connName="default") -> Any:
         return project.conn.useConn(connName).driverName()
 
-    def nameHost(self, connName="default"):
+    def nameHost(self, connName="default") -> Any:
         return project.conn.useConn(connName).host()
 
-    def addDatabase(self, *args):
+    def addDatabase(self, *args) -> bool:
         # def addDatabase(self, driver_name = None, db_name = None, db_user_name = None,
         #                 db_password = None, db_host = None, db_port = None, connName="default"):
         if len(args) == 1:
@@ -185,9 +186,9 @@ class SysType(object, metaclass=Singleton):
 
         return True
 
-    def removeDatabase(self, connName="default"):
+    def removeDatabase(self, connName="default") -> Any:
         return project.conn.useConn(connName).removeConn(connName)
 
-    def idSession(self):
+    def idSession(self) -> Any:
         # FIXME: Code copied from flapplication.aqApp
         return self.time_user_.toString(QtCore.Qt.ISODate)

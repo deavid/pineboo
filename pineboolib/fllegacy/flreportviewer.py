@@ -15,6 +15,7 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flstylepainter import FLStylePainter
 from pineboolib.fllegacy.flreportengine import FLReportEngine
 from pineboolib import logging
+from typing import Any, List, Mapping, Sized, Union
 
 
 AQ_USRHOME = "."  # FIXME
@@ -27,7 +28,7 @@ class FLReportViewer(QObject):
     Display = None
     PageBreak = None
 
-    def __init__(self, parent=None, name=0, embedInParent=False, rptEngine=None):
+    def __init__(self, parent=None, name=0, embedInParent=False, rptEngine=None) -> None:
         # pParam = 0 if parent and embedInParent else 0
         # pParam = pParam | Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint
         # pParam = pParam | 0 | Qt.Dialog | Qt.WindowModal
@@ -106,13 +107,13 @@ class FLReportViewer(QObject):
 
         self.report_ = self.rptViewer_.reportPages()
 
-    def rptViewer(self):
+    def rptViewer(self) -> internalReportViewer:
         return self.rptViewer_
 
-    def rptEngine(self):
+    def rptEngine(self) -> Any:
         return self.rptEngine_
 
-    def setReportEngine(self, r=None):
+    def setReportEngine(self, r=None) -> None:
         if self.rptEngine_ == r:
             return
 
@@ -142,7 +143,7 @@ class FLReportViewer(QObject):
         if noSigDestroy:
             self.rptViewer_.setReportEngine(self.rptEngine_)
 
-    def exec_(self):
+    def exec_(self) -> None:
         # if self.loop_:
         #    print("FLReportViewer::exec(): Se ha detectado una llamada recursiva")
         #    return
@@ -200,7 +201,7 @@ class FLReportViewer(QObject):
                 if inter.width() * inter.height() > (geodim / 20):
                     self.move(geo.topLeft())
 
-    def renderReport(self, init_row=0, init_col=0, append_or_flags=None, display_report=None):
+    def renderReport(self, init_row=0, init_col=0, append_or_flags: Union[Sized, Mapping[int, Any]] = None, display_report=None) -> Any:
 
         if not self.rptEngine_:
             return False
@@ -519,7 +520,7 @@ class FLReportViewer(QObject):
         self.printing_ = False
         self.setDisabled(False)
 
-    def setReportData(self, d):
+    def setReportData(self, d) -> Any:
         if isinstance(d, FLSqlQuery):
             self.qry_ = d
             if self.rptEngine_ and self.rptEngine_.setReportData(d):
@@ -538,7 +539,7 @@ class FLReportViewer(QObject):
             return self.rptEngine_.setReportData(d)
         return False
 
-    def setReportTemplate(self, t, style=None):
+    def setReportTemplate(self, t, style=None) -> bool:
         if isinstance(t, QtXml.QDomNode):
             self.xmlTemplate_ = t
             self.template_ = ""
@@ -728,12 +729,12 @@ class FLReportViewer(QObject):
             return self.report_.pageOrientation()
         return -1
 
-    def pageDimensions(self):
+    def pageDimensions(self) -> Any:
         if hasattr(self.rptViewer_.rptEngine_, "parser_"):
             return self.rptViewer_.rptEngine_.parser_._page_size
         return -1
 
-    def pageCount(self):
+    def pageCount(self) -> Any:
         if hasattr(self.rptViewer_, "rptEngine_"):
             return self.rptViewer_.rptEngine_.number_pages()
         return -1
@@ -813,7 +814,7 @@ class FLReportViewer(QObject):
     def name(self):
         return self.name_
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         return getattr(self.rptViewer_, name, None)
 
 
@@ -824,26 +825,26 @@ class internalReportViewer(QObject):
     report_ = []
     num_copies = 1
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         super(internalReportViewer, self).__init__(parent)
         self.dpi_ = 300
         self.report_ = []
         self.num_copies = 1
 
-    def setReportEngine(self, rptEngine):
+    def setReportEngine(self, rptEngine) -> None:
         self.rptEngine_ = rptEngine
 
-    def resolution(self):
+    def resolution(self) -> int:
         return self.dpi_
 
-    def reportPages(self):
+    def reportPages(self) -> List[nothing]:
         return self.report_
 
-    def renderReport(self, init_row, init_col, flags):
+    def renderReport(self, init_row, init_col, flags) -> Any:
         return self.rptEngine_.renderReport(init_row, init_col, flags)
 
-    def setNumCopies(self, num_copies):
+    def setNumCopies(self, num_copies) -> None:
         self.num_copies = num_copies
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         return getattr(self.rptEngine_, name, None)

@@ -3,6 +3,7 @@ from pineboolib.application import project
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib import logging
 from typing import Union
+from typing import Any
 
 logger = logging.getLogger(__name__)
 """
@@ -24,7 +25,7 @@ class AQSql(object):
     @return La base de datos correspondiente al nombre de conexion indicado
     """
 
-    def database(self, connection_name="default"):
+    def database(self, connection_name="default") -> Any:
         return project.conn.useConn(connection_name)
 
     """

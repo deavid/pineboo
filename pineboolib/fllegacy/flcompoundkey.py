@@ -12,6 +12,7 @@ es decir objetos FLFieldMetaData.
 
 
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
+from typing import Any
 
 
 class FLCompoundKey(object):
@@ -28,7 +29,7 @@ class FLCompoundKey(object):
         if other:
             self.copy(other)
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.fieldList_ = None
 
     """
@@ -47,7 +48,7 @@ class FLCompoundKey(object):
     @return TRUE si el campo forma parte de la clave compuesta, FALSE en caso contrario
     """
 
-    def hasField(self, fN):
+    def hasField(self, fN) -> bool:
         for i in self.fieldList_:
             if i.name() == str(fN):
                 return True
@@ -60,10 +61,10 @@ class FLCompoundKey(object):
     @return Objeto con la lista de deficiones de campos de la clave compuesta
     """
 
-    def fieldList(self):
+    def fieldList(self) -> Any:
         return self.fieldList_
 
-    def copy(self, other):
+    def copy(self, other) -> None:
         if self is other:
             return
         self.fieldList_ = other.fieldList_[:]

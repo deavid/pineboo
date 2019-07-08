@@ -4,6 +4,7 @@ from PyQt5 import Qt  # type: ignore
 from pineboolib.core import decorators
 from pineboolib import logging
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects import qlistview
+from typing import Any
 
 logger = logging.getLogger("FLListViewItem")
 
@@ -16,7 +17,7 @@ class FLListViewItem(Qt.QStandardItem):
     _root = None
     _index_child = None
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__()
         self._root = False
         self.setExpandable(False)
@@ -45,21 +46,21 @@ class FLListViewItem(Qt.QStandardItem):
 
         #    self._rows = self._parent.model().item(0,0)._rowcount - 1
 
-    def firstChild(self):
+    def firstChild(self) -> Any:
         self._index_child = 0
         item = self.child(self._index_child)
         return item
 
-    def nextSibling(self):
+    def nextSibling(self) -> Any:
         self._index_child += 1
         item = self.child(self._index_child)
         return item
 
-    def isExpandable(self):
+    def isExpandable(self) -> bool:
         return self._expandable
         # return True if self.child(0) is not None or not self.parent() else False
 
-    def setText(self, *args):
+    def setText(self, *args) -> None:
         # print("Seteando", args, self.parent())
         # logger.warning("Seteo texto %s" , args, stack_info = True )
         col = 0
@@ -81,7 +82,7 @@ class FLListViewItem(Qt.QStandardItem):
 
             item.setText(value)
 
-    def text(self, col):
+    def text(self, col) -> str:
         ret = ""
         if col == 0:
             ret = super().text()
@@ -92,19 +93,19 @@ class FLListViewItem(Qt.QStandardItem):
     def setPixmap(self, *args):
         pass
 
-    def setExpandable(self, b):
+    def setExpandable(self, b) -> None:
         self._expandable = b
 
-    def setKey(self, k):
+    def setKey(self, k) -> None:
         self._key = str(k)
 
-    def key(self):
+    def key(self) -> Any:
         if self.parent() and self.column() > 0:
             return self.parent().child(self.row(), 0).key()
         return self._key
 
-    def setOpen(self, o):
+    def setOpen(self, o) -> None:
         self._open = o
 
-    def del_(self):
+    def del_(self) -> None:
         del self

@@ -34,10 +34,10 @@ class dgi_schema(object):
         self.loadReferences()
         self._mobile = is_mobile_mode()
 
-    def name(self):
+    def name(self) -> str:
         return self._name
 
-    def alias(self):
+    def alias(self) -> str:
         return self._alias
 
     def create_app(self):

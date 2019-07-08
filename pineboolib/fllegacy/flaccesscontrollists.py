@@ -4,6 +4,7 @@ from PyQt5 import QtCore  # type: ignore
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
 from pineboolib import logging
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ class FLAccessControlLists(object):
         self.name_ = None
         self.accessControlList_ = []
 
-    def __del__(self):
+    def __del__(self) -> None:
         """
         Destructor
         """
@@ -47,7 +48,7 @@ class FLAccessControlLists(object):
             self.accessControlList_.clear()
             del self.accessControlList_
 
-    def name(self):
+    def name(self) -> Any:
         """
         Para obtener el nombre que identifica la lista de control de acceso actualmente establecida.
 
@@ -55,7 +56,7 @@ class FLAccessControlLists(object):
         """
         return self.name_
 
-    def init(self, aclXml=None):
+    def init(self, aclXml=None) -> None:
         """
         Lee el fichero "acl.xml" y establece una nueva lista de control de acceso.
 
@@ -105,7 +106,7 @@ class FLAccessControlLists(object):
 
             no = no.nextSibling()
 
-    def process(self, obj):
+    def process(self, obj) -> None:
         """
         Procesa un objeto de alto nivel según la lista de control de acceso establecida.
 
@@ -130,7 +131,7 @@ class FLAccessControlLists(object):
         if ac:
             ac.processObject(obj)
 
-    def installACL(self, idacl):
+    def installACL(self, idacl) -> None:
         """
         Crea un nuevo fichero "acl.xml" y lo almacena sustituyendo el anterior, en el caso de que exista.
 
@@ -169,7 +170,7 @@ class FLAccessControlLists(object):
 
             project.conn.managerModules().setContent("acl.xml", "sys", doc.toString())
 
-    def makeRule(self, q, d):
+    def makeRule(self, q, d) -> None:
         """
         Crea el/los nodo(s) DOM correspondiente(s) a un registro de la tabla "flacs".
 
@@ -189,7 +190,7 @@ class FLAccessControlLists(object):
         else:
             self.makeRuleUser(q, d, str(q.value(3)))
 
-    def makeRuleUser(self, q, d, iduser):
+    def makeRuleUser(self, q, d, iduser) -> None:
         """
         Crea un nodo DOM correspondiente a un registro de la tabla "flacs" y para un usuario determinado.
 
@@ -226,7 +227,7 @@ class FLAccessControlLists(object):
 
             del ac
 
-    def makeRuleGroup(self, q, d, idgroup=""):
+    def makeRuleGroup(self, q, d, idgroup="") -> None:
         """
         Crea varios nodos DOM correspondientes a un registro de la tabla "flacs" y para un grupo de usuarios determinado.
 

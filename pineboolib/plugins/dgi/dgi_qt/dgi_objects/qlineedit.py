@@ -7,6 +7,7 @@ from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qframe import QFrame
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget import QWidget
 from typing import Union, Optional
+from typing import Any
 
 
 class QLineEdit(QtWidgets.QLineEdit):
@@ -23,7 +24,7 @@ class QLineEdit(QtWidgets.QLineEdit):
         # if not project._DGI.localDesktop():
         #    project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QLineEdit")
 
-    def getText(self):
+    def getText(self) -> Any:
         return super(QLineEdit, self).text()
 
     def setText(self, v) -> None:

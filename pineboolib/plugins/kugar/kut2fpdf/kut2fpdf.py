@@ -8,6 +8,8 @@ from xml.etree.ElementTree import Element
 from pineboolib import logging
 from pineboolib.core.utils.utils_base import filedir, load2xml
 from pineboolib.application.utils.check_dependencies import check_dependencies
+import protocols
+from typing import Any, Mapping, Optional, Sized, SupportsInt, SupportsRound, Union
 
 """
 Conversor de kuts a pyFPDF
@@ -77,7 +79,7 @@ class kut2fpdf(object):
     @return Ruta a fichero pdf.
     """
 
-    def parse(self, name, kut, data, report=None, flags=[]):
+    def parse(self, name, kut: str, data: str, report=None, flags: Union[Sized, Mapping[int, Any]] = []) -> Any:
 
         try:
             self._xml = self._parser_tools.loadKut(kut).getroot()
@@ -160,7 +162,7 @@ class kut2fpdf(object):
 
         return self._document
 
-    def get_file_name(self):
+    def get_file_name(self) -> Any:
         import os
 
         from pineboolib.application import project
@@ -180,7 +182,7 @@ class kut2fpdf(object):
     @return Número con el techo de la página actual.
     """
 
-    def topSection(self):
+    def topSection(self) -> Any:
         return self._page_top[str(self._document.page_no())]
 
     """
@@ -188,7 +190,7 @@ class kut2fpdf(object):
     @param value. Numero que elspecifica el nuevo techo.
     """
 
-    def setTopSection(self, value):
+    def setTopSection(self, value) -> None:
         self._actual_section_size = value - self.topSection()
         self._page_top[str(self._document.page_no())] = value
 
@@ -196,7 +198,7 @@ class kut2fpdf(object):
     Añade una nueva página al documento.
     """
 
-    def newPage(self, data_level, add_on_header=True):
+    def newPage(self, data_level, add_on_header=True) -> None:
         self._document.add_page(self._page_orientation)
         self._page_top[str(self._document.page_no())] = self._top_margin
         self._document.set_margins(self._left_margin, self._top_margin, self._right_margin)  # Lo dejo pero no se nota nada
@@ -237,7 +239,7 @@ class kut2fpdf(object):
     Procesa las secciones details con sus correspondientes detailHeader y detailFooter.
     """
 
-    def processDetails(self, keep_page=None):
+    def processDetails(self, keep_page=None) -> None:
         # Procesamos la cabecera si procede ..
         top_level = 0
         level = 0
@@ -300,7 +302,7 @@ class kut2fpdf(object):
     @param data_level. Nivel de seccion.
     """
 
-    def processData(self, section_name, data, data_level):
+    def processData(self, section_name: str, data, data_level: Union[bytes, str, SupportsInt]) -> None:
         self.actual_data_level = data_level
         listDF = self._xml.findall(section_name)
         # data_size = len(listDF)
@@ -360,7 +362,7 @@ class kut2fpdf(object):
     @param name. Nombre de la sección a procesar.
     """
 
-    def processSection(self, name, level=0):
+    def processSection(self, name: str, level=0) -> None:
         sec_list = self._xml.findall(name)
         sec_ = None
         for s in sec_list:
@@ -377,7 +379,7 @@ class kut2fpdf(object):
     @param. data: Linea de datos afectada.
     """
 
-    def processXML(self, xml, data=None):
+    def processXML(self, xml, data=None) -> None:
 
         fix_height = True
         if data is None:
@@ -428,7 +430,7 @@ class kut2fpdf(object):
         if not size_updated:
             self.setTopSection(self.topSection() + self._parser_tools.getHeight(xml))
 
-    def fix_extra_size(self):
+    def fix_extra_size(self) -> None:
         if self.increase_section_size > 0:
             self.setTopSection(self.topSection() + self.increase_section_size)
             self.increase_section_size = 0
@@ -439,7 +441,7 @@ class kut2fpdf(object):
     @param fix_height. Ajusta la altura a los .kut originales, excepto el pageFooter.
     """
 
-    def processLine(self, xml, fix_height=True):
+    def processLine(self, xml, fix_height=True) -> None:
 
         color = xml.get("Color")
         r = 0 if not color else int(color.split(",")[0])
@@ -481,7 +483,7 @@ class kut2fpdf(object):
     @return Valor corregido, si procede.
     """
 
-    def calculateLeftStart(self, x):
+    def calculateLeftStart(self, x: Union[bytes, str, SupportsInt]) -> Any:
         return self._parser_tools.ratio_correction_w(int(x)) + self._left_margin
 
     """
@@ -490,7 +492,7 @@ class kut2fpdf(object):
     @return Valor corregido, si procede.
     """
 
-    def calculateWidth(self, width, pos_x, fix_ratio=True):
+    def calculateWidth(self, width: Union[bytes, str, SupportsInt], pos_x: Union[bytes, str, SupportsInt], fix_ratio=True) -> Any:
         width = int(width)
         ret_ = width
         limit = self._document.w - self._right_margin
@@ -510,7 +512,7 @@ class kut2fpdf(object):
     @param fix_height. Ajusta la altura a los .kut originales, excepto el pageFooter.
     """
 
-    def processText(self, xml, data_row=None, fix_height=True, section_name=None):
+    def processText(self, xml, data_row=None, fix_height=True, section_name=None) -> None:
         is_image = False
         is_barcode = False
         text: str = xml.get("Text")
@@ -623,7 +625,9 @@ class kut2fpdf(object):
     @param txt. Texto calculado de la etiqueta a crear.
     """
 
-    def drawText(self, x, y, W, H, xml, txt):
+    def drawText(
+        self, x: Union[bytes, str, SupportsInt], y, W: Union[bytes, str, SupportsInt], H, xml, txt: protocols.SupportsReplace
+    ) -> None:
 
         if txt in ("None", None):
             # return
@@ -812,7 +816,7 @@ class kut2fpdf(object):
         if self.increase_section_size < extra_size:  # Si algun incremento extra hay superior se respeta
             self.increase_section_size = extra_size
 
-    def split_text(self, texto, limit_w):
+    def split_text(self, texto, limit_w) -> List[Optional[str]]:
         list_ = []
         linea_ = None
 
@@ -841,7 +845,7 @@ class kut2fpdf(object):
     @param H. Altura del cuadrado.
     """
 
-    def get_color(self, value):
+    def get_color(self, value) -> List[int]:
         value = value.split(",")
         r = None
         g = None
@@ -857,7 +861,9 @@ class kut2fpdf(object):
 
         return [r, g, b]
 
-    def drawRect(self, x, y, W, H, xml=None):
+    def drawRect(
+        self, x: Union[float, SupportsRound], y: Union[float, SupportsRound], W: float, H: Union[float, SupportsRound], xml=None
+    ) -> None:
         style_ = ""
         border_color = None
         bg_color = None
@@ -898,7 +904,15 @@ class kut2fpdf(object):
         # self._document.set_draw_color(255, 255, 255)
         # self._document.set_fill_color(0, 0, 0)
 
-    def write_cords_debug(self, x, y, w, h, ox, ow):
+    def write_cords_debug(
+        self,
+        x: Union[float, SupportsRound],
+        y: Union[float, SupportsRound],
+        w: Union[float, SupportsRound],
+        h: Union[float, SupportsRound],
+        ox: Union[float, SupportsRound],
+        ow: Union[float, SupportsRound],
+    ) -> None:
         self.write_debug(
             x,
             y,
@@ -907,7 +921,7 @@ class kut2fpdf(object):
             "red",
         )
 
-    def write_debug(self, x, y, text, h, color=None):
+    def write_debug(self, x, y, text, h, color=None) -> None:
         orig_color = self._document.text_color
         r = None
         g = None
@@ -987,7 +1001,7 @@ class kut2fpdf(object):
     @param xml: Elemento xml con los datos del fichero .kut a procesar
     """
 
-    def setPageFormat(self, xml):
+    def setPageFormat(self, xml) -> None:
         custom_size = None
 
         self._bottom_margin = int(xml.get("BottomMargin"))
@@ -1004,7 +1018,7 @@ class kut2fpdf(object):
         self._page_orientation = "P" if page_orientation == "0" else "L"
         self._page_size = self._parser_tools.converPageSize(page_size, int(page_orientation), custom_size)  # devuelve un array
 
-    def draw_margins(self):
+    def draw_margins(self) -> None:
         self.draw_debug_line(0 + self._left_margin, 0, 0 + self._left_margin, self._page_size[1])  # Vertical derecha
         self.draw_debug_line(
             self._page_size[0] - self._right_margin, 0, self._page_size[0] - self._right_margin, self._page_size[1]
@@ -1014,7 +1028,7 @@ class kut2fpdf(object):
             0, self._page_size[1] - self._bottom_margin, self._page_size[0], self._page_size[1] - self._bottom_margin
         )  # Horizontal inferior
 
-    def draw_debug_line(self, X1, Y1, X2, Y2, title=None, color="GREY"):
+    def draw_debug_line(self, X1, Y1, X2, Y2, title=None, color="GREY") -> None:
         dash_length = 2
         space_length = 2
 
@@ -1029,8 +1043,8 @@ class kut2fpdf(object):
         self._document.set_draw_color(r, g, b)
         self._document.dashed_line(X1, Y1, X2, Y2, dash_length, space_length)
 
-    def number_pages(self):
+    def number_pages(self) -> int:
         return self._actual_append_page_no if self._actual_append_page_no > 0 else 0
 
-    def reset_page_no(self):
+    def reset_page_no(self) -> None:
         self._actual_append_page_no = -1

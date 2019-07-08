@@ -10,6 +10,7 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.flapplication import aqApp
+from typing import Any
 
 
 class FLFormSearchDB(FLFormDB):
@@ -50,7 +51,7 @@ class FLFormSearchDB(FLFormDB):
     constructor.
     """
 
-    def __init__(self, name_or_cursor, parent=None):
+    def __init__(self, name_or_cursor, parent=None) -> None:
 
         if not name_or_cursor:
             self.logger.warning("Se ha llamado a FLFormSearchDB sin name_or_cursor")
@@ -79,14 +80,14 @@ class FLFormSearchDB(FLFormDB):
 
         self.eventloop = QtCore.QEventLoop()
 
-    def setAction(self, a):
+    def setAction(self, a) -> None:
         self.cursor_.setAction(a)
 
     """
     destructor
     """
 
-    def __delattr__(self, *args, **kwargs):
+    def __delattr__(self, *args, **kwargs) -> None:
         if self.cursor_:
             self.cursor_.restoreEditionFlag(self)
             self.cursor_.restoreBrowseFlag(self)
@@ -197,7 +198,7 @@ class FLFormSearchDB(FLFormDB):
     @return El valor del campo si se acepta, o QVariant::Invalid si se cancela
     """
 
-    def exec_(self, valor=None):
+    def exec_(self, valor=None) -> bool:
         if not self.cursor_:
             return False
 
@@ -246,7 +247,7 @@ class FLFormSearchDB(FLFormDB):
     Aplica un filtro al cursor
     """
 
-    def setFilter(self, f):
+    def setFilter(self, f) -> None:
 
         if not self.cursor_:
             return
@@ -377,10 +378,10 @@ class FLFormSearchDB(FLFormDB):
     def show(self):
         self.exec_()
 
-    def child(self, childName):
+    def child(self, childName) -> Any:
         return self.findChild(QtWidgets.QWidget, childName, QtCore.Qt.FindChildrenRecursively)
 
-    def accepted(self):
+    def accepted(self) -> bool:
         return self.accepted_
 
     def setMainWidget(self, w=None):

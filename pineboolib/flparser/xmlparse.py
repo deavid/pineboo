@@ -5,6 +5,9 @@ import ast
 import __builtin__
 from typing import Iterable, List
 
+__builtin__: module
+__builtin__: module
+
 elements = []
 show_end = True
 lasttextdata = ""

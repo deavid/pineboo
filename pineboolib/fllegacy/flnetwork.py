@@ -16,7 +16,7 @@ class FLNetwork(QtCore.QObject):
     data = QtCore.pyqtSignal(str)
     dataTransferProgress = QtCore.pyqtSignal(int, int)
 
-    def __init__(self, url):
+    def __init__(self, url) -> None:
         super(FLNetwork, self).__init__()
         self.url = url
         from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager  # type: ignore
@@ -71,7 +71,7 @@ class FLNetwork(QtCore.QObject):
     #    buffer = b
     #    self.data.emit(b)
 
-    def _slotNetworkProgress(self, bDone, bTotal):
+    def _slotNetworkProgress(self, bDone, bTotal) -> None:
         self.dataTransferProgress.emit(bDone, bTotal)
         data_ = None
         reply_ = self.reply.readAll().data()

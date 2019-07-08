@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import QInputDialog, QLineEdit  # type: ignore
+from typing import Any, Optional, SupportsFloat, Union
 
 
 class Input(object):
@@ -7,7 +8,7 @@ class Input(object):
     """
 
     @classmethod
-    def getText(cls, question, prevtxt="", title="Pineboo"):
+    def getText(cls, question, prevtxt="", title="Pineboo") -> Any:
         """
         Recoge texto
         @param question. Label del diálogo.
@@ -21,14 +22,14 @@ class Input(object):
         return text
 
     @classmethod
-    def getNumber(cls, question, value, part_decimal, title="Pineboo"):
+    def getNumber(cls, question, value: Union[bytes, str, SupportsFloat], part_decimal, title="Pineboo") -> Optional[float]:
         text, ok = QInputDialog.getText(None, title, question, QLineEdit.Normal, str(round(float(value), part_decimal)))
         if not ok:
             return None
         return float(text)
 
     @classmethod
-    def getItem(cls, question, items_list=[], title="Pineboo", editable=True):
+    def getItem(cls, question, items_list=[], title="Pineboo", editable=True) -> Any:
         """
         Recoge Item
         @param question. Label del diálogo.

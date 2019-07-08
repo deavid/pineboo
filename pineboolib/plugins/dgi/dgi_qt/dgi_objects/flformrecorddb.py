@@ -13,6 +13,7 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flapplication import aqApp
+from typing import Any
 
 
 DEBUG = False
@@ -103,7 +104,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
                  QWidget *parent = 0, bool showAcceptContinue = true);
     """
 
-    def __init__(self, parent_or_cursor, action, load=False):
+    def __init__(self, parent_or_cursor, action, load=False) -> None:
         self.logger.trace("__init__: parent_or_cursor=%s, action=%s, load=%s", parent_or_cursor, action, load)
 
         if isinstance(action, str):
@@ -155,7 +156,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     @author Silix
     """
 
-    def setCaptionWidget(self, text=None):
+    def setCaptionWidget(self, text=None) -> None:
         if not self.cursor():
             return
 
@@ -495,7 +496,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     @return TRUE si el formulario ha sido validado correctamente
     """
 
-    def validateForm(self):
+    def validateForm(self) -> Any:
         if not self.cursor_:
             return True
         mtd = self.cursor_.metadata()
@@ -560,7 +561,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     se acepta el formulario y justo antes de hace el commit del registro.
     """
 
-    def acceptedForm(self):
+    def acceptedForm(self) -> None:
         if self.iface:
             try:
                 self.iface.acceptedForm()
@@ -574,7 +575,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     justo después de hacer el commit del buffer del registro.
     """
 
-    def afterCommitBuffer(self):
+    def afterCommitBuffer(self) -> None:
         if self.iface:
             try:
                 self.iface.afterCommitBuffer()
@@ -588,7 +589,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     juesto despues de terminar la transacción en curso aceptando.
     """
 
-    def afterCommitTransaction(self):
+    def afterCommitTransaction(self) -> None:
         if self.iface:
             try:
                 self.iface.afterCommitTransaction()
@@ -602,7 +603,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     cancela el formulario.
     """
 
-    def canceledForm(self):
+    def canceledForm(self) -> None:
         if self.iface:
             try:
                 self.iface.canceledForm()
@@ -847,7 +848,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
 
         super(FLFormRecordDB, self).show()
 
-    def inicializeControls(self):
+    def inicializeControls(self) -> None:
         from pineboolib import pncontrolsfactory
 
         for child_ in self.findChildren(QtWidgets.QWidget):

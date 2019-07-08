@@ -7,7 +7,7 @@ class QMdiArea(QMdiArea):
 
     logo = None
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
         super().__init__(*args)
         from pineboolib import pncontrolsfactory
 
@@ -17,7 +17,7 @@ class QMdiArea(QMdiArea):
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.logo = self.logo.scaled(self.size(), QtCore.Qt.IgnoreAspectRatio)
 
-    def paintEvent(self, e):
+    def paintEvent(self, e) -> None:
         super().paintEvent(e)
 
         # painter = super().viewport()

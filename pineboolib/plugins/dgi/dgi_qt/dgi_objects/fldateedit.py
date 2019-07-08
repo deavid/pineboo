@@ -3,6 +3,8 @@
 from PyQt5 import QtCore  # type: ignore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qdateedit import QDateEdit
 from pineboolib.application.utils.date_conversion import convert_to_qdate
+import datetime
+from typing import Union
 
 
 class FLDateEdit(QDateEdit):
@@ -11,19 +13,19 @@ class FLDateEdit(QDateEdit):
     DMY = "dd-MM-yyyy"
     _parent = None
 
-    def __init__(self, parent, name):
+    def __init__(self, parent, name) -> None:
         super(FLDateEdit, self).__init__(parent, name)
         self.setMinimumWidth(90)
         self.setMaximumWidth(90)
         self._parent = parent
 
-    def setOrder(self, order):
+    def setOrder(self, order) -> None:
         self.setDisplayFormat(order)
 
     def getDate(self):
         return super(FLDateEdit, self).date
 
-    def setDate(self, d=None):
+    def setDate(self, d: Union[str, datetime.date, pineboolib.application.utils.date_conversion.Date] = None) -> None:
         if d in (None, "NAN", ""):
             date = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
         else:

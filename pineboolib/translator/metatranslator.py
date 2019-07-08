@@ -2,6 +2,10 @@
 
 from PyQt5 import QtXml, QtCore  # type: ignore
 from pineboolib import logging
+import protocols
+from typing import Any, TypeVar
+
+_TMetaTranslatorMessage = TypeVar("_TMetaTranslatorMessage", bound=MetaTranslatorMessage)
 
 
 class metaTranslator(object):
@@ -18,7 +22,7 @@ class metaTranslator(object):
     @param nombre fichero origen
     """
 
-    def load(self, filename):
+    def load(self, filename) -> Any:
         f = QtCore.QFile(filename)
         if not f.open(QtCore.QIODevice.ReadOnly):
             return False
@@ -39,7 +43,7 @@ class metaTranslator(object):
         f.close()
         return ok
 
-    def release(self, file_name, verbose, mode):
+    def release(self, file_name, verbose, mode) -> bool:
         from pineboolib.translator.qtranslator import QTranslator
 
         tor = QTranslator(None)
@@ -75,7 +79,7 @@ class metaTranslator(object):
 
         return saved
 
-    def contains(self, context, source_text, comment):
+    def contains(self, context, source_text, comment) -> bool:
         size_ = len(self.mm)
         pos = 1
         for item in self.mm.keys():
@@ -88,12 +92,12 @@ class metaTranslator(object):
 
         return False
 
-    def insert(self, m):
+    def insert(self, m) -> None:
 
         self.mm[m] = m
 
 
-def encoding_is_utf8(atts):
+def encoding_is_utf8(atts) -> Any:
     for i in range(atts.length()):
         if atts.qName(i) == "utf8":
             return atts.value(i) == "true"
@@ -117,7 +121,7 @@ class tsHandler(QtXml.QXmlDefaultHandler):
     comment = None
     translation = None
 
-    def __init__(self, translator):
+    def __init__(self, translator) -> None:
         super(tsHandler, self).__init__()
 
         self.tor = translator
@@ -128,7 +132,7 @@ class tsHandler(QtXml.QXmlDefaultHandler):
         self.message_is_utf8 = False
         self.accum = ""
 
-    def startElement(self, name_space_uri, local_name, qname, atts):
+    def startElement(self, name_space_uri, local_name, qname, atts) -> bool:
         if qname == "byte":
             for i in range(atts.length()):
                 if atts.qName(i) == "value":
@@ -176,7 +180,7 @@ class tsHandler(QtXml.QXmlDefaultHandler):
         self.accum = ""
         return True
 
-    def endElement(self, name_space_uri, local_name, qname):
+    def endElement(self, name_space_uri, local_name, qname) -> bool:
         context_comment = None  # FIXME: De donde sale esta variable?
         if qname in ("codec", "defaultcodec"):
             self.tor.setCodec(self.accum)
@@ -225,7 +229,7 @@ class tsHandler(QtXml.QXmlDefaultHandler):
 
         return True
 
-    def characters(self, ch):
+    def characters(self, ch: protocols.SupportsReplace) -> bool:
         t = ch.replace("\r", "")
         self.accum += t
         return True
@@ -247,7 +251,7 @@ class MetaTranslatorMessage(QtCore.QObject):
     source_text_ = None
     comment_ = None
 
-    def __init__(self, context, source_text=None, comment=None, translation=None, utf8=False, type_=1):
+    def __init__(self, context, source_text=None, comment=None, translation=None, utf8=False, type_=1) -> None:
 
         super(MetaTranslatorMessage, self).__init__()
 
@@ -265,28 +269,28 @@ class MetaTranslatorMessage(QtCore.QObject):
         self.utf8_ = False
         self.ty_ = type_
 
-    def setType(self, nt):
+    def setType(self, nt) -> None:
         self.ty_ = nt
 
-    def translation(self):
+    def translation(self) -> Any:
         return self.translation_
 
-    def sourceText(self):
+    def sourceText(self) -> Any:
         return self.source_text_
 
-    def comment(self):
+    def comment(self) -> Any:
         return self.comment_
 
-    def context(self):
+    def context(self) -> Any:
         return self.context_
 
-    def type_(self):
+    def type_(self) -> Any:
         return self.ty_
 
-    def utf8(self):
+    def utf8(self) -> Any:
         return self.utf8_
 
-    def operator_is(self, m):
+    def operator_is(self: _TMetaTranslatorMessage, m) -> _TMetaTranslatorMessage:
         if isinstance(m, metaTranslator):
             self.mm = m.mm
             self.codec_name = m.codec_name
@@ -297,10 +301,10 @@ class MetaTranslatorMessage(QtCore.QObject):
 
         return self
 
-    def operator_isequal(self, m):
+    def operator_isequal(self, m) -> Any:
         return self.context() == m.context() and self.source_text() == m.source_text() and self.comment() == m.comment()
 
-    def operator_minus(self, m):
+    def operator_minus(self, m) -> Any:
         delta = self.context() == m.context()
         if delta:
             delta = self.source_text() == m.source_text()

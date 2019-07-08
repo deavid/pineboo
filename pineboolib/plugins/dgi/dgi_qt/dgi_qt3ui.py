@@ -9,6 +9,14 @@ from PyQt5.QtCore import QObject  # type: ignore
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib import pncontrolsfactory
 from pineboolib.application import project
+import protocols
+from typing import Iterable, Optional, Tuple, TypeVar, Union
+
+_T0 = TypeVar("_T0")
+_T2 = TypeVar("_T2")
+
+_T0 = TypeVar("_T0")
+_T2 = TypeVar("_T2")
 
 ICONS = {}
 root = None
@@ -25,7 +33,7 @@ class Options:
 #      una nueva clase.
 
 
-def loadUi(form_path, widget, parent=None):
+def loadUi(form_path: str, widget, parent: _T2 = None) -> Optional[_T2]:
 
     global ICONS, root
     # parser = etree.XMLParser(
@@ -170,7 +178,7 @@ def loadUi(form_path, widget, parent=None):
         widget.show()
 
 
-def loadToolBar(xml, widget):
+def loadToolBar(xml: Union[protocols.SupportsFind, Iterable], widget) -> None:
     name_elem = xml.find("./property[@name='name']/cstring")
     label_elem = xml.find("./property[@name='label']/string")
     if name_elem is None or label_elem is None:
@@ -195,7 +203,7 @@ def loadToolBar(xml, widget):
     widget.addToolBar(tb)
 
 
-def loadMenuBar(xml, widget):
+def loadMenuBar(xml: Iterable, widget) -> None:
     if isinstance(widget, pncontrolsfactory.QMainWindow):
         mB = widget.menuBar()
     else:
@@ -233,7 +241,7 @@ def loadMenuBar(xml, widget):
             process_item(x, mB, widget)
 
 
-def process_item(xml, parent, widget):
+def process_item(xml: Iterable, parent, widget) -> None:
     name = xml.get("name")
     text = xml.get("text")
     # accel = xml.get("accel")
@@ -250,7 +258,7 @@ def process_item(xml, parent, widget):
             process_item(x, menu_, widget)
 
 
-def load_action(action, widget):
+def load_action(action, widget) -> None:
     real_action = widget.findChild(QtWidgets.QAction, action.objectName())
     if real_action is not None:
         action.setText(real_action.text())
@@ -265,7 +273,7 @@ def load_action(action, widget):
         action.toggled.connect(real_action.toggle)
 
 
-def loadAction(action, widget):
+def loadAction(action, widget) -> None:
     global ICONS
     act_ = QtWidgets.QAction(widget)
     for p in action.findall("property"):
@@ -289,7 +297,7 @@ def loadAction(action, widget):
             act_.setWhatsThis(string.text)
 
 
-def createWidget(classname, parent=None):
+def createWidget(classname: str, parent=None) -> Any:
     from pineboolib import pncontrolsfactory
 
     cls = getattr(pncontrolsfactory, classname, None) or getattr(QtWidgets, classname, None)
@@ -303,7 +311,7 @@ def createWidget(classname, parent=None):
     return cls(parent)
 
 
-def loadWidget(xml, widget=None, parent=None, origWidget=None):
+def loadWidget(xml: Iterable, widget=None, parent=None, origWidget=None) -> None:
     translate_properties = {
         "caption": "windowTitle",
         "name": "objectName",
@@ -695,7 +703,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
     #        origWidget.ui_[origWidget.objectName()] = nwidget
 
 
-def loadIcon(xml):
+def loadIcon(xml: protocols.SupportsFind) -> None:
     global ICONS
 
     name = xml.get("name")
@@ -714,25 +722,25 @@ def loadIcon(xml):
     ICONS[name] = icon
 
 
-def loadVariant(xml, widget=None):
+def loadVariant(xml: Iterable, widget=None) -> Any:
     for variant in xml:
         return _loadVariant(variant, widget)
     raise ValueError("No property in provided XML")
 
 
-def loadProperty(xml):
+def loadProperty(xml: Iterable) -> Tuple[Any, Any]:
     for variant in xml:
         return (xml.get("name"), _loadVariant(variant))
     raise ValueError("No property in provided XML")
 
 
-def u(x):
+def u(x: _T0) -> Union[str, _T0]:
     if isinstance(x, str):
         return x
     return str(x)
 
 
-def b(x):
+def b(x: protocols.SupportsLower) -> Optional[bool]:
     x = x.lower()
     if x[0] == "t":
         return True

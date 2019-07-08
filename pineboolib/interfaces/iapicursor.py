@@ -1,7 +1,7 @@
 from typing import List, Any, Generator
 
 
-class ICursor:
+class IApiCursor:
     """Database internal cursor. Follows Python DBAPI for cursors. Do not confuse with FLSqlCuror"""
 
     description: List
