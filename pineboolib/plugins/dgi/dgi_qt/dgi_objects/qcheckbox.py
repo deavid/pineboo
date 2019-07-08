@@ -8,16 +8,17 @@ class QCheckBox(QtWidgets.QCheckBox):
 
     def __init__(self, parent) -> None:
         self._parent = parent
-        super(QCheckBox, self).__init__(parent)
+        super().__init__(parent)
 
     @QtCore.pyqtProperty(int)
     def checked(self):
         return self.isChecked()
 
     @checked.setter
-    def _setChecked(self, b):
+    def checked(self, b):
         if isinstance(b, str):
             b = b == "true"
-        super(QCheckBox, self).setChecked(b)
+
+        super().setChecked(b)
         # if not project._DGI.localDesktop():
         #    project._DGI._par.addQueque("%s_setChecked" % self._parent.objectName(), b)
