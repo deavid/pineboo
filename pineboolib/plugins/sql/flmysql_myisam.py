@@ -16,11 +16,14 @@ from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.application import project
 from pineboolib import logging
-import protocols
-from typing import Any, Iterable, Mapping, Optional, Sized, TypeVar, Union
 
-_T0 = TypeVar("_T0")
-_T1 = TypeVar("_T1")
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any, Iterable, Mapping, Optional, Sized, TypeVar, Union
+
+    _T0 = TypeVar("_T0")
+    _T1 = TypeVar("_T1")
 
 logger = logging.getLogger(__name__)
 
@@ -464,7 +467,7 @@ class FLMYSQL_MYISAM(object):
         except Exception:
             qWarning("CursorTableModel.Refresh\n %s" % traceback.format_exc())
 
-    def fix_query(self, val: protocols.SupportsReplace) -> Any:
+    def fix_query(self, val: str) -> Any:
         ret_ = val.replace("'true'", "1")
         ret_ = ret_.replace("'false'", "0")
         ret_ = ret_.replace("'0'", "0")
@@ -484,7 +487,7 @@ class FLMYSQL_MYISAM(object):
     def useTimer(self) -> bool:
         return True
 
-    def fetchAll(self, cursor, tablename, where_filter, fields, curname) -> List[nothing]:
+    def fetchAll(self, cursor, tablename, where_filter, fields, curname) -> List[Any]:
         if curname not in self.rowsFetched.keys():
             self.rowsFetched[curname] = 0
 
@@ -1324,7 +1327,7 @@ class FLMYSQL_MYISAM(object):
     def desktopFile(self) -> bool:
         return False
 
-    def execute_query(self, q: protocols.SupportsReplace) -> Any:
+    def execute_query(self, q: str) -> Any:
         if not self.isOpen():
             logger.warning("MySQLDriver::execute_query. DB is closed")
             return False

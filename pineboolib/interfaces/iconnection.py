@@ -1,11 +1,11 @@
-from typing import Any, List, Dict, Optional
 from .imanager import IManager
 from .iapicursor import IApiCursor
-from typing import TypeVar
+from typing import TYPE_CHECKING
 
-_TIConnection = TypeVar("_TIConnection", bound=IConnection)
+if TYPE_CHECKING:
+    from typing import Any, List, Dict, Optional
 
-_TIConnection = TypeVar("_TIConnection", bound=IConnection)
+    _TIConnection = "IConnection"
 
 
 class IConnection:

@@ -5,11 +5,15 @@ from pineboolib.core.utils.logging import logging
 
 from pineboolib.interfaces import ITableMetaData
 from pineboolib.interfaces import IFieldMetaData
-from typing import List, Optional, Union, Any
-from typing import TypeVar
+from typing import TYPE_CHECKING
 
-_T0 = TypeVar("_T0")
-_T1 = TypeVar("_T1")
+if TYPE_CHECKING:
+    from typing import List, Optional, Union, Any
+    from typing import TypeVar
+    import pineboolib
+
+    _T0 = TypeVar("_T0")
+    _T1 = TypeVar("_T1")
 
 logger = logging.getLogger("FLFieldMetadata")
 

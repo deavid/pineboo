@@ -23,9 +23,12 @@ from pineboolib.interfaces import IManager
 
 from PyQt5.QtXml import QDomElement  # type: ignore
 from pineboolib.interfaces.iconnection import IConnection
-from typing import Optional, Union
-from typing import Any, Mapping
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from typing import Optional, Union
+    from typing import Any, Mapping
+    import pineboolib
 logger = logging.getLogger(__name__)
 
 # FIXME: This class is emulating Eneboo, but the way is set up it is a core part of Pineboo now.

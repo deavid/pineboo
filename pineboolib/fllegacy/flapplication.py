@@ -9,8 +9,11 @@ from pineboolib.core import decorators
 
 from pineboolib.application import project
 from pineboolib.application.database import db_signals
-from typing import Any, Optional, Union
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from typing import Any, Optional, Union
+    import pineboolib
 
 logger = logging.getLogger("FLApplication")
 

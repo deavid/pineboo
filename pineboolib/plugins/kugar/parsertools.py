@@ -11,10 +11,13 @@ from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.utils.xpm import cacheXPM
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flapplication import aqApp
-import protocols
-from typing import Any, Iterable, Mapping, Optional, Sequence, Sized, SupportsFloat, SupportsInt, TypeVar, Union
+from typing import TYPE_CHECKING
 
-_T2 = TypeVar("_T2")
+if TYPE_CHECKING:
+    from typing import Any, Iterable, Mapping, Optional, Sequence, Sized, SupportsFloat, SupportsInt, TypeVar, Union
+    import xml
+
+    _T2 = TypeVar("_T2")
 
 
 """
@@ -119,7 +122,7 @@ class KParserTools(object):
 
     def calculated(
         self,
-        value: Union[bytes, str, protocols.SupportsFind, SupportsFloat, Mapping[slice, Any]],
+        value: Union[bytes, str, str, SupportsFloat, Mapping[slice, Any]],
         data_type,
         p: Union[bytes, str, SupportsInt] = None,
         data=None,
@@ -157,7 +160,7 @@ class KParserTools(object):
     @return. Ruta completa del fichero en tempdata.
     """
 
-    def parseKey(self, ref_key: Union[protocols.SupportsEndswith, protocols.SupportsReplace, Mapping[slice, Any]] = None) -> Any:
+    def parseKey(self, ref_key: Union[str, str, Mapping[slice, Any]] = None) -> Any:
         ret = None
         table_name = "fllarge"
         if ref_key is not None:
@@ -279,7 +282,7 @@ class KParserTools(object):
     @return Path del fichero ".ttf" o None
     """
 
-    def find_font(self, font_name: protocols.SupportsReplace, font_style) -> Optional[Union[bool, str]]:
+    def find_font(self, font_name: str, font_style) -> Optional[Union[bool, str]]:
         fonts_folders: List[str] = []
         if sys.platform.find("win") > -1:
             windir = os.environ.get("WINDIR")
@@ -356,7 +359,7 @@ class KParserTools(object):
 
         return val
 
-    def restore_text(self, t: protocols.SupportsReplace) -> Any:
+    def restore_text(self, t: str) -> Any:
         ret_ = t
         ret_ = ret_.replace("__RPAREN__", ")")
         ret_ = ret_.replace("__LPAREN__", "(")

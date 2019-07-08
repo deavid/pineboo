@@ -17,11 +17,15 @@ from jsonrpc import JSONRPCResponseManager, dispatcher
 from pineboolib import logging
 from pineboolib.core import decorators
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from typing import Dict, List, Mapping, Optional, Sized, TypeVar, Union
+from typing import TYPE_CHECKING
 
-_T0 = TypeVar("_T0")
+if TYPE_CHECKING:
+    from typing import Dict, List, Mapping, Optional, Sized, TypeVar, Union
+    import xml
 
-_T0 = TypeVar("_T0")
+    _T0 = TypeVar("_T0")
+
+    _T0 = TypeVar("_T0")
 
 
 logger = logging.getLogger(__name__)
@@ -432,10 +436,10 @@ class json_mainWindow(object):
         _jsonStr = dumps(_json, sort_keys=True, indent=2)
         return _jsonStr
 
-    def json_areas(self, *args) -> Dict[nothing, nothing]:
+    def json_areas(self, *args) -> Dict[Any, Any]:
         return self.areas_
 
-    def json_modules(self, args: Union[Sized, Mapping[int, Any]]) -> List[nothing]:
+    def json_modules(self, args: Union[Sized, Mapping[int, Any]]) -> List[Any]:
         _area = None
         if len(args) > 1:
             _area = args[1]
@@ -454,7 +458,7 @@ class json_mainWindow(object):
 
         return modulesS
 
-    def json_actions(self, args: Union[Sized, Mapping[int, Any]]) -> List[nothing]:
+    def json_actions(self, args: Union[Sized, Mapping[int, Any]]) -> List[Any]:
         _module = None
         _ret = []
         if len(args) > 1:

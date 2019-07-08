@@ -1,8 +1,13 @@
 from pineboolib import logging
 
 from pineboolib.plugins.dgi.dgi_qt.dgi_qt import dgi_qt
-from typing import Callable
-from typing import Any
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import pineboolib
+    from typing import Callable
+    from typing import Any
 
 logger = logging.getLogger(__name__)
 

@@ -15,10 +15,45 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flstylepainter import FLStylePainter
 from pineboolib.fllegacy.flreportengine import FLReportEngine
 from pineboolib import logging
-from typing import Any, List, Mapping, Sized, Union
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any, List, Mapping, Sized, Union
 
 
 AQ_USRHOME = "."  # FIXME
+
+
+class internalReportViewer(QObject):
+
+    rptEngine_ = None
+    dpi_ = 0
+    report_ = []
+    num_copies = 1
+
+    def __init__(self, parent) -> None:
+        super(internalReportViewer, self).__init__(parent)
+        self.dpi_ = 300
+        self.report_ = []
+        self.num_copies = 1
+
+    def setReportEngine(self, rptEngine) -> None:
+        self.rptEngine_ = rptEngine
+
+    def resolution(self) -> int:
+        return self.dpi_
+
+    def reportPages(self) -> List[Any]:
+        return self.report_
+
+    def renderReport(self, init_row, init_col, flags) -> Any:
+        return self.rptEngine_.renderReport(init_row, init_col, flags)
+
+    def setNumCopies(self, num_copies) -> None:
+        self.num_copies = num_copies
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.rptEngine_, name, None)
 
 
 class FLReportViewer(QObject):
@@ -816,35 +851,3 @@ class FLReportViewer(QObject):
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self.rptViewer_, name, None)
-
-
-class internalReportViewer(QObject):
-
-    rptEngine_ = None
-    dpi_ = 0
-    report_ = []
-    num_copies = 1
-
-    def __init__(self, parent) -> None:
-        super(internalReportViewer, self).__init__(parent)
-        self.dpi_ = 300
-        self.report_ = []
-        self.num_copies = 1
-
-    def setReportEngine(self, rptEngine) -> None:
-        self.rptEngine_ = rptEngine
-
-    def resolution(self) -> int:
-        return self.dpi_
-
-    def reportPages(self) -> List[nothing]:
-        return self.report_
-
-    def renderReport(self, init_row, init_col, flags) -> Any:
-        return self.rptEngine_.renderReport(init_row, init_col, flags)
-
-    def setNumCopies(self, num_copies) -> None:
-        self.num_copies = num_copies
-
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self.rptEngine_, name, None)

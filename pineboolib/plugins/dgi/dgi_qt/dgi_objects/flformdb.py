@@ -11,7 +11,11 @@ from pineboolib.application.utils.geometry import loadGeometryForm, saveGeometry
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flapplication import aqApp
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any
+    import pineboolib
 
 
 """

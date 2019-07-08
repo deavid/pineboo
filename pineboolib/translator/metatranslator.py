@@ -2,10 +2,13 @@
 
 from PyQt5 import QtXml, QtCore  # type: ignore
 from pineboolib import logging
-import protocols
-from typing import Any, TypeVar
 
-_TMetaTranslatorMessage = TypeVar("_TMetaTranslatorMessage", bound=MetaTranslatorMessage)
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any
+
+    _TMetaTranslatorMessage = "MetaTranslatorMessage"
 
 
 class metaTranslator(object):
@@ -229,7 +232,7 @@ class tsHandler(QtXml.QXmlDefaultHandler):
 
         return True
 
-    def characters(self, ch: protocols.SupportsReplace) -> bool:
+    def characters(self, ch: str) -> bool:
         t = ch.replace("\r", "")
         self.accum += t
         return True

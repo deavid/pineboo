@@ -10,7 +10,6 @@ from .dgi import load_dgi
 from PyQt5 import QtCore  # type: ignore
 
 from optparse import Values
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 

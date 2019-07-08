@@ -12,13 +12,16 @@ from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader, AQStaticBdInfo
 
-from typing import Union, List
-import protocols
-from typing import Any, Mapping, Optional, TypeVar
+from typing import TYPE_CHECKING
 
-_T0 = TypeVar("_T0")
+if TYPE_CHECKING:
+    from typing import Union, List
+    from typing import Any, Mapping, Optional, TypeVar
+    import pineboolib
 
-_T0 = TypeVar("_T0")
+    _T0 = TypeVar("_T0")
+
+    _T0 = TypeVar("_T0")
 
 """
 Gestor de módulos.
@@ -396,7 +399,7 @@ class FLManagerModules(object):
     @param id Identificador del módulo
     """
 
-    def setActiveIdModule(self, _id: Optional[Union[int, str, protocols.SupportsUpper]] = None) -> None:
+    def setActiveIdModule(self, _id: Optional[Union[int, str, str]] = None) -> None:
         if _id is None or not self.dictInfoMods:
             self.activeIdArea_ = None
             self.activeIdModule_ = None
@@ -456,7 +459,7 @@ class FLManagerModules(object):
     @return Lista de identificadores de módulos
     """
 
-    def listIdModules(self, idA) -> List[nothing]:
+    def listIdModules(self, idA) -> List[Any]:
         list_ = []
         for mod in self.dictInfoMods.keys():
             if self.dictInfoMods[mod].idArea == idA:
@@ -525,7 +528,7 @@ class FLManagerModules(object):
     @return QPixmap con el icono
     """
 
-    def iconModule(self, idM: protocols.SupportsUpper) -> Any:
+    def iconModule(self, idM: str) -> Any:
         from pineboolib import pncontrolsfactory
 
         pix = None
@@ -700,7 +703,7 @@ class FLManagerModules(object):
     @return Identificador del módulo al que pertenece el fichero
     """
 
-    def idModuleOfFile(self, n: Union[protocols.SupportsEndswith, protocols.SupportsFind, Mapping[slice, Any]]) -> Any:
+    def idModuleOfFile(self, n: Union[str, str, Mapping[slice, Any]]) -> Any:
         if not isinstance(n, str):
             n = n.toString()
 

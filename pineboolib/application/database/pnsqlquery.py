@@ -3,7 +3,10 @@ from pineboolib.core import decorators
 from pineboolib.core.settings import config
 from pineboolib.application.utils import sql_tools
 from pineboolib.application import project
-from typing import Any, Iterable, Mapping, Sequence, Sized, Union, List
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any, Iterable, Mapping, Sequence, Sized, Union, List
 
 logger = logging.getLogger(__name__)
 
@@ -715,7 +718,7 @@ class PNSqlQuery(object):
         separados por comas, p.e. "tabla1,tabla2,tabla3"
     """
 
-    def setTablesList(self, tl: protocols.SupportsReplace) -> None:
+    def setTablesList(self, tl: str) -> None:
         self.d.tablesList_ = []
         tl = tl.replace(" ", "")
         for tabla in tl.split(","):

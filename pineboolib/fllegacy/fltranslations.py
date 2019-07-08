@@ -3,7 +3,11 @@ import os
 from pineboolib import logging
 
 from PyQt5 import QtCore, Qt  # type: ignore
-from typing import Any, Mapping, Union
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any, Mapping, Union
+    from pineboolib.translator.metatranslator import metaTranslator
 
 
 """
@@ -32,7 +36,7 @@ class FLTranslations(object):
     @return Boolean. Proceso realizado correctamente
     """
 
-    def loadTsFile(self, tor, ts_file_name: Union[_PathLike, bytes, int, str], verbose) -> Any:
+    def loadTsFile(self, tor, ts_file_name: Union[metaTranslator, bytes, int, str], verbose) -> Any:
         # qm_file_name = "%s.qm" % ts_file_name[:-3]
         ok = False
         if os.path.exists(ts_file_name):
@@ -69,7 +73,7 @@ class FLTranslations(object):
     @param stripped. no usado
     """
 
-    def releaseTsFile(self, ts_file_name: Union[_PathLike, bytes, int, str, Mapping[slice, Any]], verbose, stripped) -> None:
+    def releaseTsFile(self, ts_file_name: Union[str, bytes, int, str, Mapping[slice, Any]], verbose, stripped) -> None:
         tor = None
 
         if self.loadTsFile(tor, ts_file_name, verbose):
@@ -84,7 +88,7 @@ class FLTranslations(object):
     @param stripped. No usado
     """
 
-    def lrelease(self, ts_input_file: Union[_PathLike, bytes, int, str, Mapping[slice, Any]], qm_output_file, stripped=True) -> None:
+    def lrelease(self, ts_input_file: Union[str, bytes, int, str, Mapping[slice, Any]], qm_output_file, stripped=True) -> None:
         from pineboolib.translator.metatranslator import metaTranslator
         from pineboolib.application import project
 

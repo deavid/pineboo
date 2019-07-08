@@ -1,14 +1,13 @@
-from typing import List, Union
 from PyQt5.QtCore import QDate  # type: ignore
 from PyQt5 import QtCore  # type: ignore
 import datetime
-from typing import Any, Mapping, Optional, Sized, TypeVar
+from typing import TYPE_CHECKING
 
-_T0 = TypeVar("_T0")
-_TDate = TypeVar("_TDate", bound=Date)
+if TYPE_CHECKING:
+    from typing import Any, Mapping, Optional, Sized, TypeVar, List, Union
 
-_T0 = TypeVar("_T0")
-_TDate = TypeVar("_TDate", bound=Date)
+    _T0 = TypeVar("_T0")
+    _TDate = "Date"
 
 
 def date_dma_to_amd(f) -> Optional[str]:
@@ -270,7 +269,7 @@ class Date(object):
         return Date(self.date_.addYears(y).toString("yyyy-MM-dd"))
 
     @classmethod
-    def parse(cls, value: Union[Sized, Mapping[slice, Any]]) -> Date:
+    def parse(cls, value: Union[Sized, Mapping[slice, Any]]) -> _TDate:
         return Date(value, "yyyy-MM-dd")
 
     def __str__(self):

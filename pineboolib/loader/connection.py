@@ -1,6 +1,11 @@
 from pineboolib.core.utils.utils_base import filedir
 from .projectconfig import ProjectConfig
-from typing import Optional
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Optional
+    import pineboolib
 
 DEFAULT_SQLITE_CONN = ProjectConfig(database="pineboo.sqlite3", type="SQLite3 (SQLITE3)")
 
