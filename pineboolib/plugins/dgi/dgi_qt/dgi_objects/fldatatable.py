@@ -676,7 +676,9 @@ class FLDataTable(QtWidgets.QTableView):
 
             last_pk = None
             if self.cursor().buffer():
-                last_pk = self.cursor().buffer().value(self.cursor().buffer().pK())
+                pk_name = self.cursor().buffer().pK()
+                if pk_name is not None:
+                    last_pk = self.cursor().buffer().value(pk_name)
 
             self.cursor().refresh()
 

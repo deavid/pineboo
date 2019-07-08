@@ -122,7 +122,7 @@ class FormInternalObj(FormDBWidget):
             if valor_name in ("ebCallFunction", "maxPixImages", "kugarParser", "colorObligatorio", "kugar_temp_dir", "git_updates_repo"):
                 valor = config.value("ebcomportamiento/%s" % valor_name, "")
                 if valor_name == "kugar_temp_dir" and valor == "":
-                    from pineboolib import project
+                    from pineboolib.application import project
 
                     valor = project.tmpdir
 

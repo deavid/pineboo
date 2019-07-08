@@ -2,11 +2,12 @@ from pineboolib import logging
 
 from PyQt5.QtWidgets import QApplication  # type: ignore
 from pineboolib.loader.projectconfig import ProjectConfig
+from typing import Optional
 
 logger = logging.getLogger("loader.conn_dialog")
 
 
-def show_connection_dialog(app: QApplication) -> ProjectConfig:
+def show_connection_dialog(app: QApplication) -> Optional[ProjectConfig]:
     """Show the connection dialog, and configure the project accordingly."""
     from .dlgconnect import DlgConnect
 

@@ -274,7 +274,7 @@ class PNCursorPrivate(QtCore.QObject):
             condTrue_ = False
 
             if self.acosCond_ == PNSqlCursor.Value:
-                condTrue_ = self.cursor_.value(self.acosCondName_) == self.acosCondVal_
+                condTrue_ = self.cursor_.valueBuffer(self.acosCondName_) == self.acosCondVal_
             elif self.acosCond_ == PNSqlCursor.RegExp:
                 from PyQt5.Qt import QRegExp  # type: ignore
 

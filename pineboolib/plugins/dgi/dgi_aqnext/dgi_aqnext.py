@@ -2,7 +2,7 @@
 import collections
 import traceback
 import inspect
-from pineboolib import logging
+from pineboolib.core.utils.logging import logging
 import os
 from typing import List, Dict, Any
 from PyQt5 import QtCore  # type: ignore
