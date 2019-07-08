@@ -69,10 +69,18 @@ def loadUi(form_path, widget, parent=None):
         loadAction(action, widget)
 
     for xmlconnection in root.findall("connections//connection"):
-        sender_name = xmlconnection.find("sender").text
-        signal_name = xmlconnection.find("signal").text
-        receiv_name = xmlconnection.find("receiver").text
-        slot_name = xmlconnection.find("slot").text
+        sender_elem = xmlconnection.find("sender")
+        signal_elem = xmlconnection.find("signal")
+        receiv_elem = xmlconnection.find("receiver")
+        slot_elem = xmlconnection.find("slot")
+
+        if sender_elem is None or signal_elem is None or receiv_elem is None or slot_elem is None:
+            continue
+
+        sender_name = sender_elem.text
+        signal_name = signal_elem.text
+        receiv_name = receiv_elem.text
+        slot_name = slot_elem.text
 
         receiver = None
         if isinstance(widget, pncontrolsfactory.QMainWindow):
@@ -164,8 +172,13 @@ def loadUi(form_path, widget, parent=None):
 
 
 def loadToolBar(xml, widget):
-    name = xml.find("./property[@name='name']/cstring").text
-    label = xml.find("./property[@name='label']/string").text
+    name_elem = xml.find("./property[@name='name']/cstring")
+    label_elem = xml.find("./property[@name='label']/string")
+    if name_elem is None or label_elem is None:
+        raise Exception("Unable to find required name and label properties")
+
+    name = name_elem.text
+    label = label_elem.text
 
     tb = pncontrolsfactory.QToolBar(name)
     tb.label = label
@@ -202,17 +215,21 @@ def loadMenuBar(xml, widget):
                     ex, ey, ew, eh = geo_.find("x"), geo_.find("y"), geo_.find("width"), geo_.find("height")
                     if ex is None or ey is None or ew is None or eh is None:
                         continue
-                    x = int(ex.text)
-                    y = int(ey.text)
-                    w = int(ew.text)
-                    h = int(eh.text)
-                    mB.setGeometry(x, y, w, h)
+                    x1 = int(ex.text)
+                    y1 = int(ey.text)
+                    w1 = int(ew.text)
+                    h1 = int(eh.text)
+                    mB.setGeometry(x1, y1, w1, h1)
             elif name == "acceptDrops":
-                mB.setAcceptDrops(x.find("bool").text == "true")
+                bool_elem = x.find("bool")
+                if bool_elem is not None:
+                    mB.setAcceptDrops(bool_elem.text == "true")
             elif name == "frameShape":
                 continue
             elif name == "defaultUp":
-                mB.setDefaultUp(x.find("bool").text == "true")
+                bool_elem = x.find("bool")
+                if bool_elem is not None:
+                    mB.setDefaultUp(bool_elem.text == "true")
         elif x.tag == "item":
             process_item(x, mB, widget)
 
@@ -540,11 +557,15 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             lay_spacing = 2
             for p in c.findall("property"):
                 p_name = p.get("name")
+                number_elem = p.find("number")
 
                 if p_name == "name":
-                    lay_name = p.find("cstring").text
+                    lay_name_e = p.find("cstring")
+                    if lay_name_e is not None:
+                        lay_name = lay_name_e.text
                 elif p_name == "margin":
-                    lay_margin = int(p.find("number").text)
+                    if number_elem is not None:
+                        lay_margin = int(number_elem.text)
 
                     if c.tag == "hbox":
                         lay_margin_h = lay_margin
@@ -554,7 +575,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                         lay_margin_h = lay_margin_v = lay_margin
 
                 elif p_name == "spacing":
-                    lay_spacing = int(p.find("number").text)
+                    if number_elem is not None:
+                        lay_spacing = int(number_elem.text)
                 elif p_name == "sizePolicy":
                     widget.setSizePolicy(loadVariant(p, widget))
 

@@ -1156,7 +1156,7 @@ class FLMYSQL_MYISAM2(object):
 
     def recordInfo2(self, tablename):
         if not self.isOpen():
-            return False
+            raise Exception("MYISAM2: conn not opened")
         info = []
         cursor = self.conn_.cursor()
 
