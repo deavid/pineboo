@@ -1002,6 +1002,8 @@ class DockListView(QtCore.QObject):
             ac.triggered.emit()
 
     def update(self, action_group=None, reverse=False):
+        from pineboolib.fllegacy.aqsobjects.aqs import AQS
+
         self.ag_ = action_group
 
         if not self.ag_:
@@ -1009,7 +1011,7 @@ class DockListView(QtCore.QObject):
 
         self.lw_.clear()
 
-        self.buildListView(self.lw_, pncontrolsfactory.AQS.toXml(self.ag_), self.ag_, reverse)
+        self.buildListView(self.lw_, AQS().toXml(self.ag_), self.ag_, reverse)
 
     def buildListView(self, parent_item, parent_element, ag, reverse):
         this_item = None

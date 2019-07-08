@@ -2,11 +2,11 @@
 import collections
 import traceback
 import inspect
-from pineboolib.core.utils.logging import logging
 import os
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 from PyQt5 import QtCore  # type: ignore
 
+from pineboolib.core.utils.logging import logging
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.application.utils import sql_tools
 from pineboolib.application import project
@@ -144,10 +144,10 @@ class dgi_aqnext(dgi_schema):
             raise ImportError
 
         from pineboolib import qsa as qsa_dict_modules
-        from pineboolib.pnapplication.xmlaction import XMLAction
-        from pineboolib.pnapplication.proxy import DelayedObjectProxyLoader
+        from pineboolib.application.xmlaction import XMLAction
+        from pineboolib.application.proxy import DelayedObjectProxyLoader
 
-        action = XMLAction()
+        action = XMLAction(project=project)
         action.name = module_name
         action.alias = module_name
         action.form = None
@@ -169,7 +169,7 @@ class dgi_aqnext(dgi_schema):
             if prefix == "":
                 return
 
-        action_xml = XMLAction()
+        action_xml = XMLAction(project=project)
         action_xml.name = module_name
 
         if "%s_legacy" in action_xml.name not in project.actions.keys():
@@ -525,15 +525,15 @@ class dgi_aqnext(dgi_schema):
             ret[cursor.valueBuffer("descripcion")]["default"] = cursor.valueBuffer("inicial")
         return ret
 
-    def _convert_to_ordered_dict(self, data):
+    def _convert_to_ordered_dict(self, data: Union[List[Dict[str, Any]], Dict[str, Any]]):
         ret_ = []
 
         if isinstance(data, list):
             for t in data:
                 o = {key: t[key] for key in t.keys()}
                 ret_.append(o)
-        else:
-            o = {key: t[key] for key in data.keys()}
+        elif isinstance(data, dict):
+            o = {key: data[key] for key in data.keys()}
             ret_.append(o)
 
         return ret_

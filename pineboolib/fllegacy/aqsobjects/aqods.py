@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+from typing import Union, List, Any
+
+import odf
+from odf import table, style
+
 from pineboolib import logging
 
 
@@ -67,6 +72,23 @@ class AQOdsSpreadSheet(object):
         pass
 
 
+class AQOdsImage(object):
+    name_ = None
+    width_ = None
+    height_ = None
+    x_ = None
+    y_ = None
+    link_ = None
+
+    def __init__(self, name, width, height, x, y, link):
+        self.name_ = name
+        self.width_ = width
+        self.height_ = height
+        self.x_ = x
+        self.y_ = y
+        self.link_ = link
+
+
 """
 Hoja dentro del documento
 """
@@ -111,13 +133,13 @@ Linea dentro de una hoja
 
 
 class AQOdsRow(object):
-    sheet_ = None
+    sheet_: Any
     row_ = None
-    cells_list_ = None
+    cells_list_: List[Any]
     style_cell_text_ = None
     fix_precision_ = None
     row_color_ = None
-    property_cell_ = None
+    property_cell_: List[Any]
 
     """
     Constructor
@@ -125,8 +147,8 @@ class AQOdsRow(object):
     """
 
     def __init__(self, sheet):
+
         self.sheet_ = sheet
-        from odf import table
 
         self.row_ = table.TableRow()
         self.cells_list_ = []
@@ -147,7 +169,10 @@ class AQOdsRow(object):
     @param opt. Opciones de linea, cada celda acaba con la asignación del valor
     """
 
-    def opIn(self, opt):
+    def opIn(self, opt: Union[float, str, odf.element.Element, List, AQOdsImage]):
+        from odf.text import P, Span
+        from odf.draw import Frame, Image
+
         if isinstance(opt, float):
             if self.fix_precision_ is not None:
                 opt = "%s" % round(opt, self.fix_precision_)
@@ -155,7 +180,6 @@ class AQOdsRow(object):
                 opt = "%s" % opt
         if isinstance(opt, str):  # Último paso
             cell, style = self.__newCell__()
-            from odf.text import P, Span
 
             if self.style_cell_text_:
                 text_elem = P(text="")
@@ -171,27 +195,11 @@ class AQOdsRow(object):
             self.style_cell_text_ = None
 
         else:
-            import odf
-
-            if isinstance(opt, odf.element.Element):
-                if opt.tagName in ("style:paragraph-properties", "style:table-cell-properties"):
-                    import copy
-
-                    prop = copy.copy(opt)
-                    self.property_cell_.append(prop)
-                elif opt.tagName == "style:style":
-                    self.sheet_.spread_sheet_parent_.automaticstyles.addElement(opt)
-                    self.style_cell_text_ = opt
-                else:
-                    logger.warning("%s:Parámetro desconocido %s", __name__, opt.tagName)
-
-            elif isinstance(opt, list):  # Si es lista , Insertamos todos los parámetros uno a uno
+            if isinstance(opt, list):  # Si es lista , Insertamos todos los parámetros uno a uno
                 for l in opt:
                     self.opIn(l)
 
             elif isinstance(opt, AQOdsImage):
-                from odf.text import P
-                from odf.draw import Frame, Image
 
                 href = self.sheet_.spread_sheet_parent_.addPictureFromFile(opt.link_)
                 cell, style = self.__newCell__()
@@ -205,13 +213,23 @@ class AQOdsRow(object):
                 # self.coveredCell()
                 # self.opIn(href)
                 # print("FIXME:: Vacio", href)
+            elif isinstance(opt, odf.element.Element):
+                if opt.tagName in ("style:paragraph-properties", "style:table-cell-properties"):
+                    import copy
+
+                    prop = copy.copy(opt)
+                    self.property_cell_.append(prop)
+                elif opt.tagName == "style:style":
+                    self.sheet_.spread_sheet_parent_.automaticstyles.addElement(opt)
+                    self.style_cell_text_ = opt
+                else:
+                    logger.warning("%s:Parámetro desconocido %s", __name__, opt.tagName)
 
     """
     Nueva celda. Esta se crea al asignar el valor a la anterior
     """
 
     def __newCell__(self):
-        from odf import table, style
 
         style_cell = style.Style(name="stylecell_%s_%s" % (len(self.cells_list_), self.sheet_.rowsCount()), family="table-cell")
         if self.row_color_:  # Guardo color si hay
@@ -360,23 +378,6 @@ class AQOdsStyle_class(object):
     Border_top = property(borderTop, None)
     Border_right = property(borderRight, None)
     Border_left = property(borderLeft, None)
-
-
-class AQOdsImage(object):
-    name_ = None
-    width_ = None
-    height_ = None
-    x_ = None
-    y_ = None
-    link_ = None
-
-    def __init__(self, name, width, height, x, y, link):
-        self.name_ = name
-        self.width_ = width
-        self.height_ = height
-        self.x_ = x
-        self.y_ = y
-        self.link_ = link
 
 
 AQOdsStyle = AQOdsStyle_class()

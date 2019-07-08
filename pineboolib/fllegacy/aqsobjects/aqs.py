@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtGui import QPixmap  # type: ignore
-
+from typing import Type
 from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication  # type: ignore
+from PyQt5.QtXml import QDomDocument  # type: ignore
 from PyQt5 import QtCore  # type: ignore
 from PyQt5 import QtGui  # type: ignore
 
 from pineboolib.core.utils.logging import logging
-from PyQt5.QtXml import QDomDocument  # type: ignore
 
 logger = logging.getLogger("AQS")
 
@@ -66,7 +65,7 @@ class AQS(object):
     """
 
     @classmethod
-    def toXml(self, obj_, include_children=True, include_complex_types=False):
+    def toXml(cls: Type["AQS"], obj_, include_children=True, include_complex_types=False):
         xml_ = QDomDocument()
 
         if not obj_:
@@ -111,7 +110,7 @@ class AQS(object):
 
             for child in obj_.children():
 
-                itd = self.toXml(child, include_children, include_complex_types)
+                itd = cls.toXml(child, include_children, include_complex_types)
                 xml_.firstChild().appendChild(itd.firstChild())
         return xml_
 

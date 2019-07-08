@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class FLQPSQL(object):
 
     version_ = None
-    conn_ = None
+    conn_: Any = None
     name_ = None
     alias_ = None
     errorList = None
@@ -39,7 +39,6 @@ class FLQPSQL(object):
 
     def __init__(self):
         self.version_ = "0.8"
-        self.conn_ = None
         self.name_ = "FLQPSQL"
         self.open_ = False
         self.errorList = []
@@ -579,9 +578,9 @@ class FLQPSQL(object):
         else:
             return self.mismatchedTable(table1, tmd_or_table2.name(), db_)
 
-    def recordInfo2(self, tablename):
+    def recordInfo2(self, tablename) -> List[List[Any]]:
         if not self.isOpen():
-            return False
+            raise Exception("PSQL is not open")
         info = []
         stmt = (
             "select pg_attribute.attname, pg_attribute.atttypid, pg_attribute.attnotnull, pg_attribute.attlen, pg_attribute.atttypmod, "
@@ -861,7 +860,8 @@ class FLQPSQL(object):
                         if defVal is not None:
                             v = defVal
 
-                    if v is not None and not newBuffer.field(newField.name()).type() == newField.type():
+                    # FIXME: newBuffer is an array from recordInfo2()
+                    """if v is not None and not newBuffer.field(newField.name()).type() == newField.type():
                         print(
                             "FLManager::alterTable : "
                             + util.translate("application", "Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.").arg(
@@ -886,7 +886,9 @@ class FLQPSQL(object):
                         else:
                             v = "NULL"[0 : newField.length()]
 
+                    # FIXME: newBuffer is an array from recordInfo2()
                     newBuffer.setValue(newField.name(), v)
+                    """
 
                 listRecords.append(newBuffer)
 

@@ -1079,18 +1079,13 @@ class FLFieldDB(QtWidgets.QWidget):
                     return
 
                 # if self.topWidget_ and not self.topWidget_.isShown() and not self.cursor_.modeAccess() == FLSqlCursor.Insert:
-                #    if tmd and not tmd.inCache():
-                #        del tmd
                 #    return
 
                 if field is None:
-                    if tmd and not tmd.inCache():
-                        del tmd
+                    return
 
                 if not field.relationM1():
                     self.logger.info("FLFieldDB :El campo de la relación debe estar relacionado en M1")
-                    if tmd and not tmd.inCache():
-                        del tmd
                     return
 
                 v = self.cursor_.valueBuffer(self.fieldRelation_)
@@ -1123,8 +1118,6 @@ class FLFieldDB(QtWidgets.QWidget):
                     if not v1 == v:
                         self.cursor_.setValueBuffer(self.fieldRelation_, v1)
 
-                if tmd and not tmd.inCache():
-                    del tmd
             return
 
         field = tMD.field(str(self.fieldName_))
@@ -1285,7 +1278,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 #    return
                 if isinstance(v, str):
                     if v.find("static char") > -1:
-                        from pineboolib.core.utils.utils_base import cacheXPM
+                        from pineboolib.application.utils.xpm import cacheXPM
 
                         v = cacheXPM(v)
 
@@ -1501,7 +1494,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             if isinstance(v, str):
                 if v.find("static char") > -1:
-                    from pineboolib.core.utils.utils_base import cacheXPM
+                    from pineboolib.application.utils.xpm import cacheXPM
 
                     v = cacheXPM(v)
 

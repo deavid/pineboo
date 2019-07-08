@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
-from pineboolib import logging
+from typing import Dict, List
 from PyQt5 import QtWidgets, QtCore  # type: ignore
 from PyQt5.QtWidgets import QTreeWidgetItem, QActionGroup, QMenu, QAction, QIcon, QMainWindow, QTreeWidget  # type: ignore
 from PyQt5.QtCore import QSignalMapper  # type: ignore
 from PyQt5.QtXml import QDomDocument  # type: ignore
 from PyQt5.QtGui import QPixmap, QImage  # type: ignore
+from pineboolib import logging
 from pineboolib import pncontrolsfactory
-from pineboolib.fllegacy.aqsobjects.aqs import AQS
+from pineboolib.fllegacy.aqsobjects.aqs import AQS as AQSClass
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQUtil, AQSettings
 from pineboolib.fllegacy.flapplication import aqApp
 
 logger = logging.getLogger("mainForm_%s" % __name__)
+AQS = AQSClass()
 
 
 class MainForm(QtWidgets.QMainWindow):
@@ -26,8 +28,8 @@ class MainForm(QtWidgets.QMainWindow):
     tw_ = None
     tw_corner = None  # deprecated
     act_sig_map_ = None
-    initialized_mods_ = None
-    main_widgets_ = None
+    initialized_mods_: List[str] = None
+    main_widgets_: Dict[str, QtCore.QObject] = None
     lista_tabs_ = []
 
     def __init__(self):
@@ -202,7 +204,7 @@ class MainForm(QtWidgets.QMainWindow):
 
     def init(self):
         self.w_.statusBar().hide()
-        self.main_widgets_ = []
+        self.main_widgets_ = {}
         self.initialized_mods_ = []
         self.act_sig_map_ = QSignalMapper(self.w_)
         self.act_sig_map_.setObjectName("pinebooActSignalMap")
@@ -216,7 +218,7 @@ class MainForm(QtWidgets.QMainWindow):
 
     def initFromWidget(self, w):
         self.w_ = w
-        self.main_widgets_ = []
+        self.main_widgets_ = {}
         self.initialized_mods_ = []
         self.act_sig_map_ = QSignalMapper(self.w_)
         self.act_sig_map_.setObjectName("pinebooActSignalMap")
@@ -245,7 +247,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.dck_rec_.w_.installEventFilter(self)
         self.dck_mar_.w_.installEventFilter(self)
 
-    def initModule(self, module):
+    def initModule(self, module: str):
         if module in self.main_widgets_:
             mwi = self.main_widgets_[module]
             mwi.name = module
@@ -600,11 +602,11 @@ class MainForm(QtWidgets.QMainWindow):
 
     def initDocks(self):
         self.dck_mar_ = DockListView(self.w_, "pinebooDockMarks", self.qsa_sys.translate("Marcadores"))
-        self.w_.addDockWidget(AQS.DockLeft, self.dck_mar_.w_)
+        self.w_.addDockWidget(AQS.LeftDockWidgetArea, self.dck_mar_.w_)
         self.dck_rec_ = DockListView(self.w_, "pinebooDockRecent", self.qsa_sys.translate("Recientes"))
-        self.w_.addDockWidget(AQS.DockLeft, self.dck_rec_.w_)
+        self.w_.addDockWidget(AQS.LeftDockWidgetArea, self.dck_rec_.w_)
         self.dck_mod_ = DockListView(self.w_, "pinebooDockModules", self.qsa_sys.translate("Módulos"))
-        self.w_.addDockWidget(AQS.DockLeft, self.dck_mod_.w_)
+        self.w_.addDockWidget(AQS.LeftDockWidgetArea, self.dck_mod_.w_)
 
         windowMenu = self.w_.findChild(QtWidgets.QMenu, "windowMenu")
         sub_menu = windowMenu.addMenu(self.qsa_sys.translate("&Vistas"))

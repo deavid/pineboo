@@ -57,7 +57,7 @@ class parser(object):
         try:
             response = JSONRPCResponseManager.handle(request.data, dispatcher)
         except Exception:
-            response = "Not Found"
+            return Response("Not found", mimetype="application/json")
 
         return Response(response.json, mimetype="application/json")
 
@@ -102,6 +102,8 @@ class parser(object):
 
         if fun_name == "execute":
             try:
+                if cursor is None:
+                    raise Exception("No cursor")
                 cursor.execute(dict_["arguments"]["sql"])
             #    for data in cursor_dict[dict_["arguments"]["cursor_id"]]:
             #        res.append(data)
@@ -111,8 +113,9 @@ class parser(object):
 
         elif fun_name == "fetchone":
             ret = None
-
             try:
+                if cursor is None:
+                    raise Exception("No cursor")
                 ret = cursor.fetchone()
             except Exception:
                 print("Error %s" % fun_name, traceback.format_exc())
@@ -120,6 +123,8 @@ class parser(object):
 
         elif fun_name == "refreshQuery":
             try:
+                if cursor is None:
+                    raise Exception("No cursor")
                 fun = getattr(conn.driver(), fun_name)
 
                 fun(
@@ -135,6 +140,8 @@ class parser(object):
 
         elif fun_name == "refreshFetch":
             try:
+                if cursor is None:
+                    raise Exception("No cursor")
                 fun = getattr(conn.driver(), fun_name)
 
                 fun(
@@ -150,6 +157,8 @@ class parser(object):
 
         elif fun_name == "fetchAll":
             try:
+                if cursor is None:
+                    raise Exception("No cursor")
                 fun = getattr(conn.driver(), fun_name)
 
                 ret = fun(
@@ -165,6 +174,8 @@ class parser(object):
 
         elif fun_name == "fetchall":
             try:
+                if cursor is None:
+                    raise Exception("No cursor")
                 ret_ = cursor.fetchall()
                 return normalize_data(ret_)
             except Exception:
@@ -172,6 +183,8 @@ class parser(object):
 
         elif fun_name == "close":
             try:
+                if cursor is None:
+                    raise Exception("No cursor")
                 cursor.close()
                 del cursor
                 del cursor_dict["%s_%s" % (id_conn, dict_["arguments"]["cursor_id"])]
