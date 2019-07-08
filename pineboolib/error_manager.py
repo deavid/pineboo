@@ -25,7 +25,7 @@ def error_manager(e: str) -> str:
 
 
 def process_error(error_str: str) -> str:
-    ret = "\n=========== Wiki error =============\n\n"
+    ret = "\n=========== Error Manager =============\n\n"
 
     if "AttributeError: 'dict' object has no attribute" in error_str:
         error = "AttributeError: 'dict' object has no attribute"
