@@ -29,10 +29,12 @@ class dgi_qt(dgi_schema):
         from pineboolib.plugins.dgi.dgi_qt import dgi_qt3ui
         from .dgi_objects.splash_screen import splashscreen
         from .dgi_objects.progress_dialog_manager import ProgressDialogManager
+        from .dgi_objects.status_help_msg import StatusHelpMsg
 
         self.pnqt3ui = dgi_qt3ui
         self.splash = splashscreen()
         self.progress_dialog_manager = ProgressDialogManager()
+        self.status_help_msg = StatusHelpMsg()
 
     def __getattr__(self, name):
 

@@ -248,7 +248,7 @@ class PNConnection(QtCore.QObject, IConnection):
 
         if self.transaction_ == 0 and self.canTransaction():
             if config.value("application/isDebuggerMode", False):
-                project.message_manager().send("statusHelpMsg", "Iniciando Transacción... %s" % self.transaction_)
+                project.message_manager().send("status_help_msg", "send", ["Iniciando Transacción... %s" % self.transaction_])
             if self.transaction():
                 self.lastActiveCursor_ = cursor
                 db_signals.emitTransactionBegin(cursor)
@@ -270,7 +270,9 @@ class PNConnection(QtCore.QObject, IConnection):
 
         else:
             if config.value("application/isDebuggerMode", False):
-                project.message_manager().send("statusHelpMsg", "Creando punto de salvaguarda %s:%s" % (self.name, self.transaction_))
+                project.message_manager().send(
+                    "status_help_msg", "send", ["Creando punto de salvaguarda %s:%s" % (self.name, self.transaction_)]
+                )
             if not self.canSavePoint():
                 if self.transaction_ == 0:
                     if self.currentSavePoint_:
@@ -344,7 +346,8 @@ class PNConnection(QtCore.QObject, IConnection):
             return True
 
         if self.transaction_ == 0 and self.canTransaction():
-            project.message_manager().send("statusHelpMsg", "Deshaciendo Transacción...")
+            if config.value("application/isDebuggerMode", False):
+                project.message_manager().send("status_help_msg", "send", ["Deshaciendo Transacción..."])
             if self.rollbackTransaction():
                 self.lastActiveCursor_ = None
 
@@ -368,7 +371,9 @@ class PNConnection(QtCore.QObject, IConnection):
 
         else:
 
-            project.message_manager().send("statusHelpMsg", "Restaurando punto de salvaguarda %s:%s..." % (self.name, self.transaction_))
+            project.message_manager().send(
+                "statusHelpMsg", "send", "Restaurando punto de salvaguarda %s:%s..." % (self.name, self.transaction_)
+            )
             if not self.canSavePoint():
                 tam_queue = len(self.queueSavePoints_)
                 for i in range(tam_queue):
@@ -428,7 +433,7 @@ class PNConnection(QtCore.QObject, IConnection):
 
         if self.transaction_ == 0 and self.canTransaction():
             if config.value("application/isDebuggerMode", False):
-                project.message_manager().send("statusHelpMsg", "Terminando transacción... %s" % self.transaction_)
+                project.message_manager().send("statusHelpMsg", "send", ["Terminando transacción... %s" % self.transaction_])
             try:
                 if self.driver().commitTransaction():
                     self.lastActiveCursor_ = None
@@ -455,7 +460,9 @@ class PNConnection(QtCore.QObject, IConnection):
                 logger.error("doCommit: Fallo al intentar terminar transacción: %s", e)
                 return False
         else:
-            project.message_manager().send("statusHelpMsg", "Liberando punto de salvaguarda %s:%s..." % (self.name, self.transaction_))
+            project.message_manager().send(
+                "statusHelpMsg", "send", ["Liberando punto de salvaguarda %s:%s..." % (self.name, self.transaction_)]
+            )
             if (self.transaction_ == 1 and self.canTransaction()) or (self.transaction_ == 0 and not self.canTransaction()):
                 if not self.canSavePoint():
                     if self.currentSavePoint_:

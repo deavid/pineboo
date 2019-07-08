@@ -22,7 +22,6 @@ class Manager(object):
                 ret_ = attr_()
             else:
                 ret_ = attr_(*data_)
-
             self._dgi.processEvents()
 
         if ret_ is not None:
