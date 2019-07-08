@@ -119,7 +119,7 @@ class ProjectConfig:
             dbname = connstring
             if not re.match(r"\w+", dbname):
                 raise ValueError("base de datos no valida")
-            return user, passwd, host, port, dbname
+            return user, passwd, driver_alias, host, port, dbname
         dbname = connstring[connstring.rindex("/") + 1 :]
         conn_list = [None, None] + uphpstring.split("@")
         user_pass, host_port = conn_list[-2], conn_list[-1]
