@@ -88,9 +88,10 @@ class dgi_aqnext(dgi_schema):
         return True
 
     def get_nameuser(self):
-        from YBUTILS.viewREST.cacheController import getUser
-
-        return str(getUser())
+        return ""
+        # FIXME
+        # from YBUTILS.viewREST.cacheController import getUser
+        # return str(getUser())
 
     def sys_mtds(self):
         return ["sis_acl", "sis_user_notifications", "sis_gridfilter"]
@@ -246,9 +247,9 @@ class dgi_aqnext(dgi_schema):
             cursor = module.widget.cursor()
         else:
             logger.warning("*** DGI.get_master_cursor creando cursor %s sin action asociada ***", prefix)
-            from pineboolib import pncontrolsfactory
+            from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
-            cursor = pncontrolsfactory.FLSqlCursor(prefix)
+            cursor = FLSqlCursor(prefix)
 
         if cursor is None:
             logger.warning("*** DGI.get_master_cursor no encuentra cursor de %s***", prefix)
@@ -512,10 +513,10 @@ class dgi_aqnext(dgi_schema):
         return response
 
     def carga_datos_custom_filter(self, table, usuario):
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
         ret: Dict[str, Dict[str, Any]] = {}
-        cursor = pncontrolsfactory.FLSqlCursor("sis_gridfilter")
+        cursor = FLSqlCursor("sis_gridfilter")
         cursor.select(" prefix ='%s' AND usuario ='%s'" % (table, usuario))
         if cursor.first():
             ret[cursor.valueBuffer("descripcion")] = {}

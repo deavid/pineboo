@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib import logging
-import os
+
+# import os
 from PyQt5 import QtCore  # type: ignore
 from pineboolib import pncontrolsfactory
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
@@ -36,6 +37,8 @@ class DelayedObjectProxyLoader(object):
     """
 
     def __load(self):
+        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+
         # print("**Carga", self._field.name())
         field_relation = self._field.relationM1()
 
@@ -64,9 +67,7 @@ class DelayedObjectProxyLoader(object):
                 relation_mtd.setField(relation_field_name)
 
                 if relation_table_name and relation_field_name:
-                    self.cursor_tree_dict[key_] = pncontrolsfactory.FLSqlCursor(
-                        relation_table_name, True, self._obj.conn(), self._obj, relation_mtd
-                    )
+                    self.cursor_tree_dict[key_] = FLSqlCursor(relation_table_name, True, self._obj.conn(), self._obj, relation_mtd)
 
             rel_cursor = self.cursor_tree_dict[key_]
 
@@ -147,25 +148,25 @@ class FLSqlCursor(QtCore.QObject):
 
         self.show_debug = False
 
-        if stabla is not None:
-            from pineboolib.application import project
-
-            module_name = project.conn.managerModules().idModuleOfFile("%s.mtd" % stabla)
-            model_file = "models.%s.%s" % (module_name, stabla)
-            if os.path.exists(model_file):
-                (
-                    self._model,
-                    self._buffer_changed,
-                    self._before_commit,
-                    self._after_commit,
-                    self._buffer_commited,
-                    self._inicia_valores_cursor,
-                    self._buffer_changed_label,
-                    self._validate_cursor,
-                    self._validate_transaction,
-                    self._cursor_accepted,
-                ) = self.obtener_modelo(stabla)
-                # self._stabla = self._model._meta.db_table
+        # if stabla is not None:
+        #     from pineboolib.application import project
+        #
+        #     module_name = project.conn.managerModules().idModuleOfFile("%s.mtd" % stabla)
+        #     model_file = "models.%s.%s" % (module_name, stabla)
+        #     if os.path.exists(model_file):
+        #         (
+        #             self._model,
+        #             self._buffer_changed,
+        #             self._before_commit,
+        #             self._after_commit,
+        #             self._buffer_commited,
+        #             self._inicia_valores_cursor,
+        #             self._buffer_changed_label,
+        #             self._validate_cursor,
+        #             self._validate_transaction,
+        #             self._cursor_accepted,
+        #         ) = self.obtener_modelo(stabla)
+        #         self._stabla = self._model._meta.db_table
 
     def buffer_changed_signal(self, scampo):
         if self._buffer_changed is None:
@@ -239,11 +240,11 @@ class FLSqlCursor(QtCore.QObject):
 
         return self._cursor_accepted(self.parent_cursor)
 
-    def obtener_modelo(self, stabla):
-        # logger.warning("****** obtener_modelo %s", stabla, stack_info = True)
-        from YBLEGACY.FLAux import FLAux
-
-        return FLAux.obtener_modelo(stabla)
+    # def obtener_modelo(self, stabla):
+    #     # logger.warning("****** obtener_modelo %s", stabla, stack_info = True)
+    #     from YBLEGACY.FLAux import FLAux
+    #
+    #     return FLAux.obtener_modelo(stabla)
 
     def assoc_model(self, module_name=None):
         from pineboolib.application import project
@@ -277,6 +278,8 @@ class meta_model(object):
         self.cursor_tree_dict = {}
 
     def __getattr__(self, name):
+        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+
         # print("Buscando", name)
         ret = None
         if name == "pk":
@@ -302,7 +305,7 @@ class meta_model(object):
                     relation_mtd.setField(relation_field_name)
 
                     if relation_table_name and relation_field_name:
-                        self.cursor_tree_dict[key_] = pncontrolsfactory.FLSqlCursor(
+                        self.cursor_tree_dict[key_] = FLSqlCursor(
                             relation_table_name, True, self._cursor.conn(), self._cursor, relation_mtd
                         )
 

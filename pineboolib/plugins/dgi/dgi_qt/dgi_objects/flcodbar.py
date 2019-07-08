@@ -8,6 +8,7 @@ from PyQt5.QtSvg import QSvgRenderer  # type: ignore
 from pineboolib import logging
 
 import barcode  # pip3 install python-barcode
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ class FLCodBar(object):
 
     barcode = {}
     p: QPixmap = None
-    pError = None
+    pError: QPixmap = None
 
     def __init__(
         self,
@@ -54,19 +55,17 @@ class FLCodBar(object):
         from pineboolib.application.utils.check_dependencies import check_dependencies
 
         check_dependencies(dict_)
-        self.pError = "Not Implemented"
+        self.pError = QPixmap()
 
         self.barcode["value"] = ""
 
         self.p: QPixmap = None
         if value in [None, 0]:
-            self.pError = QPixmap()
             self.readingStdout = False
             self.writingStdout = False
             self.fillDefault(self.barcode)
         else:
             if isinstance(value, str):
-                self.pError = QPixmap()
                 self.readingStdout = False
                 self.writingStdout = False
                 self.barcode["value"] = value
@@ -286,7 +285,7 @@ class FLCodBar(object):
 
         margin_ = self.barcode["margin"] / 10
 
-        render_options = {}
+        render_options: Dict[str, Any] = {}
         render_options["module_width"] = 0.6
         render_options["module_height"] = 10
         render_options["background"] = bg_.lower()
