@@ -123,6 +123,17 @@ class Date(object):
         )
         return texto
 
+    def getTime(self):
+        pattern = "%s%s%s%s%s%s" % (
+            self.date_.toString("yyyy"),
+            self.date_.toString("MM"),
+            self.date_.toString("dd"),
+            self.time_.toString("hh"),
+            self.time_.toString("mm"),
+            self.time_.toString("ss"),
+        )
+        return int(pattern)
+
     def getYear(self):
         """
         Retorna el año
