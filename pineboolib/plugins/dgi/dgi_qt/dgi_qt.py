@@ -1,12 +1,10 @@
 # # -*- coding: utf-8 -*-
-from pineboolib import logging
 import os
-import pineboolib
-
 from importlib import import_module
 
 from PyQt5 import QtWidgets, QtCore, QtGui, Qt, QtXml  # type: ignore
 
+from pineboolib import logging
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.core.utils.utils_base import filedir, load2xml
 from pineboolib.application.utils.path import _path
@@ -61,6 +59,7 @@ class dgi_qt(dgi_schema):
         self.MessageBox.warning(t, self.MessageBox.Ok, self.MessageBox.NoButton, self.MessageBox.NoButton, "Pineboo", parent)
 
     def createUI(self, n, connector=None, parent=None, name=None):
+        import pineboolib.pncontrolsfactory
 
         if ".ui" not in n:
             n += ".ui"
@@ -82,6 +81,8 @@ class dgi_qt(dgi_schema):
         UIVersion = root_.get("version")
         if parent is None:
             wid = root_.find("widget")
+            if wid is None:
+                raise Exception("No parent provided and also no <widget> found")
             parent = getattr(pineboolib.pncontrolsfactory, wid.get("class"))()
 
         if hasattr(parent, "widget"):

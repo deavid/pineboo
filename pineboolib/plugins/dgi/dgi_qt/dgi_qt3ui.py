@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-
 from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
-
+from typing import Any
 from xml.etree import ElementTree as ET
 from binascii import unhexlify
 from pineboolib import logging
@@ -718,6 +717,7 @@ def loadIcon(xml):
 def loadVariant(xml, widget=None):
     for variant in xml:
         return _loadVariant(variant, widget)
+    raise ValueError("No property in provided XML")
 
 
 def loadProperty(xml):
@@ -750,7 +750,7 @@ def b(x):
     return None
 
 
-def _loadVariant(variant, widget=None):
+def _loadVariant(variant, widget=None) -> Any:
     text = variant.text or ""
     text = text.strip()
     if variant.tag == "cstring":
