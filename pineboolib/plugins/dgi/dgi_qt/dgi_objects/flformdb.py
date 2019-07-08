@@ -934,7 +934,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         # settings = FLSettings()
 
         if self.parent().parent() is None:
-            from PyQt5.QtWidgets import QDesktopWidget  # Centrado
+            from PyQt5.QtWidgets import QDesktopWidget  # type: ignore # Centrado
 
             qt_rectangle = self.frameGeometry()
             center_point = QDesktopWidget().availableGeometry().center()
@@ -963,6 +963,6 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     def exportToXml(self, b):
         from pineboolib import pncontrolsfactory
 
-        xml = pncontrolsfactory.AQS.toXml(self, True, True)
+        xml = pncontrolsfactory.AQS().toXml(self, True, True)
         print(xml.toString(2))
         pass

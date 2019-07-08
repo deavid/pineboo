@@ -598,7 +598,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             new_widget.hide()
             new_widget._attrs = {}
             loadWidget(c, new_widget, parent, origWidget)
-            path = c.find("./property[@name='name']/cstring").text
+            prop_name = c.find("./property[@name='name']/cstring")
+            path = prop_name.text if prop_name is not None else ""
             if not project._DGI.localDesktop():
                 origWidget.ui_[path] = new_widget
             new_widget.setContentsMargins(0, 0, 0, 0)
@@ -631,7 +632,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         if c.tag == "action":
             acName = c.get("name")
             for xmlaction in root.findall("actions//action"):
-                if xmlaction.find("./property[@name='name']/cstring").text == acName:
+                prop_name = xmlaction.find("./property[@name='name']/cstring")
+                if prop_name is not None and prop_name.text == acName:
                     process_action(xmlaction, widget)
                     continue
 
@@ -699,6 +701,7 @@ def loadVariant(xml, widget=None):
 def loadProperty(xml):
     for variant in xml:
         return (xml.get("name"), _loadVariant(variant))
+    raise ValueError("No property in provided XML")
 
 
 def u(x):

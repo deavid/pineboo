@@ -63,6 +63,7 @@ class AQS(object):
     @return xml del objeto dado
     """
 
+    @classmethod
     def toXml(self, obj_, include_children=True, include_complex_types=False):
         xml_ = QDomDocument()
 

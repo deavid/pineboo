@@ -16,8 +16,8 @@ class ProjectConfig:
         type: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
-        load_xml: None = None,
-        connstring: None = None,
+        load_xml: Optional[str] = None,
+        connstring: Optional[str] = None,
     ) -> None:
         if connstring:
             username, password, type, host, port, database = self.translate_connstring(connstring)
