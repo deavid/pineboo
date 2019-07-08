@@ -12,14 +12,11 @@ from jsonrpc import JSONRPCResponseManager, dispatcher
 
 from pineboolib import logging
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from pineboolib.fllegacy.flapplication import aqApp
 
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from typing import Any, TypeVar, Union
+from typing import Any, TypeVar, Union
 
-    _T0 = TypeVar("_T0")
+_T0 = TypeVar("_T0")
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +28,8 @@ class parser_options(object):
         return "Welcome to pineboo server"
 
     def db_name(self, *args) -> Any:
+        from pineboolib.fllegacy.flapplication import aqApp
+
         return aqApp.db().DBName()
 
     def __getattr__(self, name) -> None:

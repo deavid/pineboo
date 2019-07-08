@@ -6,10 +6,8 @@ from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
 from pineboolib import logging
 import copy
 
-from typing import Any, Optional, List, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from pineboolib.fllegacy import flfieldmetadata
+from typing import Any, Optional, List
+from pineboolib.fllegacy import flfieldmetadata
 
 """
 Mantiene la definicion de una tabla.

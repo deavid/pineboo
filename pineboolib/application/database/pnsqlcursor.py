@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import weakref
 import importlib
-from typing import Any, Optional, TYPE_CHECKING
+from typing import Any, Optional
 
 from PyQt5 import QtCore  # type: ignore
 from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
@@ -19,8 +19,7 @@ from .pncursortablemodel import PNCursorTableModel
 # FIXME: Removde dependency: Should not import from fllegacy.*
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  # FIXME: Removde dependency
 
-if TYPE_CHECKING:
-    from pineboolib.fllegacy import fltablemetadata
+from pineboolib.fllegacy import fltablemetadata
 
 logger = logging.getLogger(__name__)
 

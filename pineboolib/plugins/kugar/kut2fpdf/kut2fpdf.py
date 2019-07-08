@@ -8,10 +8,8 @@ from pineboolib import logging
 from pineboolib.core.utils.utils_base import filedir, load2xml
 from pineboolib.application.utils.check_dependencies import check_dependencies
 
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from typing import Any, Mapping, Optional, Sized, SupportsInt, SupportsRound, Union, List
+from typing import Any, Mapping, Optional, Sized, SupportsInt, SupportsRound, Union, List
 
 """
 Conversor de kuts a pyFPDF

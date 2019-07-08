@@ -449,7 +449,7 @@ from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
 # aqApp -- imported from loader.main after reload_from_DGI() call, as it is a cyclic dependency
 
 # --- create empty objects first:
-
+"""
 QComboBox: Any = ObjectNotFoundDGINotLoaded
 QTable: Any = ObjectNotFoundDGINotLoaded
 QLayoutWidget: Any = ObjectNotFoundDGINotLoaded
@@ -560,3 +560,4 @@ TimeEdit: Any = ObjectNotFoundDGINotLoaded
 
 # Clases AQNext
 auth: Any = ObjectNotFoundDGINotLoaded
+"""

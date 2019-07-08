@@ -11,11 +11,8 @@ from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.utils.xpm import cacheXPM
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flapplication import aqApp
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Any, Iterable, Mapping, Optional, Sequence, Sized, SupportsFloat, SupportsInt, TypeVar, Union
-    import xml
+from typing import Any, Iterable, Mapping, Optional, Sequence, Sized, SupportsFloat, SupportsInt, TypeVar, Union
+import xml
 
     _T2 = TypeVar("_T2")
 

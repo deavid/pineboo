@@ -1,10 +1,8 @@
 from pineboolib.core.utils.logging import logging
 
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from pineboolib.application.xmlaction import XMLAction
-    from pineboolib.fllegacy.flaction import FLAction
+from pineboolib.application.xmlaction import XMLAction
+from pineboolib.fllegacy.flaction import FLAction
 
 logger = logging.getLogger("application.utils.convert_flaction")
 
