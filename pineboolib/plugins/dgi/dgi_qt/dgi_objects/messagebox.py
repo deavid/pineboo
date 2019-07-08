@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtWidgets import QMessageBox, QApplication  # type: ignore
-import pineboolib
-from pineboolib import logging
+from pineboolib.core.utils.logging import logging
 
 logger = logging.getLogger("messageBox")
 

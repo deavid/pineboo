@@ -2,13 +2,14 @@
 import collections
 import traceback
 import inspect
-from pineboolib import logging
+from pineboolib.core.utils.logging import logging
 import os
 from typing import List, Dict, Any
 from PyQt5 import QtCore  # type: ignore
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.application.utils import sql_tools
+from pineboolib.application import project
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +76,6 @@ class dgi_aqnext(dgi_schema):
 
     def content_cached(self, tmp_folder, db_name, module_id, file_ext, file_name, sha_key):
         from pineboolib.core.utils.utils_base import filedir
-        from pineboolib.application import project
 
         data_ = None
         if module_id == "sys" and file_name in self.sys_mtds():

@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
-import os.path
 
 from PyQt5.QtGui import QPixmap  # type: ignore
 from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication  # type: ignore
 from PyQt5 import QtCore  # type: ignore
 from PyQt5 import QtGui  # type: ignore
 
-from pineboolib.core.utils.utils_base import filedir
-
-from pineboolib import logging
+from pineboolib.core.utils.logging import logging
 from PyQt5.QtXml import QDomDocument  # type: ignore
 
 logger = logging.getLogger("AQS")
