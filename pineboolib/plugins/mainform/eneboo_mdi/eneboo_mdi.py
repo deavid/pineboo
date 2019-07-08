@@ -12,17 +12,17 @@ class MainForm(QMainWindow):
     is_closing_ = False
     mdi_enable_ = True
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         aqApp.main_widget_ = self
         self.is_closing_ = False
         self.mdi_enable_ = True
 
     @classmethod
-    def setDebugLevel(self, q):
+    def setDebugLevel(self, q) -> None:
         MainForm.debugLevel = q
 
-    def initScript(self):
+    def initScript(self) -> None:
         from pineboolib.core.utils.utils_base import filedir
 
         mw = mainWindow
@@ -30,7 +30,7 @@ class MainForm(QMainWindow):
         aqApp.container_ = mw
         aqApp.init()
 
-    def createUi(self, ui_file):
+    def createUi(self, ui_file) -> None:
         from pineboolib.application import project
 
         mng = project.conn.managerModules()

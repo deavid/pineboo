@@ -16,7 +16,7 @@ reserved_words = ["pass"]
 """
 
 
-def mtd_parse(fileobj):
+def mtd_parse(fileobj) -> None:
     mtd_file = _dir("cache", fileobj.filekey)
     metadata_name = fileobj.filename[:-4]
     dest_file = "%s_model.py" % mtd_file[:-4]
@@ -31,7 +31,7 @@ def mtd_parse(fileobj):
         f.close()
 
 
-def generate_model(dest_file, mtd_table):
+def generate_model(dest_file, mtd_table) -> List[str]:
 
     data = []
     pk_found = False
@@ -185,7 +185,7 @@ def generate_model(dest_file, mtd_table):
     return data
 
 
-def field_type(field):
+def field_type(field) -> str:
     ret = "String"
     if field.type() in ("int, serial"):
         ret = "Integer"

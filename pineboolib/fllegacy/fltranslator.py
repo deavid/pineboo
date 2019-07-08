@@ -8,6 +8,7 @@ from pineboolib.application import project
 
 from PyQt5.Qt import QTranslator  # type: ignore
 from pineboolib import logging
+from typing import Any, Mapping
 
 
 class FLTranslator(QTranslator):
@@ -21,7 +22,7 @@ class FLTranslator(QTranslator):
     translation_from_ = None
     ts_translation_contexts = {}
 
-    def __init__(self, parent=None, name=None, multiLang=False, sysTrans=False):
+    def __init__(self, parent=None, name: Mapping[slice, Any] = None, multiLang=False, sysTrans=False) -> None:
         super(FLTranslator, self).__init__()
         self.logger = logging.getLogger("FLTranslator")
         self._prj = parent
@@ -42,7 +43,7 @@ class FLTranslator(QTranslator):
     @return  TRUE si la operación tuvo éxito
     """
 
-    def loadTsContent(self, key):
+    def loadTsContent(self, key) -> Any:
         if self.idM_ == "sys":
             ts_file = filedir("../share/pineboo/translations/%s.%s" % (self.idM_, self.lang_))
         else:
@@ -74,7 +75,7 @@ class FLTranslator(QTranslator):
 
         return ret_
 
-    def translate(self, *args):
+    def translate(self, *args) -> Any:
         context = args[0]
         if context.endswith("PlatformTheme"):
             context = "QMessageBox"
@@ -91,7 +92,7 @@ class FLTranslator(QTranslator):
 
         return ret_
 
-    def load_ts(self, file_name):
+    def load_ts(self, file_name: str) -> bool:
         try:
             from pineboolib.core.utils.utils_base import load2xml
 

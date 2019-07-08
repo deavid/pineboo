@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import weakref
 import importlib
-from typing import Any, Optional
+from typing import Any, Optional, TYPE_CHECKING
 
 from PyQt5 import QtCore  # type: ignore
 from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
@@ -19,6 +19,8 @@ from .pncursortablemodel import PNCursorTableModel
 # FIXME: Removde dependency: Should not import from fllegacy.*
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  # FIXME: Removde dependency
 
+if TYPE_CHECKING:
+    from pineboolib.fllegacy import fltablemetadata
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +46,7 @@ class PNCursorPrivate(QtCore.QObject):
     """
     Metadatos de la tabla asociada al cursor.
     """
-    metadata_ = None
+    metadata_: "fltablemetadata.FLTableMetaData" = None
 
     """
     Mantiene el modo de acceso actual del cursor, ver FLSqlCursor::Mode.
@@ -205,7 +207,7 @@ class PNCursorPrivate(QtCore.QObject):
 
     countRefCursor = None
 
-    _model = None
+    _model: PNCursorTableModel = None
 
     _currentregister = None
     edition_states_ = None
@@ -2120,7 +2122,7 @@ class PNSqlCursor(QtCore.QObject):
     def calculateField(self, name):
         return True
 
-    def model(self):
+    def model(self) -> PNCursorTableModel:
         return self.d._model
 
     def selection(self):
@@ -2973,9 +2975,9 @@ class PNSqlCursor(QtCore.QObject):
             for field in fieldList:
                 if field.isCheck():
                     fieldNameCheck = field.name()
-                    self.buffer().setGenerated(fieldNameCheck, False)
+                    self.buffer().setGenerated(field, False)
                     if self.bufferCopy():
-                        self.bufferCopy().setGenerated(fieldNameCheck, False)
+                        self.bufferCopy().setGenerated(field, False)
                     continue
 
                 if not self.buffer().isGenerated(field.name()):

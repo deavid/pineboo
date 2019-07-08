@@ -6,6 +6,7 @@ from PyQt5.QtCore import pyqtProperty  # type: ignore
 
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qbuttongroup import QButtonGroup
 from typing import Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -21,23 +22,23 @@ class QRadioButton(QtWidgets.QRadioButton):
 
         self.clicked.connect(self.send_clicked)
 
-    def setButtonGroupId(self, id):
+    def setButtonGroupId(self, id) -> None:
         self.dg_id = id
         if self.parent() and hasattr(self.parent(), "selectedId"):
             if self.dg_id == self.parent().selectedId:
                 self.setChecked(True)
 
-    def send_clicked(self):
+    def send_clicked(self) -> None:
         if self.parent() and hasattr(self.parent(), "selectedId"):
             self.parent().presset.emit(self.dg_id)
 
-    def isChecked(self):
+    def isChecked(self) -> Any:
         return super().isChecked()
 
     def setChecked(self, b: bool) -> None:
         super().setChecked(b)
 
-    def getText(self):
+    def getText(self) -> Any:
         return super().getText()
 
     def setText(self, t: str) -> None:

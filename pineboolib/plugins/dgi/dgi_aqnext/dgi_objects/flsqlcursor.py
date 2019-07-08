@@ -5,6 +5,7 @@ from pineboolib import logging
 from PyQt5 import QtCore  # type: ignore
 from pineboolib import pncontrolsfactory
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
+from typing import Any
 
 # FIXME: This module uses pncontrolsfactory to access objects in fllegacy. Please avoid doing that.
 logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ class DelayedObjectProxyLoader(object):
     cursor_tree_dict = {}
     last_value_buffer = None
 
-    def __init__(self, obj, *args, **kwargs):
+    def __init__(self, obj, *args, **kwargs) -> None:
         if "field_object" in kwargs:
             self._field = kwargs["field_object"]
             del kwargs["field_object"]
@@ -88,32 +89,32 @@ class DelayedObjectProxyLoader(object):
     @return el objecto del XMLAction afectado
     """
 
-    def __getattr__(self, name):  # Solo se lanza si no existe la propiedad.
+    def __getattr__(self, name: str) -> Any:  # Solo se lanza si no existe la propiedad.
         obj_ = self.__load()
         ret = getattr(obj_, name, obj_) if obj_ is not None else None
         return ret
 
-    def __le__(self, other):
+    def __le__(self, other) -> Any:
         obj_ = self.__load()
         return obj_ <= other
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> Any:
         obj_ = self.__load()
         return obj_ < other
 
-    def __ne__(self, other):
+    def __ne__(self, other) -> Any:
         obj_ = self.__load()
         return obj_ != other
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> Any:
         obj_ = self.__load()
         return obj_ == other
 
-    def __gt__(self, other):
+    def __gt__(self, other) -> Any:
         obj_ = self.__load()
         return obj_ > other
 
-    def __ge__(self, other):
+    def __ge__(self, other) -> Any:
         obj_ = self.__load()
         return obj_ >= other
 
@@ -121,7 +122,7 @@ class DelayedObjectProxyLoader(object):
         obj_ = self.__load()
         return "%s" % obj_
 
-    def resolve_expression(self, *args, **kwargs):
+    def resolve_expression(self, *args, **kwargs) -> Any:
         return getattr(self, self._field.name())
 
 
@@ -140,7 +141,7 @@ class FLSqlCursor(QtCore.QObject):
 
     show_debug = None
 
-    def __init__(self, cursor, stabla):
+    def __init__(self, cursor, stabla) -> None:
         super().__init__()
         self.parent_cursor = cursor
         # self.parent_cursor.setActivatedBufferChanged(False)
@@ -168,13 +169,13 @@ class FLSqlCursor(QtCore.QObject):
         #         ) = self.obtener_modelo(stabla)
         #         self._stabla = self._model._meta.db_table
 
-    def buffer_changed_signal(self, scampo):
+    def buffer_changed_signal(self, scampo) -> Any:
         if self._buffer_changed is None:
             return True
 
         return self._buffer_changed(scampo, self.parent_cursor)
 
-    def buffer_commited_signal(self):
+    def buffer_commited_signal(self) -> Any:
         if not self._activatedBufferCommited:
             return True
 
@@ -186,7 +187,7 @@ class FLSqlCursor(QtCore.QObject):
         except Exception as exc:
             print("Error inesperado", exc)
 
-    def before_commit_signal(self):
+    def before_commit_signal(self) -> Any:
         if not self._activatedCommitActions:
             return True
 
@@ -195,7 +196,7 @@ class FLSqlCursor(QtCore.QObject):
 
         return self._before_commit(self.parent_cursor)
 
-    def after_commit_signal(self):
+    def after_commit_signal(self) -> Any:
         if not self._activatedCommitActions:
             return True
 
@@ -204,13 +205,13 @@ class FLSqlCursor(QtCore.QObject):
 
         return self._after_commit(self.parent_cursor)
 
-    def inicia_valores_cursor_signal(self):
+    def inicia_valores_cursor_signal(self) -> Any:
         if self._inicia_valores_cursor is None:
             return True
 
         return self._inicia_valores_cursor(self.parent_cursor)
 
-    def buffer_changed_label_signal(self, scampo):
+    def buffer_changed_label_signal(self, scampo) -> Any:
         if self._buffer_changed_label is None:
             return {}
 
@@ -222,19 +223,19 @@ class FLSqlCursor(QtCore.QObject):
         else:
             return self._buffer_changed_label(scampo, self.parent_cursor)
 
-    def validate_cursor_signal(self):
+    def validate_cursor_signal(self) -> Any:
         if self._validate_cursor is None:
             return True
 
         return self._validate_cursor(self.parent_cursor)
 
-    def validate_transaction_signal(self):
+    def validate_transaction_signal(self) -> Any:
         if self._validate_transaction is None:
             return True
 
         return self._validate_transaction(self.parent_cursor)
 
-    def cursor_accepted_signal(self):
+    def cursor_accepted_signal(self) -> Any:
         if self._cursor_accepted is None:
             return True
 
@@ -246,7 +247,7 @@ class FLSqlCursor(QtCore.QObject):
     #
     #     return FLAux.obtener_modelo(stabla)
 
-    def assoc_model(self, module_name=None):
+    def assoc_model(self, module_name=None) -> None:
         from pineboolib.application import project
 
         cursor = self.parent_cursor
@@ -272,12 +273,12 @@ class meta_model(object):
     _cursor = None
     cursor_tree_dict = {}
 
-    def __init__(self, model, cursor):
+    def __init__(self, model, cursor) -> None:
         self._model = model
         self._cursor = cursor
         self.cursor_tree_dict = {}
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
         # print("Buscando", name)

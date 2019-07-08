@@ -9,6 +9,7 @@ from pineboolib.core import decorators
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flapplication import aqApp
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ class AQStaticDirInfo(object):
     active_ = None
     path_ = None
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
 
         if len(args) == 1:
             self.active_ = args[0]
@@ -34,14 +35,14 @@ class AQStaticBdInfo(object):
     dirs_ = []
     key_ = None
 
-    def __init__(self, database):
+    def __init__(self, database) -> None:
         self.db_ = database.DBName()
 
         self.key_ = "StaticLoader/%s/" % self.db_
         settings = FLSettings()
         self.enabled_ = settings.readBoolEntry("%senabled" % self.key_, False)
 
-    def findPath(self, p):
+    def findPath(self, p) -> None:
 
         for info in self.dirs_:
             if info.path_ == p:
@@ -49,7 +50,7 @@ class AQStaticBdInfo(object):
 
         return None
 
-    def readSettings(self):
+    def readSettings(self) -> None:
         settings = FLSettings()
         self.enabled_ = settings.readBoolEntry("%senabled" % self.key_, False)
         self.dirs_.clear()
@@ -63,7 +64,7 @@ class AQStaticBdInfo(object):
             i += 1
             self.dirs_.append(AQStaticDirInfo(active_, path_))
 
-    def writeSettings(self):
+    def writeSettings(self) -> None:
         settings = FLSettings()
 
         settings.writeEntry("%senabled" % self.key_, self.enabled_)
@@ -84,7 +85,7 @@ warn_ = []
 
 
 class FLStaticLoader(QtCore.QObject):
-    def __init__(self, b, ui):
+    def __init__(self, b, ui) -> None:
 
         super(FLStaticLoader, self).__init__()
 
@@ -222,13 +223,13 @@ class FLStaticLoader(QtCore.QObject):
             info.active_ = on
 
     @staticmethod
-    def setup(b, ui):
+    def setup(b, ui) -> None:
         diag_setup = FLStaticLoader(b, ui)
         if QtWidgets.QDialog.Accepted == diag_setup.ui_.exec_():
             b.writeSettings()
 
     @staticmethod
-    def content(n, b, only_path=False):
+    def content(n, b, only_path=False) -> Any:
         global warn_
         b.readSettings()
         util = FLUtil()
@@ -264,7 +265,7 @@ class FLStaticLoader(QtCore.QObject):
 
         return None
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> Any:
         return self.ui_.findChild(QtWidgets.QWidget, name)
 
 
@@ -273,12 +274,12 @@ class FLStaticLoaderWarning(QtCore.QObject):
     warns_ = None
     paths_ = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.warns_ = []
         self.paths_ = []
 
-    def popupWarnings(self):
+    def popupWarnings(self) -> None:
         if not self.warns_:
             return
 
@@ -302,7 +303,7 @@ class FLStaticLoaderWarning(QtCore.QObject):
 
         return None
 
-    def updateScripts(self):
+    def updateScripts(self) -> None:
         if not self.paths_:
             return
 

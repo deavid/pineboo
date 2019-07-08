@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 from pineboolib.core.utils.logging import logging
 import re
+from typing import TypeVar
+
+_T1 = TypeVar("_T1")
+
+_T1 = TypeVar("_T1")
 
 logger = logging.getLogger(__name__)
 
 
-def translate(mod, txt):
+def translate(mod, txt: _T1) -> _T1:
     # FIXME: qsa_sys is not something we should import here
     return txt
 

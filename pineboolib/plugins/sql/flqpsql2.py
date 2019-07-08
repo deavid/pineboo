@@ -6,6 +6,7 @@ from PyQt5.Qt import qWarning  # type: ignore
 from PyQt5.QtWidgets import QMessageBox  # type: ignore
 
 from pineboolib.plugins.sql.flqpsql import FLQPSQL
+from typing import Any, SupportsInt, Union
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ class FLQPSQL2(FLQPSQL):
     def safe_load(self):
         return check_dependencies({"pg8000": "pg8000", "sqlalchemy": "sqlAlchemy"}, False)
 
-    def connect(self, db_name, db_host, db_port, db_userName, db_password):
+    def connect(self, db_name, db_host, db_port: Union[bytes, str, SupportsInt], db_userName, db_password) -> Any:
         self._dbname = db_name
         check_dependencies({"pg8000": "pg8000", "sqlalchemy": "sqlAlchemy"})
         import pg8000

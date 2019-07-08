@@ -11,6 +11,10 @@ from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.utils.xpm import cacheXPM
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flapplication import aqApp
+import protocols
+from typing import Any, Iterable, Mapping, Optional, Sequence, Sized, SupportsFloat, SupportsInt, TypeVar, Union
+
+_T2 = TypeVar("_T2")
 
 
 """
@@ -33,7 +37,7 @@ class KParserTools(object):
     @return xml.
     """
 
-    def loadKut(self, data):
+    def loadKut(self, data: str) -> xml.etree.ElementTree.ElementTree:
         return load2xml(data)
 
     """
@@ -42,10 +46,10 @@ class KParserTools(object):
     @return Número corregido.
     """
 
-    def ratio_correction_h(self, value):
+    def ratio_correction_h(self, value) -> Any:
         return value * self._fix_ratio_h
 
-    def ratio_correction_w(self, value):
+    def ratio_correction_w(self, value) -> Any:
         return value * self._fix_ratio_w
 
     """
@@ -54,7 +58,7 @@ class KParserTools(object):
     @return Node con la información facilitada.
     """
 
-    def convertToNode(self, data):
+    def convertToNode(self, data) -> Any:
 
         # node = Node()
         from pineboolib import pncontrolsfactory
@@ -74,7 +78,7 @@ class KParserTools(object):
     @return Valor de la altura o 0 si no existe tal dato.
     """
 
-    def getHeight(self, xml):
+    def getHeight(self, xml) -> int:
         ret_ = 0
         if xml is None:
             pass
@@ -92,7 +96,7 @@ class KParserTools(object):
     @return Valor requerido según tipo especial especificado.
     """
 
-    def getSpecial(self, name, page_num=None):
+    def getSpecial(self, name: Union[Sized, Mapping[Union[int, slice], Sequence], Sequence[Sequence]], page_num=None) -> str:
         self.logger.debug("%s:getSpecial %s" % (__name__, name))
         ret = "None"
         if name[0] == "[":
@@ -113,7 +117,13 @@ class KParserTools(object):
     @return Valor calculado.
     """
 
-    def calculated(self, value, data_type, p=None, data=None):
+    def calculated(
+        self,
+        value: Union[bytes, str, protocols.SupportsFind, SupportsFloat, Mapping[slice, Any]],
+        data_type,
+        p: Union[bytes, str, SupportsInt] = None,
+        data=None,
+    ) -> Any:
 
         p = 0 if p is None else int(p)
 
@@ -147,7 +157,7 @@ class KParserTools(object):
     @return. Ruta completa del fichero en tempdata.
     """
 
-    def parseKey(self, ref_key=None):
+    def parseKey(self, ref_key: Union[protocols.SupportsEndswith, protocols.SupportsReplace, Mapping[slice, Any]] = None) -> Any:
         ret = None
         table_name = "fllarge"
         if ref_key is not None:
@@ -196,7 +206,7 @@ class KParserTools(object):
     @return Array con los valores del tamaño de la página.
     """
 
-    def converPageSize(self, size, orientation, Custom=None):
+    def converPageSize(self, size, orientation, Custom: _T2 = None) -> Union[List[int], _T2]:
         r = None
         if size == 0:
             r = [595, 842]  # "A4"
@@ -269,7 +279,7 @@ class KParserTools(object):
     @return Path del fichero ".ttf" o None
     """
 
-    def find_font(self, font_name, font_style):
+    def find_font(self, font_name: protocols.SupportsReplace, font_style) -> Optional[Union[bool, str]]:
         fonts_folders: List[str] = []
         if sys.platform.find("win") > -1:
             windir = os.environ.get("WINDIR")
@@ -334,7 +344,7 @@ class KParserTools(object):
 
         return None
 
-    def calculate_sum(self, field_name, line, xml_list, level):
+    def calculate_sum(self, field_name, line, xml_list: Iterable, level: Union[bytes, str, SupportsInt]) -> float:
         val = 0.0
         for l in xml_list:
             if int(l.get("level")) <= int(level):
@@ -346,7 +356,7 @@ class KParserTools(object):
 
         return val
 
-    def restore_text(self, t):
+    def restore_text(self, t: protocols.SupportsReplace) -> Any:
         ret_ = t
         ret_ = ret_.replace("__RPAREN__", ")")
         ret_ = ret_.replace("__LPAREN__", "(")

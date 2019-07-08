@@ -6,6 +6,11 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
 from PyQt5.QtWidgets import QCheckBox  # type: ignore
 from pineboolib import logging
+from typing import Any, Optional, TypeVar
+
+_T1 = TypeVar("_T1")
+
+_T1 = TypeVar("_T1")
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +113,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     onlyTable_ = False
 
-    def __init__(self, parent=None, name=None, popup=False):
+    def __init__(self, parent=None, name=None, popup=False) -> None:
         super(FLDataTable, self).__init__(parent)
 
         if parent:
@@ -144,7 +149,7 @@ class FLDataTable(QtWidgets.QTableView):
     desctructor
     """
 
-    def __del__(self):
+    def __del__(self) -> None:
         if self.timerViewRepaint_:
             self.timerViewRepaint_.stop()
 
@@ -152,14 +157,14 @@ class FLDataTable(QtWidgets.QTableView):
             self.cursor_.restoreEditionFlag(self)
             self.cursor_.restoreBrowseFlag(self)
 
-    def header(self):
+    def header(self) -> Any:
         return self._h_header
 
     """
     Establece el cursor
     """
 
-    def setFLSqlCursor(self, c):
+    def setFLSqlCursor(self, c) -> None:
         if c and c.metadata():
             cur_chg = False
             if self.cursor_ and not self.cursor_ == c:
@@ -193,42 +198,42 @@ class FLDataTable(QtWidgets.QTableView):
     de hacer un refresh
     """
 
-    def marcaRow(self, id_pk):
+    def marcaRow(self, id_pk) -> None:
         if id_pk is not None:
             pos = self.model().findPKRow((id_pk,))
             if pos is not None:
                 self.cursor().move(pos)
                 # self.ensureRowSelectedVisible()
 
-    def setPersistentFilter(self, pFilter):
+    def setPersistentFilter(self, pFilter) -> None:
         self.persistentFilter_ = pFilter
 
-    def setFilter(self, f):
+    def setFilter(self, f) -> None:
         self.filter_ = f
 
     """
     retorna el número de columnas
     """
 
-    def numCols(self):
+    def numCols(self) -> Any:
 
         return self.horizontalHeader().count()
 
-    def setSort(self, s):
+    def setSort(self, s) -> None:
         self.sort_ = s
 
     """
     Devuelve el cursor
     """
 
-    def cursor(self):
+    def cursor(self) -> Any:
         return self.cursor_
 
     """
     Establece la tabla a sólo lectura o no
     """
 
-    def setFLReadOnly(self, mode):
+    def setFLReadOnly(self, mode) -> None:
 
         if not self.cursor_ or self.cursor_.aqWasDeleted():
             return
@@ -236,28 +241,28 @@ class FLDataTable(QtWidgets.QTableView):
         self.cursor_.setEdition(not mode, self)
         self.readonly_ = mode
 
-    def flReadOnly(self):
+    def flReadOnly(self) -> bool:
         return self.readonly_
 
     """
     Establece la tabla a sólo edición o no
     """
 
-    def setEditOnly(self, mode):
+    def setEditOnly(self, mode) -> None:
 
         if not self.cursor_ or self.cursor_.aqWasDeleted():
             return
 
         self.editonly_ = mode
 
-    def editOnly(self):
+    def editOnly(self) -> bool:
         return self.editonly_
 
     """
     Establece la tabla a sólo insercion o no
     """
 
-    def setInsertOnly(self, mode):
+    def setInsertOnly(self, mode) -> None:
 
         if not self.cursor_ or self.cursor_.aqWasDeleted():
             return
@@ -265,21 +270,21 @@ class FLDataTable(QtWidgets.QTableView):
         self.cursor_.setEdition(not mode, self)
         self.insertonly_ = mode
 
-    def insertOnly(self):
+    def insertOnly(self) -> bool:
         return self.insertonly_
 
     """
     Obtiene la lista con las claves primarias de los registros seleccionados por chequeo
     """
 
-    def primarysKeysChecked(self):
+    def primarysKeysChecked(self) -> list:
         return self.primarysKeysChecked_
 
     """
     Limpia la lista con las claves primarias de los registros seleccionados por chequeo
     """
 
-    def clearChecked(self):
+    def clearChecked(self) -> None:
         self.primarysKeysChecked_.clear()
         for r in self.cursor().model()._checkColumn.keys():
             self.cursor().model()._checkColumn[r].setChecked(False)
@@ -288,7 +293,7 @@ class FLDataTable(QtWidgets.QTableView):
     Establece el estado seleccionado por chequeo para un regsitro, indicando el valor de su clave primaria
     """
 
-    def setPrimaryKeyChecked(self, primaryKeyValue, on):
+    def setPrimaryKeyChecked(self, primaryKeyValue: object, on) -> None:
         if on:
             if primaryKeyValue not in self.primarysKeysChecked_:
                 self.primarysKeysChecked_.append(primaryKeyValue)
@@ -307,28 +312,28 @@ class FLDataTable(QtWidgets.QTableView):
     Ver FLDataTable::showAllPixmaps_
     """
 
-    def setShowAllPixmaps(self, s):
+    def setShowAllPixmaps(self, s) -> None:
         self.showAllPixmaps_ = s
 
-    def showAllPixmap(self):
+    def showAllPixmap(self) -> Any:
         return self.showAllPixmaps_
 
     """
     Ver FLDataTable::function_get_color
     """
 
-    def setFunctionGetColor(self, f):
+    def setFunctionGetColor(self, f) -> None:
 
         self.function_get_color = f
 
-    def functionGetColor(self):
+    def functionGetColor(self) -> Any:
         return self.function_get_color
 
     """
     Ver FLDataTable::onlyTable_
     """
 
-    def setOnlyTable(self, on=True):
+    def setOnlyTable(self, on=True) -> None:
         if not self.cursor_ or self.cursor_.aqWasDeleted():
             return
 
@@ -336,21 +341,21 @@ class FLDataTable(QtWidgets.QTableView):
         self.cursor_.setBrowse(not on, self)
         self.onlyTable_ = on
 
-    def onlyTable(self):
+    def onlyTable(self) -> bool:
         return self.onlyTable_
 
     """
     Redefinida por conveniencia
     """
 
-    def indexOf(self, i):
+    def indexOf(self, i) -> Any:
         return self.header().visualIndex(i)
 
     """
     @return El nombre del campo en la tabla de una columna dada
     """
 
-    def fieldName(self, col):
+    def fieldName(self, col) -> Any:
 
         if not self.cursor_ or self.cursor_.aqWasDeleted():
             return None
@@ -365,7 +370,7 @@ class FLDataTable(QtWidgets.QTableView):
     Filtrado de eventos
     """
 
-    def eventFilter(self, o, e):
+    def eventFilter(self, o, e) -> Any:
         r = self.currentRow()
         c = self.currentColumn()
         nr = self.numRows()
@@ -467,7 +472,7 @@ class FLDataTable(QtWidgets.QTableView):
     con las opciones para editar registros
     """
 
-    def contextMenuEvent(self, e):
+    def contextMenuEvent(self, e) -> None:
         super(FLDataTable, self).contextMenuEvent(e)
 
         if not self.cursor_ or not self.cursor_.isValid() or not self.cursor_.metadata():
@@ -546,7 +551,7 @@ class FLDataTable(QtWidgets.QTableView):
     celda
     """
 
-    def setChecked(self, index):
+    def setChecked(self, index) -> None:
         row = index.row()
         col = index.column()
         field = self.cursor_.metadata().indexFieldObject(col)
@@ -564,7 +569,7 @@ class FLDataTable(QtWidgets.QTableView):
     Redefinida por conveniencia
     """
 
-    def focusOutEvent(self, e):
+    def focusOutEvent(self, e) -> None:
         # setPaletteBackgroundColor(qApp->palette().color(QPalette::Active, QColorGroup::Background)) FIXME
         pass
 
@@ -572,7 +577,7 @@ class FLDataTable(QtWidgets.QTableView):
     Redefinida por conveniencia
     """
 
-    def handleError(self):
+    def handleError(self) -> None:
         pass
 
     """
@@ -586,7 +591,7 @@ class FLDataTable(QtWidgets.QTableView):
     """ Uso interno """
     changingNumRows_ = None
 
-    def syncNumRows(self):
+    def syncNumRows(self) -> None:
         # print("syncNumRows")
 
         if self.changingNumRows_:
@@ -605,7 +610,7 @@ class FLDataTable(QtWidgets.QTableView):
     paintFieldName_ = None
     paintFieldMtd_ = None
 
-    def paintFieldMtd(self, f, t):
+    def paintFieldMtd(self, f, t) -> Any:
         if self.paintFieldMtd_ and self.paintFieldName_ == f:
             return self.paintFieldMtd_
 
@@ -618,7 +623,7 @@ class FLDataTable(QtWidgets.QTableView):
     Redefinida por conveniencia
     """
 
-    def focusInEvent(self, e):
+    def focusInEvent(self, e) -> None:
         obj = self
         refresh = True
         while obj.parent():
@@ -650,7 +655,7 @@ class FLDataTable(QtWidgets.QTableView):
     Redefinida por conveniencia
     """
 
-    def refresh(self, refresh_option=None):
+    def refresh(self, refresh_option=None) -> None:
         if self.popup_:
             self.cursor_.refresh()
         # if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
@@ -707,7 +712,7 @@ class FLDataTable(QtWidgets.QTableView):
     Foco rápido sin refrescos para optimizar
     """
 
-    def setQuickFocus(self):
+    def setQuickFocus(self) -> None:
         # setPaletteBackgroundColor(qApp->palette().color(QPalette::Active, QColorGroup::Base)); FIXME
         super(FLDataTable, self).setFocus()
 
@@ -718,10 +723,10 @@ class FLDataTable(QtWidgets.QTableView):
     @param  w     Ancho de la columna
     """
 
-    def setColumnWidth(self, field, w):
+    def setColumnWidth(self, field, w) -> None:
         self.widthCols_[field] = w
 
-    def resize_column(self, col, str_text):
+    def resize_column(self, col, str_text: _T1) -> Optional[_T1]:
         if str_text is None:
             return str_text
 
@@ -748,7 +753,7 @@ class FLDataTable(QtWidgets.QTableView):
                         self.resize(wC, pw.height())
                         pw.resize(wC, pw.height())
 
-    def delayedViewportRepaint(self):
+    def delayedViewportRepaint(self) -> None:
         if not self.timerViewRepaint_:
             self.timerViewRepaint_ = QtCore.QTimer(self)
             self.timerViewRepaint_.timeout.connect(self.repaintViewportSlot)
@@ -765,7 +770,7 @@ class FLDataTable(QtWidgets.QTableView):
         if vw:
             vw.repaint(False)
 
-    def cursorDestroyed(self, obj=None):
+    def cursorDestroyed(self, obj=None) -> None:
 
         if not obj or not isinstance(obj, FLSqlCursor):
             return
@@ -791,7 +796,7 @@ class FLDataTable(QtWidgets.QTableView):
     Numero de registros que ofrece el cursor
     """
 
-    def numRows(self):
+    def numRows(self) -> Any:
         if not self.cursor_:
             return -1
 
@@ -803,7 +808,7 @@ class FLDataTable(QtWidgets.QTableView):
     @return posicion de la columna en la tabla
     """
 
-    def column_name_to_column_index(self, name):
+    def column_name_to_column_index(self, name) -> Any:
         """
         Retorna el index real (incusive columnas ocultas) a partir de un nombre de un campo
         @param name El nombre del campo a buscar en la tabla
@@ -814,13 +819,13 @@ class FLDataTable(QtWidgets.QTableView):
 
         return self.cursor_.model().metadata().fieldIsIndex(name)
 
-    def mouseDoubleClickEvent(self, e):
+    def mouseDoubleClickEvent(self, e) -> None:
         if e.button() != QtCore.Qt.LeftButton:
             return
 
         self.recordChoosed.emit()
 
-    def visual_index_to_column_index(self, c):
+    def visual_index_to_column_index(self, c) -> Optional[int]:
         """
         Retorna el column index a partir de un index de columnas visibles.
         @param c posicion de la columna visible.
@@ -841,19 +846,19 @@ class FLDataTable(QtWidgets.QTableView):
 
         return ret_
 
-    def visual_index_to_logical_index(self, c):
+    def visual_index_to_logical_index(self, c) -> Any:
         """
         Index visual a lógico
         """
         return self.header().logicalIndex(c)
 
-    def logical_index_to_visual_index(self, c):
+    def logical_index_to_visual_index(self, c) -> Any:
         """
         Index lógico a Index Visual
         """
         return self.header().visualIndex(c)
 
-    def visual_index_to_field(self, pos_):
+    def visual_index_to_field(self, pos_) -> Any:
         if pos_ is None:
             logger.warning("visual_index_to_field: pos is None")
             return None
@@ -874,13 +879,13 @@ class FLDataTable(QtWidgets.QTableView):
 
             return mtd
 
-    def currentRow(self):
+    def currentRow(self) -> Any:
         """
         Devuelve la fila actual
         """
         return self.currentIndex().row()
 
-    def currentColumn(self):
+    def currentColumn(self) -> Any:
         """
         Devuelve la columna actual
         """

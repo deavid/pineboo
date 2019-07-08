@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from pineboolib.core import decorators
+from typing import Any, List
 
 P76MM = 76
 P57_5MM = 57
@@ -17,24 +18,24 @@ class FLPosPrinter:
     server_ = None
     queueName_ = None
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         self.PaperWidth = [P57_5MM, P69_5MM, P76MM]
         self.paperWidth_ = P76MM
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.cleanup()
 
-    def paperWidths(self):
+    def paperWidths(self) -> List[int]:
         return self.PaperWidth
 
     def PaperWidth(self):
         return self.paperWidth_
 
-    def setPaperWidth(self, pW):
+    def setPaperWidth(self, pW) -> None:
         self.paperWidth_ = pW
 
-    def printerName(self):
+    def printerName(self) -> Any:
         return self.printerName_
 
     @decorators.NotImplementedWarn

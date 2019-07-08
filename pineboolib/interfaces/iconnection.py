@@ -1,6 +1,11 @@
 from typing import Any, List, Dict, Optional
 from .imanager import IManager
-from .icursor import ICursor
+from .iapicursor import IApiCursor
+from typing import TypeVar
+
+_TIConnection = TypeVar("_TIConnection", bound=IConnection)
+
+_TIConnection = TypeVar("_TIConnection", bound=IConnection)
 
 
 class IConnection:
@@ -64,8 +69,8 @@ class IConnection:
     def dictDatabases(self) -> Dict[str, "IConnection"]:
         return {}
 
-    def cursor(self) -> ICursor:
-        return ICursor()
+    def cursor(self) -> IApiCursor:
+        return IApiCursor()
 
     def lastActiveCursor(self) -> Optional[Any]:  # returns FLSqlCuror
         return None

@@ -1,10 +1,13 @@
+from typing import Any
+
+
 class ProgressDialogManager(object):
     progress_dialog_stack = None
 
     def __init__(self):
         self.progress_dialog_stack = []
 
-    def create(self, title, steps, id_):
+    def create(self, title, steps, id_) -> Any:
 
         from pineboolib.application import project
         from PyQt5 import QtCore  # type: ignore
@@ -18,7 +21,7 @@ class ProgressDialogManager(object):
 
         return pd_widget
 
-    def destroy(self, id_):
+    def destroy(self, id_) -> None:
         pd_widget = self.progress_dialog_stack[-1]
 
         if id_ != "default":
@@ -30,7 +33,7 @@ class ProgressDialogManager(object):
         pd_widget.close()
         self.progress_dialog_stack.remove(pd_widget)
 
-    def setProgress(self, step_number, id_):
+    def setProgress(self, step_number, id_) -> None:
         pd_widget = self.progress_dialog_stack[-1]
 
         if id_ != "default":
@@ -41,7 +44,7 @@ class ProgressDialogManager(object):
 
         pd_widget.setValue(step_number)
 
-    def setLabelText(self, l, id_):
+    def setLabelText(self, l, id_) -> None:
         pd_widget = self.progress_dialog_stack[-1]
 
         if id_ != "default":
@@ -52,7 +55,7 @@ class ProgressDialogManager(object):
 
         pd_widget.setLabelText(str(l))
 
-    def setTotalSteps(self, tS, id_):
+    def setTotalSteps(self, tS, id_) -> None:
         pd_widget = self.progress_dialog_stack[-1]
 
         if id_ != "default":

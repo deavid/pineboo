@@ -4,6 +4,7 @@ from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # type: ignore # FIXME
 
 from pineboolib.core import decorators
 from pineboolib import logging
+from typing import Any, Optional
 
 
 class FLReportEngine(object):
@@ -97,7 +98,7 @@ class FLReportEngine(object):
                 self.qFieldMtdList_ = []
                 self.qGroupDict_ = {}
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         self.d_ = FLReportEngine.FLReportEnginePrivate(self)
         self.relDpi_ = 78.0
         self.rd = None
@@ -108,16 +109,16 @@ class FLReportEngine(object):
         parserName = config.value("ebcomportamiento/kugarParser", project.kugarPlugin.defaultParser())
         self.parser_ = project.kugarPlugin.loadParser(parserName)
 
-    def rptXmlData(self):
+    def rptXmlData(self) -> Any:
         return self.rd
 
-    def rptXmlTemplate(self):
+    def rptXmlTemplate(self) -> str:
         return self.rt
 
-    def relDpi(self):
+    def relDpi(self) -> float:
         return self.relDpi_
 
-    def setReportData(self, q=None):
+    def setReportData(self, q=None) -> Optional[bool]:
         if isinstance(q, FLDomNodeInterface):
             return self.setFLReportData(q)
         if q is None:
@@ -154,7 +155,7 @@ class FLReportEngine(object):
         self.initData()
         return True
 
-    def setFLReportData(self, n):
+    def setFLReportData(self, n) -> bool:
         self.d_.setQuery(0)
         tmp_doc = QtXml.QDomDocument("KugarData")
         tmp_doc.appendChild(n)
@@ -162,7 +163,7 @@ class FLReportEngine(object):
         return True
         # return super(FLReportEngine, self).setReportData(n)
 
-    def setFLReportTemplate(self, t):
+    def setFLReportTemplate(self, t) -> bool:
         # buscamos el .kut o el .rlab
 
         self.d_.template_ = t
@@ -183,10 +184,10 @@ class FLReportEngine(object):
 
         return True
 
-    def rptQueryData(self):
+    def rptQueryData(self) -> int:
         return self.d_.qry_
 
-    def rptNameTemplate(self):
+    def rptNameTemplate(self) -> str:
         return self.d_.template_
 
     @decorators.BetaImplementation
@@ -196,10 +197,10 @@ class FLReportEngine(object):
 
         return self.setFLReportData(t)
 
-    def reportData(self):
+    def reportData(self) -> Any:
         return self.rd if self.rd else QtXml.QDomDocument()
 
-    def reportTemplate(self):
+    def reportTemplate(self) -> Any:
         return self.rt if self.rt else QtXml.QDomDocument()
 
     @decorators.NotImplementedWarn
@@ -209,7 +210,7 @@ class FLReportEngine(object):
         # FIXME: exportToOds not defined in superclass
         # super(FLReportEngine, self).exportToOds(pages.pageCollection())
 
-    def renderReport(self, init_row=0, init_col=0, flags=False, pages=None):
+    def renderReport(self, init_row=0, init_col=0, flags=False, pages=None) -> bool:
         if self.rt and self.rt.find("KugarTemplate") > -1:
             data = self.rd.toString(1)
             self.report_ = self.parser_.parse(self.d_.template_, self.rt, data, self.report_, flags)
@@ -260,7 +261,7 @@ class FLReportEngine(object):
         return pgs
         """
 
-    def initData(self):
+    def initData(self) -> None:
         n = self.rd.firstChild()
         while not n.isNull():
             if n.nodeName() == "KugarData":
@@ -274,5 +275,5 @@ class FLReportEngine(object):
                     break
             n = n.nextSibling()
 
-    def number_pages(self):
+    def number_pages(self) -> Any:
         return self.parser_.number_pages() if self.parser_ else 0

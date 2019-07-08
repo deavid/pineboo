@@ -2,9 +2,16 @@ from typing import List, Union
 from PyQt5.QtCore import QDate  # type: ignore
 from PyQt5 import QtCore  # type: ignore
 import datetime
+from typing import Any, Mapping, Optional, Sized, TypeVar
+
+_T0 = TypeVar("_T0")
+_TDate = TypeVar("_TDate", bound=Date)
+
+_T0 = TypeVar("_T0")
+_TDate = TypeVar("_TDate", bound=Date)
 
 
-def date_dma_to_amd(f):
+def date_dma_to_amd(f) -> Optional[str]:
     if not f:
         return None
 
@@ -35,7 +42,7 @@ def date_dma_to_amd(f):
     return "%s-%s-%s" % (ano_, mes_, dia_)
 
 
-def date_amd_to_dma(f):
+def date_amd_to_dma(f) -> Optional[str]:
     if not f:
         return None
 
@@ -73,7 +80,7 @@ class Date(object):
     date_ = None
     time_ = None
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
         super(Date, self).__init__()
         if not args:
             self.date_ = QtCore.QDate.currentDate()
@@ -105,7 +112,7 @@ class Date(object):
             self.date_ = QtCore.QDate(args[0], args[1], args[2])
             self.time_ = QtCore.QTime(0, 0)
 
-    def toString(self, pattern=None):
+    def toString(self, pattern=None) -> str:
         """
         Retorna una cadena de texto con los datos de fecha y hora.
         @return cadena de texto con los datos de fecha y hora
@@ -123,7 +130,7 @@ class Date(object):
         )
         return texto
 
-    def getTime(self):
+    def getTime(self) -> int:
         pattern = "%s%s%s%s%s%s" % (
             self.date_.toString("yyyy"),
             self.date_.toString("MM"),
@@ -134,14 +141,14 @@ class Date(object):
         )
         return int(pattern)
 
-    def getYear(self):
+    def getYear(self) -> Any:
         """
         Retorna el año
         @return año
         """
         return self.date_.year()
 
-    def setYear(self, yyyy):
+    def setYear(self: _TDate, yyyy) -> _TDate:
         """
         Setea un año dado
         @param yyyy. Año a setear
@@ -151,14 +158,14 @@ class Date(object):
 
         return self
 
-    def getMonth(self):
+    def getMonth(self) -> Any:
         """
         Retorna el mes
         @return mes
         """
         return self.date_.month()
 
-    def setMonth(self, mm):
+    def setMonth(self: _TDate, mm) -> _TDate:
         """
         Setea un mes dado
         @param mm. Mes a setear
@@ -171,14 +178,14 @@ class Date(object):
 
         return self
 
-    def getDay(self):
+    def getDay(self) -> Any:
         """
         Retorna el día
         @return día
         """
         return self.date_.day()
 
-    def setDay(self, dd):
+    def setDay(self: _TDate, dd) -> _TDate:
         """
         Setea un dia dado
         @param dd. Dia a setear
@@ -191,28 +198,28 @@ class Date(object):
 
         return self
 
-    def getHours(self):
+    def getHours(self) -> Any:
         """
         Retorna horas
         @return horas
         """
         return self.time_.hour()
 
-    def getMinutes(self):
+    def getMinutes(self) -> Any:
         """
         Retorna minutos
         @return minutos
         """
         return self.time_.minute()
 
-    def getSeconds(self):
+    def getSeconds(self) -> Any:
         """
         Retorna segundos
         @return segundos
         """
         return self.time_.second()
 
-    def getMilliseconds(self):
+    def getMilliseconds(self) -> Any:
         """
         Retorna milisegundos
         @return milisegundos
@@ -222,7 +229,7 @@ class Date(object):
     getDate = getDay
     # setDate = setDay
 
-    def setDate(self, date):
+    def setDate(self: _TDate, date) -> _TDate:
         """
         Se especifica fecha
         @param date. Fecha a setear
@@ -238,7 +245,7 @@ class Date(object):
 
         return self
 
-    def addDays(self, d):
+    def addDays(self: _TDate, d) -> _TDate:
         """
         Se añaden dias a una fecha dada
         @param d. Dias a sumar (o restar) a la fecha dada
@@ -246,7 +253,7 @@ class Date(object):
         """
         return Date(self.date_.addDays(d).toString("yyyy-MM-dd"))
 
-    def addMonths(self, m):
+    def addMonths(self: _TDate, m) -> _TDate:
         """
         Se añaden meses a una fecha dada
         @param m. Meses a sumar (o restar) a la fecha dada
@@ -254,7 +261,7 @@ class Date(object):
         """
         return Date(self.date_.addMonths(m).toString("yyyy-MM-dd"))
 
-    def addYears(self, y):
+    def addYears(self: _TDate, y) -> _TDate:
         """
         Se añaden años a una fecha dada
         @param y. Años a sumar (o restar) a la fecha dada
@@ -263,22 +270,22 @@ class Date(object):
         return Date(self.date_.addYears(y).toString("yyyy-MM-dd"))
 
     @classmethod
-    def parse(cls, value):
+    def parse(cls, value: Union[Sized, Mapping[slice, Any]]) -> Date:
         return Date(value, "yyyy-MM-dd")
 
     def __str__(self):
         return self.toString()
 
-    def __lt__(self, other):
+    def __lt__(self, other: _T0) -> Union[bool, _T0]:
         return self.toString() < other.toString() if not isinstance(other, str) else other
 
-    def __le__(self, other):
+    def __le__(self, other: _T0) -> Union[bool, _T0]:
         return self.toString() <= other.toString() if not isinstance(other, str) else other
 
-    def __ge__(self, other):
+    def __ge__(self, other: _T0) -> Union[bool, _T0]:
         return self.toString() >= other.toString() if not isinstance(other, str) else other
 
-    def __gt__(self, other):
+    def __gt__(self, other: _T0) -> Union[bool, _T0]:
         return self.toString() > other.toString() if not isinstance(other, str) else other
 
     def __eq__(self, other):

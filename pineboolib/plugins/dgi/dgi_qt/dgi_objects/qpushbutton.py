@@ -4,6 +4,7 @@ from pineboolib.core import decorators
 
 
 from PyQt5.QtGui import QIcon  # type: ignore
+from typing import Any
 
 
 class QPushButton(QtWidgets.QPushButton):
@@ -34,19 +35,19 @@ class QPushButton(QtWidgets.QPushButton):
     def setPixmap(self, value: QIcon) -> None:
         return self.setIcon(value)
 
-    def getToggleButton(self):
+    def getToggleButton(self) -> Any:
         return self.isCheckable()
 
     def setToggleButton(self, v: bool) -> None:
         return self.setCheckable(v)
 
-    def getOn(self):
+    def getOn(self) -> Any:
         return self.isChecked()
 
-    def setOn(self, value):
+    def setOn(self, value) -> None:
         self.setChecked(value)
 
-    def getText(self):
+    def getText(self) -> Any:
         return super().text()
 
     def setText(self, val: str) -> None:

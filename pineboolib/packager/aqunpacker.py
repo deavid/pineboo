@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore  # type: ignore
+from typing import Any
 
 err_msgs_ = []
 
 
-def AQ_STRERROR(val):
+def AQ_STRERROR(val) -> None:
     err_msgs_.append(val)
 
 
@@ -13,7 +14,7 @@ class AQUnpacker(QtCore.QObject):
     stream_ = None
     package_version_ = None
 
-    def __init__(self, in_):
+    def __init__(self, in_) -> None:
         self.file_ = QtCore.QFile(QtCore.QDir.cleanPath(in_))
         if self.file_.open(QtCore.QIODevice.ReadOnly):
             self.stream_ = QtCore.QDataStream(self.file_)
@@ -22,10 +23,10 @@ class AQUnpacker(QtCore.QObject):
         else:
             AQ_STRERROR("Error opening file %s" % input)
 
-    def errorMessages(self):
+    def errorMessages(self) -> list:
         return err_msgs_
 
-    def getText(self):
+    def getText(self) -> Any:
         from pineboolib import pncontrolsfactory
 
         ba = pncontrolsfactory.QByteArray(self.stream_.readBytes())
@@ -38,14 +39,14 @@ class AQUnpacker(QtCore.QObject):
 
         return data_
 
-    def getBinary(self):
+    def getBinary(self) -> Any:
         from pineboolib import pncontrolsfactory
 
         ba = pncontrolsfactory.QByteArray(self.stream_.readBytes())
         return QtCore.qUncompress(ba)
 
-    def getVersion(self):
+    def getVersion(self) -> Any:
         return self.package_version_
 
-    def jump(self):
+    def jump(self) -> None:
         self.stream_.readBytes()

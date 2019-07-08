@@ -20,6 +20,8 @@ from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldoublevalidator import FLDouble
 from pineboolib import logging
 from pineboolib import pncontrolsfactory
 from pineboolib.application import project
+import protocols
+from typing import Any, Mapping, Optional, SupportsFloat, Union
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +94,7 @@ class FLFieldDB(QtWidgets.QWidget):
     """
     iconSize = None
 
-    def __init__(self, parent, *args):
+    def __init__(self, parent, *args) -> None:
         super(FLFieldDB, self).__init__(parent)
 
         self.DEBUG = False  # FIXME: debe recoger DEBUG de pineboolib.project
@@ -171,7 +173,7 @@ class FLFieldDB(QtWidgets.QWidget):
             if not self.topWidget_:
                 break
 
-    def load(self):
+    def load(self) -> None:
 
         if self._loaded:
             return
@@ -202,7 +204,7 @@ class FLFieldDB(QtWidgets.QWidget):
         else:
             self.initEditor()
 
-    def setName(self, value):
+    def setName(self, value) -> None:
         self.name = str(value)
 
     """
@@ -211,7 +213,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @return Nombre de la accion
     """
 
-    def actionName(self):
+    def actionName(self) -> Any:
         return self.actionName_
 
     """
@@ -220,7 +222,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @param aN Nombre de la accion
     """
 
-    def setActionName(self, aN):
+    def setActionName(self, aN) -> None:
         self.actionName_ = str(aN)
 
     """
@@ -229,7 +231,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @return Nombre del campo
     """
 
-    def fieldName(self):
+    def fieldName(self) -> Any:
         return self.fieldName_
 
     """
@@ -237,7 +239,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
     """
 
-    def setFilter(self, f):
+    def setFilter(self, f) -> None:
         if not self.filter_ == f:
             self.filter_ = f
             self.setMapValue()
@@ -247,7 +249,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
     """
 
-    def filter(self):
+    def filter(self) -> Any:
         return self.fliter_
 
     """
@@ -256,7 +258,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @param fN Nombre del campo
     """
 
-    def setFieldName(self, fN):
+    def setFieldName(self, fN) -> None:
         self.fieldName_ = str(fN)
 
     """
@@ -265,7 +267,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @return Nombre de la tabla
     """
 
-    def tableName(self):
+    def tableName(self) -> Any:
         return self.tableName_
 
     """
@@ -274,7 +276,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @param fT Nombre de la tabla
     """
 
-    def setTableName(self, fT):
+    def setTableName(self, fT: protocols.SupportsReplace) -> None:
 
         self.tableName_ = None
         if not fT == "":
@@ -286,7 +288,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @return Nombre del campo
     """
 
-    def foreignField(self):
+    def foreignField(self) -> Any:
         return self.foreignField_
 
     """
@@ -295,7 +297,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @param fN Nombre del campo
     """
 
-    def setForeignField(self, fN):
+    def setForeignField(self, fN) -> None:
         self.foreignField_ = str(fN)
 
     """
@@ -304,7 +306,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @return Nombre del campo
     """
 
-    def fieldRelation(self):
+    def fieldRelation(self) -> Any:
         return self.fieldRelation_
 
     """
@@ -313,7 +315,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @param fN Nombre del campo
     """
 
-    def setFieldRelation(self, fN):
+    def setFieldRelation(self, fN) -> None:
         self.fieldRelation_ = str(fN)
 
     """
@@ -322,7 +324,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @param alias Alias del campo, es el valor de la etiqueta. Si es vacio no hace nada.
     """
 
-    def setFieldAlias(self, alias):
+    def setFieldAlias(self, alias) -> None:
         if alias:
             self.fieldAlias_ = alias
             if self.showAlias_:
@@ -334,20 +336,20 @@ class FLFieldDB(QtWidgets.QWidget):
     @param f Formato del campo
     """
 
-    def setTextFormat(self, f):
+    def setTextFormat(self, f) -> None:
         self.textFormat_ = f
         ted = self.editor_
         if isinstance(ted, pncontrolsfactory.QTextEdit):
             ted.setTextFormat(self.textFormat_)
 
-    def textFormat(self):
+    def textFormat(self) -> Any:
         """@return El formato del texto."""
         ted = self.editor_
         if isinstance(ted, pncontrolsfactory.QTextEdit):
             return ted.textFormat()
         return self.textFormat_
 
-    def setEchoMode(self, m):
+    def setEchoMode(self, m) -> None:
         """Establece el modo de "echo".
 
         @param m Modo (Normal, NoEcho, Password)
@@ -356,7 +358,7 @@ class FLFieldDB(QtWidgets.QWidget):
         if isinstance(led, pncontrolsfactory.QLineEdit):
             led.setEchoMode(m)
 
-    def echoMode(self):
+    def echoMode(self) -> Any:
         """Returns the echo mode.
 
         @return El mode de "echo" (Normal, NoEcho, Password)
@@ -367,7 +369,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         return pncontrolsfactory.QLineEdit.Normal
 
-    def _process_autocomplete_events(self, event):
+    def _process_autocomplete_events(self, event) -> Optional[bool]:
         timerActive = False
         if self.autoComFrame_ and self.autoComFrame_.isVisible():
             if event.key() == Qt.Key_Down and self.autoComPopup_:
@@ -635,7 +637,7 @@ class FLFieldDB(QtWidgets.QWidget):
         # if self.isVisible() and self.hasFocus() and field.type() == "string" and field.length() == len(s):
         # self.focusNextPrevChild(True)
 
-    def status(self):
+    def status(self) -> None:
         self.logger.info("****************STATUS**************")
         self.logger.info("FLField:", self.fieldName_)
         self.logger.info("FieldAlias:", self.fieldAlias_)
@@ -652,7 +654,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @param v Valor a establecer
     """
 
-    def setValue(self, v):
+    def setValue(self, v: Union[bytes, str, protocols.SupportsFind, SupportsFloat, Mapping[slice, Any]]) -> None:
         if not self.cursor_:
             self.logger.error("FLFieldDB(%s):ERROR: El control no tiene cursor todavía. (%s)", self.fieldName_, self)
             return
@@ -807,7 +809,7 @@ class FLFieldDB(QtWidgets.QWidget):
     Obtiene el valor contenido en el campo.
     """
 
-    def value(self):
+    def value(self) -> Any:
         if not self.cursor_:
             return None
 
@@ -892,7 +894,7 @@ class FLFieldDB(QtWidgets.QWidget):
     Marca como seleccionado el contenido del campo.
     """
 
-    def selectAll(self):
+    def selectAll(self) -> None:
         if not self.cursor_:
             return
 
@@ -918,7 +920,7 @@ class FLFieldDB(QtWidgets.QWidget):
     definidos, foreingField y fieldRelation en blanco).
     """
 
-    def cursor(self):
+    def cursor(self) -> Any:
         return self.cursor_
 
     """
@@ -927,14 +929,14 @@ class FLFieldDB(QtWidgets.QWidget):
     en modo de cursor relacionado.
     """
 
-    def showAlias(self):
+    def showAlias(self) -> Any:
         return self.showAlias_
 
     """
     Establece el estado de la propiedad showAlias.
     """
 
-    def setShowAlias(self, value):
+    def setShowAlias(self, value) -> None:
         if not self.showAlias_ == value:
             self.showAlias_ = value
             if self.showAlias_:
@@ -984,21 +986,21 @@ class FLFieldDB(QtWidgets.QWidget):
     @param keep TRUE para activar el mantenerse deshabilitado y FALSE para desactivar
     """
 
-    def setKeepDisabled(self, keep):
+    def setKeepDisabled(self, keep) -> None:
         self.keepDisabled_ = keep
 
     """
     Devuelve el valor de la propiedad showEditor.
     """
 
-    def showEditor(self):
+    def showEditor(self) -> Any:
         return self.showEditor_
 
     """
     Establece el valor de la propiedad showEditor.
     """
 
-    def setShowEditor(self, show):
+    def setShowEditor(self, show) -> None:
         self.showEditor_ = show
         ed = QtWidgets.QWidget()
         if self.editor_:
@@ -1016,7 +1018,7 @@ class FLFieldDB(QtWidgets.QWidget):
     Establece el número de decimales
     """
 
-    def setPartDecimal(self, d):
+    def setPartDecimal(self, d) -> None:
         self._partDecimal = d
         self.refreshQuick(self.fieldName_)
         # self.editor_.setText(self.editor_.text(),False)
@@ -1025,10 +1027,10 @@ class FLFieldDB(QtWidgets.QWidget):
     Para asistente de completado automático.
     """
 
-    def setAutoCompletionMode(self, m):
+    def setAutoCompletionMode(self, m) -> None:
         self.autoCompMode_ = m
 
-    def autoCompletionMode(self):
+    def autoCompletionMode(self) -> Any:
         return self.autoCompMode_
 
     """
@@ -1553,7 +1555,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.editor_.setChecked(v)
             self.editor_.toggled.connect(self.updateValue)
 
-    def initCursor(self):
+    def initCursor(self) -> None:
         """
         Inicia el cursor segun este campo sea de la tabla origen o de
         una tabla relacionada
@@ -1715,7 +1717,7 @@ class FLFieldDB(QtWidgets.QWidget):
         # self.cursor_.append(self.cursor_.db().db().recordInfo(self.tableName_).find(self.fieldRelation_))
         # #FIXME
 
-    def initEditor(self):
+    def initEditor(self) -> None:
         """
         Crea e inicia el editor apropiado para editar el tipo de datos
         contenido en el campo (p.e: si el campo contiene una fecha crea
@@ -2221,7 +2223,7 @@ class FLFieldDB(QtWidgets.QWidget):
     Borra imagen en campos tipo Pixmap.
     """
 
-    def clearPixmap(self):
+    def clearPixmap(self) -> None:
         if self.editorImg_:
             self.editorImg_.clear()
             self.cursor_.setValueBuffer(self.fieldName_, None)
@@ -2232,7 +2234,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @param fmt Indica el formato con el que guardar la imagen
     """
 
-    def savePixmap(self, f):
+    def savePixmap(self, f) -> None:
         if self.editorImg_:
             ext = f.text().lower()
             filename = "imagen.%s" % ext
@@ -2376,7 +2378,7 @@ class FLFieldDB(QtWidgets.QWidget):
     ofrece el asistente de completado automático.
     """
 
-    def autoCompletionUpdateValue(self):
+    def autoCompletionUpdateValue(self) -> None:
         if not self.autoComPopup_ or not self.autoComFrame_:
             return
 
@@ -2643,7 +2645,7 @@ class FLFieldDB(QtWidgets.QWidget):
   @param filename: Ruta al fichero que contiene la imagen
     """
 
-    def setPixmap(self, filename):
+    def setPixmap(self, filename) -> None:
         img = QtGui.QImage(filename)
 
         if not img:
@@ -2699,7 +2701,7 @@ class FLFieldDB(QtWidgets.QWidget):
   @author Silix
     """
 
-    def setPixmapFromPixmap(self, pixmap, w=0, h=0):
+    def setPixmapFromPixmap(self, pixmap, w=0, h=0) -> None:
         if pixmap.isNull():
             return
 
@@ -2739,7 +2741,7 @@ class FLFieldDB(QtWidgets.QWidget):
   @author Silix
     """
 
-    def setPixmapFromClipboard(self, unknown):
+    def setPixmapFromClipboard(self, unknown) -> None:
         clb = QtWidgets.QApplication.clipboard()
         img = clb.image()
 
@@ -2803,7 +2805,7 @@ class FLFieldDB(QtWidgets.QWidget):
     Emite la señal de foco perdido
     """
 
-    def emitLostFocus(self):
+    def emitLostFocus(self) -> None:
         self.lostFocus.emit()
 
     """
@@ -2919,14 +2921,14 @@ class FLFieldDB(QtWidgets.QWidget):
         if self.editor_ and self.editor_.hasFocus:
             self.activatedAccel.emit()
 
-    def setDisabled(self, disable):
+    def setDisabled(self, disable) -> None:
         self.setEnabled(not disable)
 
     """
     Redefinida por conveniencia
     """
 
-    def setEnabled(self, enable):
+    def setEnabled(self, enable) -> None:
         # print("FLFieldDB: %r setEnabled: %r" % (self.fieldName_, enable))
         if self.editor_:
             if not self.cursor():
@@ -3035,7 +3037,7 @@ class FLFieldDB(QtWidgets.QWidget):
     Captura evento mostrar
     """
 
-    def showEvent(self, e):
+    def showEvent(self, e) -> None:
         self.load()
         if self._loaded:
             self.showWidget()
@@ -3045,7 +3047,7 @@ class FLFieldDB(QtWidgets.QWidget):
     Redefinida por conveniencia
     """
 
-    def showWidget(self):
+    def showWidget(self) -> None:
         if self._loaded:
             if not self.showed:
                 if self.topWidget_:
@@ -3105,7 +3107,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
                 self.showed = True
 
-    def editor(self):
+    def editor(self) -> Any:
         return self.editor_
 
     """
@@ -3117,7 +3119,7 @@ class FLFieldDB(QtWidgets.QWidget):
     ver la posisicón y el tamaño aproximado que tendrá el editor real.
     """
 
-    def initFakeEditor(self):
+    def initFakeEditor(self) -> None:
 
         hasPushButtonDB = None
         if not self.tableName_ and not self.foreignField_ and not self.fieldRelation_:
@@ -3184,7 +3186,7 @@ class FLFieldDB(QtWidgets.QWidget):
     Color de los campos obligatorios
     """
 
-    def notNullColor(self):
+    def notNullColor(self) -> Any:
         if not self.initNotNullColor_:
             self.initNotNullColor_ = True
         self.notNullColor_ = FLSettings().readEntry("ebcomportamiento/colorObligatorio", None)

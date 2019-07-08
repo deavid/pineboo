@@ -2,6 +2,7 @@ from pineboolib import logging
 
 from pineboolib.plugins.dgi.dgi_qt.dgi_qt import dgi_qt
 from typing import Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -33,25 +34,25 @@ class DGILoader(object):
         return dgi.dgi_qt()
 
     @staticmethod
-    def load_dgi_aqnext():
+    def load_dgi_aqnext() -> Any:
         from pineboolib.plugins.dgi.dgi_aqnext import dgi_aqnext as dgi
 
         return dgi.dgi_aqnext()
 
     @staticmethod
-    def load_dgi_fcgi():
+    def load_dgi_fcgi() -> pineboolib.plugins.dgi.dgi_fcgi.dgi_fcgi.dgi_fcgi:
         from pineboolib.plugins.dgi.dgi_fcgi import dgi_fcgi as dgi
 
         return dgi.dgi_fcgi()
 
     @staticmethod
-    def load_dgi_jsonrpc():
+    def load_dgi_jsonrpc() -> pineboolib.plugins.dgi.dgi_jsonrpc.dgi_jsonrpc.dgi_jsonrpc:
         from pineboolib.plugins.dgi.dgi_jsonrpc import dgi_jsonrpc as dgi
 
         return dgi.dgi_jsonrpc()
 
     @staticmethod
-    def load_dgi_server():
+    def load_dgi_server() -> pineboolib.plugins.dgi.dgi_server.dgi_server.dgi_server:
         from pineboolib.plugins.dgi.dgi_server import dgi_server as dgi
 
         return dgi.dgi_server()

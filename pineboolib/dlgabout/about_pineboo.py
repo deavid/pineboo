@@ -7,11 +7,11 @@ class about_pineboo(QWidget):
 
     ui = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.load()
 
-    def load(self):
+    def load(self) -> None:
         from pineboolib.application import project
         from pineboolib.fllegacy.flmanagermodules import FLManagerModules
         from pineboolib.core.utils.utils_base import filedir
@@ -28,7 +28,7 @@ class about_pineboo(QWidget):
 
         self.ui.lbl_librerias.setText(self.load_components())
 
-    def load_components(self):
+    def load_components(self) -> str:
         import platform
         from pineboolib.application.utils.check_dependencies import DEPENDENCIES_CHECKED
 
@@ -48,7 +48,7 @@ class about_pineboo(QWidget):
 
         return components
 
-    def to_clipboard(self):
+    def to_clipboard(self) -> None:
 
         clip_board = QApplication.clipboard()
         clip_board.clear()

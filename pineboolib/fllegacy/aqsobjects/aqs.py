@@ -6,6 +6,7 @@ from PyQt5 import QtCore  # type: ignore
 from PyQt5 import QtGui  # type: ignore
 
 from pineboolib.core.utils.logging import logging
+from typing import Any
 
 logger = logging.getLogger("AQS")
 
@@ -43,7 +44,7 @@ class AQS(object):
     @param name. deprecated. Paramametro usado para compatibilidad
     """
 
-    def ColorDialog_getColor(self, color=None, parent=None, name=None):
+    def ColorDialog_getColor(self, color=None, parent=None, name=None) -> Any:
         from PyQt5.QtWidgets import QColorDialog  # type: ignore
         from PyQt5.QtGui import QColor  # type: ignore
 
@@ -121,7 +122,7 @@ class AQS(object):
     """
 
     @staticmethod
-    def pixmap_fromMimeSource(name):
+    def pixmap_fromMimeSource(name) -> Any:
         from pineboolib.core.utils.utils_base import pixmap_fromMimeSource
 
         return pixmap_fromMimeSource(name)
@@ -129,21 +130,21 @@ class AQS(object):
     Pixmap_fromMineSource = pixmap_fromMimeSource
 
     @classmethod
-    def sha1(self, byte_array):
+    def sha1(self, byte_array) -> Any:
         from pineboolib.pncontrolsfactory import QByteArray
 
         ba = QByteArray(byte_array)
         return ba.sha1()
 
     @classmethod
-    def Application_setOverrideCursor(self, shape, replace=False):
+    def Application_setOverrideCursor(self, shape, replace=False) -> None:
         QApplication.setOverrideCursor(shape)
 
     @classmethod
-    def Application_restoreOverrideCursor(self):
+    def Application_restoreOverrideCursor(self) -> None:
         QApplication.restoreOverrideCursor()
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         if name in self.translate:
             if name == "DockLeft":
                 name = "LeftDockWidgetArea"

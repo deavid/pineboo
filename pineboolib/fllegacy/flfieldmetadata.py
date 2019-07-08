@@ -6,7 +6,10 @@ from pineboolib.core.utils.logging import logging
 from pineboolib.interfaces import ITableMetaData
 from pineboolib.interfaces import IFieldMetaData
 from typing import List, Optional, Union, Any
+from typing import TypeVar
 
+_T0 = TypeVar("_T0")
+_T1 = TypeVar("_T1")
 
 logger = logging.getLogger("FLFieldMetadata")
 
@@ -50,7 +53,7 @@ class FLFieldMetaData(IFieldMetaData):
             self.inicializeNewFLFieldMetaData(*args, **kwargs)
         ++self.count_
 
-    def inicializeFLFieldMetaData(self, other):
+    def inicializeFLFieldMetaData(self, other) -> None:
         self.d = FLFieldMetaDataPrivate()
         self.copy(other)
 
@@ -85,7 +88,7 @@ class FLFieldMetaData(IFieldMetaData):
     desctructor
     """
 
-    def __del__(self):
+    def __del__(self) -> None:
         del self.d
         --self.count_
 
@@ -104,7 +107,7 @@ class FLFieldMetaData(IFieldMetaData):
     @param n Nombre del campo
     """
 
-    def setName(self, n):
+    def setName(self, n) -> None:
         self.d.fieldName_ = n
 
     """
@@ -134,7 +137,7 @@ class FLFieldMetaData(IFieldMetaData):
     def isPrimaryKey(self) -> bool:
         return self.d.isPrimaryKey_
 
-    def setIsPrimaryKey(self, b):
+    def setIsPrimaryKey(self, b) -> None:
         self.d.isPrimaryKey_ = b
 
     """
@@ -170,7 +173,7 @@ class FLFieldMetaData(IFieldMetaData):
     @return TRUE si el campo es calculado, FALSE en caso contrario
     """
 
-    def calculated(self):
+    def calculated(self) -> Any:
         return self.d.calculated_
 
     """
@@ -179,7 +182,7 @@ class FLFieldMetaData(IFieldMetaData):
     @param c Valor TRUE si se quiere poner el campo como calculado, FALSE en caso contrario
     """
 
-    def setCalculated(self, c):
+    def setCalculated(self, c) -> None:
         self.d.calculated_ = c
 
     """
@@ -226,7 +229,7 @@ class FLFieldMetaData(IFieldMetaData):
     def generated(self) -> bool:
         return self.d.generated_
 
-    def setGenerated(self, value):
+    def setGenerated(self, value) -> None:
         self.d.generated_ = value
 
     """
@@ -246,7 +249,7 @@ class FLFieldMetaData(IFieldMetaData):
          en caso contrario
     """
 
-    def setVisibleGrid(self, v):
+    def setVisibleGrid(self, v) -> None:
         self.d.visibleGrid_ = v
 
     """
@@ -273,7 +276,7 @@ class FLFieldMetaData(IFieldMetaData):
     @return TRUE si el campo es una referencia con contador
     """
 
-    def isCounter(self):
+    def isCounter(self) -> Any:
         return self.d.contador_
 
     """
@@ -282,7 +285,7 @@ class FLFieldMetaData(IFieldMetaData):
     @return TRUE si el campo es índice, FALSE en caso contrario
     """
 
-    def isIndex(self):
+    def isIndex(self) -> Any:
         return self.d.isIndex_
 
     """
@@ -291,7 +294,7 @@ class FLFieldMetaData(IFieldMetaData):
     @return TRUE si el campo determina registros únicos, FALSE en caso contrario
     """
 
-    def isUnique(self):
+    def isUnique(self) -> Any:
         return self.d.isUnique_
 
     """
@@ -344,7 +347,7 @@ class FLFieldMetaData(IFieldMetaData):
     @return Objeto con la lista de deficiones de la relaciones del campo
     """
 
-    def relationList(self):
+    def relationList(self) -> List[Union[pineboolib.fllegacy.flrelationmetadata.FLRelationMetaData, _T0, _T1]]:
         return self.d.relationList_
 
     """
@@ -507,7 +510,7 @@ class FLFieldMetaData(IFieldMetaData):
     Obtiene si el campo es de tipo Check
     """
 
-    def isCheck(self):
+    def isCheck(self) -> bool:
         if self.d.type_ == self.Check:
             return True
         else:
@@ -524,7 +527,7 @@ class FLFieldMetaData(IFieldMetaData):
     Ver FLFieldMetaData::fullyCaclulated_
     """
 
-    def fullyCalculated(self):
+    def fullyCalculated(self) -> Any:
         return self.d.fullyCalculated_
 
     def setFullyCalculated(self, c: bool) -> None:
@@ -536,7 +539,7 @@ class FLFieldMetaData(IFieldMetaData):
     Ver FLFieldMetaData::trimmed_
     """
 
-    def trimed(self):
+    def trimed(self) -> Any:
         return self.d.trimmed_
 
     def setTrimed(self, t: bool) -> None:
@@ -560,7 +563,7 @@ class FLFieldMetaData(IFieldMetaData):
     Obtiene el tipo del campo convertido a un tipo equivalente de la clase QVariant
     """
 
-    def flDecodeType(self, fltype_):
+    def flDecodeType(self, fltype_) -> Optional[str]:
 
         _type = None
         # print("Decode", fltype)
@@ -591,7 +594,7 @@ class FLFieldMetaData(IFieldMetaData):
     @return lista de las distintas opciones
     """
 
-    def searchOptions(self):
+    def searchOptions(self) -> Any:
         return self.d.searchOptions_
 
     """
@@ -601,12 +604,12 @@ class FLFieldMetaData(IFieldMetaData):
           separada por comas, p.e. "opcion1,opcion2,opcion3"
     """
 
-    def setSearchOptions(self, ol):
+    def setSearchOptions(self, ol) -> None:
         self.d.searchOptions_ = []
         for dato in ol.split(","):
             self.d.searchOptions_.append(dato)
 
-    def copy(self, other):
+    def copy(self, other) -> None:
         if other is self:
             return
 
@@ -898,7 +901,7 @@ class FLFieldMetaDataPrivate(object):
         else:
             self.inicialize(*args, **kwargs)
 
-    def inicializeEmpty(self):
+    def inicializeEmpty(self) -> None:
         self.relationList_ = []
         self.relationM1_ = None
         self.associatedFieldFilterTo_ = None
@@ -996,5 +999,5 @@ class FLFieldMetaDataPrivate(object):
     Limpia la lista de definiciones de relaciones
     """
 
-    def clearRelationList(self):
+    def clearRelationList(self) -> None:
         self.relationList_ = []

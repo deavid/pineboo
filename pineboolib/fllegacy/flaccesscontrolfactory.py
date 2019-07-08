@@ -24,7 +24,7 @@ class FLAccessControlMainWindow(FLAccessControl):
     def type(self):
         return "mainwindow"
 
-    def processObject(self, obj):
+    def processObject(self, obj) -> None:
         from pineboolib import pncontrolsfactory
 
         mw = pncontrolsfactory.QMainWindow(obj)
@@ -52,7 +52,7 @@ class FLAccessControlMainWindow(FLAccessControl):
                 if perm in ("-w", "--"):
                     a.setVisible(False)
 
-    def setFromObject(self, object):
+    def setFromObject(self, object) -> None:
         print("FLAccessControlMainWindow::setFromObject %s" % "No implementado todavía.")
 
 
@@ -95,7 +95,7 @@ class FLAccessControlForm(FLAccessControl):
   FLFormRecordDB y FLFormSearchDB) se pueda hacer no visible o no editable a conveniencia.
     """
 
-    def processObject(self, obj):
+    def processObject(self, obj) -> None:
         fm = obj
         if not fm or not self.acosPerms_:
             return
@@ -135,7 +135,7 @@ class FLAccessControlForm(FLAccessControl):
             else:
                 print("WARN: FLAccessControlFactory: No se encuentra el control %s para procesar ACLS." % it)
 
-    def setFromObject(self, object):
+    def setFromObject(self, object) -> None:
         print("FLAccessControlform::setFromObject: No implementado todavía.")
 
 
@@ -239,7 +239,7 @@ class FLAccessControlFactory(object):
 
         raise ValueError("type_ %r unknown" % type_)
 
-    def type(self, obj):
+    def type(self, obj) -> str:
         if obj is None:
             print("NO OBJ")
 

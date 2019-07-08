@@ -24,6 +24,7 @@ from pineboolib.interfaces import IManager
 from PyQt5.QtXml import QDomElement  # type: ignore
 from pineboolib.interfaces.iconnection import IConnection
 from typing import Optional, Union
+from typing import Any, Mapping
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +131,7 @@ class FLManager(QtCore.QObject, IManager):
         if not self.cacheMetaDataSys_:
             self.cacheMetaDataSys_ = {}
 
-    def finish(self):
+    def finish(self) -> None:
         self.dictKeyMetaData_ = {}
         self.listTables_ = []
         self.cacheMetaData_ = {}
@@ -420,7 +421,7 @@ class FLManager(QtCore.QObject, IManager):
     def metadataDev(self, n, quick=None):
         return True
 
-    def query(self, n, parent=None):
+    def query(self, n, parent=None) -> Optional[pineboolib.application.database.pnsqlquery.PNSqlQuery]:
         """
         Para obtener una consulta de la base de datos, a partir de un fichero XML.
 
@@ -639,7 +640,7 @@ class FLManager(QtCore.QObject, IManager):
         else:
             return self.db_.existsTable(n)
 
-    def checkMetaData(self, mtd1, mtd2):
+    def checkMetaData(self, mtd1, mtd2) -> Any:
         """
         Compara los metadatos de dos tablas,  la definición en XML de esas dos tablas se
         pasan como dos cadenas de caracteres.
@@ -709,7 +710,7 @@ class FLManager(QtCore.QObject, IManager):
 
             return True
 
-    def alterTable(self, mtd1=None, mtd2=None, key=None, force=False):
+    def alterTable(self, mtd1=None, mtd2=None, key=None, force=False) -> None:
         """
         Modifica la estructura o metadatos de una tabla, preservando los posibles datos
         que pueda contener.
@@ -726,7 +727,7 @@ class FLManager(QtCore.QObject, IManager):
         """
         return self.db_.dbAux().alterTable(mtd1, mtd2, key, force)
 
-    def createTable(self, n_or_tmd):
+    def createTable(self, n_or_tmd) -> Any:
         """
         Crea una tabla en la base de datos.
 
@@ -762,7 +763,7 @@ class FLManager(QtCore.QObject, IManager):
 
             return n_or_tmd
 
-    def formatValueLike(self, *args, **kwargs):
+    def formatValueLike(self, *args, **kwargs) -> str:
         """
         Devuelve el contenido del valor de de un campo formateado para ser reconocido
         por la base de datos actual en condiciones LIKE, dentro de la clausura WHERE de SQL.
@@ -784,7 +785,7 @@ class FLManager(QtCore.QObject, IManager):
         else:
             return self.db_.formatValueLike(args[0], args[1], args[2])
 
-    def formatAssignValueLike(self, *args, **kwargs):
+    def formatAssignValueLike(self, *args, **kwargs) -> str:
         """
         Devuelve el contenido del valor de de un campo formateado para ser reconocido
         por la base de datos actual, dentro de la clausura WHERE de SQL.
@@ -1336,7 +1337,7 @@ class FLManager(QtCore.QObject, IManager):
 
         return False
 
-    def loadTables(self):
+    def loadTables(self) -> None:
         """
         Carga en la lista de tablas los nombres de las tablas de la base de datos
         """
@@ -1347,7 +1348,7 @@ class FLManager(QtCore.QObject, IManager):
 
         self.listTables_ = self.db_.dbAux().tables()
 
-    def cleanupMetaData(self):
+    def cleanupMetaData(self) -> None:
         """
         Limpieza la tabla flmetadata, actualiza el cotenido xml con el de los fichero .mtd
         actualmente cargados
@@ -1423,7 +1424,7 @@ class FLManager(QtCore.QObject, IManager):
 
         return False
 
-    def storeLargeValue(self, mtd, largeValue):
+    def storeLargeValue(self, mtd, largeValue: Mapping[slice, Any]) -> Optional[str]:
         """
         Utilizado para almacenar valores grandes de campos en tablas separadas indexadas
         por claves SHA del contenido del valor.
@@ -1490,7 +1491,7 @@ class FLManager(QtCore.QObject, IManager):
 
         return refKey
 
-    def fetchLargeValue(self, refKey):
+    def fetchLargeValue(self, refKey: Mapping[slice, Any]) -> Optional[str]:
         """
         Obtiene el valor de gran tamaño segun su clave de referencia.
 
@@ -1522,7 +1523,7 @@ class FLManager(QtCore.QObject, IManager):
 
             return v
 
-    def initCount(self):
+    def initCount(self) -> int:
         """
         Uso interno. Indica el número de veces que se ha llamado a FLManager::init().
         """

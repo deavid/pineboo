@@ -13,6 +13,12 @@ from jsonrpc import JSONRPCResponseManager, dispatcher
 from pineboolib import logging
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.fllegacy.flapplication import aqApp
+import protocols
+from typing import Any, TypeVar, Union
+
+_T0 = TypeVar("_T0")
+
+_T0 = TypeVar("_T0")
 
 logger = logging.getLogger(__name__)
 
@@ -20,20 +26,20 @@ cursor_dict = {}
 
 
 class parser_options(object):
-    def hello(self, *args):
+    def hello(self, *args) -> str:
         return "Welcome to pineboo server"
 
-    def db_name(self, *args):
+    def db_name(self, *args) -> Any:
         return aqApp.db().DBName()
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> None:
         print("** parser_options no contiene", name)
 
 
 parser_server = parser_options()
 
 
-def normalize_data(data):
+def normalize_data(data: _T0) -> Union[list, _T0]:
     if isinstance(data, (list, tuple)):
         new_data = []
         for line in data:
@@ -213,7 +219,7 @@ class dgi_server(dgi_schema):
     _W = {}
     _WJS = {}
 
-    def __init__(self):
+    def __init__(self) -> None:
         # desktopEnabled y mlDefault a True
         super().__init__()
         self._name = "server"
@@ -228,20 +234,20 @@ class dgi_server(dgi_schema):
         self.qApp = QtCore.QCoreApplication
         # self.parserDGI = parserJson()
 
-    def alternativeMain(self, options):
+    def alternativeMain(self, options) -> None:
         if options.dgi_parameter:
             self._listenSocket = int(options.dgi_parameter)
 
-    def exec_(self):
+    def exec_(self) -> None:
         self._par = parser()
         self.launchServer()
 
-    def launchServer(self):
+    def launchServer(self) -> None:
         # run_simple('localhost', self._listenSocket, self._par.receive, ssl_context="adhoc")
         run_simple("0.0.0.0", self._listenSocket, self._par.receive)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> Any:
         return super().resolveObject(self._name, name)
 
-    def accept_file(self, name):
+    def accept_file(self, name: protocols.SupportsEndswith) -> bool:
         return False if name.endswith((".ui")) else True

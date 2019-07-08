@@ -4,10 +4,11 @@ from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flapplication import aqApp
 
 from PyQt5 import QtCore  # type: ignore
+from typing import Any
 
 
 class FLVar(object):
-    def set(self, n, v):
+    def set(self, n, v) -> Any:
         id_sesion = aqApp.timeUser().toString(QtCore.Qt.ISODate)
         where = "idvar = '%s' AND idsesion ='%s'" % (n, id_sesion)
 
@@ -26,17 +27,17 @@ class FLVar(object):
         values = "%s,%s,%s" % (n, id_sesion, str(v))
         FLUtil().sqlInsert("flvar", "idvar,idsesion,idvalor", values)
 
-    def get(self, n):
+    def get(self, n) -> Any:
         id_sesion = aqApp.timeUser().toString(QtCore.Qt.ISODate)
         where = "idvar = '%s' AND idsesion ='%s'" % (n, id_sesion)
         return FLUtil().sqlSelect("flvar", "valor", where, "flvar")
 
-    def del_(self, n):
+    def del_(self, n) -> Any:
         id_sesion = aqApp.timeUser().toString(QtCore.Qt.ISODate)
         where = "idvar = '%s' AND idsesion ='%s'" % (n, id_sesion)
         return FLUtil().sqlDelete("flvar", where)
 
-    def clean(self):
+    def clean(self) -> Any:
         id_sesion = aqApp.timeUser().toString(QtCore.Qt.ISODate)
         where = "idsesion = '%s'" % id_sesion
         return FLUtil().sqlDelete("flvar", where)

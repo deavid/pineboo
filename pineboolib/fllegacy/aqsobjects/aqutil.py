@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from pineboolib import logging
+from typing import Any
 
 
 class AQUtil(object):
@@ -13,6 +14,6 @@ class AQUtil(object):
         self.util = FLUtil()
         self.logger = logging.getLogger(__name__)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         # self.logger.info("Usando function FAKE %s de FLUtil()", name)
         return getattr(self.util, name)

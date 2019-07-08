@@ -2,6 +2,7 @@
 from PyQt5 import QtCore, QtWidgets  # type: ignore
 from pineboolib import logging
 from pineboolib.fllegacy.flapplication import aqApp
+from typing import Any
 
 
 class FLLineEdit(QtWidgets.QLineEdit):
@@ -19,7 +20,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
 
     lostFocus = QtCore.pyqtSignal()
 
-    def __init__(self, parent, name=None):
+    def __init__(self, parent, name=None) -> None:
         super(FLLineEdit, self).__init__(parent)
         self._name = name
         if hasattr(parent, "fieldName_"):
@@ -40,7 +41,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
             if self._tipo in ("int", "uint", "double"):
                 self.setAlignment(QtCore.Qt.AlignRight)
 
-    def setText(self, text_, check_focus=True):
+    def setText(self, text_, check_focus=True) -> None:
         text_ = str(text_)
         # if not project._DGI.localDesktop():
         #    project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text_)
@@ -80,7 +81,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
 
         super().setText(s)
 
-    def text(self):
+    def text(self) -> Any:
         text_ = super().text()
         if text_ == "":
             return text_
@@ -113,10 +114,10 @@ class FLLineEdit(QtWidgets.QLineEdit):
 
         return text_
 
-    def setMaxValue(self, max_value):
+    def setMaxValue(self, max_value) -> None:
         self._maxValue = max_value
 
-    def focusOutEvent(self, f):
+    def focusOutEvent(self, f) -> None:
         if self._tipo in ("double", "int", "uint"):
             text_ = super(FLLineEdit, self).text()
 
@@ -132,7 +133,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
                 self.setText(text_)
         super().focusOutEvent(f)
 
-    def focusInEvent(self, f):
+    def focusInEvent(self, f) -> None:
         if self.isReadOnly():
             return
 

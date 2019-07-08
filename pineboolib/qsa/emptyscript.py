@@ -6,10 +6,10 @@ from pineboolib.application.types import Object
 class interna(object):
     ctx = Object()
 
-    def __init__(self, context=None):
+    def __init__(self, context=None) -> None:
         self.ctx = context
 
-    def init(self):
+    def init(self) -> None:
         self.ctx.interna_init()
 
 
@@ -29,11 +29,11 @@ class ifaceCtx(head):
 
 
 class FormInternalObj(FormDBWidget):
-    def _class_init(self):
+    def _class_init(self) -> None:
         # DEBUG:: Const Declaration:
         self.iface = ifaceCtx(self)
 
-    def interna_init(self):
+    def interna_init(self) -> None:
         pass
 
 

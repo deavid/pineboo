@@ -4,6 +4,9 @@ from pineboolib import logging
 from typing import Any, Optional, TypeVar, Union
 
 _T0 = TypeVar("_T0")
+_T0 = TypeVar("_T0")
+
+_T0 = TypeVar("_T0")
 
 logger = logging.getLogger(__name__)
 

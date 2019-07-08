@@ -3,6 +3,11 @@ import re
 
 
 from typing import Optional
+from typing import Any, Tuple, TypeVar
+
+_T1 = TypeVar("_T1")
+
+_T1 = TypeVar("_T1")
 
 
 class ProjectConfig:
@@ -98,7 +103,7 @@ class ProjectConfig:
         return True
 
     @classmethod
-    def translate_connstring(cls, connstring):
+    def translate_connstring(cls, connstring: _T1) -> Tuple[Any, Any, Any, Any, Any, Any]:
         """Translate a DSN connection string into user, pass, etc.
 
         Acepta un parámetro "connstring" que tenga la forma user@host/dbname

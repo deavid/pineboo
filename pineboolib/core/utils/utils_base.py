@@ -11,6 +11,13 @@ from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkReques
 from typing import Optional, Union, Any, List
 from xml.etree.ElementTree import ElementTree
 from . import logging
+import protocols
+from typing import Callable, Dict, Iterable, Sized, TypeVar
+
+_T0 = TypeVar("_T0")
+_T1 = TypeVar("_T1")
+_T2 = TypeVar("_T2")
+_T3 = TypeVar("_T3")
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +63,7 @@ class DefFun:
         self.funname = funname
         self.realfun = None
 
-    def __str__(self):
+    def __str__(self) -> Any:
         if self.realfun:
             logger.debug("%r: Redirigiendo Propiedad a función %r", self.parent.__class__.__name__, self.funname)
             return self.realfun()
@@ -64,7 +71,7 @@ class DefFun:
         logger.debug("WARN: %r: Propiedad no implementada %r", self.parent.__class__.__name__, self.funname)
         return 0
 
-    def __call__(self, *args):
+    def __call__(self, *args) -> Any:
         if self.realfun:
             logger.debug("%r: Redirigiendo Llamada a función %s %s", self.parent.__class__.__name__, self.funname, args)
             return self.realfun(*args)
@@ -73,7 +80,7 @@ class DefFun:
         return None
 
 
-def traceit(frame, event, arg):
+def traceit(frame, event, arg) -> Callable[[Any, Any, Any], Any]:
     """Print a trace line for each Python line executed or call.
 
     This function is intended to be the callback of sys.settrace.
@@ -99,15 +106,15 @@ def traceit(frame, event, arg):
 
 
 class TraceBlock:
-    def __enter__(self):
+    def __enter__(self) -> Callable[[Any, Any, Any], Any]:
         sys.settrace(traceit)
         return traceit
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, type, value, traceback) -> None:
         sys.settrace(None)
 
 
-def trace_function(f):
+def trace_function(f: Callable) -> Callable:
     def wrapper(*args):
         with TraceBlock():
             return f(*args)
@@ -125,24 +132,24 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
     dir_ = None
     url_ = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(downloadManager, self).__init__()
         self.manager = QNetworkAccessManager()
         self.currentDownload = []
         self.manager.finished.connect(self.downloadFinished)
 
-    def setLE(self, filename, dir_, urllineedit):
+    def setLE(self, filename, dir_, urllineedit) -> None:
         self.filename = filename
         self.dir_ = dir_
         self.url_ = urllineedit
 
-    def doDownload(self):
+    def doDownload(self) -> None:
         request = QNetworkRequest(QUrl("%s/%s/%s" % (self.url_.text(), self.dir_, self.filename)))
         self.reply = self.manager.get(request)
         # self.reply.sslErrors.connect(self.sslErrors)
         self.currentDownload.append(self.reply)
 
-    def saveFileName(self, url):
+    def saveFileName(self, url) -> Any:
         path = url.path()
         basename = QFileInfo(path).fileName()
 
@@ -159,7 +166,7 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
 
         return basename
 
-    def saveToDisk(self, filename, data):
+    def saveToDisk(self, filename, data) -> bool:
         fi = "%s/%s" % (self.dir_, filename)
         if not os.path.exists(self.dir_):
             os.makedirs(self.dir_)
@@ -172,7 +179,7 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
 
         return True
 
-    def isHttpRedirect(self, reply):
+    def isHttpRedirect(self, reply) -> bool:
         statusCode = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
         return statusCode in [301, 302, 303, 305, 307, 308]
 
@@ -191,7 +198,7 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
             self.result = reply.errorString()
 
 
-def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
+def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False) -> bool:
     dir = QDir()
     dir.setPath(from_dir)
 
@@ -287,7 +294,7 @@ def ustr1(t: Union[str, int]) -> str:
 
 
 class StructMyDict(dict):
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> Any:
         try:
             return self[name]
         except KeyError as e:
@@ -297,13 +304,13 @@ class StructMyDict(dict):
         self[name] = value
 
 
-def version_check(mod_name, mod_ver, min_ver):
+def version_check(mod_name, mod_ver, min_ver) -> None:
     """Compare two version numbers and raise a warning if "minver" is not met."""
     if version_normalize(mod_ver) < version_normalize(min_ver):
         logger.warning("La version de <%s> es %s. La mínima recomendada es %s.", mod_name, mod_ver, min_ver)
 
 
-def version_normalize(v):
+def version_normalize(v) -> List[int]:
     """Normalize version string numbers like 3.10.1 so they can be compared."""
     return [int(x) for x in re.sub(r"(\.0+)*$", "", v).split(".")]
 
@@ -351,7 +358,7 @@ def load2xml(form_path_or_str: str) -> ElementTree:
             raise
 
 
-def parse_for_duplicates(text):
+def parse_for_duplicates(text: protocols.SupportsReplace) -> str:
     ret_ = ""
     text = text.replace("+", "__PLUS__")
     text = text.replace("(", "__LPAREN__")
@@ -430,7 +437,7 @@ printed in a nice way
 """
 
 
-def indent(elem, level=0):
+def indent(elem: Union[Iterable, Sized], level=0) -> None:
     i = "\n" + level * "  "
     if len(elem):
         if not elem.text or not elem.text.strip():
@@ -446,7 +453,7 @@ def indent(elem, level=0):
             elem.tail = i
 
 
-def format_double(d, part_integer, part_decimal):
+def format_double(d: _T0, part_integer, part_decimal) -> Union[str, _T0]:
     if d == "":
         return d
     # import locale
@@ -478,7 +485,7 @@ def format_double(d, part_integer, part_decimal):
     return ret_
 
 
-def format_int(value, part_intenger=None):
+def format_int(value: _T0, part_intenger=None) -> Union[str, _T0]:
     str_integer = value
     if value is not None:
         str_integer = "{:,d}".format(int(value))
@@ -491,7 +498,7 @@ def format_int(value, part_intenger=None):
     return str_integer
 
 
-def unformat_number(new_str, old_str, type_):
+def unformat_number(new_str: Union[protocols.SupportsEndswith, protocols.SupportsReplace], old_str, type_) -> Any:
     ret_ = new_str
     if old_str is not None:
 
@@ -529,7 +536,9 @@ def unformat_number(new_str, old_str, type_):
     return ret_
 
 
-def create_dict(method, fun, id, arguments=[]):
+def create_dict(
+    method: _T0, fun: _T1, id: _T2, arguments: _T3 = []
+) -> Dict[str, Union[str, List[Dict[str, Union[_T1, _T2, _T3]]], _T0, _T2]]:
     data = [{"function": fun, "arguments": arguments, "id": id}]
     return {"method": method, "params": data, "jsonrpc": "2.0", "id": id}
 
@@ -561,7 +570,7 @@ def filedir(*path) -> str:
     return ruta_
 
 
-def download_files():
+def download_files() -> None:
     if os.path.exists(filedir("forms")):
         return
 
@@ -571,7 +580,7 @@ def download_files():
         os.mkdir(filedir("../tempdata"))
 
 
-def pixmap_fromMimeSource(name):
+def pixmap_fromMimeSource(name) -> Any:
 
     file_name = filedir("../share/icons", name)
     return QPixmap(file_name) if os.path.exists(file_name) else None

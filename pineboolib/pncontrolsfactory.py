@@ -12,6 +12,14 @@ from pineboolib.core.utils.utils_base import create_dict
 from pineboolib.core.utils.logging import logging
 from pineboolib.application import project
 from pineboolib.fllegacy.systype import SysType
+import protocols
+import types
+from typing import Callable, Container, Mapping, TypeVar, Union
+
+_T0 = TypeVar("_T0")
+_T1 = TypeVar("_T1")
+_T2 = TypeVar("_T2")
+_T3 = TypeVar("_T3")
 
 
 logger = logging.getLogger("PNControlsFactory")
@@ -42,7 +50,7 @@ def resolveObject(name: str) -> Any:
     return ObjectNotFoundInCurrentDGI
 
 
-def reload_from_DGI():
+def reload_from_DGI() -> None:
     # Clases Qt
     global QComboBox, QTable, QLayoutWidget, QToolButton, QTabWidget, QLabel, QGroupBox, QListView, QPushButton, QTextEdit
     global QLineEdit, QDateEdit, QTimeEdit, QCheckBox, QWidget, QtWidgets, QColor, QMessageBox, QButtonGroup, QDialog
@@ -176,10 +184,10 @@ def reload_from_DGI():
 
 
 class System_class(object):
-    def setenv(self, name, val):
+    def setenv(self, name, val) -> None:
         os.environ[name] = val
 
-    def getenv(self, name):
+    def getenv(self, name) -> str:
         ret_ = ""
         if name in os.environ.keys():
             ret_ = os.environ[name]
@@ -193,7 +201,7 @@ System = System_class()
 class ProxySlot:
     PROXY_FUNCTIONS = {}
 
-    def __init__(self, remote_fn, receiver, slot):
+    def __init__(self, remote_fn: types.MethodType, receiver, slot) -> None:
         self.key = "%r.%r->%r" % (remote_fn, receiver, slot)
         if self.key not in self.PROXY_FUNCTIONS:
             weak_fn = weakref.WeakMethod(remote_fn)
@@ -201,11 +209,11 @@ class ProxySlot:
             self.PROXY_FUNCTIONS[self.key] = proxy_fn(weak_fn, weak_receiver, slot)
         self.proxy_function = self.PROXY_FUNCTIONS[self.key]
 
-    def getProxyFn(self):
+    def getProxyFn(self) -> Callable:
         return self.proxy_function
 
 
-def get_expected_args_num(inspected_function):
+def get_expected_args_num(inspected_function) -> int:
     expected_args = inspect.getargspec(inspected_function)[0]
     args_num = len(expected_args)
 
@@ -215,12 +223,12 @@ def get_expected_args_num(inspected_function):
     return args_num
 
 
-def get_expected_kwargs(inspected_function):
+def get_expected_kwargs(inspected_function) -> bool:
     expected_kwargs = inspect.getargspec(inspected_function)[2]
     return True if expected_kwargs else False
 
 
-def proxy_fn(wf, wr, slot):
+def proxy_fn(wf, wr, slot) -> Callable:
     def fn(*args, **kwargs):
         f = wf()
         if not f:
@@ -239,7 +247,7 @@ def proxy_fn(wf, wr, slot):
     return fn
 
 
-def slot_done(fn, signal, sender, caller):
+def slot_done(fn, signal, sender, caller) -> Callable:
     def new_fn(*args, **kwargs):
 
         res = False
@@ -316,7 +324,9 @@ def disconnect(sender, signal, receiver, slot, caller=None) -> Optional[Tuple[An
     return signal_slot
 
 
-def solve_connection(sender, signal, receiver, slot):
+def solve_connection(
+    sender, signal: Union[protocols.SupportsReplace, Container], receiver, slot: Union[str, protocols.SupportsEndswith, Mapping[slice, Any]]
+) -> Optional[Union[bool, Tuple[Any, Any]]]:
     if sender is None:
         logger.error("Connect Error:: %s %s %s %s", sender, signal, receiver, slot)
         return False
@@ -376,7 +386,7 @@ def solve_connection(sender, signal, receiver, slot):
     return False
 
 
-def GET(function_name, arguments=[], conn=None):
+def GET(function_name, arguments=[], conn=None) -> Any:
     if conn is None:
         conn = project.conn
     if hasattr(conn.driver(), "send_to_server"):
@@ -385,7 +395,7 @@ def GET(function_name, arguments=[], conn=None):
         return "Funcionalidad no soportada"
 
 
-def check_gc_referrers(typename, w_obj, name):
+def check_gc_referrers(typename, w_obj: Callable, name) -> None:
     import threading
     import time
 
@@ -419,14 +429,14 @@ def check_gc_referrers(typename, w_obj, name):
 
 
 class QEventLoop(QtCore.QEventLoop):
-    def exitLoop(self):
+    def exitLoop(self) -> None:
         super().exit()
 
-    def enterLoop(self):
+    def enterLoop(self) -> None:
         super().exec_()
 
 
-def print_stack(maxsize=1):
+def print_stack(maxsize=1) -> None:
     for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
         print(tb.rstrip())
 
@@ -441,113 +451,113 @@ from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
 
 # --- create empty objects first:
 
-QComboBox = ObjectNotFoundDGINotLoaded
-QTable = ObjectNotFoundDGINotLoaded
-QLayoutWidget = ObjectNotFoundDGINotLoaded
-QToolButton = ObjectNotFoundDGINotLoaded
-QTabWidget = ObjectNotFoundDGINotLoaded
-QLabel = ObjectNotFoundDGINotLoaded
-QGroupBox = ObjectNotFoundDGINotLoaded
-QListView = ObjectNotFoundDGINotLoaded
-QPushButton = ObjectNotFoundDGINotLoaded
-QTextEdit = ObjectNotFoundDGINotLoaded
-QLineEdit = ObjectNotFoundDGINotLoaded
-QDateEdit = ObjectNotFoundDGINotLoaded
-QTimeEdit = ObjectNotFoundDGINotLoaded
-QCheckBox = ObjectNotFoundDGINotLoaded
-QWidget = ObjectNotFoundDGINotLoaded
-QtWidgets = ObjectNotFoundDGINotLoaded
-QColor = ObjectNotFoundDGINotLoaded
-QMessageBox = ObjectNotFoundDGINotLoaded
-QButtonGroup = ObjectNotFoundDGINotLoaded
-QDialog = ObjectNotFoundDGINotLoaded
-QVBoxLayout = ObjectNotFoundDGINotLoaded
-QHBoxLayout = ObjectNotFoundDGINotLoaded
-QFrame = ObjectNotFoundDGINotLoaded
-QMainWindow = ObjectNotFoundDGINotLoaded
-QSignalMapper = ObjectNotFoundDGINotLoaded
-QDomDocument = ObjectNotFoundDGINotLoaded
-QMenu = ObjectNotFoundDGINotLoaded
-QToolBar = ObjectNotFoundDGINotLoaded
-QListWidgetItem = ObjectNotFoundDGINotLoaded
-QListViewWidget = ObjectNotFoundDGINotLoaded
-QPixmap = ObjectNotFoundDGINotLoaded
-QImage = ObjectNotFoundDGINotLoaded
-QIcon = ObjectNotFoundDGINotLoaded
-QAction = ObjectNotFoundDGINotLoaded
-QActionGroup = ObjectNotFoundDGINotLoaded
-QTreeWidget = ObjectNotFoundDGINotLoaded
-QTreeWidgetItem = ObjectNotFoundDGINotLoaded
-QTreeWidgetItemIterator = ObjectNotFoundDGINotLoaded
-QDataView = ObjectNotFoundDGINotLoaded
-QProcess = ObjectNotFoundDGINotLoaded
-QByteArray = ObjectNotFoundDGINotLoaded
-QRadioButton = ObjectNotFoundDGINotLoaded
-QSpinBox = ObjectNotFoundDGINotLoaded
-QInputDialog = ObjectNotFoundDGINotLoaded
-QApplication = ObjectNotFoundDGINotLoaded
-qApp = ObjectNotFoundDGINotLoaded
-QStyleFactory = ObjectNotFoundDGINotLoaded
-QFontDialog = ObjectNotFoundDGINotLoaded
-QDockWidget = ObjectNotFoundDGINotLoaded
-QMdiArea = ObjectNotFoundDGINotLoaded
-QMdiSubWindow = ObjectNotFoundDGINotLoaded
-QKeySequence = ObjectNotFoundDGINotLoaded
-QSize = ObjectNotFoundDGINotLoaded
-QSizePolicy = ObjectNotFoundDGINotLoaded
-QToolBox = ObjectNotFoundDGINotLoaded
-QPainter = ObjectNotFoundDGINotLoaded
-QBrush = ObjectNotFoundDGINotLoaded
-QProgressDialog = ObjectNotFoundDGINotLoaded
-QFileDialog = ObjectNotFoundDGINotLoaded
+QComboBox: Any = ObjectNotFoundDGINotLoaded
+QTable: Any = ObjectNotFoundDGINotLoaded
+QLayoutWidget: Any = ObjectNotFoundDGINotLoaded
+QToolButton: Any = ObjectNotFoundDGINotLoaded
+QTabWidget: Any = ObjectNotFoundDGINotLoaded
+QLabel: Any = ObjectNotFoundDGINotLoaded
+QGroupBox: Any = ObjectNotFoundDGINotLoaded
+QListView: Any = ObjectNotFoundDGINotLoaded
+QPushButton: Any = ObjectNotFoundDGINotLoaded
+QTextEdit: Any = ObjectNotFoundDGINotLoaded
+QLineEdit: Any = ObjectNotFoundDGINotLoaded
+QDateEdit: Any = ObjectNotFoundDGINotLoaded
+QTimeEdit: Any = ObjectNotFoundDGINotLoaded
+QCheckBox: Any = ObjectNotFoundDGINotLoaded
+QWidget: Any = ObjectNotFoundDGINotLoaded
+QtWidgets: Any = ObjectNotFoundDGINotLoaded
+QColor: Any = ObjectNotFoundDGINotLoaded
+QMessageBox: Any = ObjectNotFoundDGINotLoaded
+QButtonGroup: Any = ObjectNotFoundDGINotLoaded
+QDialog: Any = ObjectNotFoundDGINotLoaded
+QVBoxLayout: Any = ObjectNotFoundDGINotLoaded
+QHBoxLayout: Any = ObjectNotFoundDGINotLoaded
+QFrame: Any = ObjectNotFoundDGINotLoaded
+QMainWindow: Any = ObjectNotFoundDGINotLoaded
+QSignalMapper: Any = ObjectNotFoundDGINotLoaded
+QDomDocument: Any = ObjectNotFoundDGINotLoaded
+QMenu: Any = ObjectNotFoundDGINotLoaded
+QToolBar: Any = ObjectNotFoundDGINotLoaded
+QListWidgetItem: Any = ObjectNotFoundDGINotLoaded
+QListViewWidget: Any = ObjectNotFoundDGINotLoaded
+QPixmap: Any = ObjectNotFoundDGINotLoaded
+QImage: Any = ObjectNotFoundDGINotLoaded
+QIcon: Any = ObjectNotFoundDGINotLoaded
+QAction: Any = ObjectNotFoundDGINotLoaded
+QActionGroup: Any = ObjectNotFoundDGINotLoaded
+QTreeWidget: Any = ObjectNotFoundDGINotLoaded
+QTreeWidgetItem: Any = ObjectNotFoundDGINotLoaded
+QTreeWidgetItemIterator: Any = ObjectNotFoundDGINotLoaded
+QDataView: Any = ObjectNotFoundDGINotLoaded
+QProcess: Any = ObjectNotFoundDGINotLoaded
+QByteArray: Any = ObjectNotFoundDGINotLoaded
+QRadioButton: Any = ObjectNotFoundDGINotLoaded
+QSpinBox: Any = ObjectNotFoundDGINotLoaded
+QInputDialog: Any = ObjectNotFoundDGINotLoaded
+QApplication: Any = ObjectNotFoundDGINotLoaded
+qApp: Any = ObjectNotFoundDGINotLoaded
+QStyleFactory: Any = ObjectNotFoundDGINotLoaded
+QFontDialog: Any = ObjectNotFoundDGINotLoaded
+QDockWidget: Any = ObjectNotFoundDGINotLoaded
+QMdiArea: Any = ObjectNotFoundDGINotLoaded
+QMdiSubWindow: Any = ObjectNotFoundDGINotLoaded
+QKeySequence: Any = ObjectNotFoundDGINotLoaded
+QSize: Any = ObjectNotFoundDGINotLoaded
+QSizePolicy: Any = ObjectNotFoundDGINotLoaded
+QToolBox: Any = ObjectNotFoundDGINotLoaded
+QPainter: Any = ObjectNotFoundDGINotLoaded
+QBrush: Any = ObjectNotFoundDGINotLoaded
+QProgressDialog: Any = ObjectNotFoundDGINotLoaded
+QFileDialog: Any = ObjectNotFoundDGINotLoaded
 
 # Clases FL
-FLLineEdit = ObjectNotFoundDGINotLoaded
-FLTimeEdit = ObjectNotFoundDGINotLoaded
-FLDateEdit = ObjectNotFoundDGINotLoaded
-FLPixmapView = ObjectNotFoundDGINotLoaded
-FLDomDocument = ObjectNotFoundDGINotLoaded
-FLDomElement = ObjectNotFoundDGINotLoaded
-FLDomNode = ObjectNotFoundDGINotLoaded
-FLDomNodeList = ObjectNotFoundDGINotLoaded
-FLListViewItem = ObjectNotFoundDGINotLoaded
-FLTable = ObjectNotFoundDGINotLoaded
-FLDataTable = ObjectNotFoundDGINotLoaded
-FLCheckBox = ObjectNotFoundDGINotLoaded
-FLTextEditOutput = ObjectNotFoundDGINotLoaded
-FLSpinBox = ObjectNotFoundDGINotLoaded
-FLTableDB = ObjectNotFoundDGINotLoaded
-FLFieldDB = ObjectNotFoundDGINotLoaded
-FLFormDB = ObjectNotFoundDGINotLoaded
-FLFormRecordDB = ObjectNotFoundDGINotLoaded
-FLFormSearchDB = ObjectNotFoundDGINotLoaded
-FLDoubleValidator = ObjectNotFoundDGINotLoaded
-FLIntValidator = ObjectNotFoundDGINotLoaded
-FLUIntValidator = ObjectNotFoundDGINotLoaded
-FLCodBar = ObjectNotFoundDGINotLoaded
-FLWidget = ObjectNotFoundDGINotLoaded
-FLWorkSpace = ObjectNotFoundDGINotLoaded
+FLLineEdit: Any = ObjectNotFoundDGINotLoaded
+FLTimeEdit: Any = ObjectNotFoundDGINotLoaded
+FLDateEdit: Any = ObjectNotFoundDGINotLoaded
+FLPixmapView: Any = ObjectNotFoundDGINotLoaded
+FLDomDocument: Any = ObjectNotFoundDGINotLoaded
+FLDomElement: Any = ObjectNotFoundDGINotLoaded
+FLDomNode: Any = ObjectNotFoundDGINotLoaded
+FLDomNodeList: Any = ObjectNotFoundDGINotLoaded
+FLListViewItem: Any = ObjectNotFoundDGINotLoaded
+FLTable: Any = ObjectNotFoundDGINotLoaded
+FLDataTable: Any = ObjectNotFoundDGINotLoaded
+FLCheckBox: Any = ObjectNotFoundDGINotLoaded
+FLTextEditOutput: Any = ObjectNotFoundDGINotLoaded
+FLSpinBox: Any = ObjectNotFoundDGINotLoaded
+FLTableDB: Any = ObjectNotFoundDGINotLoaded
+FLFieldDB: Any = ObjectNotFoundDGINotLoaded
+FLFormDB: Any = ObjectNotFoundDGINotLoaded
+FLFormRecordDB: Any = ObjectNotFoundDGINotLoaded
+FLFormSearchDB: Any = ObjectNotFoundDGINotLoaded
+FLDoubleValidator: Any = ObjectNotFoundDGINotLoaded
+FLIntValidator: Any = ObjectNotFoundDGINotLoaded
+FLUIntValidator: Any = ObjectNotFoundDGINotLoaded
+FLCodBar: Any = ObjectNotFoundDGINotLoaded
+FLWidget: Any = ObjectNotFoundDGINotLoaded
+FLWorkSpace: Any = ObjectNotFoundDGINotLoaded
 
-FormDBWidget = ObjectNotFoundDGINotLoaded
+FormDBWidget: Any = ObjectNotFoundDGINotLoaded
 
 # Clases QSA
-CheckBox = ObjectNotFoundDGINotLoaded
-ComboBox = ObjectNotFoundDGINotLoaded
-TextEdit = ObjectNotFoundDGINotLoaded
-LineEdit = ObjectNotFoundDGINotLoaded
-FileDialog = ObjectNotFoundDGINotLoaded
-MessageBox = ObjectNotFoundDGINotLoaded
-RadioButton = ObjectNotFoundDGINotLoaded
+CheckBox: Any = ObjectNotFoundDGINotLoaded
+ComboBox: Any = ObjectNotFoundDGINotLoaded
+TextEdit: Any = ObjectNotFoundDGINotLoaded
+LineEdit: Any = ObjectNotFoundDGINotLoaded
+FileDialog: Any = ObjectNotFoundDGINotLoaded
+MessageBox: Any = ObjectNotFoundDGINotLoaded
+RadioButton: Any = ObjectNotFoundDGINotLoaded
 Color = QColor
-Dialog = ObjectNotFoundDGINotLoaded
-Label = ObjectNotFoundDGINotLoaded
-GroupBox = ObjectNotFoundDGINotLoaded
-Process = ObjectNotFoundDGINotLoaded
-SpinBox = ObjectNotFoundDGINotLoaded
-Line = ObjectNotFoundDGINotLoaded
-NumberEdit = ObjectNotFoundDGINotLoaded
-DateEdit = ObjectNotFoundDGINotLoaded
-TimeEdit = ObjectNotFoundDGINotLoaded
+Dialog: Any = ObjectNotFoundDGINotLoaded
+Label: Any = ObjectNotFoundDGINotLoaded
+GroupBox: Any = ObjectNotFoundDGINotLoaded
+Process: Any = ObjectNotFoundDGINotLoaded
+SpinBox: Any = ObjectNotFoundDGINotLoaded
+Line: Any = ObjectNotFoundDGINotLoaded
+NumberEdit: Any = ObjectNotFoundDGINotLoaded
+DateEdit: Any = ObjectNotFoundDGINotLoaded
+TimeEdit: Any = ObjectNotFoundDGINotLoaded
 
 # Clases AQNext
-auth = ObjectNotFoundDGINotLoaded
+auth: Any = ObjectNotFoundDGINotLoaded

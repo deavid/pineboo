@@ -9,6 +9,8 @@ from pineboolib import logging
 
 import barcode  # pip3 install python-barcode
 from typing import Dict, Any
+import protocols
+from typing import Mapping, Union
 
 logger = logging.getLogger(__name__)
 
@@ -40,17 +42,17 @@ class FLCodBar(object):
 
     def __init__(
         self,
-        value=None,
+        value: Mapping[str, protocols.SupportsLower] = None,
         type_=BARCODE_128,
         margin=10,
         scale=1.0,
         cut=1.0,
         rotation=0,
         text_flag=False,
-        fg=QtCore.Qt.black,
-        bg=QtCore.Qt.white,
+        fg: protocols.SupportsLower = QtCore.Qt.black,
+        bg: protocols.SupportsLower = QtCore.Qt.white,
         res=72,
-    ):
+    ) -> None:
         dict_ = {"barcode": "python-barcode"}
         from pineboolib.application.utils.check_dependencies import check_dependencies
 
@@ -91,82 +93,82 @@ class FLCodBar(object):
 
         return self.p
 
-    def pixmapError(self):
+    def pixmapError(self) -> Any:
         return self.pError
 
-    def value(self):
+    def value(self) -> Any:
         return self.barcode["value"]
 
-    def type_(self):
+    def type_(self) -> Any:
         return self.barcode["type"]
 
-    def margin(self):
+    def margin(self) -> Any:
         return self.barcode["margin"]
 
-    def scale(self):
+    def scale(self) -> Any:
         return self.barcode["scale"]
 
-    def cut(self):
+    def cut(self) -> Any:
         return self.barcode["cut"]
 
-    def text(self):
+    def text(self) -> Any:
         return self.barcode["text"]
 
-    def rotation(self):
+    def rotation(self) -> Any:
         return self.barcode["rotation"]
 
-    def fg(self):
+    def fg(self) -> Union[str, protocols.SupportsLower]:
         return self.barcode["fg"]
 
-    def bg(self):
+    def bg(self) -> Union[str, protocols.SupportsLower]:
         return self.barcode["bg"]
 
-    def setData(self, d):
+    def setData(self, d: Mapping[str, Any]) -> None:
         self.barcode = d
 
-    def validBarcode(self):
+    def validBarcode(self) -> Any:
         return self.barcode["valid"]
 
-    def setCaption(self, caption):
+    def setCaption(self, caption) -> None:
         self.barcode["caption"] = caption
 
-    def caption(self):
+    def caption(self) -> Any:
         return self.barcode["caption"]
 
-    def setValue(self, value):
+    def setValue(self, value) -> None:
         self.barcode["value"] = value
 
-    def setType(self, type_):
+    def setType(self, type_) -> None:
         self.barcode["type"] = type_
 
-    def setMargin(self, margin):
+    def setMargin(self, margin) -> None:
         self.barcode["margin"] = margin
 
-    def setScale(self, scale):
+    def setScale(self, scale) -> None:
         self.barcode["scale"] = scale
 
-    def setCut(self, cut):
+    def setCut(self, cut) -> None:
         self.barcode["cut"] = cut
 
-    def setText(self, text):
+    def setText(self, text) -> None:
         self.barcode["text"] = text
 
-    def setRotation(self, rotation):
+    def setRotation(self, rotation) -> None:
         self.barcode["rotation"] = rotation
 
-    def setFg(self, fg):
+    def setFg(self, fg) -> None:
         self.barcode["fg"] = fg
 
-    def setBg(self, bg):
+    def setBg(self, bg) -> None:
         self.barcode["bg"] = bg
 
-    def setRes(self, res):
+    def setRes(self, res) -> None:
         self.barcode["res"] = res
 
-    def data(self):
+    def data(self) -> Dict[str, Any]:
         return self.barcode
 
-    def fillDefault(self, data):
+    def fillDefault(self, data) -> None:
         data["bg"] = "white"
         data["fg"] = "black"
         data["margin"] = 10
@@ -180,11 +182,11 @@ class FLCodBar(object):
         data["valid"] = False
         data["res"] = 72
 
-    def cleanUp(self):
+    def cleanUp(self) -> None:
         self.p.resize(0, 0)
         self.pError.resize(0, 0)
 
-    def nameToType(self, name):
+    def nameToType(self, name: protocols.SupportsLower) -> int:
         n = name.lower()
         if n == "any":
             return BARCODE_ANY
@@ -226,7 +228,7 @@ class FLCodBar(object):
             logger.warning("Formato no soportado (%s)\nSoportados: %s." % (n, barcode.PROVIDED_BARCODES))
             return BARCODE_ANY
 
-    def typeToName(self, type_):
+    def typeToName(self, type_) -> str:
         if type_ == BARCODE_ANY:
             return "ANY"
         elif type_ == BARCODE_EAN:
@@ -266,7 +268,7 @@ class FLCodBar(object):
         else:
             return "ANY"
 
-    def _createBarcode(self):
+    def _createBarcode(self) -> None:
         if self.barcode["value"] == "":
             return
         if self.barcode["type"] == BARCODE_ANY:
@@ -329,7 +331,7 @@ class FLCodBar(object):
 
             self.barcode["valid"] = True
 
-    def _copyBarCode(self, source, dest):
+    def _copyBarCode(self, source: Mapping[str, Any], dest) -> None:
         dest["value"] = source["value"]
         dest["type"] = source["type"]
         dest["margin"] = source["margin"]

@@ -47,10 +47,10 @@ class QGroupBox(QtWidgets.QGroupBox):
     def selectedId(self):
         return 0
 
-    def get_enabled(self):
+    def get_enabled(self) -> Any:
         return self.isEnabled()
 
-    def set_enabled(self, b):
+    def set_enabled(self, b) -> None:
         self.setDisabled(not b)
 
     @decorators.NotImplementedWarn

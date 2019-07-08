@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtWidgets import QMessageBox, QApplication  # type: ignore
 from pineboolib.core.utils.logging import logging
+from typing import Any
 
 logger = logging.getLogger("messageBox")
 
 
 class MessageBox(QMessageBox):
     @classmethod
-    def msgbox(cls, typename, text, button0, button1=None, button2=None, title=None, form=None):
+    def msgbox(cls, typename, text, button0, button1=None, button2=None, title=None, form=None) -> Any:
         from pineboolib.application import project
 
         if project._splash:
@@ -65,15 +66,15 @@ class MessageBox(QMessageBox):
         return msg.exec_()
 
     @classmethod
-    def question(cls, *args):
+    def question(cls, *args) -> Any:
         return cls.msgbox("question", *args)
 
     @classmethod
-    def information(cls, *args):
+    def information(cls, *args) -> Any:
         return cls.msgbox("question", *args)
 
     @classmethod
-    def warning(cls, *args):
+    def warning(cls, *args) -> Any:
         clip_board = QApplication.clipboard()
         clip_board.clear()
         text_ = args[0] if isinstance(args[0], str) else args[2]
@@ -82,7 +83,7 @@ class MessageBox(QMessageBox):
         return cls.msgbox("warning", *args)
 
     @classmethod
-    def critical(cls, *args):
+    def critical(cls, *args) -> Any:
         clip_board = QApplication.clipboard()
         clip_board.clear()
         text_ = args[0] if isinstance(args[0], str) else args[2]

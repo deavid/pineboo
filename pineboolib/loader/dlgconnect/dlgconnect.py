@@ -387,7 +387,7 @@ class DlgConnect(QtWidgets.QWidget):
         else:
             self.ui.lePassword.setEnabled(True)
 
-    def updateDBName(self):
+    def updateDBName(self) -> None:
         """
         Actualiza el nombre de la BD con el nombre de la descripción
         """
@@ -404,7 +404,7 @@ class DlgConnect(QtWidgets.QWidget):
         else:
             self.ui.leProfilePassword.setEnabled(True)
 
-    def change_profile_dir(self):
+    def change_profile_dir(self) -> None:
 
         new_dir = QtWidgets.QFileDialog.getExistingDirectory(
             self.ui, self.tr("Carpeta profiles"), self.profile_dir, QtWidgets.QFileDialog.ShowDirsOnly

@@ -18,6 +18,11 @@ from sqlalchemy import create_engine
 import traceback
 import os
 from pineboolib import logging
+import protocols
+from typing import Iterable, Mapping, NoReturn, Optional, TypeVar, Union
+
+_T0 = TypeVar("_T0")
+_T1 = TypeVar("_T1")
 
 
 class FLSQLITE(object):
@@ -66,47 +71,47 @@ class FLSQLITE(object):
         self.session_ = None
         self.declarative_base_ = None
 
-    def pure_python(self):
+    def pure_python(self) -> bool:
         return self.pure_python_
 
-    def mobile(self):
+    def mobile(self) -> bool:
         return self.mobile_
 
-    def version(self):
+    def version(self) -> str:
         return self.version_
 
-    def driverName(self):
+    def driverName(self) -> str:
         return self.name_
 
-    def safe_load(self):
+    def safe_load(self) -> Any:
         return check_dependencies({"sqlite3": "sqlite3", "sqlalchemy": "sqlAlchemy"}, False)
 
-    def isOpen(self):
+    def isOpen(self) -> bool:
         return self.open_
 
-    def cursor(self):
+    def cursor(self) -> Any:
         if not self.cursor_:
             self.cursor_ = self.conn_.cursor()
             # self.cursor_.execute("PRAGMA journal_mode = WAL")
             # self.cursor_.execute("PRAGMA synchronous = NORMAL")
         return self.cursor_
 
-    def useThreads(self):
+    def useThreads(self) -> bool:
         return False
 
-    def useTimer(self):
+    def useTimer(self) -> bool:
         return True
 
-    def cascadeSupport(self):
+    def cascadeSupport(self) -> bool:
         return False
 
-    def canDetectLocks(self):
+    def canDetectLocks(self) -> bool:
         return True
 
-    def desktopFile(self):
+    def desktopFile(self) -> bool:
         return True
 
-    def connect(self, db_name, db_host, db_port, db_userName, db_password):
+    def connect(self, db_name, db_host, db_port, db_userName, db_password) -> Any:
         from pineboolib.application import project
 
         check_dependencies({"sqlite3": "sqlite3", "sqlalchemy": "sqlAlchemy"})
@@ -133,10 +138,10 @@ class FLSQLITE(object):
 
         return self.conn_
 
-    def engine(self):
+    def engine(self) -> Any:
         return self.engine_
 
-    def session(self):
+    def session(self) -> None:
         if self.session_ is None:
             from sqlalchemy.orm import sessionmaker
 
@@ -147,7 +152,7 @@ class FLSQLITE(object):
             # event.listen(Session, 'before_commit', before_commit, self.session_)
             # event.listen(Session, 'after_commit', after_commit, self.session_)
 
-    def declarative_base(self):
+    def declarative_base(self) -> Any:
         if self.declarative_base_ is None:
             from sqlalchemy.ext.declarative import declarative_base
 
@@ -155,7 +160,7 @@ class FLSQLITE(object):
 
         return self.declarative_base_
 
-    def formatValueLike(self, type_, v, upper):
+    def formatValueLike(self, type_, v: Mapping[int, Any], upper) -> str:
         res = "IS NULL"
 
         if type_ == "bool":
@@ -182,7 +187,7 @@ class FLSQLITE(object):
 
         return res
 
-    def formatValue(self, type_, v, upper):
+    def formatValue(self, type_, v: _T1, upper) -> Optional[Union[int, str, _T1]]:
 
         util = FLUtil()
 
@@ -227,13 +232,13 @@ class FLSQLITE(object):
             s = "'%s'" % v
         return s
 
-    def DBName(self):
+    def DBName(self) -> Any:
         return self.db_filename[self.db_filename.rfind("/") + 1 : -8]
 
-    def canOverPartition(self):
+    def canOverPartition(self) -> bool:
         return True
 
-    def nextSerialVal(self, table, field):
+    def nextSerialVal(self, table, field) -> Optional[int]:
         q = FLSqlQuery()
         q.setSelect("max(%s)" % field)
         q.setFrom(table)
@@ -246,7 +251,7 @@ class FLSQLITE(object):
         else:
             return None
 
-    def savePoint(self, n):
+    def savePoint(self, n) -> bool:
         if n == 0:
             return True
 
@@ -265,13 +270,13 @@ class FLSQLITE(object):
 
         return True
 
-    def canSavePoint(self):
+    def canSavePoint(self) -> bool:
         return True
 
-    def canTransaction(self):
+    def canTransaction(self) -> bool:
         return True
 
-    def rollbackSavePoint(self, n):
+    def rollbackSavePoint(self, n) -> bool:
         if n == 0:
             return True
 
@@ -289,13 +294,13 @@ class FLSQLITE(object):
 
         return True
 
-    def setLastError(self, text, command):
+    def setLastError(self, text, command) -> None:
         self.lastError_ = "%s (%s)" % (text, command)
 
-    def lastError(self):
+    def lastError(self) -> str:
         return self.lastError_
 
-    def commitTransaction(self):
+    def commitTransaction(self) -> bool:
         if not self.isOpen():
             self.logger.warning("%s::commitTransaction: Database not open", __name__)
 
@@ -309,14 +314,14 @@ class FLSQLITE(object):
 
         return True
 
-    def inTransaction(self):
+    def inTransaction(self) -> Any:
         return self.conn_.in_transaction
 
-    def fix_query(self, query):
+    def fix_query(self, query: _T0) -> _T0:
         # ret_ = query.replace(";", "")
         return query
 
-    def execute_query(self, q):
+    def execute_query(self, q: str) -> Any:
         if not self.isOpen():
             self.logger.warning("%s::execute_query: Database not open", __name__)
 
@@ -330,7 +335,7 @@ class FLSQLITE(object):
 
         return cursor
 
-    def rollbackTransaction(self):
+    def rollbackTransaction(self) -> bool:
         if not self.isOpen():
             self.logger.warning("SQL3Driver::rollbackTransaction: Database not open")
 
@@ -344,7 +349,7 @@ class FLSQLITE(object):
 
         return True
 
-    def transaction(self):
+    def transaction(self) -> bool:
         if not self.isOpen():
             self.logger.warning("SQL3Driver::transaction: Database not open")
         cursor = self.cursor()
@@ -357,7 +362,7 @@ class FLSQLITE(object):
 
         return True
 
-    def releaseSavePoint(self, n):
+    def releaseSavePoint(self, n) -> bool:
         if n == 0:
             return True
         if not self.isOpen():
@@ -374,14 +379,14 @@ class FLSQLITE(object):
 
         return True
 
-    def setType(self, type_, leng=None):
+    def setType(self, type_: protocols.SupportsUpper, leng=None) -> str:
         return " %s(%s)" % (type_.upper(), leng) if leng else " %s" % type_.upper()
 
-    def refreshQuery(self, curname, fields, table, where, cursor, conn):
+    def refreshQuery(self, curname, fields, table, where, cursor, conn) -> None:
         where = self.process_booleans(where)
         self.sql = "SELECT %s FROM %s WHERE %s" % (fields, table, where)
 
-    def refreshFetch(self, number, curname, table, cursor, fields, where):
+    def refreshFetch(self, number, curname, table, cursor, fields, where) -> Any:
         try:
             cursor.execute(self.sql)
             rows = cursor.fetchmany(number)
@@ -389,11 +394,11 @@ class FLSQLITE(object):
         except Exception:
             self.logger.error("SQL3Driver:: refreshFetch")
 
-    def process_booleans(self, where):
+    def process_booleans(self, where: protocols.SupportsReplace) -> Any:
         where = where.replace("'true'", str(1))
         return where.replace("'false'", str(0))
 
-    def fetchAll(self, cursor, tablename, where_filter, fields, curname):
+    def fetchAll(self, cursor, tablename, where_filter, fields, curname) -> list:
         if curname not in self.rowsFetched.keys():
             self.rowsFetched[curname] = 0
 
@@ -415,7 +420,7 @@ class FLSQLITE(object):
 
         return rowsF
 
-    def existsTable(self, name):
+    def existsTable(self, name) -> bool:
         if not self.isOpen():
             return False
 
@@ -427,7 +432,7 @@ class FLSQLITE(object):
 
         return ok
 
-    def sqlCreateTable(self, tmd):
+    def sqlCreateTable(self, tmd) -> Optional[str]:
         if not tmd:
             return None
 
@@ -518,7 +523,7 @@ class FLSQLITE(object):
 
         return sql
 
-    def mismatchedTable(self, table1, tmd_or_table2, db_=None):
+    def mismatchedTable(self, table1, tmd_or_table2: Iterable, db_=None) -> bool:
         if db_ is None:
             db_ = self.db_
 
@@ -562,7 +567,7 @@ class FLSQLITE(object):
         else:
             return self.mismatchedTable(table1, tmd_or_table2.name(), db_)
 
-    def notEqualsFields(self, field1, field2):
+    def notEqualsFields(self, field1: Mapping[int, Any], field2: Mapping[int, Any]) -> bool:
         ret = False
         try:
             if not field1[2] == field2[2] and not field2[6]:
@@ -588,7 +593,7 @@ class FLSQLITE(object):
             self.logger.error("notEqualsFields %s %s", field1, field2)
         return ret
 
-    def recordInfo2(self, tablename):
+    def recordInfo2(self, tablename) -> Any:
         if not self.isOpen():
             raise Exception("recordInfo2: Cannot proceed: SQLLITE not open")
 
@@ -598,7 +603,7 @@ class FLSQLITE(object):
         res = cursor.fetchall()
         return self.recordInfo(res)
 
-    def recordInfo(self, tablename_or_query):
+    def recordInfo(self, tablename_or_query: Iterable) -> Any:
         if not self.isOpen():
             return None
 
@@ -654,7 +659,7 @@ class FLSQLITE(object):
 
             return info
 
-    def decodeSqlType(self, type):
+    def decodeSqlType(self, type: protocols.SupportsFind) -> Optional[str]:
         ret = None
         if type == "BOOLEAN":  # y unlock
             ret = "bool"
@@ -669,7 +674,7 @@ class FLSQLITE(object):
 
         return ret
 
-    def alterTable(self, mtd1, mtd2, key, force=False):
+    def alterTable(self, mtd1, mtd2, key, force=False) -> NoReturn:
         raise Exception("not implemented")
 
     # FIXME: newField is never assigned
@@ -886,7 +891,7 @@ class FLSQLITE(object):
     #
     #     return True
 
-    def tables(self, typeName=None):
+    def tables(self, typeName=None) -> List[str]:
         tl: List[str] = []
         if not self.isOpen():
             return tl
@@ -910,14 +915,14 @@ class FLSQLITE(object):
         del t
         return tl
 
-    def normalizeValue(self, text):
+    def normalizeValue(self, text) -> Optional[str]:
         return None if text is None else str(text).replace("'", "''")
 
-    def queryUpdate(self, name, update, filter):
+    def queryUpdate(self, name, update, filter) -> str:
         sql = "UPDATE %s SET %s WHERE %s" % (name, update, filter)
         return sql
 
-    def Mr_Proper(self):
+    def Mr_Proper(self) -> None:
         self.logger.warning("FLSQLITE: FIXME: Mr_Proper no regenera tablas")
         util = FLUtil()
         self.db_.dbAux().transaction()

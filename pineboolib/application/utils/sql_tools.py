@@ -1,5 +1,7 @@
 from pineboolib.core.utils.logging import logging
 from typing import Any
+import protocols
+from typing import Dict, Iterable, Mapping, Sequence, Tuple, Union
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +18,7 @@ class sql_inspector(object):
     _sql = None
     _alias = None
 
-    def __init__(self, sql_text):
+    def __init__(self, sql_text: protocols.SupportsReplace) -> None:
 
         self._mtd_fields = {}
         self._posible_float = False
@@ -32,19 +34,19 @@ class sql_inspector(object):
             # self.table_names()
             # self.field_names()
 
-    def mtd_fields(self):
+    def mtd_fields(self) -> Dict[int, Any]:
         return self._mtd_fields
 
-    def table_names(self):
+    def table_names(self) -> list:
         return self._table_names
 
-    def field_names(self):
+    def field_names(self) -> list:
         ret = []
         if self._field_names:
             ret = list(self._field_names.keys())
         return ret
 
-    def fieldNameToPos(self, name):
+    def fieldNameToPos(self, name: Union[protocols.SupportsFind, Mapping[slice, Any]]) -> Any:
 
         if name in self._field_names.keys():
             return self._field_names[name]
@@ -58,7 +60,7 @@ class sql_inspector(object):
 
         raise Exception("No se encuentra el campo %s el la query (%s)" % (name, self._sql))
 
-    def posToFieldName(self, pos):
+    def posToFieldName(self, pos) -> Any:
 
         for k, v in self._field_names:
             if v == pos:
@@ -66,7 +68,7 @@ class sql_inspector(object):
 
         return False
 
-    def _resolve_fields(self, sql):
+    def _resolve_fields(self, sql) -> None:
         list_sql = sql.split(" ")
 
         if list_sql[0] == "select":
@@ -171,7 +173,7 @@ class sql_inspector(object):
 
             self._create_mtd_fields(fl_finish, tablas)
 
-    def resolve_empty_value(self, pos):
+    def resolve_empty_value(self, pos) -> Any:
         if not self.mtd_fields():
             return None
 
@@ -203,7 +205,7 @@ class sql_inspector(object):
 
         return ret_
 
-    def resolve_value(self, pos, value, raw=False):
+    def resolve_value(self, pos, value: Union[bytes, float, str], raw=False) -> Any:
 
         if not self.mtd_fields():
             return value
@@ -247,7 +249,7 @@ class sql_inspector(object):
 
         return ret_
 
-    def _create_mtd_fields(self, fields_list, tables_list):
+    def _create_mtd_fields(self, fields_list: Iterable, tables_list: Iterable) -> None:
         from pineboolib.application import project
 
         _filter = ["sum(", "max(", "distint("]
@@ -283,7 +285,9 @@ class sql_inspector(object):
                     # tables_list.remove(table_name)
 
 
-def resolve_query(table_name, params):
+def resolve_query(
+    table_name, params: Union[Iterable, Mapping[object, Union[protocols.SupportsStartswith, Mapping, Sequence]]]
+) -> Tuple[str, str]:
     or_where = ""
     and_where = ""
     where = ""
@@ -318,7 +322,7 @@ def resolve_query(table_name, params):
     return where, order_by
 
 
-def resolve_order_params(key, valor):
+def resolve_order_params(key, valor: Union[protocols.SupportsStartswith, Mapping[slice, Any]]) -> Any:
     if valor.startswith("-"):
         valor = valor[1:] + " DESC, "
     else:
@@ -327,7 +331,7 @@ def resolve_order_params(key, valor):
     return valor
 
 
-def resolve_where_params(key, valor, mtd_table):
+def resolve_where_params(key, valor: Union[str, Iterable[str]], mtd_table) -> str:
     list_params = key.split("__")
     campo = "_".join(list_params[0].split("_")[1:])
     tipo = list_params[1]
@@ -384,7 +388,7 @@ def resolve_where_params(key, valor, mtd_table):
     return where
 
 
-def resolve_pagination(query):
+def resolve_pagination(query: Mapping[object, Sequence]) -> Tuple[Any, Any]:
     init = 0
     limit = 0
     for k in query.keys():
@@ -407,7 +411,7 @@ def resolve_pagination(query):
     return ret
 
 
-def get_tipo_aqnext(tipo):
+def get_tipo_aqnext(tipo) -> int:
     tipo_ = 3
     # subtipo_ = None
 

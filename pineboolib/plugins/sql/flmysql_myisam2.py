@@ -17,6 +17,11 @@ import traceback
 
 from pineboolib import logging
 from PyQt5.QtCore import QTime, QDate, QDateTime, Qt  # type: ignore
+import protocols
+from typing import Any, Iterable, Mapping, Optional, Sized, TypeVar, Union
+
+_T0 = TypeVar("_T0")
+_T1 = TypeVar("_T1")
 
 logger = logging.getLogger(__name__)
 
@@ -60,28 +65,28 @@ class FLMYSQL_MYISAM2(object):
         self.session_ = None
         self.declarative_base_ = None
 
-    def version(self):
+    def version(self) -> str:
         return self.version_
 
-    def driverName(self):
+    def driverName(self) -> str:
         return self.name_
 
-    def pure_python(self):
+    def pure_python(self) -> bool:
         return self.pure_python_
 
-    def safe_load(self):
+    def safe_load(self) -> Any:
         return check_dependencies({"PyMySQL": "PyMySQL", "sqlalchemy": "sqlAlchemy"}, False)
 
-    def mobile(self):
+    def mobile(self) -> bool:
         return self.mobile_
 
-    def isOpen(self):
+    def isOpen(self) -> bool:
         return self.open_
 
-    def DBName(self):
+    def DBName(self) -> Any:
         return self._dbname
 
-    def connect(self, db_name, db_host, db_port, db_userName, db_password):
+    def connect(self, db_name, db_host, db_port, db_userName, db_password) -> Union[bool, pymysql.connections.Connection]:
         self._dbname = db_name
         check_dependencies({"PyMySQL": "PyMySQL", "sqlalchemy": "sqlAlchemy"})
         import pymysql
@@ -130,15 +135,15 @@ class FLMYSQL_MYISAM2(object):
 
         return self.conn_
 
-    def cursor(self):
+    def cursor(self) -> Any:
         if not self.cursor_:
             self.cursor_ = self.conn_.cursor()
         return self.cursor_
 
-    def engine(self):
+    def engine(self) -> Any:
         return self.engine_
 
-    def session(self):
+    def session(self) -> None:
         if self.session_ is None:
             from sqlalchemy.orm import sessionmaker
 
@@ -149,7 +154,7 @@ class FLMYSQL_MYISAM2(object):
             # event.listen(Session, 'before_commit', before_commit, self.session_)
             # event.listen(Session, 'after_commit', after_commit, self.session_)
 
-    def declarative_base(self):
+    def declarative_base(self) -> Any:
         if self.declarative_base_ is None:
             from sqlalchemy.ext.declarative import declarative_base
 
@@ -157,7 +162,7 @@ class FLMYSQL_MYISAM2(object):
 
         return self.declarative_base_
 
-    def formatValueLike(self, type_, v, upper):
+    def formatValueLike(self, type_, v: Union[Sized, Mapping[int, Any]], upper) -> str:
         res = "IS NULL"
 
         if len(v):
@@ -187,7 +192,7 @@ class FLMYSQL_MYISAM2(object):
 
         return res
 
-    def formatValue(self, type_, v, upper):
+    def formatValue(self, type_, v: _T1, upper) -> Union[bool, str, _T1]:
 
         # util = FLUtil()
 
@@ -243,10 +248,10 @@ class FLMYSQL_MYISAM2(object):
         # print ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
         return s
 
-    def canOverPartition(self):
+    def canOverPartition(self) -> bool:
         return True
 
-    def tables(self, type_name=None):
+    def tables(self, type_name=None) -> list:
         tl: List[str] = []
         if not self.isOpen():
             return tl
@@ -258,7 +263,7 @@ class FLMYSQL_MYISAM2(object):
 
         return tl
 
-    def nextSerialVal(self, table, field):
+    def nextSerialVal(self, table, field) -> Any:
         if not self.isOpen():
             logger.warning("%s::beginTransaction: Database not open", self.name_)
             return None
@@ -325,11 +330,11 @@ class FLMYSQL_MYISAM2(object):
 
         return ret
 
-    def queryUpdate(self, name, update, filter):
+    def queryUpdate(self, name, update, filter) -> str:
         sql = "UPDATE %s SET %s WHERE %s" % (name, update, filter)
         return sql
 
-    def savePoint(self, n):
+    def savePoint(self, n) -> bool:
         if n == 0:
             return True
 
@@ -347,13 +352,13 @@ class FLMYSQL_MYISAM2(object):
 
         return True
 
-    def canSavePoint(self):
+    def canSavePoint(self) -> bool:
         return False
 
-    def canTransaction(self):
+    def canTransaction(self) -> bool:
         return False
 
-    def rollbackSavePoint(self, n):
+    def rollbackSavePoint(self, n) -> bool:
         if n == 0:
             return True
 
@@ -373,13 +378,13 @@ class FLMYSQL_MYISAM2(object):
 
         return True
 
-    def setLastError(self, text, command):
+    def setLastError(self, text, command) -> None:
         self.lastError_ = "%s (%s)" % (text, command)
 
-    def lastError(self):
+    def lastError(self) -> str:
         return self.lastError_
 
-    def commitTransaction(self):
+    def commitTransaction(self) -> bool:
 
         if not self.isOpen():
             logger.warning("%s::commitTransaction: Database not open", self.name_)
@@ -394,7 +399,7 @@ class FLMYSQL_MYISAM2(object):
 
         return True
 
-    def rollbackTransaction(self):
+    def rollbackTransaction(self) -> bool:
         if not self.isOpen():
             logger.warning("%s::rollbackTransaction: Database not open", self.name_)
 
@@ -411,7 +416,7 @@ class FLMYSQL_MYISAM2(object):
 
         return True
 
-    def transaction(self):
+    def transaction(self) -> bool:
 
         if not self.isOpen():
             logger.warning("%s::transaction: Database not open", self.name_)
@@ -426,7 +431,7 @@ class FLMYSQL_MYISAM2(object):
 
         return True
 
-    def releaseSavePoint(self, n):
+    def releaseSavePoint(self, n) -> bool:
         if n == 0:
             return True
 
@@ -445,13 +450,13 @@ class FLMYSQL_MYISAM2(object):
 
         return True
 
-    def setType(self, type_, leng=None):
+    def setType(self, type_, leng=None) -> str:
         if leng:
             return "::%s(%s)" % (type_, leng)
         else:
             return "::%s" % type_
 
-    def refreshQuery(self, curname, fields, table, where, cursor, conn):
+    def refreshQuery(self, curname, fields, table, where, cursor, conn) -> None:
         if curname not in self.cursorsArray_.keys():
             self.cursorsArray_[curname] = cursor
 
@@ -463,7 +468,7 @@ class FLMYSQL_MYISAM2(object):
             print("*", sql)
             qWarning("CursorTableModel.Refresh\n %s" % traceback.format_exc())
 
-    def fix_query(self, val):
+    def fix_query(self, val: protocols.SupportsReplace) -> Any:
         ret_ = val.replace("'true'", "1")
         ret_ = ret_.replace("'false'", "0")
         ret_ = ret_.replace("'0'", "0")
@@ -471,20 +476,20 @@ class FLMYSQL_MYISAM2(object):
         # ret_ = ret_.replace(";", "")
         return ret_
 
-    def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
+    def refreshFetch(self, number, curname, table, cursor, fields, where_filter) -> None:
         pass
         # try:
         #    self.cursorsArray_[curname].fetchmany(number)
         # except Exception:
         #    qWarning("%s.refreshFetch\n %s" %(self.name_, traceback.format_exc()))
 
-    def useThreads(self):
+    def useThreads(self) -> bool:
         return False
 
-    def useTimer(self):
+    def useTimer(self) -> bool:
         return True
 
-    def fetchAll(self, cursor, tablename, where_filter, fields, curname):
+    def fetchAll(self, cursor, tablename, where_filter, fields, curname) -> List[nothing]:
         if curname not in self.rowsFetched.keys():
             self.rowsFetched[curname] = 0
 
@@ -504,7 +509,7 @@ class FLMYSQL_MYISAM2(object):
 
         return rowsF
 
-    def existsTable(self, name):
+    def existsTable(self, name) -> bool:
         if not self.isOpen():
             return False
 
@@ -516,7 +521,7 @@ class FLMYSQL_MYISAM2(object):
 
         return ok
 
-    def sqlCreateTable(self, tmd):
+    def sqlCreateTable(self, tmd) -> Optional[str]:
         # util = FLUtil()
         if not tmd:
             return None
@@ -607,7 +612,7 @@ class FLMYSQL_MYISAM2(object):
 
         return sql
 
-    def Mr_Proper(self):
+    def Mr_Proper(self) -> None:
         util = FLUtil()
         self.db_.dbAux().transaction()
 
@@ -754,10 +759,10 @@ class FLMYSQL_MYISAM2(object):
         self.active_create_index = False
         util.destroyProgressDialog()
 
-    def alterTable(self, mtd1, mtd2, key, force=False):
+    def alterTable(self, mtd1, mtd2, key: Sized, force=False) -> Any:
         return self.alterTable2(mtd1, mtd2, key, force)
 
-    def hasCheckColumn(self, mtd):
+    def hasCheckColumn(self, mtd) -> bool:
         field_list = mtd.fieldList()
         if not field_list:
             return False
@@ -768,7 +773,7 @@ class FLMYSQL_MYISAM2(object):
 
         return False
 
-    def alterTable2(self, mtd1, mtd2, key, force=False):
+    def alterTable2(self, mtd1, mtd2, key: Sized, force=False) -> bool:
 
         util = FLUtil()
 
@@ -1078,7 +1083,7 @@ class FLMYSQL_MYISAM2(object):
 
         return True
 
-    def insertMulti(self, table_name, records):
+    def insertMulti(self, table_name, records: Iterable) -> bool:
 
         if not records:
             return False
@@ -1110,7 +1115,7 @@ class FLMYSQL_MYISAM2(object):
 
         return True
 
-    def mismatchedTable(self, table1, tmd_or_table2, db_=None):
+    def mismatchedTable(self, table1, tmd_or_table2: str, db_=None) -> bool:
         if db_ is None:
             db_ = self.db_
 
@@ -1154,7 +1159,7 @@ class FLMYSQL_MYISAM2(object):
         else:
             return self.mismatchedTable(table1, tmd_or_table2.name(), db_)
 
-    def recordInfo2(self, tablename):
+    def recordInfo2(self, tablename) -> List[list]:
         if not self.isOpen():
             raise Exception("MYISAM2: conn not opened")
         info = []
@@ -1205,7 +1210,7 @@ class FLMYSQL_MYISAM2(object):
 
         return info
 
-    def decodeSqlType(self, t):
+    def decodeSqlType(self, t: _T0) -> Union[str, _T0]:
 
         ret = t
 
@@ -1231,7 +1236,7 @@ class FLMYSQL_MYISAM2(object):
 
         return ret
 
-    def recordInfo(self, tablename_or_query):
+    def recordInfo(self, tablename_or_query: str) -> Optional[List[list]]:
         if not self.isOpen():
             return None
 
@@ -1275,7 +1280,7 @@ class FLMYSQL_MYISAM2(object):
 
         return info
 
-    def notEqualsFields(self, field1, field2):
+    def notEqualsFields(self, field1: Mapping[int, Any], field2: Mapping[int, Any]) -> bool:
         # print("comparando", field1, field1[1], field2, field2[1])
         ret = False
         try:
@@ -1302,7 +1307,7 @@ class FLMYSQL_MYISAM2(object):
 
         return ret
 
-    def normalizeValue(self, text):
+    def normalizeValue(self, text) -> Any:
         if text is None:
             return None
 
@@ -1316,16 +1321,16 @@ class FLMYSQL_MYISAM2(object):
 
         # return text
 
-    def cascadeSupport(self):
+    def cascadeSupport(self) -> bool:
         return True
 
-    def canDetectLocks(self):
+    def canDetectLocks(self) -> bool:
         return True
 
-    def desktopFile(self):
+    def desktopFile(self) -> bool:
         return False
 
-    def execute_query(self, q):
+    def execute_query(self, q: protocols.SupportsReplace) -> Any:
 
         if not self.isOpen():
             logger.warning("MySQLDriver::execute_query. DB is closed")

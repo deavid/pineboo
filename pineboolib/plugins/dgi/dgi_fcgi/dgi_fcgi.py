@@ -5,6 +5,8 @@ from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.application.utils.check_dependencies import check_dependencies
 
 from pineboolib.application import project
+import protocols
+from typing import Any, Mapping
 
 
 logger = logging.getLogger(__name__)
@@ -17,7 +19,7 @@ class dgi_fcgi(dgi_schema):
     _fcgiCall = None
     _fcgiSocket = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(dgi_fcgi, self).__init__()  # desktopEnabled y mlDefault a True
         self._name = "fcgi"
         self._alias = "FastCGI"
@@ -27,14 +29,14 @@ class dgi_fcgi(dgi_schema):
         self.setUseMLDefault(False)
         self.showInitBanner()
 
-    def alternativeMain(self, main_):
+    def alternativeMain(self, main_) -> None:
         logger.info("=============================================")
         logger.info("FCGI:INFO: Listening socket %s", self._fcgiSocket)
         logger.info("FCGI:INFO: Sending queries to %s", self._fcgiCall)
         par_ = parser(main_, self._fcgiCall)
         WSGIServer(par_.call, bindAddress=self._fcgiSocket).run()
 
-    def setParameter(self, param):
+    def setParameter(self, param: protocols.SupportsFind) -> None:
         if param.find(":") > -1:
             p = param.split(":")
             self._fcgiCall = p[0]
@@ -52,11 +54,11 @@ class parser(object):
     _prj = None
     _callScript = None
 
-    def __init__(self, prj, callScript):
+    def __init__(self, prj, callScript) -> None:
         self._prj = prj
         self._callScript = callScript
 
-    def call(self, environ, start_response):
+    def call(self, environ: Mapping[str, Any], start_response) -> Any:
         start_response("200 OK", [("Content-Type", "text/html")])
         aList = environ["QUERY_STRING"]
         try:

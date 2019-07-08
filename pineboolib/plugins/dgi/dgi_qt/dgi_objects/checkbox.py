@@ -2,13 +2,14 @@
 
 from PyQt5 import QtWidgets  # type: ignore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget import QWidget
+from typing import Any
 
 
 class CheckBox(QWidget):
     _label = None
     _cb = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(CheckBox, self).__init__()
 
         self._label = QtWidgets.QLabel(self)
@@ -20,7 +21,7 @@ class CheckBox(QWidget):
         _lay.addSpacerItem(spacer)
         self.setLayout(_lay)
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name, value) -> None:
         if name == "text":
             self._label.setText(str(value))
         elif name == "checked":
@@ -28,7 +29,7 @@ class CheckBox(QWidget):
         else:
             super(CheckBox, self).__setattr__(name, value)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> Any:
         if name == "checked":
             return self._cb.isChecked()
         else:

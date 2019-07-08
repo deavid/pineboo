@@ -21,7 +21,7 @@ class XMLMainFormAction(XMLStruct):
     slot = None
     logger = logging.getLogger("main.XMLMainFormAction")
 
-    def run(self):
+    def run(self) -> None:
         """
         Lanza la action
         """
@@ -128,7 +128,7 @@ class XMLAction(XMLStruct):
     Llama a la función main de una action
     """
 
-    def execMainScript(self, name):
+    def execMainScript(self, name) -> Optional[bool]:
         a = self.project.conn.manager().action(name)
         if not a:
             self.logger.warning("No existe la acción %s", name)
@@ -159,7 +159,7 @@ class XMLAction(XMLStruct):
             if self.project._DGI.localDesktop():
                 w.show()
 
-    def openDefaultForm(self):
+    def openDefaultForm(self) -> None:
         self.logger.info("Opening default form for Action %s", self.name)
         w = self.load()
 
@@ -171,7 +171,7 @@ class XMLAction(XMLStruct):
     Ejecuta el script por defecto
     """
 
-    def execDefaultScript(self):
+    def execDefaultScript(self) -> None:
         self.logger.info("Executing default script for Action %s", self.name)
         script = self.load_script(self.scriptform, None)
 
@@ -269,5 +269,5 @@ class XMLAction(XMLStruct):
 
         return script_loaded
 
-    def unknownSlot(self):
+    def unknownSlot(self) -> None:
         self.logger.error("Executing unknown script for Action %s", self.name)

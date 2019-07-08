@@ -6,12 +6,16 @@ import itertools
 import locale
 from datetime import date
 
-from PyQt5 import QtCore, QtGui, QtWidgets, Qt  # type: ignore
+from PyQt5 import QtCore, QtGui, Qt  # type: ignore
+from PyQt5 import QtWidgets  # type: ignore  # FIXME: Not allowed here! this is for QCheckBox but it's not needed
 
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils.logging import logging
 from pineboolib.application.utils.date_conversion import date_amd_to_dma
 from pineboolib.fllegacy.flapplication import aqApp
+from typing import Any, Iterable, Optional, Union, List, Dict, Tuple
+from pineboolib.interfaces.iconnection import IConnection
+from pineboolib.interfaces.iapicursor import IApiCursor
 
 DEBUG = False
 
@@ -24,8 +28,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     logger = logging.getLogger("CursorTableModel")
     rows = 15
     cols = 5
-    _cursor_db = None
-    _cursorConn = None
     USE_THREADS = False
     USE_TIMER = False
     CURSOR_COUNT = itertools.count()
@@ -34,10 +36,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     where_filters = {}
     _metadata = None
     _sortOrder = None
-    _checkColumn = None
     _disable_refresh = None
     color_function_ = None
-    color_dict_ = None
     _parent = None
     parent_view = None
     need_update = False
@@ -45,13 +45,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     _size = None
     sql_str = None
     _initialized = None
-    """
-    Constructor
-    @param conn. Objeto PNConnection
-    @param parent. FLSqlCursor relacionado
-    """
 
-    def __init__(self, conn, parent):
+    def __init__(self, conn: IConnection, parent) -> None:
+        """
+        Constructor
+        @param conn. Objeto PNConnection
+        @param parent. FLSqlCursor relacionado
+        """
         super(PNCursorTableModel, self).__init__()
 
         self._cursorConn = conn
@@ -66,13 +66,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.USE_TIMER = self.driver_sql().useTimer()
 
         self.rowsLoaded = 0
-        self.sql_fields = []
-        self.sql_fields_omited = []
-        self.sql_fields_without_check = []
-        self.field_aliases = []
-        self.field_type = []
-        self.field_metaData = []
-        self.col_aliases = []
+        self.sql_fields: List[str] = []
+        self.sql_fields_omited: List[str] = []
+        self.sql_fields_without_check: List[str] = []
+        # self.field_aliases = []
+        # self.field_type = []
+        # self.field_metaData = []
+        self.col_aliases: List[str] = []
 
         # Indices de busqueda segun PK y CK. Los array "pos" guardan las posiciones
         # de las columnas afectadas. PK normalmente valdrá [0,].
@@ -81,16 +81,16 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         # Como valor del IDX tenemos la posicion de la fila.
         # Si se hace alguna operación en _data como borrar filas intermedias hay
         # que invalidar los indices. Opcionalmente, regenerarlos.
-        self.pkpos = []
-        self.ckpos = []
-        self.pkidx = {}
-        self.ckidx = {}
-        self._checkColumn = {}
+        self.pkpos: List[int] = []
+        self.ckpos: List[int] = []
+        self.pkidx: Dict[str, int] = {}
+        self.ckidx: Dict[str, int] = {}
+        self._checkColumn: Dict[str, Any] = {}
         # Establecer a False otra vez si el contenido de los indices es erróneo.
         self.indexes_valid = False
-        self._data = []
-        self._vdata = []
-        self._column_hints = []
+        self._data: List[List[Any]] = []
+        self._vdata: List[List[Any]] = []
+        self._column_hints: List[int] = []
         self.updateColumnsCount()
         self.rows = 0
         self.rowsLoaded = 0
@@ -99,7 +99,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.fetchedRows = 0
         self._showPixmap = True
         self.color_function_ = None
-        self.color_dict_ = {}
+        # self.color_dict_ = {}
 
         self.where_filter = None
         self.where_filters = {}
@@ -120,25 +120,23 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.canFetchMore = True
         self._disable_refresh = False
 
-        self._cursor_db = self.db().cursor()
+        self._cursor_db: IApiCursor = self.db().cursor()
         self._initialized = None
         # self.refresh()
 
-    """
-    Desactiva el refresco. Ej. FLSqlQuery.setForwardOnly(True)
-    @param disable. True o False
-    """
-
-    def disable_refresh(self, disable):
+    def disable_refresh(self, disable) -> None:
+        """
+        Desactiva el refresco. Ej. FLSqlQuery.setForwardOnly(True)
+        @param disable. True o False
+        """
         self._disable_refresh = disable
 
-    """
-    Indica el tipo de orden a usar y sobre que columna
-    @param col. Columna usada
-    @param order. 0 ASC, 1 DESC
-    """
-
-    def sort(self, col, order):
+    def sort(self, col, order) -> None:
+        """
+        Indica el tipo de orden a usar y sobre que columna
+        @param col. Columna usada
+        @param order. 0 ASC, 1 DESC
+        """
         # order 0 ascendente , 1 descendente
         ord = "ASC"
         if order == 1:
@@ -172,19 +170,17 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self._sortOrder = "%s %s" % (col_name, ord)
             self.refresh()
 
-    """
-    Retorna una cadena de texto con el valor de sortOrder
-    @return Cadena de texto con información de columna y orden
-    """
-
-    def getSortOrder(self):
+    def getSortOrder(self) -> Any:
+        """
+        Retorna una cadena de texto con el valor de sortOrder
+        @return Cadena de texto con información de columna y orden
+        """
         return self._sortOrder
 
-    """
-    Setea el ORDERBY
-    """
-
-    def setSortOrder(self, sort_order):
+    def setSortOrder(self, sort_order: Union[List[str], str]) -> None:
+        """
+        Setea el ORDERBY
+        """
         self._sortOrder = ""
         if isinstance(sort_order, list):
             self._sortOrder = ",".join(sort_order)
@@ -197,14 +193,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     # def dict_color_function(self):
     #    return self.color_function_
-    """
-    Retorna información de un registro. Puede ser desde Alineación, color de fondo, valor ... dependiendo del rol
-    @param index. Posición del registro
-    @param role. Tipo de información solicitada
-    @return Inofrmación del objeto solicitada
-    """
 
-    def data(self, index, role):
+    def data(self, index, role) -> Any:
+        """ (overload of QAbstractTableModel)
+        Retorna información de un registro. Puede ser desde Alineación, color de fondo, valor ... dependiendo del rol
+        @param index. Posición del registro
+        @param role. Tipo de información solicitada
+        @return Inofrmación del objeto solicitada
+        """
         row = index.row()
         col = index.column()
         field = self.metadata().indexFieldObject(col)
@@ -218,7 +214,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         else:
             pK = str(self.value(row, self.metadata().primaryKey()))
             if pK not in self._checkColumn.keys():
-                d = QtWidgets.QCheckBox()
+                d = QtWidgets.QCheckBox()  # FIXME: Not allowed here. This is GUI. This can be emulated with TRUE/FALSE
                 self._checkColumn[pK] = d
 
         if self.parent_view and role in [QtCore.Qt.BackgroundRole, QtCore.Qt.ForegroundRole]:
@@ -410,7 +406,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     Cuando el driver SQL soporta Thread, recoge info de la tabla
     """
 
-    def threadFetch(self):
+    def threadFetch(self) -> None:
         if not self.metadata():
             return
 
@@ -420,7 +416,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     Actualiza los registros virtuales que gestiona el modelo
     """
 
-    def updateRows(self):
+    def updateRows(self) -> None:
         if self.USE_THREADS:
             ROW_BATCH_COUNT = 200 if self.threadFetcher.is_alive() else 0
         elif self.USE_TIMER:
@@ -450,7 +446,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param where_filter. Filtro usado para recoger datos.
     """
 
-    def fetchMore(self, index, tablename=None, where_filter=None):
+    def fetchMore(self, index, tablename=None, where_filter=None) -> None:
         if not self.sql_str:
             return
 
@@ -542,12 +538,12 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param qry. Query con los campos a usar
     """
 
-    def _refresh_field_info(self, qry):
+    def _refresh_field_info(self, qry) -> None:
         is_query = self.metadata().isQuery()
         qry_tables = []
         if is_query:
             qry_select = [x.strip() for x in (qry.select()).split(",")]
-            qry_fields = {fieldname.split(".")[-1]: fieldname for fieldname in qry_select}
+            qry_fields: Dict[str, str] = {fieldname.split(".")[-1]: fieldname for fieldname in qry_select}
 
             for table in qry.tablesList():
                 mtd = self.db().manager().metadata(table, True)
@@ -593,7 +589,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     Refresca la información que va a gestionar esta clase
     """
 
-    def refresh(self):
+    def refresh(self) -> None:
 
         if self._initialized is None and self.parent_view:  # Si es el primer refresh y estoy conectado a un FLDatatable()
             self._initialized = True
@@ -690,7 +686,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         # self.threadFetcher = threading.Thread(target=self.threadFetch)
         # self.threadFetcherStop = threading.Event()
         # self.threadFetcher.start()
-        self.color_dict_ = {}  # Limpiamos diccionario de colores
+        # self.color_dict_.clear()  # Limpiamos diccionario de colores
         self.fetchMore(parent, self.metadata().name(), self.where_filter)
         # print("%s:: rows: %s" % (self._curname, self.rows))
 
@@ -699,7 +695,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param n. Número de registros a recoger
     """
 
-    def refreshFetch(self, n):
+    def refreshFetch(self, n) -> None:
         self.driver_sql().refreshFetch(n, self._curname, self.metadata().name(), self.cursorDB(), self.sql_str, self.where_filter)
 
     """
@@ -707,7 +703,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param rownum. Número de fila
     """
 
-    def indexUpdateRow(self, rownum):
+    def indexUpdateRow(self, rownum: Union[int, slice]) -> None:
         row = self._data[rownum]
         if self.pkpos:
             key = tuple([row[x] for x in self.pkpos])
@@ -721,7 +717,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param  rowramge. Array desde:hasta
     """
 
-    def indexUpdateRowRange(self, rowrange):
+    def indexUpdateRowRange(self, rowrange: Tuple[int, int]) -> None:
         rows = self._data[rowrange[0] : rowrange[1]]
         if self.pkpos:
             for n, row in enumerate(rows):
@@ -739,7 +735,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return Valor contenido
     """
 
-    def value(self, row, fieldName):
+    def value(self, row: int, fieldName) -> Any:
         if row is None or row < 0 or row >= self.rows:
             return None
         col = None
@@ -758,7 +754,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         type_ = self.metadata().field(fieldName).type()
 
         if type_ == "check":
-            return
+            return None
 
         campo = self._data[row][col]
 
@@ -766,7 +762,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             if campo not in (None, "None"):
                 campo = int(campo)
             elif campo == "None":
-                self.logger.warnign("Campo no deberia ser un string 'None'")
+                self.logger.warning("Campo no deberia ser un string 'None'")
 
         return campo
 
@@ -776,7 +772,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param dict_update. Campos que se actualizarán
     """
 
-    def updateValuesDB(self, pKValue, dict_update):
+    def updateValuesDB(self, pKValue, dict_update) -> None:
         row = self.findPKRow([pKValue])
         # if row is None:
         #    raise AssertionError(
@@ -843,7 +839,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param update_dict. array clave-valor indicando el listado de claves y valores a actualizar
     """
 
-    def setValuesDict(self, row, update_dict):
+    def setValuesDict(self, row: Union[int, slice], update_dict) -> None:
 
         if DEBUG:
             self.logger.info("CursorTableModel.setValuesDict(row %s) = %r", row, update_dict)
@@ -878,7 +874,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param value. Valor a asignar. Puede ser texto, pixmap, etc...
     """
 
-    def setValue(self, row, fieldname, value):
+    def setValue(self, row: Union[int, slice], fieldname, value) -> None:
         # Reimplementación para que todo pase por el método genérico.
         self.setValuesDict(row, {fieldname: value})
 
@@ -887,7 +883,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param buffer . PNBuffer a añadir
     """
 
-    def Insert(self, fl_cursor):
+    def Insert(self, fl_cursor) -> Optional[bool]:
         # Metemos lineas en la tabla de la bd
         pKValue = None
         buffer = fl_cursor.buffer()
@@ -937,7 +933,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param cursor . Objecto FLSqlCursor
     """
 
-    def Delete(self, cursor):
+    def Delete(self, cursor) -> None:
         pKName = self.metadata().primaryKey()
         typePK = self.metadata().field(pKName).type()
         tableName = self.metadata().name()
@@ -960,7 +956,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return index de la linea buscada
     """
 
-    def findPKRow(self, pklist):
+    def findPKRow(self, pklist: Iterable) -> Optional[int]:
         if not isinstance(pklist, (tuple, list)):
             raise ValueError("findPKRow expects a list as first argument. Enclose PK inside brackets [self.pkvalue]")
         if not self.indexes_valid:
@@ -981,7 +977,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return index de la linea buscada
     """
 
-    def findCKRow(self, cklist):
+    def findCKRow(self, cklist: Iterable) -> Optional[int]:
         if not isinstance(cklist, (tuple, list)):
             raise ValueError("findCKRow expects a list as first argument.")
         if not self.indexes_valid:
@@ -999,7 +995,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return nombre del campo PK
     """
 
-    def pK(self):
+    def pK(self) -> Any:
         return self.metadata().primaryKey()
 
     """
@@ -1008,7 +1004,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return Tipo de campo
     """
 
-    def fieldType(self, fieldName):
+    def fieldType(self, fieldName) -> Any:
         field = self.metadata().field(fieldName)
         return field.type() if field else None
 
@@ -1018,7 +1014,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return alias del campo
     """
 
-    def alias(self, fieldName):
+    def alias(self, fieldName) -> Any:
         field = self.metadata().field(fieldName)
         return field.alias() if field else None
 
@@ -1027,14 +1023,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return Número de columnas
     """
 
-    def columnCount(self, *args):
+    def columnCount(self, *args) -> int:
         return self.cols
 
     """
     Actualiza el número de columnas existentes en el tableModel
     """
 
-    def updateColumnsCount(self):
+    def updateColumnsCount(self) -> None:
         self.cols = len(self.metadata().fieldList())
         self.loadColAliases()
         if self.metadata().isQuery():
@@ -1048,7 +1044,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return Número de lineas
     """
 
-    def rowCount(self, parent=None):
+    def rowCount(self, parent=None) -> int:
         return self.rowsLoaded
 
     """
@@ -1056,7 +1052,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return lineas seleccionadas
     """
 
-    def size(self):
+    def size(self) -> Any:
         from pineboolib.application.database.utils import sqlSelect
 
         size = self.cursorDB().rowcount
@@ -1090,7 +1086,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return info segun sección, orientación y rol.
     """
 
-    def headerData(self, section, orientation, role):
+    def headerData(self, section, orientation, role) -> Any:
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
                 if not self.col_aliases:
@@ -1104,7 +1100,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     Carga los alias de las diferentes columnas.
     """
 
-    def loadColAliases(self):
+    def loadColAliases(self) -> None:
         self.col_aliases = [str(self.metadata().indexFieldObject(i).alias()) for i in range(self.cols)]
 
     """
@@ -1113,7 +1109,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return FLFieldMetadata
     """
 
-    def fieldMetadata(self, fieldName):
+    def fieldMetadata(self, fieldName) -> Any:
         return self.metadata().field(fieldName)
 
     """
@@ -1121,10 +1117,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return Objeto FLTableMetaData
     """
 
-    def metadata(self):
+    def metadata(self) -> Any:
         return self._parent.metadata()
 
-    def driver_sql(self):
+    def driver_sql(self) -> Any:
         return self._driver_sql
 
     """
@@ -1132,11 +1128,11 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return Objeto cursor
     """
 
-    def cursorDB(self):
+    def cursorDB(self) -> IApiCursor:
         return self._cursor_db
 
-    def db(self):
+    def db(self) -> IConnection:
         return self._cursorConn
 
-    def set_parent_view(self, parent_view):
+    def set_parent_view(self, parent_view) -> None:
         self.parent_view = parent_view

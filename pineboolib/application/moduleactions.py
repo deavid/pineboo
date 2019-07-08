@@ -6,6 +6,7 @@ from pineboolib.application.xmlaction import XMLAction
 from .proxy import DelayedObjectProxyLoader
 
 from typing import Any, TYPE_CHECKING
+from typing import NoReturn
 
 
 class ModuleActions(object):
@@ -87,12 +88,12 @@ class ModuleActions(object):
 
                     setattr(qsa_dict_modules, "formRecord" + name, delayed_action)
 
-    def __contains__(self, k):
+    def __contains__(self, k) -> bool:
         """Busca si es propietario de una action
         """
         return k in self.project.actions  # FIXME: Actions should be loaded to their parent, not the singleton
 
-    def __getitem__(self, name):
+    def __getitem__(self, name) -> Any:
         """Recoge una action determinada
         @param name. Nombre de la action
         @return Retorna el XMLAction de la action dada
@@ -105,6 +106,6 @@ class ModuleActions(object):
     @param action_. Action a añadir a la propiedad del módulo
     """
 
-    def __setitem__(self, name, action_):
+    def __setitem__(self, name, action_) -> NoReturn:
         raise ForbiddenError("Actions are not writable!")
         # self.project.actions[name] = action_

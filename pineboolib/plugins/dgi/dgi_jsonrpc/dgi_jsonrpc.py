@@ -17,6 +17,11 @@ from jsonrpc import JSONRPCResponseManager, dispatcher
 from pineboolib import logging
 from pineboolib.core import decorators
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
+from typing import Dict, List, Mapping, Optional, Sized, TypeVar, Union
+
+_T0 = TypeVar("_T0")
+
+_T0 = TypeVar("_T0")
 
 
 logger = logging.getLogger(__name__)
@@ -26,10 +31,10 @@ class parser(object):
     _mainForm = None
     _queqe = {}
 
-    def __init__(self, mainForm):
+    def __init__(self, mainForm) -> None:
         self._mainForm = mainForm
 
-    def addQueque(self, name, value):
+    def addQueque(self, name, value) -> None:
         self._queqe[name] = value
 
     @Request.application
@@ -162,7 +167,7 @@ class dgi_jsonrpc(dgi_schema):
     _W = {}
     _WJS = {}
 
-    def __init__(self):
+    def __init__(self) -> None:
         # desktopEnabled y mlDefault a True
         super().__init__()
         self._name = "jsonrpc"
@@ -174,22 +179,22 @@ class dgi_jsonrpc(dgi_schema):
         self._mainForm = None
         self.parserDGI = parserJson()
 
-    def extraProjectInit(self):
+    def extraProjectInit(self) -> None:
         pass
 
-    def setParameter(self, param):
+    def setParameter(self, param) -> None:
         self._listenSocket = param
 
-    def mainForm(self):
+    def mainForm(self) -> Any:
         if not self._mainForm:
             self._mainForm = mainForm()
         return self._mainForm
 
-    def exec_(self):
+    def exec_(self) -> None:
         self._par = parser(self._mainForm)
         self.launchServer()
 
-    def launchServer(self):
+    def launchServer(self) -> None:
         run_simple("localhost", 4000, self._par.receive)
         # print("JSON-RPC:INFO: Listening socket", self._listenSocket)
         # WSGIServer(self._par.query, bindAddress=self._listenSocket).run()
@@ -199,10 +204,10 @@ class dgi_jsonrpc(dgi_schema):
         self._WJS[widget.__class__.__module__] = self.parserDGI.parse(path)
         self._W[widget.__class__.__module__] = widget
 
-    def showWidget(self, widget):
+    def showWidget(self, widget) -> None:
         self._par.addQueque("%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> Any:
         return super().resolveObject(self._name, name)
 
 
@@ -212,7 +217,7 @@ Exportador UI a JSON
 
 
 class parserJson:
-    def __init__(self):
+    def __init__(self) -> None:
         # TODO: se puede ampliar con propiedades y objetos de qt4
         self.aPropsForbidden = [
             "images",
@@ -246,7 +251,7 @@ class parserJson:
             "verstretch",
         ]
 
-    def isInDgi(self, property, type):
+    def isInDgi(self, property, type) -> bool:
         if type == "prop":
             if property in self.aPropsForbidden:
                 return False
@@ -256,7 +261,7 @@ class parserJson:
 
         return True
 
-    def manageProperties(self, obj):
+    def manageProperties(self, obj: _T0) -> _T0:
         if isinstance(obj, dict):
             for property in list(obj):
                 if self.isInDgi(property, "prop"):
@@ -282,7 +287,7 @@ class parserJson:
                     del obj[ind]
         return obj
 
-    def parse(self, name):
+    def parse(self, name) -> Optional[str]:
         inputFile = name
         outputFile = re.search(r"\w+.ui", inputFile)
 
@@ -333,7 +338,7 @@ class mainForm(object):
         self.mainWindow = json_mainWindow()
         self.MainForm = json_MainForm()
 
-    def json_process(self, args):
+    def json_process(self, args: Mapping[int, Any]) -> Optional[bool]:
         try:
             _action = args[0]
 
@@ -343,7 +348,7 @@ class mainForm(object):
             print(traceback.format_exc())
             return False
 
-    def runAction(self, name):
+    def runAction(self, name) -> bool:
         try:
             self.mainWindow._actionsConnects[name].run()
             return True
@@ -410,27 +415,27 @@ class json_mainWindow(object):
             self._actionsConnects[action.name] = action
     """
 
-    def show(self):
+    def show(self) -> None:
         pass
 
-    def loadAction(self, action):
+    def loadAction(self, action) -> None:
         self._actions[action.name] = action
 
-    def loadConnection(self, action):
+    def loadConnection(self, action) -> None:
         self._actions[action.name] = action
 
-    def loadToolBarsAction(self, name):
+    def loadToolBarsAction(self, name) -> None:
         self._toolBarActions.append(name)
 
-    def addToJson(self, xml):
+    def addToJson(self, xml: xml.etree.ElementTree.Element) -> str:
         _json = xml2json.data(fromstring(etree.ElementTree.tostring(xml)))
         _jsonStr = dumps(_json, sort_keys=True, indent=2)
         return _jsonStr
 
-    def json_areas(self, *args):
+    def json_areas(self, *args) -> Dict[nothing, nothing]:
         return self.areas_
 
-    def json_modules(self, args):
+    def json_modules(self, args: Union[Sized, Mapping[int, Any]]) -> List[nothing]:
         _area = None
         if len(args) > 1:
             _area = args[1]
@@ -449,7 +454,7 @@ class json_mainWindow(object):
 
         return modulesS
 
-    def json_actions(self, args):
+    def json_actions(self, args: Union[Sized, Mapping[int, Any]]) -> List[nothing]:
         _module = None
         _ret = []
         if len(args) > 1:
@@ -471,16 +476,16 @@ class json_mainWindow(object):
 
         return _ret
 
-    def json_image(self, name):
+    def json_image(self, name: Mapping[int, Any]) -> Union[bool, str]:
         for _ac in self._actions.keys():
             if name[1] == self._actions[_ac].iconSet:
                 return str(self._actions[_ac].icon)
         return False
 
-    def initScript(self):
+    def initScript(self) -> None:
         self.initModule("sys")
 
-    def initModule(self, module):
+    def initModule(self, module) -> None:
         if module not in self.initialized_mods_:
             self.initialized_mods_.append(module)
             from pineboolib.application import project
@@ -492,5 +497,5 @@ class json_mainWindow(object):
 
 
 class json_MainForm(object):
-    def setDebugLevel(self, number):
+    def setDebugLevel(self, number) -> None:
         pass
