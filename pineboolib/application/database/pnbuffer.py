@@ -6,8 +6,8 @@ from pineboolib import logging
 from pineboolib.application import types
 
 if TYPE_CHECKING:
-    from pineboolib.application.database import pnsqlcursor
-    from pineboolib.fllegacy import flfieldmetadata
+    from pineboolib.interfaces import isqlcursor
+    from pineboolib.interfaces import ifieldmetadata
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class FieldStruct(object):
     originalValue: Any  # T_VALUE
     generated: bool
 
-    def __init__(self, field: "flfieldmetadata.FLFieldMetaData"):
+    def __init__(self, field: "ifieldmetadata.IFieldMetaData"):
         self.name = str(field.name())
         self.value = None
         self.metadata = field
@@ -84,7 +84,7 @@ class PNBuffer(object):
     the fields of the record.
     """
 
-    def __init__(self, cursor: "pnsqlcursor.PNSqlCursor") -> None:
+    def __init__(self, cursor: "isqlcursor.ISqlCursor") -> None:
         """Create a Buffer from the specified PNSqlCursor"""
         super().__init__()
         if not cursor:
@@ -180,7 +180,7 @@ class PNBuffer(object):
         """
         return self.fieldDict_[name].generated
 
-    def setGenerated(self, f: Union[int, str, "flfieldmetadata.FLFieldMetaData"], value: bool) -> None:
+    def setGenerated(self, f: Union[int, str, "ifieldmetadata.IFieldMetaData"], value: bool) -> None:
         """Setea que es generado un campo.
         @param f. FLFieldMetadata campo a marcar
         @param value. True o False si el campo es generado
@@ -327,7 +327,7 @@ class PNBuffer(object):
 
         return True
 
-    def cursor(self) -> "pnsqlcursor.PNSqlCursor":
+    def cursor(self) -> "isqlcursor.ISqlCursor":
         """Indica al cursor que pertenecemos
         @return Cursor al que pertenecemos
         """

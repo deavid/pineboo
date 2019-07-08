@@ -13,7 +13,7 @@ from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils.logging import logging
 from pineboolib.application.utils.date_conversion import date_amd_to_dma
 from pineboolib.fllegacy.flapplication import aqApp
-from typing import Any, Iterable, Mapping, Optional, SupportsInt, Union, List, Dict
+from typing import Any, Iterable, Optional, Union, List, Dict, Tuple
 from pineboolib.interfaces.iconnection import IConnection
 from pineboolib.interfaces.iapicursor import IApiCursor
 
@@ -717,7 +717,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param  rowramge. Array desde:hasta
     """
 
-    def indexUpdateRowRange(self, rowrange: Mapping[int, Any]) -> None:
+    def indexUpdateRowRange(self, rowrange: Tuple[int, int]) -> None:
         rows = self._data[rowrange[0] : rowrange[1]]
         if self.pkpos:
             for n, row in enumerate(rows):
@@ -735,7 +735,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return Valor contenido
     """
 
-    def value(self, row: int, fieldName) -> Optional[Union[str, SupportsInt]]:
+    def value(self, row: int, fieldName) -> Any:
         if row is None or row < 0 or row >= self.rows:
             return None
         col = None
