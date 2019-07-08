@@ -12,6 +12,14 @@ from pineboolib.core.utils.utils_base import create_dict
 from pineboolib.core.utils.logging import logging
 from pineboolib.application import project
 from pineboolib.fllegacy.systype import SysType
+import protocols
+import types
+from typing import Callable, Container, Mapping, TypeVar, Union
+
+_T0 = TypeVar("_T0")
+_T1 = TypeVar("_T1")
+_T2 = TypeVar("_T2")
+_T3 = TypeVar("_T3")
 
 
 logger = logging.getLogger("PNControlsFactory")
@@ -438,126 +446,118 @@ def print_stack(maxsize=1) -> None:
 from pineboolib.packager.aqunpacker import AQUnpacker  # noqa:
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData  # noqa:
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
-import protocols
-import types
-from typing import Callable, Container, Mapping, TypeVar, Union
-
-_T0 = TypeVar("_T0")
-_T1 = TypeVar("_T1")
-_T2 = TypeVar("_T2")
-_T3 = TypeVar("_T3")
 
 # aqApp -- imported from loader.main after reload_from_DGI() call, as it is a cyclic dependency
 
 # --- create empty objects first:
 
-QComboBox = ObjectNotFoundDGINotLoaded
-QTable = ObjectNotFoundDGINotLoaded
-QLayoutWidget = ObjectNotFoundDGINotLoaded
-QToolButton = ObjectNotFoundDGINotLoaded
-QTabWidget = ObjectNotFoundDGINotLoaded
-QLabel = ObjectNotFoundDGINotLoaded
-QGroupBox = ObjectNotFoundDGINotLoaded
-QListView = ObjectNotFoundDGINotLoaded
-QPushButton = ObjectNotFoundDGINotLoaded
-QTextEdit = ObjectNotFoundDGINotLoaded
-QLineEdit = ObjectNotFoundDGINotLoaded
-QDateEdit = ObjectNotFoundDGINotLoaded
-QTimeEdit = ObjectNotFoundDGINotLoaded
-QCheckBox = ObjectNotFoundDGINotLoaded
-QWidget = ObjectNotFoundDGINotLoaded
-QtWidgets = ObjectNotFoundDGINotLoaded
-QColor = ObjectNotFoundDGINotLoaded
-QMessageBox = ObjectNotFoundDGINotLoaded
-QButtonGroup = ObjectNotFoundDGINotLoaded
-QDialog = ObjectNotFoundDGINotLoaded
-QVBoxLayout = ObjectNotFoundDGINotLoaded
-QHBoxLayout = ObjectNotFoundDGINotLoaded
-QFrame = ObjectNotFoundDGINotLoaded
-QMainWindow = ObjectNotFoundDGINotLoaded
-QSignalMapper = ObjectNotFoundDGINotLoaded
-QDomDocument = ObjectNotFoundDGINotLoaded
-QMenu = ObjectNotFoundDGINotLoaded
-QToolBar = ObjectNotFoundDGINotLoaded
-QListWidgetItem = ObjectNotFoundDGINotLoaded
-QListViewWidget = ObjectNotFoundDGINotLoaded
-QPixmap = ObjectNotFoundDGINotLoaded
-QImage = ObjectNotFoundDGINotLoaded
-QIcon = ObjectNotFoundDGINotLoaded
-QAction = ObjectNotFoundDGINotLoaded
-QActionGroup = ObjectNotFoundDGINotLoaded
-QTreeWidget = ObjectNotFoundDGINotLoaded
-QTreeWidgetItem = ObjectNotFoundDGINotLoaded
-QTreeWidgetItemIterator = ObjectNotFoundDGINotLoaded
-QDataView = ObjectNotFoundDGINotLoaded
-QProcess = ObjectNotFoundDGINotLoaded
-QByteArray = ObjectNotFoundDGINotLoaded
-QRadioButton = ObjectNotFoundDGINotLoaded
-QSpinBox = ObjectNotFoundDGINotLoaded
-QInputDialog = ObjectNotFoundDGINotLoaded
-QApplication = ObjectNotFoundDGINotLoaded
-qApp = ObjectNotFoundDGINotLoaded
-QStyleFactory = ObjectNotFoundDGINotLoaded
-QFontDialog = ObjectNotFoundDGINotLoaded
-QDockWidget = ObjectNotFoundDGINotLoaded
-QMdiArea = ObjectNotFoundDGINotLoaded
-QMdiSubWindow = ObjectNotFoundDGINotLoaded
-QKeySequence = ObjectNotFoundDGINotLoaded
-QSize = ObjectNotFoundDGINotLoaded
-QSizePolicy = ObjectNotFoundDGINotLoaded
-QToolBox = ObjectNotFoundDGINotLoaded
-QPainter = ObjectNotFoundDGINotLoaded
-QBrush = ObjectNotFoundDGINotLoaded
-QProgressDialog = ObjectNotFoundDGINotLoaded
-QFileDialog = ObjectNotFoundDGINotLoaded
+QComboBox: Any = ObjectNotFoundDGINotLoaded
+QTable: Any = ObjectNotFoundDGINotLoaded
+QLayoutWidget: Any = ObjectNotFoundDGINotLoaded
+QToolButton: Any = ObjectNotFoundDGINotLoaded
+QTabWidget: Any = ObjectNotFoundDGINotLoaded
+QLabel: Any = ObjectNotFoundDGINotLoaded
+QGroupBox: Any = ObjectNotFoundDGINotLoaded
+QListView: Any = ObjectNotFoundDGINotLoaded
+QPushButton: Any = ObjectNotFoundDGINotLoaded
+QTextEdit: Any = ObjectNotFoundDGINotLoaded
+QLineEdit: Any = ObjectNotFoundDGINotLoaded
+QDateEdit: Any = ObjectNotFoundDGINotLoaded
+QTimeEdit: Any = ObjectNotFoundDGINotLoaded
+QCheckBox: Any = ObjectNotFoundDGINotLoaded
+QWidget: Any = ObjectNotFoundDGINotLoaded
+QtWidgets: Any = ObjectNotFoundDGINotLoaded
+QColor: Any = ObjectNotFoundDGINotLoaded
+QMessageBox: Any = ObjectNotFoundDGINotLoaded
+QButtonGroup: Any = ObjectNotFoundDGINotLoaded
+QDialog: Any = ObjectNotFoundDGINotLoaded
+QVBoxLayout: Any = ObjectNotFoundDGINotLoaded
+QHBoxLayout: Any = ObjectNotFoundDGINotLoaded
+QFrame: Any = ObjectNotFoundDGINotLoaded
+QMainWindow: Any = ObjectNotFoundDGINotLoaded
+QSignalMapper: Any = ObjectNotFoundDGINotLoaded
+QDomDocument: Any = ObjectNotFoundDGINotLoaded
+QMenu: Any = ObjectNotFoundDGINotLoaded
+QToolBar: Any = ObjectNotFoundDGINotLoaded
+QListWidgetItem: Any = ObjectNotFoundDGINotLoaded
+QListViewWidget: Any = ObjectNotFoundDGINotLoaded
+QPixmap: Any = ObjectNotFoundDGINotLoaded
+QImage: Any = ObjectNotFoundDGINotLoaded
+QIcon: Any = ObjectNotFoundDGINotLoaded
+QAction: Any = ObjectNotFoundDGINotLoaded
+QActionGroup: Any = ObjectNotFoundDGINotLoaded
+QTreeWidget: Any = ObjectNotFoundDGINotLoaded
+QTreeWidgetItem: Any = ObjectNotFoundDGINotLoaded
+QTreeWidgetItemIterator: Any = ObjectNotFoundDGINotLoaded
+QDataView: Any = ObjectNotFoundDGINotLoaded
+QProcess: Any = ObjectNotFoundDGINotLoaded
+QByteArray: Any = ObjectNotFoundDGINotLoaded
+QRadioButton: Any = ObjectNotFoundDGINotLoaded
+QSpinBox: Any = ObjectNotFoundDGINotLoaded
+QInputDialog: Any = ObjectNotFoundDGINotLoaded
+QApplication: Any = ObjectNotFoundDGINotLoaded
+qApp: Any = ObjectNotFoundDGINotLoaded
+QStyleFactory: Any = ObjectNotFoundDGINotLoaded
+QFontDialog: Any = ObjectNotFoundDGINotLoaded
+QDockWidget: Any = ObjectNotFoundDGINotLoaded
+QMdiArea: Any = ObjectNotFoundDGINotLoaded
+QMdiSubWindow: Any = ObjectNotFoundDGINotLoaded
+QKeySequence: Any = ObjectNotFoundDGINotLoaded
+QSize: Any = ObjectNotFoundDGINotLoaded
+QSizePolicy: Any = ObjectNotFoundDGINotLoaded
+QToolBox: Any = ObjectNotFoundDGINotLoaded
+QPainter: Any = ObjectNotFoundDGINotLoaded
+QBrush: Any = ObjectNotFoundDGINotLoaded
+QProgressDialog: Any = ObjectNotFoundDGINotLoaded
+QFileDialog: Any = ObjectNotFoundDGINotLoaded
 
 # Clases FL
-FLLineEdit = ObjectNotFoundDGINotLoaded
-FLTimeEdit = ObjectNotFoundDGINotLoaded
-FLDateEdit = ObjectNotFoundDGINotLoaded
-FLPixmapView = ObjectNotFoundDGINotLoaded
-FLDomDocument = ObjectNotFoundDGINotLoaded
-FLDomElement = ObjectNotFoundDGINotLoaded
-FLDomNode = ObjectNotFoundDGINotLoaded
-FLDomNodeList = ObjectNotFoundDGINotLoaded
-FLListViewItem = ObjectNotFoundDGINotLoaded
-FLTable = ObjectNotFoundDGINotLoaded
-FLDataTable = ObjectNotFoundDGINotLoaded
-FLCheckBox = ObjectNotFoundDGINotLoaded
-FLTextEditOutput = ObjectNotFoundDGINotLoaded
-FLSpinBox = ObjectNotFoundDGINotLoaded
-FLTableDB = ObjectNotFoundDGINotLoaded
-FLFieldDB = ObjectNotFoundDGINotLoaded
-FLFormDB = ObjectNotFoundDGINotLoaded
-FLFormRecordDB = ObjectNotFoundDGINotLoaded
-FLFormSearchDB = ObjectNotFoundDGINotLoaded
-FLDoubleValidator = ObjectNotFoundDGINotLoaded
-FLIntValidator = ObjectNotFoundDGINotLoaded
-FLUIntValidator = ObjectNotFoundDGINotLoaded
-FLCodBar = ObjectNotFoundDGINotLoaded
-FLWidget = ObjectNotFoundDGINotLoaded
-FLWorkSpace = ObjectNotFoundDGINotLoaded
+FLLineEdit: Any = ObjectNotFoundDGINotLoaded
+FLTimeEdit: Any = ObjectNotFoundDGINotLoaded
+FLDateEdit: Any = ObjectNotFoundDGINotLoaded
+FLPixmapView: Any = ObjectNotFoundDGINotLoaded
+FLDomDocument: Any = ObjectNotFoundDGINotLoaded
+FLDomElement: Any = ObjectNotFoundDGINotLoaded
+FLDomNode: Any = ObjectNotFoundDGINotLoaded
+FLDomNodeList: Any = ObjectNotFoundDGINotLoaded
+FLListViewItem: Any = ObjectNotFoundDGINotLoaded
+FLTable: Any = ObjectNotFoundDGINotLoaded
+FLDataTable: Any = ObjectNotFoundDGINotLoaded
+FLCheckBox: Any = ObjectNotFoundDGINotLoaded
+FLTextEditOutput: Any = ObjectNotFoundDGINotLoaded
+FLSpinBox: Any = ObjectNotFoundDGINotLoaded
+FLTableDB: Any = ObjectNotFoundDGINotLoaded
+FLFieldDB: Any = ObjectNotFoundDGINotLoaded
+FLFormDB: Any = ObjectNotFoundDGINotLoaded
+FLFormRecordDB: Any = ObjectNotFoundDGINotLoaded
+FLFormSearchDB: Any = ObjectNotFoundDGINotLoaded
+FLDoubleValidator: Any = ObjectNotFoundDGINotLoaded
+FLIntValidator: Any = ObjectNotFoundDGINotLoaded
+FLUIntValidator: Any = ObjectNotFoundDGINotLoaded
+FLCodBar: Any = ObjectNotFoundDGINotLoaded
+FLWidget: Any = ObjectNotFoundDGINotLoaded
+FLWorkSpace: Any = ObjectNotFoundDGINotLoaded
 
-FormDBWidget = ObjectNotFoundDGINotLoaded
+FormDBWidget: Any = ObjectNotFoundDGINotLoaded
 
 # Clases QSA
-CheckBox = ObjectNotFoundDGINotLoaded
-ComboBox = ObjectNotFoundDGINotLoaded
-TextEdit = ObjectNotFoundDGINotLoaded
-LineEdit = ObjectNotFoundDGINotLoaded
-FileDialog = ObjectNotFoundDGINotLoaded
-MessageBox = ObjectNotFoundDGINotLoaded
-RadioButton = ObjectNotFoundDGINotLoaded
+CheckBox: Any = ObjectNotFoundDGINotLoaded
+ComboBox: Any = ObjectNotFoundDGINotLoaded
+TextEdit: Any = ObjectNotFoundDGINotLoaded
+LineEdit: Any = ObjectNotFoundDGINotLoaded
+FileDialog: Any = ObjectNotFoundDGINotLoaded
+MessageBox: Any = ObjectNotFoundDGINotLoaded
+RadioButton: Any = ObjectNotFoundDGINotLoaded
 Color = QColor
-Dialog = ObjectNotFoundDGINotLoaded
-Label = ObjectNotFoundDGINotLoaded
-GroupBox = ObjectNotFoundDGINotLoaded
-Process = ObjectNotFoundDGINotLoaded
-SpinBox = ObjectNotFoundDGINotLoaded
-Line = ObjectNotFoundDGINotLoaded
-NumberEdit = ObjectNotFoundDGINotLoaded
-DateEdit = ObjectNotFoundDGINotLoaded
-TimeEdit = ObjectNotFoundDGINotLoaded
+Dialog: Any = ObjectNotFoundDGINotLoaded
+Label: Any = ObjectNotFoundDGINotLoaded
+GroupBox: Any = ObjectNotFoundDGINotLoaded
+Process: Any = ObjectNotFoundDGINotLoaded
+SpinBox: Any = ObjectNotFoundDGINotLoaded
+Line: Any = ObjectNotFoundDGINotLoaded
+NumberEdit: Any = ObjectNotFoundDGINotLoaded
+DateEdit: Any = ObjectNotFoundDGINotLoaded
+TimeEdit: Any = ObjectNotFoundDGINotLoaded
 
 # Clases AQNext
-auth = ObjectNotFoundDGINotLoaded
+auth: Any = ObjectNotFoundDGINotLoaded
