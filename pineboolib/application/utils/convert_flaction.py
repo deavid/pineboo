@@ -1,4 +1,4 @@
-from pineboolib import logging
+from pineboolib.core.utils.logging import logging
 
 from typing import TYPE_CHECKING
 

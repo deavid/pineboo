@@ -204,7 +204,7 @@ class XMLAction(XMLStruct):
             action_ = parent._action if hasattr(parent, "_action") else self
 
         # import aqui para evitar dependencia ciclica
-        from pineboolib.application.utils.convert_flaction import convertFLAction  # type: ignore
+        from .utils.convert_flaction import convertFLAction  # type: ignore
 
         if not isinstance(action_, XMLAction):
             action_ = convertFLAction(action_)
@@ -229,7 +229,7 @@ class XMLAction(XMLStruct):
 
         mng_modules = self.project.conn.managerModules()
         if mng_modules.staticBdInfo_ and mng_modules.staticBdInfo_.enabled_:
-            from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader
+            from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader  # FIXME
 
             ret_py = FLStaticLoader.content("%s.qs.py" % scriptname, mng_modules.staticBdInfo_, True)  # Con True solo devuelve el path
             if ret_py:

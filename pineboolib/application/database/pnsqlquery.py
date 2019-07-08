@@ -1,4 +1,4 @@
-from pineboolib import logging
+from pineboolib.core.utils.logging import logging
 from pineboolib.core import decorators
 from pineboolib.core.settings import config
 from pineboolib.application.utils import sql_tools
@@ -246,7 +246,7 @@ class PNSqlQuery(object):
                 pass
 
             if field == "*":
-                mtd = self.d.db_.manager().metadata(table, True)
+                mtd = self.db().manager().metadata(table, True)
                 if mtd:
                     self.d.fieldList_ = mtd.fieldList(True)
                     if not mtd.inCache():
@@ -342,11 +342,10 @@ class PNSqlQuery(object):
                 v = self.d.parameterDict_[pD]
 
                 if not v:
-                    from pineboolib import pncontrolsfactory
+                    dialog = project._DGI.QInputDialog
 
-                    v = pncontrolsfactory.QInputDialog.getText(
-                        pncontrolsfactory.QApplication, "Entrada de parámetros de la consulta", pD, None, None
-                    )
+                    if dialog is not None:
+                        v = QInputDialog.getText(project._DGI.QApplication, "Entrada de parámetros de la consulta", pD, None, None)
 
                 res = res.replace("[%s]" % pD, "'%s'" % v)
 
@@ -720,7 +719,7 @@ class PNSqlQuery(object):
         self.d.tablesList_ = []
         tl = tl.replace(" ", "")
         for tabla in tl.split(","):
-            if not project.conn.manager().existsTable(tabla) and len(tl.split(",")) >= 1:
+            if not self.db().manager().existsTable(tabla) and len(tl.split(",")) >= 1:
                 self.invalidTablesList = True
 
             self.d.tablesList_.append(tabla)
@@ -768,7 +767,7 @@ class PNSqlQuery(object):
         for f in self.d.fieldList_:
             table = f[: f.index(".")]
             field = f[f.index(".") + 1 :]
-            mtd = self.d.db_.manager().metadata(table, True)
+            mtd = self.db().manager().metadata(table, True)
             if not mtd:
                 continue
             fd = mtd.field(field)

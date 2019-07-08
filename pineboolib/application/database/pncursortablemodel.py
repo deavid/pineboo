@@ -1,7 +1,6 @@
 # # -*- coding: utf-8 -*-
 import math
 import threading
-from pineboolib import logging
 import time
 import itertools
 import locale
@@ -11,6 +10,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, Qt  # type: ignore
 
 import pineboolib
 from pineboolib.core.utils.utils_base import filedir
+from pineboolib.core.utils.logging import logging
 from pineboolib.application.utils.date_conversion import date_amd_to_dma
 
 

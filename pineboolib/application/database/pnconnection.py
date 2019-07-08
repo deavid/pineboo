@@ -9,9 +9,8 @@ from pineboolib.core import decorators
 from pineboolib.interfaces.iconnection import IConnection
 from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
 from .pnsqlsavepoint import PNSqlSavePoint
-from pineboolib import pncontrolsfactory  # FIXME: Don't import pncontrolsfactory in this file. Manage without DGI.
-
-from pineboolib import logging
+from . import db_signals
+from pineboolib.core.utils.logging import logging
 from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -245,12 +244,14 @@ class PNConnection(QtCore.QObject, IConnection):
         if not cursor or not self.db():
             return False
 
+        from pineboolib.application import project
+
         if self.transaction_ == 0 and self.canTransaction():
             if config.value("application/isDebuggerMode", False):
-                pncontrolsfactory.aqApp.statusHelpMsg("Iniciando Transacción... %s" % self.transaction_)
+                project.message_manager().send("statusHelpMsg", "Iniciando Transacción... %s" % self.transaction_)
             if self.transaction():
                 self.lastActiveCursor_ = cursor
-                pncontrolsfactory.aqApp.emitTransactionBegin(cursor)
+                db_signals.emitTransactionBegin(cursor)
 
                 if not self.canSavePoint():
                     if self.currentSavePoint_:
@@ -269,7 +270,7 @@ class PNConnection(QtCore.QObject, IConnection):
 
         else:
             if config.value("application/isDebuggerMode", False):
-                pncontrolsfactory.aqApp.statusHelpMsg("Creando punto de salvaguarda %s:%s" % (self.name, self.transaction_))
+                project.message_manager().send("statusHelpMsg", "Creando punto de salvaguarda %s:%s" % (self.name, self.transaction_))
             if not self.canSavePoint():
                 if self.transaction_ == 0:
                     if self.currentSavePoint_:
@@ -303,6 +304,8 @@ class PNConnection(QtCore.QObject, IConnection):
         if not cur or not self.conn:
             return False
 
+        from pineboolib.application import project
+
         cancel = False
         if (
             self.interactiveGUI()
@@ -310,7 +313,6 @@ class PNConnection(QtCore.QObject, IConnection):
             and cur.isModifiedBuffer()
             and cur.d.askForCancelChanges_
         ):
-            from pineboolib.application import project
 
             if project._DGI.localDesktop():
                 res = QtWidgets.QMessageBox.information(
@@ -342,7 +344,7 @@ class PNConnection(QtCore.QObject, IConnection):
             return True
 
         if self.transaction_ == 0 and self.canTransaction():
-            pncontrolsfactory.aqApp.statusHelpMsg("Deshaciendo Transacción...")
+            project.message_manager().send("statusHelpMsg", "Deshaciendo Transacción...")
             if self.rollbackTransaction():
                 self.lastActiveCursor_ = None
 
@@ -358,14 +360,15 @@ class PNConnection(QtCore.QObject, IConnection):
                 if cancel:
                     cur.select()
 
-                pncontrolsfactory.aqApp.emitTransactionRollback(cur)
+                db_signals.emitTransactionRollback(cur)
                 return True
             else:
                 logger.warning("doRollback: Fallo al intentar deshacer transacción")
                 return False
 
         else:
-            pncontrolsfactory.aqApp.statusHelpMsg("Restaurando punto de salvaguarda %s:%s..." % (self.name, self.transaction_))
+
+            project.message_manager().send("statusHelpMsg", "Restaurando punto de salvaguarda %s:%s..." % (self.name, self.transaction_))
             if not self.canSavePoint():
                 tam_queue = len(self.queueSavePoints_)
                 for i in range(tam_queue):
@@ -421,9 +424,11 @@ class PNConnection(QtCore.QObject, IConnection):
 
             return True
 
+        from pineboolib.application import project
+
         if self.transaction_ == 0 and self.canTransaction():
             if config.value("application/isDebuggerMode", False):
-                pncontrolsfactory.aqApp.statusHelpMsg("Terminando transacción... %s" % self.transaction_)
+                project.message_manager().send("statusHelpMsg", "Terminando transacción... %s" % self.transaction_)
             try:
                 if self.driver().commitTransaction():
                     self.lastActiveCursor_ = None
@@ -439,7 +444,7 @@ class PNConnection(QtCore.QObject, IConnection):
                     if notify:
                         cur.d.modeAccess_ = CursorAccessMode.Browse
 
-                    pncontrolsfactory.aqApp.emitTransactionEnd(cur)
+                    db_signals.emitTransactionEnd(cur)
                     return True
 
                 else:
@@ -450,7 +455,7 @@ class PNConnection(QtCore.QObject, IConnection):
                 logger.error("doCommit: Fallo al intentar terminar transacción: %s", e)
                 return False
         else:
-            pncontrolsfactory.aqApp.statusHelpMsg("Liberando punto de salvaguarda %s:%s..." % (self.name, self.transaction_))
+            project.message_manager().send("statusHelpMsg", "Liberando punto de salvaguarda %s:%s..." % (self.name, self.transaction_))
             if (self.transaction_ == 1 and self.canTransaction()) or (self.transaction_ == 0 and not self.canTransaction()):
                 if not self.canSavePoint():
                     if self.currentSavePoint_:

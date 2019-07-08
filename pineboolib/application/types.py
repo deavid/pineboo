@@ -64,13 +64,13 @@ function anon(%s) {
     from pineboolib.flparser import postparse
     from pineboolib.flparser.pytnyzer import write_python_file
 
-    from pineboolib import pncontrolsfactory  # FIXME: This import is not allowed in this file
+    from . import project
 
     prog = flscriptparse.parse(qs_source)
     tree_data = flscriptparse.calctree(prog, alias_mode=0)
     ast = postparse.post_parse(tree_data)
 
-    dest_filename = "%s/anon.py" % pncontrolsfactory.aqApp.tmp_dir()  # FIXME: Find another simpler way of getting tmp_dir
+    dest_filename = "%s/anon.py" % project.tmpdir
     # f1 = io.StringIO()
     if os.path.exists(dest_filename):
         os.remove(dest_filename)

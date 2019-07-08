@@ -189,15 +189,15 @@ class SysType(object, metaclass=Singleton):
 
     def nameUser(self) -> str:
         ret_ = None
-        if project.DGI_.use_alternative_credentials():
-            ret_ = project.DGI_.get_nameuser()
+        if project._DGI.use_alternative_credentials():
+            ret_ = project._DGI.get_nameuser()
         else:
             ret_ = project.conn.user()
 
         return ret_
 
     def interactiveGUI(self) -> str:
-        return project.DGI_.interactiveGUI()
+        return project._DGI.interactiveGUI()
 
     def isUserBuild(self) -> bool:
         return self.version().upper().find("USER") > -1
@@ -271,7 +271,7 @@ class SysType(object, metaclass=Singleton):
         return str(project.version)
 
     def processEvents(self) -> None:
-        return project.DGI_.processEvents()
+        return project._DGI.processEvents()
 
     def write(self, encode_, dir_, contenido):
         import codecs

@@ -9,6 +9,7 @@ from pineboolib.core import decorators
 
 # import pineboolib
 from pineboolib.application import project
+from pineboolib.application.database import db_signals
 
 # from pineboolib import pncontrolsfactory  # FIXME: Circular dependency
 from pineboolib.application.proxy import DelayedObjectProxyLoader
@@ -50,9 +51,6 @@ class FLApplication(QtCore.QObject):
     sys_tr_ = None
     fl_factory_ = None
     op_check_update_ = None
-    notify_begin_transaction_ = None
-    notify_end_transaction_ = None
-    notify_roll_back_transaction_ = None
     style = None
     timer_idle_ = None
     init_single_fl_large = None
@@ -86,12 +84,11 @@ class FLApplication(QtCore.QObject):
         self.destroying_ = False
         self.fl_factory_ = None
         self.op_check_update_ = None
-        self.notify_begin_transaction_ = False
-        self.notify_end_transaction_ = False
-        self.notify_roll_back_transaction_ = False
         self.popup_warn_ = None
         self.window_menu = None
-
+        db_signals.notify_begin_transaction_ = False
+        db_signals.notify_end_transaction_ = False
+        db_signals.notify_roll_back_transaction_ = False
         self.ted_output_ = None
         self.style = None
         self.timer_idle_ = None
@@ -1184,16 +1181,13 @@ class FLApplication(QtCore.QObject):
             self.script_entry_function_ = None
 
     def emitTransactionBegin(self, o):
-        if self.notify_begin_transaction_:
-            o.transactionBegin.emit()
+        db_signals.emitTransactionBegin(o)
 
     def emitTransactionEnd(self, o):
-        if self.notify_end_transaction_:
-            o.transactionEnd.emit()
+        db_signals.transactionEnd.emit()
 
     def emitTransactionRollback(self, o):
-        if self.notify_roll_back_transaction_:
-            o.transsactionRollBack.emit()
+        db_signals.transsactionRollBack.emit()
 
     @decorators.NotImplementedWarn
     def gsExecutable(self):
