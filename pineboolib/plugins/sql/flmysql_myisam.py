@@ -1,18 +1,21 @@
-from PyQt5.Qt import qWarning, QApplication, QRegExp, qApp
-from PyQt5.QtCore import QTime, QDate, QDateTime, Qt
-from PyQt5.QtXml import QDomDocument
-from PyQt5.QtWidgets import QMessageBox
+import traceback
+from typing import List, Dict
 
-from pineboolib.utils import auto_qt_translate_text, checkDependencies
-from pineboolib.utils import text2bool
+from PyQt5.Qt import qWarning, QApplication, QRegExp  # type: ignore
+from PyQt5.QtCore import QTime, QDate, QDateTime, Qt  # type: ignore
+from PyQt5.QtXml import QDomDocument  # type: ignore
+from PyQt5.QtWidgets import QMessageBox  # type: ignore
+
+from pineboolib.core.utils.utils_base import auto_qt_translate_text
+from pineboolib.core.utils.utils_base import text2bool
+from pineboolib.application.utils.check_dependencies import check_dependencies
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 
 from pineboolib.fllegacy.flutil import FLUtil
-import pineboolib
-import traceback
-import logging
+from pineboolib.application import project
+from pineboolib import logging
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +52,7 @@ class FLMYSQL_MYISAM(object):
         self.mobile_ = False
         self.pure_python_ = False
         self.defaultPort_ = 3306
-        self.rowsFetched = {}
+        self.rowsFetched: Dict[str, int] = {}
         self.active_create_index = True
         self.db_ = None
         self.engine_ = None
@@ -66,7 +69,7 @@ class FLMYSQL_MYISAM(object):
         return self.pure_python_
 
     def safe_load(self):
-        return checkDependencies({"MySQLdb": "mysqlclient", "sqlalchemy": "sqlAlchemy"}, False)
+        return check_dependencies({"MySQLdb": "mysqlclient", "sqlalchemy": "sqlAlchemy"}, False)
 
     def mobile(self):
         return self.mobile_
@@ -79,7 +82,7 @@ class FLMYSQL_MYISAM(object):
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         self._dbname = db_name
-        checkDependencies({"MySQLdb": "mysqlclient", "sqlalchemy": "sqlAlchemy"})
+        check_dependencies({"MySQLdb": "mysqlclient", "sqlalchemy": "sqlAlchemy"})
         from sqlalchemy import create_engine
         import MySQLdb
 
@@ -87,9 +90,11 @@ class FLMYSQL_MYISAM(object):
             self.conn_ = MySQLdb.connect(db_host, db_userName, db_password, db_name)
             self.engine_ = create_engine("mysql+mysqldb://%s:%s@%s:%s/%s" % (db_userName, db_password, db_host, db_port, db_name))
         except MySQLdb.OperationalError as e:
-            pineboolib.project._splash.hide()
+            project._splash.hide()
             if "Unknown database" in str(e):
-                ret = QMessageBox.warning(None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No)
+                ret = QMessageBox.warning(
+                    None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No
+                )
                 if ret == QMessageBox.No:
                     return False
                 else:
@@ -99,14 +104,16 @@ class FLMYSQL_MYISAM(object):
                         try:
                             cursor.execute("CREATE DATABASE %s" % db_name)
                         except Exception:
-                            print("ERROR: FLPSQL.connect", traceback.format_exc())
+                            logger.exception("ERROR: FLPSQL.connect")
                             cursor.execute("ROLLBACK")
                             cursor.close()
                             return False
                         cursor.close()
                         return self.connect(db_name, db_host, db_port, db_userName, db_password)
                     except Exception:
-                        QMessageBox.information(None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok)
+                        QMessageBox.information(
+                            None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok
+                        )
                         print("ERROR: No se ha podido crear la Base de Datos %s" % db_name)
                         return False
 
@@ -153,10 +160,11 @@ class FLMYSQL_MYISAM(object):
 
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"
-        
+
         if len(v):
             if type_ == "bool":
-                from pineboolib.pncontrolsfactory import aqApp
+                from pineboolib.fllegacy.flapplication import aqApp
+
                 s = str(v[0]).upper()
                 if s == aqApp.tr("Sí")[0].upper():
                     res = "=1"
@@ -164,7 +172,9 @@ class FLMYSQL_MYISAM(object):
                     res = "=0"
 
             elif type_ == "date":
-                res = " LIKE '%" + FLUtil().dateDMAtoAMD(str(v)) + "'"
+                from pineboolib.application.utils.date_conversion import date_dma_to_amd
+
+                res = " LIKE '%" + date_dma_to_amd(str(v)) + "'"
 
             elif type_ == "time":
                 t = v.toTime()
@@ -208,7 +218,7 @@ class FLMYSQL_MYISAM(object):
 
         elif type_ in ("uint", "int", "double", "serial"):
             if s == "Null":
-                s = 0
+                s = "0"
             else:
                 s = v
 
@@ -239,7 +249,7 @@ class FLMYSQL_MYISAM(object):
         return True
 
     def tables(self, type_name=None):
-        tl = []
+        tl: List[str] = []
         if not self.isOpen():
             return tl
 
@@ -255,12 +265,10 @@ class FLMYSQL_MYISAM(object):
             logger.warning("%s::beginTransaction: Database not open", self.name_)
             return None
 
-        # self.transaction()
+        # if not self.transaction():
         #    self.setLastError("No se puede iniciar la transacción", "BEGIN WORK")
         #    return None
 
-        # res = None
-        # row = None
         max = 0
         cur_max = 0
         updateQry = False
@@ -278,22 +286,26 @@ class FLMYSQL_MYISAM(object):
 
         cursor = self.conn_.cursor()
 
-        # print(1,"max de %s.%s = %s" % (table, field, max))
-
         strQry = "SELECT seq FROM flseqs WHERE tabla = '%s' AND campo ='%s'" % (table, field)
         try:
-            cur_max = cursor.execute(strQry)
+            cur_max = 0
+            cursor.execute(strQry)
+            line = cursor.fetchone()
+            if line:
+                cur_max = line[0]
         except Exception:
             logger.warning("%s:: La consulta a la base de datos ha fallado", self.name_, traceback.format_exc())
             self.rollbackTransaction()
             return
 
-        # print(2,"cur_max de %s.%s = %s" % (table, field , cur_max))
+        if cur_max > 0:
+            updateQry = True
+            ret = cur_max
+        else:
+            ret = max
 
-        updateQry = cur_max > 0
-
+        ret += 1
         strQry = None
-        ret = max + 1
         if updateQry:
             if ret > cur_max:
                 strQry = "UPDATE flseqs SET seq=%s WHERE tabla = '%s' AND campo = '%s'" % (ret, table, field)
@@ -309,9 +321,9 @@ class FLMYSQL_MYISAM(object):
 
                 return
 
-        # self.commitTransaction()
+        # if not self.commitTransaction():
         #    qWarning("%s:: No se puede aceptar la transacción" % self.name_)
-        #    return
+        #    return None
 
         return ret
 
@@ -356,7 +368,9 @@ class FLMYSQL_MYISAM(object):
             cursor.execute("ROLLBACK TO SAVEPOINT sv_%s" % n)
         except Exception:
             self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
-            logger.warning("%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s", self.name_, n, traceback.format_exc())
+            logger.warning(
+                "%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s", self.name_, n, traceback.format_exc()
+            )
             return False
 
         return True
@@ -601,8 +615,8 @@ class FLMYSQL_MYISAM(object):
         self.active_create_index = False
 
         rx = QRegExp("^.*\\d{6,9}$")
-        if rx in self.tables() is not False:
-            listOldBks = rx in self.tables()
+        if rx in self.tables():
+            listOldBks = self.tables()[rx]
         else:
             listOldBks = []
 
@@ -985,7 +999,11 @@ class FLMYSQL_MYISAM(object):
                         i += 1
                         oldField = vector_fields[str(i)]
                         v = row[newField.name()]
-                        if (not oldField.allowNull() or not newField.allowNull()) and (v is None) and newField.type() != FLFieldMetaData.Serial:
+                        if (
+                            (not oldField.allowNull() or not newField.allowNull())
+                            and (v is None)
+                            and newField.type() != FLFieldMetaData.Serial
+                        ):
                             defVal = newField.defaultValue()
                             if defVal is not None:
                                 v = defVal
@@ -1133,7 +1151,7 @@ class FLMYSQL_MYISAM(object):
 
     def recordInfo2(self, tablename):
         if not self.isOpen():
-            return False
+            raise Exception("Connection not open")
         info = []
         cursor = self.conn_.cursor()
 
@@ -1160,7 +1178,7 @@ class FLMYSQL_MYISAM(object):
                 # print("****", tipo_, field)
             else:
                 if len_.find(",") > -1:
-                    precision_ = len_[len_.find(",") :]
+                    precision_ = int(len_[len_.find(",") :])
                     len_ = len_[: len_.find(",")]
 
             len_ = int(len_)
@@ -1221,7 +1239,7 @@ class FLMYSQL_MYISAM(object):
             stream = self.db_.managerModules().contentCached("%s.mtd" % tablename)
             util = FLUtil()
             if not util.domDocumentSetContent(doc, stream):
-                print("FLManager : " + qApp.tr("Error al cargar los metadatos para la tabla") + tablename)
+                print("FLManager : " + QApplication.tr("Error al cargar los metadatos para la tabla") + tablename)
 
                 return self.recordInfo2(tablename)
 
@@ -1231,13 +1249,20 @@ class FLMYSQL_MYISAM(object):
                 return self.recordInfo2(tablename)
             fL = mtd.fieldList()
             if not fL:
-                del mtd
                 return self.recordInfo2(tablename)
 
             for f in mtd.fieldNames():
                 field = mtd.field(f)
                 info.append(
-                    [field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()]
+                    [
+                        field.name(),
+                        field.type(),
+                        not field.allowNull(),
+                        field.length(),
+                        field.partDecimal(),
+                        field.defaultValue(),
+                        field.isPrimaryKey(),
+                    ]
                 )
 
             del mtd

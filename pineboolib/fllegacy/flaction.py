@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 
+from typing import Optional
+
+
 class FLAction(object):
 
     """
@@ -56,7 +59,7 @@ class FLAction(object):
     constructor.
     """
 
-    def __init__(self, action=None):
+    def __init__(self, action: None = None) -> None:
         super(FLAction, self).__init__()
         if action:
             if isinstance(action, str):
@@ -73,110 +76,110 @@ class FLAction(object):
     Establece el nombre de la accion
     """
 
-    def setName(self, n):
+    def setName(self, n: str) -> None:
         self.name_ = n
 
     """
     Establece el nombre del script asociado al formulario de edición de registros
     """
 
-    def setScriptFormRecord(self, s):
+    def setScriptFormRecord(self, s: str) -> None:
         self.scriptFormRecord_ = "%s.qs" % s
 
     """
     Establece el nombre del script asociado al formulario maestro
     """
 
-    def setScriptForm(self, s):
+    def setScriptForm(self, s: str) -> None:
         self.scriptForm_ = "%s.qs" % s
 
     """
     Establece el nombre de la tabla origen del formulario maestro
     """
 
-    def setTable(self, t):
+    def setTable(self, t: str) -> None:
         self.table_ = t
 
     """
     Establece el nombre del formulario maestro
     """
 
-    def setForm(self, f):
+    def setForm(self, f: str) -> None:
         self.form_ = "%s.ui" % f
 
     """
     Establece el nombre del formulario de edición de registros
     """
 
-    def setFormRecord(self, f):
+    def setFormRecord(self, f: str) -> None:
         self.formRecord_ = "%s.ui" % f
 
     """
     Establece el texto de la barra de título del formulario maestro
     """
 
-    def setCaption(self, c):
+    def setCaption(self, c: str) -> None:
         self.caption_ = c
 
     """
     Establece la descripción
     """
 
-    def setDescription(self, d):
+    def setDescription(self, d) -> None:
         self.description_ = d
 
     """
     Obtiene el nombre de la accion
     """
 
-    def name(self):
+    def name(self) -> str:
         return self.name_
 
     """
     Obtiene el nombre del script asociado al formulario de edición de registros
     """
 
-    def scriptFormRecord(self):
+    def scriptFormRecord(self) -> str:
         return self.scriptFormRecord_
 
     """
     Obtiene el nombre del script asociado al formulario maestro
     """
 
-    def scriptForm(self):
+    def scriptForm(self) -> Optional[str]:
         return self.scriptForm_
 
     """
     Obtiene  la tabla asociada a la accion
     """
 
-    def table(self):
+    def table(self) -> Optional[str]:
         return self.table_
 
     """
     Obtiene el texto de la barra de título del formulario
     """
 
-    def caption(self):
+    def caption(self) -> Optional[str]:
         return self.caption_
 
     """
     Obtiene la descripcion
     """
 
-    def description(self):
+    def description(self) -> None:
         return self.description_
 
     """
     Obtiene el nombre del formulario mestro
     """
 
-    def form(self):
+    def form(self) -> Optional[str]:
         return self.form_
 
     """
     Obtiene el nombre del formulario de edición de registros
     """
 
-    def formRecord(self):
+    def formRecord(self) -> str:
         return self.formRecord_

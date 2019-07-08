@@ -1,22 +1,25 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtCore import QSettings
+from pineboolib.core.settings import settings
+
+
+from typing import List, Optional, Union, Any
 
 
 class FLSettings(object):
-    s = None
+    s = settings
 
-    def __init__(self):
-        self.s = QSettings(QSettings.NativeFormat, QSettings.UserScope, "Eneboo", "Pineboo")
-
-    def readListEntry(self, key):
+    def readListEntry(self, key: str) -> List[str]:
         ret = self.s.value(key)
-        if isinstance(ret, str):
-            ret = [ret]
         if ret is None:
-            ret = []
-        return ret
+            return []
+        if isinstance(ret, str):
+            return [ret]
+        if isinstance(ret, list):
+            return ret
 
-    def readEntry(self, _key, _def=None):
+        raise ValueError("Configuration key %s does not contain a list" % key)
+
+    def readEntry(self, _key: str, _def: Optional[Union[str, bool]] = None) -> Any:
         ret = self.s.value(_key, None)  # devuelve un QVariant !!!!
 
         if "geo" in _key:
@@ -32,10 +35,13 @@ class FLSettings(object):
         # print("Retornando %s ---> %s (%s)" % (_key, ret, type(ret)))
         return ret
 
-    def readNumEntry(self, key, _def=0):
+    def readNumEntry(self, key: str, _def: int = 0) -> int:
         ret = self.s.value(key)
         if ret is not None:
-            return int(ret)
+            if isinstance(ret, (int, float, str)):
+                return int(ret)
+            else:
+                raise ValueError("Configuration key %s cannot be converted to integer" % key)
         else:
             return _def
 
@@ -45,20 +51,24 @@ class FLSettings(object):
             ret = _def
         return float(ret)
 
-    def readBoolEntry(self, key, _def=False):
+    def readBoolEntry(self, key: str, _def: bool = False) -> bool:
         ret = self.s.value(key)
-        if isinstance(ret, str):
-            ret = ret == "true"
         if ret is None:
-            ret = _def
+            return _def
+        if isinstance(ret, str):
+            return ret == "true"
+        if isinstance(ret, int):
+            return ret != 0
+        if isinstance(ret, bool):
+            return ret
+        raise ValueError("Configuration key %s cannot be converted to boolean" % key)
 
-        return ret
-
-    def writeEntry(self, key, value):
+    def writeEntry(self, key: str, value: Union[int, str, bool]) -> None:
         self.s.setValue(key, value)
 
-    def writeEntryList(self, key, value):
-
+    def writeEntryList(self, key: str, value: List[str]) -> None:
+        # FIXME: This function flattens the array when saving in some cases. Should always save an array.
+        val: Union[str, List[str]]
         if len(value) == 1:
             val = value[0]
         elif len(value) == 0:

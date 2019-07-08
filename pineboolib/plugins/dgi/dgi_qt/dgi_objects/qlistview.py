@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets, QtGui
-from pineboolib import decorators
-from PyQt5.QtCore import pyqtSignal
+from PyQt5 import QtWidgets, QtGui  # type: ignore
+from pineboolib.core import decorators
+from PyQt5.QtCore import pyqtSignal  # type: ignore
 
 
 class QListView(QtWidgets.QWidget):
@@ -50,10 +50,10 @@ class QListView(QtWidgets.QWidget):
         self.doubleClicked.emit(item)
 
     def addItem(self, t):
-        from pineboolib.pncontrolsfactory import FLListViewItem
+        from pineboolib import pncontrolsfactory
 
         self._current_row = self._current_row + 1
-        item = FLListViewItem()
+        item = pncontrolsfactory.FLListViewItem()
         item.setEditable(False)
         item.setText(t)
 

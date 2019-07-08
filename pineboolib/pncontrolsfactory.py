@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
-
-from PyQt5 import QtCore
-from pineboolib.fllegacy.flapplication import FLApplication
-from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.wiki_error import wiki_error
-
 import inspect
-import pineboolib
-import logging
 import weakref
 import re
 import os
 import traceback
 
-from typing import Any, Callable
+from typing import Any, List, Tuple, Optional
+
+from PyQt5 import QtCore  # type: ignore
+from pineboolib.core.utils.utils_base import create_dict
+from pineboolib.core.utils.logging import logging
+from pineboolib.application import project
+from pineboolib.fllegacy.systype import SysType
+
 
 logger = logging.getLogger("PNControlsFactory")
 
@@ -21,282 +20,163 @@ logger = logging.getLogger("PNControlsFactory")
 Conjunto de controles usados en Pineboo. Estos son cargados desde el DGI seleccionado en el proyecto
 """
 
-"""
-Devuelve un objecto a partir de su nombre
-@param name, Nombre del objecto a buscar
-@return objecto o None si no existe el objeto buscado
-"""
+qsa_sys = SysType()
+
+
+class ObjectNotFoundInCurrentDGI(object):
+    pass
+
+
+class ObjectNotFoundDGINotLoaded(object):
+    pass
 
 
 def resolveObject(name: str) -> Any:
-    if pineboolib.project is None:
-        logger.warning("Project not initialized")
-        return None
-    obj_ = getattr(pineboolib.project._DGI, name, None)
+    if not project._DGI:
+        return ObjectNotFoundDGINotLoaded
+    obj_ = getattr(project._DGI, name, None)
     if obj_:
         return obj_
 
-    if pineboolib.project._DGI.show_object_not_found_warnings():
-        logger.warning("el objeto %s no se encuentra en el dgi %s", name, pineboolib.project._DGI.alias().lower())
+    logger.warning("resolveObject: class <%s> not found in dgi <%s>", name, project._DGI.alias().lower())
+    return ObjectNotFoundInCurrentDGI
 
 
-# Clases Qt
-QComboBox = resolveObject("QComboBox")
-QTable = resolveObject("QTable")
-QLayoutWidget = resolveObject("QWidget")
-QToolButton = resolveObject("QToolButton")
-QTabWidget = resolveObject("QTabWidget")
-QLabel = resolveObject("QLabel")
-QGroupBox = resolveObject("QGroupBox")
-QListView = resolveObject("QListView")
-QPushButton = resolveObject("QPushButton")
-QTextEdit = resolveObject("QTextEdit")
-QLineEdit = resolveObject("QLineEdit")
-QDateEdit = resolveObject("QDateEdit")
-QTimeEdit = resolveObject("QTimeEdit")
-QCheckBox = resolveObject("QCheckBox")
-QWidget = resolveObject("QWidget")
-QtWidgets = resolveObject("QtWidgets")
-QColor = resolveObject("QColor")
-QMessageBox = resolveObject("MessageBox")
-QButtonGroup = resolveObject("QButtonGroup")
-QDialog = resolveObject("QDialog")
-QVBoxLayout = resolveObject("QVBoxLayout")
-QHBoxLayout = resolveObject("QHBoxLayout")
-QFrame = resolveObject("QFrame")
-QMainWindow = resolveObject("QMainWindow")
-QSignalMapper = resolveObject("QSignalMapper")
-QDomDocument = resolveObject("QDomDocument")
-QMenu = resolveObject("QMenu")
-QToolBar = resolveObject("QToolBar")
-QListWidgetItem = resolveObject("QListWidgetItem")
-QListViewWidget = resolveObject("QListWidget")
-QPixmap = resolveObject("QPixmap")
-QImage = resolveObject("QImage")
-QIcon = resolveObject("QIcon")
-QAction = resolveObject("QAction")
-QActionGroup = resolveObject("QActionGroup")
-QTreeWidget = resolveObject("QTreeWidget")
-QTreeWidgetItem = resolveObject("QTreeWidgetItem")
-QTreeWidgetItemIterator = resolveObject("QTreeWidgetItemIterator")
-QDataView = resolveObject("QWidget")
-QProcess = resolveObject("Process")
-QByteArray = resolveObject("QByteArray")
-QRadioButton = resolveObject("QRadioButton")
-QSpinBox = resolveObject("FLSpinBox")
-QInputDialog = resolveObject("QInputDialog")
-QLineEdit = resolveObject("QLineEdit")
-QApplication = resolveObject("QApplication")
-qApp = resolveObject("qApp")
-QStyleFactory = resolveObject("QStyleFactory")
-QFontDialog = resolveObject("QFontDialog")
-QDockWidget = resolveObject("QDockWidget")
-QMdiArea = resolveObject("QMdiArea")
-QMdiSubWindow = resolveObject("QMdiSubWindow")
-QKeySequence = resolveObject("QKeySequence")
-QSize = resolveObject("QSize")
-QSizePolicy = resolveObject("QSizePolicy")
-QToolBox = resolveObject("QToolBox")
-QPainter = resolveObject("QPainter")
-QBrush = resolveObject("QBrush")
-QProgressDialog = resolveObject("QProgressDialog")
-QFileDialog = resolveObject("QFileDialog")
+def reload_from_DGI():
+    # Clases Qt
+    global QComboBox, QTable, QLayoutWidget, QToolButton, QTabWidget, QLabel, QGroupBox, QListView, QPushButton, QTextEdit
+    global QLineEdit, QDateEdit, QTimeEdit, QCheckBox, QWidget, QtWidgets, QColor, QMessageBox, QButtonGroup, QDialog
+    global QVBoxLayout, QHBoxLayout, QFrame, QMainWindow, QSignalMapper, QDomDocument, QMenu, QToolBar, QListWidgetItem, QListViewWidget
+    global QPixmap, QImage, QIcon, QAction, QActionGroup, QTreeWidget, QTreeWidgetItem, QTreeWidgetItemIterator, QDataView
+    global QProcess, QByteArray, QRadioButton, QSpinBox, QInputDialog, QApplication, qApp, QStyleFactory, QFontDialog
+    global QDockWidget, QMdiArea, QMdiSubWindow, QKeySequence, QSize, QSizePolicy, QToolBox, QPainter, QBrush, QProgressDialog, QFileDialog
+    # Clases FL
+    global FLLineEdit, FLTimeEdit, FLDateEdit, FLPixmapView, FLDomDocument, FLDomElement
+    global FLDomNode, FLDomNodeList, FLListViewItem, FLTable, FLDataTable, FLCheckBox, FLTextEditOutput
+    global FLSpinBox, FLTableDB, FLFieldDB, FLFormDB, FLFormRecordDB, FLFormSearchDB, FLDoubleValidator
+    global FLIntValidator, FLUIntValidator, FLCodBar, FLWidget, FLWorkSpace, FormDBWidget
+    # Clases QSA
+    global CheckBox, ComboBox, TextEdit, LineEdit, FileDialog, MessageBox, RadioButton, Color, Dialog
+    global Label, GroupBox, Process, SpinBox, Line, NumberEdit, DateEdit, TimeEdit
+    # Clases AQNext
+    global auth
+    # Clases Qt
+    QComboBox = resolveObject("QComboBox")
+    QTable = resolveObject("QTable")
+    QLayoutWidget = resolveObject("QWidget")
+    QToolButton = resolveObject("QToolButton")
+    QTabWidget = resolveObject("QTabWidget")
+    QLabel = resolveObject("QLabel")
+    QGroupBox = resolveObject("QGroupBox")
+    QListView = resolveObject("QListView")
+    QPushButton = resolveObject("QPushButton")
+    QTextEdit = resolveObject("QTextEdit")
+    QLineEdit = resolveObject("QLineEdit")
+    QDateEdit = resolveObject("QDateEdit")
+    QTimeEdit = resolveObject("QTimeEdit")
+    QCheckBox = resolveObject("QCheckBox")
+    QWidget = resolveObject("QWidget")
+    QtWidgets = resolveObject("QtWidgets")
+    QColor = resolveObject("QColor")
+    QMessageBox = resolveObject("MessageBox")
+    QButtonGroup = resolveObject("QButtonGroup")
+    QDialog = resolveObject("QDialog")
+    QVBoxLayout = resolveObject("QVBoxLayout")
+    QHBoxLayout = resolveObject("QHBoxLayout")
+    QFrame = resolveObject("QFrame")
+    QMainWindow = resolveObject("QMainWindow")
+    QSignalMapper = resolveObject("QSignalMapper")
+    QDomDocument = resolveObject("QDomDocument")
+    QMenu = resolveObject("QMenu")
+    QToolBar = resolveObject("QToolBar")
+    QListWidgetItem = resolveObject("QListWidgetItem")
+    QListViewWidget = resolveObject("QListWidget")
+    QPixmap = resolveObject("QPixmap")
+    QImage = resolveObject("QImage")
+    QIcon = resolveObject("QIcon")
+    QAction = resolveObject("QAction")
+    QActionGroup = resolveObject("QActionGroup")
+    QTreeWidget = resolveObject("QTreeWidget")
+    QTreeWidgetItem = resolveObject("QTreeWidgetItem")
+    QTreeWidgetItemIterator = resolveObject("QTreeWidgetItemIterator")
+    QDataView = resolveObject("QWidget")
+    QProcess = resolveObject("Process")
+    QByteArray = resolveObject("QByteArray")
+    QRadioButton = resolveObject("QRadioButton")
+    QSpinBox = resolveObject("FLSpinBox")
+    QInputDialog = resolveObject("QInputDialog")
+    QApplication = resolveObject("QApplication")
+    qApp = resolveObject("qApp")
+    QStyleFactory = resolveObject("QStyleFactory")
+    QFontDialog = resolveObject("QFontDialog")
+    QDockWidget = resolveObject("QDockWidget")
+    QMdiArea = resolveObject("QMdiArea")
+    QMdiSubWindow = resolveObject("QMdiSubWindow")
+    QKeySequence = resolveObject("QKeySequence")
+    QSize = resolveObject("QSize")
+    QSizePolicy = resolveObject("QSizePolicy")
+    QToolBox = resolveObject("QToolBox")
+    QPainter = resolveObject("QPainter")
+    QBrush = resolveObject("QBrush")
+    QProgressDialog = resolveObject("QProgressDialog")
+    QFileDialog = resolveObject("QFileDialog")
 
-"""
-QIconSet = resolveObject("QIconSet")
-"""
-# Clases FL
-FLLineEdit = resolveObject("FLLineEdit")
-FLTimeEdit = resolveObject("FLTimeEdit")
-FLDateEdit = resolveObject("FLDateEdit")
-FLPixmapView = resolveObject("FLPixmapView")
-FLDomDocument = resolveObject("QDomDocument")
-FLDomElement = resolveObject("QDomElement")
-FLDomNode = resolveObject("QDomNode")
-FLDomNodeList = resolveObject("QDomNodeList")
-FLListViewItem = resolveObject("FLListViewItem")
-FLTable = resolveObject("QTable")
-FLDataTable = resolveObject("FLDataTable")
-FLCheckBox = resolveObject("FLCheckBox")
-FLTextEditOutput = resolveObject("FLTextEditOutput")
-FLSpinBox = resolveObject("FLSpinBox")
-FLTableDB = resolveObject("FLTableDB")
-FLFieldDB = resolveObject("FLFieldDB")
-FLFormDB = resolveObject("FLFormDB")
-FLFormRecordDB = resolveObject("FLFormRecordDB")
-FLFormSearchDB = resolveObject("FLFormSearchDB")
-FLDoubleValidator = resolveObject("FLDoubleValidator")
-FLIntValidator = resolveObject("FLIntValidator")
-FLUIntValidator = resolveObject("FLUIntValidator")
-FLCodBar = resolveObject("FLCodBar")
-FLWidget = resolveObject("FLWidget")
-FLWorkSpace = resolveObject("FLWorkSpace")
+    """
+    QIconSet = resolveObject("QIconSet")
+    """
+    # Clases FL
+    FLLineEdit = resolveObject("FLLineEdit")
+    FLTimeEdit = resolveObject("FLTimeEdit")
+    FLDateEdit = resolveObject("FLDateEdit")
+    FLPixmapView = resolveObject("FLPixmapView")
+    FLDomDocument = resolveObject("QDomDocument")
+    FLDomElement = resolveObject("QDomElement")
+    FLDomNode = resolveObject("QDomNode")
+    FLDomNodeList = resolveObject("QDomNodeList")
+    FLListViewItem = resolveObject("FLListViewItem")
+    FLTable = resolveObject("QTable")
+    FLDataTable = resolveObject("FLDataTable")
+    FLCheckBox = resolveObject("FLCheckBox")
+    FLTextEditOutput = resolveObject("FLTextEditOutput")
+    FLSpinBox = resolveObject("FLSpinBox")
+    FLTableDB = resolveObject("FLTableDB")
+    FLFieldDB = resolveObject("FLFieldDB")
+    FLFormDB = resolveObject("FLFormDB")
+    FLFormRecordDB = resolveObject("FLFormRecordDB")
+    FLFormSearchDB = resolveObject("FLFormSearchDB")
+    FLDoubleValidator = resolveObject("FLDoubleValidator")
+    FLIntValidator = resolveObject("FLIntValidator")
+    FLUIntValidator = resolveObject("FLUIntValidator")
+    FLCodBar = resolveObject("FLCodBar")
+    FLWidget = resolveObject("FLWidget")
+    FLWorkSpace = resolveObject("FLWorkSpace")
 
+    FormDBWidget = resolveObject("FormDBWidget")
+    # Clases QSA
+    CheckBox = resolveObject("CheckBox")
+    ComboBox = resolveObject("QComboBox")
+    TextEdit = QTextEdit
+    LineEdit = resolveObject("LineEdit")
+    FileDialog = resolveObject("FileDialog")
+    MessageBox = resolveObject("MessageBox")
+    RadioButton = resolveObject("RadioButton")
+    Color = QColor
+    Dialog = resolveObject("Dialog")
+    Label = resolveObject("QLabel")
+    GroupBox = resolveObject("GroupBox")
+    Process = resolveObject("Process")
+    SpinBox = resolveObject("FLSpinBox")
+    Line = resolveObject("QLine")
+    NumberEdit = resolveObject("NumberEdit")
+    DateEdit = resolveObject("QDateEdit")
+    TimeEdit = resolveObject("QTimeEdit")
 
-FormDBWidget = resolveObject("FormDBWidget")
-# Clases QSA
-CheckBox = resolveObject("CheckBox")
-ComboBox = resolveObject("QComboBox")
-TextEdit = QTextEdit
-LineEdit = resolveObject("LineEdit")
-FileDialog = resolveObject("FileDialog")
-MessageBox = resolveObject("MessageBox")
-RadioButton = resolveObject("RadioButton")
-Color = QColor
-Dialog = resolveObject("Dialog")
-Label = resolveObject("QLabel")
-GroupBox = resolveObject("GroupBox")
-Process = resolveObject("Process")
-SpinBox = resolveObject("FLSpinBox")
-Line = resolveObject("QLine")
-NumberEdit = resolveObject("NumberEdit")
-DateEdit = resolveObject("QDateEdit")
-TimeEdit = resolveObject("QTimeEdit")
-
-# Clases AQNext
-auth = resolveObject("auth")
-
-
-class SysType(object):
-    def __init__(self) -> None:
-        self._name_user = None
-        self.sys_widget = None
-
-    def nameUser(self) -> str:
-        ret_ = None
-        if aqApp.DGI().use_alternative_credentials():
-            ret_ = aqApp.DGI().get_nameuser()
-        else:
-            ret_ = aqApp.db().user()
-
-        return ret_
-
-    def interactiveGUI(self):
-        return aqApp.DGI().interactiveGUI()
-
-    def isLoadedModule(self, modulename: str) -> bool:
-        return modulename in aqApp.db().managerModules().listAllIdModules()
-
-    def translate(self, *args) -> str:
-        util = FLUtil()
-
-        group = args[0] if len(args) == 2 else "scripts"
-        text = args[1] if len(args) == 2 else args[0]
-
-        return util.translate(group, text)
-
-    def osName(self) -> str:
-        util = FLUtil()
-        return util.getOS()
-
-    def nameBD(self):
-        return aqApp.db().DBName()
-
-    def toUnicode(self, val: str, format: str) -> str:
-        return val.encode(format).decode("utf-8", "replace")
-
-    def fromUnicode(self, val, format):
-        return val.encode("utf-8").decode(format, "replace")
-
-    def Mr_Proper(self):
-        aqApp.db().Mr_Proper()
-
-    def installPrefix(self):
-        from pineboolib.utils import filedir
-
-        return filedir("..")
-
-    def __getattr__(self, fun_: str) -> Callable:
-        if self.sys_widget is None:
-            self.sys_widget = pineboolib.project.actions["sys"].load().widget
-        return getattr(self.sys_widget, fun_)
-
-    def installACL(self, idacl):
-        acl_ = pineboolib.project.acl()
-        if acl_:
-            acl_.installACL(idacl)
-
-    def version(self) -> str:
-        return str(pineboolib.project.version)
-
-    def processEvents(self) -> None:
-        return aqApp.DGI().processEvents()
-
-    def write(self, encode_, dir_, contenido):
-        import codecs
-
-        f = codecs.open(dir_, encoding=encode_, mode="w+")
-        f.write(contenido)
-        f.seek(0)
-        f.close()
-
-    def cleanupMetaData(self, connName="default"):
-        aqApp.db().useConn(connName).manager().cleanupMetaData()
-
-    def updateAreas(self):
-        aqApp.initToolBox()
-
-    def isDebuggerMode(self) -> bool:
-        from pineboolib.fllegacy.flsettings import FLSettings
-
-        return FLSettings().readBoolEntry("application/isDebuggerMode", False)
-
-    def reinit(self):
-        aqApp.reinit()
-
-    def setCaptionMainWidget(self, t):
-        aqApp.setCaptionMainWidget(t)
-
-    def isDebuggerEnabled(self) -> bool:
-        from pineboolib.fllegacy.flsettings import FLSettings
-
-        return FLSettings().readBoolEntry("application/dbadmin_enabled", False)
-
-    def nameDriver(self, connName="default"):
-        return aqApp.db().useConn(connName).driverName()
-
-    def nameHost(self, connName="default"):
-        return aqApp.db().useConn(connName).host()
-
-    def addDatabase(self, *args):
-        # def addDatabase(self, driver_name = None, db_name = None, db_user_name = None,
-        #                 db_password = None, db_host = None, db_port = None, connName="default"):
-        if len(args) == 1:
-            conn_db = aqApp.db().useConn(args[0])
-            if not conn_db.isOpen():
-                conn_db.driverName_ = aqApp.db().driverName_
-                conn_db.driverSql = aqApp.db().driverSql
-                conn_db.conn = conn_db.conectar(aqApp.db().db_name, aqApp.db().db_host, aqApp.db().db_port, aqApp.db().db_userName, aqApp.db().db_password)
-                if conn_db.conn is False:
-                    return False
-
-                conn_db._isOpen = True
-
-        else:
-            conn_db = aqApp.db().useConn(args[6])
-            if not conn_db.isOpen():
-                conn_db.driverName_ = conn_db.driverSql.aliasToName(args[0])
-                if conn_db.driverName_ and conn_db.driverSql.loadDriver(conn_db.driverName_):
-                    conn_db.conn = conn_db.conectar(args[1], args[4], args[5], args[2], args[3])
-
-                if conn_db.conn is False:
-                    return False
-
-                conn_db.driver().db_ = conn_db
-                conn_db._isOpen = True
-                conn_db._dbAux = conn_db
-
-        return True
-
-    def removeDatabase(self, connName="default"):
-        return aqApp.db().useConn(connName).removeConn(connName)
-
-    def idSession(self):
-        return aqApp.timeUser().toString(QtCore.Qt.ISODate)
+    # Clases AQNext
+    auth = resolveObject("auth")
 
 
 class System_class(object):
-    def setenv(name, val):
+    def setenv(self, name, val):
         os.environ[name] = val
 
     def getenv(self, name):
@@ -367,7 +247,7 @@ def slot_done(fn, signal, sender, caller):
         # Este parche es para evitar que las conexiones de un clicked de error de cantidad de argumentos.
         # En Eneboo se esperaba que signal no contenga argumentos
         if signal.signal == "2clicked(bool)":
-            args = []
+            args = tuple()
 
         args_num = get_expected_args_num(fn)
         try:
@@ -376,8 +256,7 @@ def slot_done(fn, signal, sender, caller):
             else:
                 res = fn(*args[0:args_num])
         except Exception:
-            # script_name = caller.__module__ if caller is not None else "????"
-            aqApp.msgBoxWarning(wiki_error(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI)
+            logger.exception("Error trying to create a connection")
 
         if caller is not None:
             try:
@@ -393,7 +272,7 @@ def slot_done(fn, signal, sender, caller):
     return new_fn
 
 
-def connect(sender, signal, receiver, slot, caller=None):
+def connect(sender, signal, receiver, slot, caller=None) -> Optional[Tuple[Any, Any]]:
     if caller is not None:
         logger.debug("* * * Connect:: %s %s %s %s %s", caller, sender, signal, receiver, slot)
     else:
@@ -401,7 +280,7 @@ def connect(sender, signal, receiver, slot, caller=None):
     signal_slot = solve_connection(sender, signal, receiver, slot)
 
     if not signal_slot:
-        return False
+        return None
     # http://pyqt.sourceforge.net/Docs/PyQt4/qt.html#ConnectionType-enum
     conntype = QtCore.Qt.QueuedConnection | QtCore.Qt.UniqueConnection
     new_signal, new_slot = signal_slot
@@ -417,17 +296,17 @@ def connect(sender, signal, receiver, slot, caller=None):
         # new_signal.connect(new_slot, type=conntype)
 
     except Exception:
-        # logger.exception("ERROR Connecting: %s %s %s %s", sender, signal, receiver, slot)
-        return False
+        logger.warning("ERROR Connecting: %s %s %s %s", sender, signal, receiver, slot)
+        return None
 
     signal_slot = new_signal, slot_done_fn
     return signal_slot
 
 
-def disconnect(sender, signal, receiver, slot, caller=None):
+def disconnect(sender, signal, receiver, slot, caller=None) -> Optional[Tuple[Any, Any]]:
     signal_slot = solve_connection(sender, signal, receiver, slot)
     if not signal_slot:
-        return False
+        return None
     signal, slot = signal_slot
     try:
         signal.disconnect(slot)
@@ -491,18 +370,17 @@ def solve_connection(sender, signal, receiver, slot):
                 return False
         return oSignal, oSlot
     else:
-        logger.error("Al realizar connect %s:%s -> %s:%s ; " "el slot no se reconoce y el receptor no es QObject.", sender, signal, receiver, slot)
+        logger.error(
+            "Al realizar connect %s:%s -> %s:%s ; " "el slot no se reconoce y el receptor no es QObject.", sender, signal, receiver, slot
+        )
     return False
-
-
-aqApp = FLApplication()
 
 
 def GET(function_name, arguments=[], conn=None):
     if conn is None:
-        conn = aqApp.db()
+        conn = project.conn
     if hasattr(conn.driver(), "send_to_server"):
-        return conn.driver().send_to_server(pineboolib.utils.create_dict("call_function", function_name, conn.driver().id_, arguments))
+        return conn.driver().send_to_server(create_dict("call_function", function_name, conn.driver().id_, arguments))
     else:
         return "Funcionalidad no soportada"
 
@@ -526,7 +404,7 @@ def check_gc_referrers(typename, w_obj, name):
         # print("HINT: Objetos referenciando %r::%r (%r) :" % (typename, obj, name))
         for ref in gc.get_referrers(obj):
             if isinstance(ref, dict):
-                x = []
+                x: List[str] = []
                 for k, v in ref.items():
                     if v is obj:
                         k = "(**)" + k
@@ -558,3 +436,118 @@ def print_stack(maxsize=1):
 from pineboolib.packager.aqunpacker import AQUnpacker  # noqa:
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData  # noqa:
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
+
+# aqApp -- imported from loader.main after reload_from_DGI() call, as it is a cyclic dependency
+
+# --- create empty objects first:
+
+QComboBox = ObjectNotFoundDGINotLoaded
+QTable = ObjectNotFoundDGINotLoaded
+QLayoutWidget = ObjectNotFoundDGINotLoaded
+QToolButton = ObjectNotFoundDGINotLoaded
+QTabWidget = ObjectNotFoundDGINotLoaded
+QLabel = ObjectNotFoundDGINotLoaded
+QGroupBox = ObjectNotFoundDGINotLoaded
+QListView = ObjectNotFoundDGINotLoaded
+QPushButton = ObjectNotFoundDGINotLoaded
+QTextEdit = ObjectNotFoundDGINotLoaded
+QLineEdit = ObjectNotFoundDGINotLoaded
+QDateEdit = ObjectNotFoundDGINotLoaded
+QTimeEdit = ObjectNotFoundDGINotLoaded
+QCheckBox = ObjectNotFoundDGINotLoaded
+QWidget = ObjectNotFoundDGINotLoaded
+QtWidgets = ObjectNotFoundDGINotLoaded
+QColor = ObjectNotFoundDGINotLoaded
+QMessageBox = ObjectNotFoundDGINotLoaded
+QButtonGroup = ObjectNotFoundDGINotLoaded
+QDialog = ObjectNotFoundDGINotLoaded
+QVBoxLayout = ObjectNotFoundDGINotLoaded
+QHBoxLayout = ObjectNotFoundDGINotLoaded
+QFrame = ObjectNotFoundDGINotLoaded
+QMainWindow = ObjectNotFoundDGINotLoaded
+QSignalMapper = ObjectNotFoundDGINotLoaded
+QDomDocument = ObjectNotFoundDGINotLoaded
+QMenu = ObjectNotFoundDGINotLoaded
+QToolBar = ObjectNotFoundDGINotLoaded
+QListWidgetItem = ObjectNotFoundDGINotLoaded
+QListViewWidget = ObjectNotFoundDGINotLoaded
+QPixmap = ObjectNotFoundDGINotLoaded
+QImage = ObjectNotFoundDGINotLoaded
+QIcon = ObjectNotFoundDGINotLoaded
+QAction = ObjectNotFoundDGINotLoaded
+QActionGroup = ObjectNotFoundDGINotLoaded
+QTreeWidget = ObjectNotFoundDGINotLoaded
+QTreeWidgetItem = ObjectNotFoundDGINotLoaded
+QTreeWidgetItemIterator = ObjectNotFoundDGINotLoaded
+QDataView = ObjectNotFoundDGINotLoaded
+QProcess = ObjectNotFoundDGINotLoaded
+QByteArray = ObjectNotFoundDGINotLoaded
+QRadioButton = ObjectNotFoundDGINotLoaded
+QSpinBox = ObjectNotFoundDGINotLoaded
+QInputDialog = ObjectNotFoundDGINotLoaded
+QApplication = ObjectNotFoundDGINotLoaded
+qApp = ObjectNotFoundDGINotLoaded
+QStyleFactory = ObjectNotFoundDGINotLoaded
+QFontDialog = ObjectNotFoundDGINotLoaded
+QDockWidget = ObjectNotFoundDGINotLoaded
+QMdiArea = ObjectNotFoundDGINotLoaded
+QMdiSubWindow = ObjectNotFoundDGINotLoaded
+QKeySequence = ObjectNotFoundDGINotLoaded
+QSize = ObjectNotFoundDGINotLoaded
+QSizePolicy = ObjectNotFoundDGINotLoaded
+QToolBox = ObjectNotFoundDGINotLoaded
+QPainter = ObjectNotFoundDGINotLoaded
+QBrush = ObjectNotFoundDGINotLoaded
+QProgressDialog = ObjectNotFoundDGINotLoaded
+QFileDialog = ObjectNotFoundDGINotLoaded
+
+# Clases FL
+FLLineEdit = ObjectNotFoundDGINotLoaded
+FLTimeEdit = ObjectNotFoundDGINotLoaded
+FLDateEdit = ObjectNotFoundDGINotLoaded
+FLPixmapView = ObjectNotFoundDGINotLoaded
+FLDomDocument = ObjectNotFoundDGINotLoaded
+FLDomElement = ObjectNotFoundDGINotLoaded
+FLDomNode = ObjectNotFoundDGINotLoaded
+FLDomNodeList = ObjectNotFoundDGINotLoaded
+FLListViewItem = ObjectNotFoundDGINotLoaded
+FLTable = ObjectNotFoundDGINotLoaded
+FLDataTable = ObjectNotFoundDGINotLoaded
+FLCheckBox = ObjectNotFoundDGINotLoaded
+FLTextEditOutput = ObjectNotFoundDGINotLoaded
+FLSpinBox = ObjectNotFoundDGINotLoaded
+FLTableDB = ObjectNotFoundDGINotLoaded
+FLFieldDB = ObjectNotFoundDGINotLoaded
+FLFormDB = ObjectNotFoundDGINotLoaded
+FLFormRecordDB = ObjectNotFoundDGINotLoaded
+FLFormSearchDB = ObjectNotFoundDGINotLoaded
+FLDoubleValidator = ObjectNotFoundDGINotLoaded
+FLIntValidator = ObjectNotFoundDGINotLoaded
+FLUIntValidator = ObjectNotFoundDGINotLoaded
+FLCodBar = ObjectNotFoundDGINotLoaded
+FLWidget = ObjectNotFoundDGINotLoaded
+FLWorkSpace = ObjectNotFoundDGINotLoaded
+
+FormDBWidget = ObjectNotFoundDGINotLoaded
+
+# Clases QSA
+CheckBox = ObjectNotFoundDGINotLoaded
+ComboBox = ObjectNotFoundDGINotLoaded
+TextEdit = ObjectNotFoundDGINotLoaded
+LineEdit = ObjectNotFoundDGINotLoaded
+FileDialog = ObjectNotFoundDGINotLoaded
+MessageBox = ObjectNotFoundDGINotLoaded
+RadioButton = ObjectNotFoundDGINotLoaded
+Color = QColor
+Dialog = ObjectNotFoundDGINotLoaded
+Label = ObjectNotFoundDGINotLoaded
+GroupBox = ObjectNotFoundDGINotLoaded
+Process = ObjectNotFoundDGINotLoaded
+SpinBox = ObjectNotFoundDGINotLoaded
+Line = ObjectNotFoundDGINotLoaded
+NumberEdit = ObjectNotFoundDGINotLoaded
+DateEdit = ObjectNotFoundDGINotLoaded
+TimeEdit = ObjectNotFoundDGINotLoaded
+
+# Clases AQNext
+auth = ObjectNotFoundDGINotLoaded

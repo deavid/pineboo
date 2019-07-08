@@ -57,6 +57,9 @@ como el selector de módulos, o cada una de las ventanas principales de los mód
 """
 
 
+from typing import List, Dict, Any
+
+
 class FLAccessControl(object):
 
     """
@@ -79,9 +82,9 @@ class FLAccessControl(object):
     correspondencia entre el nombre del ACO (utilizado como clave de búsqueda)
     y el permiso a aplicar.
     """
-    acosPerms_ = None
+    acosPerms_: Dict[str, str] = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name_ = ""
         self.user_ = ""
         self.perm_ = ""
@@ -91,7 +94,7 @@ class FLAccessControl(object):
     Destructor
     """
 
-    def __del__(self):
+    def __del__(self) -> None:
         if self.acosPerms_:
             self.acosPerms_.clear()
             del self.acosPerms_
@@ -102,7 +105,7 @@ class FLAccessControl(object):
     @return Cadena de texto con el nombre del objeto.
     """
 
-    def name(self):
+    def name(self) -> str:
         return self.name_
 
     """
@@ -111,7 +114,7 @@ class FLAccessControl(object):
     @return Cadena de texto con el nombre (login) del usuario.
     """
 
-    def user(self):
+    def user(self) -> Any:
         return self.user_
 
     """
@@ -120,7 +123,7 @@ class FLAccessControl(object):
     @return Cadena de texto que identifica el permiso a aplicar.
     """
 
-    def perm(self):
+    def perm(self) -> str:
         return self.perm_
 
     """
@@ -129,7 +132,7 @@ class FLAccessControl(object):
     @param n Nombre del objeto.
     """
 
-    def setName(self, n):
+    def setName(self, n: str) -> None:
         self.name_ = n
 
     """
@@ -138,7 +141,7 @@ class FLAccessControl(object):
     @param u Nombre (login) del usuario.
     """
 
-    def setUser(self, u):
+    def setUser(self, u) -> None:
         self.user_ = u
 
     """
@@ -147,14 +150,14 @@ class FLAccessControl(object):
     @param p Cadena de texto con el identificador del permiso.
     """
 
-    def setPerm(self, p):
+    def setPerm(self, p: str) -> None:
         self.perm_ = p
 
     """
     Limpia la regla vaciándola y liberando todos los recursos
     """
 
-    def clear(self):
+    def clear(self) -> None:
         self.name_ = ""
         self.user_ = ""
         self.perm_ = ""
@@ -173,7 +176,7 @@ class FLAccessControl(object):
     @return Cadena de texto que identifica al tipo de objeto general de la regla, p.e.: "table".
     """
 
-    def type(self):
+    def type(self) -> str:
         return ""
 
     """
@@ -182,7 +185,7 @@ class FLAccessControl(object):
     @param e Elemento correspondiente al nodo DOM que se utilizará para definir la regla.
     """
 
-    def set(self, e):
+    def set(self, e) -> None:
         if not e:
             return
 
@@ -223,7 +226,7 @@ class FLAccessControl(object):
     @param d Documento DOM/XML donde se insertará el nodo construido a partir de la regla de control de acceso.
     """
 
-    def get(self, d):
+    def get(self, d) -> None:
         if not self.type() or d is None:
             return
 
@@ -259,7 +262,7 @@ class FLAccessControl(object):
     @param acos Lista de cadenas de texto con los objetos y permisos.
     """
 
-    def setAcos(self, acos):
+    def setAcos(self, acos: List[str]) -> None:
         if acos is None:
             return
 
@@ -284,7 +287,7 @@ class FLAccessControl(object):
     @return Lista de cadenas de texto con los objetos y permisos.
     """
 
-    def getAcos(self):
+    def getAcos(self) -> List[str]:
         acos = []
 
         if self.acosPerms_:
@@ -294,6 +297,12 @@ class FLAccessControl(object):
                 acos.append(self.acosPerms_[key])
 
         return acos
+
+    def processObject(self, o):
+        raise ValueError("Cannot access base class")
+
+    def setFromObject(self, obj: object) -> None:
+        raise ValueError("Cannot access base class")
 
 
 # endif

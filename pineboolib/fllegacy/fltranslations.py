@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
-import logging
+from pineboolib import logging
 
-from PyQt5 import QtCore, Qt
+from PyQt5 import QtCore, Qt  # type: ignore
 
 
 """
@@ -85,6 +85,7 @@ class FLTranslations(object):
 
     def lrelease(self, ts_input_file, qm_output_file, stripped=True):
         from pineboolib.translator.metatranslator import metaTranslator
+        from pineboolib.application import project
 
         verbose = False
         metTranslations = False
@@ -108,7 +109,7 @@ class FLTranslations(object):
 
         else:
             # modId = self.db_.managerModules().idModuleOfFile(tsInputFile)
-            key = self.db_.managerModules().shaOfFile(ts_input_file)
+            key = project.conn.managerModules().shaOfFile(ts_input_file)
             # dir = filedir("../tempdata/cache/%s/%s/file.ts/%s" %
             #               (self._prj.conn.db_name, modId, key))
             tagMap = full_text
@@ -138,5 +139,5 @@ Devuelve la traducción si existe
 """
 
 
-def FLTranslate(group, context, translate=True):
-    return Qt.qApp.translate(group.encode(), context.encode()) if translate else context.encode()
+def FLTranslate(group: str, context: str, translate: bool = True) -> str:
+    return Qt.qApp.translate(group.encode(), context.encode()) if translate else context

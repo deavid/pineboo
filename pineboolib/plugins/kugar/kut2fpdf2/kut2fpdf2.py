@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from pineboolib.utils import checkDependencies
-import logging
+from pineboolib.application.utils.check_dependencies import check_dependencies
+from pineboolib import logging
 
 from pineboolib.plugins.kugar.kut2fpdf.kut2fpdf import kut2fpdf
 
@@ -11,4 +11,4 @@ class kut2fpdf2(kut2fpdf):
         super().__init__()
 
         self.logger = logging.getLogger("kut2fpdf2")
-        checkDependencies({"fpdf": "fpdf2"})
+        check_dependencies({"fpdf": "fpdf2"})

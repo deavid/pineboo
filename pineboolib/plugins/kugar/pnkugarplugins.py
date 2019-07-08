@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from pineboolib.utils import filedir
+from pineboolib.core.utils.utils_base import filedir
 import os
-import logging
+from pineboolib import logging
 import importlib
 
 logger = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ class PNKugarPlugins(object):
     Constructor
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         # Cargamos los parsers avalibles
         dirlist = os.listdir(filedir("plugins/kugar"))

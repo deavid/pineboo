@@ -1,6 +1,6 @@
 # # -*- coding: utf-8 -*-
-from PyQt5 import QtCore
-from pineboolib import decorators
+from PyQt5 import QtCore  # type: ignore
+from pineboolib.core import decorators
 
 
 class FLNetwork(QtCore.QObject):
@@ -19,7 +19,7 @@ class FLNetwork(QtCore.QObject):
     def __init__(self, url):
         super(FLNetwork, self).__init__()
         self.url = url
-        from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager
+        from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager  # type: ignore
 
         self.request = QNetworkRequest()
 

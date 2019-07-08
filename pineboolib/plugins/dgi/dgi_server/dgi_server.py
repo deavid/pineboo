@@ -1,18 +1,18 @@
 # # -*- coding: utf-8 -*-
 import traceback
-import logging
-import sys
 import inspect
 import datetime
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
+from pineboolib import logging
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
+from pineboolib.fllegacy.flapplication import aqApp
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +24,6 @@ class parser_options(object):
         return "Welcome to pineboo server"
 
     def db_name(self, *args):
-        from pineboolib.pncontrolsfactory import aqApp
-
         return aqApp.db().DBName()
 
     def __getattr__(self, name):
@@ -59,7 +57,7 @@ class parser(object):
         try:
             response = JSONRPCResponseManager.handle(request.data, dispatcher)
         except Exception:
-            response = "Not Found"
+            return Response("Not found", mimetype="application/json")
 
         return Response(response.json, mimetype="application/json")
 
@@ -68,16 +66,16 @@ class parser(object):
         dict_ = args[0]
         func_name = dict_["function"]
         arguments = dict_["arguments"]
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.application import project
 
-        result = aqApp.call(func_name, arguments)
+        result = project.call(func_name, arguments)
         print("Llamada remota: %s(%s) --> %s" % (func_name, ", ".join(arguments), result))
         return result
 
     @dispatcher.add_method
     def dbdata(*args):
         dict_ = args[0]
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.application import project
 
         list_fun = dict_["function"].split("__")
         fun_name = list_fun[1]
@@ -85,14 +83,14 @@ class parser(object):
         cursor = None
 
         if fun_name == "hello":
-            aqApp.db().removeConn("%s_remote_client" % id_conn)
+            project.conn.removeConn("%s_remote_client" % id_conn)
             # list_to_delete = []
             for k in list(cursor_dict.keys()):
                 if k.startswith(id_conn):
                     cursor_dict[k] = None
                     del cursor_dict[k]
 
-        conn = aqApp.db().useConn("%s_remote_client" % id_conn)
+        conn = project.conn.useConn("%s_remote_client" % id_conn)
 
         # print("--->", dict_["function"], dict_["arguments"]["cursor_id"] if "cursor_id" in dict_["arguments"] else None)
 
@@ -104,6 +102,8 @@ class parser(object):
 
         if fun_name == "execute":
             try:
+                if cursor is None:
+                    raise Exception("No cursor")
                 cursor.execute(dict_["arguments"]["sql"])
             #    for data in cursor_dict[dict_["arguments"]["cursor_id"]]:
             #        res.append(data)
@@ -113,8 +113,9 @@ class parser(object):
 
         elif fun_name == "fetchone":
             ret = None
-
             try:
+                if cursor is None:
+                    raise Exception("No cursor")
                 ret = cursor.fetchone()
             except Exception:
                 print("Error %s" % fun_name, traceback.format_exc())
@@ -122,6 +123,8 @@ class parser(object):
 
         elif fun_name == "refreshQuery":
             try:
+                if cursor is None:
+                    raise Exception("No cursor")
                 fun = getattr(conn.driver(), fun_name)
 
                 fun(
@@ -130,13 +133,15 @@ class parser(object):
                     dict_["arguments"]["table"],
                     dict_["arguments"]["where"],
                     cursor,
-                    aqApp.db().driver().conn_,
+                    project.conn.driver().conn_,
                 )
             except Exception:
                 print("Error refreshQuery", traceback.format_exc())
 
         elif fun_name == "refreshFetch":
             try:
+                if cursor is None:
+                    raise Exception("No cursor")
                 fun = getattr(conn.driver(), fun_name)
 
                 fun(
@@ -152,10 +157,16 @@ class parser(object):
 
         elif fun_name == "fetchAll":
             try:
+                if cursor is None:
+                    raise Exception("No cursor")
                 fun = getattr(conn.driver(), fun_name)
 
                 ret = fun(
-                    cursor, dict_["arguments"]["tablename"], dict_["arguments"]["where_filter"], dict_["arguments"]["fields"], dict_["arguments"]["curname"]
+                    cursor,
+                    dict_["arguments"]["tablename"],
+                    dict_["arguments"]["where_filter"],
+                    dict_["arguments"]["fields"],
+                    dict_["arguments"]["curname"],
                 )
                 return normalize_data(ret)
             except Exception:
@@ -163,6 +174,8 @@ class parser(object):
 
         elif fun_name == "fetchall":
             try:
+                if cursor is None:
+                    raise Exception("No cursor")
                 ret_ = cursor.fetchall()
                 return normalize_data(ret_)
             except Exception:
@@ -170,6 +183,8 @@ class parser(object):
 
         elif fun_name == "close":
             try:
+                if cursor is None:
+                    raise Exception("No cursor")
                 cursor.close()
                 del cursor
                 del cursor_dict["%s_%s" % (id_conn, dict_["arguments"]["cursor_id"])]
@@ -214,10 +229,8 @@ class dgi_server(dgi_schema):
         # self.parserDGI = parserJson()
 
     def alternativeMain(self, options):
-        app = QtCore.QCoreApplication(sys.argv)
         if options.dgi_parameter:
             self._listenSocket = int(options.dgi_parameter)
-        return app
 
     def exec_(self):
         self._par = parser()

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from pineboolib.qsa import *
-import traceback
 
 
 class FormInternalObj(FormDBWidget):
@@ -118,7 +117,7 @@ class FormInternalObj(FormDBWidget):
                 if os.path.exists(file_py_path_):
                     os.remove(file_py_path_)
                 if path_.endswith(".qs"):
-                    postparse.pythonify(path_)
+                    postparse.pythonify([path_])
                 if os.path.exists(file_py_path_):
                     value_py = File(file_py_path_).read()
                     self.cargarFicheroEnBD("%s.py" % ficheros[i], value_py, log, directorio)
@@ -175,7 +174,9 @@ class FormInternalObj(FormDBWidget):
         if directorio:
             if comprobarLicencia:
                 if not aceptarLicenciaDelModulo(directorio):
-                    MessageBox.critical(util.translate(u"scripts", u"Imposible cargar el módulo.\nLicencia del módulo no aceptada."), MessageBox.Ok)
+                    MessageBox.critical(
+                        util.translate(u"scripts", u"Imposible cargar el módulo.\nLicencia del módulo no aceptada."), MessageBox.Ok
+                    )
                     return
             sys.cleanupMetaData()
             sys.processEvents()
@@ -337,8 +338,16 @@ class FormInternalObj(FormDBWidget):
                     cursorAreas.first()
                     areaName = cursorAreas.valueBuffer(u"descripcion")
                     if not File.exists(ustr(directorio, u"/", cursorModules.valueBuffer(u"idmodulo"), u".xpm")):
-                        sys.write(u"ISO-8859-1", ustr(directorio, u"/", cursorModules.valueBuffer(u"idmodulo"), u".xpm"), cursorModules.valueBuffer(u"icono"))
-                        log.append(util.translate(u"scripts", ustr(u"* Exportando ", cursorModules.valueBuffer(u"idmodulo"), u".xpm (Regenerado).")))
+                        sys.write(
+                            u"ISO-8859-1",
+                            ustr(directorio, u"/", cursorModules.valueBuffer(u"idmodulo"), u".xpm"),
+                            cursorModules.valueBuffer(u"icono"),
+                        )
+                        log.append(
+                            util.translate(
+                                u"scripts", ustr(u"* Exportando ", cursorModules.valueBuffer(u"idmodulo"), u".xpm (Regenerado).")
+                            )
+                        )
                     if not File.exists(ustr(directorio, u"/", cursorModules.valueBuffer(u"idmodulo"), u".mod")):
                         contenido = ustr(
                             u"<!DOCTYPE MODULE>\n<MODULE>\n<name>",
@@ -360,7 +369,9 @@ class FormInternalObj(FormDBWidget):
                             u"</description>\n</MODULE>",
                         )
                         sys.write(u"ISO-8859-1", ustr(directorio, u"/", cursorModules.valueBuffer(u"idmodulo"), u".mod"), contenido)
-                        log.append(util.translate(u"scripts", ustr(u"* Generando ", cursorModules.valueBuffer(u"idmodulo"), u".mod (Regenerado).")))
+                        log.append(
+                            util.translate(u"scripts", ustr(u"* Generando ", cursorModules.valueBuffer(u"idmodulo"), u".mod (Regenerado)."))
+                        )
 
                 self.setDisabled(False)
                 log.append(util.translate(u"scripts", u"* Exportación finalizada."))

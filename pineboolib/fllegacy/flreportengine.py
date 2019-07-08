@@ -1,17 +1,16 @@
-from PyQt5 import QtXml
+from typing import List
+from PyQt5 import QtXml  # type: ignore
+from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # type: ignore # FIXME
 
-from pineboolib import decorators
-from pineboolib.fllegacy.flsettings import FLSettings
-from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
-import pineboolib
-
-import logging
+from pineboolib.core import decorators
+from pineboolib import logging
 
 
 class FLReportEngine(object):
 
     parser_ = None
     report_ = None
+    rt: str = ""  # KUGAR *.kut template data as a string
 
     class FLReportEnginePrivate(object):
         def __init__(self, q):
@@ -21,8 +20,9 @@ class FLReportEngine(object):
             self.q_ = q
             self.template_ = ""
 
-            self.qDoubleFieldList_ = []
-            self.qImgFields_ = []
+            self.qFieldList_: List[str] = []
+            self.qDoubleFieldList_: List[str] = []
+            self.qImgFields_: List[str] = []
             self.report_ = None
 
         def addRowToReportData(self, l):
@@ -102,8 +102,11 @@ class FLReportEngine(object):
         self.relDpi_ = 78.0
         self.rd = None
         self.logger = logging.getLogger("FLReportEngine")
-        parserName = FLSettings().readEntry("ebcomportamiento/kugarParser", pineboolib.project.kugarPlugin.defaultParser())
-        self.parser_ = pineboolib.project.kugarPlugin.loadParser(parserName)
+        from pineboolib.application import project
+        from pineboolib.core.settings import config
+
+        parserName = config.value("ebcomportamiento/kugarParser", project.kugarPlugin.defaultParser())
+        self.parser_ = project.kugarPlugin.loadParser(parserName)
 
     def rptXmlData(self):
         return self.rd
@@ -165,7 +168,9 @@ class FLReportEngine(object):
         self.d_.template_ = t
 
         if not self.d_.qry_:
-            mgr = pineboolib.project.conn.managerModules()
+            from pineboolib.application import project
+
+            mgr = project.conn.managerModules()
 
         else:
             mgr = self.d_.qry_.db().managerModules()
@@ -201,8 +206,8 @@ class FLReportEngine(object):
     def exportToOds(self, pages):
         if not pages or not pages.pageCollection():
             return
-
-        super(FLReportEngine, self).exportToOds(pages.pageCollection())
+        # FIXME: exportToOds not defined in superclass
+        # super(FLReportEngine, self).exportToOds(pages.pageCollection())
 
     def renderReport(self, init_row=0, init_col=0, flags=False, pages=None):
         if self.rt and self.rt.find("KugarTemplate") > -1:
@@ -264,7 +269,8 @@ class FLReportEngine(object):
                 tempattr = attr.namedItem("Template")
                 tempname = tempattr.nodeValue() or None
                 if tempname is not None:
-                    self.preferedTemplate.emit(tempname)
+                    # FIXME: We need to add a signal:
+                    # self.preferedTemplate.emit(tempname)
                     break
             n = n.nextSibling()
 

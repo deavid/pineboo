@@ -7,9 +7,10 @@ import os.path
 from optparse import OptionParser
 import difflib
 import re
+from typing import List, Dict
 
 
-class processedFile(object):
+class processedFile:
     def __init__(self, filename, debug=False):
         self.debug = debug
         # Carga literal de la lista de hashes, pk: (startbyte, endbyte) = csvrow
@@ -29,7 +30,7 @@ class processedFile(object):
         self.table, self.idxdepth, self.idxtree, self.hashes, self.list_hashes = process(self.filename + ".hash")
 
     def indexNames(self):
-        self.names = {}
+        self.names: Dict[str, List[List]] = {}
         self.sortedNames = []
         for pk in self.idxtree:
             if len(pk) > 1:
@@ -112,16 +113,16 @@ class processedFile(object):
                 nline = startline
                 beginline = startline
                 bblocks = []
-                blockdesc = []
-                if len(sB.splitlines(1)) != endline - startline + 1:
+                blockdesc: List[str] = []
+                if len(sB.splitlines(True)) != endline - startline + 1:
                     print(startline, endline, repr(sB))
                     print(linePosChar[endline - 1] - bhasta, linePosChar[endline] - bhasta, linePosChar[endline + 1] - bhasta)
 
-                    print("Block lines doesnt match:", len(sB.splitlines(1)), endline - startline, startline, endline)
+                    print("Block lines doesnt match:", len(sB.splitlines(True)), endline - startline, startline, endline)
                     print(linePosChar[startline - 2 : startline + 3], bdesde)
                     print(linePosChar[endline - 2 : endline + 3], bhasta)
-                    print(repr(sB.splitlines(1)))
-                for line in sB.splitlines(1):
+                    print(repr(sB.splitlines(True)))
+                for line in sB.splitlines(True):
                     nline += 1
                     if line[-1] != "\n":
                         break
@@ -253,7 +254,7 @@ def main():
         pfiles = []
         for file1 in filenames:
             # print "File:", file1
-            pf = processedFile(file1, debug=options.debug)
+            pf = processedFile(file1, debug=bool(options.debug))
             pfiles.append(pf)
         # pfA = pfiles[0]
         # for pfB in pfiles[1:]:
@@ -306,7 +307,7 @@ class FindEquivalences(object):
 
                         sA = sA.replace("\t", "        ")
                         sB = sB.replace("\t", "        ")
-                        lines = list(difflib.ndiff(sA.splitlines(1), sB.splitlines(1), linejunk, charjunk))
+                        lines = list(difflib.ndiff(sA.splitlines(True), sB.splitlines(True), linejunk, charjunk))
                         modifiedlines = []
                         for n, line in enumerate(lines):
                             if line[0] != " ":

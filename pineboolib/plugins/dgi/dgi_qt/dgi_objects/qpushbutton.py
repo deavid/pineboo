@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets
-from pineboolib import decorators
+from PyQt5 import QtWidgets  # type: ignore
+from pineboolib.core import decorators
+
+
+from PyQt5.QtGui import QIcon  # type: ignore
 
 
 class QPushButton(QtWidgets.QPushButton):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super(QPushButton, self).__init__(*args, **kwargs)
         self.setTextLabel = self.setText
 
@@ -28,13 +31,13 @@ class QPushButton(QtWidgets.QPushButton):
     def pixmap(self, value):
         return self.setIcon(value)
 
-    def setPixmap(self, value):
+    def setPixmap(self, value: QIcon) -> None:
         return self.setIcon(value)
 
     def getToggleButton(self):
         return self.isCheckable()
 
-    def setToggleButton(self, v):
+    def setToggleButton(self, v: bool) -> None:
         return self.setCheckable(v)
 
     def getOn(self):
@@ -46,12 +49,12 @@ class QPushButton(QtWidgets.QPushButton):
     def getText(self):
         return super().text()
 
-    def setText(self, val):
+    def setText(self, val: str) -> None:
         if self.maximumWidth() < 33 and len(val) > 4:
             val = ""
         super().setText(val)
 
-    def setMaximumSize(self, *args):
+    def setMaximumSize(self, *args) -> None:
         w = 30
         h = 30
 

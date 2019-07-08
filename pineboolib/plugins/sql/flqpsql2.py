@@ -1,9 +1,9 @@
-import logging
-from pineboolib.utils import checkDependencies
+from pineboolib import logging
+from pineboolib.application.utils.check_dependencies import check_dependencies
 from sqlalchemy import create_engine
 
-from PyQt5.Qt import qWarning
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.Qt import qWarning  # type: ignore
+from PyQt5.QtWidgets import QMessageBox  # type: ignore
 
 from pineboolib.plugins.sql.flqpsql import FLQPSQL
 
@@ -25,31 +25,36 @@ class FLQPSQL2(FLQPSQL):
         return True
 
     def safe_load(self):
-        return checkDependencies({"pg8000": "pg8000", "sqlalchemy": "sqlAlchemy"}, False)
+        return check_dependencies({"pg8000": "pg8000", "sqlalchemy": "sqlAlchemy"}, False)
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         self._dbname = db_name
-        checkDependencies({"pg8000": "pg8000", "sqlalchemy": "sqlAlchemy"})
+        check_dependencies({"pg8000": "pg8000", "sqlalchemy": "sqlAlchemy"})
         import pg8000
         import traceback
 
-        # conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (db_name, db_host, db_port, db_userName, db_password)
+        # conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5"
+        #                % (db_name, db_host, db_port, db_userName, db_password)
 
         try:
-            self.conn_ = pg8000.connect(user=db_userName, host=db_host, port=int(db_port), database=db_name, password=db_password, timeout=5)
+            self.conn_ = pg8000.connect(
+                user=db_userName, host=db_host, port=int(db_port), database=db_name, password=db_password, timeout=5
+            )
             self.engine_ = create_engine("postgresql+pg8000://%s:%s@%s:%s/%s" % (db_userName, db_password, db_host, db_port, db_name))
         except Exception as e:
-            import pineboolib
+            from pineboolib.application import project
 
-            if not pineboolib.project._DGI.localDesktop():
+            if not project._DGI.localDesktop():
                 if repr(traceback.format_exc()).find("the database system is starting up") > -1:
                     raise
 
                 return False
 
-            pineboolib.project._splash.hide()
+            project._splash.hide()
             if repr(traceback.format_exc()).find("does not exist") > -1:
-                ret = QMessageBox.warning(None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No)
+                ret = QMessageBox.warning(
+                    None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No
+                )
                 if ret == QMessageBox.No:
                     return False
                 else:
@@ -69,7 +74,9 @@ class FLQPSQL2(FLQPSQL):
                         return self.connect(db_name, db_host, db_port, db_userName, db_password)
                     except Exception:
                         qWarning(traceback.format_exc())
-                        QMessageBox.information(None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok)
+                        QMessageBox.information(
+                            None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok
+                        )
                         print("ERROR: No se ha podido crear la Base de Datos %s" % db_name)
                         return False
             else:

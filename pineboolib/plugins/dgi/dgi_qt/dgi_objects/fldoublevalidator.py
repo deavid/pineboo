@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtGui
+from typing import Tuple
+
+from PyQt5 import QtGui  # type: ignore
+from PyQt5.QtGui import QValidator  # type: ignore
+
+from pineboolib.fllegacy.flapplication import aqApp
 
 
 class FLDoubleValidator(QtGui.QDoubleValidator):
     _formatting = None
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
         if len(args) == 4:
             super().__init__(args[0], args[1], args[2], args[3])
             # 1 inferior
@@ -15,13 +20,11 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
         self.setNotation(self.StandardNotation)
         self._formatting = False
 
-    def validate(self, input_, pos_cursor):
+    def validate(self, input_: str, pos_cursor: int) -> Tuple[QValidator.State, str, int]:
         value_in = input_
 
         if value_in is None or self._formatting:
             return (self.Acceptable, value_in, pos_cursor)
-
-        from pineboolib.pncontrolsfactory import aqApp
 
         # pos_cursor= len(value_in)
         state = super().validate(value_in, pos_cursor)

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from pineboolib.qsa import *
-import pineboolib
-from pineboolib.utils import filedir
-from PyQt5 import QtCore
+from pineboolib.core.utils.utils_base import filedir
+from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings
+from PyQt5 import QtCore  # type: ignore
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.formdbwidget import FormDBWidget
 
 settings = AQSettings()
 
@@ -31,6 +32,7 @@ class FormInternalObj(FormDBWidget):
 
     def cargarConfiguracion(self):
         w = self.w_
+        from pineboolib.application import project
 
         w.child(u"cbFLTableDC").checked = self.leerValorLocal("FLTableDoubleClick")
         w.child(u"cbFLTableSC").checked = self.leerValorLocal("FLTableShortCut")
@@ -47,19 +49,19 @@ class FormInternalObj(FormDBWidget):
         w.child(u"cbDeleteCache").checked = self.leerValorLocal("deleteCache")
         w.child(u"cbParseProject").checked = self.leerValorLocal("parseProject")
         w.child(u"cbActionsMenuRed").checked = self.leerValorLocal("ActionsMenuRed")
-        w.child(u"cbKugarParser").addItems(pineboolib.project.kugarPlugin.listAvalibles())
-        w.child(u"cbKugarParser").setCurrentText(self.leerValorLocal("kugarParser") if not "" else pineboolib.project.kugarPlugin.defaultParser())
+        w.child(u"cbKugarParser").addItems(project.kugarPlugin.listAvalibles())
+        w.child(u"cbKugarParser").setCurrentText(self.leerValorLocal("kugarParser") if not "" else project.kugarPlugin.defaultParser())
         w.child(u"cbSpacerLegacy").checked = self.leerValorLocal("spacerLegacy")
         w.child(u"cbParseModulesOnLoad").checked = self.leerValorLocal("parseModulesOnLoad")
         w.child(u"cb_traducciones").checked = self.leerValorLocal("translations_from_qm")
         w.child("le_kut_temporales").text = self.leerValorLocal("kugar_temp_dir")
         w.child("cb_kut_debug").checked = self.leerValorLocal("kugar_debug_mode")
         w.child("cb_no_borrar_cache").checked = self.leerValorLocal("keep_general_cache")
-        w.child("cb_clean_no_python").checked = self.leerValorLocal("clean_no_python")
         w.child("cb_snapshot").checked = self.leerValorLocal("show_snaptshop_button")
         w.child("cb_mdi").checked = self.leerValorLocal("mdi_mode")
         w.child("cb_imagenes").checked = self.leerValorLocal("no_img_cached")
         w.child("cb_dbadmin").checked = self.leerValorLocal("dbadmin_enabled")
+        w.child("cb_std_query").checked = self.leerValorLocal("std_query")
         autoComp = self.leerValorLocal("autoComp")
         if not autoComp or autoComp == "OnDemandF4":
             autoComp = "Bajo Demanda (F4)"
@@ -71,7 +73,7 @@ class FormInternalObj(FormDBWidget):
 
         w.child(u"leCO").hide()
         self.colorActual_ = self.leerValorLocal("colorObligatorio")
-        if self.colorActual_ is "":
+        if not self.colorActual_:
             self.colorActual_ = "#FFE9AD"
 
         w.child(u"leCO").setStyleSheet("background-color:" + self.colorActual_)
@@ -112,28 +114,31 @@ class FormInternalObj(FormDBWidget):
 
     def leerValorLocal(self, valor_name):
         util = FLUtil()
-        if valor_name in ("isDebuggerMode","dbadmin_enabled"):
-            valor = settings.readBoolEntry("application/%s" % valor_name)
+        from pineboolib.core.settings import config
+
+        if valor_name in ("isDebuggerMode", "dbadmin_enabled"):
+            valor = config.value("application/%s" % valor_name, False)
         else:
             if valor_name in ("ebCallFunction", "maxPixImages", "kugarParser", "colorObligatorio", "kugar_temp_dir", "git_updates_repo"):
-                valor = util.readSettingEntry("ebcomportamiento/%s" % valor_name, u"")
-                if valor_name is "kugar_temp_dir" and valor is "":
-                    from pineboolib.pncontrolsfactory import aqApp
+                valor = config.value("ebcomportamiento/%s" % valor_name, "")
+                if valor_name == "kugar_temp_dir" and valor == "":
+                    from pineboolib.application import project
 
-                    valor = aqApp.tmp_dir()
+                    valor = project.tmpdir
 
             else:
-                valor = settings.readBoolEntry("ebcomportamiento/%s" % valor_name, False)
+                valor = config.value("ebcomportamiento/%s" % valor_name, False)
         return valor
 
     def grabarValorLocal(self, valor_name=None, value=None):
+        from pineboolib.core.settings import config
 
-        if valor_name in ("isDebuggerMode","dbadmin_enabled"):
-            settings.writeEntry("application/%s" % valor_name, value)
+        if valor_name in ("isDebuggerMode", "dbadmin_enabled"):
+            config.set_value("application/%s" % valor_name, value)
         else:
             if valor_name == "maxPixImages" and value is None:
                 value = 600
-            settings.writeEntry("ebcomportamiento/%s" % valor_name, value)
+            config.set_value("ebcomportamiento/%s" % valor_name, value)
 
     def initEventFilter(self):
         w = self.w_
@@ -173,13 +178,13 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("kugar_temp_dir", w.child("le_kut_temporales").text)
         self.grabarValorLocal("kugar_debug_mode", w.child("cb_kut_debug").checked)
         self.grabarValorLocal("keep_general_cache", w.child("cb_no_borrar_cache").checked)
-        self.grabarValorLocal("clean_no_python", w.child("cb_clean_no_python").checked)
         self.grabarValorLocal("git_updates_enabled", w.child("cb_git_activar").checked)
         self.grabarValorLocal("git_updates_repo", w.child("le_git_ruta").text)
         self.grabarValorLocal("show_snaptshop_button", w.child("cb_snapshot").checked)
         self.grabarValorLocal("mdi_mode", w.child("cb_mdi").checked)
         self.grabarValorLocal("no_img_cached", w.child("cb_imagenes").checked)
         self.grabarValorLocal("dbadmin_enabled", w.child("cb_dbadmin").checked)
+        self.grabarValorLocal("std_query", w.child("cb_std_query").checked)
         autoComp = w.child(u"cbAutoComp").currentText()
         if autoComp == "Nunca":
             autoComp = "NeverAuto"
@@ -200,7 +205,7 @@ class FormInternalObj(FormDBWidget):
         new_dir = FileDialog.getExistingDirectory(old_dir)
         if new_dir and new_dir is not old_dir:
             self.w_.child("le_kut_temporales").text = new_dir
-            pineboolib.project.tmpdir = new_dir
+            project.tmpdir = new_dir
 
     def fixPath(self, ruta=None):
         rutaFixed = ""

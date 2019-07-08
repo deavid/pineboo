@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
+from typing import Any
 from xml.etree import ElementTree as ET
 from binascii import unhexlify
-import pineboolib
-import logging
+from pineboolib import logging
 import zlib
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject  # type: ignore
+from pineboolib.core.utils.utils_base import load2xml
+from pineboolib import pncontrolsfactory
+from pineboolib.application import project
 
 ICONS = {}
 root = None
@@ -33,7 +34,7 @@ def loadUi(form_path, widget, parent=None):
     #    remove_blank_text=True,
     # )
 
-    tree = pineboolib.utils.load2xml(form_path)
+    tree = load2xml(form_path)
 
     if not tree:
         return parent
@@ -44,7 +45,7 @@ def loadUi(form_path, widget, parent=None):
     if parent is None:
         parent = widget
 
-    # if pineboolib.project._DGI.localDesktop():
+    # if project._DGI.localDesktop():
     widget.hide()
 
     for xmlimage in root.findall("images//image"):
@@ -67,13 +68,21 @@ def loadUi(form_path, widget, parent=None):
         loadAction(action, widget)
 
     for xmlconnection in root.findall("connections//connection"):
-        sender_name = xmlconnection.find("sender").text
-        signal_name = xmlconnection.find("signal").text
-        receiv_name = xmlconnection.find("receiver").text
-        slot_name = xmlconnection.find("slot").text
+        sender_elem = xmlconnection.find("sender")
+        signal_elem = xmlconnection.find("signal")
+        receiv_elem = xmlconnection.find("receiver")
+        slot_elem = xmlconnection.find("slot")
+
+        if sender_elem is None or signal_elem is None or receiv_elem is None or slot_elem is None:
+            continue
+
+        sender_name = sender_elem.text
+        signal_name = signal_elem.text
+        receiv_name = receiv_elem.text
+        slot_name = slot_elem.text
 
         receiver = None
-        if isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow):
+        if isinstance(widget, pncontrolsfactory.QMainWindow):
             if signal_name == "activated()":
                 signal_name = "triggered()"
 
@@ -82,7 +91,7 @@ def loadUi(form_path, widget, parent=None):
         else:
             sender = widget.findChild(QObject, sender_name, QtCore.Qt.FindChildrenRecursively)
 
-        # if not pineboolib.project._DGI.localDesktop():
+        # if not project._DGI.localDesktop():
         #    wui = hasattr(widget, "ui_") and sender_name in widget.ui_
         #    if sender is None and wui:
         #        sender = widget.ui_[sender_name]
@@ -96,16 +105,14 @@ def loadUi(form_path, widget, parent=None):
         if slot_name.find("(") > -1:
             sl_name = slot_name[: slot_name.find("(")]
 
-        from pineboolib import pncontrolsfactory
-
         if sender is None:
             logger.warning("Connection sender not found:%s", sender_name)
         if receiv_name == formname:
             receiver = (
                 widget
-                if not isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow)
-                else pineboolib.project.actions[sender_name]
-                if sender_name in pineboolib.project.actions.keys()
+                if not isinstance(widget, pncontrolsfactory.QMainWindow)
+                else project.actions[sender_name]
+                if sender_name in project.actions.keys()
                 else None
             )
             fn_name = slot_name.rstrip("()")
@@ -139,7 +146,7 @@ def loadUi(form_path, widget, parent=None):
         try:
             getattr(sender, sg_name).connect(getattr(receiver, sl_name))
         except Exception:
-            logger.exception("Error connecting:", sender, signal_name, receiver, slot_name)
+            logger.exception("Error connecting: %s:%s %s:%s", sender, signal_name, receiver, slot_name)
 
     # Cargamos menubar ...
     xmlmenubar = root.find("menubar")
@@ -157,17 +164,22 @@ def loadUi(form_path, widget, parent=None):
         # toolbar = widget.addToolBar(nameTB_)
         loadToolBar(xmltoolbar, widget)
 
-    if not pineboolib.project._DGI.localDesktop():
-        pineboolib.project._DGI.showWidget(widget)
+    if not project._DGI.localDesktop():
+        project._DGI.showWidget(widget)
     else:
         widget.show()
 
 
 def loadToolBar(xml, widget):
-    name = xml.find("./property[@name='name']/cstring").text
-    label = xml.find("./property[@name='label']/string").text
+    name_elem = xml.find("./property[@name='name']/cstring")
+    label_elem = xml.find("./property[@name='label']/string")
+    if name_elem is None or label_elem is None:
+        raise Exception("Unable to find required name and label properties")
 
-    tb = pineboolib.pncontrolsfactory.QToolBar(name)
+    name = name_elem.text
+    label = label_elem.text
+
+    tb = pncontrolsfactory.QToolBar(name)
     tb.label = label
     for a in xml:
         if a.tag == "action":
@@ -184,7 +196,7 @@ def loadToolBar(xml, widget):
 
 
 def loadMenuBar(xml, widget):
-    if isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow):
+    if isinstance(widget, pncontrolsfactory.QMainWindow):
         mB = widget.menuBar()
     else:
         mB = QtWidgets.QMenuBar(widget)
@@ -193,20 +205,30 @@ def loadMenuBar(xml, widget):
         if x.tag == "property":
             name = x.get("name")
             if name == "name":
-                mB.setObjectName(x.find("cstring").text)
+                cstring = x.find("cstring")
+                if cstring is not None:
+                    mB.setObjectName(cstring.text)
             elif name == "geometry":
                 geo_ = x.find("rect")
-                x = int(geo_.find("x").text)
-                y = int(geo_.find("y").text)
-                w = int(geo_.find("width").text)
-                h = int(geo_.find("height").text)
-                mB.setGeometry(x, y, w, h)
+                if geo_:
+                    ex, ey, ew, eh = geo_.find("x"), geo_.find("y"), geo_.find("width"), geo_.find("height")
+                    if ex is None or ey is None or ew is None or eh is None:
+                        continue
+                    x1 = int(ex.text)
+                    y1 = int(ey.text)
+                    w1 = int(ew.text)
+                    h1 = int(eh.text)
+                    mB.setGeometry(x1, y1, w1, h1)
             elif name == "acceptDrops":
-                mB.setAcceptDrops(x.find("bool").text == "true")
+                bool_elem = x.find("bool")
+                if bool_elem is not None:
+                    mB.setAcceptDrops(bool_elem.text == "true")
             elif name == "frameShape":
                 continue
             elif name == "defaultUp":
-                mB.setDefaultUp(x.find("bool").text == "true")
+                bool_elem = x.find("bool")
+                if bool_elem is not None:
+                    mB.setDefaultUp(bool_elem.text == "true")
         elif x.tag == "item":
             process_item(x, mB, widget)
 
@@ -248,21 +270,23 @@ def loadAction(action, widget):
     act_ = QtWidgets.QAction(widget)
     for p in action.findall("property"):
         name = p.get("name")
-        if name == "name":
-            act_.setObjectName(p.find("cstring").text)
-        elif name == "text":
-            act_.setText(p.find("string").text)
-        # elif name == "menuText":
-        #    act_.setMenuText(p.find("string").text)
-        elif name == "iconSet":
-            if p.find("iconset").text in ICONS.keys():
-                act_.setIcon(ICONS[p.find("iconset").text])
-        elif name == "toolTip":
-            act_.setToolTip(p.find("string").text)
-        elif name == "statusTip":
-            act_.setStatusTip(p.find("string").text)
-        elif name == "whatsThis":
-            act_.setWhatsThis(p.find("string").text)
+        cstring = p.find("cstring")
+        string = p.find("string")
+        iconset = p.find("iconset")
+
+        if name == "name" and cstring is not None:
+            act_.setObjectName(cstring.text)
+        elif name == "text" and string is not None:
+            act_.setText(string.text)
+        elif name == "iconSet" and iconset is not None:
+            if iconset.text in ICONS.keys():
+                act_.setIcon(ICONS[iconset.text])
+        elif name == "toolTip" and string is not None:
+            act_.setToolTip(string.text)
+        elif name == "statusTip" and string is not None:
+            act_.setStatusTip(string.text)
+        elif name == "whatsThis" and string is not None:
+            act_.setWhatsThis(string.text)
 
 
 def createWidget(classname, parent=None):
@@ -294,7 +318,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         parent = widget
     if origWidget is None:
         origWidget = widget
-    # if pineboolib.project._DGI.localDesktop():
+    # if project._DGI.localDesktop():
     #    if not hasattr(origWidget, "ui_"):
     #        origWidget.ui_ = {}
     # else:
@@ -312,7 +336,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         elif pname in ("paletteBackgroundColor", "paletteForegroundColor"):
             set_fn = widget.setStyleSheet
         elif pname == "menuText":
-            if not isinstance(widget, pineboolib.pncontrolsfactory.QAction):
+            if not isinstance(widget, pncontrolsfactory.QAction):
                 set_fn = widget.menuText
             else:
                 return
@@ -320,13 +344,13 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             set_fn = widget.setMovable
         elif pname == "toggleAction":
             set_fn = widget.setChecked
-        elif pname == "label" and isinstance(widget, pineboolib.pncontrolsfactory.QToolBar):
+        elif pname == "label" and isinstance(widget, pncontrolsfactory.QToolBar):
             return
-        elif pname == "maxValue" and isinstance(widget, pineboolib.pncontrolsfactory.QSpinBox):
+        elif pname == "maxValue" and isinstance(widget, pncontrolsfactory.QSpinBox):
             set_fn = widget.setMaximum
-        elif pname == "minValue" and isinstance(widget, pineboolib.pncontrolsfactory.QSpinBox):
+        elif pname == "minValue" and isinstance(widget, pncontrolsfactory.QSpinBox):
             set_fn = widget.setMinimum
-        elif pname == "lineStep" and isinstance(widget, pineboolib.pncontrolsfactory.QSpinBox):
+        elif pname == "lineStep" and isinstance(widget, pncontrolsfactory.QSpinBox):
             set_fn = widget.setSingleStep
         elif pname == "newLine":
             set_fn = origWidget.addToolBarBreak
@@ -402,16 +426,19 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 continue
             elif c.tag == "widget":
                 new_widget = createWidget(c.get("class"), parent=widget)
-                if isinstance(widget, pineboolib.plugins.dgi.dgi_qt.dgi_objects.qbuttongroup.QButtonGroup):
-                    if isinstance(new_widget, pineboolib.plugins.dgi.dgi_qt.dgi_objects.qtoolbutton.QToolButton):
+                # FIXME: Should check interfaces.
+                from pineboolib.plugins.dgi.dgi_qt.dgi_objects import qbuttongroup, qtoolbutton
+
+                if isinstance(widget, qbuttongroup.QButtonGroup):
+                    if isinstance(new_widget, qtoolbutton.QToolButton):
                         widget.addButton(new_widget)
                         continue
 
                 loadWidget(c, new_widget, parent, origWidget)
                 # path = c.find("./property[@name='name']/cstring").text
-                # if not pineboolib.project._DGI.localDesktop():
+                # if not project._DGI.localDesktop():
                 #    origWidget.ui_[path] = new_widget
-                # if pineboolib.project._DGI.localDesktop():
+                # if project._DGI.localDesktop():
                 #    new_widget.show()
                 if mode == "box":
                     try:
@@ -529,11 +556,15 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             lay_spacing = 2
             for p in c.findall("property"):
                 p_name = p.get("name")
+                number_elem = p.find("number")
 
                 if p_name == "name":
-                    lay_name = p.find("cstring").text
+                    lay_name_e = p.find("cstring")
+                    if lay_name_e is not None:
+                        lay_name = lay_name_e.text
                 elif p_name == "margin":
-                    lay_margin = int(p.find("number").text)
+                    if number_elem is not None:
+                        lay_margin = int(number_elem.text)
 
                     if c.tag == "hbox":
                         lay_margin_h = lay_margin
@@ -543,7 +574,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                         lay_margin_h = lay_margin_v = lay_margin
 
                 elif p_name == "spacing":
-                    lay_spacing = int(p.find("number").text)
+                    if number_elem is not None:
+                        lay_spacing = int(number_elem.text)
                 elif p_name == "sizePolicy":
                     widget.setSizePolicy(loadVariant(p, widget))
 
@@ -558,7 +590,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             continue
 
         if c.tag == "item":
-            if isinstance(widget, pineboolib.pncontrolsfactory.QMenu):
+            if isinstance(widget, pncontrolsfactory.QMenu):
                 continue
             else:
                 prop1 = {}
@@ -587,8 +619,9 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             new_widget.hide()
             new_widget._attrs = {}
             loadWidget(c, new_widget, parent, origWidget)
-            path = c.find("./property[@name='name']/cstring").text
-            if not pineboolib.project._DGI.localDesktop():
+            prop_name = c.find("./property[@name='name']/cstring")
+            path = prop_name.text if prop_name is not None else ""
+            if not project._DGI.localDesktop():
                 origWidget.ui_[path] = new_widget
             new_widget.setContentsMargins(0, 0, 0, 0)
             new_widget.show()
@@ -600,11 +633,11 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 widget.addTab(new_widget, title)
             elif gb or wd:
                 lay = getattr(widget, "layout")()
-                if not lay and not isinstance(widget, pineboolib.pncontrolsfactory.QToolBar):
+                if not lay and not isinstance(widget, pncontrolsfactory.QToolBar):
                     lay = QtWidgets.QVBoxLayout()
                     widget.setLayout(lay)
 
-                if isinstance(widget, pineboolib.pncontrolsfactory.QToolBar):
+                if isinstance(widget, pncontrolsfactory.QToolBar):
                     if isinstance(new_widget, QtWidgets.QAction):
                         widget.addAction(new_widget)
                     else:
@@ -620,7 +653,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         if c.tag == "action":
             acName = c.get("name")
             for xmlaction in root.findall("actions//action"):
-                if xmlaction.find("./property[@name='name']/cstring").text == acName:
+                prop_name = xmlaction.find("./property[@name='name']/cstring")
+                if prop_name is not None and prop_name.text == acName:
                     process_action(xmlaction, widget)
                     continue
 
@@ -656,7 +690,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         f.setItalic(False)
         new_widget.setFont(f)
 
-    # if not pineboolib.project._DGI.localDesktop():
+    # if not project._DGI.localDesktop():
     #    if nwidget is not None and origWidget.objectName() not in origWidget.ui_:
     #        origWidget.ui_[origWidget.objectName()] = nwidget
 
@@ -666,6 +700,9 @@ def loadIcon(xml):
 
     name = xml.get("name")
     xmldata = xml.find("data")
+    if xmldata is None:
+        logger.warning("loadIcon: provided xml lacks <data>")
+        return
     img_format = xmldata.get("format")
     data = unhexlify(xmldata.text.strip())
     pixmap = QtGui.QPixmap()
@@ -680,11 +717,13 @@ def loadIcon(xml):
 def loadVariant(xml, widget=None):
     for variant in xml:
         return _loadVariant(variant, widget)
+    raise ValueError("No property in provided XML")
 
 
 def loadProperty(xml):
     for variant in xml:
         return (xml.get("name"), _loadVariant(variant))
+    raise ValueError("No property in provided XML")
 
 
 def u(x):
@@ -711,7 +750,7 @@ def b(x):
     return None
 
 
-def _loadVariant(variant, widget=None):
+def _loadVariant(variant, widget=None) -> Any:
     text = variant.text or ""
     text = text.strip()
     if variant.tag == "cstring":
@@ -786,7 +825,8 @@ def _loadVariant(variant, widget=None):
         libs = [QtCore.Qt]
 
         if text.find("WordBreak|") > -1:
-            widget.setWordWrap(True)
+            if widget is not None:
+                widget.setWordWrap(True)
             text = text.replace("WordBreak|", "")
 
         for lib in libs:

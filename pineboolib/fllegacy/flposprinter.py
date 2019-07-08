@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pineboolib import decorators
+from pineboolib.core import decorators
 
 P76MM = 76
 P57_5MM = 57

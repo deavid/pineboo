@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-from pineboolib.utils import checkDependencies, filedir, load2xml
-import pineboolib
-from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib.fllegacy.flutil import FLUtil
-import logging
 import datetime
 import re
 import os
-from pineboolib.pncontrolsfactory import aqApp
+from typing import List
+from xml.etree.ElementTree import Element
+
+from pineboolib import logging
+from pineboolib.core.utils.utils_base import filedir, load2xml
+from pineboolib.application.utils.check_dependencies import check_dependencies
 
 """
 Conversor de kuts a pyFPDF
@@ -18,8 +18,8 @@ class kut2fpdf(object):
 
     _document = None  # Aquí se irán guardando los datos del documento
     logger = None
-    _xml = None
-    _xml_data = None
+    _xml: Element = None
+    _xml_data: Element = None
     _page_orientation = None
     _page_size = None
     _bottom_margin = None
@@ -49,13 +49,14 @@ class kut2fpdf(object):
     def __init__(self):
 
         self.logger = logging.getLogger("kut2fpdf")
-        checkDependencies({"fpdf": "pyfpdf"})
-        from pineboolib.plugins.kugar.parsertools import parsertools
+        check_dependencies({"fpdf": "pyfpdf"})
+        from pineboolib.plugins.kugar.parsertools import KParserTools
+        from pineboolib.core.settings import config
 
-        self._parser_tools = parsertools()
+        self._parser_tools = KParserTools()
         self._avalible_fonts = []
         self._unavalible_fonts = []
-        self.design_mode = FLSettings().readBoolEntry("ebcomportamiento/kugar_debug_mode")
+        self.design_mode = config.value("ebcomportamiento/kugar_debug_mode", False)
         self._actual_data_line = None
         self._no_print_footer = False
         self.increase_section_size = 0
@@ -79,18 +80,22 @@ class kut2fpdf(object):
     def parse(self, name, kut, data, report=None, flags=[]):
 
         try:
-            self._xml = self._parser_tools.loadKut(kut)
+            self._xml = self._parser_tools.loadKut(kut).getroot()
         except Exception:
             self.logger.exception("KUT2FPDF: Problema al procesar %s.kut", name)
             return False
         try:
-            self._xml_data = load2xml(data)
+            self._xml_data = load2xml(data).getroot()
         except Exception:
             self.logger.exception("KUT2FPDF: Problema al procesar xml_data")
             return False
 
+        from pineboolib.fllegacy.flutil import FLUtil
+
         util = FLUtil()
-        if pineboolib.project._DGI.localDesktop():
+        from pineboolib.application import project
+
+        if project._DGI.localDesktop():
             util.createProgressDialog("Pineboo", len(self._xml_data))
             util.setLabelText("Creando informe ...")
 
@@ -158,7 +163,9 @@ class kut2fpdf(object):
     def get_file_name(self):
         import os
 
-        pdf_name = aqApp.tmp_dir()
+        from pineboolib.application import project
+
+        pdf_name = project.tmpdir
         pdf_name += "/%s_%s.pdf" % (self.name_, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
         if os.path.exists(pdf_name):
             os.remove(pdf_name)
@@ -238,7 +245,12 @@ class kut2fpdf(object):
 
         rows_array = self._xml_data.findall("Row")
         i = 0
+
+        from pineboolib.fllegacy.flutil import FLUtil
+        from pineboolib.application import project
+
         util = FLUtil()
+
         for data in rows_array:
             self._actual_data_line = data
             level = int(data.get("level"))
@@ -270,7 +282,7 @@ class kut2fpdf(object):
 
             self.prev_level = level
 
-            if pineboolib.project._DGI.localDesktop():
+            if project._DGI.localDesktop():
                 util.setProgress(i)
             i += 1
 
@@ -278,7 +290,7 @@ class kut2fpdf(object):
             for l in reversed(range(top_level + 1)):
                 self.processData("DetailFooter", data, l)
 
-        if pineboolib.project._DGI.localDesktop():
+        if project._DGI.localDesktop():
             util.destroyProgressDialog()
 
     """
@@ -320,7 +332,7 @@ class kut2fpdf(object):
                         heightCalculated += self._parser_tools.getHeight(addFooter)
 
                     pageFooter = self._xml.get("PageFooter")
-                    if pageFooter:
+                    if pageFooter is not None and isinstance(pageFooter, Element):
                         if self._document.page_no() == 1 or pageFooter.get("PrintFrecuency") == "1":
                             heightCalculated += self._parser_tools.getHeight(pageFooter)
 
@@ -501,7 +513,7 @@ class kut2fpdf(object):
     def processText(self, xml, data_row=None, fix_height=True, section_name=None):
         is_image = False
         is_barcode = False
-        text = xml.get("Text")
+        text: str = xml.get("Text")
         # borderColor = xml.get("BorderColor")
         field_name = xml.get("Field")
 
@@ -534,9 +546,9 @@ class kut2fpdf(object):
                 function_name = xml.get("FunctionName")
                 try:
                     nodo = self._parser_tools.convertToNode(data_row)
-                    from pineboolib.pncontrolsfactory import aqApp
+                    from pineboolib.application import project
 
-                    ret_ = aqApp.call(function_name, [nodo, field_name], None, False)
+                    ret_ = project.call(function_name, [nodo, field_name], None, False)
                     if ret_ is False:
                         return
                     else:
@@ -569,7 +581,7 @@ class kut2fpdf(object):
             if int(res_) == 0:
                 return
 
-        if text is not None and text.startswith(filedir("../tempdata")):
+        if text is not None and isinstance(text, str) and text.startswith(filedir("../tempdata")):
             is_image = True
 
         # negValueColor = xml.get("NegValueColor")
@@ -689,7 +701,9 @@ class kut2fpdf(object):
             else:
                 if font_full_name not in self._unavalible_fonts:
                     if self.design_mode:
-                        self.logger.warning("KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica%s." % (font_full_name, font_style))
+                        self.logger.warning(
+                            "KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica%s." % (font_full_name, font_style)
+                        )
                     self._unavalible_fonts.append(font_full_name)
                 font_name = "helvetica"
 
@@ -708,7 +722,7 @@ class kut2fpdf(object):
         result_section_size = 0
         # Miramos si el texto sobrepasa el ancho
 
-        array_text = []
+        array_text: List[str] = []
         array_n = []
         text_lines = []
         if txt.find("\n") > -1:
@@ -778,10 +792,16 @@ class kut2fpdf(object):
             y = y + extra_size
 
             if self.design_mode:
-                self.write_debug(self.calculateLeftStart(orig_x), y, "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w), 6, "green")
+                self.write_debug(
+                    self.calculateLeftStart(orig_x), y, "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w), 6, "green"
+                )
                 if xml.tag == "CalculatedField":
                     self.write_debug(
-                        self.calculateLeftStart(orig_x), y, "CalculatedField:%s, Field:%s" % (xml.get("FunctionName"), xml.get("Field")), 3, "blue"
+                        self.calculateLeftStart(orig_x),
+                        y,
+                        "CalculatedField:%s, Field:%s" % (xml.get("FunctionName"), xml.get("Field")),
+                        3,
+                        "blue",
                     )
 
             self._document.text(x, y, actual_text)
@@ -880,7 +900,11 @@ class kut2fpdf(object):
 
     def write_cords_debug(self, x, y, w, h, ox, ow):
         self.write_debug(
-            x, y, "X:%s Y:%s W:%s H:%s orig_x:%s, orig_W:%s" % (round(x, 2), round(y, 2), round(w, 2), round(h, 2), round(ox, 2), round(ow, 2)), 2, "red"
+            x,
+            y,
+            "X:%s Y:%s W:%s H:%s orig_x:%s, orig_W:%s" % (round(x, 2), round(y, 2), round(w, 2), round(h, 2), round(ox, 2), round(ow, 2)),
+            2,
+            "red",
         )
 
     def write_debug(self, x, y, text, h, color=None):
@@ -921,7 +945,7 @@ class kut2fpdf(object):
     @param file_name. Nombr del fichero de tempdata a usar
     """
 
-    def draw_image(self, x, y, W, H, xml, file_name):
+    def draw_image(self, x: int, y: int, W: int, H: int, xml, file_name: str):
         import os
 
         if not file_name.lower().endswith(".png"):
@@ -933,18 +957,19 @@ class kut2fpdf(object):
 
             self._document.image(file_name, x, y, W, H, "PNG")
 
-    def draw_barcode(self, x, y, W, H, xml, text):
+    def draw_barcode(self, x: int, y: int, W: int, H: int, xml, text: str):
         if text == "None":
             return
-        from pineboolib.pncontrolsfactory import FLCodBar
+        from pineboolib import pncontrolsfactory
+        from pineboolib.application import project
 
-        file_name = aqApp.tmp_dir()
+        file_name = project.tmpdir
         file_name += "/%s.png" % (text)
         type = xml.get("CodBarType")
 
         if not os.path.exists(file_name):
 
-            bar_code = FLCodBar(text)  # Code128
+            bar_code = pncontrolsfactory.FLCodBar(text)  # Code128
             if type is not None:
                 type = bar_code.nameToType(type.lower())
                 bar_code.setType(type)
@@ -981,9 +1006,13 @@ class kut2fpdf(object):
 
     def draw_margins(self):
         self.draw_debug_line(0 + self._left_margin, 0, 0 + self._left_margin, self._page_size[1])  # Vertical derecha
-        self.draw_debug_line(self._page_size[0] - self._right_margin, 0, self._page_size[0] - self._right_margin, self._page_size[1])  # Vertical izquierda
+        self.draw_debug_line(
+            self._page_size[0] - self._right_margin, 0, self._page_size[0] - self._right_margin, self._page_size[1]
+        )  # Vertical izquierda
         self.draw_debug_line(0, 0 + self._top_margin, self._page_size[0], 0 + self._top_margin)  # Horizontal superior
-        self.draw_debug_line(0, self._page_size[1] - self._bottom_margin, self._page_size[0], self._page_size[1] - self._bottom_margin)  # Horizontal inferior
+        self.draw_debug_line(
+            0, self._page_size[1] - self._bottom_margin, self._page_size[0], self._page_size[1] - self._bottom_margin
+        )  # Horizontal inferior
 
     def draw_debug_line(self, X1, Y1, X2, Y2, title=None, color="GREY"):
         dash_length = 2

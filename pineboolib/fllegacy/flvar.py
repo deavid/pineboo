@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from pineboolib.pncontrolsfactory import aqApp
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.fllegacy.flapplication import aqApp
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 
 
 class FLVar(object):

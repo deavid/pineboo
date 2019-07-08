@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, QtWidgets, Qt
-from pineboolib import decorators
-from pineboolib.utils import filedir
+from PyQt5 import QtCore, QtWidgets, Qt  # type: ignore
+from pineboolib.core import decorators
+from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
-from PyQt5.QtWidgets import QCheckBox
-import pineboolib
+from PyQt5.QtWidgets import QCheckBox  # type: ignore
+from pineboolib import logging
+
+logger = logging.getLogger(__name__)
 
 
 class FLDataTable(QtWidgets.QTableView):
@@ -398,9 +400,9 @@ class FLDataTable(QtWidgets.QTableView):
                 return True
 
             if key_event.key() == QtCore.Qt.Key_Space:
-                from pineboolib.pncontrolsfactory import FLCheckBox
+                from pineboolib import pncontrolsfactory
 
-                chk = FLCheckBox(self.cellWidget(r, c))
+                chk = pncontrolsfactory.FLCheckBox(self.cellWidget(r, c))
                 if chk:
                     chk.animateClick()
 
@@ -484,11 +486,14 @@ class FLDataTable(QtWidgets.QTableView):
 
         db = self.cursor_.db()
         pri_key_val = self.cursor_.valueBuffer(pri_key)
-        popup = pineboolib.pncontrolsfactory.QMenu(self)
 
-        menu_frame = pineboolib.pncontrolsfactory.QWidget(self, QtCore.Qt.Popup)
+        from pineboolib import pncontrolsfactory
 
-        lay = pineboolib.pncontrolsfactory.QVBoxLayout()
+        popup = pncontrolsfactory.QMenu(self)
+
+        menu_frame = pncontrolsfactory.QWidget(self, QtCore.Qt.Popup)
+
+        lay = pncontrolsfactory.QVBoxLayout()
         menu_frame.setLayout(lay)
 
         tmp_pos = e.globalPos()
@@ -502,13 +507,13 @@ class FLDataTable(QtWidgets.QTableView):
                 if field is None:
                     continue
 
-                sub_popup = pineboolib.pncontrolsfactory.QMenu(self)
+                sub_popup = pncontrolsfactory.QMenu(self)
                 sub_popup.setTitle(mtd.alias())
-                sub_popup_frame = pineboolib.pncontrolsfactory.QWidget(sub_popup, QtCore.Qt.Popup)
-                lay_popup = pineboolib.pncontrolsfactory.QVBoxLayout(sub_popup)
+                sub_popup_frame = pncontrolsfactory.QWidget(sub_popup, QtCore.Qt.Popup)
+                lay_popup = pncontrolsfactory.QVBoxLayout(sub_popup)
                 sub_popup_frame.setLayout(lay_popup)
 
-                dt = pineboolib.pncontrolsfactory.FLDataTable(None, "FLDataTable", True)
+                dt = pncontrolsfactory.FLDataTable(None, "FLDataTable", True)
                 lay_popup.addWidget(dt)
 
                 dt.setFLSqlCursor(cur)
@@ -671,7 +676,9 @@ class FLDataTable(QtWidgets.QTableView):
 
             last_pk = None
             if self.cursor().buffer():
-                last_pk = self.cursor().buffer().value(self.cursor().buffer().pK())
+                pk_name = self.cursor().buffer().pK()
+                if pk_name is not None:
+                    last_pk = self.cursor().buffer().value(pk_name)
 
             self.cursor().refresh()
 
@@ -692,8 +699,8 @@ class FLDataTable(QtWidgets.QTableView):
             else:
                 return
 
-        #index = self.cursor().model().index(position, 0)
-        #if index is not None:
+        # index = self.cursor().model().index(position, 0)
+        # if index is not None:
         #    self.scrollTo(index)
 
     """
@@ -847,7 +854,25 @@ class FLDataTable(QtWidgets.QTableView):
         return self.header().visualIndex(c)
 
     def visual_index_to_field(self, pos_):
-        return self.model().metadata().indexFieldObject(self.visual_index_to_logical_index(pos_))
+        if pos_ is None:
+            logger.warning("visual_index_to_field: pos is None")
+            return None
+        colIdx = self.visual_index_to_column_index(pos_)
+        if colIdx is None:
+            logger.warning("visual_index_to_field: colIdx is None")
+            return None
+
+        logIdx = self.logical_index_to_visual_index(colIdx)
+        if logIdx is None:
+            logger.warning("visual_index_to_field: logIdx is None")
+            return None
+
+        mtd = self.model().metadata().indexFieldObject(logIdx)
+        if mtd is not None:
+            if not mtd.visibleGrid():
+                raise ValueError("Se ha devuelto el field %s.%s que no es visible en el grid" % (mtd.metadata().name(), mtd.name()))
+
+            return mtd
 
     def currentRow(self):
         """

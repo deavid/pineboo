@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets, QtCore, QtGui  # type: ignore
+from typing import Any
 
 
 class QLabel(QtWidgets.QLabel):
@@ -14,12 +15,12 @@ class QLabel(QtWidgets.QLabel):
             v = str(v)
         self.setText(v)
 
-    def setText(self, text):
+    def setText(self, text: str) -> None:
         if not isinstance(text, str):
             text = str(text)
         super().setText(text)
 
-    def setPixmap(self, pix):
+    def setPixmap(self, pix) -> None:
 
         if isinstance(pix, QtGui.QIcon):
             pix = pix.pixmap(32, 32)
@@ -29,16 +30,16 @@ class QLabel(QtWidgets.QLabel):
     def setShown(self, b):
         self.setVisible(b)
 
-    def getAlign(self):
+    def getAlign(self) -> Any:
         return super().alignment()
 
-    def setAlign(self, alignment_):
+    def setAlign(self, alignment_) -> None:
         self.setAlignment(alignment_)
 
-    def get_palette_fore_ground(self):
+    def get_palette_fore_ground(self) -> Any:
         return self.palette().text().color()
 
-    def set_palette_fore_ground(self, color):
+    def set_palette_fore_ground(self, color) -> None:
         pal = self.palette()
         pal.setColor(pal.WindowText, color)
         self.setPalette(pal)

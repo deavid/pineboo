@@ -1,3 +1,5 @@
+from typing import Any
+
 # -*- coding: utf-8 -*-
 
 
@@ -13,11 +15,11 @@ class AQBoolFlagStateList(object):
     def __init__(self):
         self.data_list_ = []
 
-    def append(self, data=None):
+    def append(self, data=None) -> None:
         if data is not None:
             self.data_list_.append(data)
 
-    def pushOnTop(self, data):
+    def pushOnTop(self, data) -> None:
 
         data_list_new = []
         data_list_new.append(data)
@@ -26,14 +28,14 @@ class AQBoolFlagStateList(object):
 
         self.data_list_ = data_list_new
 
-    def erase(self, data):
+    def erase(self, data) -> None:
 
         for d in self.data_list_:
             if d == data:
                 del d
                 break
 
-    def find(self, data):
+    def find(self, data) -> Any:
         ret_ = None
         for d in self.data_list_:
             if d.modifier_ == data:
@@ -42,5 +44,5 @@ class AQBoolFlagStateList(object):
 
         return ret_
 
-    def current(self):
+    def current(self) -> Any:
         return self.data_list_[0]

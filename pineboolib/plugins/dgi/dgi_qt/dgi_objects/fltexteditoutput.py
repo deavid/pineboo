@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets  # type: ignore
 import sys
+from typing import Union
 
 
 class FLTextEditOutput(QtWidgets.QPlainTextEdit):
     oldStdout = None
     oldStderr = None
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         super(FLTextEditOutput, self).__init__(parent)
 
         self.oldStdout = sys.stdout
@@ -15,11 +16,12 @@ class FLTextEditOutput(QtWidgets.QPlainTextEdit):
         sys.stdout = self
         sys.stderr = self
 
-    def write(self, txt):
+    def write(self, txt: Union[bytearray, bytes, str]) -> None:
+        txt = str(txt)
         self.oldStdout.write(txt)
-        self.appendPlainText(str(txt))
+        self.appendPlainText(txt)
 
-    def close(self):
+    def close(self) -> None:
         sys.stdout = self.oldStdout
         sys.stderr = self.oldStderr
         super().close()

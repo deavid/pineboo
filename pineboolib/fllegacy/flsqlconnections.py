@@ -1,10 +1,7 @@
-from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
+from pineboolib.core import decorators
 
 
-class FLSqlConnections(ProjectClass):
-    pass
-
+class FLSqlConnections(object):
     @classmethod
     @decorators.NotImplementedWarn
     def database(cls):

@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 import os
-import logging
+from pineboolib import logging
 
-import pineboolib
-from pineboolib import decorators
-from pineboolib.utils import filedir, cacheXPM
+from pineboolib.core import decorators
+from pineboolib.core.utils.utils_base import filedir
+from pineboolib.application.xmlaction import XMLAction
+from pineboolib.application.utils.xpm import cacheXPM
+from pineboolib.application.utils.convert_flaction import convert2FLAction
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader, AQStaticBdInfo
-from pineboolib.pncontrolsfactory import aqApp
+
+from typing import Union, List
 
 """
 Gestor de módulos.
@@ -169,7 +172,7 @@ class FLManagerModules(object):
     """
 
     def content(self, n):
-        cursor = self.conn_.execute_query("SELECT contenido FROM flfiles WHERE nombre='%s' AND NOT sha = ''" % n)
+        cursor = self.conn_.dbAux().execute_query("SELECT contenido FROM flfiles WHERE nombre='%s' AND NOT sha = ''" % n)
 
         for contenido in cursor:
             return contenido[0]
@@ -220,7 +223,7 @@ class FLManagerModules(object):
 
     def contentCached(self, n, shaKey=None):
 
-        not_sys_table = self.conn_.dbAux() and n[0:3] != "sys" and not self.conn_.manager().isSystemTable(n)
+        not_sys_table = n[0:3] != "sys" and not self.conn_.manager().isSystemTable(n)
         if not_sys_table and self.staticBdInfo_ and self.staticBdInfo_.enabled_:
             str_ret = self.contentStatic(n)
             if str_ret:
@@ -261,16 +264,20 @@ class FLManagerModules(object):
         else:
             modId = self.conn_.managerModules().idModuleOfFile(n)
 
-        if aqApp.DGI().alternative_content_cached():
-            data = aqApp.DGI().content_cached(aqApp.tmp_dir(), self.conn_.DBName(), modId, ext_, name_, shaKey)
+        from pineboolib.application import project
+
+        if project._DGI.alternative_content_cached():
+            data = project._DGI.content_cached(project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey)
             if data is not None:
                 return data
 
         if data is None:
             """Ruta por defecto"""
-            if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (aqApp.tmp_dir(), self.conn_.DBName(), modId, ext_, name_)):
+            if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (project.tmpdir, self.conn_.DBName(), modId, ext_, name_)):
                 utf8_ = True if ext_ == "kut" else False
-                data = self.contentFS("%s/cache/%s/%s/file.%s/%s/%s.%s" % (aqApp.tmp_dir(), self.conn_.DBName(), modId, ext_, name_, shaKey, ext_), utf8_)
+                data = self.contentFS(
+                    "%s/cache/%s/%s/file.%s/%s/%s.%s" % (project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey, ext_), utf8_
+                )
 
         if data is None:
             if os.path.exists(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_))):
@@ -290,9 +297,31 @@ class FLManagerModules(object):
     @param content Contenido del fichero.
     """
 
-    @decorators.NotImplementedWarn
     def setContent(self, n, idM, content):
-        pass
+        if not self.conn_.dbAux():
+            return
+
+        format_val = self.conn_.manager().formatAssignValue("nombre", "string", n, True)
+        format_val2 = self.conn_.managere().formatAssignValue("idmodulo", "string", idM, True)
+
+        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+        from pineboolib.fllegacy.flutil import FLUtil
+
+        cursor = FLSqlCursor("flfiles", True, self.conn_.dbAux())
+        cursor.select("%s AND %s" % (format_val, format_val2))
+
+        if cursor.first():
+            cursor.setModeAccess(cursor.Edit)
+            cursor.refreshBufer()
+        else:
+            cursor.setModeAccess(cursor.Insert)
+            cursor.refreshBufer()
+            cursor.setValueBuffer("nombre", n)
+            cursor.setValueBuffer("idmodulo", idM)
+
+        cursor.setValueBuffer("contenido", content)
+        cursor.setValueBuffer("sha", FLUtil().sha1(content))
+        cursor.commitBuffer()
 
     """
     Crea un formulario a partir de su fichero de descripción.
@@ -305,7 +334,9 @@ class FLManagerModules(object):
     """
 
     def createUI(self, n, connector=None, parent=None, name=None):
-        return pineboolib.project._DGI.createUI(n, connector, parent, name)
+        from pineboolib.application import project
+
+        return project._DGI.createUI(n, connector, parent, name)
 
     """
     Crea el formulario maestro de una acción a partir de su fichero de descripción.
@@ -316,13 +347,15 @@ class FLManagerModules(object):
     @return QWidget correspondiente al formulario construido.
     """
 
-    def createForm(self, a, connector=None, parent=None, name=None):
-        from pineboolib.pncontrolsfactory import FLFormDB
+    def createForm(self, action: Union[FLAction, XMLAction], connector=None, parent=None, name=None):
+        from pineboolib import pncontrolsfactory
 
-        if not isinstance(a, FLAction):
-            a = pineboolib.utils.convert2FLAction(a)
+        if not isinstance(action, FLAction):
+            action = convert2FLAction(action)
 
-        return None if not a else FLFormDB(parent, a, load=True)
+        if not action:
+            raise Exception
+        return pncontrolsfactory.FLFormDB(parent, action, load=True)
 
     """
     Esta función es igual a la anterior, sólo se diferencia en que carga
@@ -334,16 +367,19 @@ class FLManagerModules(object):
     """
 
     def createFormRecord(self, a, connector=None, parent_or_cursor=None, name=None):
-        from pineboolib.pncontrolsfactory import FLFormRecordDB
+        logger.trace("createFormRecord: init")
+        from pineboolib import pncontrolsfactory
 
         # Falta implementar conector y name
         if not isinstance(a, FLAction):
-            a = pineboolib.utils.convert2FLAction(a)
+            logger.trace("createFormRecord: convert2FLAction")
+            a = convert2FLAction(a)
 
         if not a:
             return None
 
-        return FLFormRecordDB(parent_or_cursor, a, load=False)
+        logger.trace("createFormRecord: load FormRecordDB")
+        return pncontrolsfactory.FLFormRecordDB(parent_or_cursor, a, load=False)
 
     """
     Para establecer el módulo activo.
@@ -390,7 +426,22 @@ class FLManagerModules(object):
     """
 
     def listIdAreas(self):
-        return self.listIdAreas_
+        if self.listIdAreas_:
+            return self.listIdAreas_
+
+        ret: List[str] = []
+        if not self.conn_.dbAux():
+            return ret
+
+        q = FLSqlQuery(None, self.conn_.dbAux())
+        q.setForwardOnly(True)
+        q.exec_("SELECT idarea FROM flareas WHERE idarea <> 'sys'")
+        while q.next():
+            ret.append(str(q.value(0)))
+
+        ret.append("sys")
+
+        return ret
 
     """
     Obtiene la lista de identificadores de módulos cargados en el sistema de una area dada.
@@ -414,7 +465,21 @@ class FLManagerModules(object):
     """
 
     def listAllIdModules(self):
-        return self.listAllIdModules_
+        if self.listAllIdModules_:
+            return self.listAllIdModules_
+
+        ret: List[str] = []
+        if not self.conn_.dbAux():
+            return ret
+
+        ret.append("sys")
+        q = FLSqlQuery(None, self.conn_.dbAux())
+        q.setForwardOnly(True)
+        q.exec_("SELECT idmodulo FROM flmodules WHERE idmodulo <> 'sys'")
+        while q.next():
+            ret.append(str(q.value(0)))
+
+        return ret
 
     """
     Obtiene la descripción de un área a partir de su identificador.
@@ -455,14 +520,14 @@ class FLManagerModules(object):
     """
 
     def iconModule(self, idM):
-        from pineboolib.pncontrolsfactory import QPixmap
+        from pineboolib import pncontrolsfactory
 
         pix = None
         if idM.upper() in self.dictInfoMods.keys():
             icono = cacheXPM(self.dictInfoMods[idM.upper()].icono)
-            pix = QPixmap(icono)
+            pix = pncontrolsfactory.QPixmap(icono)
 
-        return pix or QPixmap()
+        return pix or pncontrolsfactory.QPixmap()
 
     """
     Para obtener la versión de un módulo.
@@ -495,6 +560,7 @@ class FLManagerModules(object):
     """
 
     def shaGlobal(self):
+
         if not self.conn_.dbAux():
             return ""
 
@@ -524,7 +590,7 @@ class FLManagerModules(object):
     """
 
     def shaOfFile(self, n):
-        if self.conn_.dbAux() and not n[:3] == "sys" and not self.conn_.manager().isSystemTable(n):
+        if not n[:3] == "sys" and not self.conn_.manager().isSystemTable(n):
             formatVal = self.conn_.manager().formatAssignValue("nombre", "string", n, True)
             q = FLSqlQuery(None, self.conn_.dbAux())
             # q.setForwardOnly(True)
@@ -556,8 +622,6 @@ class FLManagerModules(object):
     """
 
     def loadAllIdModules(self):
-        if not self.conn_.dbAux():
-            return
 
         self.listAllIdModules_ = []
         self.listAllIdModules_.append("sys")
@@ -604,8 +668,6 @@ class FLManagerModules(object):
     """
 
     def loadIdAreas(self):
-        if not self.conn_.dbAux():
-            return
 
         self.listIdAreas_ = []
         q = FLSqlQuery(None, self.conn_.dbAux())
@@ -636,8 +698,10 @@ class FLManagerModules(object):
         if not isinstance(n, str):
             n = n.toString()
 
+        from pineboolib.application import project
+
         if n.endswith(".mtd"):
-            if n[: n.find(".mtd")] in aqApp.DGI().sys_mtds() or n == "flfiles.mtd":
+            if n[: n.find(".mtd")] in project._DGI.sys_mtds() or n == "flfiles.mtd":
                 return "sys"
 
         cursor = self.conn_.execute_query("SELECT idmodulo FROM flfiles WHERE nombre='%s'" % n)
@@ -651,8 +715,9 @@ class FLManagerModules(object):
 
     def writeState(self):
         idDB = "noDB"
-        if self.conn_.dbAux() is not None:
-            idDB = "%s%s%s%s%s" % (self.conn_.database(), self.conn_.host(), self.conn_.user(), self.conn_.driverName(), self.conn_.port())
+        if self.conn_.dbAux():
+            db_aux = self.conn_.dbAux()
+            idDB = "%s%s%s%s%s" % (db_aux.database(), db_aux.host(), db_aux.user(), db_aux.driverName(), db_aux.port())
 
         settings = FLSettings()
         settings.writeEntry("Modules/activeIdModule/%s" % idDB, self.activeIdModule_)
@@ -664,9 +729,12 @@ class FLManagerModules(object):
     """
 
     def readState(self):
-        idDB = "noDB"
-        if self.conn_.dbAux() is not None:
-            idDB = "%s%s%s%s%s" % (self.conn_.database(), self.conn_.host(), self.conn_.user(), self.conn_.driverName(), self.conn_.port())
+        if not self.conn_.dbAux():
+            return
+
+        db_aux = self.conn_.dbAux()
+
+        idDB = "%s%s%s%s%s" % (db_aux.database(), db_aux.host(), db_aux.user(), db_aux.driverName(), db_aux.port())
 
         settings = FLSettings()
         self.activeIdModule_ = settings.readEntry("Modules/activeIdModule/%s" % idDB, None)
@@ -688,7 +756,7 @@ class FLManagerModules(object):
 
         str_ret = FLStaticLoader.content(n, self.staticBdInfo_)
         if str_ret:
-            from pineboolib.fllegacy.FLUtil import FLUtil
+            from pineboolib.fllegacy.flutil import FLUtil
 
             util = FLUtil()
             sha = util.sha1(str_ret)
@@ -701,7 +769,7 @@ class FLManagerModules(object):
                 self.dictKeyFiles[n] = sha
 
                 if n.endswith(".mtd"):
-                    from PyQt5.QtXml import QDomDocument
+                    from PyQt5.QtXml import QDomDocument  # type: ignore
 
                     doc = QDomDocument(n)
                     if util.domDocumentSetContent(doc, str_ret):
@@ -725,4 +793,5 @@ class FLManagerModules(object):
     """
 
     def staticLoaderSetup(self):
-        FLStaticLoader.setup(self.staticBdInfo_)
+        ui = FLManagerModules().createUI(filedir("../share/pineboo/forms/FLStaticLoaderUI.ui"))
+        FLStaticLoader.setup(self.staticBdInfo_, ui)

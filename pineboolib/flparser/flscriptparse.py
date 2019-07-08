@@ -1,7 +1,3 @@
-from builtins import input
-from builtins import str
-from builtins import range
-
 # -----------------------------------------------------------------------------
 # flscriptparse.py
 #
@@ -15,22 +11,10 @@ import hashlib
 import re
 import ply.yacc as yacc
 import ply.lex as lex
+from typing import Any, Dict
+from . import flex
 
-try:
-    from pineboolib.flparser import flex
-
-    # from pineboolib.flparser.flclasses import *
-except ImportError:
-    import flex
-
-    # from flclasses import *
-
-try:
-    import pineboolib
-
-    tempDir = pineboolib.project.get_temp_dir()
-except (ImportError, AttributeError):
-    tempDir = "/tmp"
+tempDir = "/tmp"
 
 # Get the token map
 tokens = flex.tokens
@@ -92,7 +76,19 @@ def p_parse(token):
         endoffile = fromline, lexspan, token.slice[0]
     # print(repr(token.slice), context, lexspan)
 
-    token[0] = {"00-toktype": str(token.slice[0]), "02-size": lexspan, "50-contents": [{"01-type": s.type, "99-value": s.value} for s in token.slice[1:]]}
+    token[0] = {
+        "00-toktype": str(token.slice[0]),
+        "02-size": lexspan,
+        "50-contents": [{"01-type": s.type, "99-value": s.value} for s in token.slice[1:]],
+    }
+
+    for n in reversed(range(len(token[0]["50-contents"]))):
+        contents = token[0]["50-contents"][n]
+        if contents["01-type"] == token[0]["00-toktype"]:
+            # If the first element is same type, unpack left. This is for recursing lists
+            # Makes tree calculation faster and less recursive.
+            token[0]["50-contents"][n : n + 1] = contents["99-value"]["50-contents"]
+
     numelems = len([s for s in token.slice[1:] if s.type != "empty" and s.value is not None])
 
     rspan = lexspan[0]
@@ -130,7 +126,7 @@ def p_parse(token):
 
 last_ok_token = None
 error_count = 0
-last_error_token = None
+last_error_token: Any = None
 last_error_line = -1
 ok_count = 0
 
@@ -156,9 +152,10 @@ def p_error(t):
                     for tokname, tokln, tokdata in seen_tokens[-32:]:
                         if tokln == t.lineno:
                             print(tokname, tokdata)
-                    print(repr(last_ok_token[0]))
-                    for s in last_ok_token.slice[:]:
-                        print(">>>", s.lineno, repr(s), pprint.pformat(s.value, depth=3))
+                    if last_ok_token:
+                        print(repr(last_ok_token[0]))
+                        for s in last_ok_token.slice[:]:
+                            print(">>>", s.lineno, repr(s), pprint.pformat(s.value, depth=3))
                 last_error_line = t.lineno
             elif abs(last_error_line - t.lineno) > 1 and ok_count > 1:
                 last_error_line = t.lineno
@@ -321,7 +318,6 @@ p_parse.__doc__ = """
 
     callargs    : callarg
                 | callargs COMMA callarg
-                | empty
 
     varmemcall  : variable_1
                 | funccall_1
@@ -426,6 +422,7 @@ p_parse.__doc__ = """
     docstring   : DOCSTRINGOPEN AT ID COMMENTCLOSE
                 | DOCSTRINGOPEN AT ID ID COMMENTCLOSE
 
+    list_constant   : LBRACKET RBRACKET
     list_constant   : LBRACKET callargs RBRACKET
     list_constant   : LBRACKET callargs COMMA RBRACKET
 
@@ -552,7 +549,7 @@ parser = yacc.yacc(method="LALR", debug=0, optimize=1, write_tables=1, debugfile
 
 # profile.run("yacc.yacc(method='LALR')")
 
-global input_data
+input_data = ""
 
 
 def print_context(token):
@@ -612,7 +609,7 @@ def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
     has_data = 0
     has_objects = 0
     contentlist = []
-
+    ctype_alias: Dict[str, str]
     if alias_mode == 0:
         ctype_alias = {}
     elif alias_mode == 1:
@@ -650,14 +647,15 @@ def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
 
         if type(value) is dict:
             # print "*"
-            # FIXME> Esto o no parsea todos los elementos o hace stackoverflow. problematico para programas largos
-            if depth < 900:
+            # FIXME: Esto o no parsea todos los elementos o hace stackoverflow. problematico para programas largos
+            if depth < 150:
                 try:
                     tree_obj = calctree(value, depth + 1, num + [str(n)], ctype, alias_mode=alias_mode)
-                except Exception:
-                    print("ERROR: trying to calculate member %d on:" % n, repr(obj))
+                except Exception as e:
+                    print("ERROR: trying to calculate member:", e)
+                    tree_obj = None
             else:
-                print("PANIC: *** Stack overflow trying to calculate member %d on:" % n, repr(obj))
+                print("PANIC: *** Stack overflow trying to calculate member %d on:" % n, ctype)
                 tree_obj = None
 
             if type(tree_obj) is dict:
@@ -743,7 +741,7 @@ def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):
                 txtinline = "".join([line.strip() for line in tlines])
 
                 # if len(tlines)>1:
-                txthash = hashlib.sha1(txtinline).hexdigest()[:16]
+                txthash = hashlib.sha1(txtinline.encode("utf8")).hexdigest()[:16]
                 # hashes.append(("depth:",depth,"hash:",txthash,"element:",ctype+":"+tname))
                 hashes.append((txthash, ctype + ":" + tname + "(%d)" % len(txtinline)))
                 ranges.append([depth, txthash] + trange + [ctype + ":" + tname, len(txtinline)])

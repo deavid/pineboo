@@ -1,11 +1,9 @@
-from PyQt5.QtXml import QDomDocument
-from PyQt5 import QtCore
+from PyQt5.QtXml import QDomDocument  # type: ignore
+from PyQt5 import QtCore  # type: ignore
 
-from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
-import pineboolib
-import logging
+from pineboolib import logging
 
 logger = logging.getLogger(__name__)
 
@@ -66,12 +64,13 @@ class FLAccessControlLists(object):
 
         @param  aclXml  Contenido XML con la definición de la lista de control de acceso.
         """
+        from pineboolib.fllegacy.flutil import FLUtil
 
         util = FLUtil()
         if aclXml is None:
-            from pineboolib.pncontrolsfactory import aqApp
+            from pineboolib.application import project
 
-            aclXml = aqApp.db().managerModules().content("acl.xml")
+            aclXml = project.conn.managerModules().content("acl.xml")
 
         doc = QDomDocument("ACL")
         if self.accessControlList_:
@@ -120,7 +119,10 @@ class FLAccessControlLists(object):
 
         type = FLAccessControlFactory().type(obj)
         name = obj.objectName() if hasattr(obj, "objectName") else ""
-        user = pineboolib.project.conn.user()
+
+        from pineboolib.application import project
+
+        user = project.conn.user()
         if type == "" or name == "" or user == "":
             return
 
@@ -134,9 +136,6 @@ class FLAccessControlLists(object):
 
         @param idacl Identificador del registro de la tabla "flacls" a utilizar para crear "acl.xml".
         """
-
-        util = FLUtil()
-
         doc = QDomDocument("ACL")
 
         root = doc.createElement("ACL")
@@ -154,21 +153,21 @@ class FLAccessControlLists(object):
         q.setFrom("flacs")
         q.setWhere("idacl='%s'" % idacl)
         q.setOrderBy("prioridad DESC, tipo")
-        q.setForwarOnly(True)
+        q.setForwardOnly(True)
 
         if q.exec_():
-            step = 0
-            progress = util.ProgressDialog(util.tr("Instalando control de acceso..."), None, q.size(), None, None, True)
-            progress.setCaption(util.tr("Instalando ACL"))
-            progress.setMinimumDuration(0)
-            progress.setProgress(++step)
+            # step = 0
+            # progress = util.ProgressDialog(util.tr("Instalando control de acceso..."), None, q.size(), None, None, True)
+            # progress.setCaption(util.tr("Instalando ACL"))
+            # progress.setMinimumDuration(0)
+            # progress.setProgress(++step)
             while q.next():
                 self.makeRule(q, doc)
-                progress.setProgress(++step)
+                # progress.setProgress(++step)
 
-            from pineboolib.pnconrolsfactory import aqApp
+            from pineboolib.application import project
 
-            aqApp.db().managerModules().setContent("acl.xml", "sys", doc.toString())
+            project.conn.managerModules().setContent("acl.xml", "sys", doc.toString())
 
     def makeRule(self, q, d):
         """
@@ -213,7 +212,7 @@ class FLAccessControlLists(object):
             qAcos.setSelect("nombre,permiso")
             qAcos.setFrom("flacos")
             qAcos.setWhere("idac ='%s'" % q.value(0))
-            qAcos.setForwardOnly()
+            qAcos.setForwardOnly(True)
 
             acos = []
 

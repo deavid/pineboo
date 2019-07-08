@@ -1,42 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 
 from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
 from pineboolib.fllegacy.flaccesscontrol import FLAccessControl
 
-import pineboolib
-
-
-class FLAccessControlFactory(object):
-    def create(self, type_):
-        if type_ is None:
-            return False
-
-        if type_ == "mainwindow":
-            return FLAccessControlMainWindow()
-        elif type_ == "form":
-            return FLAccessControlForm()
-        elif type_ == "table":
-            return FLAccessControlTable()
-
-        return False
-
-    def type(self, obj):
-        if obj is None:
-            print("NO OBJ")
-
-        ret_ = ""
-        from pineboolib.pncontrolsfactory import FLFormDB, QMainWindow
-
-        if isinstance(obj, QMainWindow):
-            ret_ = "mainwindow"
-        elif isinstance(obj, FLTableMetaData):
-            ret_ = "table"
-        elif isinstance(obj, FLFormDB):
-            ret_ = "form"
-
-        return ret_
+from pineboolib.application import project
 
 
 class FLAccessControlMainWindow(FLAccessControl):
@@ -56,9 +25,9 @@ class FLAccessControlMainWindow(FLAccessControl):
         return "mainwindow"
 
     def processObject(self, obj):
-        from pineboolib.pncontrolsfactory import QMainWindow
+        from pineboolib import pncontrolsfactory
 
-        mw = QMainWindow(obj)
+        mw = pncontrolsfactory.QMainWindow(obj)
         if not mw or not self.acosPerms_:
             return
 
@@ -70,12 +39,10 @@ class FLAccessControlMainWindow(FLAccessControl):
             while not ito.current() == 0:
                 a = ito.current()
                 ++ito
-                if self.acosPerm_[a.name()]:
+                if self.acosPerms_[a.name()]:
                     continue
                 if self.perm_ == "-w" or self.perm_ == "--":
                     a.setVisible(False)
-
-            del l
 
         it = QtCore.QDictIterator(self.acosPerms_)
         for i in range(len(it.current())):
@@ -86,17 +53,15 @@ class FLAccessControlMainWindow(FLAccessControl):
                     a.setVisible(False)
 
     def setFromObject(self, object):
-        from pineboolib.fllegacy.flutil import FLUtil
-
-        print("FLAccessControlMainWindow::setFromObject %s" % FLUtil.translate(self, "app", "No implementado todavía."))
+        print("FLAccessControlMainWindow::setFromObject %s" % "No implementado todavía.")
 
 
 class FLAccessControlForm(FLAccessControl):
     def __init__(self):
-        super(FLAccessControlForm, self).__init__()
-        if pineboolib.project._DGI.localDesktop():
-            from PyQt5.Qt import qApp
-            from PyQt5 import QtGui
+        super().__init__()
+        if project._DGI.localDesktop():
+            from PyQt5.Qt import qApp  # type: ignore
+            from PyQt5 import QtGui  # type: ignore
 
             self.pal = QtGui.QPalette()
             bg = QtGui.QColor(qApp.palette().color(QtGui.QPalette.Active, QtGui.QPalette.Background))
@@ -152,13 +117,13 @@ class FLAccessControlForm(FLAccessControl):
                     w.setDisabled(True)
 
         for it in self.acosPerms_.keys():
-            from pineboolib.pncontrolsfactory import QWidget
+            from pineboolib import pncontrolsfactory
 
-            w = fm.findChild(QWidget, it)
+            w = fm.findChild(pncontrolsfactory.QWidget, it)
             if w:
                 perm = self.acosPerms_[it]
                 if perm in ("-w", "--"):
-                    if pineboolib.project._DGI.localDesktop():
+                    if project._DGI.localDesktop():
                         w.setPalette(self.pal)
                     w.setDisabled(True)
                     w.hide()
@@ -175,13 +140,13 @@ class FLAccessControlForm(FLAccessControl):
 
 
 class FLAccessControlTable(FLAccessControl):
-    def __init__(self):
-        super(FLAccessControlTable, self).__init__()
+    def __init__(self) -> None:
+        super().__init__()
 
     def type(self):
         return "table"
 
-    def processObject(self, obj):
+    def processObject(self, obj: FLTableMetaData) -> None:
         if not obj:
             return
 
@@ -232,7 +197,7 @@ class FLAccessControlTable(FLAccessControl):
                 field.setVisible(True)
                 field.setEditable(True)
 
-    def setFromObject(self, obj):
+    def setFromObject(self, obj: FLTableMetaData) -> None:
         tm = obj
         if not tm:
             return
@@ -258,3 +223,34 @@ class FLAccessControlTable(FLAccessControl):
             if it.editable():
                 permW = "w"
             self.acosPerms_[it.name()] = "%s%s" % (permR, permW)
+
+
+class FLAccessControlFactory(object):
+    def create(self, type_: str) -> FLAccessControl:
+        if type_ is None:
+            raise ValueError("type_ must be set")
+
+        if type_ == "mainwindow":
+            return FLAccessControlMainWindow()
+        elif type_ == "form":
+            return FLAccessControlForm()
+        elif type_ == "table":
+            return FLAccessControlTable()
+
+        raise ValueError("type_ %r unknown" % type_)
+
+    def type(self, obj):
+        if obj is None:
+            print("NO OBJ")
+
+        ret_ = ""
+        from pineboolib import pncontrolsfactory
+
+        if isinstance(obj, pncontrolsfactory.QMainWindow):
+            ret_ = "mainwindow"
+        elif isinstance(obj, FLTableMetaData):
+            ret_ = "table"
+        elif isinstance(obj, pncontrolsfactory.FLFormDB):
+            ret_ = "form"
+
+        return ret_

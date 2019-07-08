@@ -1,7 +1,7 @@
-from PyQt5 import QtCore
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore  # type: ignore
+from PyQt5.QtCore import Qt  # type: ignore
 
-from pineboolib import decorators
+from pineboolib.core import decorators
 
 AQ_USRHOME = "."  # FIXME
 

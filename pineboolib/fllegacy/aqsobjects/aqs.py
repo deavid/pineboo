@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication
-from PyQt5 import QtCore
-from PyQt5 import QtGui
+from typing import Type
+from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication  # type: ignore
+from PyQt5.QtXml import QDomDocument  # type: ignore
+from PyQt5 import QtCore  # type: ignore
+from PyQt5 import QtGui  # type: ignore
 
-from pineboolib.utils import filedir
-
-import logging
-from PyQt5.QtXml import QDomDocument
+from pineboolib.core.utils.logging import logging
 
 logger = logging.getLogger("AQS")
 
@@ -46,8 +44,8 @@ class AQS(object):
     """
 
     def ColorDialog_getColor(self, color=None, parent=None, name=None):
-        from PyQt5.QtWidgets import QColorDialog
-        from PyQt5.QtGui import QColor
+        from PyQt5.QtWidgets import QColorDialog  # type: ignore
+        from PyQt5.QtGui import QColor  # type: ignore
 
         if color is None:
             color = QColor.black()
@@ -66,7 +64,8 @@ class AQS(object):
     @return xml del objeto dado
     """
 
-    def toXml(self, obj_, include_children=True, include_complex_types=False):
+    @classmethod
+    def toXml(cls: Type["AQS"], obj_, include_children=True, include_complex_types=False):
         xml_ = QDomDocument()
 
         if not obj_:
@@ -111,7 +110,7 @@ class AQS(object):
 
             for child in obj_.children():
 
-                itd = self.toXml(child, include_children, include_complex_types)
+                itd = cls.toXml(child, include_children, include_complex_types)
                 xml_.firstChild().appendChild(itd.firstChild())
         return xml_
 
@@ -121,18 +120,17 @@ class AQS(object):
     @return QPixmap
     """
 
-    @classmethod
-    def pixmap_fromMimeSource(self, name):
-        import os
+    @staticmethod
+    def pixmap_fromMimeSource(name):
+        from pineboolib.core.utils.utils_base import pixmap_fromMimeSource
 
-        file_name = filedir("../share/icons", name)
-        return QPixmap(file_name) if os.path.exists(file_name) else None
+        return pixmap_fromMimeSource(name)
 
     Pixmap_fromMineSource = pixmap_fromMimeSource
 
     @classmethod
     def sha1(self, byte_array):
-        from pineboolib.pncontrolsfacory import QByteArray
+        from pineboolib.pncontrolsfactory import QByteArray
 
         ba = QByteArray(byte_array)
         return ba.sha1()

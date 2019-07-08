@@ -1,24 +1,23 @@
 # # -*- coding: utf-8 -*-
 import traceback
-import logging
 import sys
 import re
-
-from PyQt5 import QtCore
-
-from xmljson import yahoo as xml2json
-from xml.etree.ElementTree import fromstring
+from typing import Any
 from json import dumps
 from xml import etree
+from xml.etree.ElementTree import fromstring
+
+from xmljson import yahoo as xml2json
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
-import pineboolib
+from pineboolib import logging
+from pineboolib.core import decorators
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from pineboolib import decorators
+
 
 logger = logging.getLogger(__name__)
 
@@ -39,17 +38,19 @@ class parser(object):
         try:
             response = JSONRPCResponseManager.handle(request.data, dispatcher)
         except Exception:
-            response = "Not Found"
+            return Response("not found", mimetype="application/json")
 
         return Response(response.json, mimetype="application/json")
 
     @dispatcher.add_method
     def mainWindow(*args):
-        if pineboolib.project._DGI._par._queqe:
+        from pineboolib.application import project
+
+        if project._DGI._par._queqe:
             return "queqePending"
         if not args:
             return "needArguments"
-        obj_ = getattr(pineboolib.project.main_window, "json_%s" % args[0], None)
+        obj_ = getattr(project.main_window, "json_%s" % args[0], None)
         if obj_:
             return obj_(args)
         else:
@@ -58,12 +59,14 @@ class parser(object):
 
     @dispatcher.add_method
     def mainForm(*args):
-        if pineboolib.project._DGI._par._queqe:
+        from pineboolib.application import project
+
+        if project._DGI._par._queqe:
             return "queqePending"
         if not args:
             return "needArguments"
         try:
-            obj_ = pineboolib.project._DGI.mainForm()
+            obj_ = project._DGI.mainForm()
             return obj_.json_process(args)
         except Exception:
             print(traceback.format_exc())
@@ -71,7 +74,9 @@ class parser(object):
 
     @dispatcher.add_method
     def callFunction(*args):
-        if pineboolib.project._DGI._par._queqe:
+        from pineboolib.application import project
+
+        if project._DGI._par._queqe:
             return "queqePending"
 
         fun_ = args[0]
@@ -80,10 +85,10 @@ class parser(object):
         if len(args) > 1:
             param_ = ",".join(args[1:])
         else:
-            param_ = [args[0]]
+            param_ = args[0]
 
         try:
-            pineboolib.project.call(fun_, param_)
+            project.call(fun_, param_)
         except Exception:
             return "notFound"
         # if param_:
@@ -93,39 +98,45 @@ class parser(object):
 
     @dispatcher.add_method
     def queqe(*args):
+        from pineboolib.application import project
+
+        ret: Any
         if len(args) == 1:
             if args[0] == "clean":
-                pineboolib.project._DGI._par._queqe = {}
+                project._DGI._par._queqe = {}
                 return True
-            elif args[0] in pineboolib.project._DGI._par._queqe.keys():
+            elif args[0] in project._DGI._par._queqe.keys():
                 ret = []
-                for q in pineboolib.project._DGI._par._queqe.keys():
+                for q in project._DGI._par._queqe.keys():
                     if q.find(args[0]) > -1:
-                        ret.append(q, pineboolib.project._DGI._par._queqe[q])
-                        del pineboolib.project._DGI._par._queqe[q]
+                        ret.append((q, project._DGI._par._queqe[q]))
+                        del project._DGI._par._queqe[q]
             else:
                 ret = "Not Found"
         else:
-            ret = pineboolib.project._DGI._par._queqe
-            pineboolib.project._DGI._par._queqe = {}
+            ret = project._DGI._par._queqe
+            project._DGI._par._queqe = {}
 
         return ret
 
     @dispatcher.add_method
     def action(*args):
-        if pineboolib.project._DGI._par._queqe:
+        from pineboolib.application import project
+        from pineboolib import pncontrolsfactory
+
+        if project._DGI._par._queqe:
             return "queqePending"
         arguments = args
         actionName = arguments[0]
         control = arguments[1]
         emite = arguments[2]
-        if actionName in pineboolib.project._DGI._WJS.keys():
-            ac = pineboolib.project._DGI._W[actionName]
+        if actionName in project._DGI._WJS.keys():
+            ac = project._DGI._W[actionName]
 
             cr = ac.child(control)
             if cr:
                 em = getattr(cr, emite, None)
-                if isinstance(cr, FLFieldDB):  # FIXME: import FLFieldDB
+                if isinstance(cr, pncontrolsfactory.FLFieldDB):
                     if emite == "setText":
                         cr.editor_.setText(arguments[3])
                         return True
@@ -133,7 +144,7 @@ class parser(object):
                         print("Función desconocida", emite)
                         return False
 
-                elif isinstance(cr, FLTableDB):  # FIXME: import FLFieldDB
+                elif isinstance(cr, pncontrolsfactory.FLTableDB):
                     if emite == "data":
                         print("Recoge data!!!")
 
@@ -165,10 +176,6 @@ class dgi_jsonrpc(dgi_schema):
 
     def extraProjectInit(self):
         pass
-
-    def create_app(self):
-        app = QtCore.QCoreApplication(sys.argv)
-        return app
 
     def setParameter(self, param):
         self._listenSocket = param
@@ -207,7 +214,17 @@ Exportador UI a JSON
 class parserJson:
     def __init__(self):
         # TODO: se puede ampliar con propiedades y objetos de qt4
-        self.aPropsForbidden = ["images", "includehints", "layoutdefaults", "slots", "stdsetdef", "stdset", "version", "spacer", "connections"]
+        self.aPropsForbidden = [
+            "images",
+            "includehints",
+            "layoutdefaults",
+            "slots",
+            "stdsetdef",
+            "stdset",
+            "version",
+            "spacer",
+            "connections",
+        ]
         self.aObjsForbidden = [
             "geometry",
             "sizePolicy",
@@ -368,10 +385,10 @@ class json_mainWindow(object):
 
     def loadModule(self, module):
         if module.areaid not in self.areas_.keys():
-            self.loadArea(Struct(idarea=module.areaid,
+            self.loadArea(AreaStruct(idarea=module.areaid,
                                  descripcion=module.areaid))
 
-        module_ = Struct()
+        module_ = AreaStruct()
         module_.areaid = module.areaid
         module_.description = module.description
         module_.name = module.name
@@ -406,7 +423,7 @@ class json_mainWindow(object):
         self._toolBarActions.append(name)
 
     def addToJson(self, xml):
-        _json = xml2json.data(fromstring(etree.tostring(xml, pretty_print=True)))
+        _json = xml2json.data(fromstring(etree.ElementTree.tostring(xml)))
         _jsonStr = dumps(_json, sort_keys=True, indent=2)
         return _jsonStr
 
@@ -466,11 +483,11 @@ class json_mainWindow(object):
     def initModule(self, module):
         if module not in self.initialized_mods_:
             self.initialized_mods_.append(module)
-            from pineboolib.pncontrolsfactory import aqApp
+            from pineboolib.application import project
 
-            aqApp.call("%s.iface.init" % module, [], None, False)
+            project.call("%s.iface.init" % module, [], None, False)
 
-        mng = aqApp.db().managerModules()
+        mng = project.conn.managerModules()
         mng.setActiveIdModule(module)
 
 

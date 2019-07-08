@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import pineboolib
-import logging
+from pineboolib import logging
 
-from pineboolib.utils import filedir, Struct
-from pineboolib.fllegacy.FLSettings import FLSettings
-from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.core.utils.utils_base import filedir
+from pineboolib.core.utils.struct import AreaStruct
+from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.application import project
 
-
-from PyQt5.QtWidgets import (
+from PyQt5.QtWidgets import (  # type: ignore
     QToolButton,
     QToolBox,
     QLayout,
@@ -22,8 +22,8 @@ from PyQt5.QtWidgets import (
     QTabWidget,
     QDockWidget,
 )
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore, QtGui  # type: ignore
+from PyQt5.QtCore import Qt  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -49,8 +49,9 @@ class MainForm(QMainWindow):
         MainForm.debugLevel = q
 
     def load(self):
+        from pineboolib.application import project
 
-        self.ui_ = pineboolib.project.conn.managerModules().createUI(filedir("plugins/mainform/pineboo/mainform.ui"), None, self)
+        self.ui_ = project.conn.managerModules().createUI(filedir("plugins/mainform/pineboo/mainform.ui"), None, self)
 
         self.w_ = self
         frameGm = self.frameGeometry()
@@ -117,28 +118,28 @@ class MainForm(QMainWindow):
         #                 QtCore.QSize(256, 256))
         # self.setWindowIcon(app_icon)
         self.setWindowIcon(QtGui.QIcon("share/icons/pineboo-logo-16.png"))
-        self.actionAcercaQt.triggered.connect(pineboolib.project.aboutQt)
-        self.actionAcercaPineboo.triggered.connect(pineboolib.project.aboutPineboo)
+        self.actionAcercaQt.triggered.connect(project.aboutQt)
+        self.actionAcercaPineboo.triggered.connect(project.aboutPineboo)
         self.actionFavoritos.triggered.connect(self.changeStateDockFavoritos)
         self.dockFavoritos.visibilityChanged.connect(self.changeStateActionFavoritos)
         self.actionModulos.triggered.connect(self.changeStateDockAreas)
         self.dockAreasTab.visibilityChanged.connect(self.changeStateActionAreas)
-        self.actionTipografia.triggered.connect(pineboolib.project.chooseFont)
+        self.actionTipografia.triggered.connect(project.chooseFont)
         self.menuPineboo.addSeparator()
         # self.actionEstilo.triggered.connect(pineboolib.main.styleDialog)
         # pineboolib.pnapplication.initStyle(self.configMenu)
         self.setWindowTitle("Pineboo")
 
         logger.info("Módulos y pestañas ...")
-        for k, area in sorted(pineboolib.project.areas.items()):
+        for k, area in sorted(project.areas.items()):
             self.loadArea(area)
-        for k, module in sorted(pineboolib.project.modules.items()):
+        for k, module in sorted(project.modules.items()):
             self.loadModule(module)
 
         # Cargando Area desarrollo si procede ...
         sett_ = FLSettings()
         if sett_.readBoolEntry("application/isDebuggerMode", False):
-            areaDevelop = Struct(idarea="dvl", descripcion="Desarrollo")
+            areaDevelop = AreaStruct(idarea="dvl", descripcion="Desarrollo")
             self.loadArea(areaDevelop)
 
             self.loadDevelop()
@@ -157,10 +158,10 @@ class MainForm(QMainWindow):
             statusText = verticalName
 
         if cbPosInfo == "True":
-            from pineboolib.pncontrolsfactory import SysType
+            from pineboolib import pncontrolsfactory
 
-            sys_ = SysType()
-            statusText += "\t\t\t" + sys_.nameUser() + "@" + sys_.nameBD()
+            qsa_sys = pncontrolsfactory.SysType()
+            statusText += "\t\t\t" + qsa_sys.nameUser() + "@" + qsa_sys.nameBD()
 
         self.statusBar().showMessage(statusText)
 
@@ -223,7 +224,7 @@ class MainForm(QMainWindow):
         logger.debug("loadModule: Procesando %s ", module.name)
         # Creamos pestañas de areas y un vBLayout por cada módulo. Despues ahí metemos los actions de cada módulo
         if module.areaid not in self.areas:
-            self.loadArea(Struct(idarea=module.areaid, descripcion=module.areaid))
+            self.loadArea(AreaStruct(idarea=module.areaid, descripcion=module.areaid))
 
         moduleToolBox = self.toolBoxs[self.areas.index(module.areaid)]
 
@@ -291,10 +292,10 @@ class MainForm(QMainWindow):
             sett_.writeEntry("application/mainForm/mainFormSize", self.size())
 
     def addToMenuPineboo(self, ac, mod):
-        # print(mod.name, ac.name, pineboolib.project.areas[mod.areaid].descripcion)
+        # print(mod.name, ac.name, project.areas[mod.areaid].descripcion)
         # Comprueba si el area ya se ha creado
         if mod.areaid not in self.mPAreas.keys():
-            areaM = self.menuPineboo.addMenu(QtGui.QIcon("share/icons/gtk-open.png"), pineboolib.project.areas[mod.areaid].descripcion)
+            areaM = self.menuPineboo.addMenu(QtGui.QIcon("share/icons/gtk-open.png"), project.areas[mod.areaid].descripcion)
             self.mPAreas[mod.areaid] = areaM
         else:
             areaM = self.mPAreas[mod.areaid]
@@ -322,7 +323,7 @@ class MainForm(QMainWindow):
         tabsOpened_ = sett_.readListEntry("application/mainForm/tabsOpened")
         if tabsOpened_:
             for t in tabsOpened_:
-                for k, module in sorted(pineboolib.project.modules.items()):
+                for k, module in sorted(project.modules.items()):
                     if hasattr(module, "mainform"):
                         if t in module.mainform.actions:
                             module.mainform.actions[t].run()

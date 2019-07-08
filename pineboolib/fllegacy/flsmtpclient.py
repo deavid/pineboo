@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, Qt
+from PyQt5 import QtCore, Qt  # type: ignore
 from os.path import basename
-import logging
+from pineboolib import logging
 
 import smtplib
 
@@ -218,9 +218,9 @@ class FLSmtpClient(QtCore.QObject):
         return self.auth_method_
 
     def startSend(self):
-        from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQS
+        from pineboolib.core.utils.utils_base import pixmap_fromMimeSource
         from pineboolib.fllegacy.flsettings import FLSettings
-        import pineboolib
+        from pineboolib.application import project
 
         self.sendStarted.emit()
         self.sendTotalSteps.emit(len(self.attachments_) + 3)
@@ -250,10 +250,10 @@ class FLSmtpClient(QtCore.QObject):
         self.sendStepNumber.emit(step)
         # Adjuntar logo
         if FLSettings().readBoolEntry("email/sendMailLogo", True):
-            logo = FLSettings().readEntry("email/mailLogo", "%s/logo_mail.png" % pineboolib.project.get_temp_dir())
+            logo = FLSettings().readEntry("email/mailLogo", "%s/logo_mail.png" % project.tmpdir)
             if not QtCore.QFile.exists(logo):
-                logo = "%s/logo.png" % pineboolib.project.get_temp_dir()
-                Qt.QPixmap(AQS.Pixmap_fromMineSource("pineboo-logo.png")).save(logo, "PNG")
+                logo = "%s/logo.png" % project.tmpdir
+                Qt.QPixmap(pixmap_fromMimeSource("pineboo-logo.png")).save(logo, "PNG")
 
             fp = open(logo, "rb")
             logo_part = MIMEImage(fp.read())
@@ -293,7 +293,9 @@ class FLSmtpClient(QtCore.QObject):
 
                 s.login(self.user_, self.password_)
 
-                self.changeStatus(status_msg, State.WaitingForAuthLogin if self.auth_method_ == State.SendAuthLogin else State.WaitingForAuthPlain)
+                self.changeStatus(
+                    status_msg, State.WaitingForAuthLogin if self.auth_method_ == State.SendAuthLogin else State.WaitingForAuthPlain
+                )
 
             s.sendmail(self.from_value_, self.to_, composed)
             self.changeStatus("Correo enviado", State.SendOk)

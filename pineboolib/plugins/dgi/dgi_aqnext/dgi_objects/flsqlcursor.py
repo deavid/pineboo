@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-import logging
-import os
-from PyQt5 import QtCore
-from pineboolib.pncontrolsfactory import FLRelationMetaData, FLSqlCursor as FLSqlCursor_legacy
-from pineboolib.pncontrolsfactory import aqApp
+from pineboolib import logging
 
+# import os
+from PyQt5 import QtCore  # type: ignore
+from pineboolib import pncontrolsfactory
+from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
+
+# FIXME: This module uses pncontrolsfactory to access objects in fllegacy. Please avoid doing that.
 logger = logging.getLogger(__name__)
 
 
@@ -35,6 +37,8 @@ class DelayedObjectProxyLoader(object):
     """
 
     def __load(self):
+        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+
         # print("**Carga", self._field.name())
         field_relation = self._field.relationM1()
 
@@ -48,7 +52,7 @@ class DelayedObjectProxyLoader(object):
             self.loaded_obj = None
             return self.loaded_obj
 
-        if isinstance(field_relation, FLRelationMetaData):
+        if isinstance(field_relation, pncontrolsfactory.FLRelationMetaData):
             relation_table_name = field_relation.foreignTable()
             relation_field_name = field_relation.foreignField()
 
@@ -57,11 +61,13 @@ class DelayedObjectProxyLoader(object):
             if key_ not in self.cursor_tree_dict.keys():
                 # rel_mtd = aqApp.db().manager().metadata(relation_table_name)
 
-                relation_mtd = FLRelationMetaData(relation_table_name, field_relation.field(), FLRelationMetaData.RELATION_1M, False, False, True)
+                relation_mtd = pncontrolsfactory.FLRelationMetaData(
+                    relation_table_name, field_relation.field(), FLRelationMetaData.RELATION_1M, False, False, True
+                )
                 relation_mtd.setField(relation_field_name)
 
                 if relation_table_name and relation_field_name:
-                    self.cursor_tree_dict[key_] = FLSqlCursor_legacy(relation_table_name, True, self._obj.conn(), self._obj, relation_mtd)
+                    self.cursor_tree_dict[key_] = FLSqlCursor(relation_table_name, True, self._obj.conn(), self._obj, relation_mtd)
 
             rel_cursor = self.cursor_tree_dict[key_]
 
@@ -142,25 +148,25 @@ class FLSqlCursor(QtCore.QObject):
 
         self.show_debug = False
 
-        if stabla is not None:
-            # from pineboolib.pncontrolsfactory import aqApp
-
-            module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % stabla)
-            model_file = "models.%s.%s" % (module_name, stabla)
-            if os.path.exists(model_file):
-                (
-                    self._model,
-                    self._buffer_changed,
-                    self._before_commit,
-                    self._after_commit,
-                    self._buffer_commited,
-                    self._inicia_valores_cursor,
-                    self._buffer_changed_label,
-                    self._validate_cursor,
-                    self._validate_transaction,
-                    self._cursor_accepted,
-                ) = self.obtener_modelo(stabla)
-                # self._stabla = self._model._meta.db_table
+        # if stabla is not None:
+        #     from pineboolib.application import project
+        #
+        #     module_name = project.conn.managerModules().idModuleOfFile("%s.mtd" % stabla)
+        #     model_file = "models.%s.%s" % (module_name, stabla)
+        #     if os.path.exists(model_file):
+        #         (
+        #             self._model,
+        #             self._buffer_changed,
+        #             self._before_commit,
+        #             self._after_commit,
+        #             self._buffer_commited,
+        #             self._inicia_valores_cursor,
+        #             self._buffer_changed_label,
+        #             self._validate_cursor,
+        #             self._validate_transaction,
+        #             self._cursor_accepted,
+        #         ) = self.obtener_modelo(stabla)
+        #         self._stabla = self._model._meta.db_table
 
     def buffer_changed_signal(self, scampo):
         if self._buffer_changed is None:
@@ -234,20 +240,20 @@ class FLSqlCursor(QtCore.QObject):
 
         return self._cursor_accepted(self.parent_cursor)
 
-    def obtener_modelo(self, stabla):
-        # logger.warning("****** obtener_modelo %s", stabla, stack_info = True)
-        from YBLEGACY.FLAux import FLAux
-
-        return FLAux.obtener_modelo(stabla)
+    # def obtener_modelo(self, stabla):
+    #     # logger.warning("****** obtener_modelo %s", stabla, stack_info = True)
+    #     from YBLEGACY.FLAux import FLAux
+    #
+    #     return FLAux.obtener_modelo(stabla)
 
     def assoc_model(self, module_name=None):
-        import pineboolib
+        from pineboolib.application import project
 
         cursor = self.parent_cursor
         # mtd = cursor.metadata()
         if module_name is None:
             module_name = cursor.curName()
-        model = meta_model(pineboolib.project._DGI.load_meta_model(module_name), cursor)
+        model = meta_model(project._DGI.load_meta_model(module_name), cursor)
         if model:
             cursor._meta_model = model
             # setattr(cursor.meta_model(), "_cursor", cursor)
@@ -272,6 +278,8 @@ class meta_model(object):
         self.cursor_tree_dict = {}
 
     def __getattr__(self, name):
+        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+
         # print("Buscando", name)
         ret = None
         if name == "pk":
@@ -282,7 +290,7 @@ class meta_model(object):
             field_relation = field.relationM1()
             # value = self._cursor.valueBuffer(field.name())
 
-            if isinstance(field_relation, FLRelationMetaData):
+            if isinstance(field_relation, pncontrolsfactory.FLRelationMetaData):
                 relation_table_name = field_relation.foreignTable()
                 relation_field_name = field_relation.foreignField()
 
@@ -291,11 +299,15 @@ class meta_model(object):
                 if key_ not in self.cursor_tree_dict.keys():
                     # rel_mtd = aqApp.db().manager().metadata(relation_table_name)
 
-                    relation_mtd = FLRelationMetaData(relation_table_name, field_relation.field(), FLRelationMetaData.RELATION_1M, False, False, True)
+                    relation_mtd = pncontrolsfactory.FLRelationMetaData(
+                        relation_table_name, field_relation.field(), pncontrolsfactory.FLRelationMetaData.RELATION_1M, False, False, True
+                    )
                     relation_mtd.setField(relation_field_name)
 
                     if relation_table_name and relation_field_name:
-                        self.cursor_tree_dict[key_] = FLSqlCursor_legacy(relation_table_name, True, self._cursor.conn(), self._cursor, relation_mtd)
+                        self.cursor_tree_dict[key_] = FLSqlCursor(
+                            relation_table_name, True, self._cursor.conn(), self._cursor, relation_mtd
+                        )
 
                 rel_cursor = self.cursor_tree_dict[key_]
                 rel_cursor.select()

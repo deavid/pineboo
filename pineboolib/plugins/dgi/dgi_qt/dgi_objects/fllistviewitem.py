@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import Qt
-from pineboolib import decorators
-import pineboolib
-import logging
+from PyQt5 import Qt  # type: ignore
+from pineboolib.core import decorators
+from pineboolib import logging
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects import qlistview
 
 logger = logging.getLogger("FLListViewItem")
 
@@ -24,15 +24,15 @@ class FLListViewItem(Qt.QStandardItem):
         self.setKey("")
         self.setEditable(False)
         self._index_child = 0
-
-        # Comprueba que tipo de parent es
-        if isinstance(parent, pineboolib.plugins.dgi.dgi_qt.dgi_objects.qlistview.QListView):
-            # self._root = True
-            parent.model().setItem(0, 0, self)
-        else:
-            if isinstance(parent, pineboolib.plugins.dgi.dgi_qt.dgi_objects.fllistviewitem.FLListViewItem):
-                # print("Añadiendo nueva linea a", parent.text(0))
-                parent.appendRow(self)
+        if parent:
+            # Comprueba que tipo de parent es
+            if isinstance(parent, qlistview.QListView):
+                # self._root = True
+                parent.model().setItem(0, 0, self)
+            else:
+                if isinstance(parent, self):
+                    # print("Añadiendo nueva linea a", parent.text(0))
+                    parent.appendRow(self)
 
         # if parent:
         #    self._parent = parent

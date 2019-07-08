@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtWidgets, QtCore, Qt
-from pineboolib import decorators
-from pineboolib.utils import format_double
+from PyQt5 import QtWidgets, QtCore, Qt  # type: ignore
+from pineboolib.core import decorators
+from pineboolib.core.utils.utils_base import format_double
+
+
+from PyQt5.QtWidgets import QAbstractItemView  # type: ignore
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
+from typing import Optional
 
 
 class QTable(QtWidgets.QTableWidget):
@@ -22,7 +27,7 @@ class QTable(QtWidgets.QTableWidget):
     AutoOneFit = 3
     sort_column_ = None
 
-    def __init__(self, parent=None, name=None):
+    def __init__(self, parent: Optional[QGroupBox] = None, name: None = None) -> None:
         super(QTable, self).__init__(parent)
         if not parent:
             self.setParent(self.parentWidget())
@@ -75,11 +80,11 @@ class QTable(QtWidgets.QTableWidget):
     def setCellAlignment(self, row, col, alig_):
         self.item(row, col).setTextAlignment(alig_)
 
-    def setNumCols(self, n):
+    def setNumCols(self, n: int) -> None:
         self.setColumnCount(n)
         self.setColumnLabels(",", ",".join(self.cols_list))
 
-    def setNumRows(self, n):
+    def setNumRows(self, n: int) -> None:
         self.setRowCount(n)
 
     def setReadOnly(self, b):
@@ -91,13 +96,13 @@ class QTable(QtWidgets.QTableWidget):
     def selectionMode(self):
         return super(QTable, self).selectionMode()
 
-    def setFocusStyle(self, m):
+    def setFocusStyle(self, m: str) -> None:
         if isinstance(m, int):
             return
         else:
             self.setStyleSheet(m)
 
-    def setColumnLabels(self, separador, lista):
+    def setColumnLabels(self, separador: str, lista: str) -> None:
         array_ = lista.split(separador)
         self.cols_list = []
         for i in range(self.columnCount()):
@@ -116,7 +121,7 @@ class QTable(QtWidgets.QTableWidget):
         self.setHorizontalHeaderLabels(self.cols_list)
         self.setRowCount(0)
 
-    def setSelectionMode(self, mode):
+    def setSelectionMode(self, mode: QAbstractItemView.SelectionMode) -> None:
         if mode == 999:
             self.setAlternatingRowColors(True)
         else:
@@ -170,13 +175,21 @@ class QTable(QtWidgets.QTableWidget):
             else:
                 new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
 
+    def setCellWidget(self, row, col, obj):
+        super().setCellWidget(row, col, obj)
+
+        widget = self.cellWidget(row, col)
+        if widget is not None:
+            if row in self.read_only_rows or col in self.read_only_cols:
+                widget.setEnabled(False)
+
     def adjustColumn(self, k):
         self.horizontalHeader().setSectionResizeMode(k, QtWidgets.QHeaderView.ResizeToContents)
 
     def setRowReadOnly(self, row, b):
         if b:
             if row in self.read_only_rows:
-                pass
+                return
             else:
                 self.read_only_rows.append(row)
         else:
@@ -195,7 +208,7 @@ class QTable(QtWidgets.QTableWidget):
     def setColumnReadOnly(self, col, b):
         if b:
             if col in self.read_only_cols:
-                pass
+                return
             else:
                 self.read_only_cols.append(col)
         else:

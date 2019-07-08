@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtWidgets import QWidget, QApplication
-from pineboolib.utils import DEPENDENCIES_CHECKED
-from PyQt5 import QtCore
+from PyQt5.QtWidgets import QWidget, QApplication  # type: ignore
+from PyQt5 import QtCore  # type: ignore
 
 
 class about_pineboo(QWidget):
@@ -13,15 +12,15 @@ class about_pineboo(QWidget):
         self.load()
 
     def load(self):
-        import pineboolib
+        from pineboolib.application import project
         from pineboolib.fllegacy.flmanagermodules import FLManagerModules
-        from pineboolib.utils import filedir
+        from pineboolib.core.utils.utils_base import filedir
 
         mng_mod = FLManagerModules()
 
         dlg_ = filedir("dlgabout/about_pineboo.ui")
-        version_ = pineboolib.project.version
-        self.ui = mng_mod.createUI(dlg_, None, self)
+        version_ = project.version
+        self.ui = mng_mod.createUI(dlg_, None, self)  # FIXME: Letting FL* to create Pineboo interface?
         self.ui.lbl_version.setText("Pineboo v%s" % str(version_))
         self.ui.btn_close.clicked.connect(self.ui.close)
         self.ui.btn_clipboard.clicked.connect(self.to_clipboard)
@@ -30,9 +29,10 @@ class about_pineboo(QWidget):
         self.ui.lbl_librerias.setText(self.load_components())
 
     def load_components(self):
-        components = "Versiones de componentes:\n\n"
         import platform
+        from pineboolib.application.utils.check_dependencies import DEPENDENCIES_CHECKED
 
+        components = "Versiones de componentes:\n\n"
         components += "S.O.: %s %s %s\n" % (platform.system(), platform.release(), platform.version())
         # py_ver = sys.version
         # if py_ver.find("(") > -1:

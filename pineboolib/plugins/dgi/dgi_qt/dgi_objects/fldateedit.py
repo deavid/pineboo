@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qdateedit import QDateEdit
+from pineboolib.application.utils.date_conversion import convert_to_qdate
 
 
 class FLDateEdit(QDateEdit):
@@ -23,17 +24,14 @@ class FLDateEdit(QDateEdit):
         return super(FLDateEdit, self).date
 
     def setDate(self, d=None):
-
-        from pineboolib.utils import convert_to_qdate
-
         if d in (None, "NAN", ""):
             date = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
         else:
             date = convert_to_qdate(d)
 
         super(FLDateEdit, self).setDate(date)
-        # if not pineboolib.project._DGI.localDesktop():
-        #    pineboolib.project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), date.toString())
+        # if not project._DGI.localDesktop():
+        #    project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), date.toString())
         # else:
         self.setStyleSheet("color: black")
 

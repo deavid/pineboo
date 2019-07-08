@@ -1,12 +1,14 @@
 # # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, Qt
-from PyQt5.Qt import QRectF
-from PyQt5.QtGui import QPixmap, QColor
-from pineboolib.utils import load2xml
-from PyQt5.QtSvg import QSvgRenderer
+from PyQt5 import QtCore, Qt  # type: ignore
+from PyQt5.Qt import QRectF  # type: ignore
+from PyQt5.QtGui import QPixmap, QColor  # type: ignore
+from pineboolib.core.utils.utils_base import load2xml
+from PyQt5.QtSvg import QSvgRenderer  # type: ignore
 
-import logging
-import barcode
+from pineboolib import logging
+
+import barcode  # pip3 install python-barcode
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 
@@ -33,30 +35,37 @@ BARCODE_GTIN = 17
 class FLCodBar(object):
 
     barcode = {}
-    p = None
-    pError = None
+    p: QPixmap = None
+    pError: QPixmap = None
 
     def __init__(
-        self, value=None, type_=BARCODE_128, margin=10, scale=1.0, cut=1.0, rotation=0, text_flag=False, fg=QtCore.Qt.black, bg=QtCore.Qt.white, res=72
+        self,
+        value=None,
+        type_=BARCODE_128,
+        margin=10,
+        scale=1.0,
+        cut=1.0,
+        rotation=0,
+        text_flag=False,
+        fg=QtCore.Qt.black,
+        bg=QtCore.Qt.white,
+        res=72,
     ):
         dict_ = {"barcode": "python-barcode"}
-        from pineboolib.utils import checkDependencies
+        from pineboolib.application.utils.check_dependencies import check_dependencies
 
-        checkDependencies(dict_)
-        self.pError = "Not Implemented"
+        check_dependencies(dict_)
+        self.pError = QPixmap()
 
         self.barcode["value"] = ""
 
+        self.p: QPixmap = None
         if value in [None, 0]:
-            self.p = None
-            self.pError = QPixmap()
             self.readingStdout = False
             self.writingStdout = False
             self.fillDefault(self.barcode)
         else:
             if isinstance(value, str):
-                self.p = None
-                self.pError = QPixmap()
                 self.readingStdout = False
                 self.writingStdout = False
                 self.barcode["value"] = value
@@ -74,7 +83,7 @@ class FLCodBar(object):
             else:
                 self._copyBarCode(value, self.barcode)
 
-    def pixmap(self):
+    def pixmap(self) -> QPixmap:
         self._createBarcode()
 
         if not self.p:
@@ -276,7 +285,7 @@ class FLCodBar(object):
 
         margin_ = self.barcode["margin"] / 10
 
-        render_options = {}
+        render_options: Dict[str, Any] = {}
         render_options["module_width"] = 0.6
         render_options["module_height"] = 10
         render_options["background"] = bg_.lower()
@@ -297,7 +306,7 @@ class FLCodBar(object):
             bar_ = barC("000000000000")
 
         svg = bar_.render(render_options)
-        xml_svg = load2xml(svg.decode("utf-8"))
+        xml_svg = load2xml(svg.decode("utf-8")).getroot()
         svg_w = 3.779 * float(xml_svg.get("width")[0:6])
         svg_h = 3.779 * float(xml_svg.get("height")[0:6])
         self.p = QPixmap(svg_w, svg_h)

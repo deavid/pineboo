@@ -1,17 +1,13 @@
 # # -*- coding: utf-8 -*-
-import logging
 import os
-import sys
-import pineboolib
-
 from importlib import import_module
 
-from PyQt5 import QtWidgets, QtCore, QtGui, Qt, QtXml
-from PyQt5.QtWidgets import qApp
+from PyQt5 import QtWidgets, QtCore, QtGui, Qt, QtXml  # type: ignore
 
+from pineboolib import logging
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from pineboolib.utils import filedir, load2xml, _path
-from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.core.utils.utils_base import filedir, load2xml
+from pineboolib.application.utils.path import _path
 
 
 logger = logging.getLogger(__name__)
@@ -20,26 +16,27 @@ logger = logging.getLogger(__name__)
 class dgi_qt(dgi_schema):
 
     pnqt3ui = None
+    splash = None
+    progress_dialog_mng = None
 
     def __init__(self):
         super(dgi_qt, self).__init__()  # desktopEnabled y mlDefault a True
         self._name = "qt"
         self._alias = "Qt5"
-        self.set_clean_no_python_changeable(True)
-        self.set_clean_no_python(FLSettings().readBoolEntry("ebcomportamiento/clean_no_python", False))
 
         from pineboolib.plugins.dgi.dgi_qt import dgi_qt3ui
+        from .dgi_objects.splash_screen import splashscreen
+        from .dgi_objects.progress_dialog_manager import ProgressDialogManager
+        from .dgi_objects.status_help_msg import StatusHelpMsg
 
         self.pnqt3ui = dgi_qt3ui
-
-    def create_app(self):
-        app = QtWidgets.QApplication(sys.argv)
-        app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
-        return app
+        self.splash = splashscreen()
+        self.progress_dialog_manager = ProgressDialogManager()
+        self.status_help_msg = StatusHelpMsg()
 
     def __getattr__(self, name):
 
-        cls = super().resolveObject(self._name, name)
+        cls = self.resolveObject(self._name, name)
         if cls is None:
             mod_ = import_module(__name__)
             cls = getattr(mod_, name, None)
@@ -56,10 +53,13 @@ class dgi_qt(dgi_schema):
         return cls
 
     def msgBoxWarning(self, t):
+        from PyQt5.QtWidgets import qApp  # type: ignore
+
         parent = qApp.focusWidget().parent() if hasattr(qApp.focusWidget(), "parent") else qApp.focusWidget()
         self.MessageBox.warning(t, self.MessageBox.Ok, self.MessageBox.NoButton, self.MessageBox.NoButton, "Pineboo", parent)
 
     def createUI(self, n, connector=None, parent=None, name=None):
+        import pineboolib.pncontrolsfactory
 
         if ".ui" not in n:
             n += ".ui"
@@ -81,6 +81,8 @@ class dgi_qt(dgi_schema):
         UIVersion = root_.get("version")
         if parent is None:
             wid = root_.find("widget")
+            if wid is None:
+                raise Exception("No parent provided and also no <widget> found")
             parent = getattr(pineboolib.pncontrolsfactory, wid.get("class"))()
 
         if hasattr(parent, "widget"):
@@ -92,7 +94,7 @@ class dgi_qt(dgi_schema):
         if UIVersion < "4.0":
             self.pnqt3ui.loadUi(form_path, w_)
         else:
-            from PyQt5 import uic
+            from PyQt5 import uic  # type: ignore
 
             qtWidgetPlugings = filedir("./plugins/qtwidgetsplugins")
             if qtWidgetPlugings not in uic.widgetPluginPath:

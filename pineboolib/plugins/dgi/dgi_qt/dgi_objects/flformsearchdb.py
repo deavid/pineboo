@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-import logging
+from pineboolib import logging
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import QKeySequence
+from PyQt5 import QtCore, QtWidgets  # type: ignore
+from PyQt5.QtWidgets import QToolButton  # type: ignore
+from PyQt5.Qt import QKeySequence  # type: ignore
 
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib.utils import filedir
-import pineboolib
-from pineboolib.pncontrolsfactory import QMdiSubWindow
+from pineboolib.core.utils.utils_base import filedir
+from pineboolib.fllegacy.flapplication import aqApp
 
 
 class FLFormSearchDB(FLFormDB):
@@ -56,11 +56,11 @@ class FLFormSearchDB(FLFormDB):
             self.logger.warning("Se ha llamado a FLFormSearchDB sin name_or_cursor")
             return
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.application import project
 
         parent = parent or aqApp.mainWidget()
         if isinstance(name_or_cursor, str):
-            action = pineboolib.project.conn.manager().action(name_or_cursor)
+            action = project.conn.manager().action(name_or_cursor)
             cursor = FLSqlCursor(action.table(), True, "default", None, None, self)
         else:
             action = name_or_cursor._action
@@ -98,7 +98,7 @@ class FLFormSearchDB(FLFormDB):
     """
 
     def loadControls(self):
-        from pineboolib.pncontrolsfactory import QToolButton
+        from pineboolib import pncontrolsfactory
 
         self.bottomToolbar = QtWidgets.QFrame()
         self.bottomToolbar.setMaximumHeight(64)
@@ -118,12 +118,12 @@ class FLFormSearchDB(FLFormDB):
         settings = FLSettings()
         if settings.readBoolEntry("application/isDebuggerMode", False):
 
-            pushButtonExport = QToolButton(self)
+            pushButtonExport = pncontrolsfactory.QToolButton(self)
             pushButtonExport.setObjectName("pushButtonExport")
             pushButtonExport.setSizePolicy(sizePolicy)
             pushButtonExport.setMinimumSize(pbSize)
             pushButtonExport.setMaximumSize(pbSize)
-            pushButtonExport.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-properties.png")))
+            pushButtonExport.setIcon(pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-properties.png")))
             pushButtonExport.setShortcut(QKeySequence(self.tr("F3")))
             pushButtonExport.setWhatsThis("Exportar a XML(F3)")
             pushButtonExport.setToolTip("Exportar a XML(F3)")
@@ -137,7 +137,7 @@ class FLFormSearchDB(FLFormDB):
                 push_button_snapshot.setSizePolicy(sizePolicy)
                 push_button_snapshot.setMinimumSize(pbSize)
                 push_button_snapshot.setMaximumSize(pbSize)
-                push_button_snapshot.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-paste.png")))
+                push_button_snapshot.setIcon(pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-paste.png")))
                 push_button_snapshot.setShortcut(QKeySequence(self.tr("F8")))
                 push_button_snapshot.setWhatsThis("Capturar pantalla(F8)")
                 push_button_snapshot.setToolTip("Capturar pantalla(F8)")
@@ -149,14 +149,14 @@ class FLFormSearchDB(FLFormDB):
             self.bottomToolbar.layout.addItem(spacer)
 
         if not self.pushButtonAccept:
-            self.pushButtonAccept = QToolButton(self)
+            self.pushButtonAccept = pncontrolsfactory.QToolButton(self)
             self.pushButtonAccept.setObjectName("pushButtonAccept")
             self.pushButtonAccept.clicked.connect(self.accept)
 
         self.pushButtonAccept.setSizePolicy(sizePolicy)
         self.pushButtonAccept.setMaximumSize(pbSize)
         self.pushButtonAccept.setMinimumSize(pbSize)
-        self.pushButtonAccept.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-save.png")))
+        self.pushButtonAccept.setIcon(pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-save.png")))
         # pushButtonAccept->setAccel(QKeySequence(Qt::Key_F10)); FIXME
         self.pushButtonAccept.setFocus()
         self.pushButtonAccept.setWhatsThis("Seleccionar registro actual y cerrar formulario (F10)")
@@ -166,14 +166,14 @@ class FLFormSearchDB(FLFormDB):
         self.pushButtonAccept.show()
 
         if not self.pushButtonCancel:
-            self.pushButtonCancel = QToolButton(self)
+            self.pushButtonCancel = pncontrolsfactory.QToolButton(self)
             self.pushButtonCancel.setObjectName("pushButtonCancel")
             self.pushButtonCancel.clicked.connect(self.reject)
 
         self.pushButtonCancel.setSizePolicy(sizePolicy)
         self.pushButtonCancel.setMaximumSize(pbSize)
         self.pushButtonCancel.setMinimumSize(pbSize)
-        self.pushButtonCancel.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
+        self.pushButtonCancel.setIcon(pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-stop.png")))
         self.pushButtonCancel.setFocusPolicy(QtCore.Qt.NoFocus)
         # pushButtonCancel->setAccel(Esc); FIXME
         self.pushButtonCancel.setWhatsThis("Cerrar formulario sin seleccionar registro (Esc)")
@@ -201,13 +201,13 @@ class FLFormSearchDB(FLFormDB):
         if not self.cursor_:
             return False
 
-        if not self.cursor_.isLocked():
-            self.cursor_.setModeAccess(FLSqlCursor.Edit)
+        if self.cursor_.isLocked():
+            self.cursor_.setModeAccess(FLSqlCursor.Browse)
 
         if self.loop or self.inExec_:
             print("FLFormSearchDB::exec(): Se ha detectado una llamada recursiva")
             if self.isHidden():
-                super(FLFormSearchDB, self).show()
+                super().show()
             if self.initFocusWidget_:
                 self.initFocusWidget_.setFocus()
             return False
@@ -216,7 +216,7 @@ class FLFormSearchDB(FLFormDB):
         self.acceptingRejecting_ = False
         self.accepted_ = False
 
-        super(FLFormSearchDB, self).show()
+        super().show()
         if self.initFocusWidget_:
             self.initFocusWidget_.setFocus()
 
@@ -301,7 +301,7 @@ class FLFormSearchDB(FLFormDB):
         if self.isHidden():
             # self.saveGeometry()
             # self.closed.emit()
-            super(FLFormSearchDB, self).closeEvent(e)
+            super().closeEvent(e)
             self.deleteLater()
         else:
             self.reject()
@@ -323,7 +323,7 @@ class FLFormSearchDB(FLFormDB):
         if self.isHidden():
             return
 
-        super(FLFormSearchDB, self).hide()
+        super().hide()
         if self.loop:
             self.loop = False
             self.eventloop.exit()
@@ -347,7 +347,9 @@ class FLFormSearchDB(FLFormDB):
         self.saveGeometry()
         self.hide()
 
-        if isinstance(self.parent(), QMdiSubWindow):
+        from pineboolib import pncontrolsfactory
+
+        if isinstance(self.parent(), pncontrolsfactory.QMdiSubWindow):
             self.parent().hide()
 
     """

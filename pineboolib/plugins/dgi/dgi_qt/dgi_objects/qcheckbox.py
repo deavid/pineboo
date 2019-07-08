@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore  # type: ignore
 
 
 class QCheckBox(QtWidgets.QCheckBox):
 
     _parent = None
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         self._parent = parent
-        super(QCheckBox, self).__init__(parent)
+        super().__init__(parent)
 
     @QtCore.pyqtProperty(int)
     def checked(self):
@@ -18,6 +18,7 @@ class QCheckBox(QtWidgets.QCheckBox):
     def checked(self, b):
         if isinstance(b, str):
             b = b == "true"
-        super(QCheckBox, self).setChecked(b)
-        # if not pineboolib.project._DGI.localDesktop():
-        #    pineboolib.project._DGI._par.addQueque("%s_setChecked" % self._parent.objectName(), b)
+
+        super().setChecked(b)
+        # if not project._DGI.localDesktop():
+        #    project._DGI._par.addQueque("%s_setChecked" % self._parent.objectName(), b)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pineboolib import decorators
+from pineboolib.core import decorators
 
 
 class auth(object):

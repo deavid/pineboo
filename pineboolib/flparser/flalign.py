@@ -1,18 +1,22 @@
+# pytype: skip-file
+# type: ignore
 import os
 import os.path
 from optparse import OptionParser
 import difflib
 import re
+import protocols
+from typing import Any, List, Mapping, Optional, Set, Sized, SupportsInt, Tuple, Union
 
 
 class ProcessFile(object):
-    def __init__(self, filename):
+    def __init__(self, filename) -> None:
         self.filename = filename
         self.process()
         self.indexLines()
         self.bnames = set(self.idxnames.keys())
 
-    def process(self):
+    def process(self) -> None:
         self.blocks = []
         self.idxlines = {}
         self.idxnames = {}
@@ -33,13 +37,13 @@ class ProcessFile(object):
             n += 1
             line = fblocks.readline()
 
-    def indexLines(self):
+    def indexLines(self) -> None:
         fqs = open(self.filename)
         self.lines = []
         for line in fqs:
             self.lines.append(line)
 
-    def diffTo(self, pfile2):
+    def diffTo(self, pfile2) -> Tuple[Any, Set[str]]:
         added = pfile2.bnames - self.bnames
         deleted = self.bnames - pfile2.bnames
 
@@ -47,7 +51,7 @@ class ProcessFile(object):
 
 
 class LineNumber(object):
-    def __init__(self, letter, lines):
+    def __init__(self, letter: Union[Sized, Mapping[int, Any]], lines: Mapping[int, Mapping]) -> None:
         self.nl = 0
         if len(letter) > 1:
             self.diffFrom = letter[0]
@@ -58,35 +62,37 @@ class LineNumber(object):
         self.letter = letter[-1]
         self.lines = lines
 
-    def line(self):
+    def line(self) -> Any:
         lin = self.lines[self.nl]
         if self.diffFrom:
             return lin[2:]
         else:
             return lin[:]
 
-    def symbol(self):
+    def symbol(self) -> Any:
         lin = self.lines[self.nl]
         if self.diffFrom:
             return lin[0]
         else:
             return " "
 
-    def next(self, t=1):
+    def next(self, t: Union[bytes, str, SupportsInt] = 1) -> None:
         self.nl += int(t)
 
-    def __iadd__(self, other):
+    def __iadd__(self, other: Union[bytes, str, SupportsInt]):
         self.nl += int(other)
         return self
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.nl
 
-    def __index__(self):
+    def __index__(self) -> int:
         return self.nl
 
 
-def appliedDiff(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
+def appliedDiff(
+    C, A, B, prefer: str = "C", debug=False, quiet=False, swap=False
+) -> List[Tuple[str, str, Tuple[int, int, int], Optional[str], Union[str, protocols.SupportsFind, Mapping[int, Any]]]]:
     diffAB = list(difflib.ndiff(A.sortednames, B.sortednames))
     diffAC = list(difflib.ndiff(A.sortednames, C.sortednames))
 
@@ -392,7 +398,7 @@ def appliedDiff(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
 """
 
 
-def writeAlignedFile(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
+def writeAlignedFile(C, A, B, prefer="C", debug=False, quiet=False, swap=False) -> None:
     patchlist = appliedDiff(C, A, B, prefer, debug, quiet, swap)
     F = {"A": A, "B": B, "C": C}
     L = ["A", "B", "C"]
@@ -446,7 +452,7 @@ def writeAlignedFile(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
     fout.close()
 
 
-def main():
+def main() -> None:
     parser = OptionParser()
     # parser.add_option("-q", "--quiet",
     #                action="store_false", dest="verbose", default=True,

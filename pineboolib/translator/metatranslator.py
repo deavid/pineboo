@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtXml, QtCore
-import logging
+from PyQt5 import QtXml, QtCore  # type: ignore
+from pineboolib import logging
 
 
 class metaTranslator(object):
@@ -191,11 +191,18 @@ class tsHandler(QtXml.QXmlDefaultHandler):
                 if self.context_is_utf8:
                     self.tor.insert(
                         MetaTranslatorMessage(
-                            self.context.decode("utf-8"), context_comment, self.accum.encode("UTF-8"), None, True, MetaTranslatorMessage.Unfinished
+                            self.context.decode("utf-8"),
+                            context_comment,
+                            self.accum.encode("UTF-8"),
+                            None,
+                            True,
+                            MetaTranslatorMessage.Unfinished,
                         )
                     )
                 else:
-                    self.tor.insert(MetaTranslatorMessage(self.context, context_comment, self.accum, None, True, MetaTranslatorMessage.Unfinished))
+                    self.tor.insert(
+                        MetaTranslatorMessage(self.context, context_comment, self.accum, None, True, MetaTranslatorMessage.Unfinished)
+                    )
 
         elif qname == "translation":
             self.translation = self.accum
@@ -203,7 +210,12 @@ class tsHandler(QtXml.QXmlDefaultHandler):
             if self.message_is_utf8:
                 self.tor.insert(
                     MetaTranslatorMessage(
-                        self.context.encode("UTF-8"), self.source.encode("UTF-8"), self.comment.encode("UTF-8"), self.translation, True, self.type_
+                        self.context.encode("UTF-8"),
+                        self.source.encode("UTF-8"),
+                        self.comment.encode("UTF-8"),
+                        self.translation,
+                        True,
+                        self.type_,
                     )
                 )
             else:

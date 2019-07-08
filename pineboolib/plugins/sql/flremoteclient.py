@@ -1,17 +1,18 @@
-# from PyQt5.QtCore import QTime, QDate, QDateTime
-# from PyQt5.Qt import qWarning, QDomDocument, QRegExp
-# from PyQt5.QtWidgets import QMessageBox, QProgressDialog
+import json
 
-from pineboolib.utils import checkDependencies
+# from PyQt5.QtCore import QTime, QDate, QDateTime  # type: ignore
+# from PyQt5.Qt import qWarning, QDomDocument, QRegExp  # type: ignore
+# from PyQt5.QtWidgets import QMessageBox, QProgressDialog  # type: ignore
 
-# from pineboolib import decorators
+from pineboolib.application.utils.check_dependencies import check_dependencies
+
+# from pineboolib.core import decorators
 # from pineboolib.fllegacy.flutil import FLUtil
 # from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 # from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
-import pineboolib
-import logging
-import json
+from pineboolib import logging
+from pineboolib.core.utils.utils_base import create_dict
 
 
 logger = logging.getLogger(__name__)
@@ -97,7 +98,7 @@ class FLREMOTECLIENT(object):
     pure_python_ = True
     defaultPort_ = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.version_ = "0.6"
         self.conn_ = None
         self.name_ = "REMOTECLIENT"
@@ -110,7 +111,7 @@ class FLREMOTECLIENT(object):
         self.defaultPort_ = 4000
         self.id_ = 0
         self.url = None
-        checkDependencies({"requests": "requests"}, False)
+        check_dependencies({"requests": "requests"}, False)
 
     def useThreads(self):
         return False
@@ -118,7 +119,7 @@ class FLREMOTECLIENT(object):
     def useTimer(self):
         return True
 
-    def desktopFile(self):
+    def desktopFile(self) -> bool:
         return False
 
     def version(self):
@@ -130,10 +131,10 @@ class FLREMOTECLIENT(object):
     def isOpen(self):
         return self.open_
 
-    def pure_python(self):
+    def pure_python(self) -> bool:
         return self.pure_python_
 
-    def safe_load(self):
+    def safe_load(self) -> bool:
         return True
 
     def mobile(self):
@@ -144,7 +145,7 @@ class FLREMOTECLIENT(object):
 
     def create_dict(self, fun, data=[]):
         fun = "%s__%s" % (self.id_, fun)
-        return pineboolib.utils.create_dict("dbdata", fun, self.id_, data)
+        return create_dict("dbdata", fun, self.id_, data)
 
     def send_to_server(self, js):
         import requests
@@ -196,7 +197,8 @@ class FLREMOTECLIENT(object):
     def refreshQuery(self, curname, fields, table, where, cursor, conn):
         self.send_to_server(
             self.create_dict(
-                "refreshQuery", {"cursor_id": cursor.id_, "curname": "%s_%s" % (self.id_, curname), "fields": fields, "table": table, "where": where}
+                "refreshQuery",
+                {"cursor_id": cursor.id_, "curname": "%s_%s" % (self.id_, curname), "fields": fields, "table": table, "where": where},
             )
         )
 
@@ -219,7 +221,13 @@ class FLREMOTECLIENT(object):
         return self.send_to_server(
             self.create_dict(
                 "fetchAll",
-                {"cursor_id": cursor.id_, "tablename": tablename, "where_filter": where_filter, "fields": fields, "curname": "%s_%s" % (self.id_, curname)},
+                {
+                    "cursor_id": cursor.id_,
+                    "tablename": tablename,
+                    "where_filter": where_filter,
+                    "fields": fields,
+                    "curname": "%s_%s" % (self.id_, curname),
+                },
             )
         )
 

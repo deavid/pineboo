@@ -1,8 +1,9 @@
-from builtins import str
 import xml.parsers.expat
 from optparse import OptionParser
 import re
 import ast
+import __builtin__
+from typing import Iterable, List
 
 elements = []
 show_end = True
@@ -10,7 +11,7 @@ lasttextdata = ""
 lstelements = []
 
 
-def reset():
+def reset() -> None:
     global elements, show_end, lstelements, lasttextdata
     elements = []
     show_end = True
@@ -19,7 +20,7 @@ def reset():
 
 
 # 3 handler functions
-def start_element(name, attrs):
+def start_element(name, attrs) -> None:
     global elements, show_end, lstelements, lasttextdata
     lstattrs = list(sorted(["%s=%s" % (k, v) for k, v in attrs.items()]))
     completename = name
@@ -34,7 +35,7 @@ def start_element(name, attrs):
     lasttextdata = ""
 
 
-def end_element(name):
+def end_element(name) -> None:
     global elements, show_end, lstelements, lasttextdata
     lasttextdata = ""
     if show_end:
@@ -46,7 +47,7 @@ def end_element(name):
     # print 'End element:', name
 
 
-def char_data(data):
+def char_data(data: __builtin__.str) -> None:
     global elements, show_end, lstelements, lasttextdata
     # data = data.strip()
     lasttextdata += data
@@ -58,12 +59,12 @@ def char_data(data):
         # print "/".join(elements)+ "(%s)" % repr(data)
 
 
-def unmap(lines):
+def unmap(lines: Iterable) -> List[__builtin__.str]:
 
     runmap = re.compile(r"^(?P<depth>/*)(?P<tagname>\w+)(?P<attrs>&[^\(]+)*(?P<txt>\(.+\))?$")
     # depthlevel
     # tagname
-    elementpool = []
+    elementpool: List[str] = []
     text = []
     for line in lines:
         line = line.strip()
@@ -76,7 +77,7 @@ def unmap(lines):
             break
 
         depth = len(rg1.group("depth"))
-        tagname = str(rg1.group("tagname"))
+        tagname = rg1.group("tagname")
         t_attrs = rg1.group("attrs")
         attrs = []
         if t_attrs:
@@ -103,7 +104,7 @@ def unmap(lines):
                     txtattrs += ' %s="%s"' % (k, v)
 
             if txt:
-                txt = txt.encode("utf-8")
+                # txt = txt.encode("utf-8")
                 txt = txt.replace("&", "&amp;")
                 txt = txt.replace("<", "&lt;")
             else:
@@ -124,7 +125,7 @@ def unmap(lines):
     return text
 
 
-def main():
+def main() -> None:
     parser = OptionParser()
     # parser.add_option("-f", "--file", dest="filename",
     #                  help="write report to FILE", metavar="FILE")
@@ -156,7 +157,7 @@ def main():
             fhandler = open(fname)
             fw = open(fname + ".map", "w")
             reset()
-            p.ParseFile(fhandler)
+            p.ParseFile(fhandler)  # type: ignore
             for t in lstelements:
                 elems = t.split("/")
                 lbox = []

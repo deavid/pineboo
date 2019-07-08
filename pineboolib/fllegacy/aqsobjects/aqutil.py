@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import logging
+from pineboolib import logging
 
 
 class AQUtil(object):

@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-from pineboolib import decorators
-from PyQt5 import QtCore
-import pineboolib
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.fllegacy.flsettings import FLSettings
-import platform
 import hashlib
 import datetime
-import logging
+
+from PyQt5 import QtCore  # type: ignore
+
+from pineboolib.fllegacy.systype import SysType
+from pineboolib.core import decorators
+from pineboolib import logging
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +24,6 @@ class FLUtil(QtCore.QObject):
     @author InfoSiAL S.L.
     """
 
-    progress_dialog_stack = []
     vecUnidades = [
         "",
         "uno",
@@ -60,7 +58,18 @@ class FLUtil(QtCore.QObject):
     ]
 
     vecDecenas = ["", "", "", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"]
-    vecCentenas = ["", "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"]
+    vecCentenas = [
+        "",
+        "ciento",
+        "doscientos",
+        "trescientos",
+        "cuatrocientos",
+        "quinientos",
+        "seiscientos",
+        "setecientos",
+        "ochocientos",
+        "novecientos",
+    ]
 
     def deleteCascade(self, collector, field, sub_objs, using):
         for o in sub_objs:
@@ -320,7 +329,8 @@ class FLUtil(QtCore.QObject):
         @param tabla. Nombre de la tabla
         @return Lista de campos
         """
-        from pineboolib.pncontrolsfactory import aqApp
+
+        from pineboolib.fllegacy.flapplication import aqApp
 
         campos = aqApp.db().manager().metadata(tablename).fieldNames()
         return [len(campos)] + campos
@@ -374,34 +384,9 @@ class FLUtil(QtCore.QObject):
         @param  f Cadena de texto con la fecha a transformar
         @return Cadena de texto con la fecha transformada
         """
-        if not f:
-            return None
+        from pineboolib.application.utils.date_conversion import date_dma_to_amd
 
-        f = str(f)
-        if f.find("T") > -1:
-            f = f[: f.find("T")]
-
-        array_ = []
-        dia_ = None
-        mes_ = None
-        ano_ = None
-
-        if f.find("-") > -1:
-            array_ = f.split("-")
-        elif f.find("/") > -1:
-            array_ = f.split("/")
-
-        if array_:
-            if len(array_) == 3:
-                dia_ = array_[0]
-                mes_ = array_[1]
-                ano_ = array_[2]
-            else:
-                dia_ = f[0:2]
-                mes_ = f[2:2]
-                ano_ = f[4:4]
-
-        return "%s-%s-%s" % (ano_, mes_, dia_)
+        return date_dma_to_amd(f)
 
     def dateAMDtoDMA(self, f):
         """
@@ -411,33 +396,9 @@ class FLUtil(QtCore.QObject):
         @param  f Cadena de texto con la fecha a transformar
         @return Cadena de texto con la fecha transformada
         """
-        if not f:
-            return None
+        from pineboolib.application.utils.date_conversion import date_amd_to_dma
 
-        f = str(f)
-        if f.find("T") > -1:
-            f = f[: f.find("T")]
-
-        array_ = []
-        dia_ = None
-        mes_ = None
-        ano_ = None
-        if f.find("-") > -1:
-            array_ = f.split("-")
-        elif f.find("/") > -1:
-            array_ = f.split("/")
-
-        if array_:
-            if len(array_) == 3:
-                ano_ = array_[0]
-                mes_ = array_[1]
-                dia_ = array_[2]
-            else:
-                ano_ = f[0:4]
-                mes_ = f[4:2]
-                dia_ = f[6:2]
-
-        return "%s-%s-%s" % (dia_, mes_, ano_)
+        return date_amd_to_dma(f)
 
     @decorators.BetaImplementation
     def formatoMiles(self, s):
@@ -497,9 +458,7 @@ class FLUtil(QtCore.QObject):
         from pineboolib.fllegacy.fltranslations import FLTranslate
 
         if text_ == "MetaData":
-            a = group
-            group = text_
-            text_ = a
+            group, text_ = text_, group
 
         text_ = text_.replace(" % ", " %% ")
 
@@ -517,166 +476,10 @@ class FLUtil(QtCore.QObject):
         """
         pass
 
-    def nextCounter(self, *args, **kwargs):
-        """
-        Este metodo devuelve el siguiente valor de un campo tipo contador de una tabla.
+    def nextCounter(self, *args):
+        from pineboolib.application.database.utils import nextCounter
 
-        Este metodo es muy util cuando se insertan registros en los que
-        la referencia es secuencial y no nos acordamos de cual fue el ultimo
-        numero usado. El valor devuelto es un QVariant del tipo de campo es
-        el que se busca la ultima referencia. Lo más aconsejable es que el tipo
-        del campo sea 'String' porque así se le puede dar formato y ser
-        usado para generar un código de barras. De todas formas la función
-        soporta tanto que el campo sea de tipo 'String' como de tipo 'double'.
-
-        @param name Nombre del campo
-        @param cursor_ Cursor a la tabla donde se encuentra el campo.
-        @return Qvariant con el numero siguiente.
-        @author Andrés Otón Urbano.
-        """
-        """
-        dpinelo: Este método es una extensión de nextCounter pero permitiendo la introducción de una primera
-        secuencia de caracteres. Es útil cuando queremos mantener diversos contadores dentro de una misma tabla.
-        Ejemplo, Tabla Grupo de clientes: Agregamos un campo prefijo, que será una letra: A, B, C, D.
-        Queremos que la numeración de los clientes sea del tipo A00001, o B000023. Con esta función, podremos
-        seguir usando los métodos counter cuando agregamos esa letra.
-
-        Este metodo devuelve el siguiente valor de un campo tipo contador de una tabla para una serie determinada.
-
-        Este metodo es muy util cuando se insertan registros en los que
-        la referencia es secuencial según una secuencia y no nos acordamos de cual fue el último
-        numero usado. El valor devuelto es un QVariant del tipo de campo es
-        el que se busca la ultima referencia. Lo más aconsejable es que el tipo
-        del campo sea 'String' porque así se le puede dar formato y ser
-        usado para generar un código de barras. De todas formas la función
-        soporta tanto que el campo sea de tipo 'String' como de tipo 'double'.
-
-        @param serie serie que diferencia los contadores
-        @param name Nombre del campo
-        @param cursor_ Cursor a la tabla donde se encuentra el campo.
-        @return Qvariant con el numero siguiente.
-        @author Andrés Otón Urbano.
-        """
-        if len(args) == 2:
-            name = args[0]
-            cursor_ = args[1]
-
-            if not cursor_:
-                return None
-
-            tMD = cursor_.metadata()
-            if not tMD:
-                return None
-
-            field = tMD.field(name)
-            if not field:
-                return None
-
-            type_ = field.type()
-
-            if type_ not in ["string", "double"]:
-                return None
-
-            _len = int(field.length())
-            cadena = None
-
-            q = FLSqlQuery(None, cursor_.db().connectionName())
-            q.setForwardOnly(True)
-            q.setTablesList(tMD.name())
-            q.setSelect(name)
-            q.setFrom(tMD.name())
-            q.setWhere("LENGTH(%s)=%s" % (name, _len))
-            q.setOrderBy(name + " DESC")
-
-            if not q.exec_():
-                return None
-
-            maxRange = 10 ** _len
-            numero = maxRange
-
-            while numero >= maxRange:
-                if not q.next():
-                    numero = 1
-                    break
-
-                try:
-                    numero = int(q.value(0))
-                    numero = numero + 1
-                except Exception:
-                    pass
-
-            if type_ == "string":
-                cadena = str(numero)
-
-                if len(cadena) < _len:
-                    relleno = None
-                    relleno = cadena.rjust(_len, "0")
-                    cadena = relleno
-
-                return cadena
-
-            if type_ == "double":
-                return numero
-
-            return None
-
-        else:
-            serie = args[0]
-            name = args[1]
-            cursor_ = args[2]
-
-            if not cursor_:
-                return None
-
-            tMD = cursor_.metadata()
-            if not tMD:
-                return None
-
-            field = tMD.field(name)
-            if not field:
-                return None
-
-            type_ = field.type()
-            if type_ not in ["string", "double"]:
-                return None
-
-            _len = field.length() - len(serie)
-            cadena = None
-
-            where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (name, field.length(), name, len(serie), serie)
-            select = "substring(%s FROM %d) as %s" % (name, len(serie) + 1, name)
-            q = FLSqlQuery(None, cursor_.db().connectionName())
-            q.setForwardOnly(True)
-            q.setTablesList(tMD.name())
-            q.setSelect(select)
-            q.setFrom(tMD.name())
-            q.setWhere(where)
-            q.setOrderBy(name + " DESC")
-
-            if not q.exec_():
-                return None
-
-            maxRange = 10 ** _len
-            numero = maxRange
-
-            while numero >= maxRange:
-                if not q.next():
-                    numero = 1
-                    break
-
-                numero = int(q.value(0))
-                numero = numero + 1
-
-            if type_ in ["string", "double"]:
-                cadena = numero
-                if len(cadena) < _len:
-                    relleno = cadena.rjust(_len - len(cadena), "0")
-                    cadena = relleno + cadena
-
-                # res = serie + cadena
-                return cadena
-
-            return None
+        return nextCounter(*args)
 
     @decorators.NotImplementedWarn
     def nextSequence(self, nivel, secuencia, ultimo):
@@ -739,7 +542,7 @@ class FLUtil(QtCore.QObject):
         @param offset Numero de dias que sumar. Si es negativo resta dias
         @return Fecha con el desplazamiento de dias
         """
-        from pineboolib.qsa import Date
+        from pineboolib.application.types import Date
 
         if isinstance(fecha, str):
             fecha = Date(fecha, "yyyy-MM-dd")
@@ -757,7 +560,7 @@ class FLUtil(QtCore.QObject):
         @param offset Numero de meses que sumar. Si es negativo resta meses
         @return Fecha con el desplazamiento de meses
         """
-        from pineboolib.qsa import Date
+        from pineboolib.application.types import Date
 
         if isinstance(fecha, str):
             fecha = Date(fecha)
@@ -775,7 +578,7 @@ class FLUtil(QtCore.QObject):
         @param offset Numero de años que sumar. Si es negativo resta años
         @return Fecha con el desplazamiento de años
         """
-        from pineboolib.qsa import Date
+        from pineboolib.application.types import Date
 
         if isinstance(fecha, str):
             fecha = Date(fecha)
@@ -791,7 +594,7 @@ class FLUtil(QtCore.QObject):
         @param d2 Fecha de destino
         @return Número de días entre d1 y d2. Será negativo si d2 es anterior a d1.
         """
-        from pineboolib.qsa import Date
+        from pineboolib.application.types import Date
         from datetime import date
 
         if isinstance(d1, Date):
@@ -856,7 +659,7 @@ class FLUtil(QtCore.QObject):
             ret = float(ret)
         return ret
         """
-        return ret
+        return str(ret)
 
     def readSettingEntry(self, key, def_=u""):
         """
@@ -868,6 +671,8 @@ class FLUtil(QtCore.QObject):
 
         @return Valor del setting
         """
+        from pineboolib.fllegacy.flsettings import FLSettings
+
         return FLSettings().readEntry(key, def_)
 
     def writeSettingEntry(self, key, value):
@@ -879,6 +684,8 @@ class FLUtil(QtCore.QObject):
 
         @return Indicador de si la escritura del settings se realiza correctamente
         """
+        from pineboolib.fllegacy.flsettings import FLSettings
+
         FLSettings().writeEntry(key, value)
 
     def readDBSettingEntry(self, key):
@@ -889,6 +696,8 @@ class FLUtil(QtCore.QObject):
 
         @return Valor del setting
         """
+        from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+
         ret = None
         q = FLSqlQuery()
         q.setSelect("valor")
@@ -914,9 +723,11 @@ class FLUtil(QtCore.QObject):
         @return Indicador de si la escritura del settings se realiza correctamente
         """
         # result = False
+        from pineboolib.application import project
+
         where = "flkey = '%s'" % key
         found = self.readDBSettingEntry(key)
-        cursor = pineboolib.project.conn.cursor()
+        cursor = project.conn.cursor()
         if found is None:
             sql = "INSERT INTO flsettings (flkey, valor) VALUES ('%s', '%s')" % (key, value)
         else:
@@ -943,165 +754,44 @@ class FLUtil(QtCore.QObject):
 
         @return Número redondeado
         """
-        from pineboolib.pncontrolsfactory import aqApp
+
+        from pineboolib.fllegacy.flapplication import aqApp
 
         tmd = aqApp.db().manager().metadata(table_name)
         if tmd is None:
             return 0
         fmd = tmd.field(field_name)
-        return self.buildNumber(value, "float", fmd.partDecimal()) if fmd is not None else 0
+        return float(self.buildNumber(value, "float", fmd.partDecimal())) if fmd is not None else 0
 
     def sqlSelect(self, f, s, w, tL=None, size=0, connName="default"):
-        """
-        Ejecuta una query de tipo select, devolviendo los resultados del primer registro encontrado
+        from pineboolib.application.database.utils import sqlSelect
 
-        @param f: Sentencia from de la query
-        @param s: Sentencia select de la query, que será el nombre del campo a devolver
-        @param w: Sentencia where de la query
-        @param tL: Sentencia tableslist de la query. Necesario cuando en la sentencia from se incluya más de una tabla
-        @param size: Número de líneas encontradas. (-1 si hay error)
-        @param connName Nombre de la conexion
-        @return Valor resultante de la query o falso si no encuentra nada.
-        """
-        if w is None or w == "":
-            return False
-
-        q = FLSqlQuery(None, connName)
-        if tL:
-            q.setTablesList(tL)
-        else:
-            q.setTablesList(f)
-
-        q.setSelect(s)
-        q.setFrom(f)
-        q.setWhere(w)
-        # q.setForwardOnly(True)
-        if not q.exec_():
-            return False
-
-        if q.next():
-            valor = q.value(0)
-            # if isinstance(valor, datetime.date):
-            #    valor = str(valor)
-            return valor
-
-        return False
+        return sqlSelect(f, s, w, tL, size, connName)
 
     def quickSqlSelect(self, f, s, w, connName="default"):
-        """
-        Versión rápida de sqlSelect. Ejecuta directamente la consulta sin realizar comprobaciones.
-        Usar con precaución.
-        """
-        if not w:
-            sql = "select " + s + " from " + f
-        else:
-            sql = "select " + s + " from " + f + " where " + w
+        from pineboolib.application.database.utils import quickSqlSelect
 
-        q = FLSqlQuery(None, connName)
-        if not q.exec_(sql):
-            return False
-
-        return q.value(0) if q.first() else False
+        return quickSqlSelect(f, s, w, connName)
 
     def sqlInsert(self, t, fL, vL, connName="default"):
-        """
-        Realiza la inserción de un registro en una tabla mediante un objeto FLSqlCursor
+        from pineboolib.application.database.utils import sqlInsert
 
-        @param t Nombre de la tabla
-        @param fL Lista separada con comas de los nombres de los campos
-        @param vL Lista separada con comas de los valores correspondientes
-        @param connName Nombre de la conexion
-        @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
-        """
-        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-
-        fL = fL.split(",") if isinstance(fL, str) else fL
-        vL = vL.split(",") if isinstance(vL, str) else vL
-
-        if not len(fL) == len(vL):
-            return False
-
-        c = FLSqlCursor(t, True, connName)
-        c.setModeAccess(FLSqlCursor.Insert)
-        c.refreshBuffer()
-
-        i = 0
-        for f in fL:
-            if vL[i] is None:
-                c.bufferSetNull(f)
-            else:
-                c.setValueBuffer(f, vL[i])
-
-            i = i + 1
-
-        return c.commitBuffer()
+        return sqlInsert(t, fL, vL, connName)
 
     def sqlUpdate(self, t, fL, vL, w, connName="default"):
-        """
-        Realiza la modificación de uno o más registros en una tabla mediante un objeto FLSqlCursor
+        from pineboolib.application.database.utils import sqlUpdate
 
-        @param t Nombre de la tabla
-        @param fL Lista separada con comas de los nombres de los campos
-        @param vL Lista separada con comas de los valores correspondientes
-        @param w Sentencia where para identificar los registros a editar.
-        @param connName Nombre de la conexion
-        @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
-        """
-        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-
-        c = FLSqlCursor(t, True, connName)
-        c.select(w)
-        c.setForwardOnly(True)
-        while c.next():
-
-            c.setModeAccess(FLSqlCursor.Edit)
-            c.refreshBuffer()
-
-            if isinstance(fL, list):
-                i = 0
-                for f in fL:
-                    c.setValueBuffer(f, vL[i])
-                    i = i + 1
-            else:
-                c.setValueBuffer(fL, vL)
-
-            if not c.commitBuffer():
-                return False
-
-        return True
+        return sqlUpdate(t, fL, vL, w, connName)
 
     def sqlDelete(self, t, w, connName="default"):
-        """
-        Borra uno o más registros en una tabla mediante un objeto FLSqlCursor
+        from pineboolib.application.database.utils import sqlDelete
 
-        @param t Nombre de la tabla
-        @param w Sentencia where para identificar los registros a borrar.
-        @param connName Nombre de la conexion
-        @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
-        """
-        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-
-        c = FLSqlCursor(t, True, connName)
-
-        # if not c.select(w):
-        #     return False
-        c.select(w)
-        c.setForwardOnly(True)
-
-        while c.next():
-            c.setModeAccess(FLSqlCursor.Del)
-            c.refreshBuffer()
-            if not c.commitBuffer():
-                return False
-
-        return True
+        return sqlDelete(t, w, connName)
 
     def quickSqlDelete(self, t, w, connName="default"):
-        """
-        Versión rápida de sqlDelete. Ejecuta directamente la consulta sin realizar comprobaciones y sin disparar señales de commits.
-        Usar con precaución.
-        """
-        self.execSql("DELETE FROM %s WHERE %s" % (t, w))
+        from pineboolib.application.database.utils import quickSqlDelete
+
+        return quickSqlDelete(t, w, connName)
 
     def createProgressDialog(self, title, steps, id_="default"):
         """
@@ -1110,37 +800,18 @@ class FLUtil(QtCore.QObject):
         @param l Label del diálogo
         @param tS Número total de pasos a realizar
         """
-        from pineboolib.pncontrolsfactory import QProgressDialog, SysType
+        from pineboolib.application import project
 
-        parent = None
-        if self.__class__.progress_dialog_stack:
-            parent = self.__class__.progress_dialog_stack[-1]
-        pd_widget = QProgressDialog(str(title), str(self.translate("scripts", "Cancelar")), 0, steps, parent)
-        pd_widget.setObjectName(id_)
-        pd_widget.setWindowTitle(str(title))
-        self.__class__.progress_dialog_stack.append(pd_widget)
-        pd_widget.setMinimumDuration(100)
-        SysType().processEvents()
-        return pd_widget
+        return project.message_manager().send("progress_dialog_manager", "create", [title, steps, id_])
 
     def destroyProgressDialog(self, id_="default"):
         """
         Destruye el diálogo de progreso
         """
-        from pineboolib.pncontrolsfactory import SysType
 
-        pd_widget = self.__class__.progress_dialog_stack[-1]
+        from pineboolib.application import project
 
-        if id_ != "default":
-            for w in self.__class__.progress_dialog_stack:
-                if w.objectName() == id_:
-                    pd_widget = w
-                    break
-
-        pd_widget.close()
-        self.__class__.progress_dialog_stack.remove(pd_widget)
-        # pd_widget.hide()
-        SysType().processEvents()
+        project.message_manager().send("progress_dialog_manager", "destroy", [id_])
 
     def setProgress(self, step_number, id_="default"):
         """
@@ -1148,18 +819,10 @@ class FLUtil(QtCore.QObject):
 
         @param p Grado de progreso
         """
-        from pineboolib.pncontrolsfactory import SysType
 
-        pd_widget = self.__class__.progress_dialog_stack[-1]
+        from pineboolib.application import project
 
-        if id_ != "default":
-            for w in self.__class__.progress_dialog_stack:
-                if w.objectName() == id_:
-                    pd_widget = w
-                    break
-
-        pd_widget.setValue(step_number)
-        SysType().processEvents()
+        project.message_manager().send("progress_dialog_manager", "setProgress", [step_number, id_])
 
     def setLabelText(self, l, id_="default"):
         """
@@ -1167,18 +830,10 @@ class FLUtil(QtCore.QObject):
 
         @param l Etiqueta
         """
-        from pineboolib.pncontrolsfactory import SysType
 
-        pd_widget = self.__class__.progress_dialog_stack[-1]
+        from pineboolib.application import project
 
-        if id_ != "default":
-            for w in self.__class__.progress_dialog_stack:
-                if w.objectName() == id_:
-                    pd_widget = w
-                    break
-
-        pd_widget.setLabelText(str(l))
-        SysType().processEvents()
+        project.message_manager().send("progress_dialog_manager", "setLabelText", [l, id_])
 
     def setTotalSteps(self, tS, id_="default"):
         """
@@ -1186,18 +841,10 @@ class FLUtil(QtCore.QObject):
 
         @param ts Número total de pasos
         """
-        from pineboolib.pncontrolsfactory import SysType
 
-        pd_widget = self.__class__.progress_dialog_stack[-1]
+        from pineboolib.application import project
 
-        if id_ != "default":
-            for w in self.__class__.progress_dialog_stack:
-                if w.objectName() == id_:
-                    pd_widget = w
-                    break
-
-        pd_widget.setRange(0, tS)
-        SysType().processEvents()
+        project.message_manager().send("progress_dialog_manager", "setTotalSteps", [tS, id_])
 
     def domDocumentSetContent(self, doc, content):
         """
@@ -1291,19 +938,7 @@ class FLUtil(QtCore.QObject):
         return QtCore.QLocale().name()[:2]
 
     def getOS(self):
-        """
-        Devuelve el sistema operativo sobre el que se ejecuta el programa
-
-        @return Código del sistema operativo (WIN32, LINUX, MACX)
-        """
-        if platform.system() == "Windows":
-            return "WIN32"
-        elif platform.system() == "Linux" or platform.system() == "Linux2":
-            return "LINUX"
-        elif platform.system() == "Darwin":
-            return "MACX"
-        else:
-            return platform.system()
+        return SysType().osName()
 
     @decorators.NotImplementedWarn
     def serialLettertoNumber(self, letter):
@@ -1347,24 +982,6 @@ class FLUtil(QtCore.QObject):
 
         return files_found
 
-    def execSql(self, sql, connName="default"):
-        """
-        Uso interno
-        """
-        from pineboolib.pncontrolsfactory import aqApp
-
-        conn_ = aqApp.db().useConn(connName)
-        cur = conn_.cursor()
-        try:
-            logger.warning("execSql: Ejecutando la consulta : %s", sql)
-            # sql = conn_.db().driver().fix_query(sql)
-            cur.execute(sql)
-            conn_.conn.commit()
-            return True
-        except Exception as exc:
-            logger.exception("execSql: Error al ejecutar la consulta SQL: %s %s", sql, exc)
-            return False
-
     @decorators.NotImplementedWarn
     def savePixmap(self, data, filename, format_):
         """
@@ -1385,7 +1002,8 @@ class FLUtil(QtCore.QObject):
         @param conn_name. Nombre de la conexión a usar
         @return id del tipo de campo
         """
-        from pineboolib.pncontrolsfactory import aqApp
+
+        from pineboolib.fllegacy.flapplication import aqApp
 
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
@@ -1403,7 +1021,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return 0
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.fllegacy.flapplication import aqApp
 
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
@@ -1421,7 +1039,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return fn
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.fllegacy.flapplication import aqApp
 
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
@@ -1439,7 +1057,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return None
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.fllegacy.flapplication import aqApp
 
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
@@ -1459,7 +1077,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return an
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.fllegacy.flapplication import aqApp
 
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
@@ -1478,7 +1096,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return False
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.fllegacy.flapplication import aqApp
 
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
@@ -1496,7 +1114,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return False
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.fllegacy.flapplication import aqApp
 
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
@@ -1514,15 +1132,16 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return False
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.fllegacy.flapplication import aqApp
 
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         if mtd is None:
             return False
-
-        return False if field is None else field.isCompoundKey()
+        return False
+        # field = None  # FIXME: field is not defined anywhere
+        # return False if field is None else field.isCompoundKey()
 
     def fieldDefaultValue(self, fn, tn, conn_name="default"):
         """
@@ -1535,7 +1154,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return None  # return QVariant
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.fllegacy.flapplication import aqApp
 
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
@@ -1558,32 +1177,27 @@ class FLUtil(QtCore.QObject):
         @return Valor formateado
         """
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.fllegacy.flapplication import aqApp
 
         conn = aqApp.db().useConn(conn_name)
         return conn.manager().formatValue(t, v, upper)
 
     def nameUser(self):
-        from pineboolib.pncontrolsfactory import SysType
 
         return SysType().nameUser()
 
     def userGroups(self):
-        from pineboolib.pncontrolsfactory import SysType
 
         return SysType().userGroups()
 
     def isInProd(self):
-        from pineboolib.pncontrolsfactory import SysType
 
         return SysType().isInProd()
 
     def request(self):
-        from pineboolib.pncontrolsfactory import SysType
 
         return SysType().request()
 
     def nameBD(self):
-        from pineboolib.pncontrolsfactory import SysType
 
         return SysType().nameBD()

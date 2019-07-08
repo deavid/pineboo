@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore  # type: ignore
 import sys
+from typing import Any
 
 
 class Process(QtCore.QProcess):
@@ -9,7 +10,7 @@ class Process(QtCore.QProcess):
     stderr = None
     stdout = None
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
         super(Process, self).__init__()
         self.readyReadStandardOutput.connect(self.stdoutReady)
         self.readyReadStandardError.connect(self.stderrReady)
@@ -22,43 +23,43 @@ class Process(QtCore.QProcess):
             argumentos = args[1:]
             self.setArguments(argumentos)
 
-    def start(self):
+    def start(self) -> None:
         super(Process, self).start()
 
-    def stop(self):
+    def stop(self) -> None:
         super(Process, self).stop()
 
-    def writeToStdin(self, stdin_):
+    def writeToStdin(self, stdin_) -> None:
         encoding = sys.getfilesystemencoding()
         stdin_as_bytes = stdin_.encode(encoding)
         self.writeData(stdin_as_bytes)
         # self.closeWriteChannel()
 
-    def stdoutReady(self):
+    def stdoutReady(self) -> None:
         self.stdout = str(self.readAllStandardOutput())
 
-    def stderrReady(self):
+    def stderrReady(self) -> None:
         self.stderr = str(self.readAllStandardError())
 
-    def readStderr(self):
+    def readStderr(self) -> Any:
         return self.stderr
 
-    def readStdout(self):
+    def readStdout(self) -> Any:
         return self.stdout
 
-    def getWorkingDirectory(self):
+    def getWorkingDirectory(self) -> Any:
         return super(Process, self).workingDirectory()
 
-    def setWorkingDirectory(self, wd):
+    def setWorkingDirectory(self, wd) -> None:
         super(Process, self).setWorkingDirectory(wd)
 
-    def getIsRunning(self):
+    def getIsRunning(self) -> bool:
         return self.state() in (self.Running, self.Starting)
 
-    def exitcode(self):
+    def exitcode(self) -> Any:
         return self.exitCode()
 
-    def executeNoSplit(comando, stdin_buffer):
+    def executeNoSplit(comando: list, stdin_buffer) -> None:
 
         list_ = []
         for c in comando:
@@ -77,11 +78,16 @@ class Process(QtCore.QProcess):
         Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
         Process.stderr = pro.readAllStandardError().data().decode(encoding)
 
-    def execute(comando):
+    def execute(comando: str) -> None:
         import sys
 
         encoding = sys.getfilesystemencoding()
         pro = QtCore.QProcess()
+        from pineboolib.application import types
+
+        if isinstance(comando, types.Array):
+            comando = str(comando)
+
         if isinstance(comando, str):
             comando = comando.split(" ")
 

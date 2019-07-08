@@ -5,10 +5,11 @@ from optparse import OptionParser
 import os
 import os.path
 import re
-from xml import etree
+from xml.etree import ElementTree
+from typing import Any, Generator, Optional, Tuple, Type, List, Dict
 
 
-def id_translate(name):
+def id_translate(name) -> Any:
     python_keywords = [
         "and",
         "del",
@@ -78,35 +79,56 @@ def id_translate(name):
     return name
 
 
-ast_class_types = []
 cont_switch = 0
 cont_do_while = 0
 
 
+class ASTPythonBase(object):
+    elem = None
+
+    def __init__(self, elem) -> None:
+        self.elem = elem
+
+    @classmethod
+    def can_process_tag(self, tagname) -> Any:
+        return False
+
+    def polish(self) -> "ASTPythonBase":
+        return self
+
+
 class ASTPythonFactory(type):
-    def __init__(cls, name, bases, dct):
-        global ast_class_types
-        ast_class_types.append(cls)
-        super(ASTPythonFactory, cls).__init__(name, bases, dct)
+    ast_class_types: List[Type[ASTPythonBase]] = []
+
+    def __init__(self, name, bases, dct) -> None:
+        if issubclass(self, ASTPythonBase):
+            ASTPythonFactory.register_type(self)
+
+    @staticmethod
+    def register_type(cls):
+        ASTPythonFactory.ast_class_types.append(cls)
 
 
-class ASTPython(object, metaclass=ASTPythonFactory):
+class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
     tags = []
     debug_file = None
     generate_depth = 0
     numline = 0
 
     @classmethod
-    def can_process_tag(self, tagname):
+    def can_process_tag(self, tagname) -> Any:
         return self.__name__ == tagname or tagname in self.tags
 
-    def __init__(self, elem):
-        self.elem = elem
+    def generate(self, **kwargs):
+        yield "debug", "* not-known-seq * %s" % ElementTree.tostring(self.elem, encoding="UTF-8")
+
+    def __init__(self, elem) -> None:
+        super().__init__(elem)
+        self.internal_generate = self.generate
         if self.debug_file:
-            self.internal_generate = self.generate
             self.generate = self._generate
 
-    def debug(self, text):
+    def debug(self, text) -> None:
         if self.debug_file is None:
             return
         splen = ASTPython.generate_depth
@@ -120,13 +142,7 @@ class ASTPython(object, metaclass=ASTPythonFactory):
         cname = self.__class__.__name__
         self.debug_file.write("%04d%s%s: %s\n" % (ASTPython.numline, sp, cname, text.encode("UTF-8")))
 
-    def polish(self):
-        return self
-
-    def generate(self, **kwargs):
-        yield "debug", "* not-known-seq * %s" % etree.ElementTree.tostring(self.elem, encoding="UTF-8")
-
-    def _generate(self, **kwargs):
+    def _generate(self, **kwargs) -> Generator[Tuple[str, str], Any, None]:
         self.debug("begin-gen")
         ASTPython.generate_depth += 1
         self.generate_depth = ASTPython.generate_depth
@@ -232,7 +248,7 @@ class Function(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.ElementTree.tostring(arg)
+                yield "debug", ElementTree.tostring(arg)
             else:
                 if len(expr) == 1:
                     expr += ["=", "None"]
@@ -270,7 +286,7 @@ class FunctionCall(ASTPython):
             if len(expr) == 0:
                 name = "unknownFn"
                 yield "debug", "Function name not understood"
-                yield "debug", etree.ElementTree.tostring(arg)
+                yield "debug", ElementTree.tostring(arg)
             elif len(expr) > 1:
                 name = "unknownFn"
                 yield "debug", "Multiple function names"
@@ -293,7 +309,7 @@ class FunctionCall(ASTPython):
                     name = "super(%s, self).__init__" % class_.get("name")
             functions = parent.findall('Function[@name="%s"]' % name)
             for f in functions:
-                # yield "debug", "Function to:" + etree.ElementTree.tostring(f)
+                # yield "debug", "Function to:" + ElementTree.tostring(f)
                 name = "self.%s" % name
                 break
 
@@ -310,7 +326,7 @@ class FunctionCall(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.ElementTree.tostring(arg)
+                yield "debug", ElementTree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
 
@@ -338,7 +354,7 @@ class If(ASTPython):
             if len(expr) == 0:
                 main_expr.append("False")
                 yield "debug", "Expression %d not understood" % n
-                yield "debug", etree.ElementTree.tostring(arg)
+                yield "debug", ElementTree.tostring(arg)
             else:
                 main_expr.append(" ".join(expr))
 
@@ -408,7 +424,7 @@ class While(ASTPython):
             if len(expr) == 0:
                 main_expr.append("False")
                 yield "debug", "Expression %d not understood" % n
-                yield "debug", etree.ElementTree.tostring(arg)
+                yield "debug", ElementTree.tostring(arg)
             else:
                 main_expr.append(" ".join(expr))
 
@@ -435,7 +451,7 @@ class DoWhile(ASTPython):
             if len(expr) == 0:
                 main_expr.append("False")
                 yield "debug", "Expression %d not understood" % n
-                yield "debug", etree.ElementTree.tostring(arg)
+                yield "debug", ElementTree.tostring(arg)
             else:
                 main_expr.append(" ".join(expr))
         # TODO .....
@@ -582,7 +598,7 @@ class Switch(ASTPython):
             if len(expr) == 0:
                 main_expr.append("False")
                 yield "debug", "Expression %d not understood" % n
-                yield "debug", etree.ElementTree.tostring(arg)
+                yield "debug", ElementTree.tostring(arg)
             else:
                 main_expr.append(" ".join(expr))
         yield "line", "%s = %s" % (name, " ".join(main_expr))
@@ -601,7 +617,7 @@ class Switch(ASTPython):
                 if len(expr) == 0:
                     value_expr.append("False")
                     yield "debug", "Expression %d not understood" % n
-                    yield "debug", etree.ElementTree.tostring(arg)
+                    yield "debug", ElementTree.tostring(arg)
                 else:
                     value_expr.append(" ".join(expr))
 
@@ -669,6 +685,7 @@ class With(ASTPython):
         "refreshBuffer",
         "setNull",
         "setUnLock",
+        "child",
     ]
 
     def generate(self, **kwargs):
@@ -700,6 +717,8 @@ class With(ASTPython):
             for t in self.python_keywords:
                 if obj_1.startswith(t):
                     obj_1 = "%s.%s" % (" ".join(var_expr), obj_1)
+                elif obj_1.startswith("connect(%s" % t):
+                    obj_1 = obj_1.replace("connect(%s" % t, "connect(%s.%s" % (" ".join(var_expr), t))
                 elif obj_1.find(".") == -1 and obj_1.find(t) > -1:
                     obj_1 = obj_1.replace(t, "%s.%s" % (" ".join(var_expr), t))
 
@@ -773,7 +792,7 @@ class InstructionUpdate(ASTPython):
             for dtype, data in parse_ast(arg).generate(isolate=False):
                 if dtype == "expr":
                     if data is None:
-                        raise ValueError(etree.ElementTree.tostring(arg))
+                        raise ValueError(ElementTree.tostring(arg))
                     if data == "[]":
                         data = "Array()"
                     expr.append(data)
@@ -782,7 +801,7 @@ class InstructionUpdate(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.ElementTree.tostring(arg)
+                yield "debug", ElementTree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
 
@@ -803,7 +822,7 @@ class InlineUpdate(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.ElementTree.tostring(arg)
+                yield "debug", ElementTree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
         ctype = self.elem.get("type")
@@ -836,7 +855,7 @@ class InstructionCall(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.ElementTree.tostring(arg)
+                yield "debug", ElementTree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
         yield "line", " ".join(arguments)
@@ -856,7 +875,7 @@ class Instruction(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.ElementTree.tostring(arg)
+                yield "debug", ElementTree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
         if arguments:
@@ -878,7 +897,7 @@ class InstructionFlow(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.ElementTree.tostring(arg)
+                yield "debug", ElementTree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
 
@@ -917,7 +936,7 @@ class Member(ASTPython):
             if len(expr) == 0:
                 txtarg = "unknownarg"
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.ElementTree.tostring(arg)
+                yield "debug", ElementTree.tostring(arg)
             else:
                 txtarg = " ".join(expr)
             arguments.append(txtarg)
@@ -1149,7 +1168,7 @@ class ArrayMember(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.ElementTree.tostring(arg)
+                yield "debug", ElementTree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
 
@@ -1164,7 +1183,7 @@ class Value(ASTPython):
             child.set("parent_", self.elem)
             for dtype, data in parse_ast(child).generate():
                 if data is None:
-                    raise ValueError(etree.ElementTree.tostring(child))
+                    raise ValueError(ElementTree.tostring(child))
                 yield dtype, data
         if isolate:
             yield "expr", ")"
@@ -1354,7 +1373,7 @@ class Constant(ASTPython):
                         if len(expr) == 0:
                             arguments.append("unknownarg")
                             yield "debug", "Argument %d not understood" % n
-                            yield "debug", etree.ElementTree.tostring(arg)
+                            yield "debug", ElementTree.tostring(arg)
                         else:
                             arguments.append(" ".join(expr))
 
@@ -1527,7 +1546,7 @@ class DeclarationBlock(ASTPython):
             for dtype, data in parse_ast(var).generate(force_value=True):
                 if dtype == "expr":
                     if data is None:
-                        raise ValueError(etree.ElementTree.tostring(var))
+                        raise ValueError(ElementTree.tostring(var))
                     expr.append(data)
                 else:
                     yield dtype, data
@@ -1539,47 +1558,43 @@ class DeclarationBlock(ASTPython):
 # ----- keep this one at the end.
 class Unknown(ASTPython):
     @classmethod
-    def can_process_tag(self, tagname):
+    def can_process_tag(self, tagname) -> bool:
         return True
 
 
 # -----------------
 
 
-def astparser_for(elem):
-    classobj = None
-    for cls in ast_class_types:
+def astparser_for(elem) -> Optional[ASTPythonBase]:
+    for cls in ASTPythonFactory.ast_class_types:
         if cls.can_process_tag(elem.tag):
-            classobj = cls
-            break
-    if classobj is None:
-        return None
-    return classobj(elem)
+            return cls(elem)
+    return None
 
 
-def parse_ast(elem):
+def parse_ast(elem) -> Any:
     elemparser = astparser_for(elem)
     return elemparser.polish()
 
 
-def file_template(ast):
+def file_template(ast: Any) -> Generator[Tuple[Any, Any], Any, None]:
     yield "line", "# -*- coding: utf-8 -*-"
     yield "line", "from pineboolib.qsa import *"
     # yield "line", "from pineboolib.qsaglobals import *"
     yield "line", ""
     yield "line", "#/** @file */"
     yield "line", ""
-    sourceclasses = etree.ElementTree.Element("Source")
+    sourceclasses = ElementTree.Element("Source")
     for cls in ast.findall("Class"):
         cls.set("parent_", ast)
         sourceclasses.append(cls)
 
-    mainclass = etree.ElementTree.SubElement(sourceclasses, "Class", name="FormInternalObj", extends="FormDBWidget")
-    mainsource = etree.ElementTree.SubElement(mainclass, "Source")
+    mainclass = ElementTree.SubElement(sourceclasses, "Class", name="FormInternalObj", extends="FormDBWidget")
+    mainsource = ElementTree.SubElement(mainclass, "Source")
 
-    constructor = etree.ElementTree.SubElement(mainsource, "Function", name="_class_init")
+    constructor = ElementTree.SubElement(mainsource, "Function", name="_class_init")
     # args = etree.SubElement(constructor, "Arguments")
-    csource = etree.ElementTree.SubElement(constructor, "Source")
+    csource = ElementTree.SubElement(constructor, "Source")
 
     for child in ast:
         if child.tag != "Function":
@@ -1595,10 +1610,10 @@ def file_template(ast):
     yield "line", "form = None"
 
 
-def write_python_file(fobj, ast):
-    indent = []
+def write_python_file(fobj, ast) -> None:
+    indent: List[str] = []
     indent_text = "    "
-    last_line_for_indent = {}
+    last_line_for_indent: Dict[int, int] = {}
     numline = 0
     ASTPython.numline = 1
     last_dtype = None
@@ -1653,12 +1668,12 @@ def write_python_file(fobj, ast):
         last_dtype = dtype
 
 
-def pythonize(filename, destfilename, debugname=None):
+def pythonize(filename, destfilename, debugname=None) -> None:
     # bname = os.path.basename(filename)
     ASTPython.debug_file = open(debugname, "w") if debugname else None
-    parser = etree.ElementTree.XMLParser(encoding="UTF-8")
+    parser = ElementTree.XMLParser(encoding="UTF-8")
     try:
-        ast_tree = etree.ElementTree.parse(open(filename, "r", encoding="UTF-8"), parser)
+        ast_tree = ElementTree.parse(open(filename, "r", encoding="UTF-8"), parser)
     except Exception:
         print("filename:", filename)
         raise
@@ -1669,7 +1684,7 @@ def pythonize(filename, destfilename, debugname=None):
     f1.close()
 
 
-def main():
+def main() -> None:
     parser = OptionParser()
     parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
 

@@ -22,7 +22,9 @@ class FormInternalObj(FormDBWidget):
         if nombreFichero:
             fichero = File(nombreFichero)
             if not formRecordflmodules.aceptarLicenciaDelModulo(ustr(fichero.path, u"/")):
-                MessageBox.critical(util.translate(u"scripts", u"Imposible cargar el módulo.\nLicencia del módulo no aceptada."), MessageBox.Ok)
+                MessageBox.critical(
+                    util.translate(u"scripts", u"Imposible cargar el módulo.\nLicencia del módulo no aceptada."), MessageBox.Ok
+                )
                 return
             modulo = None
             descripcion = None
@@ -38,7 +40,9 @@ class FormInternalObj(FormDBWidget):
             if xmlModule.setContent(f):
                 nodeModule = xmlModule.namedItem(u"MODULE")
                 if not nodeModule:
-                    MessageBox.critical(util.translate(u"scripts", u"Error en la carga del fichero xml .mod"), MessageBox.Ok, MessageBox.NoButton)
+                    MessageBox.critical(
+                        util.translate(u"scripts", u"Error en la carga del fichero xml .mod"), MessageBox.Ok, MessageBox.NoButton
+                    )
                 modulo = nodeModule.namedItem(u"name").toElement().text()
                 descripcion = nodeModule.namedItem(u"alias").toElement().text()
                 area = nodeModule.namedItem(u"area").toElement().text()
@@ -99,7 +103,9 @@ class FormInternalObj(FormDBWidget):
                 return
             if not valorPorClave(u"flareas", u"idarea", ustr(u"idarea = '", area, u"'")):
                 crearArea = MessageBox.warning(
-                    util.translate(u"scripts", u"El área con el identificador ") + area + util.translate(u"scripts", u" no existe. ¿Desea crearla?"),
+                    util.translate(u"scripts", u"El área con el identificador ")
+                    + area
+                    + util.translate(u"scripts", u" no existe. ¿Desea crearla?"),
                     MessageBox.Yes,
                     MessageBox.No,
                 )
@@ -228,7 +234,9 @@ def evaluarDependencias(dependencias=None):
             res = MessageBox.warning(
                 util.translate(u"scripts", u"Este módulo depende del módulo ")
                 + dependencias[i]
-                + util.translate(u"scripts", u", que no está instalado.\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"),
+                + util.translate(
+                    u"scripts", u", que no está instalado.\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"
+                ),
                 MessageBox.Yes,
                 MessageBox.No,
             )

@@ -11,6 +11,9 @@ es decir objetos FLFieldMetaData.
 """
 
 
+from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
+
+
 class FLCompoundKey(object):
 
     """
@@ -19,7 +22,7 @@ class FLCompoundKey(object):
 
     fieldList_ = []
 
-    def __init__(self, other=None):
+    def __init__(self, other: None = None) -> None:
         super(FLCompoundKey, self).__init__()
         self.fieldList_ = []
         if other:
@@ -34,7 +37,7 @@ class FLCompoundKey(object):
     @param f Objeto FLFieldMetaData con la descripción del campo a añadir
     """
 
-    def addFieldMD(self, f):
+    def addFieldMD(self, f: FLFieldMetaData) -> None:
         self.fieldList_.append(f)
 
     """

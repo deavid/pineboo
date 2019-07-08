@@ -2,7 +2,7 @@
 
 # Completada Si
 
-from pineboolib import decorators
+from pineboolib.core import decorators
 
 
 class FLRelationMetaData:
@@ -18,7 +18,7 @@ class FLRelationMetaData:
 
     d = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         if len(args) == 1:
             self.inicializeFromFLRelationMetaData(args[0])
         else:
@@ -37,7 +37,7 @@ class FLRelationMetaData:
     @param cI Chequeos de integridad sobre la relacion
     """
 
-    def inicializeNewFLRelationMetaData(self, fT, fF, rC, dC=False, uC=False, cI=True):
+    def inicializeNewFLRelationMetaData(self, fT: str, fF: str, rC: str, dC: bool = False, uC: bool = False, cI: bool = True) -> None:
         self.d = FLRelationMetaDataPrivate(fT, fF, rC, dC, uC, cI)
 
     @decorators.BetaImplementation
@@ -59,7 +59,7 @@ class FLRelationMetaData:
     @param fN Nombre del campo relacionado
     """
 
-    def setField(self, fN):
+    def setField(self, fN: str) -> None:
         self.d.field_ = fN.lower()
 
     """
@@ -68,7 +68,7 @@ class FLRelationMetaData:
     @return Devuelve el nombre del campo relacionado
     """
 
-    def field(self):
+    def field(self) -> str:
         return self.d.field_
 
     """
@@ -77,7 +77,7 @@ class FLRelationMetaData:
     @return Devuelve el nombre de la tabla de la base de datos con la que se está relacionada
     """
 
-    def foreignTable(self):
+    def foreignTable(self) -> str:
         return self.d.foreignTable_
 
     """
@@ -86,7 +86,7 @@ class FLRelationMetaData:
     @return Devuelve el nombre del campo de la tabla foránea con la que está relacionada
     """
 
-    def foreignField(self):
+    def foreignField(self) -> str:
         return self.d.foreignField_
 
     """
@@ -96,7 +96,7 @@ class FLRelationMetaData:
         define este objeto hacia la foránea
     """
 
-    def cardinality(self):
+    def cardinality(self) -> str:
         return self.d.cardinality_
 
     """
@@ -128,9 +128,11 @@ class FLRelationMetaData:
         return self.d.checkIn_
 
     @decorators.BetaImplementation
-    def copy(self, *other):
+    def copy(self, other):
         if other == self:
             return
+        if not isinstance(other, FLRelationMetaData):
+            raise ValueError("FLRelationMetaData::copy requires an instance to a FLRelationMetaData class")
         self.d.field_ = other.d.field_
         self.d.foreignTable_ = other.d.foreignTable_
         self.d.foreignField_ = other.d.foreignField_
@@ -178,13 +180,13 @@ class FLRelationMetaDataPrivate:
     """
     checkIn_ = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         if len(args) == 0:
-            self.inicializeFromFLRelationMetaDataPrivate()
+            self.inicializeFLRelationMetaDataPrivate()
         else:
             self.inicializeNewFLRelationMetaDataPrivate(args[0], args[1], args[2], args[3], args[4], args[5])
 
-    def inicializeNewFLRelationMetaDataPrivate(self, fT, fF, rC, dC, uC, cI):
+    def inicializeNewFLRelationMetaDataPrivate(self, fT: str, fF: str, rC: str, dC: bool, uC: bool, cI: bool) -> None:
         self.foreignTable_ = fT.lower()
         self.foreignField_ = fF.lower()
         self.cardinality_ = rC

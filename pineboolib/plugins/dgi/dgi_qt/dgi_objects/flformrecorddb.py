@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import QKeySequence
+import traceback
 
+from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
+from PyQt5.Qt import QKeySequence  # type: ignore
+
+from pineboolib import logging
+from pineboolib.core import decorators
+from pineboolib.core.utils.utils_base import filedir
+from pineboolib.interfaces import IFormRecordDB
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
-from pineboolib import decorators
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-from pineboolib.utils import filedir
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsettings import FLSettings
-import pineboolib
+from pineboolib.fllegacy.flapplication import aqApp
 
-import traceback
 
 DEBUG = False
 
@@ -33,8 +36,9 @@ edición de registros definidos en los metadatos
 """
 
 
-class FLFormRecordDB(FLFormDB):
+class FLFormRecordDB(FLFormDB, IFormRecordDB):
 
+    logger = logging.getLogger("dgi_qt.FLFormRecordDB")
     """
     Boton Aceptar
     """
@@ -100,7 +104,7 @@ class FLFormRecordDB(FLFormDB):
     """
 
     def __init__(self, parent_or_cursor, action, load=False):
-        from pineboolib.pncontrolsfactory import aqApp
+        self.logger.trace("__init__: parent_or_cursor=%s, action=%s, load=%s", parent_or_cursor, action, load)
 
         if isinstance(action, str):
             aqApp.db().manager().action(action)
@@ -110,11 +114,11 @@ class FLFormRecordDB(FLFormDB):
         # if not cursor:
         #    load = True
 
-        super(FLFormRecordDB, self).__init__(parent, action, load)
+        super().__init__(parent, action, load)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         if cursor:
             self.setCursor(parent_or_cursor)
-
+        self.logger.trace("__init__: load formRecord")
         self._uiName = action.formRecord()
         self._scriptForm = action.scriptFormRecord() or "emptyscript"
 
@@ -130,8 +134,11 @@ class FLFormRecordDB(FLFormDB):
                 print("*** FLFormRecordDB::__init__ -> Sin cursor??")
             self.initialModeAccess = FLSqlCursor.Browse
 
+        self.logger.trace("__init__: load form")
         self.load()
+        self.logger.trace("__init__: init form")
         self.initForm()
+        self.logger.trace("__init__: done")
 
     """
     Reimplementado, añade un widget como principal del formulario
@@ -187,7 +194,8 @@ class FLFormRecordDB(FLFormDB):
 
         else:
             self.setCaptionWidget("No hay metadatos")
-        acl = pineboolib.project.acl()
+        # acl = project.acl()
+        acl = None  # FIXME: Add ACL later
         if acl:
             acl.process(self)
 
@@ -215,7 +223,7 @@ class FLFormRecordDB(FLFormDB):
 
         if self.bottomToolbar and self.toolButtonClose:
             self.toolButtonClose.hide()
-            
+
         self.bottomToolbar = QtWidgets.QFrame()
         self.bottomToolbar.setMinimumSize(self.iconSize)
         self.bottomToolbar.layout = QtWidgets.QHBoxLayout()
@@ -495,7 +503,6 @@ class FLFormRecordDB(FLFormDB):
             return True
 
         if self.cursor_.modeAccess() == FLSqlCursor.Edit and mtd.concurWarn():
-            colFields = []
             colFields = self.cursor_.concurrencyFields()
 
             if colFields:
@@ -538,9 +545,10 @@ class FLFormRecordDB(FLFormDB):
                     ret_ = fun_()
                 except Exception:
                     # script_name = self.iface.__module__
-                    from pineboolib.pncontrolsfactory import aqApp, wiki_error
+                    from pineboolib.error_manager import error_manager
+                    from pineboolib.application import project
 
-                    aqApp.msgBoxWarning(wiki_error(traceback.format_exc(limit=-6, chain=False)), pineboolib.project._DGI)
+                    aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
 
             return ret_ if isinstance(ret_, bool) else False
         return True
@@ -840,10 +848,10 @@ class FLFormRecordDB(FLFormDB):
         super(FLFormRecordDB, self).show()
 
     def inicializeControls(self):
-        from pineboolib.pncontrolsfactory import FLFieldDB
+        from pineboolib import pncontrolsfactory
 
         for child_ in self.findChildren(QtWidgets.QWidget):
-            if isinstance(child_, FLFieldDB):
+            if isinstance(child_, pncontrolsfactory.FLFieldDB):
                 loaded = getattr(child_, "_loaded", None)
                 if loaded is False:
                     QtCore.QTimer().singleShot(0, child_.load)

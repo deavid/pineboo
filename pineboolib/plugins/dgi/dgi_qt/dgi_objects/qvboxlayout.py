@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets  # type: ignore
 
 
 class QVBoxLayout(QtWidgets.QVBoxLayout):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         if isinstance(parent, QtWidgets.QWidget):
             super().__init__(parent)
         else:

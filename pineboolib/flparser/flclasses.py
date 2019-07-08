@@ -1,5 +1,5 @@
-# from builtins import str
-# from builtins import object
+from typing import Any
+
 debug = 0
 
 
@@ -7,24 +7,25 @@ class cBase(object):
     def __init__(self):
         self.type = ("Unknown", "Unknown")
         self.codedepth = 0
+        self.name = "<NoName>"
 
-    def setSubtype(self, newsubtype):
+    def setSubtype(self, newsubtype) -> None:
         x, y = self.type
         self.type = (x, newsubtype)
 
-    def setType(self, newtype):
+    def setType(self, newtype) -> None:
         x, y = self.type
         self.type = (newtype, y)
 
-    def addCodeDepth(self):
+    def addCodeDepth(self) -> None:
         self.codedepth += 1
 
-    def __len__(self):
+    def __len__(self) -> int:
         return 1
 
 
 class cBaseItem(cBase):
-    def __init__(self, value):
+    def __init__(self, value) -> None:
         cBase.__init__(self)
         self.type = ("Item", "Unknown")
         self.value = value
@@ -36,7 +37,7 @@ class cBaseItem(cBase):
 
 
 class cBaseItemList(cBase):
-    def __init__(self, itemList, prefix, suffix, subtype="Unknown"):
+    def __init__(self, itemList, prefix, suffix, subtype="Unknown") -> None:
         cBase.__init__(self)
         self.type = ("ItemList", subtype)
         if not isinstance(itemList, cBaseList):
@@ -68,14 +69,14 @@ class cBaseItemList(cBase):
 
 
 class cBaseVarSpec(cBase):
-    def __init__(self, name, vartype=None, value=None):
+    def __init__(self, name, vartype: str = None, value=None) -> None:
         cBase.__init__(self)
         self.type = ("Item", "Variable")
         self.value = value
         self.vartype = vartype
         self.name = name
 
-    def __str__(self):
+    def __str__(self) -> Any:
         txt = self.name
         if self.vartype:
             txt += ":" + self.vartype
@@ -97,7 +98,7 @@ class cBaseList(cBase):
     def __len__(self):
         return len(self.slice)
 
-    def includeItem(self, child):
+    def includeItem(self, child) -> None:
         if not isinstance(child, cBase):
             raise NameError("Child is not an instance of Base Class!")
 
@@ -152,7 +153,7 @@ class cBaseList(cBase):
         for child in sslice:
             child.addCodeDepth()
 
-    def addAuto(self, element, subtype=None):
+    def addAuto(self, element, subtype=None) -> None:
         if not isinstance(element, cBase):
             element = cBaseItem(element)
             if subtype:
@@ -160,7 +161,7 @@ class cBaseList(cBase):
 
         self.addChild(element)
 
-    def addChild(self, child, hidden=False):
+    def addChild(self, child, hidden=False) -> None:
         self.includeItem(child)
         self.slice.append(child)
         if hidden:
@@ -222,7 +223,7 @@ class cBaseList(cBase):
 
 
 class cBaseListInline(cBaseList):
-    def __init__(self, separator=", "):
+    def __init__(self, separator: str = ", ") -> None:
         cBaseList.__init__(self)
         self.separator = separator
 
@@ -252,7 +253,7 @@ class cStatementList(cBaseList):
 
 
 class cBaseDecl(cBase):
-    def __init__(self, name):
+    def __init__(self, name) -> None:
         cBase.__init__(self)
         self.type = ("Declaration", "Unknown")
         self.name = name
@@ -262,7 +263,7 @@ class cBaseDecl(cBase):
 
 
 class cFuncDecl(cBaseDecl):
-    def __init__(self, name, arglist, rettype, source):
+    def __init__(self, name, arglist, rettype: str, source) -> None:
         cBaseDecl.__init__(self, name=name)
         self.type = ("Declaration", "Function")
         self.arglist = arglist
@@ -299,7 +300,7 @@ class cFuncDecl(cBaseDecl):
 
 
 class cClassDecl(cBaseDecl):
-    def __init__(self, name, extends, source):
+    def __init__(self, name, extends: str, source) -> None:
         cBaseDecl.__init__(self, name=name)
         self.type = ("Declaration", "Class")
         self.extends = extends

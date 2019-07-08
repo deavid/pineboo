@@ -100,7 +100,10 @@ class FormInternalObj(FormDBWidget):
             sys.processEvents()
             if not self.iface.cargarModulo(modulos[i]):
                 MessageBox.warning(
-                    util.translate(u"scripts", u"Error al cargar el módulo:\n") + modulos[i], MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton
+                    util.translate(u"scripts", u"Error al cargar el módulo:\n") + modulos[i],
+                    MessageBox.Ok,
+                    MessageBox.NoButton,
+                    MessageBox.NoButton,
                 )
                 return
             i += 1
@@ -152,7 +155,9 @@ class FormInternalObj(FormDBWidget):
         if xmlModule.setContent(f):
             nodeModule = xmlModule.namedItem(u"MODULE")
             if not nodeModule:
-                MessageBox.critical(util.translate(u"scripts", u"Error en la carga del fichero xml .mod"), MessageBox.Ok, MessageBox.NoButton)
+                MessageBox.critical(
+                    util.translate(u"scripts", u"Error en la carga del fichero xml .mod"), MessageBox.Ok, MessageBox.NoButton
+                )
             modulo = nodeModule.namedItem(u"name").toElement().text()
             descripcion = nodeModule.namedItem(u"alias").toElement().text()
             area = nodeModule.namedItem(u"area").toElement().text()

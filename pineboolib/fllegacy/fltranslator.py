@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os
-from pineboolib.utils import filedir
+from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.fltranslations import FLTranslations
 from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.application import project
 
-from PyQt5.Qt import QTranslator
-import logging
+from PyQt5.Qt import QTranslator  # type: ignore
+from pineboolib import logging
 
 
 class FLTranslator(QTranslator):
@@ -45,9 +46,9 @@ class FLTranslator(QTranslator):
         if self.idM_ == "sys":
             ts_file = filedir("../share/pineboo/translations/%s.%s" % (self.idM_, self.lang_))
         else:
-            from pineboolib.pncontrolsfactory import aqApp
-
-            ts_file = filedir("%s/cache/%s/%s/file.ts/%s.%s/%s" % (aqApp.tmp_dir(), aqApp.db().database(), self.idM_, self.idM_, self.lang_, key))
+            ts_file = filedir(
+                "%s/cache/%s/%s/file.ts/%s.%s/%s" % (project.tmpdir, project.conn.DBName(), self.idM_, self.idM_, self.lang_, key)
+            )
         # qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
 
         ret_ = None
@@ -92,18 +93,22 @@ class FLTranslator(QTranslator):
 
     def load_ts(self, file_name):
         try:
-            from pineboolib.utils import load2xml
+            from pineboolib.core.utils.utils_base import load2xml
 
             root_ = load2xml(file_name)
             for context in root_.findall("context"):
-                context_dict_key = context.find("name").text
+                name_elem = context.find("name")
+                if name_elem is None:
+                    self.logger.warning("load_ts: <name> not found, skipping")
+                    continue
+                context_dict_key = name_elem.text
                 if context_dict_key not in self.ts_translation_contexts.keys():
                     self.ts_translation_contexts[context_dict_key] = {}
                 for message in context.findall("message"):
-                    # translation = getattr(message, "translation", None)
-                    translation_text = message.find("translation").text
-                    if translation_text is not None:
-                        source_text = message.find("source").text
+                    translation_elem, source_elem = message.find("translation"), message.find("source")
+                    translation_text = translation_elem is not None and translation_elem.text
+                    source_text = source_elem is not None and source_elem.text
+                    if translation_text and source_text:
                         self.ts_translation_contexts[context_dict_key][source_text] = translation_text
 
             return True

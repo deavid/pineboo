@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-from pineboolib.utils import _dir
-import logging
+from pineboolib import logging
+from typing import List
+from pineboolib.application.utils.path import _dir
+from pineboolib.application import project
 
 logger = logging.getLogger(__name__)
 
@@ -8,17 +10,17 @@ reserved_words = ["pass"]
 
 """
     Esta librería es un parser de mtd a model de sqlAlchemy.
-    Se crea un fichero .py y se aloja al lado del .mtd relacionado. También se puede sobrecargar con una clase personalizada para aumentar/modificar
+    Se crea un fichero .py y se aloja al lado del .mtd relacionado.
+    También se puede sobrecargar con una clase personalizada para aumentar/modificar
         las funciones disponibles. Ver pineboolib.pnobjectsfactory.py
 """
+
 
 def mtd_parse(fileobj):
     mtd_file = _dir("cache", fileobj.filekey)
     metadata_name = fileobj.filename[:-4]
     dest_file = "%s_model.py" % mtd_file[:-4]
-    from pineboolib.pncontrolsfactory import aqApp
-
-    mtd = aqApp.db().manager().metadata(metadata_name)
+    mtd = project.conn.manager().metadata(metadata_name)
 
     lines = generate_model(dest_file, mtd) if not mtd.isQuery() else []
 
@@ -30,8 +32,6 @@ def mtd_parse(fileobj):
 
 
 def generate_model(dest_file, mtd_table):
-    # FIXME: ¿Porqué parece que estamos programando un fichero Python desde Python? ELIMINA ESTO PRONTO!
-    from pineboolib.pncontrolsfactory import aqApp
 
     data = []
     pk_found = False
@@ -56,7 +56,7 @@ def generate_model(dest_file, mtd_table):
     data.append("    __tablename__ = '%s'" % mtd_table.name())
     data.append("")
 
-    validator_list = []
+    validator_list: List[str] = []
 
     data.append("")
     data.append("# --- Fields ---> ")
@@ -88,8 +88,8 @@ def generate_model(dest_file, mtd_table):
 
     for field in mtd_table.fieldList():  # Creamos relaciones 1M
         for r in field.relationList():
-            foreign_table_mtd = aqApp.db().manager().metadata(r.foreignTable())
-            # if aqApp.db().manager().existsTable(r.foreignTable()):
+            foreign_table_mtd = project.conn.manager().metadata(r.foreignTable())
+            # if project.conn.manager().existsTable(r.foreignTable()):
             if foreign_table_mtd:
                 # comprobamos si existe el campo...
                 if foreign_table_mtd.field(r.foreignField()):
@@ -173,11 +173,13 @@ def generate_model(dest_file, mtd_table):
     # data.append("    %s%s.__table__.create(engine)" % (mtd_table.name()[0].upper(), mtd_table.name()[1:]))
 
     if not pk_found:
-        from pineboolib.fllegacy.flsettings import FLSettings
+        from pineboolib.core.settings import config
 
-        settings = FLSettings()
-        if settings.readBoolEntry("application/isDebuggerMode", False):
-            logger.warning("La tabla %s no tiene definida una clave primaria. No se generará el model %s\n" % (mtd_table.name(), mtd_table.primaryKey()))
+        if config.value("application/isDebuggerMode", False):
+            logger.warning(
+                "La tabla %s no tiene definida una clave primaria. No se generará el model %s\n"
+                % (mtd_table.name(), mtd_table.primaryKey())
+            )
         data = []
 
     return data
@@ -214,10 +216,8 @@ def field_type(field):
         ret = "Desconocido %s" % field.type()
 
     if field.relationM1() is not None:
-        from pineboolib.pncontrolsfactory import aqApp
-
         rel = field.relationM1()
-        if aqApp.db().manager().existsTable(rel.foreignTable()):
+        if project.conn.manager().existsTable(rel.foreignTable()):
             ret += ", ForeignKey('%s.%s'" % (rel.foreignTable(), rel.foreignField())
             if rel.deleteCascade():
                 ret += ", ondelete='CASCADE'"

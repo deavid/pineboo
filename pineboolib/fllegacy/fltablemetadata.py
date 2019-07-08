@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from pineboolib import decorators
+from pineboolib.core import decorators
 
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
-import logging
+from pineboolib import logging
 import copy
 
 
@@ -457,7 +457,11 @@ class FLTableMetaData(object):
                 break
 
         if field:
-            if field.d.relationM1_ and field.d.relationM1_.foreignField() == str(fFN).lower() and field.d.relationM1_.foreignTable() == str(fTN).lower():
+            if (
+                field.d.relationM1_
+                and field.d.relationM1_.foreignField() == str(fFN).lower()
+                and field.d.relationM1_.foreignTable() == str(fTN).lower()
+            ):
                 return field.d.relationM1_
 
             relationList = field.d.relationList_

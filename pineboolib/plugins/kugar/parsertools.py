@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtGui import QPixmap
-from pineboolib.utils import cacheXPM, load2xml
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.fllegacy.flutil import FLUtil
 import os
 import sys
-import logging
+from pineboolib import logging
 import datetime
 import fnmatch
+from typing import List
+
+from PyQt5.QtGui import QPixmap  # type: ignore
+from pineboolib.core.utils.utils_base import load2xml
+from pineboolib.application.utils.xpm import cacheXPM
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.fllegacy.flapplication import aqApp
 
 
 """
@@ -15,7 +18,7 @@ Esta clase ofrece algunas funciones comunes de los diferentes parser de kut.
 """
 
 
-class parsertools(object):
+class KParserTools(object):
     _fix_altura = None
 
     def __init__(self):
@@ -54,9 +57,9 @@ class parsertools(object):
     def convertToNode(self, data):
 
         # node = Node()
-        from pineboolib.pncontrolsfactory import FLDomDocument
+        from pineboolib import pncontrolsfactory
 
-        doc = FLDomDocument()
+        doc = pncontrolsfactory.FLDomDocument()
         ele = doc.createElement("element")
         for k in data.keys():
             attr_node = doc.createAttribute(k)
@@ -114,7 +117,7 @@ class parsertools(object):
 
         p = 0 if p is None else int(p)
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.application.utils.date_conversion import date_amd_to_dma
 
         ret_ = value
         if data_type == 2:  # Double
@@ -126,7 +129,7 @@ class parsertools(object):
         elif data_type == 3:
             if value.find("T") > -1:
                 value = value[: value.find("T")]
-            ret_ = FLUtil().dateAMDtoDMA(value)
+            ret_ = date_amd_to_dma(value)
 
         elif data_type == 5:  # Imagen
             pass
@@ -149,8 +152,6 @@ class parsertools(object):
         table_name = "fllarge"
         if ref_key is not None:
             value = None
-            from pineboolib.pncontrolsfactory import aqApp
-
             tmp_dir = aqApp.tmp_dir()
             img_file = "%s/%s.png" % (tmp_dir, ref_key)
 
@@ -269,7 +270,7 @@ class parsertools(object):
     """
 
     def find_font(self, font_name, font_style):
-        fonts_folders = []
+        fonts_folders: List[str] = []
         if sys.platform.find("win") > -1:
             windir = os.environ.get("WINDIR")
             fonts_folders = [os.path.join(windir, "fonts")]
@@ -334,10 +335,10 @@ class parsertools(object):
         return None
 
     def calculate_sum(self, field_name, line, xml_list, level):
-        val = 0
+        val = 0.0
         for l in xml_list:
             if int(l.get("level")) <= int(level):
-                val = 0
+                val = 0.0
                 continue
             val += float(l.get(field_name))
             if l is line:

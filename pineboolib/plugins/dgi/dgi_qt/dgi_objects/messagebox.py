@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtWidgets import QMessageBox, QApplication
-import pineboolib
-import logging
+from PyQt5.QtWidgets import QMessageBox, QApplication  # type: ignore
+from pineboolib.core.utils.logging import logging
 
 logger = logging.getLogger("messageBox")
 
@@ -9,12 +8,10 @@ logger = logging.getLogger("messageBox")
 class MessageBox(QMessageBox):
     @classmethod
     def msgbox(cls, typename, text, button0, button1=None, button2=None, title=None, form=None):
-        
-        
-        if pineboolib.project._splash:
-            pineboolib.project._splash.hide()
+        from pineboolib.application import project
 
-        
+        if project._splash:
+            project._splash.hide()
 
         if not isinstance(text, str):
             # temp = text
@@ -46,7 +43,7 @@ class MessageBox(QMessageBox):
             if not title:
                 title = "Critical"
         # title = unicode(title,"UTF-8")
-        # text = unicode(text,"UTF-8")      
+        # text = unicode(text,"UTF-8")
         msg = QMessageBox(icon, title, text)
         msg.setParent(QApplication.activeModalWidget())
         msg.setWindowModality(1)

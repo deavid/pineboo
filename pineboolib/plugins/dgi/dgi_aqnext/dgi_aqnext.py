@@ -2,14 +2,14 @@
 import collections
 import traceback
 import inspect
-import logging
-import sys
 import os
+from typing import List, Dict, Any, Union
+from PyQt5 import QtCore  # type: ignore
 
-from PyQt5 import QtCore
-
+from pineboolib.core.utils.logging import logging
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-import pineboolib
+from pineboolib.application.utils import sql_tools
+from pineboolib.application import project
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +33,6 @@ class dgi_aqnext(dgi_schema):
     def extraProjectInit(self):
         pass
 
-    def create_app(self):
-        app = QtCore.QCoreApplication(sys.argv)
-        return app
-
     def setParameter(self, param):
         self._listenSocket = param
 
@@ -49,13 +45,13 @@ class dgi_aqnext(dgi_schema):
         return super().resolveObject(self._name, name)
 
     def exec_(self):
-        from pineboolib.pncontrolsfactory import SysType, aqApp
+        from pineboolib import pncontrolsfactory
 
-        sys = SysType()
+        qsa_sys = pncontrolsfactory.SysType()
         logger.warning("DGI_%s se ha inicializado correctamente" % self._alias)
-        logger.warning("Driver  DB: %s", aqApp.db().driverAlias())
-        logger.warning("Usuario DB: %s", sys.nameUser())
-        logger.warning("Nombre  DB: %s", sys.nameBD())
+        logger.warning("Driver  DB: %s", project.conn.driverAlias())
+        logger.warning("Usuario DB: %s", qsa_sys.nameUser())
+        logger.warning("Nombre  DB: %s", qsa_sys.nameBD())
 
     def processEvents(self):
         return QtCore.QCoreApplication.processEvents()
@@ -64,8 +60,9 @@ class dgi_aqnext(dgi_schema):
         return "Django"
 
     def authenticate(self, **kwargs):
-        user = kwargs["username"]  # FIXME
-        password = kwargs["password"]
+        # user = kwargs["username"]  # FIXME
+        # password = kwargs["password"]
+        pass
 
     def use_authentication(self):
         return self._use_authentication
@@ -77,14 +74,13 @@ class dgi_aqnext(dgi_schema):
         return True
 
     def content_cached(self, tmp_folder, db_name, module_id, file_ext, file_name, sha_key):
-        from pineboolib.utils import filedir
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.core.utils.utils_base import filedir
 
         data_ = None
         if module_id == "sys" and file_name in self.sys_mtds():
             path_ = filedir("./plugins/dgi/dgi_aqnext/system_files/%s/%s.%s" % (file_ext, file_name, file_ext))
             if os.path.exists(path_):
-                data_ = aqApp.db().managerModules().contentFS(path_, False)
+                data_ = project.conn.managerModules().contentFS(path_, False)
 
         return data_
 
@@ -92,9 +88,10 @@ class dgi_aqnext(dgi_schema):
         return True
 
     def get_nameuser(self):
-        from YBUTILS.viewREST.cacheController import getUser
-
-        return str(getUser())
+        return ""
+        # FIXME
+        # from YBUTILS.viewREST.cacheController import getUser
+        # return str(getUser())
 
     def sys_mtds(self):
         return ["sis_acl", "sis_user_notifications", "sis_gridfilter"]
@@ -112,12 +109,12 @@ class dgi_aqnext(dgi_schema):
             legacy_path = "%s/legacy/%s/%s.py" % (folder_, module_id, name_)
             print("**** Buscando en path", legacy_path)
             if os.path.exists(legacy_path):
-                data = pineboolib.project.conn.managerModules().contentFS(legacy_path, True)
+                data = project.conn.managerModules().contentFS(legacy_path, True)
         else:
             if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (tmp_dir, db_name, module_id, ext_, name_)):
                 if ext_ == "kut":
                     utf8_ = True
-                data = pineboolib.project.conn.managerModules().contentFS(
+                data = project.conn.managerModules().contentFS(
                     "%s/cache/%s/%s/file.%s/%s/%s.%s" % (tmp_dir, db_name, module_id, ext_, name_, sha_key, ext_), utf8_
                 )
 
@@ -147,9 +144,10 @@ class dgi_aqnext(dgi_schema):
             raise ImportError
 
         from pineboolib import qsa as qsa_dict_modules
-        from pineboolib.pnapplication import DelayedObjectProxyLoader, XMLAction
+        from pineboolib.application.xmlaction import XMLAction
+        from pineboolib.application.proxy import DelayedObjectProxyLoader
 
-        action = XMLAction()
+        action = XMLAction(project=project)
         action.name = module_name
         action.alias = module_name
         action.form = None
@@ -167,17 +165,17 @@ class dgi_aqnext(dgi_schema):
 
             # Se crea el script
             setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % app))
-            pineboolib.project.actions[action.name] = action
+            project.actions[action.name] = action
             if prefix == "":
                 return
 
-        action_xml = XMLAction()
+        action_xml = XMLAction(project=project)
         action_xml.name = module_name
 
-        if "%s_legacy" in action_xml.name not in pineboolib.project.actions.keys():
-            if action_xml.name in pineboolib.project.actions.keys():
-                pineboolib.project.actions["%s_legacy" % action_xml.name] = pineboolib.project.actions[action_xml.name]
-                del pineboolib.project.actions[action_xml.name]
+        if "%s_legacy" in action_xml.name not in project.actions.keys():
+            if action_xml.name in project.actions.keys():
+                project.actions["%s_legacy" % action_xml.name] = project.actions[action_xml.name]
+                del project.actions[action_xml.name]
 
         if prefix == "form":
             if hasattr(qsa_dict_modules, "form" + action_xml.name):
@@ -188,7 +186,7 @@ class dgi_aqnext(dgi_schema):
 
             action_xml.table = action_xml.name
             action_xml.scriptform = script_name
-            pineboolib.project.actions[action_xml.name] = action_xml
+            project.actions[action_xml.name] = action_xml
             delayed_action = DelayedObjectProxyLoader(action_xml.load, name="QSA.Module.%s.Action.form%s" % (app, action_xml.name))
             # print("Creando", "form" + module_name)
             setattr(qsa_dict_modules, "form" + action_xml.name, delayed_action)
@@ -202,16 +200,17 @@ class dgi_aqnext(dgi_schema):
 
             action_xml.table = action_xml.name
             action_xml.script = script_name
-            pineboolib.project.actions[action_xml.name] = action_xml
-            delayed_action = DelayedObjectProxyLoader(action_xml.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (app, action_xml.name))
+            project.actions[action_xml.name] = action_xml
+            delayed_action = DelayedObjectProxyLoader(
+                action_xml.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (app, action_xml.name)
+            )
             setattr(qsa_dict_modules, "formRecord" + action_xml.name, delayed_action)
             # print("Creando **** ", getattr(qsa_dict_modules, "formRecord" + module_name))
 
     def load_meta_model(self, action_name, opt=None):
         import importlib
-        from pineboolib.pncontrolsfactory import aqApp
 
-        module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % action_name)
+        module_name = project.conn.managerModules().idModuleOfFile("%s.mtd" % action_name)
         module = None
         ret_ = None
         model_file = "models.%s.%s" % (module_name, action_name)
@@ -248,7 +247,7 @@ class dgi_aqnext(dgi_schema):
             cursor = module.widget.cursor()
         else:
             logger.warning("*** DGI.get_master_cursor creando cursor %s sin action asociada ***", prefix)
-            from pineboolib.pncontrolsfactory import FLSqlCursor
+            from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
             cursor = FLSqlCursor(prefix)
 
@@ -300,7 +299,7 @@ class dgi_aqnext(dgi_schema):
                 print("FIXME:: populate_with_params", k, params[k])
 
     def cursor2json(self, cursor, template=None):
-        ret_ = []
+        ret_: List[Dict[str, Any]] = []
         if not cursor.modeAccess() == cursor.Insert:
             if not cursor.isValid():
                 logger.warning("Cursor inválido/vacío en %s", cursor.curName())
@@ -311,7 +310,7 @@ class dgi_aqnext(dgi_schema):
 
         meta_model = cursor.meta_model()
 
-        # pineboolib.project.init_time()
+        # project.init_time()
         size_ = cursor.size()
         pk = cursor.primaryKey()
         fields_list = cursor.metadata().fieldList()
@@ -354,28 +353,27 @@ class dgi_aqnext(dgi_schema):
             #     serializer._declared_fields.update(
             #         {field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])}
             #     )
-            if size_ == 1:
-                ret_ = dict_
-                break
-            else:
-                ret_.append(dict_)
 
             if cursor.next():
                 pass
             i += 1
-        # pineboolib.project.show_time("Fin cursor2json %s %s %s" % (cursor.curName(), meta_model, cursor.filter()))
-        return ret_
+
+        # project.show_time("Fin cursor2json %s %s %s" % (cursor.curName(), meta_model, cursor.filter()))
+        if len(ret_) == 1:
+            # FIXME: Avoid changing the type "automagically", as the caller can get confused.
+            return ret_[0]
+        else:
+            return ret_
 
     def getYBschema(self, cursor, template=None):
         """Permite obtener definicion de schema de uso interno de YEBOYEBO"""
-        import pineboolib
 
         mtd = cursor.metadata()
 
         meta_model = cursor.meta_model()
 
-        dict = collections.OrderedDict()
-        meta = collections.OrderedDict()
+        dict: Dict = collections.OrderedDict()
+        meta: Dict = collections.OrderedDict()
 
         if mtd is None:
             return dict, meta
@@ -406,7 +404,7 @@ class dgi_aqnext(dgi_schema):
             dict[key]["field"] = False
 
             dict[key]["visible"] = False if key in ["pk", "desc"] else True
-            dict[key]["tipo"] = pineboolib.utils.get_tipo_aqnext(field.type())
+            dict[key]["tipo"] = sql_tools.get_tipo_aqnext(field.type())
             if field.type() == "stringlist":
                 dict[key]["subtipo"] = 6
 
@@ -469,10 +467,10 @@ class dgi_aqnext(dgi_schema):
         # retorna una lista con objetos del modelo
         cursor_master = self.get_master_cursor(prefix)
         list_objects = []
-        where, order_by = pineboolib.utils.resolve_query(prefix, params)
+        where, order_by = sql_tools.resolve_query(prefix, params)
         where_filter = "%s ORDER BY %s" % (where, order_by) if len(order_by) else where
 
-        first_reg, limit_reg = pineboolib.utils.resolve_pagination(params)
+        first_reg, limit_reg = sql_tools.resolve_pagination(params)
         if first_reg:
             where_filter += " OFFSET %s" % first_reg
 
@@ -504,7 +502,7 @@ class dgi_aqnext(dgi_schema):
         response.data["data"] = data_list
 
         # pagination = pagination_class(data_list, params)
-        first_reg, limit_reg = pineboolib.utils.resolve_pagination(params)
+        first_reg, limit_reg = sql_tools.resolve_pagination(params)
 
         response.data["PAG"] = {
             "NO": "%s" % (int(limit_reg) + int(first_reg)) if first_reg else 0,
@@ -515,9 +513,9 @@ class dgi_aqnext(dgi_schema):
         return response
 
     def carga_datos_custom_filter(self, table, usuario):
-        from pineboolib.pncontrolsfactory import FLSqlCursor
+        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
-        ret = {}
+        ret: Dict[str, Dict[str, Any]] = {}
         cursor = FLSqlCursor("sis_gridfilter")
         cursor.select(" prefix ='%s' AND usuario ='%s'" % (table, usuario))
         if cursor.first():
@@ -527,40 +525,34 @@ class dgi_aqnext(dgi_schema):
             ret[cursor.valueBuffer("descripcion")]["default"] = cursor.valueBuffer("inicial")
         return ret
 
-    def _convert_to_ordered_dict(self, data):
+    def _convert_to_ordered_dict(self, data: Union[List[Dict[str, Any]], Dict[str, Any]]):
         ret_ = []
 
         if isinstance(data, list):
             for t in data:
-                o = collections.OrderedDict()
-                for key in t.keys():
-                    o[key] = t[key]
+                o = {key: t[key] for key in t.keys()}
                 ret_.append(o)
-        else:
-            o = collections.OrderedDict()
-            for key in data.keys():
-                o[key] = data[key]
+        elif isinstance(data, dict):
+            o = {key: data[key] for key in data.keys()}
             ret_.append(o)
 
         return ret_
 
 
 class paginated_object(object):
-    pass
+    data: Dict
 
 
-"""
 class pagination_class(object):
 
     count = None
     _limit = None
     _page = None
 
-    def __init__(self, data_, query = {}):
+    def __init__(self, data_, query={}):
         self.count = len(data_)
-        self._limit = 50 if not "p_l" in query.keys() or query["p_l"] == 'true' else int(query["p_l"])
-        self._page =  0 if not "p_c" in query.keys() or query["p_c"] == 'true'  else int(query["p_c"])
-
+        self._limit = 50 if "p_l" not in query.keys() or query["p_l"] == "true" else int(query["p_l"])
+        self._page = 0 if "p_c" not in query.keys() or query["p_c"] == "true" else int(query["p_c"])
 
     def get_next_offset(self):
         ret_ = None
@@ -571,9 +563,7 @@ class pagination_class(object):
             ret_ = actual
             i += 1
 
-
         return ret_
-
 
     def get_previous_offset(self):
         ret_ = None
@@ -586,4 +576,8 @@ class pagination_class(object):
             i += 1
 
         return ret_
-"""
+
+
+class mainForm(object):
+    mainWindow = None
+    MainForm = None

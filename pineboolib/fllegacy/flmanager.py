@@ -1,30 +1,37 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore
-from PyQt5.QtXml import QDomDocument
+from PyQt5 import QtCore  # type: ignore
+from PyQt5.QtXml import QDomDocument  # type: ignore
 
 
-from pineboolib import decorators
-from pineboolib.utils import filedir, auto_qt_translate_text, cacheXPM
+from pineboolib.core import decorators
+from pineboolib.core.utils.utils_base import filedir, auto_qt_translate_text
+from pineboolib.application.utils.xpm import cacheXPM
 
 
 from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery, FLGroupByQuery
+from pineboolib.application.database.pnsqlquery import PNSqlQuery, PNGroupByQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flutil import FLUtil
-import pineboolib
 
-from xml import etree
-import logging
+from xml import etree  # type: ignore
+from pineboolib import logging
+from pineboolib.interfaces import IManager
 
-# import os
+from PyQt5.QtXml import QDomElement  # type: ignore
+from pineboolib.interfaces.iconnection import IConnection
+from typing import Optional, Union
+
 logger = logging.getLogger(__name__)
 
+# FIXME: This class is emulating Eneboo, but the way is set up it is a core part of Pineboo now.
+# ... we should probably create our own one. Not this one.
 
-class FLManager(QtCore.QObject):
+
+class FLManager(QtCore.QObject, IManager):
     """
     Esta clase sirve como administrador de la base de datos.
 
@@ -47,7 +54,7 @@ class FLManager(QtCore.QObject):
     buffer_ = None
     metadataCachedFails = []
 
-    def __init__(self, db):
+    def __init__(self, db: IConnection) -> None:
         """
         constructor
         """
@@ -62,7 +69,7 @@ class FLManager(QtCore.QObject):
         QtCore.QTimer.singleShot(100, self.init)
         self.metadataCachedFails = []
 
-    def init(self):
+    def init(self) -> None:
         """
         Acciones de inicialización.
         """
@@ -73,14 +80,14 @@ class FLManager(QtCore.QObject):
         if not self.db_.dbAux():
             return
 
-        # q = FLSqlQuery(None, self.db_.dbAux())
+        # q = PNSqlQuery(None, self.db_.dbAux())
         # q.setForwardOnly(True)
 
         self.createSystemTable("flsettings")
         """
         if not q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'"):
 
-            if pineboolib.project.conn.driver().cascadeSupport():
+            if project.conn.driver().cascadeSupport():
                 q.exec_("DROP TABLE flsettings CASCADE")
             else:
                 q.exec_("DROP TABLE flsettings")
@@ -100,7 +107,7 @@ class FLManager(QtCore.QObject):
         q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'")
         if not q.next():
 
-            if pineboolib.project.conn.driver().cascadeSupport():
+            if project.conn.driver().cascadeSupport():
                 q.exec_("DROP TABLE flmetadata CASCADE")
             else:
                 q.exec_("DROP TABLE flmetadata")
@@ -131,7 +138,7 @@ class FLManager(QtCore.QObject):
 
         del self
 
-    def metadata(self, n, quick=None):
+    def metadata(self, n: Union[str, QDomElement], quick: Optional[bool] = None) -> Optional[FLTableMetaData]:
         """
         Para obtener definicion de una tabla de la base de datos, a partir de un fichero XML.
 
@@ -156,13 +163,12 @@ class FLManager(QtCore.QObject):
 
         if not n:
             return None
-        
+
         if quick is None:
             quick = False if util.readSettingEntry("application/dbadmin_enabled", False) else True
-                
 
         if isinstance(n, str):
-            if not n or not self.db_.dbAux():
+            if not n:
                 return None
 
             ret = False
@@ -205,7 +211,8 @@ class FLManager(QtCore.QObject):
                 if not ret.isQuery() and not self.existsTable(n):
                     self.createTable(ret)
 
-                acl = pineboolib.project.acl()
+                # acl = project.acl()
+                acl = None  # FIXME: Add ACL later
 
                 # if ret.fieldNamesUnlock():
                 #    ret = FLTableMetaData(ret)
@@ -382,7 +389,7 @@ class FLManager(QtCore.QObject):
                                     fmtdAux.setIsPrimaryKey(False)
                                     fmtdAux.setEditable(False)
 
-                                newRef = not isForeignKey
+                                # newRef = not isForeignKey
                                 fmtdAuxName = fmtdAux.name().lower()
                                 if fmtdAuxName.find(".") == -1:
                                     # fieldsAux = tmd.fieldNames().split(",")
@@ -392,16 +399,18 @@ class FLManager(QtCore.QObject):
                                             fmtdAux = FLFieldMetaData(fmtdAux)
 
                                         fmtdAux.setName("%s.%s" % (table, field))
-                                        newRef = False
+                                        # newRef = False
 
-                                if newRef:
-                                    fmtdAux.ref()
+                                # FIXME: ref() does not exist. Probably a C++ quirk from Qt to reference counting.
+                                # if newRef:
+                                #    fmtdAux.ref()
 
                                 tmd.addFieldMD(fmtdAux)
 
                     del qry
 
-            acl = pineboolib.project.acl()
+            # acl = project.acl()
+            acl = None  # FIXME: Add ACL later
             if acl:
                 acl.process(tmd)
 
@@ -435,23 +444,28 @@ class FLManager(QtCore.QObject):
         #    remove_blank_text=True,
         # )
 
-        q = FLSqlQuery(parent, self.db_.connectionName())
+        q = PNSqlQuery(parent, self.db_.connectionName())
 
         root_ = etree.ElementTree.fromstring(qry_)
-        q.setSelect(root_.find("select").text.replace(" ", "").replace("\n", "").replace("\t", "").replace("\r", ""))
-        q.setFrom(root_.find("from").text.strip(" \t\n\r"))
+        elem_select = root_.find("select")
+        elem_from = root_.find("from")
+
+        if elem_select is not None:
+            q.setSelect(elem_select.text.replace(" ", "").replace("\n", "").replace("\t", "").replace("\r", ""))
+        if elem_from is not None:
+            q.setFrom(elem_from.text.strip(" \t\n\r"))
 
         for where in root_.iter("where"):
             q.setWhere(where.text.strip(" \t\n\r"))
 
-        q.setTablesList(root_.find("tables").text.strip(" \t\n\r"))
+        elem_tables = root_.find("tables")
+        if elem_tables is not None:
+            q.setTablesList(elem_tables.text.strip(" \t\n\r"))
 
-        orderBy_ = None
-        try:
-            orderBy_ = root_.find("order").text.strip(" \t\n\r")
+        elem_order = root_.find("order")
+        if elem_order is not None:
+            orderBy_ = elem_order.text.strip(" \t\n\r")
             q.setOrderBy(orderBy_)
-        except Exception:
-            pass
 
         groupXml_ = root_.findall("group")
 
@@ -461,14 +475,17 @@ class FLManager(QtCore.QObject):
         i = 0
         while i < len(groupXml_):
             gr = groupXml_[i]
-            if float(gr.find("level").text.strip(" \t\n\r")) == i:
+            elem_level = gr.find("level")
+            elem_field = gr.find("field")
+            if elem_field is not None and elem_level is not None and float(elem_level.text.strip(" \t\n\r")) == i:
                 # print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
-                q.addGroup(FLGroupByQuery(i, gr.find("field").text.strip(" \t\n\r")))
-                i = i + 1
+                q.addGroup(PNGroupByQuery(i, elem_field.text.strip(" \t\n\r")))
+
+            i = i + 1
 
         return q
 
-    def action(self, n=None):
+    def action(self, n: str) -> FLAction:
         """
         Obtiene la definición de una acción a partir de su nombre.
 
@@ -479,12 +496,9 @@ class FLManager(QtCore.QObject):
         @param n Nombre de la accion
         @return Un objeto FLAction con la descripcion de la accion
         """
-        if not n:
-            return None
-
+        # FIXME: This function is really inefficient. Pineboo already parses the actions much before.
         if n in self.cacheAction_.keys():
             return self.cacheAction_[n]
-
         a = FLAction()
         util = FLUtil()
         doc = QDomDocument(n)
@@ -597,17 +611,18 @@ class FLManager(QtCore.QObject):
                                 no2 = no2.nextSibling()
                                 continue
 
-                        no2.nextSibling()
+                        no2 = no2.nextSibling()
 
                     no = no.nextSibling()
                     continue
 
             no = no.nextSibling()
+        logger.trace("action: saving cache and finishing %s", n)
 
         self.cacheAction_[n] = a
         return a
 
-    def existsTable(self, n, cache=True):
+    def existsTable(self, n: str, cache: bool = True) -> bool:
         """
         Comprueba si existe la tabla especificada en la base de datos.
 
@@ -616,7 +631,7 @@ class FLManager(QtCore.QObject):
                     realiza una consulta a la base para obtener las tablas existentes
         @return TRUE si existe la tabla, FALSE en caso contrario
         """
-        if not self.db_ or not self.db_.dbAux() or n is None:
+        if not self.db_ or n is None:
             return False
 
         if cache and n in self.listTables_:
@@ -660,7 +675,11 @@ class FLManager(QtCore.QObject):
                 if field1.isUnique() != field2.isUnique() or field1.isIndex() != field2.isIndex():
                     return False
 
-                if field1.length() != field2.length() or field1.partDecimal() != field2.partDecimal() or field1.partInteger() != field2.partInteger():
+                if (
+                    field1.length() != field2.length()
+                    or field1.partDecimal() != field2.partDecimal()
+                    or field1.partInteger() != field2.partInteger()
+                ):
                     return False
 
             field_list = mtd2.fieldList()
@@ -681,7 +700,11 @@ class FLManager(QtCore.QObject):
                 if field1.isUnique() != field2.isUnique() or field1.isIndex() != field2.isIndex():
                     return False
 
-                if field1.length() != field2.length() or field1.partDecimal() != field2.partDecimal() or field1.partInteger() != field2.partInteger():
+                if (
+                    field1.length() != field2.length()
+                    or field1.partDecimal() != field2.partDecimal()
+                    or field1.partInteger() != field2.partInteger()
+                ):
                     return False
 
             return True
@@ -701,7 +724,7 @@ class FLManager(QtCore.QObject):
         @param key Clave sha1 de la vieja estructura
         @return TRUE si la modificación tuvo éxito
         """
-        return self.db_.alterTable(mtd1, mtd2, key, force)
+        return self.db_.dbAux().alterTable(mtd1, mtd2, key, force)
 
     def createTable(self, n_or_tmd):
         """
@@ -790,7 +813,7 @@ class FLManager(QtCore.QObject):
 
             fieldName = args[0].name()
             if mtd.isQuery() and fieldName.find(".") == -1:
-                qry = FLSqlQuery(mtd.query())
+                qry = PNSqlQuery(mtd.query())
 
                 if qry:
                     fL = qry.fieldList()
@@ -803,8 +826,8 @@ class FLManager(QtCore.QObject):
 
                     if itFieldName == fieldName:
                         break
-
-                qry.deleteLater()
+                # FIXME: deleteLater() is a C++ internal to clear the memory later. Not used in Python
+                # qry.deleteLater()
 
             return self.formatAssignValueLike("%s.%s" % (prefixTable, fieldName), args[0].type(), args[1], args[2])
 
@@ -838,17 +861,18 @@ class FLManager(QtCore.QObject):
 
             return "%s%s" % (field_name, format_value)
 
-    def formatValue(self, fMD_or_type, v, upper=False):
+    def formatValue(self, fMD_or_type: str, v: Optional[Union[str, int]], upper: bool = False) -> str:
+        # FIXME: This function sometimes returns integers!
 
-        if fMD_or_type is None:
-            return None
+        if not fMD_or_type:
+            raise ValueError("fMD_or_type is required")
 
         if not isinstance(fMD_or_type, str):
             return self.formatValue(fMD_or_type.type(), v, upper)
 
         return self.db_.formatValue(fMD_or_type, v, upper)
 
-    def formatAssignValue(self, *args, **kwargs):
+    def formatAssignValue(self, *args, **kwargs) -> str:
         if args[0] is None:
             # print("FLManager.formatAssignValue(). Primer argumento vacio %s" % args[0])
             return "1 = 1"
@@ -926,7 +950,7 @@ class FLManager(QtCore.QObject):
 
             return retorno
 
-    def metadataField(self, field, v=True, ed=True):
+    def metadataField(self, field: QDomElement, v: bool = True, ed: bool = True) -> FLFieldMetaData:
         """
         Crea un objeto FLFieldMetaData a partir de un elemento XML.
 
@@ -942,8 +966,8 @@ class FLManager(QtCore.QObject):
         @param ed Valor utilizado por defecto para la propiedad editable
         @return Objeto FLFieldMetaData que contiene la descripción del campo
         """
-        if field is None:
-            return None
+        if not field:
+            raise ValueError("field is required")
 
         util = FLUtil()
 
@@ -967,7 +991,7 @@ class FLManager(QtCore.QObject):
         fullCalc = False
         trimm = False
 
-        t = -1
+        t: str = None
         length = 0
         pI = 4
         pD = 0
@@ -1127,7 +1151,9 @@ class FLManager(QtCore.QObject):
 
             no = no.nextSibling()
 
-        f = FLFieldMetaData(n, util.translate("Metadata", a), aN, iPK, t, length, c, v, ed, pI, pD, iNX, uNI, coun, dV, oT, rX, vG, True, ck)
+        f = FLFieldMetaData(
+            n, util.translate("Metadata", a), aN, iPK, t, length, c, v, ed, pI, pD, iNX, uNI, coun, dV, oT, rX, vG, True, ck
+        )
         f.setFullyCalculated(fullCalc)
         f.setTrimed(trimm)
 
@@ -1173,7 +1199,7 @@ class FLManager(QtCore.QObject):
 
         return f
 
-    def metadataRelation(self, relation):
+    def metadataRelation(self, relation: QDomElement) -> FLRelationMetaData:
         """
         Crea un objeto FLRelationMetaData a partir de un elemento XML.
 
@@ -1185,8 +1211,8 @@ class FLManager(QtCore.QObject):
         @param relation Elemento XML con la descripción de la relación
         @return Objeto FLRelationMetaData que contiene la descripción de la relación
         """
-        if relation is None:
-            return False
+        if not relation:
+            raise ValueError("relation is required")
 
         fT = ""
         fF = ""
@@ -1266,7 +1292,7 @@ class FLManager(QtCore.QObject):
         """
         return True
 
-    def createSystemTable(self, n):
+    def createSystemTable(self, n: str) -> bool:
         """
         Crea una tabla del sistema.
 
@@ -1300,9 +1326,13 @@ class FLManager(QtCore.QObject):
                     docElem = doc.documentElement()
 
                     mtd = self.createTable(self.metadata(docElem, True))
-                    return mtd
-
-                f.close()
+                    if mtd:
+                        return True
+                    else:
+                        return False
+                # FIXME: f.close() is closing an unknown object. it is a file?
+                # ... also, close, but we have return inside the loop.
+                # f.close()
 
         return False
 
@@ -1310,9 +1340,6 @@ class FLManager(QtCore.QObject):
         """
         Carga en la lista de tablas los nombres de las tablas de la base de datos
         """
-        if not self.db_.dbAux():
-            return
-
         if not self.listTables_:
             self.listTables_ = []
         else:
@@ -1345,14 +1372,14 @@ class FLManager(QtCore.QObject):
         self.db_.managerModules().loadAllIdModules()
         self.db_.managerModules().loadIdAreas()
 
-        q = FLSqlQuery(None, self.db_.dbAux())
+        q = PNSqlQuery(None, self.db_.dbAux())
         q.exec_("SELECT tabla,xml FROM flmetadata")
         while q.next():
             self.dictKeyMetaData_[str(q.value(0))] = str(q.value(1))
 
         c = FLSqlCursor("flmetadata", True, self.db_.dbAux())
 
-        q2 = FLSqlQuery(None, self.db_.dbAux())
+        q2 = PNSqlQuery(None, self.db_.dbAux())
         q2.exec_("SELECT nombre,sha FROM flfiles WHERE nombre LIKE '%.mtd' and nombre not like '%%alteredtable%'")
         while q2.next():
             table = str(q2.value(0))
@@ -1362,7 +1389,8 @@ class FLManager(QtCore.QObject):
                 self.createTable(table)
             if not tmd:
                 logger.warning(
-                    "FLManager::cleanupMetaData %s", FLUtil().translate("application", "No se ha podido crear los metadatatos para la tabla %s") % table
+                    "FLManager::cleanupMetaData %s",
+                    FLUtil().translate("application", "No se ha podido crear los metadatatos para la tabla %s") % table,
                 )
 
             c.select("tabla='%s'" % table)
@@ -1372,15 +1400,16 @@ class FLManager(QtCore.QObject):
                 c.update()
             self.dictKeyMetaData_[table] = q2.value(1)
 
-    def isSystemTable(self, n):
+    def isSystemTable(self, n: str) -> bool:
         """
         Para saber si la tabla dada es una tabla de sistema.
 
         @param n Nombre de la tabla.
         @return TRUE si es una tabla de sistema
         """
+        from pineboolib.application import project
 
-        if n in pineboolib.project._DGI.sys_mtds():
+        if n in project._DGI.sys_mtds():
             return True
 
         if n[0:2] != "fl":
@@ -1420,7 +1449,7 @@ class FLManager(QtCore.QObject):
         #    return None
 
         tableLarge = None
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.fllegacy.flapplication import aqApp
 
         if aqApp.singleFLLarge():
             tableLarge = "fllarge"
@@ -1443,7 +1472,7 @@ class FLManager(QtCore.QObject):
         sha = str(util.sha1(largeValue))
         # print("-->", tableName, sha)
         refKey = "RK@%s@%s" % (tableName, sha)
-        q = FLSqlQuery()
+        q = PNSqlQuery(None, self.db_.dbAux())
         q.setSelect("refkey")
         q.setFrom("fllarge")
         q.setWhere(" refkey = '%s'" % refKey)
@@ -1473,14 +1502,14 @@ class FLManager(QtCore.QObject):
         if not refKey[0:3] == "RK@":
             return None
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.fllegacy.flapplication import aqApp
 
         tableName = "fllarge" if aqApp.singleFLLarge() else "fllarge_" + refKey.split("@")[1]
 
         if not self.existsTable(tableName):
             return None
 
-        q = FLSqlQuery()
+        q = PNSqlQuery()
         q.setSelect("contenido")
         q.setFrom(tableName)
         q.setWhere(" refkey = '%s'" % refKey)

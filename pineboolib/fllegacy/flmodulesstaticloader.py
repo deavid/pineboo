@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
+import os
+
+from PyQt5 import QtWidgets, Qt, QtCore  # type: ignore
+
+from pineboolib import logging
+from pineboolib.core import decorators
+
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.pncontrolsfactory import aqApp
-
-from PyQt5 import QtWidgets, Qt, QtCore
-
-import os
-import logging
-
+from pineboolib.fllegacy.flapplication import aqApp
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +21,8 @@ class AQStaticDirInfo(object):
     def __init__(self, *args):
 
         if len(args) == 1:
-            self.active_ = args[0][len(args) - 1]
-            self.path_ = args[1 : len(args) - 1]
+            self.active_ = args[0]
+            self.path_ = ""
         else:
             self.active_ = args[0]
             self.path_ = args[1]
@@ -75,7 +76,7 @@ class AQStaticBdInfo(object):
             if info.active_:
                 active_dirs.append(info.path_)
 
-        settings.writeEntry("%sdirs" % self.key_, dirs)
+        settings.writeEntryList("%sdirs" % self.key_, dirs)
         settings.writeEntry("%sactiveDirs" % self.key_, ",".join(active_dirs))
 
 
@@ -83,18 +84,11 @@ warn_ = []
 
 
 class FLStaticLoader(QtCore.QObject):
-
-    ui_ = None
-    b_ = None
-
-    def __init__(self, b):
+    def __init__(self, b, ui):
 
         super(FLStaticLoader, self).__init__()
 
-        from pineboolib.fllegacy.flmanagermodules import FLManagerModules
-        from pineboolib.utils import filedir
-
-        self.ui_ = FLManagerModules().createUI(filedir("../share/pineboo/forms/FLStaticLoaderUI.ui"))
+        self.ui_ = ui
         self.b_ = b
         self.pixOn.setVisible(False)
         self.tblDirs.verticalHeader().setVisible(False)
@@ -130,12 +124,12 @@ class FLStaticLoader(QtCore.QObject):
             n_rows = len(self.b_.dirs_)
             self.tblDirs.setNumRows(n_rows)
             row = 0
-            from pineboolib.pncontrolsfactory import FLCheckBox
+            from pineboolib import pncontrolsfactory
 
             for info in self.b_.dirs_:
                 self.tblDirs.setText(row, 0, info.path_)
 
-                chk = FLCheckBox(self.tblDirs, row)
+                chk = pncontrolsfactory.FLCheckBox(self.tblDirs, row)
                 chk.setChecked(info.active_ == "True")
                 chk.toggled.connect(self.setChecked)
                 self.tblDirs.setCellWidget(row, 1, chk)
@@ -152,13 +146,13 @@ class FLStaticLoader(QtCore.QObject):
         dir = Qt.QFileDialog.getExistingDirectory(None, self.tr("Selecciones el directorio a insertar"), dir_init)
 
         if dir:
-            from pineboolib.pncontrolsfactory import FLCheckBox
+            from pineboolib import pncontrolsfactory
 
             n_rows = self.tblDirs.numRows()
             self.tblDirs.setNumRows(n_rows + 1)
             self.tblDirs.setText(n_rows, 0, dir)
 
-            chk = FLCheckBox(self.tblDirs, n_rows)
+            chk = pncontrolsfactory.FLCheckBox(self.tblDirs, n_rows)
             chk.setChecked(True)
             chk.toggled.connect(self.setChecked)
 
@@ -193,7 +187,10 @@ class FLStaticLoader(QtCore.QObject):
             return
 
         if QtWidgets.QMessageBox.No == QtWidgets.QMessageBox.warning(
-            None, self.tr("Borrar registro"), self.tr("El registro activo será borrado. ¿ Está seguro ?"), QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No
+            None,
+            self.tr("Borrar registro"),
+            self.tr("El registro activo será borrado. ¿ Está seguro ?"),
+            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No,
         ):
             return
 
@@ -224,11 +221,13 @@ class FLStaticLoader(QtCore.QObject):
         if info:
             info.active_ = on
 
-    def setup(b):
-        diag_setup = FLStaticLoader(b)
+    @staticmethod
+    def setup(b, ui):
+        diag_setup = FLStaticLoader(b, ui)
         if QtWidgets.QDialog.Accepted == diag_setup.ui_.exec_():
             b.writeSettings()
 
+    @staticmethod
     def content(n, b, only_path=False):
         global warn_
         b.readSettings()
@@ -259,9 +258,9 @@ class FLStaticLoader(QtCore.QObject):
                 if only_path:
                     return content_path
                 else:
-                    from pineboolib.pncontrolsfactory import aqApp
+                    from pineboolib.application import project
 
-                    return aqApp.db().managerModules().contentFS(info.path_ + separator + n)
+                    return project.conn.managerModules().contentFS(info.path_ + separator + n)
 
         return None
 
@@ -275,7 +274,7 @@ class FLStaticLoaderWarning(QtCore.QObject):
     paths_ = None
 
     def __init__(self):
-        super(FLStaticLoaderWarning).__init__()
+        super().__init__()
         self.warns_ = []
         self.paths_ = []
 
@@ -290,9 +289,12 @@ class FLStaticLoaderWarning(QtCore.QObject):
 
         msg += "</font><br></p>"
         self.warns_.clear()
+
         aqApp.popupWarn(msg)
 
+    @decorators.NotImplementedWarn
     def scriptBaseFileName(self, name):
+
         scripts = aqApp.project().scripts()
         for it in scripts:
             if it.baseFileName() == name:
