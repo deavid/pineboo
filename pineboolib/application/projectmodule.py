@@ -458,7 +458,6 @@ class Project(object):
 
         maxValue = 0
         value = 0
-        result = None
         resultValue = 0
         if name:
             try:
@@ -480,9 +479,9 @@ class Project(object):
         if result is None and maxValue > 0:
             resultValue = value
 
-        result = "%s/%s" % (resultValue, maxValue)
+        self.logger.warning("%s/%s", resultValue, maxValue)
 
-        return result
+        return value
 
     def get_temp_dir(self) -> str:
         """
