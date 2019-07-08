@@ -10,6 +10,7 @@ from PyQt5.QtGui import QPixmap  # type: ignore
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.utils.xpm import cacheXPM
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.fllegacy.flapplication import aqApp
 
 
 """
@@ -116,14 +117,13 @@ class parsertools(object):
 
         p = 0 if p is None else int(p)
 
-        from pineboolib import pncontrolsfactory
         from pineboolib.application.utils.date_conversion import date_amd_to_dma
 
         ret_ = value
         if data_type == 2:  # Double
             if value in (None, "None"):
                 return
-            ret_ = pncontrolsfactory.aqApp.localeSystem().toString(float(value), "f", p)
+            ret_ = aqApp.localeSystem().toString(float(value), "f", p)
         elif data_type == 0:
             pass
         elif data_type == 3:
@@ -152,13 +152,11 @@ class parsertools(object):
         table_name = "fllarge"
         if ref_key is not None:
             value = None
-            from pineboolib import pncontrolsfactory
-
-            tmp_dir = pncontrolsfactory.aqApp.tmp_dir()
+            tmp_dir = aqApp.tmp_dir()
             img_file = "%s/%s.png" % (tmp_dir, ref_key)
 
             if not os.path.exists(img_file) and ref_key[0:3] == "RK@":
-                if not pncontrolsfactory.aqApp.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
+                if not aqApp.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
                     table_name += "_%s" % ref_key.split("@")[1]
 
                 q = FLSqlQuery()

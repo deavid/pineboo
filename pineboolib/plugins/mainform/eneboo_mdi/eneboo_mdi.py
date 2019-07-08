@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-from pineboolib import logging
 from PyQt5.QtWidgets import QMainWindow  # type: ignore
+
+from pineboolib import logging
+from pineboolib.fllegacy.flapplication import aqApp
 
 logger = logging.getLogger("mainForm_%s" % __name__)
 
@@ -12,9 +14,7 @@ class MainForm(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        from pineboolib import pncontrolsfactory
-
-        pncontrolsfactory.aqApp.main_widget_ = self
+        aqApp.main_widget_ = self
         self.is_closing_ = False
         self.mdi_enable_ = True
 
@@ -24,12 +24,11 @@ class MainForm(QMainWindow):
 
     def initScript(self):
         from pineboolib.core.utils.utils_base import filedir
-        from pineboolib import pncontrolsfactory
 
         mw = mainWindow
         mw.createUi(filedir("plugins/mainform/eneboo_mdi/mainform.ui"))
-        pncontrolsfactory.aqApp.container_ = mw
-        pncontrolsfactory.aqApp.init()
+        aqApp.container_ = mw
+        aqApp.init()
 
     def createUi(self, ui_file):
         from pineboolib.application import project

@@ -4,6 +4,7 @@ import os
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.fltranslations import FLTranslations
 from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.application import project
 
 from PyQt5.Qt import QTranslator  # type: ignore
 from pineboolib import logging
@@ -45,11 +46,8 @@ class FLTranslator(QTranslator):
         if self.idM_ == "sys":
             ts_file = filedir("../share/pineboo/translations/%s.%s" % (self.idM_, self.lang_))
         else:
-            from pineboolib import pncontrolsfactory
-
             ts_file = filedir(
-                "%s/cache/%s/%s/file.ts/%s.%s/%s"
-                % (pncontrolsfactory.aqApp.tmp_dir(), pncontrolsfactory.aqApp.db().database(), self.idM_, self.idM_, self.lang_, key)
+                "%s/cache/%s/%s/file.ts/%s.%s/%s" % (project.tmpdir, project.conn.DBName(), self.idM_, self.idM_, self.lang_, key)
             )
         # qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
 

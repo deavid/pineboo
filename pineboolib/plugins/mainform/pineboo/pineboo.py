@@ -3,7 +3,8 @@
 import sys
 from pineboolib import logging
 
-from pineboolib.core.utils.utils_base import filedir, Struct
+from pineboolib.core.utils.utils_base import filedir
+from pineboolib.core.utils.struct import AreaStruct
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.application import project
@@ -138,7 +139,7 @@ class MainForm(QMainWindow):
         # Cargando Area desarrollo si procede ...
         sett_ = FLSettings()
         if sett_.readBoolEntry("application/isDebuggerMode", False):
-            areaDevelop = Struct(idarea="dvl", descripcion="Desarrollo")
+            areaDevelop = AreaStruct(idarea="dvl", descripcion="Desarrollo")
             self.loadArea(areaDevelop)
 
             self.loadDevelop()
@@ -223,7 +224,7 @@ class MainForm(QMainWindow):
         logger.debug("loadModule: Procesando %s ", module.name)
         # Creamos pestañas de areas y un vBLayout por cada módulo. Despues ahí metemos los actions de cada módulo
         if module.areaid not in self.areas:
-            self.loadArea(Struct(idarea=module.areaid, descripcion=module.areaid))
+            self.loadArea(AreaStruct(idarea=module.areaid, descripcion=module.areaid))
 
         moduleToolBox = self.toolBoxs[self.areas.index(module.areaid)]
 

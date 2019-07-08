@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-
 from PyQt5.QtGui import QPixmap  # type: ignore
+
 from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication  # type: ignore
 from PyQt5 import QtCore  # type: ignore
 from PyQt5 import QtGui  # type: ignore
@@ -65,6 +65,7 @@ class AQS(object):
     @return xml del objeto dado
     """
 
+    @classmethod
     def toXml(self, obj_, include_children=True, include_complex_types=False):
         xml_ = QDomDocument()
 

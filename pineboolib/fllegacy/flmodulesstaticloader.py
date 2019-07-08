@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.core import decorators
+import os
+
 from PyQt5 import QtWidgets, Qt, QtCore  # type: ignore
 
-import os
 from pineboolib import logging
+from pineboolib.core import decorators
 
+from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.fllegacy.flapplication import aqApp
 
 logger = logging.getLogger(__name__)
 
@@ -287,15 +289,13 @@ class FLStaticLoaderWarning(QtCore.QObject):
 
         msg += "</font><br></p>"
         self.warns_.clear()
-        from pineboolib import pncontrolsfactory
 
-        pncontrolsfactory.aqApp.popupWarn(msg)
+        aqApp.popupWarn(msg)
 
     @decorators.NotImplementedWarn
     def scriptBaseFileName(self, name):
-        from pineboolib import pncontrolsfactory
 
-        scripts = pncontrolsfactory.aqApp.project().scripts()
+        scripts = aqApp.project().scripts()
         for it in scripts:
             if it.baseFileName() == name:
                 return it

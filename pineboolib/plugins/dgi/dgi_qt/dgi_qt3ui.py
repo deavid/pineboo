@@ -193,14 +193,20 @@ def loadMenuBar(xml, widget):
         if x.tag == "property":
             name = x.get("name")
             if name == "name":
-                mB.setObjectName(x.find("cstring").text)
+                cstring = x.find("cstring")
+                if cstring is not None:
+                    mB.setObjectName(cstring.text)
             elif name == "geometry":
                 geo_ = x.find("rect")
-                x = int(geo_.find("x").text)
-                y = int(geo_.find("y").text)
-                w = int(geo_.find("width").text)
-                h = int(geo_.find("height").text)
-                mB.setGeometry(x, y, w, h)
+                if geo_:
+                    ex, ey, ew, eh = geo_.find("x"), geo_.find("y"), geo_.find("width"), geo_.find("height")
+                    if ex is None or ey is None or ew is None or eh is None:
+                        continue
+                    x = int(ex.text)
+                    y = int(ey.text)
+                    w = int(ew.text)
+                    h = int(eh.text)
+                    mB.setGeometry(x, y, w, h)
             elif name == "acceptDrops":
                 mB.setAcceptDrops(x.find("bool").text == "true")
             elif name == "frameShape":
@@ -248,21 +254,23 @@ def loadAction(action, widget):
     act_ = QtWidgets.QAction(widget)
     for p in action.findall("property"):
         name = p.get("name")
-        if name == "name":
-            act_.setObjectName(p.find("cstring").text)
-        elif name == "text":
-            act_.setText(p.find("string").text)
-        # elif name == "menuText":
-        #    act_.setMenuText(p.find("string").text)
-        elif name == "iconSet":
-            if p.find("iconset").text in ICONS.keys():
-                act_.setIcon(ICONS[p.find("iconset").text])
-        elif name == "toolTip":
-            act_.setToolTip(p.find("string").text)
-        elif name == "statusTip":
-            act_.setStatusTip(p.find("string").text)
-        elif name == "whatsThis":
-            act_.setWhatsThis(p.find("string").text)
+        cstring = p.find("cstring")
+        string = p.find("string")
+        iconset = p.find("iconset")
+
+        if name == "name" and cstring is not None:
+            act_.setObjectName(cstring.text)
+        elif name == "text" and string is not None:
+            act_.setText(string.text)
+        elif name == "iconSet" and iconset is not None:
+            if iconset.text in ICONS.keys():
+                act_.setIcon(ICONS[iconset.text])
+        elif name == "toolTip" and string is not None:
+            act_.setToolTip(string.text)
+        elif name == "statusTip" and string is not None:
+            act_.setStatusTip(string.text)
+        elif name == "whatsThis" and string is not None:
+            act_.setWhatsThis(string.text)
 
 
 def createWidget(classname, parent=None):
@@ -590,7 +598,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             new_widget.hide()
             new_widget._attrs = {}
             loadWidget(c, new_widget, parent, origWidget)
-            path = c.find("./property[@name='name']/cstring").text
+            prop_name = c.find("./property[@name='name']/cstring")
+            path = prop_name.text if prop_name is not None else ""
             if not project._DGI.localDesktop():
                 origWidget.ui_[path] = new_widget
             new_widget.setContentsMargins(0, 0, 0, 0)
@@ -623,7 +632,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         if c.tag == "action":
             acName = c.get("name")
             for xmlaction in root.findall("actions//action"):
-                if xmlaction.find("./property[@name='name']/cstring").text == acName:
+                prop_name = xmlaction.find("./property[@name='name']/cstring")
+                if prop_name is not None and prop_name.text == acName:
                     process_action(xmlaction, widget)
                     continue
 
@@ -669,6 +679,9 @@ def loadIcon(xml):
 
     name = xml.get("name")
     xmldata = xml.find("data")
+    if xmldata is None:
+        logger.warning("loadIcon: provided xml lacks <data>")
+        return
     img_format = xmldata.get("format")
     data = unhexlify(xmldata.text.strip())
     pixmap = QtGui.QPixmap()
@@ -688,6 +701,7 @@ def loadVariant(xml, widget=None):
 def loadProperty(xml):
     for variant in xml:
         return (xml.get("name"), _loadVariant(variant))
+    raise ValueError("No property in provided XML")
 
 
 def u(x):
@@ -789,7 +803,8 @@ def _loadVariant(variant, widget=None):
         libs = [QtCore.Qt]
 
         if text.find("WordBreak|") > -1:
-            widget.setWordWrap(True)
+            if widget is not None:
+                widget.setWordWrap(True)
             text = text.replace("WordBreak|", "")
 
         for lib in libs:

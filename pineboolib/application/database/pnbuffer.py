@@ -8,7 +8,7 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 
-class Struct(object):
+class FieldStruct(object):
     tablename: Any
     name: str
     query_table: Any
@@ -38,7 +38,7 @@ class PNBuffer(object):
         else:
             campos = tmd.fieldList()
         for campo in campos:
-            field = Struct()
+            field = FieldStruct()
             field.name = str(campo.name())
             field.value = None
             field.metadata = campo
@@ -401,13 +401,13 @@ class PNBuffer(object):
     def fieldsList(self):
         return self.fieldList_
 
-    def field(self, n) -> Optional[Struct]:
+    def field(self, n) -> Optional[FieldStruct]:
         try:
             return self._field(n)
         except KeyError:
             return None
 
-    def _field(self, n) -> Struct:
+    def _field(self, n) -> FieldStruct:
         if isinstance(n, str):
             for f in self.fieldsList():
                 if f.name.lower() == n.lower():

@@ -219,9 +219,9 @@ class FLSQLITE(object):
                 s = v
 
         else:
-            if type_ == "string":
+            if v and type_ == "string":
                 v = auto_qt_translate_text(v)
-            if upper and type_ == "string":
+            if upper and v and type_ == "string":
                 v = v.upper()
                 # v = v.encode("UTF-8")
             s = "'%s'" % v
@@ -443,7 +443,7 @@ class FLSQLITE(object):
 
         if unlocks > 1:
             self.logger.debug(u"FLManager : No se ha podido crear la tabla " + tmd.name())
-            self.loger.debug(u"FLManager : Hay mas de un campo tipo unlock. Solo puede haber uno.")
+            self.logger.debug(u"FLManager : Hay mas de un campo tipo unlock. Solo puede haber uno.")
             return None
 
         i = 1
@@ -590,7 +590,7 @@ class FLSQLITE(object):
 
     def recordInfo2(self, tablename):
         if not self.isOpen():
-            return None
+            raise Exception("recordInfo2: Cannot proceed: SQLLITE not open")
 
         sql = "PRAGMA table_info('%s')" % tablename
         conn = self.conn_

@@ -46,7 +46,6 @@ class dgi_aqnext(dgi_schema):
 
     def exec_(self):
         from pineboolib import pncontrolsfactory
-        from pineboolib.application import project
 
         qsa_sys = pncontrolsfactory.SysType()
         logger.warning("DGI_%s se ha inicializado correctamente" % self._alias)
@@ -208,7 +207,6 @@ class dgi_aqnext(dgi_schema):
 
     def load_meta_model(self, action_name, opt=None):
         import importlib
-        from pineboolib.application import project
 
         module_name = project.conn.managerModules().idModuleOfFile("%s.mtd" % action_name)
         module = None
@@ -367,7 +365,6 @@ class dgi_aqnext(dgi_schema):
 
     def getYBschema(self, cursor, template=None):
         """Permite obtener definicion de schema de uso interno de YEBOYEBO"""
-        import pineboolib
 
         mtd = cursor.metadata()
 

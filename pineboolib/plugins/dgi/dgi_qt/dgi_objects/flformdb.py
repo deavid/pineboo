@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
-from pineboolib import logging
+import traceback
 from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
 from PyQt5.Qt import QKeySequence  # type: ignore
 
+from pineboolib import logging
+from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
+from pineboolib.interfaces import IFormDB
 from pineboolib.application.utils.geometry import loadGeometryForm, saveGeometryForm
 from pineboolib.application.xmlaction import XMLAction
 from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib.core import decorators
-from pineboolib.interfaces import IFormDB
-import traceback
+from pineboolib.fllegacy.flapplication import aqApp
 
 
 """
@@ -161,9 +162,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         from pineboolib.application import project
 
         if not parent:
-            from pineboolib import pncontrolsfactory
-
-            parent = pncontrolsfactory.aqApp.mainWidget()
+            parent = aqApp.mainWidget()
 
         # if project._DGI.localDesktop():  # Si es local Inicializa
         #    super(QtWidgets.QWidget, self).__init__(parent)
@@ -252,11 +251,10 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
                     self.iface.init()
                 except Exception:
                     # script_name = self.iface.__module__
-                    from pineboolib import pncontrolsfactory
                     from pineboolib.error_manager import error_manager
                     from pineboolib.application import project
 
-                    pncontrolsfactory.aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
+                    aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
 
             return True
 
@@ -442,10 +440,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         if not path_file:
             from pineboolib import pncontrolsfactory
 
-            tmp_file = "%s/snap_shot_%s.png" % (
-                pncontrolsfactory.aqApp.tmp_dir(),
-                QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"),
-            )
+            tmp_file = "%s/snap_shot_%s.png" % (aqApp.tmp_dir(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
 
             ret = pncontrolsfactory.QFileDialog.getSaveFileName(None, "Pineboo", tmp_file, "PNG(*.png)")
             path_file = ret[0] if ret else None
@@ -602,7 +597,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         qsa_sys = pncontrolsfactory.SysType()
         if qsa_sys.isLoadedModule("fltesttest"):
 
-            pncontrolsfactory.aqApp.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)
+            aqApp.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)
         self.formReady.emit()
 
     # protected_:
@@ -912,8 +907,8 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         module_name = getattr(project.actions[self._action.name()].mod, "module_name", None)
         if module_name:
 
-            if module_name in pncontrolsfactory.aqApp.dict_main_widgets_.keys():
-                module_window = pncontrolsfactory.aqApp.dict_main_widgets_[module_name]
+            if module_name in aqApp.dict_main_widgets_.keys():
+                module_window = aqApp.dict_main_widgets_[module_name]
                 mdi_area = module_window.centralWidget()
 
                 if isinstance(mdi_area, pncontrolsfactory.QMdiArea) and type(self).__name__ == "FLFormDB":
@@ -934,7 +929,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         # settings = FLSettings()
 
         if self.parent().parent() is None:
-            from PyQt5.QtWidgets import QDesktopWidget  # Centrado
+            from PyQt5.QtWidgets import QDesktopWidget  # type: ignore # Centrado
 
             qt_rectangle = self.frameGeometry()
             center_point = QDesktopWidget().availableGeometry().center()
@@ -963,6 +958,6 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     def exportToXml(self, b):
         from pineboolib import pncontrolsfactory
 
-        xml = pncontrolsfactory.AQS.toXml(self, True, True)
+        xml = pncontrolsfactory.AQS().toXml(self, True, True)
         print(xml.toString(2))
         pass

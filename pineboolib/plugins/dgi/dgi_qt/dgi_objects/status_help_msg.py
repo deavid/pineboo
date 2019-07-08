@@ -1,5 +1,5 @@
 class StatusHelpMsg(object):
     def send(self, text_):
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flapplication import aqApp
 
-        pncontrolsfactory.aqApp.statusHelpMsg(text_)
+        aqApp.statusHelpMsg(text_)

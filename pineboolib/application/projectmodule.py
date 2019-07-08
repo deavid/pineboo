@@ -7,7 +7,8 @@ from optparse import Values
 from PyQt5 import QtCore  # type: ignore
 
 from pineboolib.core.utils.logging import logging
-from pineboolib.core.utils.utils_base import filedir, Struct
+from pineboolib.core.utils.utils_base import filedir
+from pineboolib.core.utils.struct import AreaStruct
 from pineboolib.core.exceptions import CodeDoesNotBelongHereException, NotConnectedError
 from pineboolib.core.settings import config, settings
 from pineboolib.interfaces.dgi_schema import dgi_schema
@@ -176,12 +177,12 @@ class Project(object):
             self.conn.manager().createSystemTable(table)
 
         cursor_ = self.conn.dbAux().cursor()
-        self.areas: Dict[str, Struct] = {}
+        self.areas: Dict[str, AreaStruct] = {}
         cursor_.execute(""" SELECT idarea, descripcion FROM flareas WHERE 1 = 1""")
         for idarea, descripcion in cursor_:
-            self.areas[idarea] = Struct(idarea=idarea, descripcion=descripcion)
+            self.areas[idarea] = AreaStruct(idarea=idarea, descripcion=descripcion)
 
-        self.areas["sys"] = Struct(idarea="sys", descripcion="Area de Sistema")
+        self.areas["sys"] = AreaStruct(idarea="sys", descripcion="Area de Sistema")
 
         # Obtener módulos activos
         cursor_.execute(
@@ -307,7 +308,7 @@ class Project(object):
         # FIXME: Can we call this outside of this class?
         # from pineboolib import pncontrolsfactory
         #
-        # pncontrolsfactory.aqApp.loadTranslations()
+        # aqApp.loadTranslations()
 
         # FIXME: ACLs needed at this level?
         # self.acl_ = FLAccessControlLists()

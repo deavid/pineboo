@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets  # type: ignore
 from pineboolib import logging
+from pineboolib.fllegacy.flapplication import aqApp
 
 
 class FLLineEdit(QtWidgets.QLineEdit):
@@ -40,8 +41,6 @@ class FLLineEdit(QtWidgets.QLineEdit):
                 self.setAlignment(QtCore.Qt.AlignRight)
 
     def setText(self, text_, check_focus=True):
-        from pineboolib import pncontrolsfactory
-
         text_ = str(text_)
         # if not project._DGI.localDesktop():
         #    project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text_)
@@ -60,30 +59,28 @@ class FLLineEdit(QtWidgets.QLineEdit):
             if s[0] == "-":
                 minus = True
                 s = s[1:]
-            if pncontrolsfactory.aqApp.commaSeparator() == ",":
+            if aqApp.commaSeparator() == ",":
                 s = s.replace(".", ",")
 
-            val, ok = pncontrolsfactory.aqApp.localeSystem().toDouble(s)
+            val, ok = aqApp.localeSystem().toDouble(s)
             if ok:
-                s = pncontrolsfactory.aqApp.localeSystem().toString(val, "f", self.partDecimal)
+                s = aqApp.localeSystem().toString(val, "f", self.partDecimal)
             if minus:
                 s = "-%s" % s
 
         elif self._tipo in ("int"):
-            val, ok = pncontrolsfactory.aqApp.localeSystem().toInt(s)
+            val, ok = aqApp.localeSystem().toInt(s)
             if ok:
-                s = pncontrolsfactory.aqApp.localeSystem().toString(val)
+                s = aqApp.localeSystem().toString(val)
 
         elif self._tipo in ("uint"):
-            val, ok = pncontrolsfactory.aqApp.localeSystem().toUInt(s)
+            val, ok = aqApp.localeSystem().toUInt(s)
             if ok:
-                s = pncontrolsfactory.aqApp.localeSystem().toString(val)
+                s = aqApp.localeSystem().toString(val)
 
         super().setText(s)
 
     def text(self):
-        from pineboolib import pncontrolsfactory
-
         text_ = super().text()
         if text_ == "":
             return text_
@@ -96,7 +93,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
                 minus = True
                 text_ = text_[1:]
 
-            val, ok = pncontrolsfactory.aqApp.localeSystem().toDouble(text_)
+            val, ok = aqApp.localeSystem().toDouble(text_)
             if ok:
                 text_ = str(val)
 
@@ -104,12 +101,12 @@ class FLLineEdit(QtWidgets.QLineEdit):
                 text_ = "-%s" % text_
 
         elif self._tipo == "uint":
-            val, ok = pncontrolsfactory.aqApp.localeSystem().toUInt(text_)
+            val, ok = aqApp.localeSystem().toUInt(text_)
             if ok:
                 text_ = str(val)
 
         elif self._tipo == "int":
-            val, ok = pncontrolsfactory.aqApp.localeSystem().toInt(text_)
+            val, ok = aqApp.localeSystem().toInt(text_)
 
             if ok:
                 text_ = str(val)
@@ -120,18 +117,15 @@ class FLLineEdit(QtWidgets.QLineEdit):
         self._maxValue = max_value
 
     def focusOutEvent(self, f):
-
-        from pineboolib import pncontrolsfactory
-
         if self._tipo in ("double", "int", "uint"):
             text_ = super(FLLineEdit, self).text()
 
             if self._tipo == "double":
 
-                val, ok = pncontrolsfactory.aqApp.localeSystem().toDouble(text_)
+                val, ok = aqApp.localeSystem().toDouble(text_)
 
                 if ok:
-                    text_ = pncontrolsfactory.aqApp.localeSystem().toString(val, "f", self.partDecimal)
+                    text_ = aqApp.localeSystem().toString(val, "f", self.partDecimal)
                 super().setText(text_)
             else:
 
@@ -142,15 +136,13 @@ class FLLineEdit(QtWidgets.QLineEdit):
         if self.isReadOnly():
             return
 
-        from pineboolib import pncontrolsfactory
-
         if self._tipo in ("double", "int", "uint"):
             self.blockSignals(True)
             s = self.text()
             if self._tipo == "double":
                 if s != "":
-                    s = pncontrolsfactory.aqApp.localeSystem().toString(float(s), "f", self.partDecimal)
-                if pncontrolsfactory.aqApp.commaSeparator() == ",":
+                    s = aqApp.localeSystem().toString(float(s), "f", self.partDecimal)
+                if aqApp.commaSeparator() == ",":
                     s = s.replace(".", "")
                 else:
                     s = s.replace(",", "")

@@ -163,12 +163,12 @@ class FLMYSQL_MYISAM(object):
 
         if len(v):
             if type_ == "bool":
-                from pineboolib import pncontrolsfactory
+                from pineboolib.fllegacy.flapplication import aqApp
 
                 s = str(v[0]).upper()
-                if s == pncontrolsfactory.aqApp.tr("Sí")[0].upper():
+                if s == aqApp.tr("Sí")[0].upper():
                     res = "=1"
-                elif pncontrolsfactory.aqApp.tr("No")[0].upper():
+                elif aqApp.tr("No")[0].upper():
                     res = "=0"
 
             elif type_ == "date":
@@ -1151,7 +1151,7 @@ class FLMYSQL_MYISAM(object):
 
     def recordInfo2(self, tablename):
         if not self.isOpen():
-            return False
+            raise Exception("Connection not open")
         info = []
         cursor = self.conn_.cursor()
 
@@ -1249,7 +1249,6 @@ class FLMYSQL_MYISAM(object):
                 return self.recordInfo2(tablename)
             fL = mtd.fieldList()
             if not fL:
-                del mtd
                 return self.recordInfo2(tablename)
 
             for f in mtd.fieldNames():
