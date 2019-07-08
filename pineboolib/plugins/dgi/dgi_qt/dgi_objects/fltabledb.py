@@ -2,18 +2,19 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
 from PyQt5.QtCore import Qt  # type: ignore
+from PyQt5.QtGui import QPixmap  # type: ignore
+
+from pineboolib import logging
 from pineboolib.core import decorators
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldatatable import FLDataTable
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformsearchdb import FLFormSearchDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformsearchdb import FLFormSearchDB
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.fllegacy.flapplication import aqApp
 
-
-from pineboolib import logging
-from PyQt5.QtGui import QPixmap  # type: ignore
 
 logger = logging.getLogger(__name__)
 DEBUG = False
@@ -2378,14 +2379,10 @@ class FLTableDB(QtWidgets.QWidget):
 
         util.setProgress(tdb_num_rows)
         pncontrolsfactory.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-        file_name = "%s/%s%s.ods" % (
-            pncontrolsfactory.aqApp.tmp_dir(),
-            mtd.name(),
-            QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"),
-        )
+        file_name = "%s/%s%s.ods" % (aqApp.tmp_dir(), mtd.name(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
         ods_gen.generateOds(file_name)
 
-        pncontrolsfactory.aqApp.call("sys.openUrl", [file_name], None)
+        aqApp.call("sys.openUrl", [file_name], None)
 
         pncontrolsfactory.QApplication.restoreOverrideCursor()
         util.destroyProgressDialog()

@@ -12,7 +12,7 @@ import pineboolib
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils.logging import logging
 from pineboolib.application.utils.date_conversion import date_amd_to_dma
-
+from pineboolib.fllegacy.flapplication import aqApp
 
 DEBUG = False
 
@@ -206,8 +206,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def data(self, index, role):
-        from pineboolib import pncontrolsfactory
-
         row = index.row()
         col = index.column()
         field = self.metadata().indexFieldObject(col)
@@ -314,10 +312,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             elif _type == "double":
                 if d is not None:
-                    d = pncontrolsfactory.aqApp.localeSystem().toString(float(d), "f", field.partDecimal())
+                    d = aqApp.localeSystem().toString(float(d), "f", field.partDecimal())
             elif _type in ("int", "uint"):
                 if d is not None:
-                    d = pncontrolsfactory.aqApp.localeSystem().toString(int(d))
+                    d = aqApp.localeSystem().toString(int(d))
 
             self.parent_view.resize_column(col, d)
 

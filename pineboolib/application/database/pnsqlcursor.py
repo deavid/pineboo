@@ -11,6 +11,7 @@ from pineboolib.application.utils.xpm import cacheXPM
 
 from pineboolib.core import decorators
 from pineboolib.core.utils.logging import logging
+from pineboolib.fllegacy.flapplication import aqApp
 
 from .pnbuffer import PNBuffer
 from .pncursortablemodel import PNCursorTableModel
@@ -760,7 +761,7 @@ class PNSqlCursor(QtCore.QObject):
             arglist = []
             arglist.append(fN)
             arglist.append(buffer.value(fN))
-            v = pncontrolsfactory.aqApp.call(functionName, arglist, self.context())
+            v = aqApp.call(functionName, arglist, self.context())
 
             q = PNSqlQuery(None, self.db().dbAux())
             ret = q.exec_(

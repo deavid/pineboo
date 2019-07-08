@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
+import traceback
+
 from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
 from PyQt5.Qt import QKeySequence  # type: ignore
 
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
+from pineboolib import logging
 from pineboolib.core import decorators
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.core.utils.utils_base import filedir
+from pineboolib.interfaces import IFormRecordDB
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib.interfaces import IFormRecordDB
+from pineboolib.fllegacy.flapplication import aqApp
 
-import traceback
-from pineboolib import logging
 
 DEBUG = False
 
@@ -103,12 +105,11 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
 
     def __init__(self, parent_or_cursor, action, load=False):
         self.logger.trace("__init__: parent_or_cursor=%s, action=%s, load=%s", parent_or_cursor, action, load)
-        from pineboolib import pncontrolsfactory
 
         if isinstance(action, str):
-            pncontrolsfactory.aqApp.db().manager().action(action)
+            aqApp.db().manager().action(action)
 
-        parent = pncontrolsfactory.aqApp.mainWidget() if isinstance(parent_or_cursor, FLSqlCursor) else parent_or_cursor
+        parent = aqApp.mainWidget() if isinstance(parent_or_cursor, FLSqlCursor) else parent_or_cursor
         cursor = parent_or_cursor if isinstance(parent_or_cursor, FLSqlCursor) else None
         # if not cursor:
         #    load = True
@@ -544,11 +545,10 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
                     ret_ = fun_()
                 except Exception:
                     # script_name = self.iface.__module__
-                    from pineboolib import pncontrolsfactory
                     from pineboolib.error_manager import error_manager
                     from pineboolib.application import project
 
-                    pncontrolsfactory.aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
+                    aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
 
             return ret_ if isinstance(ret_, bool) else False
         return True

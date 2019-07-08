@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-from pineboolib import pncontrolsfactory
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.fllegacy.flapplication import aqApp
 
 from PyQt5 import QtCore  # type: ignore
 
 
 class FLVar(object):
     def set(self, n, v):
-        id_sesion = pncontrolsfactory.aqApp.timeUser().toString(QtCore.Qt.ISODate)
+        id_sesion = aqApp.timeUser().toString(QtCore.Qt.ISODate)
         where = "idvar = '%s' AND idsesion ='%s'" % (n, id_sesion)
 
         q = FLSqlQuery()
@@ -27,16 +27,16 @@ class FLVar(object):
         FLUtil().sqlInsert("flvar", "idvar,idsesion,idvalor", values)
 
     def get(self, n):
-        id_sesion = pncontrolsfactory.aqApp.timeUser().toString(QtCore.Qt.ISODate)
+        id_sesion = aqApp.timeUser().toString(QtCore.Qt.ISODate)
         where = "idvar = '%s' AND idsesion ='%s'" % (n, id_sesion)
         return FLUtil().sqlSelect("flvar", "valor", where, "flvar")
 
     def del_(self, n):
-        id_sesion = pncontrolsfactory.aqApp.timeUser().toString(QtCore.Qt.ISODate)
+        id_sesion = aqApp.timeUser().toString(QtCore.Qt.ISODate)
         where = "idvar = '%s' AND idsesion ='%s'" % (n, id_sesion)
         return FLUtil().sqlDelete("flvar", where)
 
     def clean(self):
-        id_sesion = pncontrolsfactory.aqApp.timeUser().toString(QtCore.Qt.ISODate)
+        id_sesion = aqApp.timeUser().toString(QtCore.Qt.ISODate)
         where = "idsesion = '%s'" % id_sesion
         return FLUtil().sqlDelete("flvar", where)

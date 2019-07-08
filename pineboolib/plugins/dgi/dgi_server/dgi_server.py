@@ -1,6 +1,5 @@
 # # -*- coding: utf-8 -*-
 import traceback
-from pineboolib import logging
 import inspect
 import datetime
 
@@ -11,7 +10,9 @@ from werkzeug.serving import run_simple
 
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
+from pineboolib import logging
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
+from pineboolib.fllegacy.flapplication import aqApp
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +24,7 @@ class parser_options(object):
         return "Welcome to pineboo server"
 
     def db_name(self, *args):
-        from pineboolib import pncontrolsfactory
-
-        return pncontrolsfactory.aqApp.db().DBName()
+        return aqApp.db().DBName()
 
     def __getattr__(self, name):
         print("** parser_options no contiene", name)

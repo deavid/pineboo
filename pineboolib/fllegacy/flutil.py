@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-import platform
 import hashlib
 import datetime
 
 from PyQt5 import QtCore  # type: ignore
 
+from pineboolib.fllegacy.flapplication import aqApp
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.fllegacy.systype import SysType
 from pineboolib.core import decorators
 from pineboolib import logging
 
@@ -331,9 +332,8 @@ class FLUtil(QtCore.QObject):
         @param tabla. Nombre de la tabla
         @return Lista de campos
         """
-        from pineboolib import pncontrolsfactory
 
-        campos = pncontrolsfactory.aqApp.db().manager().metadata(tablename).fieldNames()
+        campos = aqApp.db().manager().metadata(tablename).fieldNames()
         return [len(campos)] + campos
 
     def calcularDC(self, n):
@@ -459,9 +459,7 @@ class FLUtil(QtCore.QObject):
         from pineboolib.fllegacy.fltranslations import FLTranslate
 
         if text_ == "MetaData":
-            a = group
-            group = text_
-            text_ = a
+            group, text_ = text_, group
 
         text_ = text_.replace(" % ", " %% ")
 
@@ -751,9 +749,8 @@ class FLUtil(QtCore.QObject):
 
         @return Número redondeado
         """
-        from pineboolib import pncontrolsfactory
 
-        tmd = pncontrolsfactory.aqApp.db().manager().metadata(table_name)
+        tmd = aqApp.db().manager().metadata(table_name)
         if tmd is None:
             return 0
         fmd = tmd.field(field_name)
@@ -934,19 +931,7 @@ class FLUtil(QtCore.QObject):
         return QtCore.QLocale().name()[:2]
 
     def getOS(self):
-        """
-        Devuelve el sistema operativo sobre el que se ejecuta el programa
-
-        @return Código del sistema operativo (WIN32, LINUX, MACX)
-        """
-        if platform.system() == "Windows":
-            return "WIN32"
-        elif platform.system() == "Linux" or platform.system() == "Linux2":
-            return "LINUX"
-        elif platform.system() == "Darwin":
-            return "MACX"
-        else:
-            return platform.system()
+        return SysType().osName()
 
     @decorators.NotImplementedWarn
     def serialLettertoNumber(self, letter):
@@ -1010,9 +995,8 @@ class FLUtil(QtCore.QObject):
         @param conn_name. Nombre de la conexión a usar
         @return id del tipo de campo
         """
-        from pineboolib import pncontrolsfactory
 
-        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
+        conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         return None if mtd is None else mtd.fieldType(fn)
@@ -1028,9 +1012,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return 0
 
-        from pineboolib import pncontrolsfactory
-
-        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
+        conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         return 0 if mtd is None else mtd.fieldLength(fn)
@@ -1046,9 +1028,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return fn
 
-        from pineboolib import pncontrolsfactory
-
-        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
+        conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         return fn if mtd is None else mtd.fieldNameToAlias(fn)
@@ -1064,9 +1044,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return None
 
-        from pineboolib import pncontrolsfactory
-
-        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
+        conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         return None if mtd is None else mtd.alias()
@@ -1084,9 +1062,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return an
 
-        from pineboolib import pncontrolsfactory
-
-        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
+        conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         return an if mtd is None else mtd.fieldAliasToName(an)
@@ -1103,9 +1079,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return False
 
-        from pineboolib import pncontrolsfactory
-
-        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
+        conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         return False if mtd is None else mtd.fieldAllowNull(fn)
@@ -1121,9 +1095,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return False
 
-        from pineboolib import pncontrolsfactory
-
-        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
+        conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         return False if mtd is None else mtd.fieldIsPrimaryKey(fn)
@@ -1139,9 +1111,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return False
 
-        from pineboolib import pncontrolsfactory
-
-        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
+        conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         if mtd is None:
@@ -1161,9 +1131,7 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return None  # return QVariant
 
-        from pineboolib import pncontrolsfactory
-
-        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
+        conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
         if mtd is None:
@@ -1184,32 +1152,25 @@ class FLUtil(QtCore.QObject):
         @return Valor formateado
         """
 
-        from pineboolib import pncontrolsfactory
-
-        conn = pncontrolsfactory.aqApp.db().useConn(conn_name)
+        conn = aqApp.db().useConn(conn_name)
         return conn.manager().formatValue(t, v, upper)
 
     def nameUser(self):
-        from pineboolib import pncontrolsfactory
 
-        return pncontrolsfactory.SysType().nameUser()
+        return SysType().nameUser()
 
     def userGroups(self):
-        from pineboolib import pncontrolsfactory
 
-        return pncontrolsfactory.SysType().userGroups()
+        return SysType().userGroups()
 
     def isInProd(self):
-        from pineboolib import pncontrolsfactory
 
-        return pncontrolsfactory.SysType().isInProd()
+        return SysType().isInProd()
 
     def request(self):
-        from pineboolib import pncontrolsfactory
 
-        return pncontrolsfactory.SysType().request()
+        return SysType().request()
 
     def nameBD(self):
-        from pineboolib import pncontrolsfactory
 
-        return pncontrolsfactory.SysType().nameBD()
+        return SysType().nameBD()

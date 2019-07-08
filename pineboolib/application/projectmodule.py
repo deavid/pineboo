@@ -308,7 +308,7 @@ class Project(object):
         # FIXME: Can we call this outside of this class?
         # from pineboolib import pncontrolsfactory
         #
-        # pncontrolsfactory.aqApp.loadTranslations()
+        # aqApp.loadTranslations()
 
         # FIXME: ACLs needed at this level?
         # self.acl_ = FLAccessControlLists()

@@ -1,11 +1,11 @@
 from typing import Callable
+import platform
 
 from PyQt5 import QtCore  # type: ignore
 
 from pineboolib.core.utils.singleton import Singleton
 from pineboolib.core.settings import config
 from pineboolib.core import decorators
-from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.application import project
 
 from pineboolib.core.utils.logging import logging
@@ -57,16 +57,32 @@ class SysType(object, metaclass=Singleton):
         return modulename in project.conn.managerModules().listAllIdModules()
 
     def translate(self, *args) -> str:
-        util = FLUtil()
+        from pineboolib.fllegacy.fltranslations import FLTranslate
 
         group = args[0] if len(args) == 2 else "scripts"
         text = args[1] if len(args) == 2 else args[0]
 
-        return util.translate(group, text)
+        if text == "MetaData":
+            group, text = text, group
+
+        text = text.replace(" % ", " %% ")
+
+        return str(FLTranslate(group, text))
 
     def osName(self) -> str:
-        util = FLUtil()
-        return util.getOS()
+        """
+        Devuelve el sistema operativo sobre el que se ejecuta el programa
+
+        @return Código del sistema operativo (WIN32, LINUX, MACX)
+        """
+        if platform.system() == "Windows":
+            return "WIN32"
+        elif platform.system() == "Linux" or platform.system() == "Linux2":
+            return "LINUX"
+        elif platform.system() == "Darwin":
+            return "MACX"
+        else:
+            return platform.system()
 
     def nameBD(self):
         return project.conn.DBName()

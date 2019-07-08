@@ -9,6 +9,7 @@ from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.core.utils.utils_base import filedir
+from pineboolib.fllegacy.flapplication import aqApp
 
 
 class FLFormSearchDB(FLFormDB):
@@ -55,10 +56,9 @@ class FLFormSearchDB(FLFormDB):
             self.logger.warning("Se ha llamado a FLFormSearchDB sin name_or_cursor")
             return
 
-        from pineboolib import pncontrolsfactory
         from pineboolib.application import project
 
-        parent = parent or pncontrolsfactory.aqApp.mainWidget()
+        parent = parent or aqApp.mainWidget()
         if isinstance(name_or_cursor, str):
             action = project.conn.manager().action(name_or_cursor)
             cursor = FLSqlCursor(action.table(), True, "default", None, None, self)

@@ -9,6 +9,7 @@ from pineboolib.core.utils.utils_base import text2bool
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
+from pineboolib.fllegacy.flapplication import aqApp
 
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.application import project
@@ -161,12 +162,11 @@ class FLMYSQL_MYISAM2(object):
 
         if len(v):
             if type_ == "bool":
-                from pineboolib import pncontrolsfactory
 
                 s = str(v[0]).upper()
-                if s == pncontrolsfactory.aqApp.tr("Sí")[0].upper():
+                if s == aqApp.tr("Sí")[0].upper():
                     res = "=1"
-                elif pncontrolsfactory.aqApp.tr("No")[0].upper():
+                elif aqApp.tr("No")[0].upper():
                     res = "=0"
 
             elif type_ == "date":
