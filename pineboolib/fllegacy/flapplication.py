@@ -1,21 +1,15 @@
 # -*- coding: utf-8 -*-
-from pineboolib import logging
 
 from PyQt5 import QtCore, QtWidgets  # type: ignore
+from PyQt5.QtCore import QTimer, QEvent, QRect, QObject  # type: ignore
+from PyQt5.QtGui import QCursor  # type: ignore
 
-from pineboolib.fllegacy.fltranslator import FLTranslator
-from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib import logging
 from pineboolib.core import decorators
 
-# import pineboolib
 from pineboolib.application import project
 from pineboolib.application.database import db_signals
 
-# from pineboolib import pncontrolsfactory  # FIXME: Circular dependency
-from pineboolib.application.proxy import DelayedObjectProxyLoader
-
-from PyQt5.QtCore import QTimer, QEvent, QRect, QObject  # type: ignore
-from PyQt5.QtGui import QCursor  # type: ignore
 
 logger = logging.getLogger("FLApplication")
 
@@ -475,6 +469,7 @@ class FLApplication(QtCore.QObject):
 
     def chooseFont(self):
         from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flsettings import FLSettings
 
         font_ = pncontrolsfactory.QFontDialog().getFont()
         if font_:
@@ -775,6 +770,8 @@ class FLApplication(QtCore.QObject):
             mw.setCentralWidget(view_back)
 
     def setStyle(self, style_):
+        from pineboolib.fllegacy.flsettings import FLSettings
+
         if style_:
             sett_ = FLSettings()
             sett_.writeEntry("application/style", style_)
@@ -1002,6 +999,9 @@ class FLApplication(QtCore.QObject):
         project.tables = {}
 
     def reinitP(self):
+        from pineboolib import qsa as qsa_dict_modules
+        from pineboolib.application.proxy import DelayedObjectProxyLoader
+
         self.db().managerModules().finish()
         self.db().manager().finish()
         self.setMainWidget(None)
@@ -1016,8 +1016,6 @@ class FLApplication(QtCore.QObject):
             self.main_widget_ = project.main_form.mainWindow
 
         project.main_window.initialized_mods_ = []
-
-        from pineboolib import qsa as qsa_dict_modules
 
         list_ = [attr for attr in dir(qsa_dict_modules) if not attr[0] == "_"]
         for name in list_:
@@ -1354,6 +1352,7 @@ class FLApplication(QtCore.QObject):
 
     def writeState(self):
         from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flsettings import FLSettings
 
         settings = FLSettings()
         settings.writeEntry("MultiLang/Enabled", self.multi_lang_enabled_)
@@ -1395,6 +1394,7 @@ class FLApplication(QtCore.QObject):
 
     def writeStateModule(self):
         from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flsettings import FLSettings
 
         settings = FLSettings()
         idm = self.db().managerModules().activeIdModule()
@@ -1420,6 +1420,8 @@ class FLApplication(QtCore.QObject):
         settings.writeEntry("%s/Height" % k, self.main_widget_.height())
 
     def readState(self):
+        from pineboolib.fllegacy.flsettings import FLSettings
+
         settings = FLSettings()
         self.initializing_ = False
         self.dict_main_widgets_ = {}
@@ -1493,7 +1495,7 @@ class FLApplication(QtCore.QObject):
             self.activateModule(active_id_module)
 
     def readStateModule(self):
-
+        from pineboolib.fllegacy.flsettings import FLSettings
         from pineboolib import pncontrolsfactory
 
         idm = self.db().managerModules().activeIdModule()
@@ -1663,6 +1665,8 @@ class FLApplication(QtCore.QObject):
     """
 
     def createModTranslator(self, idM, lang, loadDefault=False):
+        from pineboolib.fllegacy.fltranslator import FLTranslator
+
         fileTs = "%s.%s.ts" % (idM, lang)
         key = self.db().managerModules().shaOfFile(fileTs)
 

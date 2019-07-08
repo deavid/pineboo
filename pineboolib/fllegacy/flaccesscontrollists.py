@@ -1,7 +1,6 @@
 from PyQt5.QtXml import QDomDocument  # type: ignore
 from PyQt5 import QtCore  # type: ignore
 
-from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
 from pineboolib import logging
@@ -65,6 +64,7 @@ class FLAccessControlLists(object):
 
         @param  aclXml  Contenido XML con la definición de la lista de control de acceso.
         """
+        from pineboolib.fllegacy.flutil import FLUtil
 
         util = FLUtil()
         if aclXml is None:
@@ -136,9 +136,6 @@ class FLAccessControlLists(object):
 
         @param idacl Identificador del registro de la tabla "flacls" a utilizar para crear "acl.xml".
         """
-
-        util = FLUtil()
-
         doc = QDomDocument("ACL")
 
         root = doc.createElement("ACL")
@@ -159,14 +156,14 @@ class FLAccessControlLists(object):
         q.setForwardOnly(True)
 
         if q.exec_():
-            step = 0
-            progress = util.ProgressDialog(util.tr("Instalando control de acceso..."), None, q.size(), None, None, True)
-            progress.setCaption(util.tr("Instalando ACL"))
-            progress.setMinimumDuration(0)
-            progress.setProgress(++step)
+            # step = 0
+            # progress = util.ProgressDialog(util.tr("Instalando control de acceso..."), None, q.size(), None, None, True)
+            # progress.setCaption(util.tr("Instalando ACL"))
+            # progress.setMinimumDuration(0)
+            # progress.setProgress(++step)
             while q.next():
                 self.makeRule(q, doc)
-                progress.setProgress(++step)
+                # progress.setProgress(++step)
 
             from pineboolib.application import project
 

@@ -3,7 +3,7 @@
 from PyQt5 import Qt  # type: ignore
 from pineboolib.core import decorators
 from pineboolib import logging
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects import qlistview, fllistviewitem
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects import qlistview
 
 logger = logging.getLogger("FLListViewItem")
 
@@ -30,7 +30,7 @@ class FLListViewItem(Qt.QStandardItem):
                 # self._root = True
                 parent.model().setItem(0, 0, self)
             else:
-                if isinstance(parent, fllistviewitem.FLListViewItem):
+                if isinstance(parent, self):
                     # print("Añadiendo nueva linea a", parent.text(0))
                     parent.appendRow(self)
 

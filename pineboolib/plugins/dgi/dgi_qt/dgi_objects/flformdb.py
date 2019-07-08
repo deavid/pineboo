@@ -8,7 +8,7 @@ from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.interfaces import IFormDB
 from pineboolib.application.utils.geometry import loadGeometryForm, saveGeometryForm
-from pineboolib.application.xmlaction import XMLAction
+from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flapplication import aqApp
 
@@ -155,7 +155,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
     init_thread_script = None
 
-    def __init__(self, parent, action: XMLAction, load=False):
+    def __init__(self, parent, action: FLAction, load=False):
 
         self.logger = logging.getLogger("FLFormDB")
         # self.tiempo_ini = time.time()
@@ -956,8 +956,8 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
     @decorators.NotImplementedWarn
     def exportToXml(self, b):
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.aqsobjects.aqs import AQS
 
-        xml = pncontrolsfactory.AQS().toXml(self, True, True)
+        xml = AQS().toXml(self, True, True)
         print(xml.toString(2))
         pass

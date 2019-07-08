@@ -4,9 +4,6 @@ import datetime
 
 from PyQt5 import QtCore  # type: ignore
 
-from pineboolib.fllegacy.flapplication import aqApp
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.systype import SysType
 from pineboolib.core import decorators
 from pineboolib import logging
@@ -332,6 +329,8 @@ class FLUtil(QtCore.QObject):
         @param tabla. Nombre de la tabla
         @return Lista de campos
         """
+
+        from pineboolib.fllegacy.flapplication import aqApp
 
         campos = aqApp.db().manager().metadata(tablename).fieldNames()
         return [len(campos)] + campos
@@ -672,6 +671,8 @@ class FLUtil(QtCore.QObject):
 
         @return Valor del setting
         """
+        from pineboolib.fllegacy.flsettings import FLSettings
+
         return FLSettings().readEntry(key, def_)
 
     def writeSettingEntry(self, key, value):
@@ -683,6 +684,8 @@ class FLUtil(QtCore.QObject):
 
         @return Indicador de si la escritura del settings se realiza correctamente
         """
+        from pineboolib.fllegacy.flsettings import FLSettings
+
         FLSettings().writeEntry(key, value)
 
     def readDBSettingEntry(self, key):
@@ -693,6 +696,8 @@ class FLUtil(QtCore.QObject):
 
         @return Valor del setting
         """
+        from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+
         ret = None
         q = FLSqlQuery()
         q.setSelect("valor")
@@ -749,6 +754,8 @@ class FLUtil(QtCore.QObject):
 
         @return Número redondeado
         """
+
+        from pineboolib.fllegacy.flapplication import aqApp
 
         tmd = aqApp.db().manager().metadata(table_name)
         if tmd is None:
@@ -996,6 +1003,8 @@ class FLUtil(QtCore.QObject):
         @return id del tipo de campo
         """
 
+        from pineboolib.fllegacy.flapplication import aqApp
+
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
@@ -1011,6 +1020,8 @@ class FLUtil(QtCore.QObject):
         """
         if tn is None:
             return 0
+
+        from pineboolib.fllegacy.flapplication import aqApp
 
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
@@ -1028,6 +1039,8 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return fn
 
+        from pineboolib.fllegacy.flapplication import aqApp
+
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
@@ -1043,6 +1056,8 @@ class FLUtil(QtCore.QObject):
 
         if tn is None:
             return None
+
+        from pineboolib.fllegacy.flapplication import aqApp
 
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
@@ -1062,6 +1077,8 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return an
 
+        from pineboolib.fllegacy.flapplication import aqApp
+
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
@@ -1079,6 +1096,8 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return False
 
+        from pineboolib.fllegacy.flapplication import aqApp
+
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
@@ -1095,6 +1114,8 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return False
 
+        from pineboolib.fllegacy.flapplication import aqApp
+
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
@@ -1110,6 +1131,8 @@ class FLUtil(QtCore.QObject):
         """
         if tn is None:
             return False
+
+        from pineboolib.fllegacy.flapplication import aqApp
 
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
@@ -1131,6 +1154,8 @@ class FLUtil(QtCore.QObject):
         if tn is None:
             return None  # return QVariant
 
+        from pineboolib.fllegacy.flapplication import aqApp
+
         conn = aqApp.db().useConn(conn_name)
         mtd = conn.manager().metadata(tn)
 
@@ -1151,6 +1176,8 @@ class FLUtil(QtCore.QObject):
         @param conn_name. Nombre de la conexión a usar
         @return Valor formateado
         """
+
+        from pineboolib.fllegacy.flapplication import aqApp
 
         conn = aqApp.db().useConn(conn_name)
         return conn.manager().formatValue(t, v, upper)

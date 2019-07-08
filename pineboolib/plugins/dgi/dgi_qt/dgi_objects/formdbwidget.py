@@ -1,5 +1,6 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore  # type: ignore
+from typing import Set, Tuple
 from pineboolib import logging
 import weakref
 import sys
@@ -31,7 +32,7 @@ class FormDBWidget(QtWidgets.QWidget):
             if isinstance(self.parent(), pncontrolsfactory.FLFormDB):
                 self.form = self.parent()
 
-            self._formconnections = set([])
+            self._formconnections: Set[Tuple] = set([])
 
         self._class_init()
 
@@ -146,11 +147,11 @@ class FormDBWidget(QtWidgets.QWidget):
         return self.cursor_
 
     def __getattr__(self, name):
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flapplication import aqApp
 
         ret_ = (
             getattr(self.cursor_, name, None)
-            or getattr(pncontrolsfactory.aqApp, name, None)
+            or getattr(aqApp, name, None)
             or getattr(self.parent(), name, None)
             or getattr(self.parent().script, name, None)
         )

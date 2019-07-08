@@ -5,7 +5,7 @@ import re
 import os
 import traceback
 
-from typing import Any, List
+from typing import Any, List, Tuple, Optional
 
 from PyQt5 import QtCore  # type: ignore
 from pineboolib.core.utils.utils_base import create_dict
@@ -272,7 +272,7 @@ def slot_done(fn, signal, sender, caller):
     return new_fn
 
 
-def connect(sender, signal, receiver, slot, caller=None):
+def connect(sender, signal, receiver, slot, caller=None) -> Optional[Tuple[Any, Any]]:
     if caller is not None:
         logger.debug("* * * Connect:: %s %s %s %s %s", caller, sender, signal, receiver, slot)
     else:
@@ -280,7 +280,7 @@ def connect(sender, signal, receiver, slot, caller=None):
     signal_slot = solve_connection(sender, signal, receiver, slot)
 
     if not signal_slot:
-        return False
+        return None
     # http://pyqt.sourceforge.net/Docs/PyQt4/qt.html#ConnectionType-enum
     conntype = QtCore.Qt.QueuedConnection | QtCore.Qt.UniqueConnection
     new_signal, new_slot = signal_slot
@@ -296,17 +296,17 @@ def connect(sender, signal, receiver, slot, caller=None):
         # new_signal.connect(new_slot, type=conntype)
 
     except Exception:
-        # logger.exception("ERROR Connecting: %s %s %s %s", sender, signal, receiver, slot)
-        return False
+        logger.warning("ERROR Connecting: %s %s %s %s", sender, signal, receiver, slot)
+        return None
 
     signal_slot = new_signal, slot_done_fn
     return signal_slot
 
 
-def disconnect(sender, signal, receiver, slot, caller=None):
+def disconnect(sender, signal, receiver, slot, caller=None) -> Optional[Tuple[Any, Any]]:
     signal_slot = solve_connection(sender, signal, receiver, slot)
     if not signal_slot:
-        return False
+        return None
     signal, slot = signal_slot
     try:
         signal.disconnect(slot)
