@@ -510,6 +510,7 @@ from pineboolib.fllegacy.flsqlquery import FLSqlQuery  # noqa
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor  # noqa
 from pineboolib.fllegacy.flnetwork import FLNetwork  # noqa
 from pineboolib.fllegacy.flreportviewer import FLReportViewer  # noqa
+from pineboolib.fllegacy.flapplication import FLApplication  # noqa
 from pineboolib.fllegacy.flvar import FLVar  # noqa
 from pineboolib.core.utils.utils_base import ustr, ustr1, filedir  # noqa
 from .input import Input  # noqa
