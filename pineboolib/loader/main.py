@@ -10,6 +10,7 @@ from .dgi import load_dgi
 from PyQt5 import QtCore  # type: ignore
 
 from optparse import Values
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +97,7 @@ def setup_gui(app: QtCore.QCoreApplication, options: Values):
     app.setFont(font)
 
 
-def exec_main(options: Values) -> int:
+def exec_main(options: Values) -> Optional[int]:
     """Exec main program.
 
     Handles optionlist and help.
@@ -206,7 +207,7 @@ def exec_main(options: Values) -> int:
     project.no_python_cache = options.no_python_cache
 
     if options.test:
-        return project.test()
+        project.test()
 
     if _DGI.useDesktop():
         # FIXME: What is happening here? Why dynamic load?
@@ -217,8 +218,10 @@ def exec_main(options: Values) -> int:
             if _DGI.localDesktop()
             else _DGI.mainForm()
         )
-        project.main_window = project.main_form.mainWindow
-        project.main_form.MainForm.setDebugLevel(options.debug_level)
+        project.main_window = getattr(project.main_form, "mainWindow", None)
+        main_form_ = getattr(project.main_form, "MainForm", None)
+        if main_form_ is not None:
+            main_form_.setDebugLevel(options.debug_level)
 
     project.message_manager().send("splash", "show")
     # Cargando spashscreen
