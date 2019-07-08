@@ -9,6 +9,7 @@ from PyQt5 import QtCore  # type: ignore
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.application.utils import sql_tools
+from pineboolib.application import project
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,6 @@ class dgi_aqnext(dgi_schema):
 
     def exec_(self):
         from pineboolib import pncontrolsfactory
-        from pineboolib.application import project
 
         qsa_sys = pncontrolsfactory.SysType()
         logger.warning("DGI_%s se ha inicializado correctamente" % self._alias)
@@ -75,7 +75,6 @@ class dgi_aqnext(dgi_schema):
 
     def content_cached(self, tmp_folder, db_name, module_id, file_ext, file_name, sha_key):
         from pineboolib.core.utils.utils_base import filedir
-        from pineboolib.application import project
 
         data_ = None
         if module_id == "sys" and file_name in self.sys_mtds():
@@ -208,7 +207,6 @@ class dgi_aqnext(dgi_schema):
 
     def load_meta_model(self, action_name, opt=None):
         import importlib
-        from pineboolib.application import project
 
         module_name = project.conn.managerModules().idModuleOfFile("%s.mtd" % action_name)
         module = None
@@ -367,7 +365,6 @@ class dgi_aqnext(dgi_schema):
 
     def getYBschema(self, cursor, template=None):
         """Permite obtener definicion de schema de uso interno de YEBOYEBO"""
-        import pineboolib
 
         mtd = cursor.metadata()
 

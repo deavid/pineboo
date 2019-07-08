@@ -383,10 +383,10 @@ class json_mainWindow(object):
 
     def loadModule(self, module):
         if module.areaid not in self.areas_.keys():
-            self.loadArea(Struct(idarea=module.areaid,
+            self.loadArea(AreaStruct(idarea=module.areaid,
                                  descripcion=module.areaid))
 
-        module_ = Struct()
+        module_ = AreaStruct()
         module_.areaid = module.areaid
         module_.description = module.description
         module_.name = module.name

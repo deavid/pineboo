@@ -7,7 +7,7 @@ from .utils.path import _path
 # For types only:
 from .file import File
 from typing import Dict
-from pineboolib.core.utils.utils_base import Struct
+from pineboolib.core.utils.struct import TableStruct
 
 
 class Module(object):
@@ -29,7 +29,7 @@ class Module(object):
         self.description = description  # En python2 era .decode(UTF-8)
         self.icon = icon
         self.files: Dict[str, File] = {}
-        self.tables: Dict[str, Struct] = {}
+        self.tables: Dict[str, TableStruct] = {}
         self.loaded = False
 
     def add_project_file(self, fileobj: File) -> None:

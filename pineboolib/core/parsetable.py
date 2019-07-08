@@ -1,10 +1,11 @@
 from .utils import logging
-from .utils.utils_base import getTableObj, Struct
+from .utils.get_table_obj import getTableObj
+from .utils.struct import TableStruct
 
 logger = logging.getLogger("core.parsetable")
 
 
-def parseTable(nombre: str, contenido: str, encoding: str = "UTF-8", remove_blank_text: bool = True) -> Struct:
+def parseTable(nombre: str, contenido: str, encoding: str = "UTF-8", remove_blank_text: bool = True) -> TableStruct:
     # FIXME: parseTable is something too specific to be in utils.py
     from io import StringIO
     from xml import etree

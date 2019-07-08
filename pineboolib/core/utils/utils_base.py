@@ -8,8 +8,8 @@ from PyQt5.QtGui import QPixmap  # type: ignore
 from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir  # type: ignore
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest  # type: ignore
 
-from typing import Optional, Union, Any, List, Dict
-from xml.etree.ElementTree import Element, ElementTree
+from typing import Optional, Union, Any, List
+from xml.etree.ElementTree import ElementTree
 from . import logging
 
 logger = logging.getLogger(__name__)
@@ -34,70 +34,13 @@ def auto_qt_translate_text(text: Optional[str]) -> str:
 aqtt = auto_qt_translate_text
 
 
-def one(x, default=None):
+def one(x: List[Any], default=None):
     """ Se le pasa una lista de elementos (normalmente de un xml) y devuelve el primero o None;
     sirve para ahorrar try/excepts y limpiar código"""
     try:
         return x[0]
     except IndexError:
         return default
-
-
-class Struct(object):
-    """
-        Plantilla básica de objeto. Asigna sus propiedades en el __init__.
-        Especialmente útil para bocetar clases al vuelo.
-    """
-
-    xmltree: Any
-    xmlroot: Any
-    tablename: str
-    name: str
-    query_table: str
-    fields: List[str]
-    pk: List[str]
-    fields_idx: Dict[str, int]
-
-    def __init__(self, **kwargs) -> None:
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-
-class XMLStruct(Struct):
-    """
-        Plantilla de objeto que replica el contenido de un xml. Sirve para tener rápidamente un objeto
-        que sea idéntico al xml que se pueda acceder fácilmente por propiedades.
-    """
-
-    def __init__(self, xmlobj: Optional[Element] = None) -> None:
-        self._attrs: List[str] = []
-        if xmlobj is not None:
-            self.__name__ = xmlobj.tag
-            for child in xmlobj:
-                if child.tag == "property":
-                    # Se importa aquí para evitar error de importación cíclica.
-                    raise Exception("FIXME: No property support")
-                    # FIXME: Esto es del DGI QT:
-                    # from pineboolib.pnqt3ui import loadProperty
-                    # key, text = loadProperty(child)
-                else:
-                    text = aqtt(child.text)
-                    key = child.tag
-                if isinstance(text, str):
-                    text = text.strip()
-                try:
-                    setattr(self, key, text)
-                    self._attrs.append(key)
-                except Exception:
-                    print("utils.XMLStruct: Omitiendo", self.__name__, key, text)
-
-    def __str__(self):
-        attrs = ["%s=%s" % (k, repr(getattr(self, k))) for k in self._attrs]
-        txtattrs = " ".join(attrs)
-        return "<%s.%s %s>" % (self.__class__.__name__, self.__name__, txtattrs)
-
-    def _v(self, k: str, default: None = None) -> Optional[str]:
-        return getattr(self, k, default)
 
 
 class DefFun:
@@ -312,29 +255,6 @@ def text2bool(text: str) -> bool:
     if text.startswith("s"):
         return True
     raise ValueError("Valor booleano no comprendido '%s'" % text)
-
-
-def getTableObj(tree: ElementTree, root: Element) -> Struct:
-    table = Struct()
-    table.xmltree = tree
-    table.xmlroot = root
-    elem_query = table.xmlroot.find("query")
-    query_name = elem_query and one(elem_query.text, None)
-    elem_name = table.xmlroot.find("name")
-    if elem_name is None:
-        raise ValueError("XML Tag for <name> not found!")
-    name = elem_name.text
-    table.tablename = name
-    if query_name:
-        table.name = query_name
-        table.query_table = name
-    else:
-        table.name = name
-        table.query_table = None
-    table.fields = []
-    table.pk = []
-    table.fields_idx = {}
-    return table
 
 
 def ustr(*t1) -> str:

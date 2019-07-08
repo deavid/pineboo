@@ -415,7 +415,7 @@ class PNSqlCursor(QtCore.QObject):
         else:
             self.ext_cursor = None
 
-        from pineboolib.core.utils.utils_base import XMLStruct
+        from pineboolib.core.utils.struct import XMLStruct
 
         if isinstance(name, XMLStruct):
             logger.trace("FIXME::__init__ XMLSTRUCT %s", name.name, stack_info=True)
