@@ -8,9 +8,7 @@ from PyQt5.QtSvg import QSvgRenderer  # type: ignore
 from pineboolib import logging
 
 import barcode  # pip3 install python-barcode
-from typing import Dict, Any
-import protocols
-from typing import Mapping, Union
+from typing import Dict, Any, Mapping, Union
 
 logger = logging.getLogger(__name__)
 
@@ -42,15 +40,15 @@ class FLCodBar(object):
 
     def __init__(
         self,
-        value: Mapping[str, protocols.SupportsLower] = None,
+        value: Mapping[str, str] = None,
         type_=BARCODE_128,
         margin=10,
         scale=1.0,
         cut=1.0,
         rotation=0,
         text_flag=False,
-        fg: protocols.SupportsLower = QtCore.Qt.black,
-        bg: protocols.SupportsLower = QtCore.Qt.white,
+        fg: list = QtCore.Qt.black,
+        bg: list = QtCore.Qt.white,
         res=72,
     ) -> None:
         dict_ = {"barcode": "python-barcode"}
@@ -117,10 +115,10 @@ class FLCodBar(object):
     def rotation(self) -> Any:
         return self.barcode["rotation"]
 
-    def fg(self) -> Union[str, protocols.SupportsLower]:
+    def fg(self) -> Union[str, str]:
         return self.barcode["fg"]
 
-    def bg(self) -> Union[str, protocols.SupportsLower]:
+    def bg(self) -> Union[str, str]:
         return self.barcode["bg"]
 
     def setData(self, d: Mapping[str, Any]) -> None:
@@ -186,7 +184,7 @@ class FLCodBar(object):
         self.p.resize(0, 0)
         self.pError.resize(0, 0)
 
-    def nameToType(self, name: protocols.SupportsLower) -> int:
+    def nameToType(self, name: str) -> int:
         n = name.lower()
         if n == "any":
             return BARCODE_ANY

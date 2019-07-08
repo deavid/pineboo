@@ -14,11 +14,9 @@ from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flapplication import aqApp
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from typing import Any, Optional
-    import pineboolib
+
+from typing import Any, Optional
 
 
 logger = logging.getLogger(__name__)
@@ -965,7 +963,7 @@ class FLTableDB(QtWidgets.QWidget):
     Obtiene el componente tabla de registros
     """
 
-    def tableRecords(self) -> pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldatatable.FLDataTable:
+    def tableRecords(self) -> FLDataTable:
         if not self.tableRecords_:
             self.tableRecords_ = FLDataTable(self.tabData, "tableRecords")
             self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)

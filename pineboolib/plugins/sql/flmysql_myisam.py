@@ -1,5 +1,4 @@
 import traceback
-from typing import List, Dict
 
 from PyQt5.Qt import qWarning, QApplication, QRegExp  # type: ignore
 from PyQt5.QtCore import QTime, QDate, QDateTime, Qt  # type: ignore
@@ -17,13 +16,10 @@ from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.application import project
 from pineboolib import logging
 
-from typing import TYPE_CHECKING
+from typing import Any, Iterable, Mapping, Optional, Sized, TypeVar, Union, List, Dict
 
-if TYPE_CHECKING:
-    from typing import Any, Iterable, Mapping, Optional, Sized, TypeVar, Union
-
-    _T0 = TypeVar("_T0")
-    _T1 = TypeVar("_T1")
+_T0 = TypeVar("_T0")
+_T1 = TypeVar("_T1")
 
 logger = logging.getLogger(__name__)
 

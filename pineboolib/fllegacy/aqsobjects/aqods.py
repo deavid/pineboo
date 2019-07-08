@@ -1,15 +1,10 @@
 # -*- coding: utf-8 -*-
-from typing import Union, List, Any
+from typing import Union, List, Any, Tuple
 
 import odf
 from odf import table, style
 
 from pineboolib import logging
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Tuple
 
 
 logger = logging.getLogger("AQOds")

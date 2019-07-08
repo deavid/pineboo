@@ -1,11 +1,9 @@
 from .imanager import IManager
 from .iapicursor import IApiCursor
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from typing import Any, List, Dict, Optional
+from typing import Any, List, Dict, Optional
 
-    _TIConnection = "IConnection"
+_TIConnection = "IConnection"
 
 
 class IConnection:

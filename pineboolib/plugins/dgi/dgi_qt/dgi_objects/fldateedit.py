@@ -2,13 +2,9 @@
 
 from PyQt5 import QtCore  # type: ignore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qdateedit import QDateEdit
-from pineboolib.application.utils.date_conversion import convert_to_qdate
+from pineboolib.application.utils.date_conversion import convert_to_qdate, Date
 import datetime
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Union
-    import pineboolib
+from typing import Union
 
 
 class FLDateEdit(QDateEdit):
@@ -29,7 +25,7 @@ class FLDateEdit(QDateEdit):
     def getDate(self):
         return super(FLDateEdit, self).date
 
-    def setDate(self, d: Union[str, datetime.date, pineboolib.application.utils.date_conversion.Date] = None) -> None:
+    def setDate(self, d: Union[str, datetime.date, Date] = None) -> None:
         if d in (None, "NAN", ""):
             date = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
         else:

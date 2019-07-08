@@ -13,16 +13,13 @@ from pineboolib.application.utils.check_dependencies import check_dependencies
 
 from pineboolib import logging
 from pineboolib.core.utils.utils_base import create_dict
-from typing import TYPE_CHECKING
+from typing import Any, Callable, Dict, List, TypeVar, Union
 
-if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, List, TypeVar, Union
-
-    _T0 = TypeVar("_T0")
-    _T1 = TypeVar("_T1")
-    _T2 = TypeVar("_T2")
-    _T3 = TypeVar("_T3")
-    _Tcursor_class = "cursor_class"
+_T0 = TypeVar("_T0")
+_T1 = TypeVar("_T1")
+_T2 = TypeVar("_T2")
+_T3 = TypeVar("_T3")
+_Tcursor_class = "cursor_class"
 
 
 logger = logging.getLogger(__name__)

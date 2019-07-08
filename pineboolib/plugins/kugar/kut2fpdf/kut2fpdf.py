@@ -2,14 +2,16 @@
 import datetime
 import re
 import os
-from typing import List
 from xml.etree.ElementTree import Element
 
 from pineboolib import logging
 from pineboolib.core.utils.utils_base import filedir, load2xml
 from pineboolib.application.utils.check_dependencies import check_dependencies
-import protocols
-from typing import Any, Mapping, Optional, Sized, SupportsInt, SupportsRound, Union
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any, Mapping, Optional, Sized, SupportsInt, SupportsRound, Union, List
 
 """
 Conversor de kuts a pyFPDF
@@ -625,9 +627,7 @@ class kut2fpdf(object):
     @param txt. Texto calculado de la etiqueta a crear.
     """
 
-    def drawText(
-        self, x: Union[bytes, str, SupportsInt], y, W: Union[bytes, str, SupportsInt], H, xml, txt: protocols.SupportsReplace
-    ) -> None:
+    def drawText(self, x: Union[bytes, str, int], y, W: Union[bytes, str, int], H, xml, txt: str) -> None:
 
         if txt in ("None", None):
             # return

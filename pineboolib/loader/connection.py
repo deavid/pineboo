@@ -1,16 +1,13 @@
 from pineboolib.core.utils.utils_base import filedir
 from .projectconfig import ProjectConfig
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Optional
-    import pineboolib
+from typing import Optional
+from pineboolib.application.database.pnconnection import PNConnection
 
 DEFAULT_SQLITE_CONN = ProjectConfig(database="pineboo.sqlite3", type="SQLite3 (SQLITE3)")
 
 
-def config_dbconn(options) -> Optional[pineboolib.loader.projectconfig.ProjectConfig]:
+def config_dbconn(options) -> Optional[ProjectConfig]:
     if options.project:  # FIXME: --project debería ser capaz de sobreescribir algunas opciones
         if not options.project.endswith(".xml"):
             options.project += ".xml"
@@ -23,8 +20,7 @@ def config_dbconn(options) -> Optional[pineboolib.loader.projectconfig.ProjectCo
     return None
 
 
-def connect_to_db(config) -> pineboolib.application.database.pnconnection.PNConnection:
-    from pineboolib.application.database.pnconnection import PNConnection
+def connect_to_db(config) -> PNConnection:
 
     connection = PNConnection(config.database, config.host, config.port, config.username, config.password, config.type)
     return connection

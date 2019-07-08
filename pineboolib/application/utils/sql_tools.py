@@ -1,6 +1,5 @@
 from pineboolib.core.utils.logging import logging
 from typing import Any
-import protocols
 from typing import Dict, Iterable, Mapping, Sequence, Tuple, Union
 
 logger = logging.getLogger(__name__)
@@ -18,7 +17,7 @@ class sql_inspector(object):
     _sql = None
     _alias = None
 
-    def __init__(self, sql_text: protocols.SupportsReplace) -> None:
+    def __init__(self, sql_text: str) -> None:
 
         self._mtd_fields = {}
         self._posible_float = False
@@ -46,7 +45,7 @@ class sql_inspector(object):
             ret = list(self._field_names.keys())
         return ret
 
-    def fieldNameToPos(self, name: Union[protocols.SupportsFind, Mapping[slice, Any]]) -> Any:
+    def fieldNameToPos(self, name: Union[str, Mapping[slice, Any]]) -> Any:
 
         if name in self._field_names.keys():
             return self._field_names[name]
@@ -285,9 +284,7 @@ class sql_inspector(object):
                     # tables_list.remove(table_name)
 
 
-def resolve_query(
-    table_name, params: Union[Iterable, Mapping[object, Union[protocols.SupportsStartswith, Mapping, Sequence]]]
-) -> Tuple[str, str]:
+def resolve_query(table_name, params: Union[Iterable, Mapping[object, Union[str, Mapping, Sequence]]]) -> Tuple[str, str]:
     or_where = ""
     and_where = ""
     where = ""
@@ -322,7 +319,7 @@ def resolve_query(
     return where, order_by
 
 
-def resolve_order_params(key, valor: Union[protocols.SupportsStartswith, Mapping[slice, Any]]) -> Any:
+def resolve_order_params(key, valor: Union[str, Mapping[slice, Any]]) -> Any:
     if valor.startswith("-"):
         valor = valor[1:] + " DESC, "
     else:

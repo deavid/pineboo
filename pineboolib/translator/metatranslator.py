@@ -2,13 +2,9 @@
 
 from PyQt5 import QtXml, QtCore  # type: ignore
 from pineboolib import logging
+from typing import Any
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Any
-
-    _TMetaTranslatorMessage = "MetaTranslatorMessage"
+_TMetaTranslatorMessage = "MetaTranslatorMessage"
 
 
 class metaTranslator(object):

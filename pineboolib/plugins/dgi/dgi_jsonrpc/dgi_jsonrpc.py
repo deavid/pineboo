@@ -2,7 +2,6 @@
 import traceback
 import sys
 import re
-from typing import Any
 from json import dumps
 from xml import etree
 from xml.etree.ElementTree import fromstring
@@ -17,15 +16,11 @@ from jsonrpc import JSONRPCResponseManager, dispatcher
 from pineboolib import logging
 from pineboolib.core import decorators
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from typing import Dict, List, Mapping, Optional, Sized, TypeVar, Union
-    import xml
+from typing import Dict, List, Mapping, Optional, Sized, TypeVar, Union, Any
+import xml
 
-    _T0 = TypeVar("_T0")
-
-    _T0 = TypeVar("_T0")
+_T0 = TypeVar("_T0")
 
 
 logger = logging.getLogger(__name__)

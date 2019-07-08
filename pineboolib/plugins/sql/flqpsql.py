@@ -1,4 +1,3 @@
-from typing import List, Dict, Any
 from PyQt5.QtCore import QTime, QDate, QDateTime, Qt  # type: ignore
 from PyQt5.Qt import qWarning, QDomDocument, QRegExp  # type: ignore
 from PyQt5.QtWidgets import QMessageBox, QProgressDialog  # type: ignore
@@ -16,8 +15,9 @@ from sqlalchemy import create_engine
 import traceback
 from pineboolib.application import project
 from pineboolib import logging
-import protocols
-from typing import Iterable, Mapping, Optional, Sized, TypeVar, Union
+
+
+from typing import Iterable, Mapping, Optional, Sized, TypeVar, Union, List, Dict, Any
 
 _T0 = TypeVar("_T0")
 _T1 = TypeVar("_T1")
@@ -539,7 +539,7 @@ class FLQPSQL(object):
 
         return sql
 
-    def mismatchedTable(self, table1: protocols.SupportsLower, tmd_or_table2: str, db_=None) -> bool:
+    def mismatchedTable(self, table1: str, tmd_or_table2: str, db_=None) -> bool:
         if db_ is None:
             db_ = self.db_
 

@@ -12,16 +12,9 @@ from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader, AQStaticBdInfo
 
-from typing import TYPE_CHECKING
+from typing import Union, List, Any, Mapping, Optional, TypeVar
 
-if TYPE_CHECKING:
-    from typing import Union, List
-    from typing import Any, Mapping, Optional, TypeVar
-    import pineboolib
-
-    _T0 = TypeVar("_T0")
-
-    _T0 = TypeVar("_T0")
+_T0 = TypeVar("_T0")
 
 """
 Gestor de módulos.
@@ -375,7 +368,7 @@ class FLManagerModules(object):
     @param name. Nombre del formRecord
     """
 
-    def createFormRecord(self, a: pineboolib.application.xmlaction.XMLAction, connector=None, parent_or_cursor=None, name=None) -> Any:
+    def createFormRecord(self, a: XMLAction, connector=None, parent_or_cursor=None, name=None) -> Any:
         logger.trace("createFormRecord: init")
         from pineboolib import pncontrolsfactory
 

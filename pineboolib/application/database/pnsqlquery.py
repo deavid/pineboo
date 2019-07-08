@@ -3,10 +3,7 @@ from pineboolib.core import decorators
 from pineboolib.core.settings import config
 from pineboolib.application.utils import sql_tools
 from pineboolib.application import project
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Any, Iterable, Mapping, Sequence, Sized, Union, List
+from typing import Any, Iterable, Mapping, Sequence, Sized, Union, List
 
 logger = logging.getLogger(__name__)
 

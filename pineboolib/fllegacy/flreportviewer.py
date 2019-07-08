@@ -1,5 +1,3 @@
-from typing import Dict
-
 from PyQt5 import QtWidgets  # type: ignore
 from PyQt5 import QtCore  # type: ignore
 from PyQt5 import QtXml  # type: ignore
@@ -15,10 +13,8 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flstylepainter import FLStylePainter
 from pineboolib.fllegacy.flreportengine import FLReportEngine
 from pineboolib import logging
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from typing import Any, List, Mapping, Sized, Union
+from typing import Any, List, Mapping, Sized, Union, Dict
 
 
 AQ_USRHOME = "."  # FIXME

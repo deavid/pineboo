@@ -1,4 +1,3 @@
-from typing import Any, List
 from PyQt5.Qt import QDomDocument, QRegExp, QApplication  # type: ignore
 
 # from PyQt5.Qt import QDateTime, QProgressDialog, QDate
@@ -18,8 +17,8 @@ from sqlalchemy import create_engine
 import traceback
 import os
 from pineboolib import logging
-import protocols
-from typing import Iterable, Mapping, NoReturn, Optional, TypeVar, Union
+
+from typing import Iterable, Mapping, NoReturn, Optional, TypeVar, Union, Any, List
 
 _T0 = TypeVar("_T0")
 _T1 = TypeVar("_T1")
@@ -379,7 +378,7 @@ class FLSQLITE(object):
 
         return True
 
-    def setType(self, type_: protocols.SupportsUpper, leng=None) -> str:
+    def setType(self, type_: str, leng=None) -> str:
         return " %s(%s)" % (type_.upper(), leng) if leng else " %s" % type_.upper()
 
     def refreshQuery(self, curname, fields, table, where, cursor, conn) -> None:
@@ -394,7 +393,7 @@ class FLSQLITE(object):
         except Exception:
             self.logger.error("SQL3Driver:: refreshFetch")
 
-    def process_booleans(self, where: protocols.SupportsReplace) -> Any:
+    def process_booleans(self, where: str) -> Any:
         where = where.replace("'true'", str(1))
         return where.replace("'false'", str(0))
 
@@ -659,7 +658,7 @@ class FLSQLITE(object):
 
             return info
 
-    def decodeSqlType(self, type: protocols.SupportsFind) -> Optional[str]:
+    def decodeSqlType(self, type: str) -> Optional[str]:
         ret = None
         if type == "BOOLEAN":  # y unlock
             ret = "bool"

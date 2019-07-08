@@ -13,12 +13,13 @@ from jsonrpc import JSONRPCResponseManager, dispatcher
 from pineboolib import logging
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.fllegacy.flapplication import aqApp
-import protocols
-from typing import Any, TypeVar, Union
 
-_T0 = TypeVar("_T0")
+from typing import TYPE_CHECKING
 
-_T0 = TypeVar("_T0")
+if TYPE_CHECKING:
+    from typing import Any, TypeVar, Union
+
+    _T0 = TypeVar("_T0")
 
 logger = logging.getLogger(__name__)
 
@@ -249,5 +250,5 @@ class dgi_server(dgi_schema):
     def __getattr__(self, name) -> Any:
         return super().resolveObject(self._name, name)
 
-    def accept_file(self, name: protocols.SupportsEndswith) -> bool:
+    def accept_file(self, name: str) -> bool:
         return False if name.endswith((".ui")) else True

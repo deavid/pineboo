@@ -5,7 +5,7 @@ from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.application.utils.check_dependencies import check_dependencies
 
 from pineboolib.application import project
-import protocols
+
 from typing import Any, Mapping
 
 
@@ -36,7 +36,7 @@ class dgi_fcgi(dgi_schema):
         par_ = parser(main_, self._fcgiCall)
         WSGIServer(par_.call, bindAddress=self._fcgiSocket).run()
 
-    def setParameter(self, param: protocols.SupportsFind) -> None:
+    def setParameter(self, param: str) -> None:
         if param.find(":") > -1:
             p = param.split(":")
             self._fcgiCall = p[0]

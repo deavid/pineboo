@@ -7,13 +7,11 @@ from pineboolib import logging
 import zlib
 from PyQt5.QtCore import QObject  # type: ignore
 from pineboolib.core.utils.utils_base import load2xml
-from pineboolib import pncontrolsfactory
 from pineboolib.application import project
-import protocols
-from typing import Iterable, Optional, Tuple, TypeVar, Union
 
-_T0 = TypeVar("_T0")
-_T2 = TypeVar("_T2")
+from pineboolib import pncontrolsfactory
+
+from typing import Iterable, Optional, Tuple, TypeVar, Union
 
 _T0 = TypeVar("_T0")
 _T2 = TypeVar("_T2")
@@ -178,7 +176,7 @@ def loadUi(form_path: str, widget, parent: _T2 = None) -> Optional[_T2]:
         widget.show()
 
 
-def loadToolBar(xml: Union[protocols.SupportsFind, Iterable], widget) -> None:
+def loadToolBar(xml: Union[str, Iterable], widget) -> None:
     name_elem = xml.find("./property[@name='name']/cstring")
     label_elem = xml.find("./property[@name='label']/string")
     if name_elem is None or label_elem is None:
@@ -204,6 +202,7 @@ def loadToolBar(xml: Union[protocols.SupportsFind, Iterable], widget) -> None:
 
 
 def loadMenuBar(xml: Iterable, widget) -> None:
+
     if isinstance(widget, pncontrolsfactory.QMainWindow):
         mB = widget.menuBar()
     else:
@@ -298,7 +297,6 @@ def loadAction(action, widget) -> None:
 
 
 def createWidget(classname: str, parent=None) -> Any:
-    from pineboolib import pncontrolsfactory
 
     cls = getattr(pncontrolsfactory, classname, None) or getattr(QtWidgets, classname, None)
 
@@ -703,7 +701,7 @@ def loadWidget(xml: Iterable, widget=None, parent=None, origWidget=None) -> None
     #        origWidget.ui_[origWidget.objectName()] = nwidget
 
 
-def loadIcon(xml: protocols.SupportsFind) -> None:
+def loadIcon(xml: ET) -> None:
     global ICONS
 
     name = xml.get("name")
@@ -740,7 +738,7 @@ def u(x: _T0) -> Union[str, _T0]:
     return str(x)
 
 
-def b(x: protocols.SupportsLower) -> Optional[bool]:
+def b(x: str) -> Optional[bool]:
     x = x.lower()
     if x[0] == "t":
         return True

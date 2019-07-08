@@ -9,11 +9,10 @@ from pineboolib.core import decorators
 
 from pineboolib.application import project
 from pineboolib.application.database import db_signals
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from typing import Any, Optional, Union
-    import pineboolib
+from typing import Any, Optional, Union
+from pineboolib import pncontrolsfactory
+from pineboolib.fllegacy.fltranslator import FLTranslator
 
 logger = logging.getLogger("FLApplication")
 
@@ -241,7 +240,7 @@ class FLApplication(QtCore.QObject):
 
         return super().eventFilter(obj, ev)
 
-    def eventLoop(self) -> pineboolib.pncontrolsfactory.QEventLoop:
+    def eventLoop(self) -> pncontrolsfactory.QEventLoop:
         from pineboolib import pncontrolsfactory
 
         return pncontrolsfactory.QEventLoop()
@@ -1668,7 +1667,7 @@ class FLApplication(QtCore.QObject):
     @return objeto traducción
     """
 
-    def createModTranslator(self, idM, lang, loadDefault=False) -> Optional[pineboolib.fllegacy.fltranslator.FLTranslator]:
+    def createModTranslator(self, idM, lang, loadDefault=False) -> Optional[FLTranslator]:
         from pineboolib.fllegacy.fltranslator import FLTranslator
 
         fileTs = "%s.%s.ts" % (idM, lang)

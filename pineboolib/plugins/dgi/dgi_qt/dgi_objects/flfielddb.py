@@ -20,7 +20,7 @@ from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldoublevalidator import FLDouble
 from pineboolib import logging
 from pineboolib import pncontrolsfactory
 from pineboolib.application import project
-import protocols
+
 from typing import Any, Mapping, Optional, SupportsFloat, Union
 
 logger = logging.getLogger(__name__)
@@ -276,7 +276,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @param fT Nombre de la tabla
     """
 
-    def setTableName(self, fT: protocols.SupportsReplace) -> None:
+    def setTableName(self, fT: str) -> None:
 
         self.tableName_ = None
         if not fT == "":
@@ -654,7 +654,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @param v Valor a establecer
     """
 
-    def setValue(self, v: Union[bytes, str, protocols.SupportsFind, SupportsFloat, Mapping[slice, Any]]) -> None:
+    def setValue(self, v: Union[bytes, str, str, SupportsFloat, Mapping[slice, Any]]) -> None:
         if not self.cursor_:
             self.logger.error("FLFieldDB(%s):ERROR: El control no tiene cursor todavía. (%s)", self.fieldName_, self)
             return

@@ -12,7 +12,6 @@ from pineboolib.core.utils.utils_base import create_dict
 from pineboolib.core.utils.logging import logging
 from pineboolib.application import project
 from pineboolib.fllegacy.systype import SysType
-import protocols
 import types
 from typing import Callable, Container, Mapping, TypeVar, Union
 
@@ -325,7 +324,7 @@ def disconnect(sender, signal, receiver, slot, caller=None) -> Optional[Tuple[An
 
 
 def solve_connection(
-    sender, signal: Union[protocols.SupportsReplace, Container], receiver, slot: Union[str, protocols.SupportsEndswith, Mapping[slice, Any]]
+    sender, signal: Union[str, Container], receiver, slot: Union[str, str, Mapping[slice, Any]]
 ) -> Optional[Union[bool, Tuple[Any, Any]]]:
     if sender is None:
         logger.error("Connect Error:: %s %s %s %s", sender, signal, receiver, slot)

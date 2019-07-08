@@ -3,11 +3,8 @@ import os
 from pineboolib import logging
 
 from PyQt5 import QtCore, Qt  # type: ignore
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Any, Mapping, Union
-    from pineboolib.translator.metatranslator import metaTranslator
+from typing import Any, Mapping, Union
+from pineboolib.translator.metatranslator import metaTranslator
 
 
 """

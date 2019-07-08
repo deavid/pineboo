@@ -12,15 +12,12 @@ from typing import Optional, Union, Any, List
 from xml.etree.ElementTree import ElementTree
 from . import logging
 
-from typing import TYPE_CHECKING
+from typing import Callable, Dict, Iterable, Sized, TypeVar
 
-if TYPE_CHECKING:
-    from typing import Callable, Dict, Iterable, Sized, TypeVar
-
-    _T0 = TypeVar("_T0")
-    _T1 = TypeVar("_T1")
-    _T2 = TypeVar("_T2")
-    _T3 = TypeVar("_T3")
+_T0 = TypeVar("_T0")
+_T1 = TypeVar("_T1")
+_T2 = TypeVar("_T2")
+_T3 = TypeVar("_T3")
 
 logger = logging.getLogger(__name__)
 

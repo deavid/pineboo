@@ -11,12 +11,7 @@ from pineboolib.application.utils.geometry import loadGeometryForm, saveGeometry
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flapplication import aqApp
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Any
-    import pineboolib
-
+from typing import Any
 
 """
 Representa un formulario que enlaza con una tabla.
@@ -617,7 +612,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         if self.widget:
             self.widget.closed.emit()
 
-    def action(self) -> pineboolib.fllegacy.flaction.FLAction:
+    def action(self) -> FLAction:
         return self._action
 
     """
