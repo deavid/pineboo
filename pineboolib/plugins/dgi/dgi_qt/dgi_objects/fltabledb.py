@@ -1698,7 +1698,7 @@ class FLTableDB(QtWidgets.QWidget):
                 if fieldCheck is None:
                     self.fieldNameCheckColumn_ = "%s_check_column" % tMD.name()
 
-                    if self.fieldNameCheckColumn_ not in tMD.fieldsNames():
+                    if self.fieldNameCheckColumn_ not in tMD.fieldNames():
                         fieldCheck = FLFieldMetaData(
                             self.fieldNameCheckColumn_,
                             self.tr(self.aliasCheckColumn_),
