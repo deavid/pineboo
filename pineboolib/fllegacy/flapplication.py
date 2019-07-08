@@ -97,8 +97,8 @@ class FLApplication(QtCore.QObject):
         self.script_entry_function_ = None
         self.last_text_caption_ = None
 
-        # self.fl_factory_ = FLObjectFactory() #FIXME para un futuro
-        self.time_user_ = QtCore.QDateTime.currentDateTime()
+        # self.fl_factory_ = FLObjectFactory() # FIXME para un futuro
+        # self.time_user_ = QtCore.QDateTime.currentDateTime() # Moved to pncontrolsfacotry.SysType
         self.multi_lang_enabled_ = False
         self.multi_lang_id_ = QtCore.QLocale().name()[:2].upper()
 
@@ -1062,7 +1062,9 @@ class FLApplication(QtCore.QObject):
         pass
 
     def timeUser(self):
-        return self.time_user_
+        from pineboolib import pncontrolsfactory
+
+        return pncontrolsfactory.SysType().time_user_
 
     def call(self, function, argument_list=[], object_content=None, show_exceptions=True):
         return project.call(function, argument_list, object_content, show_exceptions)

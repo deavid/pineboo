@@ -64,7 +64,8 @@ def base_model(name: str) -> Any:
             try:
                 # FIXME: load_module is deprecated!
                 # https://docs.python.org/3/library/importlib.html#importlib.machinery.SourceFileLoader.load_module
-                return machinery.SourceFileLoader(name, path).load_module() if path else None
+                loader = machinery.SourceFileLoader(name, path)
+                return loader.load_module()  # type: ignore
             except Exception as exc:
                 logger.warning("Error recargando model base:\n%s\n%s", exc, traceback.format_exc())
                 pass
