@@ -158,7 +158,7 @@ class DlgConnect(QtWidgets.QWidget):
 
         for profile in root.findall("profile-data"):
             if getattr(profile.find("password"), "text", None):
-                psP = profile.find("password").text
+                psP = getattr(profile.find("password"), "text", "")
                 invalid_password = False
                 if version == 1.0:
                     psP = base64.b64decode(psP).decode()
@@ -178,18 +178,18 @@ class DlgConnect(QtWidgets.QWidget):
                     QMessageBox.information(self.ui, "Pineboo", "Contraseña Incorrecta")
                     return
 
-        self.database = root.find("database-name").text
+        self.database = getattr(root.find("database-name"), "text", None)
         for db in root.findall("database-server"):
-            self.hostname = db.find("host").text
-            self.portnumber = db.find("port").text
-            self.driveralias = db.find("type").text
+            self.hostname = getattr(db.find("host"), "text", None)
+            self.portnumber = getattr(db.find("port"), "text", None)
+            self.driveralias = getattr(db.find("type"), "text", None)
             if self.driveralias not in self.pNSqlDrivers.aliasList():
                 QMessageBox.information(self.ui, "Pineboo", "Esta versión de pineboo no soporta el driver '%s'" % self.driveralias)
                 self.database = None
                 return
         for credentials in root.findall("database-credentials"):
-            self.username = credentials.find("username").text
-            ps = credentials.find("password").text
+            self.username = getattr(credentials.find("username"), "text", None)
+            ps = getattr(credentials.find("password"), "text", None)
             if ps:
                 self.password = base64.b64decode(ps).decode()
             else:
@@ -318,7 +318,7 @@ class DlgConnect(QtWidgets.QWidget):
             self.ui.cbAutoLogin.setChecked(True)
             for profile in root.findall("profile-data"):
                 if getattr(profile.find("password"), "text", None):
-                    psP = profile.find("password").text
+                    psP = getattr(profile.find("password"), "text", None)
                     psP = base64.b64decode(psP).decode()
                     if psP is not None:
                         self.ui.leProfilePassword.setText(psP)
@@ -330,18 +330,21 @@ class DlgConnect(QtWidgets.QWidget):
             self.ui.cbAutoLogin.setChecked(False)
 
         self.ui.leDescription.setText(self.ui.cbProfiles.currentText())
-        self.ui.leDBName.setText(root.find("database-name").text)
-        root.find("database-name").text
+        self.ui.leDBName.setText(getattr(root.find("database-name"), "text", ""))
+
         for db in root.findall("database-server"):
-            self.ui.leURL.setText(db.find("host").text)
-            self.ui.lePort.setText(db.find("port").text)
-            self.ui.cbDBType.setCurrentText(db.find("type").text)
+            self.ui.leURL.setText(getattr(db.find("host"), "text", ""))
+            self.ui.lePort.setText(getattr(db.find("port"), "text", 0))
+            self.ui.cbDBType.setCurrentText(getattr(db.find("type"), "text", None))
         for credentials in root.findall("database-credentials"):
-            if credentials.find("username").text is not None:
-                self.ui.leDBUser.setText(credentials.find("username").text)
-            if credentials.find("password").text is not None and version == 1.0:
-                self.ui.leDBPassword.setText(base64.b64decode(credentials.find("password").text).decode())
-                self.ui.leDBPassword2.setText(base64.b64decode(credentials.find("password").text).decode())
+            user_name = getattr(credentials.find("username"), "text", None)
+            pass_text = getattr(credentials.find("password"), "text", None)
+            if user_name is not None:
+                self.ui.leDBUser.setText(user_name)
+
+            if pass_text is not None and version == 1.0:
+                self.ui.leDBPassword.setText(base64.b64decode(pass_text).decode())
+                self.ui.leDBPassword2.setText(base64.b64decode(pass_text).decode())
 
         self.edit_mode = True
 
