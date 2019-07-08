@@ -11,13 +11,16 @@ from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkReques
 from typing import Optional, Union, Any, List
 from xml.etree.ElementTree import ElementTree
 from . import logging
-import protocols
-from typing import Callable, Dict, Iterable, Sized, TypeVar
 
-_T0 = TypeVar("_T0")
-_T1 = TypeVar("_T1")
-_T2 = TypeVar("_T2")
-_T3 = TypeVar("_T3")
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Callable, Dict, Iterable, Sized, TypeVar
+
+    _T0 = TypeVar("_T0")
+    _T1 = TypeVar("_T1")
+    _T2 = TypeVar("_T2")
+    _T3 = TypeVar("_T3")
 
 logger = logging.getLogger(__name__)
 
@@ -358,7 +361,7 @@ def load2xml(form_path_or_str: str) -> ElementTree:
             raise
 
 
-def parse_for_duplicates(text: protocols.SupportsReplace) -> str:
+def parse_for_duplicates(text: str) -> str:
     ret_ = ""
     text = text.replace("+", "__PLUS__")
     text = text.replace("(", "__LPAREN__")
@@ -498,7 +501,7 @@ def format_int(value: _T0, part_intenger=None) -> Union[str, _T0]:
     return str_integer
 
 
-def unformat_number(new_str: Union[protocols.SupportsEndswith, protocols.SupportsReplace], old_str, type_) -> Any:
+def unformat_number(new_str: Union[str, str], old_str, type_) -> Any:
     ret_ = new_str
     if old_str is not None:
 

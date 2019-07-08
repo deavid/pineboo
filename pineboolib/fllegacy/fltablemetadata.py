@@ -5,7 +5,7 @@ from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
 from pineboolib import logging
 import copy
-import protocols
+
 from typing import Any, Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -179,7 +179,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo a eliminar
     """
 
-    def removeFieldMD(self, fN: protocols.SupportsLower) -> None:
+    def removeFieldMD(self, fN: str) -> None:
         if fN is None:
             return
 
@@ -219,7 +219,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldNameToAlias(self, fN: protocols.SupportsLower) -> Any:
+    def fieldNameToAlias(self, fN: str) -> Any:
 
         if not fN:
             return fN
@@ -236,7 +236,7 @@ class FLTableMetaData(object):
     @param aN Nombre del alias del campo
     """
 
-    def fieldAliasToName(self, aN: protocols.SupportsLower) -> Any:
+    def fieldAliasToName(self, aN: str) -> Any:
 
         if not aN:
             return aN
@@ -328,7 +328,7 @@ class FLTableMetaData(object):
     @author Andrés Otón Urbano (baxas@eresmas.com)
     """
 
-    def fieldIsCounter(self, fN: protocols.SupportsLower) -> Any:
+    def fieldIsCounter(self, fN: str) -> Any:
         if fN.isEmpty():
             return False
 
@@ -350,7 +350,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldAllowNull(self, fN: protocols.SupportsLower) -> Any:
+    def fieldAllowNull(self, fN: str) -> Any:
         if fN.isEmpty():
             return False
 
@@ -372,7 +372,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldIsUnique(self, fN: protocols.SupportsLower) -> Any:
+    def fieldIsUnique(self, fN: str) -> Any:
         if fN.isEmpty():
             return False
 
@@ -398,7 +398,7 @@ class FLTableMetaData(object):
       vacia sin el campo no está relacionado
     """
 
-    def fieldTableM1(self, fN: protocols.SupportsLower) -> Any:
+    def fieldTableM1(self, fN: str) -> Any:
         if not fN:
             return False
 
@@ -423,7 +423,7 @@ class FLTableMetaData(object):
     @return El nombre del campo foráneo relacionado con el indicado
     """
 
-    def fieldForeignFieldM1(self, fN: protocols.SupportsLower) -> Any:
+    def fieldForeignFieldM1(self, fN: str) -> Any:
         if not fN:
             return False
 
@@ -449,7 +449,7 @@ class FLTableMetaData(object):
       cuando esta exista. Si no existe devuelve False
     """
 
-    def relation(self, fN: protocols.SupportsLower, fFN, fTN) -> Any:
+    def relation(self, fN: str, fFN, fTN) -> Any:
         if not fN:
             return False
 
@@ -483,7 +483,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldLength(self, fN: protocols.SupportsLower) -> Any:
+    def fieldLength(self, fN: str) -> Any:
         if not fN:
             return
 
@@ -499,7 +499,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldPartInteger(self, fN: protocols.SupportsLower) -> Any:
+    def fieldPartInteger(self, fN: str) -> Any:
         if not fN:
             return
 
@@ -515,7 +515,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldPartDecimal(self, fN: protocols.SupportsLower) -> Any:
+    def fieldPartDecimal(self, fN: str) -> Any:
         if not fN:
             return
 
@@ -531,7 +531,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldCalculated(self, fN: protocols.SupportsLower) -> Any:
+    def fieldCalculated(self, fN: str) -> Any:
         if not fN:
             return
 
@@ -547,7 +547,7 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldVisible(self, fN: protocols.SupportsLower) -> None:
+    def fieldVisible(self, fN: str) -> None:
 
         if not fN:
             return
@@ -564,7 +564,7 @@ class FLTableMetaData(object):
     @return Un objeto FLFieldMetaData con lainformación o metadatos de un campo dado
     """
 
-    def field(self, fN: protocols.SupportsLower) -> Any:
+    def field(self, fN: str) -> Any:
         if not fN:
             return
 
@@ -795,7 +795,7 @@ class FLTableMetaDataPrivate:
 
     count_ = 0
 
-    def __init__(self, n: protocols.SupportsLower = None, a=None, q=None) -> None:
+    def __init__(self, n: str = None, a=None, q=None) -> None:
         self.fieldList_ = []
         self.fieldNamesUnlock_ = []
         self.aliasFieldMap_ = {}
@@ -813,7 +813,7 @@ class FLTableMetaDataPrivate:
         self.compoundKey_ = None
         self.inCache = False
 
-    def inicializeNewFLTableMetaDataPrivate(self, n: protocols.SupportsLower, a, q=None) -> None:
+    def inicializeNewFLTableMetaDataPrivate(self, n: str, a, q=None) -> None:
         self.name_ = n.lower()
         self.alias_ = a
         self.compoundKey_ = 0
@@ -832,7 +832,7 @@ class FLTableMetaDataPrivate:
     @param n Nombre del campo
     """
 
-    def addFieldName(self, n: protocols.SupportsLower) -> None:
+    def addFieldName(self, n: str) -> None:
         self.fieldNames_.append(n.lower())
 
     """
@@ -841,7 +841,7 @@ class FLTableMetaDataPrivate:
     @param n Nombre del campo
     """
 
-    def removeFieldName(self, n) -> None:
+    def removeFieldName(self, n: str) -> None:
 
         if self.fieldNames_:
             oldFN = self.fieldNames_

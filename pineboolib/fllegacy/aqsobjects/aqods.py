@@ -5,8 +5,11 @@ import odf
 from odf import table, style
 
 from pineboolib import logging
-import protocols
-from typing import Tuple
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Tuple
 
 
 logger = logging.getLogger("AQOds")
@@ -33,7 +36,7 @@ class AQOdsGenerator_class(object):
     @param file_name. Nombre del fichero a generar
     """
 
-    def generateOds(self, file_name: protocols.SupportsReplace) -> None:
+    def generateOds(self, file_name: str) -> None:
         file_name = file_name.replace(".ods", "")
         self.doc_.save(file_name, True)
 
