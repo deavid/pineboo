@@ -481,7 +481,7 @@ class Project(object):
 
         self.logger.warning("%s/%s", resultValue, maxValue)
 
-        return value
+        return True
 
     def get_temp_dir(self) -> str:
         """
