@@ -1,21 +1,22 @@
 # # -*- coding: utf-8 -*-
 import traceback
-from pineboolib import logging
 import sys
 import re
-
-from xmljson import yahoo as xml2json
-from xml.etree.ElementTree import fromstring
+from typing import Any
 from json import dumps
 from xml import etree
+from xml.etree.ElementTree import fromstring
+
+from xmljson import yahoo as xml2json
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
-from pineboolib.plugins.dgi.dgi_schema import dgi_schema
+from pineboolib import logging
 from pineboolib.core import decorators
+from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ class parser(object):
         try:
             response = JSONRPCResponseManager.handle(request.data, dispatcher)
         except Exception:
-            response = "Not Found"
+            return Response("not found", mimetype="application/json")
 
         return Response(response.json, mimetype="application/json")
 
@@ -84,7 +85,7 @@ class parser(object):
         if len(args) > 1:
             param_ = ",".join(args[1:])
         else:
-            param_ = [args[0]]
+            param_ = args[0]
 
         try:
             project.call(fun_, param_)
@@ -99,6 +100,7 @@ class parser(object):
     def queqe(*args):
         from pineboolib.application import project
 
+        ret: Any
         if len(args) == 1:
             if args[0] == "clean":
                 project._DGI._par._queqe = {}

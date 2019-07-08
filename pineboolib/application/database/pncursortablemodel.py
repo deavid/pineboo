@@ -8,7 +8,7 @@ from datetime import date
 
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt  # type: ignore
 
-import pineboolib
+import pineboolib.qsa
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils.logging import logging
 from pineboolib.application.utils.date_conversion import date_amd_to_dma

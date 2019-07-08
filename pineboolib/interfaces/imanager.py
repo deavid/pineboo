@@ -1,7 +1,7 @@
 from typing import Any, Callable, Dict, Mapping, Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import pineboolib.pnconnection
+    import pineboolib.application.database.pnconnection
     import pineboolib.fllegacy.flaction
     import pineboolib.fllegacy.fltablemetadata
     import pineboolib.fllegacy.flfieldmetadata
@@ -15,7 +15,7 @@ class IManager(object):
     cacheAction_: Optional[Dict[str, "pineboolib.fllegacy.flaction.FLAction"]]
     cacheMetaDataSys_: Optional[dict]
     cacheMetaData_: Optional[dict]
-    db_: Optional["pineboolib.pnconnection.PNConnection"]
+    db_: Optional["pineboolib.application.database.pnconnection.PNConnection"]
     dictKeyMetaData_: Optional[Dict[str, Any]]
     initCount_: int
     listTables_: Any

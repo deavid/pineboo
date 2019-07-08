@@ -1,5 +1,6 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtCore  # type: ignore
+from typing import Set, Tuple
 import sys
 import weakref
 
@@ -17,27 +18,26 @@ class FormDBWidget(QtCore.QObject):
     _cursors = {}
 
     def __init__(self, action=None, project=None, parent=None):
-        if project is not None:
-
+        if project is None:
             parent = QtCore.QObject()
 
-            super().__init__(parent)
+        super().__init__(parent)
 
-            self._module = sys.modules[self.__module__]
-            self._module.connect = self._connect
-            self._module.disconnect = self._disconnect
-            self._action = action
-            self.cursor_ = None
-            self._loaded = None
+        self._module = sys.modules[self.__module__]
+        self._module.connect = self._connect
+        self._module.disconnect = self._disconnect
+        self._action = action
+        self.cursor_ = None
+        self._loaded = None
 
-            self.parent_ = parent
-            self._cursors = {}
+        self.parent_ = parent
+        self._cursors = {}
 
-            # import pineboolib
-            # if isinstance(self.parent(), pineboolib.pncontrolsfactory.FLFormDB):
-            #    self.form = self.parent()
+        # import pineboolib
+        # if isinstance(self.parent(), pineboolib.pncontrolsfactory.FLFormDB):
+        #    self.form = self.parent()
 
-            self._formconnections = set([])
+        self._formconnections: Set[Tuple] = set([])
         self._class_init()
 
     def _connect(self, sender, signal, receiver, slot):
@@ -158,9 +158,9 @@ class FormDBWidget(QtCore.QObject):
             self.cursor_ = cursor
         else:
             if not self.cursor_:
-                from pineboolib import pncontrolsfactory
+                from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
-                self.cursor_ = pncontrolsfactory.FLSqlCursor(self._action)
+                self.cursor_ = FLSqlCursor(self._action)
 
         return self.cursor_
 
@@ -168,11 +168,11 @@ class FormDBWidget(QtCore.QObject):
         return self.parent_
 
     def __getattr__(self, name):
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flapplication import aqApp
 
         ret_ = (
             getattr(self.cursor_, name, None)
-            or getattr(pncontrolsfactory.aqApp, name, None)
+            or getattr(aqApp, name, None)
             or getattr(self.parent(), name, None)
             or getattr(self._action.script, name, None)
         )

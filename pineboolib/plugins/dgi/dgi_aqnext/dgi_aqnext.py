@@ -143,7 +143,8 @@ class dgi_aqnext(dgi_schema):
             raise ImportError
 
         from pineboolib import qsa as qsa_dict_modules
-        from pineboolib.pnapplication import DelayedObjectProxyLoader, XMLAction
+        from pineboolib.pnapplication.xmlaction import XMLAction
+        from pineboolib.pnapplication.proxy import DelayedObjectProxyLoader
 
         action = XMLAction()
         action.name = module_name
