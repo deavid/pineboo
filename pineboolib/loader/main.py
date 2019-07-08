@@ -97,7 +97,7 @@ def setup_gui(app: QtCore.QCoreApplication, options: Values):
     app.setFont(font)
 
 
-def exec_main(options: Values) -> Optional[int]:
+def exec_main(options: Values) -> int:
     """Exec main program.
 
     Handles optionlist and help.
@@ -207,7 +207,7 @@ def exec_main(options: Values) -> Optional[int]:
     project.no_python_cache = options.no_python_cache
 
     if options.test:
-        project.test()
+        return 0 if project.test() else 1
 
     if _DGI.useDesktop():
         # FIXME: What is happening here? Why dynamic load?
