@@ -8,7 +8,6 @@ from datetime import date
 
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt  # type: ignore
 
-import pineboolib.qsa
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils.logging import logging
 from pineboolib.application.utils.date_conversion import date_amd_to_dma
@@ -226,7 +225,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             fun_get_color = self.parent_view.functionGetColor()
             if fun_get_color is not None:
                 list_ = fun_get_color.split(".")
-                context_ = getattr(pineboolib.qsa, list_[0], None).iface
+                import pineboolib.qsa as qsa_tree
+
+                context_ = getattr(qsa_tree, list_[0], None).iface
                 function_color = getattr(context_, "%s" % (list_[1]))
                 if function_color is not None:
                     field_name = field.name()
