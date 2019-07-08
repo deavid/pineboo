@@ -345,7 +345,7 @@ class PNSqlQuery(object):
                     dialog = project._DGI.QInputDialog
 
                     if dialog is not None:
-                        v = QInputDialog.getText(project._DGI.QApplication, "Entrada de parámetros de la consulta", pD, None, None)
+                        v = dialog.getText(project._DGI.QApplication, "Entrada de parámetros de la consulta", pD, None, None)
 
                 res = res.replace("[%s]" % pD, "'%s'" % v)
 

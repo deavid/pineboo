@@ -1186,10 +1186,10 @@ class FLApplication(QtCore.QObject):
         db_signals.emitTransactionBegin(o)
 
     def emitTransactionEnd(self, o):
-        db_signals.transactionEnd.emit()
+        db_signals.emitTransactionEnd(o)
 
     def emitTransactionRollback(self, o):
-        db_signals.transsactionRollBack.emit()
+        db_signals.emitTransactionRollBack(o)
 
     @decorators.NotImplementedWarn
     def gsExecutable(self):

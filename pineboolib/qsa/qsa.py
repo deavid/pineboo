@@ -15,7 +15,8 @@ from pineboolib.application import types
 
 
 # from pineboolib.pnobjectsfactory import load_model, Calculated
-from pineboolib.pncontrolsfactory import FLUtil, qsa_sys
+from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.pncontrolsfactory import qsa_sys
 
 Boolean = types.Boolean
 QString = types.QString
@@ -193,18 +194,23 @@ class qsaRegExp(object):
 
 
 class Math(object):
+    @staticmethod
     def abs(x):
         return math.fabs(x)
 
+    @staticmethod
     def ceil(x):
         return math.ceil(x)
 
+    @staticmethod
     def floor(x):
         return math.floor(x)
 
+    @staticmethod
     def pow(x, y):
         return math.pow(x, y)
 
+    @staticmethod
     def round(x):
         return round(float(x), 2)
 
