@@ -1,4 +1,4 @@
-from pineboolib import logging
+from pineboolib.core.utils.logging import logging
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -239,6 +239,8 @@ class sql_inspector(object):
             ret_ = str(ret_)[:8]
         elif type_ in ("unlock", "bool"):
             pass
+        elif type_ == "bytearray":
+            ret_ = bytearray(ret_)
         else:
             ret_ = float(ret_)
             print("TIPO DESCONOCIDO", type_, ret_)

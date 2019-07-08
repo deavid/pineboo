@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from pineboolib import logging
+from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils.singleton import Singleton
+
 import importlib
 import sys
-
-from pineboolib.core.utils.singleton import Singleton
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,6 @@ class PNSqlDrivers(object, metaclass=Singleton):
         """
         from pineboolib.core.utils.utils_base import filedir
         import os
-        import sys
 
         self.only_pure_python_ = getattr(sys, "frozen", False)
 

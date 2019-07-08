@@ -1,5 +1,6 @@
-from pineboolib import logging
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery  # FIXME: Remove dependency
+from pineboolib.core.utils.logging import logging
+from .pnsqlquery import PNSqlQuery
+
 
 logger = logging.getLogger("database.utils")
 
@@ -67,7 +68,7 @@ def nextCounter(*args):
         _len = int(field.length())
         cadena = None
 
-        q = FLSqlQuery(None, cursor_.db().connectionName())
+        q = PNSqlQuery(None, cursor_.db().connectionName())
         q.setForwardOnly(True)
         q.setTablesList(tMD.name())
         q.setSelect(name)
@@ -132,7 +133,7 @@ def nextCounter(*args):
 
         where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (name, field.length(), name, len(serie), serie)
         select = "substring(%s FROM %d) as %s" % (name, len(serie) + 1, name)
-        q = FLSqlQuery(None, cursor_.db().connectionName())
+        q = PNSqlQuery(None, cursor_.db().connectionName())
         q.setForwardOnly(True)
         q.setTablesList(tMD.name())
         q.setSelect(select)
@@ -181,7 +182,7 @@ def sqlSelect(f, s, w, tL=None, size=0, connName="default"):
     if w is None or w == "":
         return False
 
-    q = FLSqlQuery(None, connName)
+    q = PNSqlQuery(None, connName)
     if tL:
         q.setTablesList(tL)
     else:
@@ -213,7 +214,7 @@ def quickSqlSelect(f, s, w, connName="default"):
     else:
         sql = "select " + s + " from " + f + " where " + w
 
-    q = FLSqlQuery(None, connName)
+    q = PNSqlQuery(None, connName)
     if not q.exec_(sql):
         return False
 
@@ -230,7 +231,6 @@ def sqlInsert(t, fL, vL, connName="default"):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
-    from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
     fL = fL.split(",") if isinstance(fL, str) else fL
     vL = vL.split(",") if isinstance(vL, str) else vL
@@ -238,8 +238,10 @@ def sqlInsert(t, fL, vL, connName="default"):
     if not len(fL) == len(vL):
         return False
 
-    c = FLSqlCursor(t, True, connName)
-    c.setModeAccess(FLSqlCursor.Insert)
+    from .pnsqlcursor import PNSqlCursor
+
+    c = PNSqlCursor(t, True, connName)
+    c.setModeAccess(PNSqlCursor.Insert)
     c.refreshBuffer()
 
     i = 0
@@ -265,14 +267,14 @@ def sqlUpdate(t, fL, vL, w, connName="default"):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
-    from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+    from .pnsqlcursor import PNSqlCursor
 
-    c = FLSqlCursor(t, True, connName)
+    c = PNSqlCursor(t, True, connName)
     c.select(w)
     c.setForwardOnly(True)
     while c.next():
 
-        c.setModeAccess(FLSqlCursor.Edit)
+        c.setModeAccess(PNSqlCursor.Edit)
         c.refreshBuffer()
 
         if isinstance(fL, list):
@@ -298,9 +300,9 @@ def sqlDelete(t, w, connName="default"):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
-    from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+    from .pnsqlcursor import PNSqlCursor
 
-    c = FLSqlCursor(t, True, connName)
+    c = PNSqlCursor(t, True, connName)
 
     # if not c.select(w):
     #     return False
@@ -308,7 +310,7 @@ def sqlDelete(t, w, connName="default"):
     c.setForwardOnly(True)
 
     while c.next():
-        c.setModeAccess(FLSqlCursor.Del)
+        c.setModeAccess(PNSqlCursor.Del)
         c.refreshBuffer()
         if not c.commitBuffer():
             return False
@@ -328,9 +330,9 @@ def execSql(sql, connName="default"):
     """
     Uso interno
     """
-    from pineboolib import pncontrolsfactory
+    from pineboolib.application import project
 
-    conn_ = pncontrolsfactory.aqApp.db().useConn(connName)
+    conn_ = project.conn.useConn(connName)
     cur = conn_.cursor()
     try:
         logger.warning("execSql: Ejecutando la consulta : %s", sql)

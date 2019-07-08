@@ -1,5 +1,5 @@
 import sys
-from pineboolib import logging
+from pineboolib.core.utils.logging import logging
 import traceback
 
 from pineboolib.core.utils.utils_base import version_check, is_deployed

@@ -8,15 +8,14 @@ from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
 from pineboolib.application.database.pnsqlquery import PNSqlQuery
 from pineboolib.application import project
 from pineboolib.application.utils.xpm import cacheXPM
-from pineboolib.application.database.utils import nextCounter
+
 from pineboolib.core import decorators
-from pineboolib import logging
+from pineboolib.core.utils.logging import logging
 
 from .pnbuffer import PNBuffer
 from .pncursortablemodel import PNCursorTableModel
 
 # FIXME: Removde dependency: Should not import from fllegacy.*
-from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData  # FIXME: Removde dependency
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  # FIXME: Removde dependency
 
 
@@ -260,8 +259,6 @@ class PNCursorPrivate(QtCore.QObject):
             del self.transactionsOpened_
 
     def doAcl(self):
-        from pineboolib import pncontrolsfactory
-
         if not self.acTable_:
             self.acTable_ = FLAccessControlFactory().create("table")
             self.acTable_.setFromObject(self.metadata_)
@@ -283,7 +280,7 @@ class PNCursorPrivate(QtCore.QObject):
                 # FIXME: What is happenning here? bool(str(Regexp)) ??
                 condTrue_ = bool(str(QRegExp(str(self.acosCondVal_)).exactMatch(str(self.cursor_.value(self.acosCondName_)))))
             elif self.acosCond_ == PNSqlCursor.Function:
-                condTrue_ = pncontrolsfactory.aqApp.call(self.acosCondName_, [self.cursor_]) == self.acosCondVal_
+                condTrue_ = project.call(self.acosCondName_, [self.cursor_]) == self.acosCondVal_
 
             if condTrue_:
                 if self.acTable_.name() != self.id_:
@@ -1487,7 +1484,7 @@ class PNSqlCursor(QtCore.QObject):
                         if self.buffer().value(fiName) == self.bufferCopy().value(fiName):
                             continue
 
-                if self.buffer().isNull(fiName) and not field.allowNull() and not field.type() == FLFieldMetaData.Serial:
+                if self.buffer().isNull(fiName) and not field.allowNull() and not field.type() == "serial":
                     msg = msg + "\n" + self.metadata().name() + ":" + field.alias() + " : No puede ser nulo"
 
                 if field.isUnique():
@@ -1729,7 +1726,7 @@ class PNSqlCursor(QtCore.QObject):
         metadata = self.metadata()
         if not metadata or not self.modeAccess() == self.Browse:
             return
-        if not metadata.field(fN).type() == FLFieldMetaData.Unlock:
+        if not metadata.field(fN).type() == "unlock":
             logger.warning("setUnLock sólo permite modificar campos del tipo Unlock")
             return
         buffer = self.d.buffer_ = self.primeUpdate()
@@ -2351,6 +2348,8 @@ class PNSqlCursor(QtCore.QObject):
                         self.buffer().setValue(field_name, val)
 
                     if field.isCounter():
+                        from pineboolib.application.database.utils import nextCounter
+
                         siguiente = None
                         if self._action.scriptFormRecord():
                             context_ = getattr(qsa_tree, "formRecord%s" % self._action.scriptFormRecord()[:-3]).iface
