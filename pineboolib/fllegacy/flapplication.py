@@ -1687,6 +1687,12 @@ class FLApplication(QtCore.QObject):
     def tmp_dir(self):
         return project.tmpdir
 
+    def transactionLevel(self):
+        return project.conn.transactionLevel()
+
+    def version(self):
+        return project.version
+
 
 """
 class FLPopuWarn(QtWidgets.QWhatsThis):

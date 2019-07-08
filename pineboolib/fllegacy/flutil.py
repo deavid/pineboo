@@ -793,6 +793,11 @@ class FLUtil(QtCore.QObject):
 
         return quickSqlDelete(t, w, connName)
 
+    def execSql(self, sql, connName="default"):
+        from pineboolib.application.database.utils import execSql
+
+        return execSql(sql, connName)
+
     def createProgressDialog(self, title, steps, id_="default"):
         """
         Crea un diálogo de progreso
