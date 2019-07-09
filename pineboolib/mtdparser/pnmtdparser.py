@@ -22,7 +22,7 @@ def mtd_parse(fileobj) -> None:
     dest_file = "%s_model.py" % mtd_file[:-4]
     mtd = project.conn.manager().metadata(metadata_name)
 
-    lines = generate_model(dest_file, mtd) if not mtd.isQuery() else []
+    lines = generate_model(dest_file, mtd) if mtd and not mtd.isQuery() else []
 
     if lines:
         f = open(dest_file, "w")
