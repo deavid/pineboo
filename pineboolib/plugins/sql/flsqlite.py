@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt  # type: ignore
 from pineboolib.core.utils.utils_base import auto_qt_translate_text
 from pineboolib.application.utils.check_dependencies import check_dependencies
 
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
 # from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flutil import FLUtil
@@ -238,7 +238,7 @@ class FLSQLITE(object):
         return True
 
     def nextSerialVal(self, table, field) -> Optional[int]:
-        q = FLSqlQuery()
+        q = PNSqlQuery()
         q.setSelect("max(%s)" % field)
         q.setFrom(table)
         q.setWhere("1 = 1")
@@ -423,7 +423,7 @@ class FLSQLITE(object):
         if not self.isOpen():
             return False
 
-        t = FLSqlQuery()
+        t = PNSqlQuery()
         t.setForwardOnly(True)
         ok = t.exec_("SELECT name FROM sqlite_master WHERE type='table' AND name='%s'" % name)
         if ok:
@@ -515,7 +515,7 @@ class FLSQLITE(object):
 
         createIndex = "CREATE INDEX %s_pkey ON %s (%s)" % (tmd.name(), tmd.name(), tmd.primaryKey())
 
-        # q = FLSqlQuery()
+        # q = PNSqlQuery()
         # q.setForwardOnly(True)
         # q.exec_(createIndex)
         sql += createIndex
@@ -780,7 +780,7 @@ class FLSQLITE(object):
     #             buffer.setValue("sha", key)
     #             c.insert()
     #
-    #     q = FLSqlQuery("", self.db_.dbAux())
+    #     q = PNSqlQuery("", self.db_.dbAux())
     #     if not q.exec_("CREATE TABLE %s AS SELECT * FROM %s;" % (renameOld, oldMTD.name())) or not q.exec_(
     #         "DROP TABLE %s;" % oldMTD.name()
     #     ):
@@ -895,7 +895,7 @@ class FLSQLITE(object):
         if not self.isOpen():
             return tl
 
-        t = FLSqlQuery()
+        t = PNSqlQuery()
         t.setForwardOnly(True)
 
         if typeName == "Tables" and typeName == "Views":
@@ -927,9 +927,9 @@ class FLSQLITE(object):
         self.db_.dbAux().transaction()
         rx = QRegExp("^.*[\\d][\\d][\\d][\\d].[\\d][\\d].*[\\d][\\d]$")
         rx2 = QRegExp("^.*alteredtable[\\d][\\d][\\d][\\d].*$")
-        qry = FLSqlQuery(None, "dbAux")
-        qry2 = FLSqlQuery(None, "dbAux")
-        qry3 = FLSqlQuery(None, "dbAux")
+        qry = PNSqlQuery(None, "dbAux")
+        qry2 = PNSqlQuery(None, "dbAux")
+        qry3 = PNSqlQuery(None, "dbAux")
         steps = 0
         item = ""
 

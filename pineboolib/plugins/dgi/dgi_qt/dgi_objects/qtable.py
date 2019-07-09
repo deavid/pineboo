@@ -126,7 +126,7 @@ class QTable(QtWidgets.QTableWidget):
         self.setHorizontalHeaderLabels(self.cols_list)
         self.setRowCount(0)
 
-    def setSelectionMode(self, mode: QAbstractItemView.SelectionMode) -> None:
+    def setSelectionMode(self, mode: "QAbstractItemView.SelectionMode") -> None:
         if mode == 999:
             self.setAlternatingRowColors(True)
         else:

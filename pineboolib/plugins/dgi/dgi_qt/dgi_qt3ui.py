@@ -709,7 +709,7 @@ def loadWidget(xml: Iterable, widget=None, parent=None, origWidget=None) -> None
     #        origWidget.ui_[origWidget.objectName()] = nwidget
 
 
-def loadIcon(xml: ET) -> None:
+def loadIcon(xml: "ET") -> None:
     global ICONS
 
     name = xml.get("name")

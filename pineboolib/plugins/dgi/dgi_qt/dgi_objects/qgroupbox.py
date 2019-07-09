@@ -17,13 +17,12 @@ class QGroupBox(QtWidgets.QGroupBox):
 
     def __init__(self, *args, **kwargs) -> None:
         super(QGroupBox, self).__init__(*args, **kwargs)
-        from pineboolib.fllegacy.flsettings import FLSettings
+        from pineboolib.core.settings import config
 
-        settings = FLSettings()
         self._line_width = 0
         # self._do_style()
         self.setFlat(True)
-        if not settings.readBoolEntry("ebcomportamiento/spacerLegacy", False):
+        if not config.value("ebcomportamiento/spacerLegacy", False):
             self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
 
     def setLineWidth(self, width: int) -> None:
@@ -61,7 +60,7 @@ class QGroupBox(QtWidgets.QGroupBox):
         if name == "title":
             self.setTitle(str(value))
         else:
-            super(QGroupBox, self).__setattr__(name, value)
+            super().__setattr__(name, value)
 
     @decorators.NotImplementedWarn
     def setFrameShadow(self, fs):

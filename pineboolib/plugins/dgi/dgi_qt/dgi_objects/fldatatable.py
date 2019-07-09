@@ -10,8 +10,6 @@ from typing import Any, Optional, TypeVar
 
 _T1 = TypeVar("_T1")
 
-_T1 = TypeVar("_T1")
-
 logger = logging.getLogger(__name__)
 
 
