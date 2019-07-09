@@ -55,8 +55,11 @@ class FieldStruct(object):
 
                     return float(value)
 
-        elif self.type_ in ("string", "stringlist") and not isinstance(value, str) and value is not None:
-            return str(value)
+        elif self.type_ in ("string", "stringlist"):
+            if value is None:
+                return None
+            else:
+                return str(value)
 
         elif self.type_ == "time":
             if value is not None:

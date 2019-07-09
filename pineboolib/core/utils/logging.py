@@ -21,16 +21,16 @@ NOTSET = 0
 
 class Logger(python_logging.Logger):
     def message(self, message, *args, **kwargs):
-        self.log(MESSAGE, message, args, **kwargs)
+        self.log(MESSAGE, message, *args, **kwargs)
 
     def hint(self, message, *args, **kwargs):
-        self.log(HINT, message, args, **kwargs)
+        self.log(HINT, message, *args, **kwargs)
 
     def notice(self, message, *args, **kwargs):
-        self.log(NOTICE, message, args, **kwargs)
+        self.log(NOTICE, message, *args, **kwargs)
 
     def trace(self, message, *args, **kwargs):
-        self.log(TRACE, message, args, **kwargs)
+        self.log(TRACE, message, *args, **kwargs)
 
 
 python_logging.Logger.manager.loggerClass = Logger  # type: ignore

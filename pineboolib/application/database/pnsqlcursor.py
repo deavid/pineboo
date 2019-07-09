@@ -3516,7 +3516,7 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def update(self, notify=True):
-        logger.trace("PNSqlCursor.update --- BEGIN")
+        logger.trace("PNSqlCursor.update --- BEGIN:")
         if self.modeAccess() == PNSqlCursor.Edit:
             buffer = self.buffer()
             if not buffer:
@@ -3528,7 +3528,7 @@ class PNSqlCursor(QtCore.QObject):
             # .. soportar updates de PKey, que, aunque inapropiados deberían funcionar.
             pKValue = buffer.value(self.buffer().pK())
 
-            dict_update = dict([(fieldName, buffer.value(fieldName)) for fieldName in lista])
+            dict_update = {fieldName: buffer.value(fieldName) for fieldName in lista}
             try:
                 update_successful = self.model().updateValuesDB(pKValue, dict_update)
             except Exception:

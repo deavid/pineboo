@@ -204,7 +204,7 @@ class FLMYSQL_MYISAM(object):
         # TODO: psycopg2.mogrify ???
 
         if v is None:
-            s = "Null"
+            return "NULL"
 
         if type_ == "bool" or type_ == "unlock":
             s = text2bool(v)
@@ -1315,7 +1315,7 @@ class FLMYSQL_MYISAM(object):
 
         return ret
 
-    def normalizeValue(self, text) -> Any:
+    def normalizeValue(self, text) -> Optional[str]:
         if text is None:
             return None
 

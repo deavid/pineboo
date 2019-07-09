@@ -191,8 +191,8 @@ class IConnection:
     def mismatchedTable(self, tablename, tmd) -> None:
         return
 
-    def normalizeValue(self, text) -> None:
-        return
+    def normalizeValue(self, text) -> Optional[str]:
+        return None
 
     def queryUpdate(self, name, update, filter) -> None:
         return

@@ -221,6 +221,8 @@ class FLSQLITE(object):
 
         else:
             if v and type_ == "string":
+                if v is None:
+                    return "NULL"
                 v = auto_qt_translate_text(v)
             if upper and v and type_ == "string":
                 v = v.upper()

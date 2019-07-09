@@ -85,8 +85,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         # que invalidar los indices. Opcionalmente, regenerarlos.
         self.pkpos: List[int] = []
         self.ckpos: List[int] = []
-        self.pkidx: Dict[str, int] = {}
-        self.ckidx: Dict[str, int] = {}
+        self.pkidx: Dict[Tuple, int] = {}
+        self.ckidx: Dict[Tuple, int] = {}
         self._checkColumn: Dict[str, Any] = {}
         # Establecer a False otra vez si el contenido de los indices es erróneo.
         self.indexes_valid = False
@@ -705,7 +705,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param rownum. Número de fila
     """
 
-    def indexUpdateRow(self, rownum: Union[int, slice]) -> None:
+    def indexUpdateRow(self, rownum: int) -> None:
         row = self._data[rownum]
         if self.pkpos:
             key = tuple([row[x] for x in self.pkpos])
@@ -775,6 +775,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def updateValuesDB(self, pKValue, dict_update) -> None:
+        self.logger.trace("updateValuesDB: init: pKValue %s, dict_update %s", pKValue, dict_update)
         row = self.findPKRow([pKValue])
         # if row is None:
         #    raise AssertionError(
@@ -841,7 +842,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param update_dict. array clave-valor indicando el listado de claves y valores a actualizar
     """
 
-    def setValuesDict(self, row: Union[int, slice], update_dict) -> None:
+    def setValuesDict(self, row: int, update_dict) -> None:
 
         if DEBUG:
             self.logger.info("CursorTableModel.setValuesDict(row %s) = %r", row, update_dict)

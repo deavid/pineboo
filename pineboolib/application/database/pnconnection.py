@@ -614,7 +614,7 @@ class PNConnection(QtCore.QObject, IConnection):
 
         return self.dbAux().driver().mismatchedTable(tablename, tmd, self)
 
-    def normalizeValue(self, text) -> Any:
+    def normalizeValue(self, text) -> Optional[str]:
         if getattr(self.driver(), "normalizeValue", None):
             return self.driver().normalizeValue(text)
 

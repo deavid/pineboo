@@ -223,7 +223,7 @@ class FLQPSQL(object):
         # TODO: psycopg2.mogrify ???
 
         if v is None:
-            s = "Null"
+            return "NULL"
 
         if type_ == "bool" or type_ == "unlock":
             s = text2bool(v)
