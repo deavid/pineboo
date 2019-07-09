@@ -169,7 +169,7 @@ class AQOdsRow(object):
     @param opt. Opciones de linea, cada celda acaba con la asignación del valor
     """
 
-    def opIn(self, opt: Union[float, str, odf.element.Element, List, AQOdsImage]):
+    def opIn(self, opt: Union[float, str, "odf.element.Element", List, "AQOdsImage"]):
         from odf.text import P, Span
         from odf.draw import Frame, Image
 

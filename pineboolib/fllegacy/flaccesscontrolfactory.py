@@ -146,7 +146,7 @@ class FLAccessControlTable(FLAccessControl):
     def type(self):
         return "table"
 
-    def processObject(self, obj: FLTableMetaData) -> None:
+    def processObject(self, obj: "FLTableMetaData") -> None:
         if not obj:
             return
 
@@ -197,7 +197,7 @@ class FLAccessControlTable(FLAccessControl):
                 field.setVisible(True)
                 field.setEditable(True)
 
-    def setFromObject(self, obj: FLTableMetaData) -> None:
+    def setFromObject(self, obj: "FLTableMetaData") -> None:
         tm = obj
         if not tm:
             return
@@ -226,7 +226,7 @@ class FLAccessControlTable(FLAccessControl):
 
 
 class FLAccessControlFactory(object):
-    def create(self, type_: str) -> FLAccessControl:
+    def create(self, type_: str) -> "FLAccessControl":
         if type_ is None:
             raise ValueError("type_ must be set")
 

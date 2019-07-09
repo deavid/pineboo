@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from pineboolib.core import decorators
 
-from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
 from pineboolib import logging
 import copy
 
-from typing import Any, Optional, List
-from pineboolib.fllegacy import flfieldmetadata
+from typing import Any, Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 
 """
 Mantiene la definicion de una tabla.
@@ -158,7 +159,7 @@ class FLTableMetaData(object):
     @param f Objeto FLFieldMetaData con la descripción del campo a añadir
     """
 
-    def addFieldMD(self, f: "flfieldmetadata.FLFieldMetaData") -> None:
+    def addFieldMD(self, f: "FLFieldMetaData") -> None:
         if f is None:
             return
         if not f.metadata():
@@ -166,6 +167,8 @@ class FLTableMetaData(object):
         self.d.fieldList_.append(f)
         self.d.addFieldName(f.name())
         self.d.formatAlias(f)
+        from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
+
         if f.type() == FLFieldMetaData.Unlock:
             self.d.fieldNamesUnlock_.append(f.name())
         if f.d.isPrimaryKey_:

@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from pineboolib.core.utils.utils_base import aqtt
-from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
-from pineboolib.core.utils.logging import logging
 
-from pineboolib.interfaces import ITableMetaData
+from pineboolib.core.utils.logging import logging
 from pineboolib.interfaces import IFieldMetaData
-from typing import List, Optional, Union, Any
-from typing import TypeVar
+
+from typing import List, Optional, Union, Any, TypeVar, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.interfaces import ITableMetaData
+    from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
+
 
 _T0 = TypeVar("_T0")
 _T1 = TypeVar("_T1")
@@ -319,10 +322,12 @@ class FLFieldMetaData(IFieldMetaData):
     @param r Objeto FlRelationMetaData con la definicion de la
          relacion a añadir """
 
-    def addRelationMD(self, r: FLRelationMetaData) -> None:
+    def addRelationMD(self, r: "FLRelationMetaData") -> None:
 
         isRelM1 = False
         # print("FLFieldMetadata(%s).addRelationMD(card %s)" % (self.name(), r.cardinality()))
+        from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
+
         if r.cardinality() == FLRelationMetaData.RELATION_M1:
             isRelM1 = True
         if isRelM1 and self.d.relationM1_:
@@ -347,7 +352,7 @@ class FLFieldMetaData(IFieldMetaData):
     @return Objeto con la lista de deficiones de la relaciones del campo
     """
 
-    def relationList(self) -> List[Union[FLRelationMetaData, _T0, _T1]]:
+    def relationList(self) -> List[Union["FLRelationMetaData", _T0, _T1]]:
         return self.d.relationList_
 
     """
@@ -359,7 +364,7 @@ class FLFieldMetaData(IFieldMetaData):
         muchos a uno para este campo
     """
 
-    def relationM1(self) -> Optional[FLRelationMetaData]:
+    def relationM1(self) -> Optional["FLRelationMetaData"]:
         return self.d.relationM1_
 
     """
@@ -402,7 +407,7 @@ class FLFieldMetaData(IFieldMetaData):
       si no hay campo asociado
     """
 
-    def associatedField(self) -> Optional[ITableMetaData]:
+    def associatedField(self) -> Optional["ITableMetaData"]:
         mtd = self.metadata()
         return mtd and mtd.field(self.d.associatedFieldName_)
 
@@ -549,14 +554,14 @@ class FLFieldMetaData(IFieldMetaData):
     Establece el objeto FLTableMetaData al que pertenece
     """
 
-    def setMetadata(self, mtd: ITableMetaData) -> None:
+    def setMetadata(self, mtd: "ITableMetaData") -> None:
         self.d.mtd_ = mtd
 
     """
     Obtiene el objeto FLTableMetaData al que pertenece
     """
 
-    def metadata(self) -> Optional[ITableMetaData]:
+    def metadata(self) -> Optional["ITableMetaData"]:
         return self.d.mtd_
 
     """

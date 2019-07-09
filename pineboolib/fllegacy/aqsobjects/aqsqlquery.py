@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
 
-class AQSqlQuery(FLSqlQuery):
+class AQSqlQuery(PNSqlQuery):
     pass

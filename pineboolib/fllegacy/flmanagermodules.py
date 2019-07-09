@@ -4,15 +4,16 @@ from pineboolib import logging
 
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
-from pineboolib.application.xmlaction import XMLAction
-from pineboolib.application.utils.xpm import cacheXPM
-from pineboolib.application.utils.convert_flaction import convert2FLAction
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.fllegacy.flaction import FLAction
-from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader, AQStaticBdInfo
 
-from typing import Union, List, Any, Mapping, Optional, TypeVar
+
+from pineboolib.application.database.pnsqlquery import PNSqlQuery
+
+from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader
+
+from typing import Union, List, Any, Mapping, Optional, TypeVar, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.application.xmlaction import XMLAction
 
 _T0 = TypeVar("_T0")
 
@@ -118,6 +119,7 @@ class FLManagerModules(object):
         super(FLManagerModules, self).__init__()
         if db:
             self.conn_ = db
+            from pineboolib.fllegacy.flmodulesstaticloader import AQStaticBdInfo
 
             self.staticBdInfo_ = AQStaticBdInfo(self.conn_)
 
@@ -349,10 +351,13 @@ class FLManagerModules(object):
     @return QWidget correspondiente al formulario construido.
     """
 
-    def createForm(self, action: Union[FLAction, XMLAction], connector=None, parent=None, name=None):
+    def createForm(self, action: Union["FLAction", "XMLAction"], connector=None, parent=None, name=None):
         from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flaction import FLAction
 
         if not isinstance(action, FLAction):
+            from pineboolib.application.utils.convert_flaction import convert2FLAction
+
             action = convert2FLAction(action)
 
         if not action:
@@ -368,13 +373,16 @@ class FLManagerModules(object):
     @param name. Nombre del formRecord
     """
 
-    def createFormRecord(self, a: XMLAction, connector=None, parent_or_cursor=None, name=None) -> Any:
+    def createFormRecord(self, a: "XMLAction", connector=None, parent_or_cursor=None, name=None) -> Any:
         logger.trace("createFormRecord: init")
         from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flaction import FLAction
 
         # Falta implementar conector y name
         if not isinstance(a, FLAction):
             logger.trace("createFormRecord: convert2FLAction")
+            from pineboolib.application.utils.convert_flaction import convert2FLAction
+
             a = convert2FLAction(a)
 
         if not a:
@@ -435,7 +443,7 @@ class FLManagerModules(object):
         if not self.conn_.dbAux():
             return ret
 
-        q = FLSqlQuery(None, self.conn_.dbAux())
+        q = PNSqlQuery(None, self.conn_.dbAux())
         q.setForwardOnly(True)
         q.exec_("SELECT idarea FROM flareas WHERE idarea <> 'sys'")
         while q.next():
@@ -475,7 +483,7 @@ class FLManagerModules(object):
             return ret
 
         ret.append("sys")
-        q = FLSqlQuery(None, self.conn_.dbAux())
+        q = PNSqlQuery(None, self.conn_.dbAux())
         q.setForwardOnly(True)
         q.exec_("SELECT idmodulo FROM flmodules WHERE idmodulo <> 'sys'")
         while q.next():
@@ -526,6 +534,8 @@ class FLManagerModules(object):
 
         pix = None
         if idM.upper() in self.dictInfoMods.keys():
+            from pineboolib.application.utils.xpm import cacheXPM
+
             icono = cacheXPM(self.dictInfoMods[idM.upper()].icono)
             pix = pncontrolsfactory.QPixmap(icono)
 
@@ -566,7 +576,7 @@ class FLManagerModules(object):
         if not self.conn_.dbAux():
             return ""
 
-        q = FLSqlQuery(None, self.conn_.dbAux())
+        q = PNSqlQuery(None, self.conn_.dbAux())
         q.setForwardOnly(True)
         q.exec_("SELECT sha FROM flserial")
         if q.lastError is None:
@@ -594,7 +604,7 @@ class FLManagerModules(object):
     def shaOfFile(self, n: Mapping[slice, Any]) -> Optional[str]:
         if not n[:3] == "sys" and not self.conn_.manager().isSystemTable(n):
             formatVal = self.conn_.manager().formatAssignValue("nombre", "string", n, True)
-            q = FLSqlQuery(None, self.conn_.dbAux())
+            q = PNSqlQuery(None, self.conn_.dbAux())
             # q.setForwardOnly(True)
             q.exec_("SELECT sha FROM flfiles WHERE %s" % formatVal)
             if q.next():
@@ -610,7 +620,7 @@ class FLManagerModules(object):
 
         self.dictKeyFiles = {}
         self.dictModFiles = {}
-        q = FLSqlQuery(None, self.conn_.dbAux())
+        q = PNSqlQuery(None, self.conn_.dbAux())
         # q.setForwardOnly(True)
         q.exec_("SELECT nombre, sha, idmodulo FROM flfiles")
         name = None
@@ -629,7 +639,7 @@ class FLManagerModules(object):
         self.listAllIdModules_.append("sys")
         self.dictInfoMods = {}
 
-        q = FLSqlQuery(None, self.conn_.dbAux())
+        q = PNSqlQuery(None, self.conn_.dbAux())
         q.setTablesList("flmodules,flareas")
         q.setSelect("idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion")
         q.setFrom("flmodules left join flareas on flmodules.idarea = flareas.idarea")
@@ -672,7 +682,7 @@ class FLManagerModules(object):
     def loadIdAreas(self) -> None:
 
         self.listIdAreas_ = []
-        q = FLSqlQuery(None, self.conn_.dbAux())
+        q = PNSqlQuery(None, self.conn_.dbAux())
         # q.setForwardOnly(True)
         q.exec_("SELECT idarea from flareas WHERE idarea <> 'sys'")
         while q.next():
@@ -721,10 +731,11 @@ class FLManagerModules(object):
             db_aux = self.conn_.dbAux()
             idDB = "%s%s%s%s%s" % (db_aux.database(), db_aux.host(), db_aux.user(), db_aux.driverName(), db_aux.port())
 
-        settings = FLSettings()
-        settings.writeEntry("Modules/activeIdModule/%s" % idDB, self.activeIdModule_)
-        settings.writeEntry("Modules/activeIdArea/%s" % idDB, self.activeIdArea_)
-        settings.writeEntry("Modules/shaLocal/%s" % idDB, self.shaLocal_)
+        from pineboolib.core.settings import settings
+
+        settings.setValue("Modules/activeIdModule/%s" % idDB, self.activeIdModule_)
+        settings.setValue("Modules/activeIdArea/%s" % idDB, self.activeIdArea_)
+        settings.setValue("Modules/shaLocal/%s" % idDB, self.shaLocal_)
 
     """
     Lee el estado del sistema de módulos
@@ -738,10 +749,11 @@ class FLManagerModules(object):
 
         idDB = "%s%s%s%s%s" % (db_aux.database(), db_aux.host(), db_aux.user(), db_aux.driverName(), db_aux.port())
 
-        settings = FLSettings()
-        self.activeIdModule_ = settings.readEntry("Modules/activeIdModule/%s" % idDB, None)
-        self.activeIdArea_ = settings.readEntry("Modules/activeIdArea/%s" % idDB, None)
-        self.shaLocal_ = settings.readEntry("Modules/shaLocal/%s" % idDB, None)
+        from pineboolib.core.settings import settings
+
+        self.activeIdModule_ = settings.value("Modules/activeIdModule/%s" % idDB, None)
+        self.activeIdArea_ = settings.value("Modules/activeIdArea/%s" % idDB, None)
+        self.shaLocal_ = settings.value("Modules/shaLocal/%s" % idDB, None)
 
         if self.activeIdModule_ is None or self.activeIdModule_ not in self.listAllIdModules():
             self.setActiveIdModule(None)

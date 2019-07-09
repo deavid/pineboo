@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.application.database.pnsqlcursor import PNSqlCursor
 
 
-class AQSqlCursor(FLSqlCursor):
+class AQSqlCursor(PNSqlCursor):
     pass
