@@ -97,6 +97,11 @@ class FLFieldDB(QtWidgets.QWidget):
         super(FLFieldDB, self).__init__(parent)
 
         self.DEBUG = False  # FIXME: debe recoger DEBUG de pineboolib.project
+        self.editor_ = None
+        self.cursor_ = None
+        self.cursorBackup_ = None
+        self.cursorInit_ = False
+        self.cursorAuxInit_ = False
 
         self.maxPixImages_ = FLSettings().readEntry("ebcomportamiento/maxPixImages", None)
         self.autoCompMode_ = FLSettings().readEntry("ebcomportamiento/autoComp", "OnDemandF4")
