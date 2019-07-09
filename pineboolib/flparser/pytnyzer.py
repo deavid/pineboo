@@ -7,11 +7,6 @@ import os.path
 import re
 from xml.etree import ElementTree
 from typing import Any, Generator, Optional, Tuple, Type, List, Dict
-from typing import TypeVar
-
-_TASTPythonBase = TypeVar("_TASTPythonBase", bound=ASTPythonBase)
-
-_TASTPythonBase = TypeVar("_TASTPythonBase", bound=ASTPythonBase)
 
 
 def id_translate(name) -> Any:

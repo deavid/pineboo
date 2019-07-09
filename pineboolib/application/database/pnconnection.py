@@ -12,13 +12,13 @@ from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
 from pineboolib.interfaces.iapicursor import IApiCursor
 from .pnsqlsavepoint import PNSqlSavePoint
 from . import db_signals
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, TYPE_CHECKING
 
 logger = logging.getLogger(__name__)
 
-
-from pineboolib.fllegacy import flmanager
-from pineboolib.fllegacy import flmanagermodules
+if TYPE_CHECKING:
+    from pineboolib.fllegacy import flmanager
+    from pineboolib.fllegacy import flmanagermodules
 
 
 class PNConnection(QtCore.QObject, IConnection):
