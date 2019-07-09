@@ -28,3 +28,4 @@ def show_connection_dialog(app: QApplication) -> Optional[ProjectConfig]:
             )
 
         return project_config
+    return None

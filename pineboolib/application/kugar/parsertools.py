@@ -4,13 +4,14 @@ import sys
 from pineboolib import logging
 import datetime
 import fnmatch
+import xml.etree.ElementTree
 from PyQt5.QtGui import QPixmap  # type: ignore
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.utils.xpm import cacheXPM
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flapplication import aqApp
 
-from typing import Any, Iterable, Mapping, Optional, Sequence, Sized, SupportsFloat, SupportsInt, TypeVar, Union, List, TYPE_CHECKING
+from typing import Any, Iterable, Optional, SupportsInt, TypeVar, Union, List, TYPE_CHECKING
 
 _T2 = TypeVar("_T2")
 
@@ -97,7 +98,7 @@ class KParserTools(object):
     @return Valor requerido según tipo especial especificado.
     """
 
-    def getSpecial(self, name: Union[Sized, Mapping[Union[int, slice], Sequence], Sequence[Sequence]], page_num=None) -> str:
+    def getSpecial(self, name: str, page_num=None) -> str:
         self.logger.debug("%s:getSpecial %s" % (__name__, name))
         ret = "None"
         if name[0] == "[":
@@ -118,13 +119,7 @@ class KParserTools(object):
     @return Valor calculado.
     """
 
-    def calculated(
-        self,
-        value: Union[bytes, str, str, SupportsFloat, Mapping[slice, Any]],
-        data_type,
-        p: Union[bytes, str, SupportsInt] = None,
-        data=None,
-    ) -> Any:
+    def calculated(self, value: Any, data_type, p: Union[bytes, str, SupportsInt] = None, data=None) -> Any:
 
         p = 0 if p is None else int(p)
 
@@ -158,7 +153,7 @@ class KParserTools(object):
     @return. Ruta completa del fichero en tempdata.
     """
 
-    def parseKey(self, ref_key: Union[str, str, Mapping[slice, Any]] = None) -> Any:
+    def parseKey(self, ref_key: str = None) -> Any:
         ret = None
         table_name = "fllarge"
         if ref_key is not None:
@@ -207,7 +202,7 @@ class KParserTools(object):
     @return Array con los valores del tamaño de la página.
     """
 
-    def converPageSize(self, size, orientation, Custom: _T2 = None) -> Union[List[int], _T2]:
+    def converPageSize(self, size, orientation, Custom: Optional[List[int]] = None) -> List[int]:
         r = None
         if size == 0:
             r = [595, 842]  # "A4"

@@ -475,20 +475,20 @@ class Date(object):
     def __str__(self):
         return self.toString()
 
-    def __lt__(self, other: _T0) -> bool:
+    def __lt__(self, other) -> bool:
         return str(self) < str(other)
 
-    def __le__(self, other: _T0) -> bool:
+    def __le__(self, other) -> bool:
         return str(self) <= str(other)
 
-    def __ge__(self, other: _T0) -> bool:
+    def __ge__(self, other) -> bool:
         return str(self) >= str(other)
 
-    def __gt__(self, other: _T0) -> bool:
+    def __gt__(self, other) -> bool:
         return str(self) > str(other)
 
     def __eq__(self, other):
-        if str(other) == self.toString():
+        if str(other) == str(self):
             return True
         else:
             return False

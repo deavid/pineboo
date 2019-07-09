@@ -35,6 +35,8 @@ class ObjectNotFoundDGINotLoaded(object):
     pass
 
 
+aqApp: Any = ObjectNotFoundDGINotLoaded
+
 # --- create empty objects first:
 QComboBox: Any = ObjectNotFoundDGINotLoaded
 QTable: Any = ObjectNotFoundDGINotLoaded

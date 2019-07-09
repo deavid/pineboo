@@ -123,8 +123,8 @@ def trace_function(f: Callable) -> Callable:
 
 
 class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
-    manager = None
-    currentDownload = None
+    manager: QNetworkAccessManager
+    currentDownload: List[Any]
     reply = None
     url = None
     result = None
@@ -138,12 +138,14 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
         self.currentDownload = []
         self.manager.finished.connect(self.downloadFinished)
 
-    def setLE(self, filename, dir_, urllineedit) -> None:
+    def setLE(self, filename: str, dir_: str, urllineedit: Any) -> None:
         self.filename = filename
         self.dir_ = dir_
         self.url_ = urllineedit
 
     def doDownload(self) -> None:
+        if self.url_ is None or self.dir_ is None:
+            raise ValueError("setLE was not called first")
         request = QNetworkRequest(QUrl("%s/%s/%s" % (self.url_.text(), self.dir_, self.filename)))
         self.reply = self.manager.get(request)
         # self.reply.sslErrors.connect(self.sslErrors)
@@ -167,6 +169,8 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
         return basename
 
     def saveToDisk(self, filename, data) -> bool:
+        if self.dir_ is None:
+            raise ValueError("setLE was not called first")
         fi = "%s/%s" % (self.dir_, filename)
         if not os.path.exists(self.dir_):
             os.makedirs(self.dir_)
@@ -290,7 +294,7 @@ def ustr1(t: Union[str, int]) -> str:
         return "%s" % t
     except Exception:
         logger.exception("ERROR Coercing to string: %s", repr(t))
-        return None
+        return repr(t)
 
 
 class StructMyDict(dict):
@@ -335,7 +339,7 @@ def load2xml(form_path_or_str: str) -> ElementTree:
             return super(xml_parser, self).close()
     """
 
-    file_ptr: io.StringIO = None
+    file_ptr: Optional[io.StringIO] = None
     if (
         form_path_or_str.find("KugarTemplate") > -1
         or form_path_or_str.find("DOCTYPE KugarData") > -1
