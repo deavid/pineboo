@@ -4,7 +4,7 @@ from pineboolib.core.settings import config
 from pineboolib.application.utils import sql_tools
 from pineboolib.application import project
 from pineboolib.interfaces.ifieldmetadata import IFieldMetaData
-from typing import Any, Iterable, Mapping, Sequence, Sized, Union, List, Dict, Optional
+from typing import Any, Union, List, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,6 @@ class PNSqlQuery(object):
     fields_cache = None
     _is_active = False
     _fieldNameToPosDict: Dict[str, int] = None
-    value = None
     _sql_inspector = None
 
     def __init__(self, cx=None, connection_name="default") -> None:
@@ -34,7 +33,7 @@ class PNSqlQuery(object):
         self.d.db_ = project.conn.useConn(connection_name)
 
         self.countRefQuery = self.countRefQuery + 1
-        self._row = None
+        self._row = []
         self._posicion = None
         self._datos = None
         self._cursor = None
@@ -52,11 +51,6 @@ class PNSqlQuery(object):
 
         if retornoQry:
             self.d = retornoQry.d
-
-        self.value = self._value_quick
-
-        if config.value("ebcomportamiento/std_query", False):
-            self.value = self._value_std
 
     def __del__(self) -> None:
         try:
@@ -482,7 +476,7 @@ class PNSqlQuery(object):
              en vez de contenido al que apunta esa referencia
     """
 
-    def _value_quick(self, n: str, raw: bool = False) -> Any:
+    def _value_quick(self, n: Union[str, int], raw: bool = False) -> Any:
         # Fast version of self.value
         if self._fieldNameToPosDict is None:
             self._fieldNameToPosDict = {v: n for n, v in enumerate(self.d.fieldList_)}
@@ -496,14 +490,15 @@ class PNSqlQuery(object):
             ret = self._value_std(n, raw)
         return ret
 
-    def _value_std(self, n: str, raw: bool = False) -> Any:
+    def _value_std(self, n: Union[str, int], raw: bool = False) -> Any:
         if n is None:
             logger.trace("value::invalid use with n=None.", stack_info=True)
             return None
 
-        pos = n
         if isinstance(n, str):
-            pos = self.sql_inspector.fieldNameToPos(n.lower())
+            pos: int = self.sql_inspector.fieldNameToPos(n.lower())
+        if isinstance(n, int):
+            pos = n
 
         ret = self._row[pos]
 
@@ -516,6 +511,13 @@ class PNSqlQuery(object):
                 logger.exception("value::error retrieving row position %s", pos)
 
         return ret
+
+    def value(self, n: Union[str, int], raw: bool = False) -> Any:
+        _value = self._value_quick
+
+        if config.value("ebcomportamiento/std_query", False):
+            _value = self._value_std
+        return _value(n, raw)
 
     """
     def _value_std(self, n, raw=False):

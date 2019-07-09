@@ -16,11 +16,9 @@ class about_pineboo(QWidget):
         from pineboolib.fllegacy.flmanagermodules import FLManagerModules
         from pineboolib.core.utils.utils_base import filedir
 
-        mng_mod = FLManagerModules()
-
         dlg_ = filedir("dlgabout/about_pineboo.ui")
         version_ = project.version
-        self.ui = mng_mod.createUI(dlg_, None, self)  # FIXME: Letting FL* to create Pineboo interface?
+        self.ui = FLManagerModules.createUI(dlg_, None, self)  # FIXME: Letting FL* to create Pineboo interface?
         if self.ui is None:
             raise Exception("Error creating UI About Dialog")
         self.ui.lbl_version.setText("Pineboo v%s" % str(version_))

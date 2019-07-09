@@ -10,12 +10,11 @@ from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
 from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader
 
-from typing import Union, List, Any, Mapping, Optional, TypeVar, TYPE_CHECKING
+from typing import Union, List, Dict, Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib.application.xmlaction import XMLAction
-
-_T0 = TypeVar("_T0")
+    from pineboolib.application.xmlaction import XMLAction  # noqa: F401
+    from pineboolib.fllegacy import flaction  # noqa: F401
 
 """
 Gestor de módulos.
@@ -41,12 +40,12 @@ logger = logging.getLogger(__name__)
 
 
 class FLInfoMod(object):
-    idModulo = None
-    idArea = None
-    descripcion = None
-    version = None
-    icono = None
-    areaDescripcion = None
+    idModulo: str
+    idArea: str
+    descripcion: str
+    version: str
+    icono: str
+    areaDescripcion: str
 
 
 class FLManagerModules(object):
@@ -70,32 +69,27 @@ class FLManagerModules(object):
     """
     Diccionario de claves de ficheros, para optimizar lecturas
     """
-    dictKeyFiles = {}
+    dictKeyFiles: Dict[str, str] = {}
 
     """
     Lista de todos los identificadores de módulos cargados, para optimizar lecturas
     """
-    listAllIdModules_ = []
+    listAllIdModules_: List[str] = []
 
     """
     Lista de todas los identificadores de areas cargadas, para optimizar lecturas
     """
-    listIdAreas_ = []
+    listIdAreas_: List[str] = []
 
     """
     Diccionario con información de los módulos
     """
-    dictInfoMods = {}
+    dictInfoMods: Dict[str, FLInfoMod] = {}
 
     """
     Diccionario de identificadores de modulo de ficheros, para optimizar lecturas
     """
-    dictModFiles = {}
-
-    """
-    Base de datos a utilizar por el manejador
-    """
-    conn_ = None
+    dictModFiles: Dict[str, str] = {}
 
     """
     Uso interno.
@@ -110,18 +104,19 @@ class FLManagerModules(object):
     reports_dir_ = None
     queries_dir_ = None
     trans_dir_ = None
-    filesCached_ = {}
+    filesCached_: Dict[str, str] = {}
     """
     constructor
     """
 
-    def __init__(self, db=None) -> None:
+    def __init__(self, db) -> None:
         super(FLManagerModules, self).__init__()
-        if db:
-            self.conn_ = db
-            from pineboolib.fllegacy.flmodulesstaticloader import AQStaticBdInfo
+        if db is None:
+            raise ValueError("Database is required")
+        self.conn_ = db
+        from pineboolib.fllegacy.flmodulesstaticloader import AQStaticBdInfo
 
-            self.staticBdInfo_ = AQStaticBdInfo(self.conn_)
+        self.staticBdInfo_ = AQStaticBdInfo(self.conn_)
 
         self.filesCached_ = {}
 
@@ -213,7 +208,8 @@ class FLManagerModules(object):
         try:
             return str(open(pN, "rb").read(), encode_)
         except Exception:
-            return None
+            logger.warn("Error trying to read %r", pN, exc_info=True)
+            return ""
 
     """
     Obtiene el contenido de un fichero, utilizando la caché de memoria y disco.
@@ -225,8 +221,7 @@ class FLManagerModules(object):
     @return QString con el contenido del fichero o vacía en caso de error.
     """
 
-    def contentCached(self, n: Mapping[slice, Any], shaKey=None) -> Any:
-
+    def contentCached(self, n: str, shaKey=None) -> str:
         not_sys_table = n[0:3] != "sys" and not self.conn_.manager().isSystemTable(n)
         if not_sys_table and self.staticBdInfo_ and self.staticBdInfo_.enabled_:
             str_ret = self.contentStatic(n)
@@ -269,6 +264,9 @@ class FLManagerModules(object):
             modId = self.conn_.managerModules().idModuleOfFile(n)
 
         from pineboolib.application import project
+
+        if not project._DGI:
+            raise Exception("DGI not loaded")
 
         if project._DGI.alternative_content_cached():
             data = project._DGI.content_cached(project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey)
@@ -337,9 +335,12 @@ class FLManagerModules(object):
     @return QWidget correspondiente al formulario construido.
     """
 
-    def createUI(self, n, connector=None, parent=None, name=None) -> Any:
+    @staticmethod
+    def createUI(n, connector=None, parent=None, name=None) -> Any:
         from pineboolib.application import project
 
+        if not project._DGI:
+            raise Exception("DGI not loaded")
         return project._DGI.createUI(n, connector, parent, name)
 
     """
@@ -351,7 +352,7 @@ class FLManagerModules(object):
     @return QWidget correspondiente al formulario construido.
     """
 
-    def createForm(self, action: Union["FLAction", "XMLAction"], connector=None, parent=None, name=None):
+    def createForm(self, action: Union["flaction.FLAction", "XMLAction"], connector=None, parent=None, name=None):
         from pineboolib import pncontrolsfactory
         from pineboolib.fllegacy.flaction import FLAction
 
@@ -373,7 +374,7 @@ class FLManagerModules(object):
     @param name. Nombre del formRecord
     """
 
-    def createFormRecord(self, a: "XMLAction", connector=None, parent_or_cursor=None, name=None) -> Any:
+    def createFormRecord(self, a: Union["flaction.FLAction", "XMLAction"], connector=None, parent_or_cursor=None, name=None) -> Any:
         logger.trace("createFormRecord: init")
         from pineboolib import pncontrolsfactory
         from pineboolib.fllegacy.flaction import FLAction
@@ -383,13 +384,15 @@ class FLManagerModules(object):
             logger.trace("createFormRecord: convert2FLAction")
             from pineboolib.application.utils.convert_flaction import convert2FLAction
 
-            a = convert2FLAction(a)
+            action = convert2FLAction(a)
+        else:
+            action = a
 
-        if not a:
+        if not action:
             return None
 
         logger.trace("createFormRecord: load FormRecordDB")
-        return pncontrolsfactory.FLFormRecordDB(parent_or_cursor, a, load=False)
+        return pncontrolsfactory.FLFormRecordDB(parent_or_cursor, action, load=False)
 
     """
     Para establecer el módulo activo.
@@ -400,7 +403,7 @@ class FLManagerModules(object):
     @param id Identificador del módulo
     """
 
-    def setActiveIdModule(self, _id: Optional[Union[int, str, str]] = None) -> None:
+    def setActiveIdModule(self, _id: Optional[str] = None) -> None:
         if _id is None or not self.dictInfoMods:
             self.activeIdArea_ = None
             self.activeIdModule_ = None
@@ -460,11 +463,13 @@ class FLManagerModules(object):
     @return Lista de identificadores de módulos
     """
 
-    def listIdModules(self, idA) -> List[Any]:
-        list_ = []
+    def listIdModules(self, idA) -> List[str]:
+        list_: List[str] = []
         for mod in self.dictInfoMods.keys():
             if self.dictInfoMods[mod].idArea == idA:
-                list_.append(self.dictInfoMods[mod].idModulo)
+                idModulo = self.dictInfoMods[mod].idModulo
+                if idModulo:
+                    list_.append(idModulo)
 
         return list_
 
@@ -498,16 +503,13 @@ class FLManagerModules(object):
     @return Texto de descripción del área, si lo encuentra o idA si no lo encuentra.
     """
 
-    def idAreaToDescription(self, idA: _T0 = None) -> Union[str, _T0]:
-
-        if idA:
-            for area in self.dictInfoMods.keys():
-                if self.dictInfoMods[area].idArea.upper() == idA.upper():
-                    return self.dictInfoMods[area].areaDescripcion
-        else:
-            idA = ""
-
-        return idA
+    def idAreaToDescription(self, idA: str = None) -> str:
+        if not idA:
+            return ""
+        for areaObj in self.dictInfoMods.values():
+            if areaObj.idArea and areaObj.idArea.upper() == idA.upper():
+                return areaObj.areaDescripcion
+        return ""
 
     """
     Obtiene la descripción de un módulo a partir de su identificador.
@@ -516,9 +518,10 @@ class FLManagerModules(object):
     @return Texto de descripción del módulo, si lo encuentra o idM si no lo encuentra.
     """
 
-    def idModuleToDescription(self, idM: _T0) -> _T0:
-        if idM.upper() in self.dictInfoMods.keys():
-            return self.dictInfoMods[idM.upper()].descripcion
+    def idModuleToDescription(self, idM: str) -> str:
+        modObj = self.dictInfoMods.get(idM.upper(), None)
+        if modObj and modObj.descripcion:
+            return modObj.descripcion
 
         return idM
 
@@ -533,10 +536,11 @@ class FLManagerModules(object):
         from pineboolib import pncontrolsfactory
 
         pix = None
-        if idM.upper() in self.dictInfoMods.keys():
+        modObj = self.dictInfoMods.get(idM.upper(), None)
+        if modObj and modObj.icono:
             from pineboolib.application.utils.xpm import cacheXPM
 
-            icono = cacheXPM(self.dictInfoMods[idM.upper()].icono)
+            icono = cacheXPM(modObj.icono)
             pix = pncontrolsfactory.QPixmap(icono)
 
         return pix or pncontrolsfactory.QPixmap()
@@ -548,13 +552,15 @@ class FLManagerModules(object):
     @return Cadena con la versión
     """
 
-    def versionModule(self, idM: _T0) -> Any:
-        if not self.dictInfoMods:
-            return idM
-
-        im = idM.upper()
-
-        return im.version if im else idM
+    def versionModule(self, idM: str) -> str:
+        return idM
+        # FIXME: This code will not work
+        # if not self.dictInfoMods:
+        #     return idM
+        #
+        # im = idM.upper()
+        #
+        # return im.version if im else idM
 
     """
     Para obtener la clave sha local.
@@ -601,7 +607,7 @@ class FLManagerModules(object):
     @return Clave sh asociada al ficheros
     """
 
-    def shaOfFile(self, n: Mapping[slice, Any]) -> Optional[str]:
+    def shaOfFile(self, n: str) -> Optional[str]:
         if not n[:3] == "sys" and not self.conn_.manager().isSystemTable(n):
             formatVal = self.conn_.manager().formatAssignValue("nombre", "string", n, True)
             q = PNSqlQuery(None, self.conn_.dbAux())
@@ -706,13 +712,15 @@ class FLManagerModules(object):
     @return Identificador del módulo al que pertenece el fichero
     """
 
-    def idModuleOfFile(self, n: Union[str, str, Mapping[slice, Any]]) -> Any:
-        if not isinstance(n, str):
-            n = n.toString()
+    def idModuleOfFile(self, name: Union[str]) -> Any:
+        if not isinstance(name, str):
+            n = str(name.toString())
+        else:
+            n = name
 
         from pineboolib.application import project
 
-        if n.endswith(".mtd"):
+        if n.endswith(".mtd") and project._DGI:
             if n[: n.find(".mtd")] in project._DGI.sys_mtds() or n == "flfiles.mtd":
                 return "sys"
 
@@ -807,5 +815,5 @@ class FLManagerModules(object):
     """
 
     def staticLoaderSetup(self) -> None:
-        ui = FLManagerModules().createUI(filedir("../share/pineboo/forms/FLStaticLoaderUI.ui"))
+        ui = self.createUI(filedir("../share/pineboo/forms/FLStaticLoaderUI.ui"))
         FLStaticLoader.setup(self.staticBdInfo_, ui)
