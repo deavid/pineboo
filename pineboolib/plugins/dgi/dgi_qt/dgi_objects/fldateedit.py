@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+import datetime
+from typing import Union
 
 from PyQt5 import QtCore  # type: ignore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qdateedit import QDateEdit
-from pineboolib.application.utils.date_conversion import convert_to_qdate, Date
-import datetime
-from typing import Union
+from pineboolib.application.utils.date_conversion import convert_to_qdate
+from pineboolib.application.types import Date
 
 
 class FLDateEdit(QDateEdit):

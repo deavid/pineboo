@@ -3,8 +3,6 @@ from .iapicursor import IApiCursor
 
 from typing import Any, List, Dict, Optional
 
-_TIConnection = "IConnection"
-
 
 class IConnection:
     """Interface for database cursors which are used to emulate FLSqlCursor."""

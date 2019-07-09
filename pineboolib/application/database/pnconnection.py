@@ -12,7 +12,7 @@ from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
 
 from .pnsqlsavepoint import PNSqlSavePoint
 from . import db_signals
-from typing import Dict, List, Optional, Any, TYPE_CHECKING
+from typing import Dict, List, Optional, Any, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.interfaces.iapicursor import IApiCursor
@@ -90,13 +90,16 @@ class PNConnection(QtCore.QObject, IConnection):
         """Get the current connection name for this cursor."""
         return self.name
 
-    def useConn(self, name="default") -> "IConnection":
+    def useConn(self, name_or_conn: Union[str, IConnection] = "default") -> IConnection:
         """Select another connection which can be not the default one.
 
         Permite seleccionar una conexion que no es la default, Si no existe la crea
         """
-        if isinstance(name, IConnection):
-            name = name.connectionName()
+        name: str
+        if isinstance(name_or_conn, IConnection):
+            name = str(name_or_conn.connectionName())
+        else:
+            name = str(name_or_conn)
 
         if name in ("default", None):
             return self
