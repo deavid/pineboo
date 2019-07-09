@@ -6,7 +6,6 @@ import os
 import traceback
 
 from PyQt5 import QtCore  # type: ignore
-from pineboolib.core.utils.utils_base import create_dict
 from pineboolib.core.utils.logging import logging
 from pineboolib.application import project
 from pineboolib.fllegacy.systype import SysType
@@ -496,13 +495,14 @@ def solve_connection(
     return False
 
 
-def GET(function_name, arguments=[], conn=None) -> Any:
-    if conn is None:
-        conn = project.conn
-    if hasattr(conn.driver(), "send_to_server"):
-        return conn.driver().send_to_server(create_dict("call_function", function_name, conn.driver().id_, arguments))
-    else:
-        return "Funcionalidad no soportada"
+# FIXME: Belongs to RPC drivers
+# def GET(function_name, arguments=[], conn=None) -> Any:
+#     if conn is None:
+#         conn = project.conn
+#     if hasattr(conn.driver(), "send_to_server"):
+#         return conn.driver().send_to_server(create_dict("call_function", function_name, conn.driver().id_, arguments))
+#     else:
+#         return "Funcionalidad no soportada"
 
 
 def check_gc_referrers(typename, w_obj: Callable, name) -> None:

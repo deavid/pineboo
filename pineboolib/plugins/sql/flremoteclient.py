@@ -12,17 +12,20 @@ from pineboolib.application.utils.check_dependencies import check_dependencies
 # from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
 from pineboolib import logging
-from pineboolib.core.utils.utils_base import create_dict
 from typing import Any, Callable, Dict, List, TypeVar, Union
 
 _T0 = TypeVar("_T0")
 _T1 = TypeVar("_T1")
 _T2 = TypeVar("_T2")
 _T3 = TypeVar("_T3")
-_Tcursor_class = "cursor_class"
 
 
 logger = logging.getLogger(__name__)
+
+
+def base_create_dict(method: str, fun: str, id: int, arguments: List[Any] = []) -> Dict[str, Union[str, int, List[Any], Dict[str, Any]]]:
+    data = [{"function": fun, "arguments": arguments, "id": id}]
+    return {"method": method, "params": data, "jsonrpc": "2.0", "id": id}
 
 
 class cursor_class(object):
@@ -61,7 +64,7 @@ class cursor_class(object):
         # print(self.id_, "**", self.last_sql, ret_)
         return ret_
 
-    def __iter__(self: _Tcursor_class) -> _Tcursor_class:
+    def __iter__(self) -> "cursor_class":
         return self
 
     def __next__(self) -> Any:
@@ -150,9 +153,9 @@ class FLREMOTECLIENT(object):
     def DBName(self) -> Any:
         return self._dbname
 
-    def create_dict(self, fun, data: _T1 = []) -> Dict[str, Union[int, str, List[Dict[str, Union[int, str, _T1, _T2]]], _T2]]:
+    def create_dict(self, fun, data: List[Any] = []) -> Dict[str, Union[int, str, List[Dict[str, Union[int, str, _T1, _T2]]], _T2]]:
         fun = "%s__%s" % (self.id_, fun)
-        return create_dict("dbdata", fun, self.id_, data)
+        return base_create_dict("dbdata", fun, self.id_, data)
 
     def send_to_server(self, js) -> Any:
         import requests

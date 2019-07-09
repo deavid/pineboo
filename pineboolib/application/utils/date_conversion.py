@@ -1,6 +1,5 @@
+import datetime
 from PyQt5 import QtCore  # type: ignore
-
-
 from typing import Any, Mapping, Optional, Sized, TypeVar, List, Union, TYPE_CHECKING
 
 _T0 = TypeVar("_T0")
@@ -8,7 +7,6 @@ _TDate = "Date"
 
 if TYPE_CHECKING:
     from PyQt5.QtCore import QDate  # type: ignore
-    import datetime
 
 
 def date_dma_to_amd(f) -> Optional[str]:

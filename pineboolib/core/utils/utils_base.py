@@ -9,10 +9,10 @@ from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir  # typ
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest  # type: ignore
 
 from typing import Optional, Union, Any, List
-from xml.etree.ElementTree import ElementTree
+from xml.etree.ElementTree import ElementTree, Element
 from . import logging
 
-from typing import Callable, Dict, Iterable, Sized, TypeVar
+from typing import Callable, TypeVar
 
 _T0 = TypeVar("_T0")
 _T1 = TypeVar("_T1")
@@ -430,14 +430,12 @@ def parse_for_duplicates(text: str) -> str:
     return ret_
 
 
-"""
-copy and paste from http://effbot.org/zone/element-lib.htm#prettyprint
-it basically walks your tree and adds spaces and newlines so the tree is
-printed in a nice way
-"""
-
-
-def indent(elem: Union[Iterable, Sized], level=0) -> None:
+def indent(elem: Element, level=0) -> None:
+    """
+    copy and paste from http://effbot.org/zone/element-lib.htm#prettyprint
+    it basically walks your tree and adds spaces and newlines so the tree is
+    printed in a nice way
+    """
     i = "\n" + level * "  "
     if len(elem):
         if not elem.text or not elem.text.strip():
@@ -453,8 +451,8 @@ def indent(elem: Union[Iterable, Sized], level=0) -> None:
             elem.tail = i
 
 
-def format_double(d: _T0, part_integer, part_decimal) -> Union[str, _T0]:
-    if d == "":
+def format_double(d: Union[int, str, float], part_integer: int, part_decimal: int) -> str:
+    if isinstance(d, str) and d == "":
         return d
     # import locale
     # p_int = field_meta.partInteger()
@@ -485,8 +483,7 @@ def format_double(d: _T0, part_integer, part_decimal) -> Union[str, _T0]:
     return ret_
 
 
-def format_int(value: _T0, part_intenger=None) -> Union[str, _T0]:
-    str_integer = value
+def format_int(value: Union[str, int, float], part_intenger=None) -> str:
     if value is not None:
         str_integer = "{:,d}".format(int(value))
 
@@ -495,7 +492,9 @@ def format_int(value: _T0, part_intenger=None) -> Union[str, _T0]:
         else:
             str_integer = str_integer.replace(".", ",")
 
-    return str_integer
+        return str_integer
+    else:
+        return ""
 
 
 def unformat_number(new_str: Union[str, str], old_str, type_) -> Any:
@@ -536,11 +535,10 @@ def unformat_number(new_str: Union[str, str], old_str, type_) -> Any:
     return ret_
 
 
-def create_dict(
-    method: _T0, fun: _T1, id: _T2, arguments: _T3 = []
-) -> Dict[str, Union[str, List[Dict[str, Union[_T1, _T2, _T3]]], _T0, _T2]]:
-    data = [{"function": fun, "arguments": arguments, "id": id}]
-    return {"method": method, "params": data, "jsonrpc": "2.0", "id": id}
+# FIXME: Belongs to RPC drivers
+# def create_dict(method: str, fun: str, id: int, arguments: List[Any] = []) -> Dict[str, Union[str, int, List[Any], Dict[str, Any]]]:
+#     data = [{"function": fun, "arguments": arguments, "id": id}]
+#     return {"method": method, "params": data, "jsonrpc": "2.0", "id": id}
 
 
 def is_deployed() -> bool:
