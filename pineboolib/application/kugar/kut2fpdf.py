@@ -197,7 +197,7 @@ class Kut2FPDF(object):
     Añade una nueva página al documento.
     """
 
-    def newPage(self, data_level, add_on_header=True) -> None:
+    def newPage(self, data_level: int, add_on_header=True) -> None:
         self._document.add_page(self._page_orientation)
         self._page_top[str(self._document.page_no())] = self._top_margin
         self._document.set_margins(self._left_margin, self._top_margin, self._right_margin)  # Lo dejo pero no se nota nada
@@ -301,7 +301,7 @@ class Kut2FPDF(object):
     @param data_level. Nivel de seccion.
     """
 
-    def processData(self, section_name: str, data, data_level: Union[bytes, str, SupportsInt]) -> None:
+    def processData(self, section_name: str, data, data_level: int) -> None:
         self.actual_data_level = data_level
         listDF = self._xml.findall(section_name)
         # data_size = len(listDF)

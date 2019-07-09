@@ -23,7 +23,7 @@ class PNSqlQuery(object):
     invalidTables = False
     fields_cache = None
     _is_active = False
-    _fieldNameToPosDict = None
+    _fieldNameToPosDict: Dict[str, int] = None
     value = None
     _sql_inspector = None
 
@@ -130,7 +130,7 @@ class PNSqlQuery(object):
     def addGroup(self, g=None) -> None:
         if g:
             if not self.d.groupDict_:
-                self.d.groupDict_ = {}
+                self.d.groupDict_: Dict[int, Any] = {}
 
             self.d.groupDict_[g.level()] = g.field()
 
@@ -396,7 +396,7 @@ class PNSqlQuery(object):
     @param gd Diccionario de parámetros
     """
 
-    def setGroupDict(self, gd: Union[Iterable, Sized, Mapping[int, Any]]) -> None:
+    def setGroupDict(self, gd: Dict[int, Any]) -> None:
         if not gd:
             return
 
@@ -415,7 +415,7 @@ class PNSqlQuery(object):
     @param pd Diccionario de parámetros
     """
 
-    def setParameterDict(self, pd: Mapping[object, Sequence]) -> None:
+    def setParameterDict(self, pd: Dict[str, Any]) -> None:
         if not pd:
             return
 
@@ -485,7 +485,7 @@ class PNSqlQuery(object):
     def _value_quick(self, n: str, raw: bool = False) -> Any:
         # Fast version of self.value
         if self._fieldNameToPosDict is None:
-            self._fieldNameToPosDict = dict(enumerate(self.d.fieldList_))
+            self._fieldNameToPosDict = {v: n for n, v in enumerate(self.d.fieldList_)}
         try:
             if isinstance(n, int):
                 ret = self._row[n]
@@ -934,6 +934,9 @@ class PNSqlQueryPrivate(object):
     from_ = None
     where_ = None
     orderBy_ = None
+    parameterDict_: Dict[str, Any]
+    groupDict_: Dict[int, Any]
+    fieldMetaDataList_: Dict[str, IFieldMetaData]
 
     def __init__(self, name=None) -> None:
         self.name_ = name
@@ -941,9 +944,9 @@ class PNSqlQueryPrivate(object):
         self.from_ = None
         self.where_ = None
         self.orderBy_ = None
-        self.parameterDict_: Dict[str, Any] = {}
-        self.groupDict_: Dict[int, Any] = {}
-        self.fieldMetaDataList_: Dict[str, IFieldMetaData] = {}
+        self.parameterDict_ = {}
+        self.groupDict_ = {}
+        self.fieldMetaDataList_ = {}
         self.db_ = None
 
     """
@@ -979,7 +982,7 @@ class PNSqlQueryPrivate(object):
     """
     Lista de parámetros
     """
-    parameterDict_ = {}
+    parameterDict_: Dict[str, Any] = {}
 
     """
     Lista de grupos
