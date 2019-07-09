@@ -235,7 +235,7 @@ class PNConnection(QtCore.QObject, IConnection):
     def formatValue(self, t, v, upper) -> Any:
         return self.driver().formatValue(t, v, upper)
 
-    def formatValueLike(self, t, v, upper) -> Any:
+    def formatValueLike(self, t, v, upper) -> str:
         return self.driver().formatValueLike(t, v, upper)
 
     def canSavePoint(self) -> Any:

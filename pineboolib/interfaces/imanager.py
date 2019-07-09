@@ -63,8 +63,8 @@ class IManager(object):
     def formatValue(self, fMD_or_type: str, v: Optional[Union[int, str]], upper: bool = False) -> str:
         return ""
 
-    def formatValueLike(self, *args, **kwargs) -> Any:
-        return None
+    def formatValueLike(self, *args, **kwargs) -> str:
+        return ""
 
     def init(self) -> None:
         return None

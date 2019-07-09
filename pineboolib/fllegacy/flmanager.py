@@ -790,7 +790,7 @@ class FLManager(QtCore.QObject, IManager):
             if args[0] is None:
                 return ""
 
-            self.formatValueLike(args[0].type(), args[1], args[2])
+            return self.formatValueLike(args[0].type(), args[1], args[2])
         else:
             return self.db_.formatValueLike(args[0], args[1], args[2])
 
