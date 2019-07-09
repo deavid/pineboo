@@ -114,7 +114,7 @@ class ProjectConfig:
         valores por defecto y las diferentes formas de abreviar que existen.
         """
         user = "postgres"
-        passwd = None
+        passwd = ""
         host = "127.0.0.1"
         port = "5432"
         dbname = ""
@@ -134,13 +134,13 @@ class ProjectConfig:
         _user_pass, _host_port = conn_list[-2], conn_list[-1]
 
         if _user_pass:
-            user_pass = _user_pass.split(":") + [None, None, None]
+            user_pass = _user_pass.split(":") + ["", "", ""]
             user, passwd, driver_alias = (user_pass[0], user_pass[1] or passwd, user_pass[2] or driver_alias)
             if user_pass[3]:
                 raise ValueError("La cadena de usuario debe tener el formato user:pass:driver.")
 
         if _host_port:
-            host_port = _host_port.split(":") + [None]
+            host_port = _host_port.split(":") + [""]
             host, port = host_port[0], host_port[1] or port
             if host_port[2]:
                 raise ValueError("La cadena de host debe ser host:port.")

@@ -1,5 +1,6 @@
 import traceback
 from pineboolib import logging
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ def monkey_patch_connect() -> None:
     class BoundSignal:
         _CONNECT = QtCore.pyqtBoundSignal.connect
         _EMIT = QtCore.pyqtBoundSignal.emit
-        _LAST_EMITTED_SIGNAL = {}
+        _LAST_EMITTED_SIGNAL: Dict[str, Any] = {}
 
         def slot_decorator(self, slot, connect_stack):
             selfid = repr(self)
@@ -25,7 +26,7 @@ def monkey_patch_connect() -> None:
             def decorated_slot(*args):
                 ret = None
                 if len(args) == 1 and args[0] is False:
-                    args = []
+                    args = tuple()
                 try:
                     # print("Calling slot: %r %r" % (slot, args))
                     ret = slot(*args)
