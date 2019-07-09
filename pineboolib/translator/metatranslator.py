@@ -2,17 +2,12 @@
 
 from PyQt5 import QtXml, QtCore  # type: ignore
 from pineboolib import logging
-from typing import Any
-
-_TMetaTranslatorMessage = "MetaTranslatorMessage"
+from typing import Any, Dict
 
 
 class metaTranslator(object):
-
-    mm = {}
-
     def __init__(self):
-        self.mm = {}
+        self.mm: Dict[Any, Any] = {}
         self.logger = logging.getLogger("FLTranslations.metaTranslator")
 
     # TODO: Esto en producción seria necesario hacerlo desde el programa.
@@ -74,7 +69,7 @@ class metaTranslator(object):
 
         saved = tor.save_qm(file_name, mode)
         if saved and verbose:
-            self.logger.warning("%d finished, %d unfinished and %d untranslated messages" % finished, unfinished, untranslated)
+            self.logger.warning("%d finished, %d unfinished and %d untranslated messages", finished, unfinished, untranslated)
 
         return saved
 
@@ -107,7 +102,6 @@ def encoding_is_utf8(atts) -> Any:
 
 
 class tsHandler(QtXml.QXmlDefaultHandler):
-    tor = None
     type_ = None
     in_message = False
     ferror_count = 0
@@ -115,9 +109,9 @@ class tsHandler(QtXml.QXmlDefaultHandler):
     message_is_utf8 = False
     accum = ""
 
-    context = None
-    source = None
-    comment = None
+    context = ""
+    source = ""
+    comment = ""
     translation = None
 
     def __init__(self, translator) -> None:
@@ -194,12 +188,7 @@ class tsHandler(QtXml.QXmlDefaultHandler):
                 if self.context_is_utf8:
                     self.tor.insert(
                         MetaTranslatorMessage(
-                            self.context.decode("utf-8"),
-                            context_comment,
-                            self.accum.encode("UTF-8"),
-                            None,
-                            True,
-                            MetaTranslatorMessage.Unfinished,
+                            self.context, context_comment, self.accum.encode("UTF-8"), None, True, MetaTranslatorMessage.Unfinished
                         )
                     )
                 else:
@@ -255,9 +244,10 @@ class MetaTranslatorMessage(QtCore.QObject):
         super(MetaTranslatorMessage, self).__init__()
 
         if isinstance(context, metaTranslator):
-            self.mm = context.m.mm
-            self.codec_name = context.tor.codec_name
-            self.codec = context.tor.codec
+            self.mm = context.mm
+            # FIXME: metaTranslator has no att "tor"
+            # self.codec_name = context.tor.codec_name
+            # self.codec = context.tor.codec
             return
 
         self.context_ = context
@@ -289,11 +279,12 @@ class MetaTranslatorMessage(QtCore.QObject):
     def utf8(self) -> Any:
         return self.utf8_
 
-    def operator_is(self: _TMetaTranslatorMessage, m) -> _TMetaTranslatorMessage:
+    def operator_is(self, m) -> "MetaTranslatorMessage":
         if isinstance(m, metaTranslator):
             self.mm = m.mm
-            self.codec_name = m.codec_name
-            self.codec = m.codec
+            # FIXME: metaTranslator has no attr codec
+            # self.codec_name = m.codec_name
+            # self.codec = m.codec
         else:
             self.utf8_ = m.utf8_
             self.ty_ = m.ty_

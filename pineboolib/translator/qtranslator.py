@@ -5,15 +5,12 @@ from typing import Any, Sized, Tuple, List
 
 
 class QTranslator(QtCore.QObject):
-    d = None
-
     def __init__(self, parent, name=None) -> None:
         self.logger = logging.getLogger(__name__)
+        self.d = QTranslatorPrivate(self)
         super(QTranslator, self).__init__(parent)
         if name:
             self.setObjectName(name)
-
-        self.d = QTranslatorPrivate(self)
 
     def insert(self, message) -> None:
         self.unsquezze()
