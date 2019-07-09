@@ -1,11 +1,14 @@
 from pineboolib import logging
 
-from pineboolib.plugins.dgi.dgi_qt.dgi_qt import dgi_qt
-from pineboolib.plugins.dgi.dgi_aqnext.dgi_aqnext import dgi_aqnext
-from pineboolib.plugins.dgi.dgi_fcgi.dgi_fcgi import dgi_fcgi
-from pineboolib.plugins.dgi.dgi_jsonrpc.dgi_jsonrpc import dgi_jsonrpc
-from pineboolib.plugins.dgi.dgi_server.dgi_server import dgi_server
-from typing import Callable
+from typing import Callable, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.plugins.dgi.dgi_qt.dgi_qt import dgi_qt
+    from pineboolib.plugins.dgi.dgi_aqnext.dgi_aqnext import dgi_aqnext
+    from pineboolib.plugins.dgi.dgi_fcgi.dgi_fcgi import dgi_fcgi
+    from pineboolib.plugins.dgi.dgi_jsonrpc.dgi_jsonrpc import dgi_jsonrpc
+    from pineboolib.plugins.dgi.dgi_server.dgi_server import dgi_server
+
 
 logger = logging.getLogger(__name__)
 

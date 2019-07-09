@@ -5,15 +5,13 @@ import re
 import os
 import traceback
 
-from typing import Any, List, Tuple, Optional
-
 from PyQt5 import QtCore  # type: ignore
 from pineboolib.core.utils.utils_base import create_dict
 from pineboolib.core.utils.logging import logging
 from pineboolib.application import project
 from pineboolib.fllegacy.systype import SysType
 import types
-from typing import Callable, Container, Mapping, TypeVar, Union
+from typing import Callable, Container, Mapping, TypeVar, Union, Any, List, Tuple, Optional
 
 _T0 = TypeVar("_T0")
 _T1 = TypeVar("_T1")
@@ -449,7 +447,6 @@ from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
 # aqApp -- imported from loader.main after reload_from_DGI() call, as it is a cyclic dependency
 
 # --- create empty objects first:
-"""
 QComboBox: Any = ObjectNotFoundDGINotLoaded
 QTable: Any = ObjectNotFoundDGINotLoaded
 QLayoutWidget: Any = ObjectNotFoundDGINotLoaded
@@ -560,4 +557,3 @@ TimeEdit: Any = ObjectNotFoundDGINotLoaded
 
 # Clases AQNext
 auth: Any = ObjectNotFoundDGINotLoaded
-"""
