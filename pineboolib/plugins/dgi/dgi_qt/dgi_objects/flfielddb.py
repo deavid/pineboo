@@ -1164,7 +1164,7 @@ class FLFieldDB(QtWidgets.QWidget):
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
             except Exception:
-                self.logger.exception("Error al desconectar señal textChanged")
+                self.logger.debug("Error al desconectar señal textChanged", exc_info=True)
             s = None
             if nulo and v in (None, 0):
                 dv = field.defaultValue()
@@ -1178,6 +1178,8 @@ class FLFieldDB(QtWidgets.QWidget):
                         self.editor_.setText(dv)
 
             else:
+                if v is None:
+                    v = 0.0
                 s = str(round(float(v), partDecimal))
                 if s.find(".") > -1:
                     while len(s[s.find(".") + 1 :]) < partDecimal:
