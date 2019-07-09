@@ -4,15 +4,11 @@ from pineboolib.core.utils.utils_base import aqtt
 from pineboolib.core.utils import logging
 from pineboolib.interfaces import IFieldMetaData
 
-from typing import List, Optional, Union, Any, TypeVar, TYPE_CHECKING
+from typing import List, Optional, Union, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.interfaces import ITableMetaData
     from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
-
-
-_T0 = TypeVar("_T0")
-_T1 = TypeVar("_T1")
 
 logger = logging.getLogger("FLFieldMetadata")
 
@@ -352,7 +348,7 @@ class FLFieldMetaData(IFieldMetaData):
     @return Objeto con la lista de deficiones de la relaciones del campo
     """
 
-    def relationList(self) -> List[Union["FLRelationMetaData", _T0, _T1]]:
+    def relationList(self) -> List["FLRelationMetaData"]:
         return self.d.relationList_
 
     """
