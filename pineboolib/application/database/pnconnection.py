@@ -9,16 +9,17 @@ from pineboolib.core.settings import config
 from pineboolib.core import decorators
 from pineboolib.interfaces.iconnection import IConnection
 from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
-from pineboolib.interfaces.iapicursor import IApiCursor
+
 from .pnsqlsavepoint import PNSqlSavePoint
 from . import db_signals
 from typing import Dict, List, Optional, Any, TYPE_CHECKING
 
-logger = logging.getLogger(__name__)
-
 if TYPE_CHECKING:
+    from pineboolib.interfaces.iapicursor import IApiCursor
     from pineboolib.fllegacy import flmanager
     from pineboolib.fllegacy import flmanagermodules
+
+logger = logging.getLogger(__name__)
 
 
 class PNConnection(QtCore.QObject, IConnection):
@@ -89,7 +90,7 @@ class PNConnection(QtCore.QObject, IConnection):
         """Get the current connection name for this cursor."""
         return self.name
 
-    def useConn(self, name="default") -> IConnection:
+    def useConn(self, name="default") -> "IConnection":
         """Select another connection which can be not the default one.
 
         Permite seleccionar una conexion que no es la default, Si no existe la crea
@@ -115,7 +116,7 @@ class PNConnection(QtCore.QObject, IConnection):
             self.connAux[name] = connection
         return connection
 
-    def dictDatabases(self) -> Dict[str, IConnection]:
+    def dictDatabases(self) -> Dict[str, "IConnection"]:
         return self.connAux
 
     def removeConn(self, name="default") -> bool:
@@ -134,7 +135,7 @@ class PNConnection(QtCore.QObject, IConnection):
     def tables(self) -> Any:
         return self.driver().tables()
 
-    def database(self, name=None) -> IConnection:
+    def database(self, name=None) -> "IConnection":
         if name is None:
             return self
 
@@ -159,7 +160,7 @@ class PNConnection(QtCore.QObject, IConnection):
     def declarative_base(self):
         return self.driver().declarative_base()
 
-    def cursor(self) -> IApiCursor:
+    def cursor(self) -> "IApiCursor":
         return self.conn.cursor()
 
     def conectar(self, db_name, db_host, db_port, db_userName, db_password) -> Any:
@@ -222,10 +223,10 @@ class PNConnection(QtCore.QObject, IConnection):
     def setQsaExceptions(self, b):
         pass
 
-    def db(self) -> IConnection:
+    def db(self) -> "IConnection":
         return self
 
-    def dbAux(self) -> IConnection:
+    def dbAux(self) -> "IConnection":
         return self.useConn("dbAux")
 
     def formatValue(self, t, v, upper) -> Any:

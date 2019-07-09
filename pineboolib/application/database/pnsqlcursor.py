@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import weakref
 import importlib
-from typing import Any, Optional
+from typing import Any, Optional, TYPE_CHECKING
 
 from PyQt5 import QtCore  # type: ignore
 from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
@@ -14,12 +14,15 @@ from pineboolib.core.utils.logging import logging
 from pineboolib.fllegacy.flapplication import aqApp
 
 from .pnbuffer import PNBuffer
-from .pncursortablemodel import PNCursorTableModel
 
 # FIXME: Removde dependency: Should not import from fllegacy.*
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  # FIXME: Removde dependency
 
 from pineboolib.fllegacy import fltablemetadata
+
+if TYPE_CHECKING:
+    from .pncursortablemodel import PNCursorTableModel
+
 
 logger = logging.getLogger(__name__)
 
@@ -206,7 +209,7 @@ class PNCursorPrivate(QtCore.QObject):
 
     countRefCursor = None
 
-    _model: PNCursorTableModel = None
+    _model: "PNCursorTableModel" = None
 
     _currentregister = None
     edition_states_ = None
@@ -665,6 +668,9 @@ class PNSqlCursor(QtCore.QObject):
             self.d.metadata_ = self.db().manager().metadata(self._action.table())
 
         self.d.doAcl()
+
+        from .pncursortablemodel import PNCursorTableModel
+
         self.d._model = PNCursorTableModel(self.conn(), self)
         if not self.model():
             return None
@@ -2121,7 +2127,7 @@ class PNSqlCursor(QtCore.QObject):
     def calculateField(self, name):
         return True
 
-    def model(self) -> PNCursorTableModel:
+    def model(self) -> "PNCursorTableModel":
         return self.d._model
 
     def selection(self):

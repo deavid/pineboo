@@ -201,7 +201,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.close()
 
     @QtCore.pyqtSlot()
-    def saveProfile(self):
+    def saveProfile(self) -> None:
         """
         Guarda la conexión
         """
@@ -277,7 +277,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.ui.cbProfiles.setCurrentText(description)
 
     @QtCore.pyqtSlot()
-    def deleteProfile(self):
+    def deleteProfile(self) -> None:
         """
         Borra la conexión seleccionada
         """
@@ -297,7 +297,7 @@ class DlgConnect(QtWidgets.QWidget):
             self.loadProfiles()
 
     @QtCore.pyqtSlot()
-    def editProfile(self):
+    def editProfile(self) -> None:
         """
         Edita la conexión seleccionada
         """
@@ -394,7 +394,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.ui.leDBName.setText(self.ui.leDescription.text().replace(" ", "_"))
 
     @QtCore.pyqtSlot(int)
-    def enableProfilePassword(self):
+    def enableProfilePassword(self) -> None:
         """
         Comprueba si el perfil requiere password
         """

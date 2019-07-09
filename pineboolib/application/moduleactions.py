@@ -5,8 +5,7 @@ from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.xmlaction import XMLAction
 from .proxy import DelayedObjectProxyLoader
 
-from typing import Any, TYPE_CHECKING
-from typing import NoReturn
+from typing import Any, TYPE_CHECKING, NoReturn
 
 
 class ModuleActions(object):

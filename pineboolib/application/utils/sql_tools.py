@@ -1,6 +1,6 @@
 from pineboolib.core.utils.logging import logging
-from typing import Any
-from typing import Dict, Iterable, Mapping, Sequence, Tuple, Union
+
+from typing import Dict, Iterable, Mapping, Sequence, Tuple, Union, Any
 
 logger = logging.getLogger(__name__)
 

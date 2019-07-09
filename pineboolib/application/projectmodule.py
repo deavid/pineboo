@@ -1,6 +1,6 @@
 import os
 import time
-from typing import List, Optional, Union, Any, Dict
+from typing import List, Optional, Union, Any, Dict, TYPE_CHECKING
 from optparse import Values
 
 # from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists # FIXME: Not allowed yet
@@ -11,14 +11,16 @@ from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils.struct import AreaStruct
 from pineboolib.core.exceptions import CodeDoesNotBelongHereException, NotConnectedError
 from pineboolib.core.settings import config, settings
-from pineboolib.interfaces.dgi_schema import dgi_schema
-from pineboolib.interfaces.iconnection import IConnection
 
 from pineboolib.application.module import Module
-from pineboolib.application.file import File
-from pineboolib.application.xmlaction import XMLAction
-from pineboolib.application.utils.xpm import cacheXPM
+
+
 from pineboolib.application.utils.path import _dir
+
+if TYPE_CHECKING:
+    from pineboolib.interfaces.dgi_schema import dgi_schema
+    from pineboolib.interfaces.iconnection import IConnection
+    from pineboolib.application.xmlaction import XMLAction
 
 
 class Project(object):
@@ -28,10 +30,10 @@ class Project(object):
 
     logger = logging.getLogger("main.Project")
     app: QtCore.QCoreApplication = None
-    conn: IConnection = None  # Almacena la conexión principal a la base de datos
+    conn: "IConnection" = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
     options: Values = None
-    modules: Dict[str, Module]
+    modules: Dict[str, "Module"]
 
     # _initModules = None
     main_form: Any = None  # FIXME: How is this used? Which type?
@@ -68,7 +70,7 @@ class Project(object):
         self.deleteCache = None
         self.parseProject = None
 
-    def init_conn(self, connection: IConnection) -> None:
+    def init_conn(self, connection: "IConnection") -> None:
         self.conn = connection
         self.apppath = filedir("..")
         self.tmpdir = config.value("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))
@@ -78,7 +80,7 @@ class Project(object):
         self.deleteCache = config.value("ebcomportamiento/deleteCache", False)
         self.parseProject = config.value("ebcomportamiento/parseProject", False)
 
-    def init_dgi(self, DGI: dgi_schema) -> None:
+    def init_dgi(self, DGI: "dgi_schema") -> None:
         """Load and associate the defined DGI onto this project"""
         # FIXME: Actually, DGI should be loaded here, or kind of.
         from pineboolib.core.message_manager import Manager
@@ -186,7 +188,9 @@ class Project(object):
             % self.conn.driver().formatValue("bool", "True", False)
         )
 
-        self.modules: Dict[str, Module] = {}
+        self.modules: Dict[str, "Module"] = {}
+        from pineboolib.application.utils.xpm import cacheXPM
+
         for idarea, idmodulo, descripcion, icono in cursor_:
             icono = cacheXPM(icono)
             self.modules[idmodulo] = Module(idarea, idmodulo, descripcion, icono)
@@ -210,6 +214,8 @@ class Project(object):
             raise AssertionError
         p = 0
         pos_qs = 1
+        from pineboolib.application.file import File
+
         for idmodulo, nombre, sha in cursor_:
             if not self._DGI.accept_file(nombre):
                 continue

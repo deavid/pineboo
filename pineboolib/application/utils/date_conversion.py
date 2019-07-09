@@ -1,11 +1,14 @@
-from PyQt5.QtCore import QDate  # type: ignore
 from PyQt5 import QtCore  # type: ignore
-import datetime
 
-from typing import Any, Mapping, Optional, Sized, TypeVar, List, Union
+
+from typing import Any, Mapping, Optional, Sized, TypeVar, List, Union, TYPE_CHECKING
 
 _T0 = TypeVar("_T0")
 _TDate = "Date"
+
+if TYPE_CHECKING:
+    from PyQt5.QtCore import QDate  # type: ignore
+    import datetime
 
 
 def date_dma_to_amd(f) -> Optional[str]:
@@ -295,7 +298,7 @@ class Date(object):
         return not self.__eq__(other)
 
 
-def convert_to_qdate(date: Union[Date, datetime.date, str]) -> QDate:
+def convert_to_qdate(date: Union["Date", "datetime.date", str]) -> "QDate":
     """Convierte diferentes formatos de fecha a QDate
     @param date: Fecha a convertir
     @return QDate con el valor de la fecha dada

@@ -1,12 +1,13 @@
 import copy
 import datetime
-from typing import Dict, List, Union, Optional, Any, TypeVar
+from typing import Dict, List, Union, Optional, Any, TypeVar, TYPE_CHECKING
 
 from pineboolib import logging
 from pineboolib.application import types
 
-from pineboolib.interfaces import isqlcursor
-from pineboolib.interfaces import ifieldmetadata
+if TYPE_CHECKING:
+    from pineboolib.interfaces import isqlcursor
+    from pineboolib.interfaces import ifieldmetadata
 
 logger = logging.getLogger(__name__)
 

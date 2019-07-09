@@ -1,16 +1,20 @@
 import os
 import os.path
-from typing import Any, Optional, Dict
-from pineboolib.core.utils.utils_base import StructMyDict
+from typing import Any, Optional, Dict, TYPE_CHECKING
+
 from pineboolib.core.utils.logging import logging
 from .utils import date_conversion
+
+if TYPE_CHECKING:
+    from pineboolib.core.utils.utils_base import StructMyDict
+
 
 logger = logging.getLogger(__name__)
 
 Date = date_conversion.Date
 
 
-def Boolean(x=False):
+def Boolean(x=False) -> bool:
     """
     Retorna Booelan de una cadena de texto
     """
@@ -91,12 +95,14 @@ function anon(%s) {
     return getattr(forminternalobj(), "anon", None)
 
 
-def Object(x: Optional[Dict[str, Any]] = None) -> StructMyDict:
+def Object(x: Optional[Dict[str, Any]] = None) -> "StructMyDict":
     """
     Objeto tipo object
     """
     if x is None:
         x = {}
+
+    from pineboolib.core.utils.utils_base import StructMyDict
 
     return StructMyDict(x)
 
