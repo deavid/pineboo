@@ -5,7 +5,7 @@ from pineboolib import logging
 from typing import Union, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+    from pineboolib.fllegacy.flsqlcursor import FLSqlCursor  # noqa: F401
 
 logger = logging.getLogger(__name__)
 """
@@ -48,7 +48,7 @@ class AQSql(object):
     }
     """
 
-    def update(self, table_or_cursor: Union[str, FLSqlCursor], fields, values, where="", conn=None):
+    def update(self, table_or_cursor: Union[str, "FLSqlCursor"], fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
             from pineboolib.application.database.pnsqlcursor import PNSqlCursor
@@ -106,7 +106,7 @@ class AQSql(object):
             }
     """
 
-    def insert(self, table_or_cursor: Union[str, FLSqlCursor], fields, values, where="", conn=None):
+    def insert(self, table_or_cursor: Union[str, "FLSqlCursor"], fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
             from pineboolib.application.database.pnsqlcursor import PNSqlCursor
@@ -157,7 +157,7 @@ class AQSql(object):
         }
     """
 
-    def del_(self, cur_or_table: Union[str, FLSqlCursor], where="", conn_name="default"):
+    def del_(self, cur_or_table: Union[str, "FLSqlCursor"], where="", conn_name="default"):
 
         if not isinstance(cur_or_table, str):
             cur = cur_or_table
