@@ -1,5 +1,5 @@
 from pineboolib.core.utils.logging import logging
-from .pnsqlquery import PNSqlQuery
+
 from typing import Any, Iterable, Mapping, Sized, Union
 
 
@@ -46,6 +46,8 @@ def nextCounter(*args) -> Any:
     @return Qvariant con el numero siguiente.
     @author Andrés Otón Urbano.
     """
+    from .pnsqlquery import PNSqlQuery
+
     if len(args) == 2:
         name = args[0]
         cursor_ = args[1]
@@ -183,6 +185,8 @@ def sqlSelect(f: str, s: str, w, tL: str = None, size=0, connName="default") -> 
     if w is None or w == "":
         return False
 
+    from .pnsqlquery import PNSqlQuery
+
     q = PNSqlQuery(None, connName)
     if tL:
         q.setTablesList(tL)
@@ -210,6 +214,8 @@ def quickSqlSelect(f: str, s: str, w: str, connName="default") -> Any:
     Versión rápida de sqlSelect. Ejecuta directamente la consulta sin realizar comprobaciones.
     Usar con precaución.
     """
+    from .pnsqlquery import PNSqlQuery
+
     if not w:
         sql = "select " + s + " from " + f
     else:

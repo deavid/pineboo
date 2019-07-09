@@ -1,8 +1,7 @@
 from pineboolib import logging
 import re
 
-from typing import Optional
-from typing import Any, Tuple
+from typing import Any, Tuple, Optional
 
 
 class ProjectConfig:

@@ -2,10 +2,12 @@ from pineboolib.core.utils.logging import logging
 import os.path
 
 from pineboolib.core.utils.struct import XMLStruct
-from pineboolib.interfaces import IFormDB, IFormRecordDB
 from .utils.path import _path, coalesce_path
 
-from typing import Optional, Any
+from typing import Optional, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.interfaces import IFormDB, IFormRecordDB
 
 
 class XMLMainFormAction(XMLStruct):
@@ -67,7 +69,7 @@ class XMLAction(XMLStruct):
     @return widget con form inicializado
     """
 
-    def loadRecord(self, cursor: None) -> IFormRecordDB:
+    def loadRecord(self, cursor: None) -> "IFormRecordDB":
         self._loaded = getattr(self.formrecord_widget, "_loaded", False)
         if not self._loaded:
             if getattr(self.formrecord_widget, "widget", None):
@@ -100,7 +102,7 @@ class XMLAction(XMLStruct):
 
         return self.formrecord_widget
 
-    def load(self) -> IFormDB:
+    def load(self) -> "IFormDB":
         self._loaded = getattr(self.mainform_widget, "_loaded", False)
         if not self._loaded:
             if getattr(self.mainform_widget, "widget", None):
@@ -140,7 +142,7 @@ class XMLAction(XMLStruct):
     @return wigdet del formRecord.
     """
 
-    def formRecordWidget(self) -> IFormRecordDB:
+    def formRecordWidget(self) -> "IFormRecordDB":
         if not getattr(self.formrecord_widget, "_loaded", None):
             self.loadRecord(None)
 
@@ -187,7 +189,7 @@ class XMLAction(XMLStruct):
     @param parent. Objecto al que carga el script, si no se especifica es a self.script
     """
 
-    def load_script(self, scriptname: str, parent: Optional[IFormDB] = None) -> Any:  # returns loaded script
+    def load_script(self, scriptname: str, parent: Optional["IFormDB"] = None) -> Any:  # returns loaded script
         # FIXME: Parent logic is broken. We're loading scripts to two completely different objects.
         from importlib import machinery
 

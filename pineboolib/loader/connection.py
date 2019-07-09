@@ -20,7 +20,7 @@ def config_dbconn(options) -> Optional[ProjectConfig]:
     return None
 
 
-def connect_to_db(config) -> PNConnection:
+def connect_to_db(config) -> "PNConnection":
 
     connection = PNConnection(config.database, config.host, config.port, config.username, config.password, config.type)
     return connection

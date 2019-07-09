@@ -13,9 +13,11 @@ from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils.logging import logging
 from pineboolib.application.utils.date_conversion import date_amd_to_dma
 from pineboolib.fllegacy.flapplication import aqApp
-from typing import Any, Iterable, Optional, Union, List, Dict, Tuple
-from pineboolib.interfaces.iconnection import IConnection
-from pineboolib.interfaces.iapicursor import IApiCursor
+from typing import Any, Iterable, Optional, Union, List, Dict, Tuple, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.interfaces.iconnection import IConnection
+    from pineboolib.interfaces.iapicursor import IApiCursor
 
 DEBUG = False
 
@@ -46,7 +48,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     sql_str = None
     _initialized = None
 
-    def __init__(self, conn: IConnection, parent) -> None:
+    def __init__(self, conn: "IConnection", parent) -> None:
         """
         Constructor
         @param conn. Objeto PNConnection
@@ -1128,10 +1130,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return Objeto cursor
     """
 
-    def cursorDB(self) -> IApiCursor:
+    def cursorDB(self) -> "IApiCursor":
         return self._cursor_db
 
-    def db(self) -> IConnection:
+    def db(self) -> "IConnection":
         return self._cursorConn
 
     def set_parent_view(self, parent_view) -> None:
