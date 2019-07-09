@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-from typing import Optional
-
-
 class FLAction(object):
 
     """
@@ -18,42 +15,42 @@ class FLAction(object):
     """
     Nombre de la accion
     """
-    name_ = None
+    name_: str
 
     """
     Nombre del script asociado al formulario de edición de registros
     """
-    scriptFormRecord_ = None
+    scriptFormRecord_: str
 
     """
     Nombre del script asociado al formulario maestro
     """
-    scriptForm_ = None
+    scriptForm_: str
 
     """
     Nombre de la tabla origen para el formulario maestro
     """
-    table_ = None
+    table_: str
 
     """
     Nombre del formulario maestro
     """
-    form_ = None
+    form_: str
 
     """
     Nombre del formulario de edición de registros
     """
-    formRecord_ = None
+    formRecord_: str
 
     """
     Texto para la barra de título del formulario maestro
     """
-    caption_ = None
+    caption_: str
 
     """
     Descripción
     """
-    description_ = None
+    description_: str
 
     """
     constructor.
@@ -146,35 +143,35 @@ class FLAction(object):
     Obtiene el nombre del script asociado al formulario maestro
     """
 
-    def scriptForm(self) -> Optional[str]:
+    def scriptForm(self) -> str:
         return self.scriptForm_
 
     """
     Obtiene  la tabla asociada a la accion
     """
 
-    def table(self) -> Optional[str]:
+    def table(self) -> str:
         return self.table_
 
     """
     Obtiene el texto de la barra de título del formulario
     """
 
-    def caption(self) -> Optional[str]:
+    def caption(self) -> str:
         return self.caption_
 
     """
     Obtiene la descripcion
     """
 
-    def description(self) -> None:
+    def description(self) -> str:
         return self.description_
 
     """
     Obtiene el nombre del formulario mestro
     """
 
-    def form(self) -> Optional[str]:
+    def form(self) -> str:
         return self.form_
 
     """

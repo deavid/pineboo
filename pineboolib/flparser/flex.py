@@ -1,5 +1,5 @@
-import ply.lex as lex
-from ply.lex import TOKEN
+import ply.lex as lex  # type: ignore
+from ply.lex import TOKEN  # type: ignore
 
 
 # Reserved words

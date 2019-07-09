@@ -1035,7 +1035,7 @@ class PNSqlCursor(QtCore.QObject):
     @param b TRUE o FALSE
     """
 
-    def setEdition(self, b, m=None):
+    def setEdition(self, b, m: bool = None):
         from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQBoolFlagStateList, AQBoolFlagState  # FIXME: Should not depend on AQS
 
         if m is None:
