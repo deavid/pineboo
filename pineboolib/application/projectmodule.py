@@ -40,7 +40,6 @@ class Project(object):
     _DGI = None
     deleteCache = None
     path = None
-    kugarPluging = None
     _splash = None
     sql_drivers_manager = None
     timer_ = None
@@ -66,7 +65,6 @@ class Project(object):
         self.tables: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.files: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.apppath = None
-        self.kugarPlugin = None
         self.deleteCache = None
         self.parseProject = None
 
@@ -76,9 +74,7 @@ class Project(object):
         self.tmpdir = config.value("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))
         if not os.path.exists(self.tmpdir):
             os.mkdir(self.tmpdir)
-        from pineboolib.plugins.kugar.pnkugarplugins import PNKugarPlugins
 
-        self.kugarPlugin = PNKugarPlugins()
         self.deleteCache = config.value("ebcomportamiento/deleteCache", False)
         self.parseProject = config.value("ebcomportamiento/parseProject", False)
 

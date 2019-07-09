@@ -16,7 +16,7 @@ Conversor de kuts a pyFPDF
 """
 
 
-class kut2fpdf(object):
+class Kut2FPDF(object):
 
     _document = None  # Aquí se irán guardando los datos del documento
     logger = None
@@ -51,8 +51,8 @@ class kut2fpdf(object):
     def __init__(self):
 
         self.logger = logging.getLogger("kut2fpdf")
-        check_dependencies({"fpdf": "pyfpdf"})
-        from pineboolib.plugins.kugar.parsertools import KParserTools
+        check_dependencies({"fpdf": "fpdf2"})
+        from pineboolib.application.kugar.parsertools import KParserTools
         from pineboolib.core.settings import config
 
         self._parser_tools = KParserTools()
