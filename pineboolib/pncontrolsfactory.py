@@ -10,12 +10,7 @@ from pineboolib.core.utils import logging
 from pineboolib.application import project
 from pineboolib.fllegacy.systype import SysType
 import types
-from typing import Callable, Container, Mapping, TypeVar, Union, Any, List, Tuple, Optional
-
-_T0 = TypeVar("_T0")
-_T1 = TypeVar("_T1")
-_T2 = TypeVar("_T2")
-_T3 = TypeVar("_T3")
+from typing import Callable, Any, List, Tuple, Optional, Dict
 
 
 logger = logging.getLogger("PNControlsFactory")
@@ -310,7 +305,7 @@ System = System_class()
 
 
 class ProxySlot:
-    PROXY_FUNCTIONS = {}
+    PROXY_FUNCTIONS: Dict[str, Callable] = {}
 
     def __init__(self, remote_fn: types.MethodType, receiver, slot) -> None:
         self.key = "%r.%r->%r" % (remote_fn, receiver, slot)
@@ -435,12 +430,10 @@ def disconnect(sender, signal, receiver, slot, caller=None) -> Optional[Tuple[An
     return signal_slot
 
 
-def solve_connection(
-    sender, signal: Union[str, Container], receiver, slot: Union[str, str, Mapping[slice, Any]]
-) -> Optional[Union[bool, Tuple[Any, Any]]]:
+def solve_connection(sender, signal: str, receiver, slot: str) -> Optional[Tuple[Any, Any]]:
     if sender is None:
         logger.error("Connect Error:: %s %s %s %s", sender, signal, receiver, slot)
-        return False
+        return None
 
     m = re.search(r"^(\w+)\.(\w+)(\(.*\))?", slot)
     if slot.endswith("()"):
@@ -466,7 +459,7 @@ def solve_connection(
 
     if not oSignal:
         logger.error("ERROR: No existe la señal %s para la clase %s", signal, sender.__class__.__name__)
-        return
+        return None
 
     if remote_fn:
         # if receiver.__class__.__name__ in ("FLFormSearchDB", "QDialog") and slot in ("accept", "reject"):
@@ -488,13 +481,14 @@ def solve_connection(
         if isinstance(slot, str):
             oSlot = getattr(receiver, slot, None)
             if not oSlot:
-                return False
+                logger.error("Al realizar connect %s:%s -> %s:%s ; " "el es QObject pero no tiene slot", sender, signal, receiver, slot)
+                return None
         return oSignal, oSlot
     else:
         logger.error(
             "Al realizar connect %s:%s -> %s:%s ; " "el slot no se reconoce y el receptor no es QObject.", sender, signal, receiver, slot
         )
-    return False
+    return None
 
 
 # FIXME: Belongs to RPC drivers
