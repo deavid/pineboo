@@ -22,8 +22,6 @@ class DlgConnect(QtWidgets.QWidget):
     optionsShowed = True
     minSize = None
     maxSize = None
-    profile_dir = None
-    pNSqlDrivers = None
     edit_mode = None
 
     def __init__(self) -> None:
@@ -34,7 +32,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.optionsShowed = True
         self.minSize = QSize(350, 140)
         self.maxSize = QSize(350, 495)
-        self.profile_dir = FLSettings().readEntry("ebcomportamiento/profiles_folder", filedir("../profiles"))
+        self.profile_dir: str = FLSettings().readEntry("ebcomportamiento/profiles_folder", filedir("../profiles"))
         from pineboolib.application.database.pnsqldrivers import PNSqlDrivers
 
         self.pNSqlDrivers = PNSqlDrivers()
@@ -145,11 +143,11 @@ class DlgConnect(QtWidgets.QWidget):
         tree = ET.parse(fileName)
         root = tree.getroot()
 
-        version = root.get("Version")
-        if version is None:
+        _version = root.get("Version")
+        if _version is None:
             version = 1.0
         else:
-            version = float(version)
+            version = float(_version)
 
         last_profile = self.ui.cbProfiles.currentText()
         if last_profile not in (None, ""):
@@ -235,11 +233,11 @@ class DlgConnect(QtWidgets.QWidget):
         nameDB = self.ui.leDBName.text()
 
         auto_login = self.ui.cbAutoLogin.isChecked()
-        pass_profile = ""
+        pass_profile_text = ""
         if not auto_login:
-            pass_profile = self.ui.leProfilePassword.text()
+            pass_profile_text = self.ui.leProfilePassword.text()
 
-        pass_profile = hashlib.sha256(pass_profile.encode())
+        pass_profile = hashlib.sha256(pass_profile_text.encode())
         profile_user = ET.SubElement(profile, "profile-data")
         profile_password = ET.SubElement(profile_user, "password")
         profile_password.text = pass_profile.hexdigest()
@@ -306,11 +304,11 @@ class DlgConnect(QtWidgets.QWidget):
         tree = ET.parse(file_name)
         root = tree.getroot()
 
-        version = root.get("Version")
-        if version is None:
+        _version = root.get("Version")
+        if _version is None:
             version = 1.0
         else:
-            version = float(version)
+            version = float(_version)
 
         self.ui.leProfilePassword.setText("")
 
@@ -373,11 +371,11 @@ class DlgConnect(QtWidgets.QWidget):
             )
             return
 
-        version = root.get("Version")
-        if version is None:
+        _version = root.get("Version")
+        if _version is None:
             version = 1.0
         else:
-            version = float(version)
+            version = float(_version)
 
         for profile in root.findall("profile-data"):
             password = profile.find("password")
