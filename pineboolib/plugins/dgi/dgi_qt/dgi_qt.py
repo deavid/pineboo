@@ -9,6 +9,7 @@ from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.core.utils.utils_base import filedir, load2xml
 from pineboolib.application.utils.path import _path
 
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ class dgi_qt(dgi_schema):
         parent = qApp.focusWidget().parent() if hasattr(qApp.focusWidget(), "parent") else qApp.focusWidget()
         self.MessageBox.warning(t, self.MessageBox.Ok, self.MessageBox.NoButton, self.MessageBox.NoButton, "Pineboo", parent)
 
-    def createUI(self, n, connector=None, parent=None, name=None):
+    def createUI(self, n, connector=None, parent=None, name=None) -> Any:
         import pineboolib.pncontrolsfactory
 
         if ".ui" not in n:
@@ -68,8 +69,8 @@ class dgi_qt(dgi_schema):
 
         if form_path is None:
             # raise AttributeError("File %r not found in project" % n)
-            # logger.warning("%s.createUI : No se encuentra el fichero %s", self.__name__, n)
-            return
+            logger.debug("createUI: No se encuentra el fichero %s", n)
+            return None
 
         tree = load2xml(form_path)
 

@@ -21,6 +21,8 @@ class about_pineboo(QWidget):
         dlg_ = filedir("dlgabout/about_pineboo.ui")
         version_ = project.version
         self.ui = mng_mod.createUI(dlg_, None, self)  # FIXME: Letting FL* to create Pineboo interface?
+        if self.ui is None:
+            raise Exception("Error creating UI About Dialog")
         self.ui.lbl_version.setText("Pineboo v%s" % str(version_))
         self.ui.btn_close.clicked.connect(self.ui.close)
         self.ui.btn_clipboard.clicked.connect(self.to_clipboard)
