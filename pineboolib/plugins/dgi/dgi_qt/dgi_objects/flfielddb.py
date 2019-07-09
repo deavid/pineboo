@@ -21,7 +21,7 @@ from pineboolib import logging
 from pineboolib import pncontrolsfactory
 from pineboolib.application import project
 
-from typing import Any, Mapping, Optional, SupportsFloat, Union
+from typing import Any, Union
 
 logger = logging.getLogger(__name__)
 
@@ -36,20 +36,19 @@ class FLFieldDB(QtWidgets.QWidget):
     _partDecimal = None
     autoSelect = False
 
-    editor_ = None  # Editor para el contenido del campo que representa el componente
-    fieldName_ = None  # Nombre del campo de la tabla al que esta asociado este componente
-    tableName_ = None  # Nombre de la tabla fóranea
-    actionName_ = None  # Nombre de la accion
-    foreignField_ = None  # Nombre del campo foráneo
-    fieldRelation_ = None  # Nombre del campo de la relación
-    filter_ = None  # Nombre del campo de la relación
-    cursor_ = None  # Cursor con los datos de la tabla origen para el componente
-    cursorInit_ = False  # Indica que si ya se ha inicializado el cursor
-    cursorAuxInit = None  # Indica que si ya se ha inicializado el cursor auxiliar
-    cursorBackup_ = False  # Backup del cursor por defecto para acceder al modo tabla externa
-    cursorAux = False  # Cursor auxiliar de uso interno para almacenar los registros de la tabla relacionada con la de origen
+    editor_: Any  # Editor para el contenido del campo que representa el componente
+    fieldName_: str  # Nombre del campo de la tabla al que esta asociado este componente
+    tableName_: str  # Nombre de la tabla fóranea
+    actionName_: str  # Nombre de la accion
+    foreignField_: str  # Nombre del campo foráneo
+    fieldRelation_: str  # Nombre del campo de la relación
+    filter_: str  # Nombre del campo de la relación
+    cursor_: Any  # Cursor con los datos de la tabla origen para el componente
+    cursorInit_: bool  # Indica que si ya se ha inicializado el cursor
+    cursorAuxInit: bool  # Indica que si ya se ha inicializado el cursor auxiliar
+    cursorBackup_: Any  # Backup del cursor por defecto para acceder al modo tabla externa
+    cursorAux: Any  # Cursor auxiliar de uso interno para almacenar los registros de la tabla relacionada con la de origen
 
-    topWidget_ = False
     showed = False
     showAlias_ = True
     datePopup_ = None
@@ -60,7 +59,7 @@ class FLFieldDB(QtWidgets.QWidget):
     autoComFieldName_ = None
     accel_ = None
     keepDisabled_ = False
-    editorImg_ = None
+    editorImg_: "pncontrolsfactory.FLPixmapView"
     pbAux_ = None
     pbAux2_ = None
     pbAux3_ = None
@@ -104,7 +103,7 @@ class FLFieldDB(QtWidgets.QWidget):
         if self.maxPixImages_ in (None, ""):
             self.maxPixImages_ = 600
         self.maxPixImages_ = int(self.maxPixImages_)
-
+        self.editorImg_ = None
         self.topWidget_ = parent
         # self._parent = parent
         from pineboolib import pncontrolsfactory
@@ -369,7 +368,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         return pncontrolsfactory.QLineEdit.Normal
 
-    def _process_autocomplete_events(self, event) -> Optional[bool]:
+    def _process_autocomplete_events(self, event) -> bool:
         timerActive = False
         if self.autoComFrame_ and self.autoComFrame_.isVisible():
             if event.key() == Qt.Key_Down and self.autoComPopup_:
@@ -416,6 +415,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 else:
                     self.timerAutoComp_.singleShot(0, self.autoCompletionUpdateValue)
                     return True
+        return False
 
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(int)
@@ -654,7 +654,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @param v Valor a establecer
     """
 
-    def setValue(self, v: Union[bytes, str, str, SupportsFloat, Mapping[slice, Any]]) -> None:
+    def setValue(self, v: Union[str, float]) -> None:
         if not self.cursor_:
             self.logger.error("FLFieldDB(%s):ERROR: El control no tiene cursor todavía. (%s)", self.fieldName_, self)
             return
@@ -822,7 +822,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.logger.warning(FLUtil.tr("FLFieldDB::value() : No existe el campo %s"), self.fieldName_)
             return None
 
-        v = None
+        v: Any = None
 
         if field.hasOptionsList():
             v = int(self.editor_.currentItem())
@@ -1164,7 +1164,7 @@ class FLFieldDB(QtWidgets.QWidget):
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
             except Exception:
-                self.logger.exception("Error al desconectar señal textChanged")
+                self.logger.debug("Error al desconectar señal textChanged", exc_info=True)
             s = None
             if nulo and v in (None, 0):
                 dv = field.defaultValue()
@@ -1178,6 +1178,8 @@ class FLFieldDB(QtWidgets.QWidget):
                         self.editor_.setText(dv)
 
             else:
+                if v is None:
+                    v = 0.0
                 s = str(round(float(v), partDecimal))
                 if s.find(".") > -1:
                     while len(s[s.find(".") + 1 :]) < partDecimal:
