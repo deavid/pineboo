@@ -1,13 +1,8 @@
 from pineboolib import logging
 import re
 
-
 from typing import Optional
-from typing import Any, Tuple, TypeVar
-
-_T1 = TypeVar("_T1")
-
-_T1 = TypeVar("_T1")
+from typing import Any, Tuple
 
 
 class ProjectConfig:
@@ -46,8 +41,8 @@ class ProjectConfig:
         tree = ET.parse(file_name)
         root = tree.getroot()
 
-        version = root.get("Version")
-        if version is None:
+        version_ = root.get("Version")
+        if version_ is None:
             version = 1.0
         else:
             version = float(version)  # FIXME: Esto es muy mala idea. Tratar versiones como float causará problemas al comparar.
@@ -103,7 +98,7 @@ class ProjectConfig:
         return True
 
     @classmethod
-    def translate_connstring(cls, connstring: _T1) -> Tuple[Any, Any, Any, Any, Any, Any]:
+    def translate_connstring(cls, connstring: str) -> Tuple[Any, Any, Any, Any, Any, Any]:
         """Translate a DSN connection string into user, pass, etc.
 
         Acepta un parámetro "connstring" que tenga la forma user@host/dbname
