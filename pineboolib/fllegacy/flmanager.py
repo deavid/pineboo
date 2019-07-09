@@ -8,13 +8,11 @@ from pineboolib.core.utils.utils_base import filedir, auto_qt_translate_text
 from pineboolib.application.utils.xpm import cacheXPM
 
 
-from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
-from pineboolib.application.database.pnsqlquery import PNSqlQuery, PNGroupByQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-from pineboolib.fllegacy.flaction import FLAction
+
 from pineboolib.fllegacy.flutil import FLUtil
 
 from xml import etree  # type: ignore
@@ -22,8 +20,16 @@ from pineboolib import logging
 from pineboolib.interfaces import IManager
 
 from PyQt5.QtXml import QDomElement  # type: ignore
-from pineboolib.interfaces.iconnection import IConnection
-from typing import Optional, Union, Any, Mapping
+
+
+from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
+from pineboolib.application.database.pnsqlquery import PNSqlQuery, PNGroupByQuery
+
+from typing import Optional, Union, Any, Mapping, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.interfaces.iconnection import IConnection
+    from pineboolib.fllegacy.flaction import FLAction
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +60,7 @@ class FLManager(QtCore.QObject, IManager):
     buffer_ = None
     metadataCachedFails = []
 
-    def __init__(self, db: IConnection) -> None:
+    def __init__(self, db: "IConnection") -> None:
         """
         constructor
         """
@@ -138,7 +144,7 @@ class FLManager(QtCore.QObject, IManager):
 
         del self
 
-    def metadata(self, n: Union[str, QDomElement], quick: Optional[bool] = None) -> Optional[FLTableMetaData]:
+    def metadata(self, n: Union[str, QDomElement], quick: Optional[bool] = None) -> Optional["FLTableMetaData"]:
         """
         Para obtener definicion de una tabla de la base de datos, a partir de un fichero XML.
 
@@ -420,7 +426,7 @@ class FLManager(QtCore.QObject, IManager):
     def metadataDev(self, n, quick=None):
         return True
 
-    def query(self, n, parent=None) -> Optional[PNSqlQuery]:
+    def query(self, n, parent=None) -> Optional["PNSqlQuery"]:
         """
         Para obtener una consulta de la base de datos, a partir de un fichero XML.
 
@@ -443,6 +449,7 @@ class FLManager(QtCore.QObject, IManager):
         #    encoding="UTF-8",
         #    remove_blank_text=True,
         # )
+        from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
         q = PNSqlQuery(parent, self.db_.connectionName())
 
@@ -485,7 +492,7 @@ class FLManager(QtCore.QObject, IManager):
 
         return q
 
-    def action(self, n: str) -> FLAction:
+    def action(self, n: str) -> "FLAction":
         """
         Obtiene la definición de una acción a partir de su nombre.
 
@@ -499,6 +506,9 @@ class FLManager(QtCore.QObject, IManager):
         # FIXME: This function is really inefficient. Pineboo already parses the actions much before.
         if n in self.cacheAction_.keys():
             return self.cacheAction_[n]
+
+        from pineboolib.fllegacy.flaction import FLAction
+
         a = FLAction()
         util = FLUtil()
         doc = QDomDocument(n)
@@ -950,7 +960,7 @@ class FLManager(QtCore.QObject, IManager):
 
             return retorno
 
-    def metadataField(self, field: QDomElement, v: bool = True, ed: bool = True) -> FLFieldMetaData:
+    def metadataField(self, field: QDomElement, v: bool = True, ed: bool = True) -> "FLFieldMetaData":
         """
         Crea un objeto FLFieldMetaData a partir de un elemento XML.
 
@@ -1199,7 +1209,7 @@ class FLManager(QtCore.QObject, IManager):
 
         return f
 
-    def metadataRelation(self, relation: QDomElement) -> FLRelationMetaData:
+    def metadataRelation(self, relation: QDomElement) -> "FLRelationMetaData":
         """
         Crea un objeto FLRelationMetaData a partir de un elemento XML.
 
@@ -1449,9 +1459,9 @@ class FLManager(QtCore.QObject, IManager):
         #    return None
 
         tableLarge = None
-        from pineboolib.fllegacy.flapplication import aqApp
+        from pineboolib import pncontrolsfactory
 
-        if aqApp.singleFLLarge():
+        if pncontrolsfactory.aqApp.singleFLLarge():
             tableLarge = "fllarge"
         else:
             tableLarge = "fllarge_%s" % tableName

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from pineboolib.application import project
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib import logging
-from typing import Union
-from typing import Any
+
+from typing import Union, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
 logger = logging.getLogger(__name__)
 """
@@ -49,7 +51,9 @@ class AQSql(object):
     def update(self, table_or_cursor: Union[str, FLSqlCursor], fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
-            cur = FLSqlCursor(table_or_cursor, conn)
+            from pineboolib.application.database.pnsqlcursor import PNSqlCursor
+
+            cur = PNSqlCursor(table_or_cursor, conn)
         else:
             cur = table_or_cursor
 
@@ -105,7 +109,9 @@ class AQSql(object):
     def insert(self, table_or_cursor: Union[str, FLSqlCursor], fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
-            cur = FLSqlCursor(table_or_cursor, conn)
+            from pineboolib.application.database.pnsqlcursor import PNSqlCursor
+
+            cur = PNSqlCursor(table_or_cursor, conn)
         else:
             cur = table_or_cursor
 
@@ -187,9 +193,9 @@ class AQSql(object):
 
             return ok
         else:
-            from .aqsqlcursor import AQSqlCursor
+            from pineboolib.application.database.pnsqlcursor import PNSqlCursor
 
-            cur = AQSqlCursor(cur_or_table, True, conn_name)
+            cur = PNSqlCursor(cur_or_table, True, conn_name)
             cur.setForwardOnly(True)
             return cur.del_(where)
 
