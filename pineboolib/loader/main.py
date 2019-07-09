@@ -176,7 +176,7 @@ def exec_main(options: Values) -> int:
     from .connection import config_dbconn, connect_to_db, DEFAULT_SQLITE_CONN
 
     configdb = config_dbconn(options)
-
+    logger.debug(configdb)
     project.init_dgi(_DGI)
 
     from pineboolib import pncontrolsfactory

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
+import importlib
+import sys
+from typing import Dict
 
 from pineboolib.core.utils.logging import logging
 from pineboolib.core.utils.singleton import Singleton
-
-import importlib
-import sys
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,6 @@ class PNSqlDrivers(object, metaclass=Singleton):
     Esta clase gestiona los diferentes controladores de BD.
     """
 
-    driverName = None
     driver_ = None
     only_pure_python_ = None
 
@@ -27,15 +26,21 @@ class PNSqlDrivers(object, metaclass=Singleton):
 
         self.only_pure_python_ = getattr(sys, "frozen", False)
 
-        self.driversdict = {}
-        self.driversDefaultPort = {}
-        self.desktopFile = {}
+        self.driversdict: Dict[str, str] = {}
+        self.driversDefaultPort: Dict[str, int] = {}
+        self.desktopFile: Dict[str, str] = {}
 
         dir_list = [file for file in os.listdir(filedir("plugins/sql")) if not file[0] == "_" and file.find(".py") > -1]
         for item in dir_list:
             file_name = item[: item.find(".py")]
-            mod_ = importlib.import_module("pineboolib.plugins.sql.%s" % file_name)
-
+            try:
+                mod_ = importlib.import_module("pineboolib.plugins.sql.%s" % file_name)
+            except ModuleNotFoundError:
+                logger.debug("Error trying to load driver %s", file_name, exc_info=True)
+                continue
+            except Exception:
+                logger.exception("Unexpected error loading driver %s", file_name)
+                continue
             driver_ = getattr(mod_, file_name.upper())()
             if driver_.pure_python() or driver_.safe_load():
                 self.driversdict[file_name] = driver_.alias_
