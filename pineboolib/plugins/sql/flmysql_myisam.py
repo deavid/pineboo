@@ -16,27 +16,23 @@ from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.application import project
 from pineboolib import logging
 
-from typing import Any, Iterable, Mapping, Optional, Sized, TypeVar, Union, List, Dict
-
-_T0 = TypeVar("_T0")
-_T1 = TypeVar("_T1")
+from typing import Any, Iterable, Optional, Union, List, Dict
 
 logger = logging.getLogger(__name__)
 
 
 class FLMYSQL_MYISAM(object):
 
-    version_ = None
+    version_: str
     conn_ = None
-    name_ = None
-    alias_ = None
-    errorList = None
-    lastError_ = None
-    cursorsArray_ = None
-    noInnoDB = None
+    name_: str
+    alias_: str
+    lastError_ = ""
+    cursorsArray_: Dict[str, Any]
+    noInnoDB: bool
     mobile_ = False
     pure_python_ = False
-    defaultPort_ = None
+    defaultPort_: int
     cursor_ = None
     db_ = None
     engine_ = None
@@ -48,7 +44,6 @@ class FLMYSQL_MYISAM(object):
         self.conn_ = None
         self.name_ = "FLMYSQL_MyISAM"
         self.open_ = False
-        self.errorList = []
         self.alias_ = "MySQL MyISAM (MYSQLDB)"
         self.cursorsArray_ = {}
         self.noInnoDB = True
@@ -87,14 +82,15 @@ class FLMYSQL_MYISAM(object):
     def connect(self, db_name, db_host, db_port, db_userName, db_password) -> Any:
         self._dbname = db_name
         check_dependencies({"MySQLdb": "mysqlclient", "sqlalchemy": "sqlAlchemy"})
-        from sqlalchemy import create_engine
-        import MySQLdb
+        from sqlalchemy import create_engine  # type: ignore
+        import MySQLdb  # type: ignore
 
         try:
             self.conn_ = MySQLdb.connect(db_host, db_userName, db_password, db_name)
             self.engine_ = create_engine("mysql+mysqldb://%s:%s@%s:%s/%s" % (db_userName, db_password, db_host, db_port, db_name))
         except MySQLdb.OperationalError as e:
-            project._splash.hide()
+            if project._splash:
+                project._splash.hide()
             if "Unknown database" in str(e):
                 ret = QMessageBox.warning(
                     None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No
@@ -134,6 +130,8 @@ class FLMYSQL_MYISAM(object):
 
     def cursor(self) -> Any:
         if not self.cursor_:
+            if not self.conn_:
+                raise Exception("Must be connected")
             self.cursor_ = self.conn_.cursor()
             # self.cursor_.execute('SET NAMES utf8;')
             # self.cursor_.execute('SET CHARACTER SET utf8;')
@@ -145,7 +143,7 @@ class FLMYSQL_MYISAM(object):
 
     def session(self) -> None:
         if self.session_ is None:
-            from sqlalchemy.orm import sessionmaker
+            from sqlalchemy.orm import sessionmaker  # type: ignore
 
             # from sqlalchemy import event
             # from pineboolib.pnobjectsfactory import before_commit, after_commit
@@ -156,16 +154,16 @@ class FLMYSQL_MYISAM(object):
 
     def declarative_base(self) -> Any:
         if self.declarative_base_ is None:
-            from sqlalchemy.ext.declarative import declarative_base
+            from sqlalchemy.ext.declarative import declarative_base  # type: ignore
 
             self.declarative_base_ = declarative_base()
 
         return self.declarative_base_
 
-    def formatValueLike(self, type_, v: Union[Sized, Mapping[int, Any]], upper) -> str:
+    def formatValueLike(self, type_, v: Any, upper) -> str:
         res = "IS NULL"
 
-        if len(v):
+        if v:
             if type_ == "bool":
                 from pineboolib.fllegacy.flapplication import aqApp
 
@@ -178,7 +176,9 @@ class FLMYSQL_MYISAM(object):
             elif type_ == "date":
                 from pineboolib.application.utils.date_conversion import date_dma_to_amd
 
-                res = " LIKE '%" + date_dma_to_amd(str(v)) + "'"
+                amd_date = date_dma_to_amd(str(v)) or ""
+
+                res = " LIKE '%" + amd_date + "'"
 
             elif type_ == "time":
                 t = v.toTime()
@@ -193,11 +193,11 @@ class FLMYSQL_MYISAM(object):
 
         return res
 
-    def formatValue(self, type_, v: _T1, upper) -> Union[bool, str, _T1]:
+    def formatValue(self, type_, v: str, upper) -> Union[bool, str, None]:
 
         # util = FLUtil()
 
-        s = None
+        s: Union[bool, str, None] = None
 
         # if v == None:
         #    v = ""
@@ -238,11 +238,12 @@ class FLMYSQL_MYISAM(object):
                 s = "'%s'" % v
 
         elif type_ == "pixmap":
-            if s is None:
+            if v is None:
                 s = v
-            if s.find("'") > -1:
-                s = self.normalizeValue(v)
-            s = "'%s'" % s
+            else:
+                if v.find("'") > -1:
+                    s = self.normalizeValue(v)
+                s = "'%s'" % s
 
         else:
             s = v
@@ -288,9 +289,11 @@ class FLMYSQL_MYISAM(object):
         if q.first() and q.value(0) is not None:
             max = q.value(0)
 
+        if not self.conn_:
+            raise Exception("Must be connected")
         cursor = self.conn_.cursor()
 
-        strQry = "SELECT seq FROM flseqs WHERE tabla = '%s' AND campo ='%s'" % (table, field)
+        strQry: Optional[str] = "SELECT seq FROM flseqs WHERE tabla = '%s' AND campo ='%s'" % (table, field)
         try:
             cur_max = 0
             cursor.execute(strQry)
@@ -607,6 +610,8 @@ class FLMYSQL_MYISAM(object):
         return sql
 
     def Mr_Proper(self) -> None:
+        if not self.db_:
+            raise Exception("must be connected")
         util = FLUtil()
         self.db_.dbAux().transaction()
 
@@ -753,7 +758,7 @@ class FLMYSQL_MYISAM(object):
         self.active_create_index = False
         util.destroyProgressDialog()
 
-    def alterTable(self, mtd1, mtd2, key: Sized, force=False) -> Any:
+    def alterTable(self, mtd1, mtd2, key: str, force=False) -> Any:
         return self.alterTable2(mtd1, mtd2, key, force)
 
     def hasCheckColumn(self, mtd) -> bool:
@@ -767,7 +772,9 @@ class FLMYSQL_MYISAM(object):
 
         return False
 
-    def alterTable2(self, mtd1, mtd2, key: Sized, force=False) -> bool:
+    def alterTable2(self, mtd1, mtd2, key: str, force=False) -> bool:
+        if not self.db_:
+            raise Exception("must be connected")
 
         util = FLUtil()
 
@@ -1080,6 +1087,8 @@ class FLMYSQL_MYISAM(object):
 
         if not records:
             return False
+        if not self.db_:
+            raise Exception("must be connected")
 
         mtd = self.db_.manager().metadata(table_name)
         fList = []
@@ -1121,6 +1130,8 @@ class FLMYSQL_MYISAM(object):
             processed_fields = []
             try:
                 recMtd = self.recordInfo(tmd_or_table2)
+                if not recMtd:
+                    raise Exception("Unexpected error trying to get recordInfo for %r" % tmd_or_table2)
                 recBd = self.recordInfo2(table1)
                 # fieldBd = None
                 for fieldMtd in recMtd:
@@ -1146,7 +1157,7 @@ class FLMYSQL_MYISAM(object):
                     mismatch = True
 
             except Exception:
-                print(traceback.format_exc())
+                logger.exception("mismatchedTable: Unexpected exception")
 
             return mismatch
 
@@ -1156,6 +1167,8 @@ class FLMYSQL_MYISAM(object):
     def recordInfo2(self, tablename) -> List[list]:
         if not self.isOpen():
             raise Exception("Connection not open")
+        if not self.conn_:
+            raise Exception("Must be connected")
         info = []
         cursor = self.conn_.cursor()
 
@@ -1185,10 +1198,10 @@ class FLMYSQL_MYISAM(object):
                     precision_ = int(len_[len_.find(",") :])
                     len_ = len_[: len_.find(",")]
 
-            len_ = int(len_)
+            len_n = int(len_)
 
-            if len_ == 255 and tipo_ == "string":
-                len_ = 0
+            if len_n == 255 and tipo_ == "string":
+                len_n = 0
 
             default_value_ = field[4]
             primary_key_ = True if field[3] == "PRI" else False
@@ -1199,12 +1212,12 @@ class FLMYSQL_MYISAM(object):
             # print("longitud:", len_)
             # print("Precision:", precision_)
             # print("Defecto:", default_value_)
-            info.append([col_name, tipo_, allow_null, len_, precision_, default_value_, primary_key_])
+            info.append([col_name, tipo_, allow_null, len_n, precision_, default_value_, primary_key_])
             # info.append(desc[0], desc[1], not desc[6], , part_decimal, default_value, is_primary_key)
 
         return info
 
-    def decodeSqlType(self, t: _T0) -> Union[str, _T0]:
+    def decodeSqlType(self, t: str) -> str:
 
         ret = t
 
@@ -1234,6 +1247,8 @@ class FLMYSQL_MYISAM(object):
         if not self.isOpen():
             return None
 
+        if not self.db_:
+            raise Exception("must be connected")
         info = []
 
         if isinstance(tablename_or_query, str):
@@ -1273,7 +1288,7 @@ class FLMYSQL_MYISAM(object):
 
         return info
 
-    def notEqualsFields(self, field1: Mapping[int, Any], field2: Mapping[int, Any]) -> bool:
+    def notEqualsFields(self, field1: List[Any], field2: List[Any]) -> bool:
         # print("comparando", field1, field1[1], field2, field2[1])
         ret = False
         try:
