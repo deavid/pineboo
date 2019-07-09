@@ -61,7 +61,7 @@ class IFieldMetaData:
         return 0
 
     def metadata(self) -> ITableMetaData:
-        return ITableMetaData()
+        return ITableMetaData("", None, None)
 
     def name(self) -> str:
         return ""
