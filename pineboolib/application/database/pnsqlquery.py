@@ -3,7 +3,8 @@ from pineboolib.core import decorators
 from pineboolib.core.settings import config
 from pineboolib.application.utils import sql_tools
 from pineboolib.application import project
-from typing import Any, Iterable, Mapping, Sequence, Sized, Union, List
+from pineboolib.interfaces.ifieldmetadata import IFieldMetaData
+from typing import Any, Iterable, Mapping, Sequence, Sized, Union, List, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -303,7 +304,7 @@ class PNSqlQuery(object):
     @return Cadena de texto con la sentencia completa SQL que genera la consulta
     """
 
-    def sql(self) -> Union[bool, str]:
+    def sql(self) -> Optional[str]:
         # for tableName in self.d.tablesList_:
         #    if not self.d.db_.manager().existsTable(tableName) and not self.d.db_.manager().createTable(tableName):
         #        return
@@ -311,7 +312,7 @@ class PNSqlQuery(object):
         res = None
 
         if not self.d.select_:
-            return False
+            return None
 
         if not self.d.from_:
             res = "SELECT %s" % self.d.select_
@@ -399,7 +400,6 @@ class PNSqlQuery(object):
         if not gd:
             return
 
-        self.d.groupDict_ = []
         self.d.groupDict_ = gd
 
     """
@@ -419,7 +419,6 @@ class PNSqlQuery(object):
         if not pd:
             return
 
-        self.d.parameterDict_ = []
         self.d.parameterDict_ = pd
 
     """
@@ -435,7 +434,7 @@ class PNSqlQuery(object):
         logger.warning("DEBUG : Nombre de la consulta : %s", self.d.name_)
         logger.warning("DEBUG : Niveles de agrupamiento :")
         if self.d.groupDict_:
-            for lev in self.d.groupDict_:
+            for lev in self.d.groupDict_.values():
                 logger.warning("**Nivel : %s", lev.level())
                 logger.warning("**Campo : %s", lev.field())
         else:
@@ -731,7 +730,7 @@ class PNSqlQuery(object):
     @param v Valor para el parámetros
     """
 
-    def setValueParam(self, name: object, v) -> None:
+    def setValueParam(self, name: str, v: Any) -> None:
         self.d.parameterDict_[name] = v
 
     """
@@ -740,7 +739,7 @@ class PNSqlQuery(object):
     @param name Nombre del parámetro.
     """
 
-    def valueParam(self, name: object) -> Any:
+    def valueParam(self, name: str) -> Any:
         if name in self.d.parameterDict_.keys():
             return self.d.parameterDict_[name]
         else:
@@ -935,7 +934,6 @@ class PNSqlQueryPrivate(object):
     from_ = None
     where_ = None
     orderBy_ = None
-    groupDict_ = []
 
     def __init__(self, name=None) -> None:
         self.name_ = name
@@ -943,15 +941,10 @@ class PNSqlQueryPrivate(object):
         self.from_ = None
         self.where_ = None
         self.orderBy_ = None
-        self.parameterDict_ = {}
-        self.groupDict_ = []
-        self.fieldMetaDataList_ = {}
+        self.parameterDict_: Dict[str, Any] = {}
+        self.groupDict_: Dict[int, Any] = {}
+        self.fieldMetaDataList_: Dict[str, IFieldMetaData] = {}
         self.db_ = None
-
-    def __del__(self) -> None:
-        self.parameterDict_ = None
-        self.groupDict_ = None
-        self.fieldMetaDataList_ = None
 
     """
     Nombre de la consulta
@@ -991,7 +984,7 @@ class PNSqlQueryPrivate(object):
     """
     Lista de grupos
     """
-    groupDict_ = {}
+    groupDict_: Dict[int, Any] = {}
 
     """
     Lista de nombres de las tablas que entran a formar
