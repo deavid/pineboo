@@ -44,7 +44,7 @@ class XMLAction(XMLStruct):
 
     logger = logging.getLogger("main.XMLAction")
 
-    def __init__(self, *args, project, **kwargs) -> None:
+    def __init__(self, *args, project, name=None, **kwargs) -> None:
         """
         Constructor
         """
@@ -53,7 +53,7 @@ class XMLAction(XMLStruct):
         if not self.project:
             raise ValueError("XMLActions must belong to a project")
         self.form = self._v("form")
-        self.name = self._rv("name")  # Mandatory
+        self.name = name or self._rv("name")  # Mandatory
         self.description = self._v("description")
         self.scriptform = self._v("scriptform")
         self.table = self._v("table")

@@ -726,7 +726,7 @@ class FLTableMetaDataPrivate:
     """
     Lista de campos que tiene esta tabla
     """
-    fieldList_: List[FLFieldMetaData]
+    fieldList_: List["FLFieldMetaData"]
 
     """
     Clave compuesta que tiene esta tabla

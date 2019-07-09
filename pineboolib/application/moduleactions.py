@@ -47,9 +47,8 @@ class ModuleActions(object):
         self.tree = load2xml(self.path)
         self.root = self.tree.getroot()
 
-        action = XMLAction(project=self.project)
+        action = XMLAction(project=self.project, name=self.mod.name)
         action.mod = self
-        action.name = self.mod.name
         action.alias = self.mod.name
         # action.form = self.mod.name
         action.form = None
