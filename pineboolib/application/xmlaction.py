@@ -18,7 +18,7 @@ class XMLMainFormAction(XMLStruct):
     name = "unnamed"
     text = ""
     mainform = None
-    mod = None
+    mod: Any = None
     prj = None
     slot = None
     logger = logging.getLogger("main.XMLMainFormAction")
@@ -27,6 +27,8 @@ class XMLMainFormAction(XMLStruct):
         """
         Lanza la action
         """
+        if self.mod is None:
+            raise Exception("No module set")
         self.logger.debug("Running: %s %s %s", self.name, self.text, self.slot)
         try:
             action = self.mod.actions[self.name]
@@ -130,11 +132,11 @@ class XMLAction(XMLStruct):
     Llama a la función main de una action
     """
 
-    def execMainScript(self, name) -> Optional[bool]:
+    def execMainScript(self, name) -> None:
         a = self.project.conn.manager().action(name)
         if not a:
             self.logger.warning("No existe la acción %s", name)
-            return True
+            return
         self.project.call("%s.main" % a.name(), [], None, False)
 
     """
@@ -217,8 +219,9 @@ class XMLAction(XMLStruct):
 
         if scriptname is None:
             script_loaded.form = script_loaded.FormInternalObj(action=action_, project=self.project, parent=parent_object)
-            parent.widget = script_loaded.form
-            parent.iface = parent.widget.iface
+            if parent:
+                parent.widget = script_loaded.form
+                parent.iface = parent.widget.iface
             return script_loaded
 
         script_path_py = self.project._DGI.alternative_script_path("%s.py" % scriptname)

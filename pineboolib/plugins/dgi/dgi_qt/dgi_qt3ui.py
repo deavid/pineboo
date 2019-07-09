@@ -11,10 +11,9 @@ from pineboolib.application import project
 
 from pineboolib import pncontrolsfactory
 
-from typing import Iterable, Optional, Tuple, TypeVar, Union
+from typing import Iterable, Optional, Tuple, TypeVar, Union, Callable
 
 _T0 = TypeVar("_T0")
-_T2 = TypeVar("_T2")
 
 ICONS = {}
 root = None
@@ -31,7 +30,7 @@ class Options:
 #      una nueva clase.
 
 
-def loadUi(form_path: str, widget, parent: _T2 = None) -> Optional[_T2]:
+def loadUi(form_path: str, widget, parent=None) -> None:
 
     global ICONS, root
     # parser = etree.XMLParser(
@@ -43,7 +42,7 @@ def loadUi(form_path: str, widget, parent: _T2 = None) -> Optional[_T2]:
     tree = load2xml(form_path)
 
     if not tree:
-        return parent
+        return
 
     root = tree.getroot()
     ICONS = {}
@@ -331,6 +330,7 @@ def loadWidget(xml: Iterable, widget=None, parent=None, origWidget=None) -> None
     #    origWidget.ui_ = {}
 
     def process_property(xmlprop, widget=widget):
+        set_fn: Callable = None
         pname = xmlprop.get("name")
         if pname in translate_properties:
             pname = translate_properties[pname]
@@ -362,7 +362,10 @@ def loadWidget(xml: Iterable, widget=None, parent=None, origWidget=None) -> None
             set_fn = origWidget.addToolBarBreak
         elif pname == "functionGetColor":
             set_fn = widget.setFunctionGetColor
-
+        elif pname == "cursor":
+            # Ignore "cursor" styles, this is for blinking cursor styles
+            # not needed.
+            return
         else:
             set_fn = getattr(widget, setpname, None)
 
@@ -372,7 +375,7 @@ def loadWidget(xml: Iterable, widget=None, parent=None, origWidget=None) -> None
         if pname == "contentsMargins" or pname == "layoutSpacing":
             try:
                 value = int(xmlprop.get("stdset"))
-                value /= 2
+                value //= 2
             except Exception:
                 value = 0
             if pname == "contentsMargins":
@@ -403,7 +406,12 @@ def loadWidget(xml: Iterable, widget=None, parent=None, origWidget=None) -> None
         try:
             set_fn(value)
         except Exception:
-            logger.exception(ET.tostring(xmlprop))
+            logger.exception(
+                "Error processing property %s with value %s. Original XML: %s",
+                pname,
+                value,
+                ET.tostring(xmlprop).replace(b" ", b"").replace(b"\n", b""),
+            )
             # if Options.DEBUG_LEVEL > 50:
             #    print(e, repr(value))
             # if Options.DEBUG_LEVEL > 50:
@@ -732,7 +740,7 @@ def loadProperty(xml: Iterable) -> Tuple[Any, Any]:
     raise ValueError("No property in provided XML")
 
 
-def u(x: _T0) -> Union[str, _T0]:
+def u(x: Any) -> str:
     if isinstance(x, str):
         return x
     return str(x)
