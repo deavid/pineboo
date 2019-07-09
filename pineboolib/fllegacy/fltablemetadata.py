@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from pineboolib.core import decorators
 
+from pineboolib.interfaces.itablemetadata import ITableMetaData
 from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
 from pineboolib import logging
 import copy
 
-from typing import Any, Optional, List, TYPE_CHECKING
+from typing import Any, Optional, List, Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
@@ -24,9 +25,9 @@ los metadatos de una consulta, ver FLTableMetaData::query().
 """
 
 
-class FLTableMetaData(object):
+class FLTableMetaData(ITableMetaData):
     logger = logging.getLogger("CursorTableModel")
-    d = None
+    d: "FLTableMetaDataPrivate"
 
     """
     constructor
@@ -36,8 +37,8 @@ class FLTableMetaData(object):
     @param q (Opcional) Nombre de la consulta de la que define sus metadatos
     """
 
-    def __init__(self, n, a=None, q=None) -> None:
-        super(FLTableMetaData, self).__init__()
+    def __init__(self, n, a=None, q: str = None) -> None:
+        super(FLTableMetaData, self).__init__(n, a, q)
         # tmp = None
 
         if not a and not q:
@@ -54,7 +55,7 @@ class FLTableMetaData(object):
         self.d.fieldNames_ = []
         self.copy(other)
 
-    def inicializeNewFLTableMetaData(self, n, a, q=None) -> None:
+    def inicializeNewFLTableMetaData(self, n, a, q: str = None) -> None:
         self.d = FLTableMetaDataPrivate(n, a, q)
         self.d.fieldNames_ = []
 
@@ -82,13 +83,6 @@ class FLTableMetaData(object):
             if field.type() == FLFieldMetaData.Unlock:
                 self.d.fieldNamesUnlock_.append(field.name())
         """
-
-    """
-    destructor
-    """
-
-    def __del__(self) -> None:
-        self.d = None
 
     """
     Obtiene el nombre de la tabla
@@ -183,8 +177,10 @@ class FLTableMetaData(object):
     def removeFieldMD(self, fN: str) -> None:
         if fN is None:
             return
-
-        self.d.fieldList_[fN.lower()].clear()
+        # FIXME: FLFieldMetaData does not have .clear()
+        # for key in self.d.fieldList_:
+        #     if key.name().lower() == fN.lower():
+        #         key.clear()
         self.d.removeFieldName(fN)
 
     """
@@ -304,7 +300,7 @@ class FLTableMetaData(object):
         fN = str(fN)
         for f in self.d.fieldList_:
             if f.name() == fN.lower():
-                return f.pK()
+                return f.isPrimaryKey()
 
         return None
 
@@ -330,12 +326,12 @@ class FLTableMetaData(object):
     """
 
     def fieldIsCounter(self, fN: str) -> Any:
-        if fN.isEmpty():
+        if not fN:
             return False
 
         field = None
 
-        for f in self.d.fieldName_:
+        for f in self.d.fieldList_:
             if f.name() == fN.lower():
                 field = f
                 break
@@ -352,12 +348,12 @@ class FLTableMetaData(object):
     """
 
     def fieldAllowNull(self, fN: str) -> Any:
-        if fN.isEmpty():
+        if not fN:
             return False
 
         field = None
 
-        for f in self.d.fieldName_:
+        for f in self.d.fieldList_:
             if f.name() == fN.lower():
                 field = f
                 break
@@ -374,12 +370,12 @@ class FLTableMetaData(object):
     """
 
     def fieldIsUnique(self, fN: str) -> Any:
-        if fN.isEmpty():
+        if not fN:
             return False
 
         field = None
 
-        for f in self.d.fieldName_:
+        for f in self.d.fieldList_:
             if f.name() == fN.lower():
                 field = f
                 break
@@ -730,7 +726,7 @@ class FLTableMetaDataPrivate:
     """
     Lista de campos que tiene esta tabla
     """
-    fieldList_ = None
+    fieldList_: List[FLFieldMetaData]
 
     """
     Clave compuesta que tiene esta tabla
@@ -740,23 +736,23 @@ class FLTableMetaDataPrivate:
     """
     Nombre de la consulta (fichero .qry) de la que define los metadatos
     """
-    query_ = []
+    query_: Optional[str] = None
 
     """
     Cadena de texto con los nombre de los campos separados por comas
     """
-    fieldNames_ = []
+    fieldNames_: List[str] = []
 
     """
     Mapas alias<->nombre
     """
-    aliasFieldMap_ = {}
-    fieldAliasMap_ = {}
+    aliasFieldMap_: Dict[str, str]
+    fieldAliasMap_: Dict[str, str]
 
     """
     Lista de nombres de campos de la tabla que son del tipo FLFieldMetaData::Unlock
     """
-    fieldNamesUnlock_ = []
+    fieldNamesUnlock_: List[str] = []
 
     """
     Clave primaria
@@ -796,7 +792,7 @@ class FLTableMetaDataPrivate:
 
     count_ = 0
 
-    def __init__(self, n: str = None, a=None, q=None) -> None:
+    def __init__(self, n: str = None, a=None, q: str = None) -> None:
         self.fieldList_ = []
         self.fieldNamesUnlock_ = []
         self.aliasFieldMap_ = {}
@@ -814,7 +810,7 @@ class FLTableMetaDataPrivate:
         self.compoundKey_ = None
         self.inCache = False
 
-    def inicializeNewFLTableMetaDataPrivate(self, n: str, a, q=None) -> None:
+    def inicializeNewFLTableMetaDataPrivate(self, n: str, a, q: str = None) -> None:
         self.name_ = n.lower()
         self.alias_ = a
         self.compoundKey_ = 0
@@ -845,11 +841,7 @@ class FLTableMetaDataPrivate:
     def removeFieldName(self, n: str) -> None:
 
         if self.fieldNames_:
-            oldFN = self.fieldNames_
-            self.fieldNames_ = []
-            for value in oldFN:
-                if not value.name().lower() == n.lower():
-                    self.fieldNames.append(value)
+            self.fieldNames_.remove(n)
 
     """
     Formatea el alias del campo indicado para evitar duplicados
