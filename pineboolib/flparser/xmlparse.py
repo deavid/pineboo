@@ -2,11 +2,7 @@ import xml.parsers.expat
 from optparse import OptionParser
 import re
 import ast
-import __builtin__
 from typing import Iterable, List
-
-__builtin__: module
-__builtin__: module
 
 elements = []
 show_end = True
@@ -50,7 +46,7 @@ def end_element(name) -> None:
     # print 'End element:', name
 
 
-def char_data(data: __builtin__.str) -> None:
+def char_data(data: str) -> None:
     global elements, show_end, lstelements, lasttextdata
     # data = data.strip()
     lasttextdata += data
@@ -62,7 +58,7 @@ def char_data(data: __builtin__.str) -> None:
         # print "/".join(elements)+ "(%s)" % repr(data)
 
 
-def unmap(lines: Iterable) -> List[__builtin__.str]:
+def unmap(lines: Iterable) -> List[str]:
 
     runmap = re.compile(r"^(?P<depth>/*)(?P<tagname>\w+)(?P<attrs>&[^\(]+)*(?P<txt>\(.+\))?$")
     # depthlevel
