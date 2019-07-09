@@ -105,7 +105,7 @@ class FLReportEngine(object):
         self.logger = logging.getLogger("FLReportEngine")
         from pineboolib.application.kugar.kut2fpdf import Kut2FPDF
 
-        self.parser_ = Kut2FPDF
+        self.parser_ = Kut2FPDF()
 
     def rptXmlData(self) -> Any:
         return self.rd
@@ -211,7 +211,6 @@ class FLReportEngine(object):
     def renderReport(self, init_row=0, init_col=0, flags=False, pages=None) -> bool:
         if self.rt and self.rt.find("KugarTemplate") > -1:
             data = self.rd.toString(1)
-
             self.report_ = self.parser_.parse(self.d_.template_, self.rt, data, self.report_, flags)
 
             return True if self.report_ else False

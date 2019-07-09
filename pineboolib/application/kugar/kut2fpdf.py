@@ -80,7 +80,6 @@ class Kut2FPDF(object):
     """
 
     def parse(self, name, kut: str, data: str, report=None, flags: Union[Sized, Mapping[int, Any]] = []) -> Any:
-
         try:
             self._xml = self._parser_tools.loadKut(kut).getroot()
         except Exception:
