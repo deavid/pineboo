@@ -1,14 +1,13 @@
 import os
 import os.path
-from typing import Any, Optional, Dict, TypeVar
+import collections
+from typing import Any, Optional, Dict
 
 from PyQt5 import QtCore  # type: ignore
 
 from pineboolib.core.utils import logging
 from pineboolib.core.utils.utils_base import StructMyDict
 from pineboolib.application.utils.date_conversion import date_dma_to_amd
-
-_T0 = TypeVar("_T0")
 
 logger = logging.getLogger(__name__)
 
@@ -118,15 +117,10 @@ class Array(object):
     Objeto tipo Array
     """
 
-    dict_: Dict[Any, Any] = None
-    key_ = None
-    names_ = None
-    pos_iter = None
-
     def __init__(self, *args) -> None:
-        import collections
+        self.pos_iter = 0
 
-        self.dict_ = collections.OrderedDict()
+        self.dict_: Dict[Any, Any] = collections.OrderedDict()
 
         if not len(args):
             return
