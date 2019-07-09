@@ -15,42 +15,42 @@ class FLAction(object):
     """
     Nombre de la accion
     """
-    name_: str
+    name_: str = ""
 
     """
     Nombre del script asociado al formulario de edición de registros
     """
-    scriptFormRecord_: str
+    scriptFormRecord_: str = ""
 
     """
     Nombre del script asociado al formulario maestro
     """
-    scriptForm_: str
+    scriptForm_: str = ""
 
     """
     Nombre de la tabla origen para el formulario maestro
     """
-    table_: str
+    table_: str = ""
 
     """
     Nombre del formulario maestro
     """
-    form_: str
+    form_: str = ""
 
     """
     Nombre del formulario de edición de registros
     """
-    formRecord_: str
+    formRecord_: str = ""
 
     """
     Texto para la barra de título del formulario maestro
     """
-    caption_: str
+    caption_: str = ""
 
     """
     Descripción
     """
-    description_: str
+    description_: str = ""
 
     """
     constructor.
