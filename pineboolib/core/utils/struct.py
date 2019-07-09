@@ -54,6 +54,12 @@ class XMLStruct(Struct):
     def _v(self, k: str, default: None = None) -> Optional[str]:
         return getattr(self, k, default)
 
+    def _rv(self, k: str) -> str:
+        ret = getattr(self, k, None)
+        if not isinstance(ret, str):
+            raise ValueError("Retrieving value for %s, found %r which is not a string" % (k, ret))
+        return ret
+
 
 class AreaStruct(Struct):
     idarea: str

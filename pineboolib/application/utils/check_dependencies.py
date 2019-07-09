@@ -7,7 +7,7 @@ from pineboolib.application import project
 from typing import Dict
 
 logger = logging.getLogger("application.utils.check_dependencies")
-DEPENDENCIES_CHECKED = {}
+DEPENDENCIES_CHECKED: Dict[str, str] = {}
 
 
 def check_dependencies(dict_: Dict[str, str], exit: bool = True) -> bool:
@@ -36,7 +36,7 @@ def check_dependencies(dict_: Dict[str, str], exit: bool = True) -> bool:
             elif key == "fpdf":
                 version_check(key, version, "1.7.3")
             elif key == "odf":
-                from odf import namespaces
+                from odf import namespaces  # type: ignore
 
                 mod_ver = namespaces.__version__
             elif key == "PyQt5.QtCore":
@@ -56,25 +56,24 @@ def check_dependencies(dict_: Dict[str, str], exit: bool = True) -> bool:
             # print(traceback.format_exc())
             error.append(traceback.format_exc())
 
-    msg = ""
-    if len(dependences) > 0 and key not in DEPENDENCIES_CHECKED.keys():
-        logger.warning("HINT: Dependencias incumplidas:")
-        for dep in dependences:
-            logger.warning("HINT: Instale el paquete %s" % dep)
-            msg += "Instale el paquete %s.\n%s" % (dep, error)
-            if dep == "pyfpdf":
-                msg += "\n\n\n Use pip3 install -i https://test.pypi.org/simple/ pyfpdf==1.7.3"
+        msg = ""
+        if len(dependences) > 0 and key not in DEPENDENCIES_CHECKED.keys():
+            logger.warning("HINT: Dependencias incumplidas:")
+            for dep in dependences:
+                logger.warning("HINT: Instale el paquete %s" % dep)
+                msg += "Instale el paquete %s.\n%s" % (dep, error)
+                if dep == "pyfpdf":
+                    msg += "\n\n\n Use pip3 install -i https://test.pypi.org/simple/ pyfpdf==1.7.3"
 
-        if exit:
-            if project._DGI.useDesktop() and project._DGI.localDesktop():
-                from pineboolib import pncontrolsfactory
+            if exit:
+                if project._DGI and project._DGI.useDesktop() and project._DGI.localDesktop():
+                    from pineboolib import pncontrolsfactory
 
-                pncontrolsfactory.QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, pncontrolsfactory.QMessageBox.Ok)
+                    pncontrolsfactory.QMessageBox.warning(
+                        None, "Pineboo - Dependencias Incumplidas -", msg, pncontrolsfactory.QMessageBox.Ok
+                    )
 
-            if not is_deployed():
-                sys.exit(32)
-
-    if key not in DEPENDENCIES_CHECKED.keys():
-        DEPENDENCIES_CHECKED[key] = mod_ver
+                if not is_deployed():
+                    sys.exit(32)
 
     return len(dependences) == 0
