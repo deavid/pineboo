@@ -6,10 +6,10 @@ from .utils import logging
 """
 Esta libreria se usa para especificar estados de una función que no son final
 """
-from typing import Callable, Any
+from typing import Callable, Any, Dict
 
 logger = logging.getLogger(__name__)
-MSG_EMITTED = {}
+MSG_EMITTED: Dict[str, float] = {}
 CLEAN_REGEX = re.compile(r"\s*object\s+at\s+0x[0-9a-zA-Z]{6,38}", re.VERBOSE)
 MINIMUM_TIME_FOR_REPRINT = 300
 

@@ -65,7 +65,7 @@ class TableStruct(Struct):
     xmlroot: Any
     tablename: str
     name: str
-    query_table: str
+    query_table: Optional[str]
     fields: List[str]
     pk: List[str]
     fields_idx: Dict[str, int]

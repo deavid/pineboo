@@ -12,6 +12,8 @@ class Manager(object):
         self._dgi = dgi
 
     def send(self, type_: str, function_: str = None, data_=None) -> Any:
+        if self._dgi is None:
+            return None
         obj_ = getattr(self._dgi, type_, None)
         ret_ = None
         if obj_:

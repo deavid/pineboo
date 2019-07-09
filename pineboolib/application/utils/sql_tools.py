@@ -1,6 +1,6 @@
 from pineboolib.core.utils.logging import logging
 
-from typing import Dict, Iterable, Mapping, Sequence, Tuple, Union, Any
+from typing import Dict, Iterable, Mapping, Sequence, Tuple, Union, Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -319,7 +319,7 @@ def resolve_query(table_name, params: Union[Iterable, Mapping[object, Union[str,
     return where, order_by
 
 
-def resolve_order_params(key, valor: Union[str, Mapping[slice, Any]]) -> Any:
+def resolve_order_params(key, valor: str) -> Any:
     if valor.startswith("-"):
         valor = valor[1:] + " DESC, "
     else:
@@ -328,7 +328,7 @@ def resolve_order_params(key, valor: Union[str, Mapping[slice, Any]]) -> Any:
     return valor
 
 
-def resolve_where_params(key, valor: Union[str, Iterable[str]], mtd_table) -> str:
+def resolve_where_params(key: str, valor: str, mtd_table) -> str:
     list_params = key.split("__")
     campo = "_".join(list_params[0].split("_")[1:])
     tipo = list_params[1]
@@ -385,7 +385,7 @@ def resolve_where_params(key, valor: Union[str, Iterable[str]], mtd_table) -> st
     return where
 
 
-def resolve_pagination(query: Mapping[object, Sequence]) -> Tuple[Any, Any]:
+def resolve_pagination(query: Dict[str, Any]) -> Tuple[Optional[Any], Optional[Any]]:
     init = 0
     limit = 0
     for k in query.keys():
