@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets  # type: ignore
+from typing import Union, TYPE_CHECKING
 
-
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget import QWidget
-from typing import Union
+if TYPE_CHECKING:
+    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox  # noqa: F401
+    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget import QWidget  # noqa: F401
 
 
 class QFrame(QtWidgets.QFrame):
     _line_width = None
 
-    def __init__(self, parent: Union[QGroupBox, QWidget]) -> None:
+    def __init__(self, parent: Union["QGroupBox", "QWidget"]) -> None:
         super().__init__(parent)
         self.setContentsMargins(0, 0, 0, 0)
         self._line_width = 1

@@ -4,9 +4,12 @@ from PyQt5.QtWidgets import QMessageBox  # type: ignore
 
 from pineboolib.core.utils.utils_base import auto_qt_translate_text
 from pineboolib.application.utils.check_dependencies import check_dependencies
+from pineboolib.application.database.pnsqlquery import PNSqlQuery
+from pineboolib.application.database.pnsqlcursor import PNSqlCursor
+
 from pineboolib.core.utils.utils_base import text2bool
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+
+
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flapplication import aqApp
 
@@ -17,8 +20,10 @@ import traceback
 from pineboolib import logging
 from PyQt5.QtCore import QTime, QDate, QDateTime, Qt  # type: ignore
 
-from typing import Any, Iterable, Mapping, Optional, Sized, TypeVar, Union, List, Dict
-import pymysql
+from typing import Any, Iterable, Mapping, Optional, Sized, TypeVar, Union, List, Dict, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import pymysql  # noqa: F401
 
 _T0 = TypeVar("_T0")
 _T1 = TypeVar("_T1")
@@ -86,7 +91,7 @@ class FLMYSQL_MYISAM2(object):
     def DBName(self) -> Any:
         return self._dbname
 
-    def connect(self, db_name, db_host, db_port, db_userName, db_password) -> Union[bool, pymysql.connections.Connection]:
+    def connect(self, db_name, db_host, db_port, db_userName, db_password) -> Union[bool, "pymysql.connections.Connection"]:
         self._dbname = db_name
         check_dependencies({"PyMySQL": "PyMySQL", "sqlalchemy": "sqlAlchemy"})
         import pymysql
@@ -256,7 +261,7 @@ class FLMYSQL_MYISAM2(object):
         if not self.isOpen():
             return tl
 
-        q_tables = FLSqlQuery()
+        q_tables = PNSqlQuery()
         q_tables.exec_("show tables")
         while q_tables.next():
             tl.append(q_tables.value(0))
@@ -277,7 +282,7 @@ class FLMYSQL_MYISAM2(object):
         updateQry = False
         ret = None
 
-        q = FLSqlQuery()
+        q = PNSqlQuery()
         q.setSelect("max(%s)" % field)
         q.setFrom(table)
         q.setWhere("1 = 1")
@@ -513,7 +518,7 @@ class FLMYSQL_MYISAM2(object):
         if not self.isOpen():
             return False
 
-        t = FLSqlQuery()
+        t = PNSqlQuery()
         t.setForwardOnly(True)
         ok = t.exec_("SHOW TABLES LIKE '%s'" % name)
         if ok:
@@ -616,11 +621,11 @@ class FLMYSQL_MYISAM2(object):
         util = FLUtil()
         self.db_.dbAux().transaction()
 
-        qry = FLSqlQuery(None, "dbAux")
-        qry2 = FLSqlQuery(None, "dbAux")
-        qry3 = FLSqlQuery(None, "dbAux")
-        # qry4 = FLSqlQuery(None, "dbAux")
-        # qry5 = FLSqlQuery(None, "dbAux")
+        qry = PNSqlQuery(None, "dbAux")
+        qry2 = PNSqlQuery(None, "dbAux")
+        qry3 = PNSqlQuery(None, "dbAux")
+        # qry4 = PNSqlQuery(None, "dbAux")
+        # qry5 = PNSqlQuery(None, "dbAux")
         steps = 0
         self.active_create_index = False
 
@@ -694,13 +699,13 @@ class FLMYSQL_MYISAM2(object):
         self.db_.dbAux().driver().transaction()
         self.active_create_index = True
         steps = 0
-        # sqlCursor = FLSqlCursor(None, True, self.db_.dbAux())
+        # sqlCursor = PNSqlCursor(None, True, self.db_.dbAux())
         engine = "MyISAM" if self.noInnoDB else "INNODB"
         convert_engine = False
         do_ques = True
 
-        sqlQuery = FLSqlQuery(None, self.db_.dbAux())
-        sql_query2 = FLSqlQuery(None, self.db_.dbAux())
+        sqlQuery = PNSqlQuery(None, self.db_.dbAux())
+        sql_query2 = PNSqlQuery(None, self.db_.dbAux())
         if sqlQuery.exec_("SHOW TABLES"):
             util.setTotalSteps(sqlQuery.size())
             while sqlQuery.next():
@@ -717,7 +722,7 @@ class FLMYSQL_MYISAM2(object):
                 for it in fL:
                     if not it or not it.type() == "pixmap":
                         continue
-                    cur = FLSqlCursor(item, True, self.db_.dbAux())
+                    cur = PNSqlCursor(item, True, self.db_.dbAux())
                     cur.select(it.name() + " not like 'RK@%'")
                     while cur.next():
                         v = cur.value(it.name())
@@ -882,7 +887,7 @@ class FLMYSQL_MYISAM2(object):
 
             return False
 
-        q = FLSqlQuery(None, "dbAux")
+        q = PNSqlQuery(None, "dbAux")
         in_sql = "ALTER TABLE %s RENAME TO %s" % (oldMTD.name(), renameOld)
         logger.warning(in_sql)
         if not q.exec_(in_sql):
@@ -907,7 +912,7 @@ class FLMYSQL_MYISAM2(object):
         self.db_.dbAux().transaction()
 
         if not force and key and len(key) == 40:
-            c = FLSqlCursor("flfiles", True, self.db_.dbAux())
+            c = PNSqlCursor("flfiles", True, self.db_.dbAux())
             # oldCursor.setModeAccess(oldCursor.Browse)
             c.setForwardOnly(True)
             c.setFilter("nombre='%s.mtd'" % renameOld)
@@ -952,7 +957,7 @@ class FLMYSQL_MYISAM2(object):
             oldCursor.execute("SELECT * FROM %s WHERE 1 = 1" % (renameOld))
             result_set = oldCursor.fetchall()
             totalSteps = len(result_set)
-            # oldCursor = FLSqlCursor(renameOld, True, "dbAux")
+            # oldCursor = PNSqlCursor(renameOld, True, "dbAux")
             # oldCursor.setModeAccess(oldCursor.Browse)
             # oldCursor.setForwardOnly(True)
             # oldCursor.select()

@@ -963,7 +963,7 @@ class FLTableDB(QtWidgets.QWidget):
     Obtiene el componente tabla de registros
     """
 
-    def tableRecords(self) -> FLDataTable:
+    def tableRecords(self) -> "FLDataTable":
         if not self.tableRecords_:
             self.tableRecords_ = FLDataTable(self.tabData, "tableRecords")
             self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)

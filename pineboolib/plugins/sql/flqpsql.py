@@ -4,10 +4,10 @@ from PyQt5.QtWidgets import QMessageBox, QProgressDialog  # type: ignore
 
 from pineboolib.core.utils.utils_base import text2bool, auto_qt_translate_text
 from pineboolib.application.utils.check_dependencies import check_dependencies
+from pineboolib.application.database.pnsqlquery import PNSqlQuery
+from pineboolib.application.database.pnsqlcursor import PNSqlCursor
 
 from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 
 from sqlalchemy import create_engine
@@ -277,7 +277,7 @@ class FLQPSQL(object):
         return True
 
     def nextSerialVal(self, table: str, field: str) -> Any:
-        q = FLSqlQuery()
+        q = PNSqlQuery()
         q.setSelect(u"nextval('" + table + "_" + field + "_seq')")
         q.setFrom("")
         q.setWhere("")
@@ -431,7 +431,7 @@ class FLQPSQL(object):
         if not self.isOpen():
             return False
 
-        t = FLSqlQuery()
+        t = PNSqlQuery()
         t.setForwardOnly(True)
         ok = t.exec_("select relname from pg_class where relname = '%s'" % name)
         if ok:
@@ -486,7 +486,7 @@ class FLQPSQL(object):
                 sql = sql + " BYTEA"
             elif field.type() == "serial":
                 seq = "%s_%s_seq" % (tmd.name(), field.name())
-                q = FLSqlQuery()
+                q = PNSqlQuery()
                 q.setForwardOnly(True)
                 q.exec_("SELECT relname FROM pg_class WHERE relname='%s'" % seq)
                 if not q.next():
@@ -714,7 +714,7 @@ class FLQPSQL(object):
         if not self.isOpen():
             return tl
 
-        t = FLSqlQuery()
+        t = PNSqlQuery()
         t.setForwardOnly(True)
 
         if not typeName or typeName == "Tables":
@@ -751,7 +751,7 @@ class FLQPSQL(object):
     def constraintExists(self, name) -> bool:
         sql = "SELECT constraint_name FROM information_schema.table_constraints where constraint_name='%s'" % name
 
-        q = FLSqlQuery(None, self.db_.dbAux())
+        q = PNSqlQuery(None, self.db_.dbAux())
 
         return q.exec_(sql) and q.size() > 0
 
@@ -778,7 +778,7 @@ class FLQPSQL(object):
 
         self.db_.dbAux().transaction()
 
-        q = FLSqlQuery(None, self.db_.dbAux())
+        q = PNSqlQuery(None, self.db_.dbAux())
 
         constraintName = "%s_key" % oldMTD.name()
 
@@ -805,7 +805,7 @@ class FLQPSQL(object):
             self.db_.dbAux().rollback()
             return False
 
-        oldCursor = FLSqlCursor(renameOld, True, self.db_.dbAux())
+        oldCursor = PNSqlCursor(renameOld, True, self.db_.dbAux())
         oldCursor.setModeAccess(oldCursor.Browse)
         oldCursor.select()
 
@@ -1014,7 +1014,7 @@ class FLQPSQL(object):
         self.db_.dbAux().transaction()
 
         if key and len(key) == 40:
-            c = FLSqlCursor("flfiles", True, self.db_.dbAux())
+            c = PNSqlCursor("flfiles", True, self.db_.dbAux())
             c.setForwardOnly(True)
             c.setFilter("nombre = '%s.mtd'" % renameOld)
             c.select()
@@ -1025,7 +1025,7 @@ class FLQPSQL(object):
                 buffer.setValue("sha", key)
                 c.insert()
 
-        q = FLSqlQuery(None, self.db_.dbAux())
+        q = PNSqlQuery(None, self.db_.dbAux())
         constraintName = "%s_pkey" % oldMTD.name()
 
         if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
@@ -1276,11 +1276,11 @@ class FLQPSQL(object):
         util = FLUtil()
         self.db_.dbAux().transaction()
 
-        qry = FLSqlQuery(None, "dbAux")
-        qry2 = FLSqlQuery(None, "dbAux")
-        qry3 = FLSqlQuery(None, "dbAux")
-        qry4 = FLSqlQuery(None, "dbAux")
-        qry5 = FLSqlQuery(None, "dbAux")
+        qry = PNSqlQuery(None, "dbAux")
+        qry2 = PNSqlQuery(None, "dbAux")
+        qry3 = PNSqlQuery(None, "dbAux")
+        qry4 = PNSqlQuery(None, "dbAux")
+        qry5 = PNSqlQuery(None, "dbAux")
         steps = 0
 
         rx = QRegExp("^.*\\d{6,9}$")
@@ -1351,8 +1351,8 @@ class FLQPSQL(object):
 
         self.db_.dbAux().driver().transaction()
         steps = 0
-        # sqlCursor = FLSqlCursor(None, True, self.db_.dbAux())
-        sqlQuery = FLSqlQuery(None, self.db_.dbAux())
+        # sqlCursor = PNSqlCursor(None, True, self.db_.dbAux())
+        sqlQuery = PNSqlQuery(None, self.db_.dbAux())
         if sqlQuery.exec_(
             "select relname from pg_class where ( relkind = 'r' ) "
             "and ( relname !~ '^Inv' ) "
@@ -1374,7 +1374,7 @@ class FLQPSQL(object):
                 for it in fL:
                     if not it or not it.type() == "pixmap":
                         continue
-                    cur = FLSqlCursor(item, True, self.db_.dbAux())
+                    cur = PNSqlCursor(item, True, self.db_.dbAux())
                     cur.select(it.name() + " not like 'RK@%'")
                     while cur.next():
                         v = cur.value(it.name())
