@@ -1058,7 +1058,8 @@ class FLFieldDB(QtWidgets.QWidget):
         nulo = False
         if not fN:
             v = self.cursor_.valueBuffer(self.fieldName_)
-            nulo = self.cursor_.bufferIsNull(self.fieldRelation_)
+            if self.fieldRelation_ is not None:
+                nulo = self.cursor_.bufferIsNull(self.fieldRelation_)
 
             # if self.cursor_.cursorRelation():
             # print(1)
