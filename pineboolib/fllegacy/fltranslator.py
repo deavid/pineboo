@@ -8,7 +8,7 @@ from pineboolib.application import project
 
 from PyQt5.Qt import QTranslator  # type: ignore
 from pineboolib import logging
-from typing import Any, Mapping
+from typing import Any, Dict
 
 
 class FLTranslator(QTranslator):
@@ -20,12 +20,14 @@ class FLTranslator(QTranslator):
     idM_ = None
     lang_ = None
     translation_from_ = None
-    ts_translation_contexts = {}
+    ts_translation_contexts: Dict[str, Dict[str, str]] = {}
 
-    def __init__(self, parent=None, name: Mapping[slice, Any] = None, multiLang=False, sysTrans=False) -> None:
+    def __init__(self, parent=None, name: str = None, multiLang=False, sysTrans=False) -> None:
         super(FLTranslator, self).__init__()
         self.logger = logging.getLogger("FLTranslator")
         self._prj = parent
+        if not name:
+            raise Exception("Name is mandatory")
         self.idM_ = name[: name.rfind("_")]
         self.lang_ = name[name.rfind("_") + 1 :]
         self.mulTiLang_ = multiLang
@@ -103,6 +105,8 @@ class FLTranslator(QTranslator):
                     self.logger.warning("load_ts: <name> not found, skipping")
                     continue
                 context_dict_key = name_elem.text
+                if not context_dict_key:
+                    continue
                 if context_dict_key not in self.ts_translation_contexts.keys():
                     self.ts_translation_contexts[context_dict_key] = {}
                 for message in context.findall("message"):
