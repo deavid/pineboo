@@ -12,12 +12,7 @@ from pineboolib.application.utils.check_dependencies import check_dependencies
 # from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
 from pineboolib import logging
-from typing import Any, Callable, Dict, List, TypeVar, Union
-
-_T0 = TypeVar("_T0")
-_T1 = TypeVar("_T1")
-_T2 = TypeVar("_T2")
-_T3 = TypeVar("_T3")
+from typing import Any, Callable, Dict, List, Union, Optional
 
 
 logger = logging.getLogger(__name__)
@@ -120,7 +115,7 @@ class FLREMOTECLIENT(object):
         self.pure_python_ = False
         self.defaultPort_ = 4000
         self.id_ = 0
-        self.url = None
+        self.url: Optional[str] = None
         check_dependencies({"requests": "requests"}, False)
 
     def useThreads(self) -> bool:
@@ -153,7 +148,7 @@ class FLREMOTECLIENT(object):
     def DBName(self) -> Any:
         return self._dbname
 
-    def create_dict(self, fun, data: List[Any] = []) -> Dict[str, Union[int, str, List[Dict[str, Union[int, str, _T1, _T2]]], _T2]]:
+    def create_dict(self, fun, data: Any = []) -> Dict[str, Any]:
         fun = "%s__%s" % (self.id_, fun)
         return base_create_dict("dbdata", fun, self.id_, data)
 

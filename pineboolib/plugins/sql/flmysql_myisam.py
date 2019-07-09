@@ -758,7 +758,7 @@ class FLMYSQL_MYISAM(object):
         self.active_create_index = False
         util.destroyProgressDialog()
 
-    def alterTable(self, mtd1, mtd2, key: str, force=False) -> Any:
+    def alterTable(self, mtd1, mtd2, key: Optional[str], force=False) -> bool:
         return self.alterTable2(mtd1, mtd2, key, force)
 
     def hasCheckColumn(self, mtd) -> bool:
@@ -772,7 +772,7 @@ class FLMYSQL_MYISAM(object):
 
         return False
 
-    def alterTable2(self, mtd1, mtd2, key: str, force=False) -> bool:
+    def alterTable2(self, mtd1, mtd2, key: Optional[str], force=False) -> bool:
         if not self.db_:
             raise Exception("must be connected")
 

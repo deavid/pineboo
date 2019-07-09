@@ -11,9 +11,7 @@ from pineboolib.application import project
 
 from pineboolib import pncontrolsfactory
 
-from typing import Iterable, Optional, Tuple, TypeVar, Union, Callable
-
-_T0 = TypeVar("_T0")
+from typing import Optional, Tuple, Callable, List, Dict
 
 ICONS = {}
 root = None
@@ -175,7 +173,7 @@ def loadUi(form_path: str, widget, parent=None) -> None:
         widget.show()
 
 
-def loadToolBar(xml: Union[str, Iterable], widget) -> None:
+def loadToolBar(xml: ET.Element, widget) -> None:
     name_elem = xml.find("./property[@name='name']/cstring")
     label_elem = xml.find("./property[@name='label']/string")
     if name_elem is None or label_elem is None:
@@ -200,7 +198,7 @@ def loadToolBar(xml: Union[str, Iterable], widget) -> None:
     widget.addToolBar(tb)
 
 
-def loadMenuBar(xml: Iterable, widget) -> None:
+def loadMenuBar(xml: ET.Element, widget) -> None:
 
     if isinstance(widget, pncontrolsfactory.QMainWindow):
         mB = widget.menuBar()
@@ -239,7 +237,7 @@ def loadMenuBar(xml: Iterable, widget) -> None:
             process_item(x, mB, widget)
 
 
-def process_item(xml: Iterable, parent, widget) -> None:
+def process_item(xml: ET.Element, parent, widget) -> None:
     name = xml.get("name")
     text = xml.get("text")
     # accel = xml.get("accel")
@@ -308,7 +306,7 @@ def createWidget(classname: str, parent=None) -> Any:
     return cls(parent)
 
 
-def loadWidget(xml: Iterable, widget=None, parent=None, origWidget=None) -> None:
+def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> None:
     translate_properties = {
         "caption": "windowTitle",
         "name": "objectName",
@@ -532,7 +530,7 @@ def loadWidget(xml: Iterable, widget=None, parent=None, origWidget=None) -> None
 
         nwidget = createWidget(class_, parent=origWidget)
         parent = nwidget
-    layouts_pending_process = []
+    layouts_pending_process: List[Tuple[ET.Element, str]] = []
     properties = []
     unbold_fonts = []
     has_layout_defined = False
@@ -607,7 +605,7 @@ def loadWidget(xml: Iterable, widget=None, parent=None, origWidget=None) -> None
             if isinstance(widget, pncontrolsfactory.QMenu):
                 continue
             else:
-                prop1 = {}
+                prop1: Dict[str, Any] = {}
                 for p in c.findall("property"):
                     k, v = loadProperty(p)
                     prop1[k] = v
@@ -679,7 +677,6 @@ def loadWidget(xml: Iterable, widget=None, parent=None, origWidget=None) -> None
             continue
 
         if c.tag == "column":
-            prop1 = {}
             for p in c.findall("property"):
                 k, v = loadProperty(p)
                 if k == "text":
@@ -709,7 +706,7 @@ def loadWidget(xml: Iterable, widget=None, parent=None, origWidget=None) -> None
     #        origWidget.ui_[origWidget.objectName()] = nwidget
 
 
-def loadIcon(xml: "ET") -> None:
+def loadIcon(xml: "ET.Element") -> None:
     global ICONS
 
     name = xml.get("name")
@@ -728,13 +725,13 @@ def loadIcon(xml: "ET") -> None:
     ICONS[name] = icon
 
 
-def loadVariant(xml: Iterable, widget=None) -> Any:
+def loadVariant(xml: ET.Element, widget=None) -> Any:
     for variant in xml:
         return _loadVariant(variant, widget)
     raise ValueError("No property in provided XML")
 
 
-def loadProperty(xml: Iterable) -> Tuple[Any, Any]:
+def loadProperty(xml: ET.Element) -> Tuple[Any, Any]:
     for variant in xml:
         return (xml.get("name"), _loadVariant(variant))
     raise ValueError("No property in provided XML")
@@ -790,24 +787,24 @@ def _loadVariant(variant, widget=None) -> Any:
 
         p = QtWidgets.QSizePolicy()
         for c in variant:
-            value = int(c.text.strip())
+            ivalue = int(c.text.strip())
             if c.tag == "hsizetype":
-                p.setHorizontalPolicy(value)
+                p.setHorizontalPolicy(ivalue)
             if c.tag == "vsizetype":
-                p.setVerticalPolicy(value)
+                p.setVerticalPolicy(ivalue)
             if c.tag == "horstretch":
-                p.setHorizontalStretch(value)
+                p.setHorizontalStretch(ivalue)
             if c.tag == "verstretch":
-                p.setVerticalStretch(value)
+                p.setVerticalStretch(ivalue)
         return p
     if variant.tag == "size":
         p = QtCore.QSize()
         for c in variant:
-            value = int(c.text.strip())
+            ivalue = int(c.text.strip())
             if c.tag == "width":
-                p.setWidth(value)
+                p.setWidth(ivalue)
             if c.tag == "height":
-                p.setHeight(value)
+                p.setHeight(ivalue)
         return p
     if variant.tag == "font":
         p = QtGui.QFont()
@@ -828,8 +825,7 @@ def _loadVariant(variant, widget=None) -> Any:
                 else:
                     logger.warning("unknown font style type %s", repr(c.tag))
             except Exception as e:
-                if Options.DEBUG_LEVEL > 50:
-                    logger.error(e)
+                logger.warning(e)
         return p
 
     if variant.tag == "set":

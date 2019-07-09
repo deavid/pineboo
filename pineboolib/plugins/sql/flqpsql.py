@@ -17,10 +17,7 @@ from pineboolib.application import project
 from pineboolib import logging
 
 
-from typing import Iterable, Mapping, Optional, Sized, TypeVar, Union, List, Dict, Any
-
-_T0 = TypeVar("_T0")
-_T1 = TypeVar("_T1")
+from typing import Iterable, Optional, Union, List, Dict, Any
 
 
 logger = logging.getLogger(__name__)
@@ -188,7 +185,7 @@ class FLQPSQL(object):
 
         return self.declarative_base_
 
-    def formatValueLike(self, type_, v: Mapping[int, Any], upper) -> str:
+    def formatValueLike(self, type_, v: Any, upper) -> str:
         util = FLUtil()
         res = "IS NULL"
 
@@ -215,7 +212,7 @@ class FLQPSQL(object):
 
         return res
 
-    def formatValue(self, type_, v: _T1, upper) -> Union[bool, str, _T1]:
+    def formatValue(self, type_, v: Any, upper) -> Union[bool, str, None]:
 
         util = FLUtil()
 
@@ -622,8 +619,8 @@ class FLQPSQL(object):
 
         return info
 
-    def decodeSqlType(self, type_: _T0) -> Union[str, _T0]:
-        ret = type_
+    def decodeSqlType(self, type_: int) -> str:
+        ret = str(type_)
 
         if type_ == 16:
             ret = "bool"
@@ -686,7 +683,7 @@ class FLQPSQL(object):
 
         return info
 
-    def notEqualsFields(self, field1: Mapping[int, Any], field2: Mapping[int, Any]) -> bool:
+    def notEqualsFields(self, field1: List[Any], field2: List[Any]) -> bool:
         ret = False
         try:
             if not field1[2] == field2[2] and not field2[6]:
@@ -758,7 +755,7 @@ class FLQPSQL(object):
     def queryUpdate(self, name, update, filter) -> str:
         return """UPDATE %s SET %s WHERE %s RETURNING *""" % (name, update, filter)
 
-    def alterTable(self, mtd1, mtd2=None, key: Sized = None, force=False) -> Any:
+    def alterTable(self, mtd1, mtd2=None, key: Optional[str] = None, force=False) -> Any:
 
         if mtd2 is None:
             return self.alterTable3(mtd1)
@@ -920,7 +917,7 @@ class FLQPSQL(object):
             q.exec_("DROP TABLE %s CASCADE" % renameOld)
         return True
 
-    def alterTable2(self, mtd1, mtd2, key: Sized, force=False) -> bool:
+    def alterTable2(self, mtd1, mtd2, key: Optional[str], force=False) -> bool:
         # logger.warning("alterTable2 FIXME::Me quedo colgado al hacer createTable --> existTable")
         util = FLUtil()
 
@@ -1409,7 +1406,7 @@ class FLQPSQL(object):
     def canDetectLocks(self) -> bool:
         return True
 
-    def fix_query(self, query: _T0) -> _T0:
+    def fix_query(self, query: str) -> str:
         # ret_ = query.replace(";", "")
         return query
 

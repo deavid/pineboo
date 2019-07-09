@@ -8,7 +8,7 @@ from PyQt5.QtSvg import QSvgRenderer  # type: ignore
 from pineboolib import logging
 
 import barcode  # pip3 install python-barcode
-from typing import Dict, Any, Mapping, Union
+from typing import Dict, Any, Union
 
 logger = logging.getLogger(__name__)
 
@@ -34,13 +34,13 @@ BARCODE_GTIN = 17
 
 class FLCodBar(object):
 
-    barcode = {}
+    barcode: Dict[str, Any]
     p: QPixmap = None
     pError: QPixmap = None
 
     def __init__(
         self,
-        value: Mapping[str, str] = None,
+        value: Union[None, int, str, Dict[str, Any]] = None,
         type_=BARCODE_128,
         margin=10,
         scale=1.0,
@@ -56,7 +56,7 @@ class FLCodBar(object):
 
         check_dependencies(dict_)
         self.pError = QPixmap()
-
+        self.barcode = {}
         self.barcode["value"] = ""
 
         self.p: QPixmap = None
@@ -79,7 +79,8 @@ class FLCodBar(object):
                 self.barcode["bg"] = bg
                 self.barcode["valid"] = False
                 self.barcode["res"] = res
-
+            elif isinstance(value, int):
+                raise ValueError("Not supported")
             else:
                 self._copyBarCode(value, self.barcode)
 
@@ -115,13 +116,13 @@ class FLCodBar(object):
     def rotation(self) -> Any:
         return self.barcode["rotation"]
 
-    def fg(self) -> Union[str, str]:
+    def fg(self) -> Any:
         return self.barcode["fg"]
 
-    def bg(self) -> Union[str, str]:
+    def bg(self) -> Any:
         return self.barcode["bg"]
 
-    def setData(self, d: Mapping[str, Any]) -> None:
+    def setData(self, d: Dict[str, Any]) -> None:
         self.barcode = d
 
     def validBarcode(self) -> Any:
@@ -329,7 +330,7 @@ class FLCodBar(object):
 
             self.barcode["valid"] = True
 
-    def _copyBarCode(self, source: Mapping[str, Any], dest) -> None:
+    def _copyBarCode(self, source: Dict[str, Any], dest) -> None:
         dest["value"] = source["value"]
         dest["type"] = source["type"]
         dest["margin"] = source["margin"]

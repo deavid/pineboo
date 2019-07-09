@@ -18,10 +18,7 @@ import traceback
 import os
 from pineboolib import logging
 
-from typing import Iterable, Mapping, NoReturn, Optional, TypeVar, Union, Any, List
-
-_T0 = TypeVar("_T0")
-_T1 = TypeVar("_T1")
+from typing import Optional, Union, Any, List
 
 
 class FLSQLITE(object):
@@ -159,7 +156,7 @@ class FLSQLITE(object):
 
         return self.declarative_base_
 
-    def formatValueLike(self, type_, v: Mapping[int, Any], upper) -> str:
+    def formatValueLike(self, type_, v: Any, upper) -> str:
         res = "IS NULL"
 
         if type_ == "bool":
@@ -186,7 +183,7 @@ class FLSQLITE(object):
 
         return res
 
-    def formatValue(self, type_, v: _T1, upper) -> Optional[Union[int, str, _T1]]:
+    def formatValue(self, type_, v: Any, upper) -> Optional[Union[int, str, bool]]:
 
         util = FLUtil()
 
@@ -316,7 +313,7 @@ class FLSQLITE(object):
     def inTransaction(self) -> Any:
         return self.conn_.in_transaction
 
-    def fix_query(self, query: _T0) -> _T0:
+    def fix_query(self, query: str) -> str:
         # ret_ = query.replace(";", "")
         return query
 
@@ -522,7 +519,7 @@ class FLSQLITE(object):
 
         return sql
 
-    def mismatchedTable(self, table1, tmd_or_table2: Iterable, db_=None) -> bool:
+    def mismatchedTable(self, table1, tmd_or_table2: str, db_=None) -> bool:
         if db_ is None:
             db_ = self.db_
 
@@ -566,7 +563,7 @@ class FLSQLITE(object):
         else:
             return self.mismatchedTable(table1, tmd_or_table2.name(), db_)
 
-    def notEqualsFields(self, field1: Mapping[int, Any], field2: Mapping[int, Any]) -> bool:
+    def notEqualsFields(self, field1: List[Any], field2: List[Any]) -> bool:
         ret = False
         try:
             if not field1[2] == field2[2] and not field2[6]:
@@ -602,7 +599,7 @@ class FLSQLITE(object):
         res = cursor.fetchall()
         return self.recordInfo(res)
 
-    def recordInfo(self, tablename_or_query: Iterable) -> Any:
+    def recordInfo(self, tablename_or_query: Any) -> Any:
         if not self.isOpen():
             return None
 
@@ -673,7 +670,7 @@ class FLSQLITE(object):
 
         return ret
 
-    def alterTable(self, mtd1, mtd2, key, force=False) -> NoReturn:
+    def alterTable(self, mtd1, mtd2, key, force=False) -> Any:
         raise Exception("not implemented")
 
     # FIXME: newField is never assigned

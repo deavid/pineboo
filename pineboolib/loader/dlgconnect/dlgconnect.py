@@ -44,12 +44,11 @@ class DlgConnect(QtWidgets.QWidget):
         """
         from pineboolib.fllegacy.flmanagermodules import FLManagerModules
 
-        mM = FLManagerModules()
         dlg_ = filedir("loader/dlgconnect/dlgconnect.ui")
 
-        self.ui = mM.createUI(dlg_, None, self)
-        del mM
-
+        self.ui = FLManagerModules.createUI(dlg_, None, self)
+        if not self.ui:
+            raise Exception("Error creating dlgConnect")
         # Centrado en pantalla
         frameGm = self.frameGeometry()
         screen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
