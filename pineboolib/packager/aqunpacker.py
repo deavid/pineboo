@@ -10,18 +10,12 @@ def AQ_STRERROR(val) -> None:
 
 
 class AQUnpacker(QtCore.QObject):
-    file_ = None
-    stream_ = None
-    package_version_ = None
-
     def __init__(self, in_) -> None:
         self.file_ = QtCore.QFile(QtCore.QDir.cleanPath(in_))
-        if self.file_.open(QtCore.QIODevice.ReadOnly):
-            self.stream_ = QtCore.QDataStream(self.file_)
-            self.package_version_ = self.stream_.readBytes().decode("utf-8")
-
-        else:
-            AQ_STRERROR("Error opening file %s" % input)
+        if not self.file_.open(QtCore.QIODevice.ReadOnly):
+            raise Exception("Error opening file %r" % in_)
+        self.stream_ = QtCore.QDataStream(self.file_)
+        self.package_version_ = self.stream_.readBytes().decode("utf-8")
 
     def errorMessages(self) -> list:
         return err_msgs_
