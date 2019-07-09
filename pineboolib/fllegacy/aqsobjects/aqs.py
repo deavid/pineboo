@@ -5,7 +5,7 @@ from PyQt5.QtXml import QDomDocument  # type: ignore
 from PyQt5 import QtCore  # type: ignore
 from PyQt5 import QtGui  # type: ignore
 
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 from typing import Any
 
 logger = logging.getLogger("AQS")

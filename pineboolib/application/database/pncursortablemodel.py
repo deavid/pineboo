@@ -10,7 +10,7 @@ from PyQt5 import QtCore, QtGui, Qt  # type: ignore
 from PyQt5 import QtWidgets  # type: ignore  # FIXME: Not allowed here! this is for QCheckBox but it's not needed
 
 from pineboolib.core.utils.utils_base import filedir
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 from pineboolib.application.utils.date_conversion import date_amd_to_dma
 from pineboolib.fllegacy.flapplication import aqApp
 from typing import Any, Iterable, Optional, Union, List, Dict, Tuple, TYPE_CHECKING

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 import re
 from typing import TypeVar
 

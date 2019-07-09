@@ -6,7 +6,7 @@ from optparse import Values
 # from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists # FIXME: Not allowed yet
 from PyQt5 import QtCore  # type: ignore
 
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils.struct import AreaStruct
 from pineboolib.core.exceptions import CodeDoesNotBelongHereException, NotConnectedError

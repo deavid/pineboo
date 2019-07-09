@@ -1,5 +1,5 @@
 import os.path
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 from typing import Optional
 
 from .utils.path import _dir

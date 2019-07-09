@@ -6,7 +6,7 @@ import os
 from typing import List, Dict, Any, Union
 from PyQt5 import QtCore  # type: ignore
 
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.application.utils import sql_tools
 from pineboolib.application import project

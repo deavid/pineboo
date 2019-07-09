@@ -6,7 +6,7 @@ import os
 import traceback
 
 from PyQt5 import QtCore  # type: ignore
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 from pineboolib.application import project
 from pineboolib.fllegacy.systype import SysType
 import types

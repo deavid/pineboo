@@ -3,7 +3,7 @@ import importlib
 import sys
 from typing import Dict
 
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 from pineboolib.core.utils.singleton import Singleton
 
 logger = logging.getLogger(__name__)

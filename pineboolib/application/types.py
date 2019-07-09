@@ -4,7 +4,7 @@ from typing import Any, Optional, Dict, TypeVar
 
 from PyQt5 import QtCore  # type: ignore
 
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 from pineboolib.core.utils.utils_base import StructMyDict
 from pineboolib.application.utils.date_conversion import date_dma_to_amd
 

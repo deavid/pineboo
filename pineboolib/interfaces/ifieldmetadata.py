@@ -1,4 +1,5 @@
 from typing import List, Optional, Union
+from .itablemetadata import ITableMetaData
 
 
 class IFieldMetaData:
@@ -59,7 +60,7 @@ class IFieldMetaData:
     def length(self) -> int:
         return 0
 
-    def metadata(self) -> None:
+    def metadata(self) -> ITableMetaData:
         return
 
     def name(self) -> str:

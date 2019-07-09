@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib.core.utils.utils_base import aqtt
 
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 from pineboolib.interfaces import IFieldMetaData
 
 from typing import List, Optional, Union, Any, TypeVar, TYPE_CHECKING

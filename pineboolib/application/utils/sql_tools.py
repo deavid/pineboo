@@ -1,25 +1,24 @@
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 
-from typing import Dict, Iterable, Mapping, Sequence, Tuple, Union, Any, Optional
+from typing import Dict, Iterable, Tuple, Union, Any, Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.interfaces.ifieldmetadata import IFieldMetaData  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
 
 class sql_inspector(object):
 
-    _table_names = None
-    _field_names = None
-    _mtd_fields = None
     _sql_list = None
-    _invalid_tables = None
-    _invalid_fields = None
-    _posible_float = None
     _sql = None
-    _alias = None
 
     def __init__(self, sql_text: str) -> None:
-
-        self._mtd_fields = {}
+        self._invalid_tables: List[str] = []  # FIXME: Maybe a set() is better
+        self._mtd_fields: Dict[int, "IFieldMetaData"] = {}
+        self._field_names: Dict[str, int] = {}
+        self._table_names: List[str] = []
+        self._alias: Dict[str, str] = {}
         self._posible_float = False
         sql_text = sql_text.replace("\n", " ")
         sql_text = sql_text.replace("\t", " ")
@@ -36,16 +35,13 @@ class sql_inspector(object):
     def mtd_fields(self) -> Dict[int, Any]:
         return self._mtd_fields
 
-    def table_names(self) -> list:
+    def table_names(self) -> List[str]:
         return self._table_names
 
-    def field_names(self) -> list:
-        ret = []
-        if self._field_names:
-            ret = list(self._field_names.keys())
-        return ret
+    def field_names(self) -> List[str]:  # FIXME: This does NOT preserve order!
+        return list(self._field_names.keys())
 
-    def fieldNameToPos(self, name: Union[str, Mapping[slice, Any]]) -> Any:
+    def fieldNameToPos(self, name: str) -> Any:
 
         if name in self._field_names.keys():
             return self._field_names[name]
@@ -75,7 +71,7 @@ class sql_inspector(object):
                 return  # Se entiende que es una consulta especial
 
             index_from = list_sql.index("from")
-            fl = []
+            fl: List[str] = []
             fields_list = list_sql[1:index_from]
             for field in fields_list:
                 field = field.replace(" ", "")
@@ -148,7 +144,7 @@ class sql_inspector(object):
                         last_was_table = True
                     prev_ = t
 
-            temp_tl = []
+            temp_tl: List[str] = []
             for t in tablas:
                 temp_tl = temp_tl + t.split(",")
 
@@ -220,7 +216,7 @@ class sql_inspector(object):
             if mtd is not None:
                 type_ = mtd.type()
 
-        ret_ = value
+        ret_: Any = value
         if type_ in ("string", "stringlist"):
             pass
         elif type_ == "double":
@@ -284,7 +280,7 @@ class sql_inspector(object):
                     # tables_list.remove(table_name)
 
 
-def resolve_query(table_name, params: Union[Iterable, Mapping[object, Union[str, Mapping, Sequence]]]) -> Tuple[str, str]:
+def resolve_query(table_name, params: Dict[str, str]) -> Tuple[str, str]:
     or_where = ""
     and_where = ""
     where = ""
@@ -294,7 +290,7 @@ def resolve_query(table_name, params: Union[Iterable, Mapping[object, Union[str,
     mtd = project.conn.manager().metadata(table_name)
 
     if hasattr(params, "_iterlists"):
-        q = params
+        q: Any = params
         params = {k: q.getlist(k) if len(q.getlist(k)) > 1 else v for k, v in q.items()}
 
     for p in params:
@@ -400,12 +396,11 @@ def resolve_pagination(query: Dict[str, Any]) -> Tuple[Optional[Any], Optional[A
                 # else:
                 #    page = int(query[k])
 
-    ret = (None, "50")
     if limit != 0:
         # init = page * limit
-        ret = (init, limit)
-
-    return ret
+        return (init, limit)
+    else:
+        return (None, "50")
 
 
 def get_tipo_aqnext(tipo) -> int:

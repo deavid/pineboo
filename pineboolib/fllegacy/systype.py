@@ -8,7 +8,7 @@ from pineboolib.core.settings import config
 from pineboolib.core import decorators
 from pineboolib.application import project
 
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 from typing import Any
 
 logger = logging.getLogger("fllegacy.systype")
