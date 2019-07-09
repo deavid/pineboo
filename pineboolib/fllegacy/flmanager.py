@@ -25,7 +25,7 @@ from PyQt5.QtXml import QDomElement  # type: ignore
 from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
 from pineboolib.application.database.pnsqlquery import PNSqlQuery, PNGroupByQuery
 
-from typing import Optional, Union, Any, Mapping, TYPE_CHECKING
+from typing import Optional, Union, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.interfaces.iconnection import IConnection
@@ -1433,7 +1433,7 @@ class FLManager(QtCore.QObject, IManager):
 
         return False
 
-    def storeLargeValue(self, mtd, largeValue: Mapping[slice, Any]) -> Optional[str]:
+    def storeLargeValue(self, mtd, largeValue: str) -> Optional[str]:
         """
         Utilizado para almacenar valores grandes de campos en tablas separadas indexadas
         por claves SHA del contenido del valor.
@@ -1500,7 +1500,7 @@ class FLManager(QtCore.QObject, IManager):
 
         return refKey
 
-    def fetchLargeValue(self, refKey: Mapping[slice, Any]) -> Optional[str]:
+    def fetchLargeValue(self, refKey: str) -> Optional[str]:
         """
         Obtiene el valor de gran tamaño segun su clave de referencia.
 
