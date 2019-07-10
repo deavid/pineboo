@@ -1,5 +1,5 @@
 from pineboolib.core.utils import logging
-
+import datetime
 from typing import Dict, Iterable, Tuple, Union, Any, Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -203,6 +203,8 @@ class sql_inspector(object):
     def resolve_value(self, pos, value: Union[bytes, float, str], raw=False) -> Any:
 
         if not self.mtd_fields():
+            if isinstance(value, datetime.time):
+                value = str(value)[0:8]
             return value
 
         type_ = "double"
@@ -233,7 +235,12 @@ class sql_inspector(object):
 
             ret_ = types.Date(str(ret_))
         elif type_ == "time":
-            ret_ = str(ret_)[:8]
+            ret_ = str(ret_)
+            if ret_.find(".") > -1:
+                ret_ = ret_[0 : ret_.find(".")]
+            elif ret_.find("+") > -1:
+                ret_ = ret_[0 : ret_.find("+")]
+
         elif type_ in ("unlock", "bool"):
             pass
         elif type_ == "bytearray":
