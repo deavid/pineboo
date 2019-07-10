@@ -2,7 +2,7 @@
 
 from PyQt5 import QtCore  # type: ignore
 import sys
-from typing import Any
+from typing import Any, List
 
 
 class Process(QtCore.QProcess):
@@ -85,14 +85,15 @@ class Process(QtCore.QProcess):
         pro = QtCore.QProcess()
         from pineboolib.application import types
 
+        comando_: List[str] = []
         if isinstance(comando, types.Array):
             comando = str(comando)
 
         if isinstance(comando, str):
-            comando = comando.split(" ")
+            comando_ = comando.split(" ")
 
-        programa = comando[0]
-        argumentos = comando[1:]
+        programa = comando_[0]
+        argumentos = comando_[1:]
         pro.setProgram(programa)
         pro.setArguments(argumentos)
         pro.start()

@@ -93,7 +93,8 @@ class dgi_qt(dgi_schema):
 
         logger.info("Procesando %s (v%s)", n, UIVersion)
         if UIVersion < "4.0":
-            self.pnqt3ui.loadUi(form_path, w_)
+            if self.pnqt3ui:
+                self.pnqt3ui.loadUi(form_path, w_)
         else:
             from PyQt5 import uic  # type: ignore
 

@@ -11,7 +11,7 @@ from pineboolib.application.utils.geometry import loadGeometryForm, saveGeometry
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flapplication import aqApp
-from typing import Any
+from typing import Any, Union, Dict, Optional, Tuple, Type
 
 """
 Representa un formulario que enlaza con una tabla.
@@ -62,7 +62,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
     Generalmente es el nombre de la acción que abre el formulario
     """
-    idMDI_ = None
+    idMDI_: Optional[str] = None
 
     """
     Capa para botones
@@ -107,12 +107,12 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     """
     Almacena que se aceptado, es decir NO se ha pulsado, botón cancelar
     """
-    accepted_ = None
+    accepted_: bool = False
 
     """
     Nombre del formulario relativo a la acción (form / formRecrd + nombre de la acción)
     """
-    actionName_ = None
+    actionName_: str = ""
 
     """
     Interface para scripts
@@ -144,14 +144,14 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     formReady = QtCore.pyqtSignal()
     formClosed = QtCore.pyqtSignal()
 
-    known_instances = {}
+    known_instances: Dict[Tuple[Type["FLFormDB"], str], "FLFormDB"] = {}
     cursor_ = None
     bottomToolbar = None
     pushButtonCancel = None
     toolButtonClose = None
 
     _uiName = None
-    _scriptForm = None
+    _scriptForm: Union[Any, str] = None
 
     init_thread_script = None
     logger = logging.getLogger("FLFormDB")
@@ -171,7 +171,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         self._loaded = False
         self.known_instances[(self.__class__, action.name())] = self
 
-        self._action = action
+        self._action: "FLAction" = action
         if type(self).__name__ == "FLFormRecordDB":
             self.actionName_ = "formRecord" + self._action.name()
             script_name = self._action.scriptFormRecord()
@@ -212,7 +212,8 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         self.widget = self.script.form
         self.iface = self.widget.iface
 
-        self.iconSize = project._DGI.iconSize()
+        if project._DGI is not None:
+            self.iconSize = project._DGI.iconSize()
         self.init_thread_script = None
         if load:
             self.load()
@@ -223,6 +224,9 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
             return
 
         # self.resize(550,350)
+        if self.layout is None:
+            return
+
         self.layout.insertWidget(0, self.widget)
         self.layout.setSpacing(1)
         self.layout.setContentsMargins(1, 1, 1, 1)
@@ -355,7 +359,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Obtiene el identificador MDI
     """
 
-    def idMDI(self) -> str:
+    def idMDI(self) -> Optional[str]:
         return self.idMDI_
 
     """
@@ -611,7 +615,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         from pineboolib.application import project
 
         if "fltesttest" in project.conn.managerModules().listAllIdModules():
-            project.call("fltesttest.iface.recibeEvento", ("formClosed", self.actionName_), None)
+            project.call("fltesttest.iface.recibeEvento", ["formClosed", self.actionName_], None)
 
         self.formClosed.emit()
         if self.widget:
@@ -641,10 +645,12 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
             v = None
 
-            if getattr(self.iface, "preloadMainFilter", None):
-                v = self.iface.preloadMainFilter()
+            preload_main_filter = getattr(self.iface, "preloadMainFilter", None)
 
-            if v:
+            if preload_main_filter:
+                v = preload_main_filter()
+
+            if v is not None and self.cursor_:
                 self.cursor_.setMainFilter(v, False)
 
             # if self._loaded and not self.__class__.__name__ == "FLFormRecordDB":
@@ -677,7 +683,8 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         self.bottomToolbar.layout.setSpacing(0)
         self.bottomToolbar.layout.addStretch()
         self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.layout.addWidget(self.bottomToolbar)
+        if self.layout is not None:
+            self.layout.addWidget(self.bottomToolbar)
         # if self.layout:
         #    self.layout = None
         # Limpiamos la toolbar
@@ -791,7 +798,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         self.hide()
         self.emitFormClosed()
         super(FLFormDB, self).closeEvent(e)
-        self._action.mainform_widget = None
+        # self._action.mainform_widget = None
         self.deleteLater()
         self._loaded = False
         from pineboolib import pncontrolsfactory

@@ -3,6 +3,7 @@ from pineboolib.application.utils.mobilemode import is_mobile_mode
 from importlib import import_module
 
 from pineboolib import logging
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -11,8 +12,8 @@ class dgi_schema(object):
 
     _desktopEnabled = False
     _mLDefault = False
-    _name = None
-    _alias = None
+    _name: Optional[str] = None
+    _alias: Optional[str] = None
     _localDesktop = True
     _mobile = False
     _clean_no_python = True

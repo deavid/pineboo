@@ -6,12 +6,12 @@ from json import dumps
 from xml import etree
 from xml.etree.ElementTree import fromstring
 
-from xmljson import yahoo as xml2json
+from xmljson import yahoo as xml2json  # type: ignore
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 
-from jsonrpc import JSONRPCResponseManager, dispatcher
+from jsonrpc import JSONRPCResponseManager, dispatcher  # type: ignore
 
 from pineboolib import logging
 from pineboolib.core import decorators
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 class parser(object):
     _mainForm = None
-    _queqe = {}
+    _queqe: Dict[str, str] = {}
 
     def __init__(self, mainForm) -> None:
         self._mainForm = mainForm
@@ -163,8 +163,9 @@ class parser(object):
 
 class dgi_jsonrpc(dgi_schema):
     _par = None
-    _W = {}
-    _WJS = {}
+    _W: Dict[str, Any] = {}
+    _WJS: Dict[str, Any] = {}
+    _mainForm: Optional[object] = None
 
     def __init__(self) -> None:
         # desktopEnabled y mlDefault a True
@@ -186,7 +187,7 @@ class dgi_jsonrpc(dgi_schema):
 
     def mainForm(self) -> Any:
         if not self._mainForm:
-            self._mainForm = mainForm()
+            self._mainForm = MainForm()
         return self._mainForm
 
     def exec_(self) -> None:
@@ -194,7 +195,8 @@ class dgi_jsonrpc(dgi_schema):
         self.launchServer()
 
     def launchServer(self) -> None:
-        run_simple("localhost", 4000, self._par.receive)
+        if self._par:
+            run_simple("localhost", 4000, self._par.receive)
         # print("JSON-RPC:INFO: Listening socket", self._listenSocket)
         # WSGIServer(self._par.query, bindAddress=self._listenSocket).run()
 
@@ -204,7 +206,8 @@ class dgi_jsonrpc(dgi_schema):
         self._W[widget.__class__.__module__] = widget
 
     def showWidget(self, widget) -> None:
-        self._par.addQueque("%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
+        if self._par:
+            self._par.addQueque("%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
 
     def __getattr__(self, name) -> Any:
         return super().resolveObject(self._name, name)
@@ -260,7 +263,7 @@ class parserJson:
 
         return True
 
-    def manageProperties(self, obj: _T0) -> _T0:
+    def manageProperties(self, obj: _T0) -> Optional[_T0]:
         if isinstance(obj, dict):
             for property in list(obj):
                 if self.isInDgi(property, "prop"):
@@ -329,7 +332,7 @@ FIXME: Estas clases de abajo ,deberian de ser tipo object para poder levantar la
 """
 
 
-class mainForm(object):
+class MainForm(object):
     mainWindow = None
     MainForm = None
 
@@ -345,25 +348,28 @@ class mainForm(object):
                 return self.runAction(args[1])
         except Exception:
             print(traceback.format_exc())
-            return False
+
+        return False
 
     def runAction(self, name) -> bool:
         try:
-            self.mainWindow._actionsConnects[name].run()
-            return True
+            if self.mainWindow is not None:
+                self.mainWindow._actionsConnects[name].run()
+                return True
         except Exception:
             print(traceback.format_exc())
-            return False
+
+        return False
 
 
 class json_mainWindow(object):
-    areas_ = {}
-    modules_ = {}
-    _actionsConnects = {}
-    _actions = {}
-    _toolBarActions = []
-    _images = {}
-    initialized_mods_ = []
+    areas_: Dict[str, str] = {}
+    modules_: Dict[str, Any] = {}
+    _actionsConnects: Dict[str, Any] = {}
+    _actions: Dict[str, Any] = {}
+    _toolBarActions: List[str] = []
+    _images: Dict[str, Any] = {}
+    initialized_mods_: List[str] = []
     w_ = None
 
     def __init__(self):
@@ -434,7 +440,7 @@ class json_mainWindow(object):
     def json_areas(self, *args) -> Dict[Any, Any]:
         return self.areas_
 
-    def json_modules(self, args: Union[Sized, Mapping[int, Any]]) -> List[Any]:
+    def json_modules(self, *args: Union[Sized, Mapping[int, Any]]) -> List[Any]:
         _area = None
         if len(args) > 1:
             _area = args[1]
@@ -453,7 +459,7 @@ class json_mainWindow(object):
 
         return modulesS
 
-    def json_actions(self, args: Union[Sized, Mapping[int, Any]]) -> List[Any]:
+    def json_actions(self, *args: Union[Sized, Mapping[int, Any]]) -> List[Any]:
         _module = None
         _ret = []
         if len(args) > 1:

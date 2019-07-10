@@ -1,6 +1,6 @@
 from pineboolib import logging
 from pineboolib.application.utils.check_dependencies import check_dependencies
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine  # type: ignore
 
 from PyQt5.Qt import qWarning  # type: ignore
 from PyQt5.QtWidgets import QMessageBox  # type: ignore
@@ -31,7 +31,7 @@ class FLQPSQL2(FLQPSQL):
     def connect(self, db_name, db_host, db_port: Union[bytes, str, SupportsInt], db_userName, db_password) -> Any:
         self._dbname = db_name
         check_dependencies({"pg8000": "pg8000", "sqlalchemy": "sqlAlchemy"})
-        import pg8000
+        import pg8000  # type: ignore
         import traceback
 
         # conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5"
@@ -45,13 +45,14 @@ class FLQPSQL2(FLQPSQL):
         except Exception as e:
             from pineboolib.application import project
 
-            if not project._DGI.localDesktop():
+            if project._DGI and not project._DGI.localDesktop():
                 if repr(traceback.format_exc()).find("the database system is starting up") > -1:
                     raise
 
                 return False
 
-            project._splash.hide()
+            if project._splash:
+                project._splash.hide()
             if repr(traceback.format_exc()).find("does not exist") > -1:
                 ret = QMessageBox.warning(
                     None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No

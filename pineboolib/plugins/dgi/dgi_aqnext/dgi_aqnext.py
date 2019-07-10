@@ -103,7 +103,7 @@ class dgi_aqnext(dgi_schema):
         data = None
         utf8_ = False
         if ext_ == "qs":
-            from django.conf import settings
+            from django.conf import settings  # type: ignore
 
             folder_ = settings.PROJECT_ROOT
             legacy_path = "%s/legacy/%s/%s.py" % (folder_, module_id, name_)

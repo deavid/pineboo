@@ -1,8 +1,8 @@
-from typing import Any
+from typing import Any, List
 
 
 class ProgressDialogManager(object):
-    progress_dialog_stack = None
+    progress_dialog_stack: List[Any] = []
 
     def __init__(self):
         self.progress_dialog_stack = []
@@ -12,14 +12,18 @@ class ProgressDialogManager(object):
         from pineboolib.application import project
         from PyQt5 import QtCore  # type: ignore
 
-        pd_widget = project._DGI.QProgressDialog(str(title), str(project._DGI.QApplication.translate("scripts", "Cancelar")), 0, steps)
-        pd_widget.setObjectName(id_)
-        pd_widget.setWindowModality(QtCore.Qt.WindowModal)
-        pd_widget.setWindowTitle(str(title))
-        self.progress_dialog_stack.append(pd_widget)
-        pd_widget.setMinimumDuration(100)
+        if project._DGI:
+            pd_widget = project._DGI.QProgressDialog(str(title), str(project._DGI.QApplication.translate("scripts", "Cancelar")), 0, steps)
+            if pd_widget is not None:
+                pd_widget.setObjectName(id_)
+                pd_widget.setWindowModality(QtCore.Qt.WindowModal)
+                pd_widget.setWindowTitle(str(title))
+                self.progress_dialog_stack.append(pd_widget)
+                pd_widget.setMinimumDuration(100)
 
-        return pd_widget
+                return pd_widget
+
+        return None
 
     def destroy(self, id_) -> None:
         pd_widget = self.progress_dialog_stack[-1]

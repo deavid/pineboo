@@ -15,7 +15,7 @@ class FLDateEdit(QDateEdit):
     _parent = None
 
     def __init__(self, parent, name) -> None:
-        super(FLDateEdit, self).__init__(parent, name)
+        super().__init__(parent, name)
         self.setMinimumWidth(90)
         self.setMaximumWidth(90)
         self._parent = parent
@@ -23,19 +23,19 @@ class FLDateEdit(QDateEdit):
     def setOrder(self, order) -> None:
         self.setDisplayFormat(order)
 
-    def getDate(self):
+    def get_date(self):
         return super(FLDateEdit, self).date
 
-    def setDate(self, d: Union[str, datetime.date, Date] = None) -> None:
+    def set_date(self, d: Union[str, datetime.date, Date] = None) -> None:
         if d in (None, "NAN", ""):
             date = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
         else:
             date = convert_to_qdate(d)
 
-        super(FLDateEdit, self).setDate(date)
+        super().setDate(date)
         # if not project._DGI.localDesktop():
         #    project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), date.toString())
         # else:
         self.setStyleSheet("color: black")
 
-    date = property(getDate, setDate)
+    date = property(get_date, set_date)

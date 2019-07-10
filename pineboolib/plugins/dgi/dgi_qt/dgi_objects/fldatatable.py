@@ -6,7 +6,7 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
 from PyQt5.QtWidgets import QCheckBox  # type: ignore
 from pineboolib import logging
-from typing import Any, Optional, TypeVar
+from typing import Any, Optional, TypeVar, List, Dict
 
 _T1 = TypeVar("_T1")
 
@@ -47,17 +47,17 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Almacena la tabla está en modo sólo lectura
     """
-    readonly_ = None
+    readonly_: bool = False
 
     """
     Almacena la tabla está en modo sólo edición
     """
-    editonly_ = None
+    editonly_: bool = False
 
     """
     Indica si la tabla está en modo sólo inserción
     """
-    insertonly_ = None
+    insertonly_: bool = False
 
     """
     Texto del último campo dibujado en la tabla
@@ -73,7 +73,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Lista con las claves primarias de los registros seleccionados por chequeo
     """
-    primarysKeysChecked_ = []
+    primarysKeysChecked_: List[object] = []
 
     """
     Filtro persistente para el cursor
@@ -94,7 +94,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Indica el ancho de las columnas establecidas explícitamente con FLDataTable::setColumnWidth
     """
-    widthCols_ = {}
+    widthCols_: Dict[str, int] = {}
 
     """
     Indica si se deben mostrar los campos tipo pixmap en todas las filas
@@ -550,6 +550,9 @@ class FLDataTable(QtWidgets.QTableView):
     """
 
     def setChecked(self, index) -> None:
+        if not self.cursor_:
+            return
+
         row = index.row()
         col = index.column()
         field = self.cursor_.metadata().indexFieldObject(col)
@@ -591,6 +594,8 @@ class FLDataTable(QtWidgets.QTableView):
 
     def syncNumRows(self) -> None:
         # print("syncNumRows")
+        if not self.cursor_:
+            return
 
         if self.changingNumRows_:
             return
@@ -654,10 +659,14 @@ class FLDataTable(QtWidgets.QTableView):
     """
 
     def refresh(self, refresh_option=None) -> None:
+
+        if not self.cursor_:
+            return
+
         if self.popup_:
             self.cursor_.refresh()
         # if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
-        if not self.refreshing_ and self.cursor():
+        if not self.refreshing_:
 
             # if self.function_get_color and self.cursor().model():
             #    if self.cursor().model().color_function_ != self.function_get_color:
@@ -724,9 +733,9 @@ class FLDataTable(QtWidgets.QTableView):
     def setColumnWidth(self, field, w) -> None:
         self.widthCols_[field] = w
 
-    def resize_column(self, col, str_text: _T1) -> Optional[_T1]:
+    def resize_column(self, col, str_text: Optional[str]) -> None:
         if str_text is None:
-            return str_text
+            return
 
         str_text = str(str_text)
 
@@ -830,7 +839,7 @@ class FLDataTable(QtWidgets.QTableView):
         @return index column de la columna
         """
         if not isinstance(c, int) or not self.cursor_:
-            return
+            return None
 
         visible_id = -1
         ret_ = None

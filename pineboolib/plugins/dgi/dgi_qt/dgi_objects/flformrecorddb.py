@@ -123,7 +123,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
         self._uiName = action.formRecord()
         self._scriptForm = action.scriptFormRecord() or "emptyscript"
 
-        if self.cursor():
+        if self.cursor_:
             self.initialModeAccess = self.cursor_.modeAccess()
             if DEBUG:
                 print("*** FLFormRecordDB::__init__: cursor: %r name: %r at:%r" % (self.cursor_, self.cursor_.curName(), self.cursor_.at()))
@@ -157,17 +157,17 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     """
 
     def setCaptionWidget(self, text=None) -> None:
-        if not self.cursor():
+        if not self.cursor_:
             return
 
         if not text:
             text = self.cursor_.metadata().alias()
 
-        if self.cursor().modeAccess() == self.cursor().Insert:
+        if self.cursor_.modeAccess() == self.cursor_.Insert:
             self.setWindowTitle("Insertar %s" % text)
-        elif self.cursor().modeAccess() == self.cursor().Edit:
+        elif self.cursor_.modeAccess() == self.cursor_.Edit:
             self.setWindowTitle("Editar %s" % text)
-        elif self.cursor().modeAccess() == self.cursor().Browse:
+        elif self.cursor_.modeAccess() == self.cursor_.Browse:
             self.setWindowTitle("Visualizar %s" % text)
 
     """

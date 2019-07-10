@@ -16,7 +16,7 @@ from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flapplication import aqApp
 
 
-from typing import Any, Optional
+from typing import Any, Optional, List
 
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ class FLTableDB(QtWidgets.QWidget):
     Null = 9
     NotNull = 10
 
-    mapCondType = None
+    mapCondType: List[List] = []
 
     _parent = None
     _name = None
@@ -82,7 +82,6 @@ class FLTableDB(QtWidgets.QWidget):
 
     _controlsInit = None
 
-    tdbFilterBuildWhere_ = None
     filterHidden_ = False
     findHidden_ = False
     _loaded = False
@@ -90,6 +89,240 @@ class FLTableDB(QtWidgets.QWidget):
     Tamaño de icono por defecto
     """
     iconSize = None
+
+    """
+    Componente para visualizar los registros
+    """
+    tableRecords_ = None
+
+    """
+    Nombre de la tabla a la que esta asociado este componente.
+    """
+    tableName_ = None
+
+    """
+    Nombre del campo foráneo
+    """
+    foreignField_ = None
+
+    """
+    Nombre del campo de la relación
+    """
+    fieldRelation_ = None
+
+    """
+    Cursor con los datos de origen para el componente
+    """
+    cursor_ = None
+
+    """
+    Cursor auxiliar de uso interno para almacenar los registros de la tabla
+    relacionada con la de origen
+    """
+    cursorAux = None
+
+    """
+    Matiene la ventana padre
+    """
+    topWidget = None
+
+    """
+    Indica que la ventana ya ha sido mostrada una vez
+    """
+    showed = None
+
+    """
+    Mantiene el filtro de la tabla
+    """
+    filter_: Optional[str] = ""
+
+    """
+    Almacena si el componente está en modo sólo lectura
+    """
+    readonly_ = False
+    reqReadOnly_ = False
+
+    """
+    Almacena si el componente está en modo sólo edición
+    """
+    editonly_ = False
+    reqEditOnly_ = False
+
+    """
+    Indica si el componente está en modo sólo permitir añadir registros
+    """
+    insertonly_ = False
+    reqInsertOnly_ = False
+
+    """
+    Almacena los metadatos del campo por el que está actualmente ordenada la tabla
+    """
+    sortField_ = None
+
+    """
+    Almacena los metadatos del campo por el que está actualmente ordenada la tabla en segunda instancia
+
+    @author Silix - dpinelo
+    """
+    sortField2_ = None
+
+    """
+    Crónometro interno
+    """
+    timer = None
+
+    """
+    Filtro inicial de búsqueda
+    """
+    initSearch_ = None
+
+    """
+    Indica que la columna de seleción está activada
+    """
+    checkColumnEnabled_: bool = False
+
+    """
+    Indica el texto de la etiqueta de encabezado para la columna de selección
+    """
+    aliasCheckColumn_ = None
+
+    """
+    Indica el nombre para crear un pseudocampo en el cursor para la columna de selección
+    """
+    fieldNameCheckColumn_ = None
+
+    """
+    Indica que la columna de selección está visible
+    """
+    checkColumnVisible_: bool = False
+
+    """
+    Indica el número de columna por la que ordenar los registros
+    """
+    sortColumn_ = 0
+
+    """
+    Indica el número de columna por la que ordenar los registros
+
+    @author Silix - dpinelo
+    """
+    sortColumn2_ = None
+
+    """
+    Indica el número de columna por la que ordenar los registros
+
+    @author Silix
+    """
+    sortColumn3_ = None
+
+    """
+    Indica el sentido ascendente o descendente del la ordenacion actual de los registros
+    """
+    orderAsc_: bool = False
+
+    """
+    Indica el sentido ascendente o descendente del la ordenacion actual de los registros
+
+    @author Silix - dpinelo
+    """
+    orderAsc2_: bool = False
+
+    """
+    Indica el sentido ascendente o descendente del la ordenacion actual de los registros
+
+    @author Silix
+    """
+    orderAsc3_: bool = False
+
+    """
+    Indica si se debe establecer automáticamente la primera columna como de ordenación
+    """
+    autoSortColumn_ = True
+
+    """
+    Almacena la última claúsula de filtro aplicada en el refresco
+    """
+    tdbFilterLastWhere_: Optional[str] = None
+
+    """
+    Diccionario que relaciona literales descriptivos de una condición de filtro
+    con su enumeración
+    """
+    mapCondType = []
+
+    """
+    Indica si el marco de búsqueda está oculto
+    """
+    findHidden_ = None
+
+    """
+    Indica si el marco para conmutar entre datos y filtro está oculto
+    """
+    filterHidden_ = None
+
+    """
+    Indica si se deben mostrar los campos tipo pixmap en todas las filas
+    """
+    showAllPixmaps_ = None
+
+    """
+    Nombre de la función de script a invocar para obtener el color y estilo de las filas y celdas
+
+    El nombre de la función debe tener la forma 'objeto.nombre_funcion' o 'nombre_funcion',
+    en el segundo caso donde no se especifica 'objeto' automáticamente se añadirá como
+    prefijo el nombre del formulario donde se inicializa el componente FLTableDB seguido de un punto.
+    De esta forma si utilizamos un mismo formulario para varias acciones, p.e. master.ui, podemos controlar
+    si usamos distintas funciones de obtener color para cada acción (distintos nombres de formularios) o
+    una única función común para todas las acciones.
+
+    Ej. Estableciendo 'tdbGetColor' si el componente se inicializa en el formulario maestro de clientes,
+    se utilizará 'formclientes.tdbGetColor', si se inicializa en el fomulario maestro de proveedores, se
+    utilizará 'formproveedores.tdbGetColor', etc... Si establecemos 'flfactppal.tdbGetColor' siempre se llama a
+    esa función independientemente del formulario en el que se inicialize el componente.
+
+    Cuando se está pintando una celda se llamará a esa función pasándole cinco parámentros:
+    - Nombre del campo correspondiente a la celda
+    - Valor del campo de la celda
+    - Cursor de la tabla posicionado en el registro correspondiente a la fila que
+      está pintando. AVISO: En este punto los valores del buffer son indefinidos, no se hace refreshBuffer
+      por motivos de eficiencia
+    - Tipo del campo, ver FLUtilInterface::Type en FLObjectFactory.h
+    - Seleccionado. Si es TRUE indica que la celda a pintar está en la fila resaltada/seleccionada.
+      Generalmente las celdas en la fila seleccionada se colorean de forma distinta al resto.
+
+    La función debe devolver una array con cuatro cadenas de caracteres;
+
+    [ "color_de_fondo", "color_lapiz", "estilo_fondo", "estilo_lapiz" ]
+
+    En los dos primeros, el color, se puede utilizar cualquier valor aceptado por QColor::setNamedColor, ejemplos;
+
+    "green"
+    "#44ADDB"
+
+    En los dos últimos, el estilo, se pueden utilizar los valores aceptados por QBrush::setStyle y QPen::setStyle,
+    ver en FLDataTable.cpp las funciones nametoBrushStyle y nametoPenStyle, ejemplos;
+
+    "SolidPattern"
+    "DiagCrossPattern"
+    "DotLine"
+    "SolidLine"
+
+    Si alguno de los valores del array es vacio "", entonces se utilizarán los colores o estilos establecidos por defecto.
+    """
+    functionGetColor_ = None
+
+    """
+    Indica que no se realicen operaciones con la base de datos (abrir formularios). Modo "sólo tabla".
+    """
+    onlyTable_ = False
+    reqOnlyTable_ = False
+
+    """
+    Editor falso
+    """
+    fakeEditor_ = None
+
+    tableDB_filterRecords_functionName_ = None
 
     """
     constructor
@@ -101,7 +334,6 @@ class FLTableDB(QtWidgets.QWidget):
         super(FLTableDB, self).__init__(parent)
         self.topWidget = parent
         self.showAllPixmaps_ = True
-        self.tdbFilterBuildWhere_ = None
         self.sortColumn_ = 0
         self.sortColumn2_ = 1
         self.sortColumn3_ = 2
@@ -114,11 +346,13 @@ class FLTableDB(QtWidgets.QWidget):
         if name:
             self.setObjectName(name)
         self.checkColumnVisible_ = False
-        self.tdbFilterLastWhere_ = None
+        self.tdbFilterLastWhere_: Optional[str] = None
         self.filter_ = None
         from pineboolib.application import project
 
-        self.iconSize = project._DGI.iconSize()
+        if project._DGI is not None:
+            self.iconSize = project._DGI.iconSize()
+
         self.tabControlLayout = QtWidgets.QHBoxLayout()
         self.tabFilter = QtWidgets.QFrame()  # contiene filtros
         self.functionGetColor_ = None
@@ -144,11 +378,13 @@ class FLTableDB(QtWidgets.QWidget):
         if self.loaded():
             return
 
-        if not self.topWidget.cursor():
-            print("FLTableDB : Uno de los padres o antecesores de FLTableDB deber ser de la clase FLFormDB o heredar de ella")
-            return
+        if self.topWidget is not None:
+            if not self.topWidget.cursor():
+                print("FLTableDB : Uno de los padres o antecesores de FLTableDB deber ser de la clase FLFormDB o heredar de ella")
+                return
 
-        self.cursor_ = self.topWidget.cursor()
+            self.cursor_ = self.topWidget.cursor()
+
         self.initCursor()
         # self.setFont(QtWidgets.QApplication.font())
 
@@ -558,7 +794,7 @@ class FLTableDB(QtWidgets.QWidget):
     @return Filtro
     """
 
-    def findFilter(self) -> Any:
+    def findFilter(self) -> Optional[str]:
         return self.tdbFilterLastWhere_
 
     """
@@ -805,16 +1041,17 @@ class FLTableDB(QtWidgets.QWidget):
         if not self.cursorAux:
             if not self.initSearch_:
                 self.refresh(True, True)
-                QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
+                if self.tableRecords_:
+                    QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
             else:
                 self.refresh(True)
-                if self.tableRecords_.numRows() <= 0:
+                if self.tableRecords_ and self.tableRecords_.numRows() <= 0:
 
                     self.refresh(False, True)
                 else:
                     self.refreshDelayed()
 
-            if not isinstance(self.topWidget, FLFormRecordDB):
+            if not isinstance(self.topWidget, FLFormRecordDB) and self.lineEditSearch is not None:
                 self.lineEditSearch.setFocus()
 
         if self.cursorAux:
@@ -824,10 +1061,11 @@ class FLTableDB(QtWidgets.QWidget):
 
             if self.initSearch_:
                 self.refresh(True, True)
-                QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
+                if self.tableRecords_:
+                    QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
             else:
                 self.refresh(True)
-                if self.tableRecords_.numRows() <= 0:
+                if self.tableRecords_ and self.tableRecords_.numRows() <= 0:
                     self.refresh(False, True)
                 else:
                     self.refreshDelayed()
@@ -854,14 +1092,16 @@ class FLTableDB(QtWidgets.QWidget):
         # self.dataLayout.setContentsMargins(0, 0, 0, 0)
         # self.dataLayout.setSizeConstraint(0)
         self.tabData = QtWidgets.QFrame()  # contiene data
-        self.tabData.setSizePolicy(sizePolicyGB)
-
-        self.tabFilter.setSizePolicy(sizePolicyGB)
-
         self.tabDataLayout = QtWidgets.QVBoxLayout()
 
+        if self.tabData is not None:
+            self.tabData.setSizePolicy(sizePolicyGB)
+            self.tabData.setLayout(self.tabDataLayout)
+
+        if self.tabFilter is not None:
+            self.tabFilter.setSizePolicy(sizePolicyGB)
+
         filterL = QtWidgets.QVBoxLayout()
-        self.tabData.setLayout(self.tabDataLayout)
 
         # Fix para acercar el lineEdit con el fltable
         # self.tabData.setContentsMargins(0, 0, 0, 0)
@@ -938,13 +1178,14 @@ class FLTableDB(QtWidgets.QWidget):
         label1.setText("Buscar")
         label2.setText("en")
 
-        self.tabControlLayout.addWidget(label1)
-        self.tabControlLayout.addWidget(self.lineEditSearch)
-        self.tabControlLayout.addWidget(label2)
-        self.tabControlLayout.addWidget(self.comboBoxFieldToSearch)
-        self.tabControlLayout.addWidget(self.comboBoxFieldToSearch2)
+        if self.tabControlLayout is not None:
+            self.tabControlLayout.addWidget(label1)
+            self.tabControlLayout.addWidget(self.lineEditSearch)
+            self.tabControlLayout.addWidget(label2)
+            self.tabControlLayout.addWidget(self.comboBoxFieldToSearch)
+            self.tabControlLayout.addWidget(self.comboBoxFieldToSearch2)
 
-        self.masterLayout.addLayout(self.tabControlLayout)
+            self.masterLayout.addLayout(self.tabControlLayout)
         self.masterLayout.addLayout(self.dataLayout)
         self.setLayout(self.masterLayout)
 
@@ -964,18 +1205,22 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     def tableRecords(self) -> "FLDataTable":
-        if not self.tableRecords_:
+        if self.tableRecords_ is None:
             self.tableRecords_ = FLDataTable(self.tabData, "tableRecords")
-            self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)
-            self.setFocusProxy(self.tableRecords_)
-            self.tabDataLayout.addWidget(self.tableRecords_)
-            self.setTabOrder(self.tableRecords_, self.lineEditSearch)
-            self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
-            self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
-            self.lineEditSearch.installEventFilter(self)
-            self.tableRecords_.installEventFilter(self)
-            if self.autoSortColumn_:
-                self.tableRecords_.header().sectionClicked.connect(self.switchSortOrder)
+            if self.tableRecords_ is not None:
+                self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)
+                self.setFocusProxy(self.tableRecords_)
+                if self.tabDataLayout is not None:
+                    self.tabDataLayout.addWidget(self.tableRecords_)
+                self.setTabOrder(self.tableRecords_, self.lineEditSearch)
+                self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
+                self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
+                if self.lineEditSearch is not None:
+                    self.lineEditSearch.installEventFilter(self)
+                self.tableRecords_.installEventFilter(self)
+
+                if self.autoSortColumn_:
+                    self.tableRecords_.header().sectionClicked.connect(self.switchSortOrder)
 
         t_cursor = self.tableRecords_.cursor()
         if (
@@ -994,16 +1239,20 @@ class FLTableDB(QtWidgets.QWidget):
 
     def setTableRecordsCursor(self) -> None:
 
-        if not self.tableRecords_:
+        if self.tableRecords_ is None:
             self.tableRecords_ = FLDataTable(self.tabData, "tableRecords")
-            self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)
-            self.setFocusProxy(self.tableRecords_)
-            self.tabDataLayout.addWidget(self.tableRecords_)
-            self.setTabOrder(self.tableRecords_, self.lineEditSearch)
-            self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
-            self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
-            self.lineEditSearch.installEventFilter(self)
-            self.tableRecords_.installEventFilter(self)
+            if self.tableRecords_ is not None:
+                self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)
+                self.setFocusProxy(self.tableRecords_)
+                if self.tabDataLayout is not None:
+                    self.tabDataLayout.addWidget(self.tableRecords_)
+                self.setTabOrder(self.tableRecords_, self.lineEditSearch)
+                self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
+                self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
+                self.tableRecords_.installEventFilter(self)
+
+                if self.lineEditSearch is not None:
+                    self.lineEditSearch.installEventFilter(self)
 
         if self.checkColumnEnabled_:
             try:
@@ -1041,7 +1290,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     def refreshTabData(self) -> None:
-        tdbWhere = self.tdbFilterBuildWhere()
+        tdbWhere: Optional[str] = self.tdbFilterBuildWhere()
         if not tdbWhere == self.tdbFilterLastWhere_:
             self.tdbFilterLastWhere_ = tdbWhere
 
@@ -1060,7 +1309,7 @@ class FLTableDB(QtWidgets.QWidget):
             return
 
         hCount = horizHeader.count() - self.sortColumn_
-        if self.tdbFilter.numRows() < hCount and self.cursor():
+        if self.tdbFilter and self.tdbFilter.numRows() < hCount and self.cursor():
             tMD = self.cursor().metadata()
             if not tMD:
                 return
@@ -1229,7 +1478,8 @@ class FLTableDB(QtWidgets.QWidget):
         k = 0
 
         while k < 5:
-            self.tdbFilter.adjustColumn(k)
+            if self.tdbFilter:
+                self.tdbFilter.adjustColumn(k)
             k += 1
 
         self.tabFilterLoaded = True  # Con esto no volvemos a cargar y reescribir el filtro
@@ -1258,6 +1508,9 @@ class FLTableDB(QtWidgets.QWidget):
         if not self.topWidget:
             return None
 
+        if self.tdbFilter is None:
+            return None
+
         rCount = self.tdbFilter.numRows()
         # rCount = self.cursor().model().columnCount()
         if not rCount or not self.cursor():
@@ -1273,7 +1526,7 @@ class FLTableDB(QtWidgets.QWidget):
         condType = None
         fieldName = None
         condValue = None
-        where = ""
+        where: str = ""
         fieldArg = None
         arg2 = None
         arg4 = None
@@ -1281,6 +1534,8 @@ class FLTableDB(QtWidgets.QWidget):
         ol = None
 
         for i in range(rCount):
+            if self.tdbFilter is None:
+                break
             fieldName = tMD.fieldAliasToName(self.tdbFilter.text(i, 0))
             field = tMD.field(fieldName)
             if field is None:
@@ -1443,240 +1698,6 @@ class FLTableDB(QtWidgets.QWidget):
                 prty = prty + "fieldRelation: %s\n" % self.fieldRelation_
 
             self.fakeEditor_.setText(prty)
-
-    """
-    Componente para visualizar los registros
-    """
-    tableRecords_ = None
-
-    """
-    Nombre de la tabla a la que esta asociado este componente.
-    """
-    tableName_ = None
-
-    """
-    Nombre del campo foráneo
-    """
-    foreignField_ = None
-
-    """
-    Nombre del campo de la relación
-    """
-    fieldRelation_ = None
-
-    """
-    Cursor con los datos de origen para el componente
-    """
-    cursor_ = None
-
-    """
-    Cursor auxiliar de uso interno para almacenar los registros de la tabla
-    relacionada con la de origen
-    """
-    cursorAux = None
-
-    """
-    Matiene la ventana padre
-    """
-    topWidget = None
-
-    """
-    Indica que la ventana ya ha sido mostrada una vez
-    """
-    showed = None
-
-    """
-    Mantiene el filtro de la tabla
-    """
-    filter_ = ""
-
-    """
-    Almacena si el componente está en modo sólo lectura
-    """
-    readonly_ = False
-    reqReadOnly_ = False
-
-    """
-    Almacena si el componente está en modo sólo edición
-    """
-    editonly_ = False
-    reqEditOnly_ = False
-
-    """
-    Indica si el componente está en modo sólo permitir añadir registros
-    """
-    insertonly_ = False
-    reqInsertOnly_ = False
-
-    """
-    Almacena los metadatos del campo por el que está actualmente ordenada la tabla
-    """
-    sortField_ = None
-
-    """
-    Almacena los metadatos del campo por el que está actualmente ordenada la tabla en segunda instancia
-
-    @author Silix - dpinelo
-    """
-    sortField2_ = None
-
-    """
-    Crónometro interno
-    """
-    timer = None
-
-    """
-    Filtro inicial de búsqueda
-    """
-    initSearch_ = None
-
-    """
-    Indica que la columna de seleción está activada
-    """
-    checkColumnEnabled_ = None
-
-    """
-    Indica el texto de la etiqueta de encabezado para la columna de selección
-    """
-    aliasCheckColumn_ = None
-
-    """
-    Indica el nombre para crear un pseudocampo en el cursor para la columna de selección
-    """
-    fieldNameCheckColumn_ = None
-
-    """
-    Indica que la columna de selección está visible
-    """
-    checkColumnVisible_ = None
-
-    """
-    Indica el número de columna por la que ordenar los registros
-    """
-    sortColumn_ = 0
-
-    """
-    Indica el número de columna por la que ordenar los registros
-
-    @author Silix - dpinelo
-    """
-    sortColumn2_ = None
-
-    """
-    Indica el número de columna por la que ordenar los registros
-
-    @author Silix
-    """
-    sortColumn3_ = None
-
-    """
-    Indica el sentido ascendente o descendente del la ordenacion actual de los registros
-    """
-    orderAsc_ = None
-
-    """
-    Indica el sentido ascendente o descendente del la ordenacion actual de los registros
-
-    @author Silix - dpinelo
-    """
-    orderAsc2_ = None
-
-    """
-    Indica el sentido ascendente o descendente del la ordenacion actual de los registros
-
-    @author Silix
-    """
-    orderAsc3_ = None
-
-    """
-    Indica si se debe establecer automáticamente la primera columna como de ordenación
-    """
-    autoSortColumn_ = True
-
-    """
-    Almacena la última claúsula de filtro aplicada en el refresco
-    """
-    tdbFilterLastWhere_ = ""
-
-    """
-    Diccionario que relaciona literales descriptivos de una condición de filtro
-    con su enumeración
-    """
-    mapCondType = []
-
-    """
-    Indica si el marco de búsqueda está oculto
-    """
-    findHidden_ = None
-
-    """
-    Indica si el marco para conmutar entre datos y filtro está oculto
-    """
-    filterHidden_ = None
-
-    """
-    Indica si se deben mostrar los campos tipo pixmap en todas las filas
-    """
-    showAllPixmaps_ = None
-
-    """
-    Nombre de la función de script a invocar para obtener el color y estilo de las filas y celdas
-
-    El nombre de la función debe tener la forma 'objeto.nombre_funcion' o 'nombre_funcion',
-    en el segundo caso donde no se especifica 'objeto' automáticamente se añadirá como
-    prefijo el nombre del formulario donde se inicializa el componente FLTableDB seguido de un punto.
-    De esta forma si utilizamos un mismo formulario para varias acciones, p.e. master.ui, podemos controlar
-    si usamos distintas funciones de obtener color para cada acción (distintos nombres de formularios) o
-    una única función común para todas las acciones.
-
-    Ej. Estableciendo 'tdbGetColor' si el componente se inicializa en el formulario maestro de clientes,
-    se utilizará 'formclientes.tdbGetColor', si se inicializa en el fomulario maestro de proveedores, se
-    utilizará 'formproveedores.tdbGetColor', etc... Si establecemos 'flfactppal.tdbGetColor' siempre se llama a
-    esa función independientemente del formulario en el que se inicialize el componente.
-
-    Cuando se está pintando una celda se llamará a esa función pasándole cinco parámentros:
-    - Nombre del campo correspondiente a la celda
-    - Valor del campo de la celda
-    - Cursor de la tabla posicionado en el registro correspondiente a la fila que
-      está pintando. AVISO: En este punto los valores del buffer son indefinidos, no se hace refreshBuffer
-      por motivos de eficiencia
-    - Tipo del campo, ver FLUtilInterface::Type en FLObjectFactory.h
-    - Seleccionado. Si es TRUE indica que la celda a pintar está en la fila resaltada/seleccionada.
-      Generalmente las celdas en la fila seleccionada se colorean de forma distinta al resto.
-
-    La función debe devolver una array con cuatro cadenas de caracteres;
-
-    [ "color_de_fondo", "color_lapiz", "estilo_fondo", "estilo_lapiz" ]
-
-    En los dos primeros, el color, se puede utilizar cualquier valor aceptado por QColor::setNamedColor, ejemplos;
-
-    "green"
-    "#44ADDB"
-
-    En los dos últimos, el estilo, se pueden utilizar los valores aceptados por QBrush::setStyle y QPen::setStyle,
-    ver en FLDataTable.cpp las funciones nametoBrushStyle y nametoPenStyle, ejemplos;
-
-    "SolidPattern"
-    "DiagCrossPattern"
-    "DotLine"
-    "SolidLine"
-
-    Si alguno de los valores del array es vacio "", entonces se utilizarán los colores o estilos establecidos por defecto.
-    """
-    functionGetColor_ = None
-
-    """
-    Indica que no se realicen operaciones con la base de datos (abrir formularios). Modo "sólo tabla".
-    """
-    onlyTable_ = False
-    reqOnlyTable_ = False
-
-    """
-    Editor falso
-    """
-    fakeEditor_ = None
-
-    tableDB_filterRecords_functionName_ = None
 
     """
     Actualiza el conjunto de registros.
@@ -1897,7 +1918,7 @@ class FLTableDB(QtWidgets.QWidget):
 
     def refreshDelayed2(self) -> None:
         self.refresh(False, self._refreshData)
-        self._refreshData = None
+        self._refreshData = False
 
     """
     Invoca al método FLSqlCursor::insertRecord()
@@ -2399,11 +2420,12 @@ class FLTableDB(QtWidgets.QWidget):
     def switchSortOrder(self, col=0) -> None:
         if not self.autoSortColumn_:
             return
-        if self.tableRecords_.logical_index_to_visual_index(col) == self.tableRecords_.visual_index_to_column_index(self.sortColumn_):
+        if self.tableRecords_:
+            if self.tableRecords_.logical_index_to_visual_index(col) == self.tableRecords_.visual_index_to_column_index(self.sortColumn_):
 
-            self.orderAsc_ = not self.orderAsc_
+                self.orderAsc_ = not self.orderAsc_
 
-        self.setSortOrder(self.orderAsc_, col)
+            self.setSortOrder(self.orderAsc_, col)
 
     """
     Filtra los registros de la tabla utilizando el primer campo, según el patrón dado.
@@ -2464,12 +2486,14 @@ class FLTableDB(QtWidgets.QWidget):
     def setSortOrder(self, ascending=True, col_order=None) -> None:
         order = Qt.AscendingOrder if ascending else Qt.DescendingOrder
         col = self.sortColumn_
-        while True:
-            column = self.tableRecords_.header().logicalIndex(col)
-            if not self.tableRecords_.isColumnHidden(column):
-                break
-            col += 1
-        self.tableRecords_.sortByColumn(column, order)
+        if self.tableRecords_:
+            while True:
+
+                column = self.tableRecords_.header().logicalIndex(col)
+                if not self.tableRecords_.isColumnHidden(column):
+                    break
+                col += 1
+            self.tableRecords_.sortByColumn(column, order)
 
     def isSortOrderAscending(self) -> bool:
         return self.orderAsc_
@@ -2480,8 +2504,10 @@ class FLTableDB(QtWidgets.QWidget):
 
     def activeTabData(self, b) -> None:
         # if (self.topWidget and not self.tabTable.visibleWidget() == self.tabData):
-        self.tabFilter.hide()
-        self.tabData.show()
+        if self.tabFilter is not None:
+            self.tabFilter.hide()
+        if self.tabData is not None:
+            self.tabData.show()
         self.refreshTabData()
         # self.tabTable.raiseWidget(self.tabData)
 
@@ -2491,8 +2517,10 @@ class FLTableDB(QtWidgets.QWidget):
 
     def activeTabFilter(self, b) -> None:
         # if (self.topWidget and not self.tabTable.visibleWidget() == self.tabFilter):
-        self.tabData.hide()
-        self.tabFilter.show()
+        if self.tabData is not None:
+            self.tabData.hide()
+        if self.tabFilter is not None:
+            self.tabFilter.show()
         self.refreshTabFilter()
         # self.tabTable.raiseWidget(self.tabFilter)
 

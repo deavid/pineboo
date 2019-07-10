@@ -38,11 +38,10 @@ class FLFormSearchDB(FLFormDB):
     """
     Almacena si se ha abierto el formulario con el método FLFormSearchDB::exec()
     """
-    loop = None
+    loop: bool = False
 
-    acceptingRejecting_ = None
-    inExec_ = None
-    accepted_ = None
+    acceptingRejecting_: bool = False
+    inExec_: bool = False
 
     eventloop = None
 
@@ -81,7 +80,8 @@ class FLFormSearchDB(FLFormDB):
         self.eventloop = QtCore.QEventLoop()
 
     def setAction(self, a) -> None:
-        self.cursor_.setAction(a)
+        if self.cursor_:
+            self.cursor_.setAction(a)
 
     """
     destructor
@@ -92,7 +92,7 @@ class FLFormSearchDB(FLFormDB):
             self.cursor_.restoreEditionFlag(self)
             self.cursor_.restoreBrowseFlag(self)
 
-        FLFormDB.__delattr__(self, *args, **kwargs)
+        super().__delattr__(self, *args, **kwargs)
 
     """
     formReady = QtCore.pyqtSignal()
@@ -233,7 +233,8 @@ class FLFormSearchDB(FLFormDB):
             timer2.singleShot(0, self.emitFormReady)
 
         self.loop = True
-        self.eventloop.exec_()
+        if self.eventloop:
+            self.eventloop.exec_()
         self.loop = False
         self.inExec_ = False
 

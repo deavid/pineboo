@@ -1,12 +1,12 @@
 # # -*- coding: utf-8 -*-
 from pineboolib import logging
-from flup.server.fcgi import WSGIServer
+from flup.server.fcgi import WSGIServer  # type: ignore
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.application.utils.check_dependencies import check_dependencies
 
 from pineboolib.application import project
 
-from typing import Any, Mapping
+from typing import Any, Mapping, Optional
 
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ Esta clase lanza contra el arbol qsa la consulta recibida y retorna la respuesta
 
 class parser(object):
     _prj = None
-    _callScript = None
+    _callScript: str = ""
 
     def __init__(self, prj, callScript) -> None:
         self._prj = prj
@@ -62,7 +62,7 @@ class parser(object):
         start_response("200 OK", [("Content-Type", "text/html")])
         aList = environ["QUERY_STRING"]
         try:
-            retorno_ = project.call(self._callScript, aList)
+            retorno_: Any = project.call(self._callScript, aList)
         except Exception:
             from pineboolib import pncontrolsfactory
 

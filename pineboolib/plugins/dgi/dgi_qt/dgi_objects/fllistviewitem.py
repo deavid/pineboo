@@ -11,11 +11,11 @@ logger = logging.getLogger("FLListViewItem")
 
 class FLListViewItem(Qt.QStandardItem):
 
-    _expandable = None
+    _expandable: bool = False
     _key = None
     _open = None
     _root = None
-    _index_child = None
+    _index_child: int = 0
 
     def __init__(self, parent=None) -> None:
         super().__init__()

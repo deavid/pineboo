@@ -7,7 +7,7 @@ from PyQt5.QtSvg import QSvgRenderer  # type: ignore
 
 from pineboolib import logging
 
-import barcode  # pip3 install python-barcode
+import barcode  # type: ignore # pip3 install python-barcode
 from typing import Dict, Any, Union
 
 logger = logging.getLogger(__name__)
@@ -81,7 +81,7 @@ class FLCodBar(object):
                 self.barcode["res"] = res
             elif isinstance(value, int):
                 raise ValueError("Not supported")
-            else:
+            elif isinstance(value, dict):
                 self._copyBarCode(value, self.barcode)
 
     def pixmap(self) -> QPixmap:

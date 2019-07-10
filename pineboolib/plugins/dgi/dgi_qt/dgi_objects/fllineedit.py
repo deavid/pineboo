@@ -2,12 +2,12 @@
 from PyQt5 import QtCore, QtWidgets  # type: ignore
 from pineboolib import logging
 from pineboolib.fllegacy.flapplication import aqApp
-from typing import Any
+from typing import Any, Optional
 
 
 class FLLineEdit(QtWidgets.QLineEdit):
     logger = logging.getLogger(__name__)
-    _tipo = None
+    _tipo: str = ""
     partDecimal = 0
     partInteger = 0
     _maxValue = None
