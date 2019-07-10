@@ -388,9 +388,9 @@ def slot_done(fn, signal, sender, caller) -> Callable:
 
 def connect(sender, signal, receiver, slot, caller=None) -> Optional[Tuple[Any, Any]]:
     if caller is not None:
-        logger.debug("* * * Connect:: %s %s %s %s %s", caller, sender, signal, receiver, slot)
+        logger.trace("* * * Connect:: %s %s %s %s %s", caller, sender, signal, receiver, slot)
     else:
-        logger.debug("? ? ? Connect:: %s %s %s %s", sender, signal, receiver, slot)
+        logger.trace("? ? ? Connect:: %s %s %s %s", sender, signal, receiver, slot)
     signal_slot = solve_connection(sender, signal, receiver, slot)
 
     if not signal_slot:

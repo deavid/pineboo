@@ -87,6 +87,7 @@ class FLQPSQL(object):
         from psycopg2.extras import LoggingConnection
 
         logger = logging.getLogger(self.alias_)
+        logger.debug = logger.trace  # Send Debug output to Trace
 
         conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (
             db_name,

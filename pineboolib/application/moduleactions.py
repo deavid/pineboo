@@ -14,7 +14,7 @@ class ModuleActions(object):
     @return el objecto del XMLAction afectado
     """
 
-    logger = logging.getLogger("main.ModuleActions")
+    logger = logging.getLogger("application.ModuleActions")
 
     def __init__(self, module: Any, path: str, modulename: str) -> None:
         """Constructor
@@ -67,7 +67,7 @@ class ModuleActions(object):
             name = action_xml.name
             if name != "unnamed":
                 if hasattr(qsa_dict_modules, "form%s" % name):
-                    self.logger.warning(
+                    self.logger.debug(
                         "No se sobreescribe variable de entorno %s. Hay una definición previa en %s",
                         "%s.form%s" % (self.module_name, name),
                         self.module_name,
