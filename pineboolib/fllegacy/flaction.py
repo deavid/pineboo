@@ -69,6 +69,16 @@ class FLAction(object):
                 self.setFormRecord(action.form)
                 self.setCaption(action.alias)
 
+    def __repr__(self):
+        return "<FLAction name=%r scriptForm=%r scriptFormRecord=%r form=%r formRecord=%r caption=%r>" % (
+            self.name_,
+            self.scriptForm_,
+            self.scriptFormRecord_,
+            self.form_,
+            self.formRecord_,
+            self.caption_,
+        )
+
     """
     Establece el nombre de la accion
     """

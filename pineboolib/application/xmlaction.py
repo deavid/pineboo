@@ -109,10 +109,11 @@ class XMLAction(XMLStruct):
         if not self._loaded:
             if getattr(self.mainform_widget, "widget", None):
                 self.mainform_widget.widget.doCleanUp()
-            self.logger.debug("Loading action %s . . . ", self.name)
             if self.project._DGI.useDesktop() and hasattr(self.project.main_window, "w_"):
+                self.logger.info("Loading action %s (createForm). . . ", self.name)
                 self.mainform_widget = self.project.conn.managerModules().createForm(action=self, parent=self.project.main_window.w_)
             else:
+                self.logger.info("Loading action %s (load_script %s). . . ", self.name, self.scriptform)
                 script = self.load_script(self.scriptform, None)
                 self.mainform_widget = script.form  # FormDBWidget FIXME: Add interface for types
                 self.mainform_widget.widget = self.mainform_widget
@@ -197,7 +198,9 @@ class XMLAction(XMLStruct):
 
         if scriptname:
             scriptname = scriptname.replace(".qs", "")
-            # self.logger.info("Cargando script %s de %s accion %s", scriptname, parent, self.name)
+            self.logger.debug("Loading script %s of %s for action %s", scriptname, parent, self.name)
+        else:
+            self.logger.info("No script to load on %s for action %s", parent, self.name)
 
         parent_object = parent
         if parent is None:

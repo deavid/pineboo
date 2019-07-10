@@ -154,10 +154,10 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     _scriptForm = None
 
     init_thread_script = None
+    logger = logging.getLogger("FLFormDB")
 
     def __init__(self, parent, action: FLAction, load=False):
 
-        self.logger = logging.getLogger("FLFormDB")
         # self.tiempo_ini = time.time()
         from pineboolib.application import project
 
@@ -176,8 +176,15 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
             self.actionName_ = "formRecord" + self._action.name()
             script_name = self._action.scriptFormRecord()
         else:
-            self.actionName_ = "form" + self._action.name()
-            script_name = self._action.scriptForm()
+            if self._action.table():
+                self.actionName_ = "form" + self._action.name()
+                script_name = self._action.scriptForm()
+            else:
+                # Load of the main script (flfactppal/flfacturac)
+                # Currently detected by having no table
+                # FIXME: A better detection method should be placed.
+                self.actionName_ = self._action.name()
+                script_name = self._action.name()
 
         # self.mod = self._action.mod
 
@@ -200,9 +207,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
         self.idMDI_ = self._action.name()
 
-        if script_name is None:
-            script_name = self._action.scriptForm() if self._action.table() else self._action.name()
-
+        self.logger.info("init: Action: %s", self._action)
         self.script = project.actions[self._action.name()].load_script(script_name, self)
         self.widget = self.script.form
         self.iface = self.widget.iface
