@@ -36,9 +36,9 @@ class FLPixmapView(QtWidgets.QScrollArea):
 
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         self.pixmap_ = pix
-
-        self.pixmapView_.clear()
-        self.pixmapView_.setPixmap(self.pixmap_)
+        if self.pixmapView_ is not None:
+            self.pixmapView_.clear()
+            self.pixmapView_.setPixmap(self.pixmap_)
         self.repaint()
         QtWidgets.QApplication.restoreOverrideCursor()
 
@@ -51,19 +51,20 @@ class FLPixmapView(QtWidgets.QScrollArea):
 
     def resizeContents(self) -> None:
 
-        if self.pixmap_.isNull():
+        if self.pixmap_ is not None and self.pixmap_.isNull():
             return
 
         new_pix = self.pixmap_
-        if self.autoScaled_:
+        if self.autoScaled_ and self.pixmap_ is not None:
             if self.pixmap_.height() > self.pixmapView_.height() or self.pixmap_.width() > self.pixmapView_.width():
                 new_pix = self.pixmap_.scaled(self.pixmapView_.size(), QtCore.Qt.KeepAspectRatio)
 
             elif self.pixmap_.height() < self.pixmapView_.pixmap().height() or self.pixmap_.width() < self.pixmapView_.pixmap().width():
                 new_pix = self.pixmap_.scaled(self.pixmapView_.size(), QtCore.Qt.KeepAspectRatio)
 
-        self.pixmapView_.clear()
-        self.pixmapView_.setPixmap(new_pix)
+        if self.pixmapView_ is not None:
+            self.pixmapView_.clear()
+            self.pixmapView_.setPixmap(new_pix)
 
     def previewUrl(self, url) -> None:
         u = QtCore.QUrl(url)
@@ -86,7 +87,8 @@ class FLPixmapView(QtWidgets.QScrollArea):
                 self.setPixmap(pix)
 
     def clear(self) -> None:
-        self.pixmapView_.clear()
+        if self.pixmapView_ is not None:
+            self.pixmapView_.clear()
 
     def pixmap(self) -> Any:
         return self.pixmap_

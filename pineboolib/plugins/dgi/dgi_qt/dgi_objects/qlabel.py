@@ -10,7 +10,7 @@ class QLabel(QtWidgets.QLabel):
         return super().text()
 
     @text.setter
-    def text(self, v):
+    def setter_text(self, v):
         if not isinstance(v, str):
             v = str(v)
         self.setText(v)

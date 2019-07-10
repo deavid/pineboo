@@ -15,7 +15,7 @@ class QCheckBox(QtWidgets.QCheckBox):
         return self.isChecked()
 
     @checked.setter
-    def checked(self, b):
+    def setter_checked(self, b):
         if isinstance(b, str):
             b = b == "true"
 
