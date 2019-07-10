@@ -67,8 +67,15 @@ class FieldStruct(object):
                     value = value.toString()
                 elif isinstance(value, datetime.timedelta):
                     value = str(value)
-            if isinstance(value, str) and value.find("T") > -1:
-                value = value[value.find("T") + 1 :]
+
+                if isinstance(value, str) and value.find("T") > -1:
+                    value = value[value.find("T") + 1 :]
+
+                if value.find(".") > -1:
+                    value = value[0 : value.find(".")]
+
+                elif value.find("+") > -1:
+                    value = value[0 : value.find("+")]
 
         elif self.type_ == "date":
             if isinstance(value, types.Date):
