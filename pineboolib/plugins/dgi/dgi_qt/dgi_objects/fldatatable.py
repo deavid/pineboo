@@ -564,7 +564,7 @@ class FLDataTable(QtWidgets.QTableView):
         pK = str(self.cursor().model().value(row, self.cursor().metadata().primaryKey()))
         self.cursor().model()._checkColumn[pK].setChecked(not self.cursor().model()._checkColumn[pK].isChecked())
         self.setPrimaryKeyChecked(str(pK), self.cursor().model()._checkColumn[pK].isChecked())
-        print("FIXME: falta un repaint para ver el color!!")
+        # print("FIXME: falta un repaint para ver el color!!")
 
     """
     Redefinida por conveniencia
