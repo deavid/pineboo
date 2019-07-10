@@ -72,7 +72,7 @@ def convert_to_qdate(date: Any) -> QDate:
     """
     internal_date = getattr(date, "date_", None)  # For types.Date
     if internal_date is not None:
-        date = str(internal_date)  # QDate -> str
+        date = date.toString()  # QDate -> str
     elif isinstance(date, datetime.date):
         date = str(date)
 
