@@ -75,7 +75,7 @@ class FLMYSQL_MYISAM2(object):
         return self.pure_python_
 
     def safe_load(self) -> Any:
-        return check_dependencies({"PyMySQL": "PyMySQL", "sqlalchemy": "sqlAlchemy"}, False)
+        return check_dependencies({"pymysql": "PyMySQL", "sqlalchemy": "sqlAlchemy"}, False)
 
     def mobile(self) -> bool:
         return self.mobile_
@@ -88,8 +88,9 @@ class FLMYSQL_MYISAM2(object):
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password) -> Union[bool, "pymysql.connections.Connection"]:
         self._dbname = db_name
-        check_dependencies({"PyMySQL": "PyMySQL", "sqlalchemy": "sqlAlchemy"})
+        check_dependencies({"pymysql": "PyMySQL", "sqlalchemy": "sqlAlchemy"})
         from sqlalchemy import create_engine  # type: ignore
+        import pymysql
 
         try:
             self.conn_ = pymysql.connect(host=db_host, user=db_userName, password=db_password, db=db_name, charset="utf8", autocommit=True)
