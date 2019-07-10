@@ -23,10 +23,10 @@ class FLDateEdit(QDateEdit):
     def setOrder(self, order) -> None:
         self.setDisplayFormat(order)
 
-    def get_date(self):
+    def getDate(self):
         return super(FLDateEdit, self).date
 
-    def set_date(self, d: Union[str, datetime.date, Date] = None) -> None:
+    def setDate(self, d: Union[str, datetime.date, Date] = None) -> None:  # type: ignore
         if d in (None, "NAN", ""):
             date = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
         else:
@@ -38,4 +38,4 @@ class FLDateEdit(QDateEdit):
         # else:
         self.setStyleSheet("color: black")
 
-    date = property(get_date, set_date)
+    date = property(getDate, setDate)
