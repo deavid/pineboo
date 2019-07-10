@@ -194,7 +194,7 @@ class PNSqlQuery(object):
               se utiliza la coma.
     """
 
-    def setSelect(self, s: str, sep: str = ",") -> None:
+    def setSelect(self, s: Optional[str], sep: str = ",") -> None:
         self.d.select_ = s
 
         if isinstance(s, str) and sep in s:
@@ -716,7 +716,7 @@ class PNSqlQuery(object):
         separados por comas, p.e. "tabla1,tabla2,tabla3"
     """
 
-    def setTablesList(self, tl: str) -> None:
+    def setTablesList(self, tl: Optional[str]) -> None:
         self.d.tablesList_ = []
         tl = tl.replace(" ", "")
         for tabla in tl.split(","):

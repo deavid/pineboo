@@ -29,7 +29,7 @@ class IConnection:
     def finish(self) -> None:
         return
 
-    def connectionName(self) -> None:
+    def connectionName(self) -> str:
         return
 
     def useConn(self, name="default") -> None:
@@ -44,7 +44,7 @@ class IConnection:
     def tables(self) -> List[str]:
         return []
 
-    def database(self, name=None) -> None:
+    def database(self, name=None) -> "IConnection":
         return
 
     def DBName(self) -> str:

@@ -21,7 +21,7 @@ from pineboolib import logging
 from pineboolib import pncontrolsfactory
 from pineboolib.application import project
 
-from typing import Any, Union
+from typing import Any, Union, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -37,12 +37,12 @@ class FLFieldDB(QtWidgets.QWidget):
     autoSelect = False
 
     editor_: Any  # Editor para el contenido del campo que representa el componente
-    fieldName_: str  # Nombre del campo de la tabla al que esta asociado este componente
-    tableName_: str  # Nombre de la tabla fóranea
-    actionName_: str  # Nombre de la accion
-    foreignField_: str  # Nombre del campo foráneo
-    fieldRelation_: str  # Nombre del campo de la relación
-    filter_: str  # Nombre del campo de la relación
+    fieldName_: Optional[str]  # Nombre del campo de la tabla al que esta asociado este componente
+    tableName_: Optional[str]  # Nombre de la tabla fóranea
+    actionName_: Optional[str]  # Nombre de la accion
+    foreignField_: Optional[str]  # Nombre del campo foráneo
+    fieldRelation_: Optional[str]  # Nombre del campo de la relación
+    filter_: Optional[str]  # Nombre del campo de la relación
     cursor_: Any  # Cursor con los datos de la tabla origen para el componente
     cursorInit_: bool  # Indica que si ya se ha inicializado el cursor
     cursorAuxInit: bool  # Indica que si ya se ha inicializado el cursor auxiliar
@@ -91,7 +91,7 @@ class FLFieldDB(QtWidgets.QWidget):
     """
     Tamaño de icono por defecto
     """
-    iconSize = None
+    iconSize: Optional[QtCore.QSize] = None
 
     def __init__(self, parent, *args) -> None:
         super(FLFieldDB, self).__init__(parent)
@@ -114,7 +114,9 @@ class FLFieldDB(QtWidgets.QWidget):
         from pineboolib import pncontrolsfactory
         from pineboolib.application import project
 
-        self.iconSize = project._DGI.iconSize()
+        if project._DGI:
+            self.iconSize = project._DGI.iconSize()
+
         self.FLLayoutH = QtWidgets.QVBoxLayout(self)
         self.FLLayoutH.setContentsMargins(0, 0, 0, 0)
         self.FLLayoutH.setSpacing(1)
@@ -155,7 +157,7 @@ class FLFieldDB(QtWidgets.QWidget):
         self.FLWidgetFieldDBLayout.addWidget(self.textLabelDB)
 
         self.pushButtonDB = pncontrolsfactory.QPushButton()
-        if project._DGI.localDesktop():
+        if project._DGI and project._DGI.localDesktop():
             self.setFocusProxy(self.pushButtonDB)
         # self.pushButtonDB.setFlat(True)
         PBSizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
@@ -331,7 +333,7 @@ class FLFieldDB(QtWidgets.QWidget):
     def setFieldAlias(self, alias) -> None:
         if alias:
             self.fieldAlias_ = alias
-            if self.showAlias_:
+            if self.showAlias_ and self.textLabelDB:
                 self.textLabelDB.setText(self.fieldAlias_)
 
     """
@@ -659,7 +661,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @param v Valor a establecer
     """
 
-    def setValue(self, v: Union[str, float]) -> None:
+    def setValue(self, v: Union[str, float, None]) -> None:
         if not self.cursor_:
             self.logger.error("FLFieldDB(%s):ERROR: El control no tiene cursor todavía. (%s)", self.fieldName_, self)
             return
@@ -944,10 +946,8 @@ class FLFieldDB(QtWidgets.QWidget):
     def setShowAlias(self, value) -> None:
         if not self.showAlias_ == value:
             self.showAlias_ = value
-            if self.showAlias_:
-                self.textLabelDB.show()
-            else:
-                self.textLabelDB.hide()
+            if self.textLabelDB:
+                self.textLabelDB.show() if self.showAlias_ else self.textLabelDB.hide()
 
     """
     Inserta como acelerador de teclado una combinación de teclas, devolviendo su identificador
@@ -1772,19 +1772,20 @@ class FLFieldDB(QtWidgets.QWidget):
         hasPushButtonDB = False
         self.fieldAlias_ = field.alias()
 
-        self.textLabelDB.setFont(self.font())
-        if not type_ == "pixmap" and not type_ == "bool":
-            if not field.allowNull() and field.editable():
-                self.textLabelDB.setText("%s*" % self.fieldAlias_)
+        if self.textLabelDB:
+            self.textLabelDB.setFont(self.font())
+            if not type_ == "pixmap" and not type_ == "bool":
+                if not field.allowNull() and field.editable():
+                    self.textLabelDB.setText("%s*" % self.fieldAlias_)
+                else:
+                    self.textLabelDB.setText(self.fieldAlias_)
             else:
-                self.textLabelDB.setText(self.fieldAlias_)
-        else:
-            self.textLabelDB.hide()
+                self.textLabelDB.hide()
 
         if rt:
             hasPushButtonDB = True
             tmd = self.cursor_.db().manager().metadata(rt)
-            if not tmd:
+            if not tmd and self.pushButtonDB:
                 self.pushButtonDB.setDisabled(True)
                 field.setEditable(False)
 
@@ -1796,7 +1797,7 @@ class FLFieldDB(QtWidgets.QWidget):
         from pineboolib.application import project
         from pineboolib import pncontrolsfactory
 
-        if not project._DGI.localDesktop():
+        if project._DGI and not project._DGI.localDesktop():
             project._DGI._par.addQueque("%s_setType" % self.objectName(), type_)
             if self.showAlias():
                 project._DGI._par.addQueque("%s_setAlias" % self.objectName(), self.fieldAlias_)
@@ -1828,7 +1829,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 for olN in olNoTranslated:
                     olTranslated.append(olN)
                 self.editor_.addItems(olTranslated)
-                if not project._DGI.localDesktop():
+                if project._DGI and not project._DGI.localDesktop():
                     project._DGI._par.addQueque("%s_setOptionsList" % self.objectName(), olTranslated)
                 self.editor_.installEventFilter(self)
                 if self.showed:
@@ -1841,8 +1842,9 @@ class FLFieldDB(QtWidgets.QWidget):
             else:
                 self.editor_ = pncontrolsfactory.FLLineEdit(self, "editor")
                 self.editor_.setFont(self.font())
-                self.editor_.setMinimumSize(self.iconSize)
-                self.editor_.setMaximumHeight(self.iconSize.height())
+                if self.iconSize:
+                    self.editor_.setMinimumSize(self.iconSize)
+                    self.editor_.setMaximumHeight(self.iconSize.height())
                 self.editor_._tipo = type_
                 self.editor_.partDecimal = partDecimal
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
@@ -1897,8 +1899,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.textChanged.connect(self.updateValue)
                 self.editor_.textChanged.connect(self.emitTextChanged)
 
-                if hasPushButtonDB:
-                    if not project._DGI.localDesktop():
+                if hasPushButtonDB and self.pushButtonDB:
+                    if project._DGI and not project._DGI.localDesktop():
                         project._DGI._par.addQueque("%s_setHasPushButton" % self.objectName(), True)
                     if self.showed:
                         try:
@@ -1921,8 +1923,9 @@ class FLFieldDB(QtWidgets.QWidget):
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(7), QtWidgets.QSizePolicy.Policy(0))
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
-            self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
-            self.FLWidgetFieldDBLayout.addWidget(self.editor_)
+            if self.FLWidgetFieldDBLayout is not None:
+                self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
+                self.FLWidgetFieldDBLayout.addWidget(self.editor_)
 
         elif type_ == "serial":
             self.editor_ = pncontrolsfactory.FLLineEdit(self, "editor")
@@ -1931,11 +1934,13 @@ class FLFieldDB(QtWidgets.QWidget):
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(7), QtWidgets.QSizePolicy.Policy(0))
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
-            self.FLWidgetFieldDBLayout.addWidget(self.editor_)
+            if self.FLWidgetFieldDBLayout:
+                self.FLWidgetFieldDBLayout.addWidget(self.editor_)
             self.editor_.installEventFilter(self)
             self.editor_.setDisabled(True)
             self.editor_.setAlignment(QtCore.Qt.AlignRight)
-            self.pushButtonDB.hide()
+            if self.pushButtonDB:
+                self.pushButtonDB.hide()
 
             if self.showed:
                 try:
@@ -1947,15 +1952,16 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "pixmap":
             # if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
             if not self.tableName():
-                if not self.editorImg_:
+                if not self.editorImg_ and self.FLWidgetFieldDBLayout:
                     self.FLWidgetFieldDBLayout.setDirection(QtWidgets.QBoxLayout.Down)
                     self.editorImg_ = pncontrolsfactory.FLPixmapView(self)
                     self.editorImg_.setFocusPolicy(Qt.NoFocus)
                     self.editorImg_.setSizePolicy(self.sizePolicy())
                     self.editorImg_.setMaximumSize(self.maximumSize())
                     self.editorImg_.setMinimumSize(self.minimumSize())
-                    self.setMinimumHeight(self.iconSize.height() + self.minimumHeight() + 1)
-                    self.setMinimumWidth(self.iconSize.width() * 4)
+                    if self.iconSize:
+                        self.setMinimumHeight(self.iconSize.height() + self.minimumHeight() + 1)
+                        self.setMinimumWidth(self.iconSize.width() * 4)
                     self.editorImg_.setAutoScaled(True)
                     self.FLWidgetFieldDBLayout.removeWidget(self.pushButtonDB)
                     self.FLWidgetFieldDBLayout.addWidget(self.editorImg_)
@@ -1968,96 +1974,98 @@ class FLFieldDB(QtWidgets.QWidget):
                     spcBut = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
                     self.lytButtons.addItem(spcBut)
                     self.pbAux3_ = pncontrolsfactory.QPushButton(self)
-                    self.pbAux3_.setSizePolicy(sizePolicy)
-                    self.pbAux3_.setMinimumSize(self.iconSize)
-                    self.pbAux3_.setFocusPolicy(Qt.NoFocus)
-                    self.pbAux3_.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-open.png")))
-                    self.pbAux3_.setText("")
-                    self.pbAux3_.setToolTip("Abrir fichero de imagen")
-                    self.pbAux3_.setWhatsThis("Abrir fichero de imagen")
-                    self.lytButtons.addWidget(self.pbAux3_)
-                    if self.showed:
-                        try:
-                            self.pbAux3_.clicked.disconnect(self.searchPixmap)
-                        except Exception:
-                            self.logger.exception("Error al desconectar señal")
-                    self.pbAux3_.clicked.connect(self.searchPixmap)
-                    if not hasPushButtonDB:
-                        if self.showed:
+                    if self.pbAux3_:
+                        self.pbAux3_.setSizePolicy(sizePolicy)
+                        self.pbAux3_.setMinimumSize(self.iconSize)
+                        self.pbAux3_.setFocusPolicy(Qt.NoFocus)
+                        self.pbAux3_.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-open.png")))
+                        self.pbAux3_.setText("")
+                        self.pbAux3_.setToolTip("Abrir fichero de imagen")
+                        self.pbAux3_.setWhatsThis("Abrir fichero de imagen")
+                        self.lytButtons.addWidget(self.pbAux3_)
+                        # if self.showed:
+                        #    try:
+                        #        self.pbAux3_.clicked.disconnect(self.searchPixmap)
+                        #    except Exception:
+                        #        self.logger.exception("Error al desconectar señal")
+                        self.pbAux3_.clicked.connect(self.searchPixmap)
+                        if not hasPushButtonDB:
+                            if self.showed:
+                                try:
+                                    self.KeyF2Pressed.disconnect(self.pbAux3_.animateClick)
+                                except Exception:
+                                    self.logger.exception("Error al desconectar señal")
                             try:
-                                self.KeyF2Pressed.disconnect(self.pbAux3_.animateClick)
+                                self.keyF2Pressed.connect(self.pbAux3_.animateClick)
                             except Exception:
                                 self.logger.exception("Error al desconectar señal")
-                        try:
-                            self.keyF2Pressed.connect(self.pbAux3_.animateClick)
-                        except Exception:
-                            self.logger.exception("Error al desconectar señal")
 
                         self.pbAux3_.setFocusPolicy(Qt.StrongFocus)
                         self.pbAux3_.installEventFilter(self)
 
                 if not self.pbAux4_:
                     self.pbAux4_ = pncontrolsfactory.QPushButton(self)
-                    self.pbAux4_.setSizePolicy(sizePolicy)
-                    self.pbAux4_.setMinimumSize(self.iconSize)
-                    self.pbAux4_.setFocusPolicy(Qt.NoFocus)
-                    self.pbAux4_.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-paste.png")))
-                    self.pbAux4_.setText("")
-                    self.pbAux4_.setToolTip("Pegar imagen desde el portapapeles")
-                    self.pbAux4_.setWhatsThis("Pegar imagen desde el portapapeles")
-                    self.lytButtons.addWidget(self.pbAux4_)
-                    if self.showed:
-                        try:
-                            self.pbAux4_.clicked.disconnect(self.setPixmapFromClipboard)
-                        except Exception:
-                            self.logger.exception("Error al desconectar señal")
-                    self.pbAux4_.clicked.connect(self.setPixmapFromClipboard)
+                    if self.pbAux4_:
+                        self.pbAux4_.setSizePolicy(sizePolicy)
+                        self.pbAux4_.setMinimumSize(self.iconSize)
+                        self.pbAux4_.setFocusPolicy(Qt.NoFocus)
+                        self.pbAux4_.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-paste.png")))
+                        self.pbAux4_.setText("")
+                        self.pbAux4_.setToolTip("Pegar imagen desde el portapapeles")
+                        self.pbAux4_.setWhatsThis("Pegar imagen desde el portapapeles")
+                        self.lytButtons.addWidget(self.pbAux4_)
+                        # if self.showed:
+                        #    try:
+                        #        self.pbAux4_.clicked.disconnect(self.setPixmapFromClipboard)
+                        #    except Exception:
+                        #        self.logger.exception("Error al desconectar señal")
+                        self.pbAux4_.clicked.connect(self.setPixmapFromClipboard)
 
                 if not self.pbAux_:
                     self.pbAux_ = pncontrolsfactory.QPushButton(self)
-                    self.pbAux_.setSizePolicy(sizePolicy)
-                    self.pbAux_.setMinimumSize(self.iconSize)
-                    self.pbAux_.setFocusPolicy(Qt.NoFocus)
-                    self.pbAux_.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-clear.png")))
-                    self.pbAux_.setText("")
-                    self.pbAux_.setToolTip("Borrar imagen")
-                    self.pbAux_.setWhatsThis("Borrar imagen")
-                    self.lytButtons.addWidget(self.pbAux_)
-                    if self.showed:
-                        try:
-                            self.pbAux_.clicked.disconnect(self.clearPixmap)
-                        except Exception:
-                            self.logger.exception("Error al desconectar señal")
-                    self.pbAux_.clicked.connect(self.clearPixmap)
+                    if self.pbAux_:
+                        self.pbAux_.setSizePolicy(sizePolicy)
+                        self.pbAux_.setMinimumSize(self.iconSize)
+                        self.pbAux_.setFocusPolicy(Qt.NoFocus)
+                        self.pbAux_.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-clear.png")))
+                        self.pbAux_.setText("")
+                        self.pbAux_.setToolTip("Borrar imagen")
+                        self.pbAux_.setWhatsThis("Borrar imagen")
+                        self.lytButtons.addWidget(self.pbAux_)
+                        # if self.showed:
+                        #    try:
+                        #        self.pbAux_.clicked.disconnect(self.clearPixmap)
+                        #    except Exception:
+                        #        self.logger.exception("Error al desconectar señal")
+                        self.pbAux_.clicked.connect(self.clearPixmap)
 
                 if not self.pbAux2_:
                     self.pbAux2_ = pncontrolsfactory.QPushButton(self)
-                    savepixmap_ = QtWidgets.QMenu(self.pbAux2_)
-                    savepixmap_.addAction("JPG")
-                    savepixmap_.addAction("XPM")
-                    savepixmap_.addAction("PNG")
-                    savepixmap_.addAction("BMP")
+                    if self.pbAux2_:
+                        savepixmap_ = QtWidgets.QMenu(self.pbAux2_)
+                        savepixmap_.addAction("JPG")
+                        savepixmap_.addAction("XPM")
+                        savepixmap_.addAction("PNG")
+                        savepixmap_.addAction("BMP")
 
-                    self.pbAux2_.setMenu(savepixmap_)
-                    self.pbAux2_.setSizePolicy(sizePolicy)
-                    self.pbAux2_.setMinimumSize(self.iconSize)
-                    self.pbAux2_.setFocusPolicy(Qt.NoFocus)
-                    self.pbAux2_.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-save.png")))
-                    self.pbAux2_.setText("")
-                    self.pbAux2_.setToolTip("Guardar imagen como...")
-                    self.pbAux2_.setWhatsThis("Guardar imagen como...")
-                    self.lytButtons.addWidget(self.pbAux2_)
-                    if self.showed:
-                        try:
-                            savepixmap_.triggered.disconnect(self.savePixmap)
-                        except Exception:
-                            self.logger.exception("Error al desconectar señal")
-                    savepixmap_.triggered.connect(self.savePixmap)
+                        self.pbAux2_.setMenu(savepixmap_)
+                        self.pbAux2_.setSizePolicy(sizePolicy)
+                        self.pbAux2_.setMinimumSize(self.iconSize)
+                        self.pbAux2_.setFocusPolicy(Qt.NoFocus)
+                        self.pbAux2_.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-save.png")))
+                        self.pbAux2_.setText("")
+                        self.pbAux2_.setToolTip("Guardar imagen como...")
+                        self.pbAux2_.setWhatsThis("Guardar imagen como...")
+                        self.lytButtons.addWidget(self.pbAux2_)
+                        # if self.showed:
+                        #    try:
+                        #        savepixmap_.triggered.disconnect(self.savePixmap)
+                        #    except Exception:
+                        #        self.logger.exception("Error al desconectar señal")
+                        savepixmap_.triggered.connect(self.savePixmap)
 
-                    if hasPushButtonDB:
-                        self.pushButtonDB.installEventFilter(self)
-                    else:  # lo desactivo si no tiene el control
-                        self.pushButtonDB.setDisabled(True)
+                    if self.pushButtonDB:
+                        self.pushButtonDB.installEventFilter(self) if hasPushButtonDB else self.pushButtonDB.setDisabled(True)
 
         elif type_ == "date":
             self.editor_ = pncontrolsfactory.FLDateEdit(self, "editor")
@@ -2065,13 +2073,15 @@ class FLFieldDB(QtWidgets.QWidget):
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
-            self.FLWidgetFieldDBLayout.insertWidget(1, self.editor_)
+            if self.FLWidgetFieldDBLayout:
+                self.FLWidgetFieldDBLayout.insertWidget(1, self.editor_)
 
             # self.editor_.setOrder(QtGui.QDateEdit.DMY)
             # self.editor_.setAutoAdvance(True)
             # self.editor_.setSeparator("-")
             self.editor_.installEventFilter(self)
-            self.pushButtonDB.hide()
+            if self.pushButtonDB:
+                self.pushButtonDB.hide()
 
             if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                 # if not self.pbAux_:
@@ -2118,9 +2128,11 @@ class FLFieldDB(QtWidgets.QWidget):
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
-            self.FLWidgetFieldDBLayout.addWidget(self.editor_)
+            if self.FLWidgetFieldDBLayout:
+                self.FLWidgetFieldDBLayout.addWidget(self.editor_)
             self.editor_.installEventFilter(self)
-            self.pushButtonDB.hide()
+            if self.pushButtonDB:
+                self.pushButtonDB.hide()
             if self.showed:
                 try:
                     self.editor_.timeChanged.disconnect(self.updateValue)
@@ -2154,7 +2166,8 @@ class FLFieldDB(QtWidgets.QWidget):
             # textEditTab_.doConnections(ted)
             # self.FLWidgetFieldDBLayout.addWidget(textEditTab_)
             self.setMinimumHeight(130)
-            self.FLWidgetFieldDBLayout.addWidget(self.editor_)
+            if self.FLWidgetFieldDBLayout:
+                self.FLWidgetFieldDBLayout.addWidget(self.editor_)
             verticalSpacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
             self.FLLayoutH.addItem(verticalSpacer)
             self.editor_.installEventFilter(self)
@@ -2191,7 +2204,8 @@ class FLFieldDB(QtWidgets.QWidget):
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(7), QtWidgets.QSizePolicy.Policy(0))
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
-            self.FLWidgetFieldDBLayout.addWidget(self.editor_)
+            if self.FLWidgetFieldDBLayout:
+                self.FLWidgetFieldDBLayout.addWidget(self.editor_)
 
             if self.showed:
                 try:
@@ -2205,18 +2219,21 @@ class FLFieldDB(QtWidgets.QWidget):
             self.setFocusProxy(self.editor_)
 
             if hasPushButtonDB:
-                self.setTabOrder(self.pushButtonDB, self.editor_)
-                self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
+                if self.pushButtonDB:
+                    self.setTabOrder(self.pushButtonDB, self.editor_)
+                    self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
                 self.editor_.setToolTip("Para buscar un valor en la tabla relacionada pulsar F2")
                 self.editor_.setWhatsThis("Para buscar un valor en la tabla relacionada pulsar F2")
 
         elif self.editorImg_:
             self.editorImg_.setFocusPolicy(Qt.NoFocus)
             if hasPushButtonDB:
-                self.pushButtonDB.setFocusPolicy(Qt.StrongFocus)
+                if self.pushButtonDB:
+                    self.pushButtonDB.setFocusPolicy(Qt.StrongFocus)
 
         if not hasPushButtonDB:
-            self.pushButtonDB.hide()
+            if self.pushButtonDB:
+                self.pushButtonDB.hide()
 
         if self.initMaxSize_.width() < 80:
             self.setShowEditor(False)
@@ -3146,29 +3163,32 @@ class FLFieldDB(QtWidgets.QWidget):
 
             self.editor_ = pncontrolsfactory.QLineEdit(self)
             self.editor_.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
-            self.textLabelDB.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Fixed)
+            if self.textLabelDB:
+                self.textLabelDB.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Fixed)
             # self.editor_.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
             self.editor_.setMinimumWidth(100)
-            if project._DGI.mobilePlatform():
+            if project._DGI and project._DGI.mobilePlatform():
                 self.editor_.setMinimumHeight(60)
-            self.FLWidgetFieldDBLayout.addWidget(self.editor_)
+
+            if self.FLWidgetFieldDBLayout:
+                self.FLWidgetFieldDBLayout.addWidget(self.editor_)
             self.editor_.setFocusPolicy(Qt.StrongFocus)
             self.setFocusProxy(self.editor_)
 
             self.editor_.show()
 
-        self.textLabelDB.setText(self.fieldAlias_)
-        if self.showAlias_:
-            self.textLabelDB.show()
-        else:
-            self.textLabelDB.hide()
+        if self.textLabelDB:
+            self.textLabelDB.setText(self.fieldAlias_)
+            self.textLabelDB.show() if self.showAlias_ else self.textLabelDB.hide()
 
         if hasPushButtonDB:
-            self.setTabOrder(self.pushButtonDB, self.editor_)
-            self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
-            self.pushButtonDB.show()
+            if self.pushButtonDB:
+                self.setTabOrder(self.pushButtonDB, self.editor_)
+                self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
+                self.pushButtonDB.show()
         else:
-            self.pushButtonDB.hide()
+            if self.pushButtonDB:
+                self.pushButtonDB.hide()
 
         prty = ""
         if self.tableName_:
