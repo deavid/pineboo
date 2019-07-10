@@ -362,13 +362,15 @@ def slot_done(fn, signal, sender, caller) -> Callable:
         # En Eneboo se esperaba que signal no contenga argumentos
         if signal.signal == "2clicked(bool)":
             args = tuple()
-
-        args_num = get_expected_args_num(fn)
+        # args_num = get_expected_args_num(fn)
         try:
             if get_expected_kwargs(fn):
-                res = fn(*args[0:args_num], **kwargs)
+                # res = fn(*args[0:args_num], **kwargs)
+                res = fn(*args, **kwargs)
             else:
-                res = fn(*args[0:args_num])
+                # res = fn(*args[0:args_num])
+                res = fn(*args)
+
         except Exception:
             logger.exception("Error trying to create a connection")
 
@@ -449,14 +451,23 @@ def solve_connection(sender, signal: str, receiver, slot: str) -> Optional[Tuple
 
     # if receiver.__class__.__name__ == "FormInternalObj" and slot == "accept":
     #    receiver = receiver.parent()
+    remote_fn = None
+    if slot.find(".") > -1:
+        slot_list = slot.split(".")
+        remote_fn = receiver
+        for slot_ in slot_list:
+            remote_fn = getattr(remote_fn, slot_, None)
 
-    remote_fn = getattr(receiver, slot, None)
+            if remote_fn is None:
+                break
+
+    else:
+        remote_fn = getattr(receiver, slot, None)
 
     sg_name = re.sub(r" *\(.*\)", "", signal)
     oSignal = getattr(sender, sg_name, None)
     # if not oSignal and sender.__class__.__name__ == "FormInternalObj":
     #    oSignal = getattr(sender.parent(), sg_name, None)
-
     if not oSignal:
         logger.error("ERROR: No existe la señal %s para la clase %s", signal, sender.__class__.__name__)
         return None
