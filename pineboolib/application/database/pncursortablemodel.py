@@ -1078,7 +1078,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 if q.first():
                     size = q.value(0)
                 else:
-                    raise ValueError("No se ha deveulto valor del count: %s" % sql)
+                    raise ValueError("No se ha devuelto valor de COUNT: %s" % sql)
 
             else:
                 size = sqlSelect(self._parent.curName(), "COUNT(*)", "1=1")
