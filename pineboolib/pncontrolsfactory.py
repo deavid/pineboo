@@ -492,6 +492,9 @@ def solve_connection(sender, signal: str, receiver, slot: str) -> Optional[Tuple
         if isinstance(slot, str):
             oSlot = getattr(receiver, slot, None)
             if not oSlot:
+                if hasattr(receiver, "iface"):
+                    oSlot = getattr(receiver.iface, slot, None)
+            if not oSlot:
                 logger.error("Al realizar connect %s:%s -> %s:%s ; " "el es QObject pero no tiene slot", sender, signal, receiver, slot)
                 return None
         return oSignal, oSlot
