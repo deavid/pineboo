@@ -140,6 +140,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
         self.logger.trace("__init__: init form")
         self.initForm()
         self.logger.trace("__init__: done")
+        self.loop = False
 
     """
     Reimplementado, añade un widget como principal del formulario

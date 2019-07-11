@@ -38,12 +38,8 @@ class FLFormSearchDB(FLFormDB):
     """
     Almacena si se ha abierto el formulario con el método FLFormSearchDB::exec()
     """
-    loop: bool = False
 
     acceptingRejecting_: bool = False
-    inExec_: bool = False
-
-    eventloop = None
 
     logger = logging.getLogger("FLFormSearchDB")
     """
@@ -72,12 +68,10 @@ class FLFormSearchDB(FLFormDB):
         self.setCursor(cursor)
 
         self.accepted_ = False
-
+        self.inExec_ = False
         self.load()
         self.initForm()
         self.setFocusPolicy(QtCore.Qt.NoFocus)
-
-        self.eventloop = QtCore.QEventLoop()
 
     def setAction(self, a) -> None:
         if self.cursor_:
@@ -326,9 +320,6 @@ class FLFormSearchDB(FLFormDB):
             return
 
         super().hide()
-        if self.loop:
-            self.loop = False
-            self.eventloop.exit()
 
     """
     Se activa al pulsar el boton aceptar

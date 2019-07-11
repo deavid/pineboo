@@ -153,6 +153,8 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     _uiName = None
     _scriptForm: Union[Any, str] = None
 
+    loop: bool
+
     init_thread_script = None
     logger = logging.getLogger("FLFormDB")
 
@@ -187,6 +189,8 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
                 script_name = self._action.name()
 
         # self.mod = self._action.mod
+        self.loop = False
+        self.eventloop = QtCore.QEventLoop()
 
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.setContentsMargins(1, 1, 1, 1)
@@ -506,9 +510,22 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Sólo para compatibilizar con FLFormSearchDB. Por defecto sólo llama QWidget::show
     """
 
-    def exec_(self) -> bool:
+    def exec_(self):
+        if self.loop:
+            self.logger.warning("%s::exec(): Se ha detectado una llamada recursiva", __class__)
+
+        self.loop = True
         self.show()
-        return True
+        if self.eventloop:
+            self.eventloop.exec_()
+        self.loop = False
+
+    def hide(self):
+        if self.loop:
+            self.loop = False
+            self.eventloop.exit()
+
+        super().hide()
 
     # public slots:
 
