@@ -515,7 +515,7 @@ class PNSqlQuery(object):
         return ret
 
     def value(self, n: Union[str, int], raw: bool = False) -> Any:
-        _value = self._value_quick
+        _value = self._value_std
 
         if config.value("ebcomportamiento/std_query", False):
             _value = self._value_std
