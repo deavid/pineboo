@@ -630,7 +630,7 @@ class PNSqlCursor(QtCore.QObject):
         if isinstance(a, str):
             action = self.db().manager().action(a.lower())
 
-            if action.table() is None:
+            if action.table() == "":
                 action.setTable(a)
         else:
             action = a
@@ -831,7 +831,7 @@ class PNSqlCursor(QtCore.QObject):
 
         type_ = field.type()
 
-        if not buffer.hasChanged(fN, v):
+        if not buffer.field(fN).has_changed(v):
             return
 
         # if not self.buffer():  # Si no lo pongo malo....
