@@ -140,7 +140,7 @@ class PNConnection(QtCore.QObject, IConnection):
 
     def database(self, name=None) -> "IConnection":
         if name is None:
-            return self
+            return self.DBName()  # Si no especificamos name, retorna str con el nombre de la BD
 
         return self.useConn(name)
 
