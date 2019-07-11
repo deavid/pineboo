@@ -1056,36 +1056,24 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def size(self) -> Any:
-        from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
-        size = self.cursorDB().rowcount
-        if size == 0:  # Cada vez que hacemos refresh se limpia
-            if self.metadata():
-                from_ = self.db().manager().query(self.metadata().query()).from_() if self.metadata().isQuery() else self.metadata().name()
+        size = 0
+        if self.metadata():
+            where_ = "1=1"
+            if self.where_filter:
                 where_ = (
                     self.where_filter[: self.where_filter.find("ORDER BY")]
                     if self.where_filter.find("ORDER BY") > -1
                     else self.where_filter
                 )
-                # where_ = (
-                #     self.where_filter.replace("ORDER BY", "GROUP BY %s ORDER BY" % self.metadata().primaryKey())
-                #     if self.where_filter.find("ORDER BY") > -1
-                #     else " %s GROUP BY %s" % (self.where_filter, self.metadata().primaryKey())
-                # )
-                q = PNSqlQuery()
-                sql = "SELECT COUNT(%s) FROM %s WHERE %s" % (self.metadata().primaryKey(), from_, where_)
-                q.exec_(sql)
-                if q.first():
-                    size = q.value(0)
-                else:
-                    raise ValueError("No se ha devuelto valor de COUNT: %s" % sql)
+            from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
-            else:
-                size = sqlSelect(self._parent.curName(), "COUNT(*)", "1=1")
-
-            if isinstance(self._size, bool):
-                size = 0
-
+            q = PNSqlQuery(self.metadata().name())
+            q.setSelect("COUNT(*)")
+            q.setWhere(where_)
+            q.exec_()
+            if q.first():
+                size = q.value(0)
         return size
 
     """
