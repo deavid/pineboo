@@ -1,5 +1,6 @@
 import copy
 import datetime
+import decimal
 from typing import Dict, List, Union, Optional, Any, TypeVar, TYPE_CHECKING
 
 from pineboolib import logging
@@ -11,7 +12,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-ACCEPTABLE_VALUES = (int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray)
+ACCEPTABLE_VALUES = (int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, decimal.Decimal)
 T_VALUE = TypeVar("T_VALUE", int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray)
 T_VALUE2 = Union[int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray]
 
@@ -91,6 +92,39 @@ class FieldStruct(object):
                     list_ = value.split("-")
                     return datetime.date(int(list_[0]), int(list_[1]), int(list_[2]))
         return value
+
+    """
+    Comprueba si un campo tiene valor diferente. Esto es especialmente util para los número con decimales
+    @return True si ha cambiado, False si es el mismo valor
+    """
+
+    def has_changed(self, val: T_VALUE) -> bool:
+
+        if self.value is None:
+            if val is None:
+                return False
+            elif val in (None, "None"):
+                return True
+
+        if self.value in (None, "None"):
+            return True
+
+        if isinstance(self.value, str) and isinstance(val, str):
+            return self.value != val
+        elif isinstance(val, (datetime.date, datetime.time)):
+            return str(self.value) != str(val)
+        elif self.type_ in ("string", "stringlist"):
+            return self.value != val
+        elif self.type_ in ("int", "uint", "serial", "date"):
+            return str(self.value) != str(val)
+        elif self.type_ == "double":
+            try:
+                return float(self.value) != float(val)
+            except Exception:
+                logger.trace("has_changed: Error converting %s != %s to floats", self.value, val)
+                return True
+
+        return True
 
 
 class PNBuffer(object):
@@ -293,51 +327,15 @@ class PNBuffer(object):
             logger.warning("setValue: no such field %s", name)
             return False
 
-        field.value = field.parse_value_input(value)
-        if mark_ and self.hasChanged(field.name, value):
-            if not field.value == field.originalValue:
-                field.modified = True
-            else:
-                field.modified = False
+        if field.has_changed(value):
+            field.value = field.parse_value_input(value)
+
+            if mark_:
+                if not field.value == field.originalValue:
+                    field.modified = True
+                else:
+                    field.modified = False
                 # self.setMd5Sum(value)
-
-        return True
-
-    """
-    Comprueba si un campo tiene valor diferente. Esto es especialmente util para los número con decimales
-    @return True si ha cambiado, False si es el mismo valor
-    """
-
-    def hasChanged(self, name, value: T_VALUE) -> bool:
-
-        field = self._field(name)
-        if field.value is None:
-            if value is None:
-                return False
-            elif value in (None, "None"):
-                return True
-
-        type_ = field.type_
-        actual = field.value
-        if actual in (None, "None"):
-            return True
-
-        if isinstance(actual, str) and isinstance(value, str):
-            return actual != value
-        elif isinstance(value, (datetime.date, datetime.time)):
-            return str(actual) != str(value)
-        elif type_ in ("string", "stringlist"):
-            return actual != value
-        elif type_ in ("int", "uint", "serial"):
-            return str(actual) != str(value)
-        elif type_ == "double":
-            try:
-                return float(actual) != float(value)
-            except Exception:
-                logger.trace("hasChanged: Error converting %s != %s to floats", actual, value)
-                return True
-        elif type_ == "date":
-            return str(actual) != str(value)
 
         return True
 
