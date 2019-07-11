@@ -5,15 +5,8 @@ from typing import Any
 
 
 class QLabel(QtWidgets.QLabel):
-    @QtCore.pyqtProperty(str)
-    def text(self):
+    def get_text(self):
         return super().text()
-
-    @text.setter
-    def setter_text(self, v):
-        if not isinstance(v, str):
-            v = str(v)
-        self.setText(v)
 
     def setText(self, text: str) -> None:
         if not isinstance(text, str):
@@ -45,4 +38,5 @@ class QLabel(QtWidgets.QLabel):
         self.setPalette(pal)
 
     alignment = property(getAlign, setAlign)
+    text = property(get_text, setText)
     paletteForegroundColor = property(get_palette_fore_ground, set_palette_fore_ground)
