@@ -20,6 +20,7 @@ class QTable(QtWidgets.QTableWidget):
     lineaActual = None
     CurrentChanged = QtCore.pyqtSignal(int, int)
     doubleClicked = QtCore.pyqtSignal(int, int)
+    clicked = QtCore.pyqtSignal(int, int)
     valueChanged = QtCore.pyqtSignal(int, int)
     read_only_cols = None
     read_only_rows = None
@@ -44,6 +45,7 @@ class QTable(QtWidgets.QTableWidget):
         self.lineaActual = -1
         self.currentCellChanged.connect(self.currentChanged_)
         self.cellDoubleClicked.connect(self.doubleClicked_)
+        self.cellClicked.connect(self.simpleClicked_)
         self.itemChanged.connect(self.valueChanged_)
         self.read_only_cols = []
         self.read_only_rows = []
@@ -57,6 +59,9 @@ class QTable(QtWidgets.QTableWidget):
 
     def doubleClicked_(self, f, c) -> None:
         self.doubleClicked.emit(f, c)
+
+    def simpleClicked_(self, f, c) -> None:
+        self.clicked.emit(f, c)
 
     @decorators.NotImplementedWarn
     def setResizePolicy(self, pol):
@@ -149,7 +154,6 @@ class QTable(QtWidgets.QTableWidget):
     def text(self, row, col) -> Any:
         if row is None:
             return
-
         return self.item(row, col).text() if self.item(row, col) else None
 
     def setText(self, row, col, value) -> None:
