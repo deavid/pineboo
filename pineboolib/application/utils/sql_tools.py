@@ -50,10 +50,11 @@ class sql_inspector(object):
                 table_name = name[0 : name.find(".")]
                 field_name = name[name.find(".") + 1 :]
                 if table_name in self._alias.keys():
+                    print("*", table_name, field_name, self._alias)
                     table_name = self._alias[table_name]
                     return self.fieldNameToPos("%s.%s" % (table_name, field_name))
 
-        raise Exception("No se encuentra el campo %s el la query (%s)" % (name, self._sql))
+        raise Exception("No se encuentra el campo %s el la query:\n%s" % (name, self._sql))
 
     def posToFieldName(self, pos) -> Any:
 
