@@ -307,10 +307,6 @@ class Project(object):
         load_models()
 
         self.message_manager().send("splash", "showMessage", ["Cargando traducciones ..."])
-        # FIXME: Can we call this outside of this class?
-        # from pineboolib import pncontrolsfactory
-        #
-        # aqApp.loadTranslations()
 
         # FIXME: ACLs needed at this level?
         # self.acl_ = FLAccessControlLists()

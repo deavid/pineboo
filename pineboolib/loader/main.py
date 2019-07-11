@@ -236,9 +236,12 @@ def exec_main(options: Values) -> int:
     # project._splash = splash
 
     project.run()
+
     if project.conn.conn is False:
         logger.warning("No connection was provided. Aborting Pineboo load.")
         return -99
+
+    aqApp.loadTranslations()
 
     from .init_project import init_project
 
