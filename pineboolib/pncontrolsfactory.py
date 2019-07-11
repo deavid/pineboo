@@ -497,7 +497,7 @@ def solve_connection(sender, signal: str, receiver, slot: str) -> Optional[Tuple
             if not oSlot:
                 logger.error("Al realizar connect %s:%s -> %s:%s ; " "el es QObject pero no tiene slot", sender, signal, receiver, slot)
                 return None
-        return oSignal, oSlot
+            return oSignal, oSlot
     else:
         logger.error(
             "Al realizar connect %s:%s -> %s:%s ; " "el slot no se reconoce y el receptor no es QObject.", sender, signal, receiver, slot
