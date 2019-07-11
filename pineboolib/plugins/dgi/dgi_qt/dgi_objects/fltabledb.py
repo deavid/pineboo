@@ -179,7 +179,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Indica que la columna de seleción está activada
     """
-    checkColumnEnabled_: bool = False
+    checkColumnEnabled_: bool
 
     """
     Indica el texto de la etiqueta de encabezado para la columna de selección
@@ -346,6 +346,7 @@ class FLTableDB(QtWidgets.QWidget):
         if name:
             self.setObjectName(name)
         self.checkColumnVisible_ = False
+        self.checkColumnEnabled_ = False
         self.tdbFilterLastWhere_: Optional[str] = None
         self.filter_ = None
         from pineboolib.application import project
@@ -1238,7 +1239,6 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     def setTableRecordsCursor(self) -> None:
-
         if self.tableRecords_ is None:
             self.tableRecords_ = FLDataTable(self.tabData, "tableRecords")
             if self.tableRecords_ is not None:
