@@ -86,6 +86,9 @@ class Process(QtCore.QProcess):
         from pineboolib.application import types
 
         comando_: List[str] = []
+        if isinstance(comando, list):
+            comando_ = comando
+
         if isinstance(comando, types.Array):
             comando = str(comando)
 
