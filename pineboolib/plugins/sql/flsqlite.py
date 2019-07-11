@@ -422,13 +422,13 @@ class FLSQLITE(object):
         if not self.isOpen():
             return False
 
-        t = PNSqlQuery()
-        t.setForwardOnly(True)
-        ok = t.exec_("SELECT name FROM sqlite_master WHERE type='table' AND name='%s'" % name)
-        if ok:
-            ok = t.next()
+        cursor = self.cursor()
 
-        return ok
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='%s'" % name)
+
+        result = cursor.fetchall()
+
+        return True if result else False
 
     def sqlCreateTable(self, tmd) -> Optional[str]:
         if not tmd:
