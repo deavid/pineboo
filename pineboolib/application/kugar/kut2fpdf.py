@@ -289,7 +289,7 @@ class Kut2FPDF(object):
 
         if not self._no_print_footer:
             for l in reversed(range(top_level + 1)):
-                self.processData("DetailFooter", data, l)
+                self.processData("DetailFooter", self.last_data_processed, l)
 
         if project._DGI.localDesktop():
             util.destroyProgressDialog()
