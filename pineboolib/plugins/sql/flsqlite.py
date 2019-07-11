@@ -511,13 +511,14 @@ class FLSQLITE(object):
                 i = i + 1
 
         sql = sql + ");"
-
-        createIndex = "CREATE INDEX %s_pkey ON %s (%s)" % (tmd.name(), tmd.name(), tmd.primaryKey())
+        create_index = ""
+        if tmd.primaryKey():
+            create_index = "CREATE INDEX %s_pkey ON %s (%s)" % (tmd.name(), tmd.name(), tmd.primaryKey())
 
         # q = PNSqlQuery()
         # q.setForwardOnly(True)
         # q.exec_(createIndex)
-        sql += createIndex
+        sql += create_index
 
         return sql
 
