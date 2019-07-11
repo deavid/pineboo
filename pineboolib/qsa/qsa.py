@@ -497,9 +497,10 @@ def startTimer(time, fun):
     return timer
 
 
-def killTimer(t):
-    t.stop()
-    t = None
+def killTimer(t=None):
+    if t is not None:
+        t.stop()
+        t = None
 
 
 def debug(txt):
