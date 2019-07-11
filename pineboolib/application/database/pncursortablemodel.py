@@ -1056,7 +1056,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def size(self) -> Any:
-        from pineboolib.application.database.utils import sqlSelect
+        from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
         size = self.cursorDB().rowcount
         if size == 0:  # Cada vez que hacemos refresh se limpia
@@ -1072,7 +1072,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 #     if self.where_filter.find("ORDER BY") > -1
                 #     else " %s GROUP BY %s" % (self.where_filter, self.metadata().primaryKey())
                 # )
-                size = sqlSelect(from_, "COUNT(%s)" % self.metadata().primaryKey(), where_)
+                q = PNSqlQuery()
+                sql = "SELECT COUNT(%s) FROM %s WHERE %s" % (self.metadata().primaryKey(), from_, where_)
+                q.exec_(sql)
+                if q.first():
+                    size = q.value(0)
+                else:
+                    raise ValueError("No se ha deveulto valor del count: %s" % sql)
+
             else:
                 size = sqlSelect(self._parent.curName(), "COUNT(*)", "1=1")
 
