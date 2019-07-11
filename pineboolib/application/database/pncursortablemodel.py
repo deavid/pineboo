@@ -103,7 +103,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.color_function_ = None
         # self.color_dict_ = {}
 
-        self.where_filter = None
+        self.where_filter = "1=1"
         self.where_filters = {}
         self.where_filters["main-filter"] = ""
         self.where_filters["filter"] = ""
@@ -1059,13 +1059,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         size = 0
         if self.metadata():
-            where_ = "1=1"
-            if self.where_filter:
-                where_ = (
-                    self.where_filter[: self.where_filter.find("ORDER BY")]
-                    if self.where_filter.find("ORDER BY") > -1
-                    else self.where_filter
-                )
+            where_ = (
+                self.where_filter[: self.where_filter.find("ORDER BY")] if self.where_filter.find("ORDER BY") > -1 else self.where_filter
+            )
             from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
             q = PNSqlQuery(self.metadata().name())
