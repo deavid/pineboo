@@ -8,7 +8,6 @@ import xml.etree.ElementTree
 from PyQt5.QtGui import QPixmap  # type: ignore
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.utils.xpm import cacheXPM
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flapplication import aqApp
 
 from typing import Any, Iterable, Optional, SupportsInt, TypeVar, Union, List, TYPE_CHECKING
@@ -164,8 +163,9 @@ class KParserTools(object):
             if not os.path.exists(img_file) and ref_key[0:3] == "RK@":
                 if not aqApp.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
                     table_name += "_%s" % ref_key.split("@")[1]
+                from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
-                q = FLSqlQuery()
+                q = PNSqlQuery()
                 # q.setForwardOnly(True)
                 q.exec_("SELECT contenido FROM %s WHERE refkey='%s'" % (table_name, ref_key))
                 if q.next():
