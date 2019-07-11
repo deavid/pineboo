@@ -35,7 +35,7 @@ class PNSqlQuery(object):
         self.countRefQuery = self.countRefQuery + 1
         self._row = []
         self._posicion = None
-        self._datos = None
+        self._datos = []
         self._cursor = None
         self.invalidTablesList = False
         self.d.select_ = None
