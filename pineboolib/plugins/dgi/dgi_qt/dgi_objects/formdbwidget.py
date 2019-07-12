@@ -111,6 +111,10 @@ class FormDBWidget(QtWidgets.QWidget):
             if ret is None and self.parent():
                 ret = getattr(self.parent(), child_name, None)
 
+            if ret is None:
+                if child_name == super().objectName() and self.form is not None:
+                    ret = self.form
+
             if ret is not None:
                 from pineboolib import pncontrolsfactory
 
