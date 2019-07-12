@@ -1343,12 +1343,13 @@ class PNSqlCursor(QtCore.QObject):
         if self.d.bufferCopy_:
             del self.d.bufferCopy_
 
-        buffer = self.d.bufferCopy_ = PNBuffer(self)
+        self.d.bufferCopy_ = PNBuffer(self)
         bufferCopy = self.bufferCopy()
         if bufferCopy is None:
             raise Exception("No buffercopy")
-        for field in buffer.fieldsList():
-            bufferCopy.setValue(field.name, buffer.value(field.name), False)
+
+        for field in self.d.buffer_.fieldsList():
+            bufferCopy.setValue(field.name, self.d.buffer_.value(field.name), False)
 
     """
     Indica si el contenido actual del buffer difiere de la copia guardada.
