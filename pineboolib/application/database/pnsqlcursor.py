@@ -3082,6 +3082,9 @@ class PNSqlCursor(QtCore.QObject):
             if v and not isinstance(v, bool):
                 return False
 
+            if not self.buffer():
+                self.d.buffer_ = self.primeUpdate()
+
             fieldList = self.metadata().fieldList()
 
             for field in fieldList:
