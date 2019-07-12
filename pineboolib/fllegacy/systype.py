@@ -125,8 +125,9 @@ class SysType(object, metaclass=Singleton):
     def write(self, encode_: str, dir_: str, contenido: str) -> None:
         import codecs
 
-        f = codecs.open(dir_, encoding=encode_, mode="w+")
-        f.write(contenido)
+        b_ = contenido.encode()
+        f = codecs.open(dir_, encoding=encode_, mode="wb+")
+        f.write(b_.decode(encode_))
         f.seek(0)
         f.close()
 
