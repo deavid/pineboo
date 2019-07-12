@@ -3,6 +3,7 @@ from pineboolib import logging
 from typing import List
 from pineboolib.application.utils.path import _dir
 from pineboolib.application import project
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -21,14 +22,15 @@ def mtd_parse(fileobj) -> None:
     metadata_name = fileobj.filename[:-4]
     dest_file = "%s_model.py" % mtd_file[:-4]
     mtd = project.conn.manager().metadata(metadata_name)
+    if not os.path.exists(dest_file) and not mtd.isQuery():
 
-    lines = generate_model(dest_file, mtd) if mtd and not mtd.isQuery() else []
+        lines = generate_model(dest_file, mtd) if mtd and not mtd.isQuery() else []
 
-    if lines:
-        f = open(dest_file, "w")
-        for line in lines:
-            f.write("%s\n" % line)
-        f.close()
+        if lines:
+            f = open(dest_file, "w")
+            for line in lines:
+                f.write("%s\n" % line)
+            f.close()
 
 
 def generate_model(dest_file, mtd_table) -> List[str]:
