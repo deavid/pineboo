@@ -1330,6 +1330,12 @@ class PNSqlCursor(QtCore.QObject):
             raise Exception("No buffer set")
         return buffer.isNull(fN)
 
+    def isCopyNull(self, fN):
+        buffer_copy = self.bufferCopy()
+        if not buffer_copy:
+            raise Exception("No buffer_copy set")
+        return buffer_copy.isNull(fN)
+
     """
     Copia el contenido del FLSqlCursor::buffer_ actual en FLSqlCursor::bufferCopy_.
 
