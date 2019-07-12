@@ -1058,15 +1058,21 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     def size(self) -> Any:
 
         size = 0
-        if self.metadata():
+        mtd = self.metadata()
+        if mtd:
             where_ = self.where_filter
+            from_ = self.metadata().name()
+
+            if mtd.isQuery():
+                from_ = self.db().manager().query(self.metadata().query()).from_()
+
             if self.where_filter.find("ORDER BY") > -1:
                 where_ = self.where_filter[: self.where_filter.find("ORDER BY")]
 
             from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
             q = PNSqlQuery(None, self.db().name)
-            q.exec_("SELECT COUNT(*) FROM %s WHERE %s" % (self.metadata().name(), where_))
+            q.exec_("SELECT COUNT(*) FROM %s WHERE %s" % (from_, where_))
             if q.first():
                 size = q.value(0)
 
