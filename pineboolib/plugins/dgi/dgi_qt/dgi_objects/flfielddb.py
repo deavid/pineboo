@@ -688,6 +688,8 @@ class FLFieldDB(QtWidgets.QWidget):
             if type_ == "string":
                 if v in field.optionsList():
                     idxItem = field.optionsList().index(v)
+                else:
+                    raise ValueError("No se encuentra el valor %s en las opciones %s" % (v, field.optionsList()))
             if idxItem == -1:
                 self.editor_.setCurrentItem(v)
             self.updateValue(self.editor_.currentText())
