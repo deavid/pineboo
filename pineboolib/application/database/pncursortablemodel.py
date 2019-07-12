@@ -222,17 +222,29 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         if self.parent_view and role in [QtCore.Qt.BackgroundRole, QtCore.Qt.ForegroundRole]:
             fun_get_color = self.parent_view.functionGetColor()
             if fun_get_color is not None:
-                list_ = fun_get_color.split(".")
-                import pineboolib.qsa as qsa_tree
+                context_ = None
+                fun_name_ = None
+                if fun_get_color.find(".") > -1:
+                    list_ = fun_get_color.split(".")
+                    import pineboolib.qsa as qsa_tree
 
-                context_ = getattr(qsa_tree, list_[0], None).iface
-                function_color = getattr(context_, "%s" % (list_[1]))
+                    qsa_widget = getattr(qsa_tree, list_[0], None)
+                    fun_name_ = list_[1]
+                    if qsa_widget:
+                        context_ = qsa_widget.iface
+                else:
+                    context_ = self.parent_view.topWidget.iface
+                    fun_name_ = fun_get_color
+
+                function_color = getattr(context_, fun_get_color, None)
                 if function_color is not None:
                     field_name = field.name()
                     field_value = d
                     cursor = self._parent
                     selected = False
                     res_color_function = function_color(field_name, field_value, cursor, selected, _type)
+                else:
+                    raise Exception("No se ha resuelto functionGetColor %s desde %s" % (fun_get_color, context_))
         # print("Data ", index, role)
         # print("Registros", self.rowCount())
         # roles
