@@ -145,7 +145,7 @@ class PNBuffer(object):
 
         tmd = self.cursor_.metadata()
         if not tmd:
-            logger.warning("Metadata not found for specified cursor")
+            logger.warning("Metadata not found for specified cursor %s", self.cursor_.curName())
             return
 
         campos = tmd.fieldList()
