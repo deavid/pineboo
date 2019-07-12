@@ -1252,11 +1252,12 @@ class PNSqlCursor(QtCore.QObject):
     Abre el formulario asociado a la tabla origen en el modo indicado.
 
     @param m Modo de apertura (FLSqlCursor::Mode)
+    @param wait Indica que se espera a que el formulario cierre para continuar
     @param cont Indica que se abra el formulario de edición de registros con el botón de
          aceptar y continuar
     """
 
-    def openFormInMode(self, m, cont=True):
+    def openFormInMode(self, m: int, wait: bool = True, cont: bool = True):
         if not self.metadata():
             return
         from pineboolib import pncontrolsfactory
@@ -1318,7 +1319,7 @@ class PNSqlCursor(QtCore.QObject):
             if m != self.Insert:
                 self.updateBufferCopy()
 
-            project.actions[self._action.name()].openDefaultFormRecord(self)
+            project.actions[self._action.name()].openDefaultFormRecord(self, wait)
 
             # if m != self.Insert and self.refreshBuffer():
             #     self.updateBufferCopy()
@@ -2790,9 +2791,9 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     @QtCore.pyqtSlot()
-    def insertRecord(self):
+    def insertRecord(self, wait: bool = True):
         logger.trace("insertRecord %s", self._action.name())
-        self.openFormInMode(self.Insert)
+        self.openFormInMode(self.Insert, wait)
 
     """
     Abre el formulario de edicion de registro definido en los metadatos (FLTableMetaData) listo
@@ -2800,7 +2801,7 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     @QtCore.pyqtSlot()
-    def editRecord(self):
+    def editRecord(self, wait: bool = True):
         logger.trace("editRecord %s", self.actionName())
         if self.d.needUpdate():
             pKN = self.metadata().primaryKey()
@@ -2810,7 +2811,7 @@ class PNSqlCursor(QtCore.QObject):
             if not pos == self.at():
                 self.seek(pos, False, False)
 
-        self.openFormInMode(self.Edit)
+        self.openFormInMode(self.Edit, wait)
 
     """
     Abre el formulario de edicion de registro definido en los metadatos (FLTableMetaData) listo
@@ -2818,7 +2819,7 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     @QtCore.pyqtSlot()
-    def browseRecord(self):
+    def browseRecord(self, wait: bool = True):
         logger.trace("browseRecord %s", self.actionName())
         if self.d.needUpdate():
             pKN = self.metadata().primaryKey()
@@ -2827,16 +2828,16 @@ class PNSqlCursor(QtCore.QObject):
             pos = self.atFromBinarySearch(pKN, pKValue)
             if not pos == self.at():
                 self.seek(pos, False, False)
-        self.openFormInMode(self.Browse)
+        self.openFormInMode(self.Browse, wait)
 
     """
     Borra, pidiendo confirmacion, el registro activo del cursor.
     """
 
     @QtCore.pyqtSlot()
-    def deleteRecord(self):
+    def deleteRecord(self, wait: bool = True):
         logger.trace("deleteRecord %s", self.actionName())
-        self.openFormInMode(self.Del)
+        self.openFormInMode(self.Del, wait)
         # self.d._action.openDefaultFormRecord(self)
 
     """

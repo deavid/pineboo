@@ -156,13 +156,16 @@ class XMLAction(XMLStruct):
     @param cursor. Cursor a usar por el FLFormRecordDB
     """
     # FIXME: cursor is FLSqlCursor but should be something core, not "FL". Also, an interface
-    def openDefaultFormRecord(self, cursor: Any) -> None:
+    def openDefaultFormRecord(self, cursor: Any, wait: bool = True) -> None:
         self.logger.info("Opening default formRecord for Action %s", self.name)
         w = self.loadRecord(cursor)
         # w.init()
         if w:
             if self.project._DGI.localDesktop():
-                w.show()
+                if wait:
+                    w.show_and_wait()
+                else:
+                    w.show()
 
     def openDefaultForm(self) -> None:
         self.logger.info("Opening default form for Action %s", self.name)

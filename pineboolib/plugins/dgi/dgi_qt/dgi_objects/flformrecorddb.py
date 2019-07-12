@@ -857,3 +857,18 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
                 loaded = getattr(child_, "_loaded", None)
                 if loaded is False:
                     QtCore.QTimer().singleShot(0, child_.load)
+
+    def show_and_wait(self):
+        if self.loop:
+            raise Exception("%s::show_and_wait(): Se ha detectado una llamada recursiva" % __class__)
+
+        self.loop = True
+        self.show()
+        if self.eventloop:
+            self.eventloop.exec_()
+
+        self.loop = False
+
+    def hide(self):
+        if self.loop:
+            self.eventloop.exit()

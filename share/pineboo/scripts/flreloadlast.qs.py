@@ -177,7 +177,7 @@ class FormInternalObj(FormDBWidget):
         # WITH_END
         curSeleccion = FLSqlCursor(u"flmodules")
         curModulo.setMainFilter(ustr(u"idmodulo = '", modulo, u"'"))
-        curModulo.editRecord()
+        curModulo.editRecord(False)
         formRecordflmodules.cargarDeDisco(ustr(fichero.path, u"/"), False)
         formRecordflmodules.accept()
         return True
