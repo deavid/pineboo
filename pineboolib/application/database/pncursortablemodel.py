@@ -220,7 +220,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 self._checkColumn[pK] = d
 
         if self.parent_view and role in [QtCore.Qt.BackgroundRole, QtCore.Qt.ForegroundRole]:
-            fun_get_color = self.parent_view.functionGetColor()
+            fun_get_color, iface = self.parent_view.functionGetColor()
             if fun_get_color is not None:
                 context_ = None
                 fun_name_ = None
@@ -233,10 +233,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     if qsa_widget:
                         context_ = qsa_widget.iface
                 else:
-                    context_ = self.parent_view.topWidget.iface
+                    context_ = iface
                     fun_name_ = fun_get_color
 
-                function_color = getattr(context_, fun_get_color, None)
+                function_color = getattr(context_, fun_name_, None)
                 if function_color is not None:
                     field_name = field.name()
                     field_value = d

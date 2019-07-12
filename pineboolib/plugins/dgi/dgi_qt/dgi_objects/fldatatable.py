@@ -320,12 +320,12 @@ class FLDataTable(QtWidgets.QTableView):
     Ver FLDataTable::function_get_color
     """
 
-    def setFunctionGetColor(self, f) -> None:
-
+    def setFunctionGetColor(self, f: str, iface=None) -> None:
+        self.fltable_iface = iface
         self.function_get_color = f
 
     def functionGetColor(self) -> Any:
-        return self.function_get_color
+        return (self.function_get_color, self.fltable_iface)
 
     """
     Ver FLDataTable::onlyTable_
@@ -807,7 +807,7 @@ class FLDataTable(QtWidgets.QTableView):
         if not self.cursor_:
             return -1
 
-        return self.cursor_.model().rowCount()
+        return self.cursor_.model().size()
 
     """
     Retorna el index real (incusive columnas ocultas) a partir de un nombre de un campo
