@@ -1070,7 +1070,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             if q.first():
                 size = q.value(0)
 
-        print("***", size)
         return size
 
     """
