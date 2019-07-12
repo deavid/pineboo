@@ -656,7 +656,7 @@ class FLFieldDB(QtWidgets.QWidget):
         self.logger.info("************************************")
 
     """
-    Establece el valor contenido en elcampo.
+    Establece el valor contenido en el campo.
 
     @param v Valor a establecer
     """
@@ -742,8 +742,8 @@ class FLFieldDB(QtWidgets.QWidget):
                     doHome = True
                 if v is not None:
                     self.editor_.setText(v)
-                else:
-                    self.editor_.setText("0")
+                # else:
+                #    self.editor_.setText("0")
 
                 if doHome:
                     self.editor_.home(False)
