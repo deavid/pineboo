@@ -969,7 +969,7 @@ class Member(ASTPython):
                     classname = full_fun_name.split("_")[0]
 
                 arguments[2] = arguments[2][2:]
-                arguments[0:2] = ["super(%s, %s)" % (classname, ".".join(arguments[0:2]))]
+                arguments[0:2] = ['super(getattr(self._module, "%s"), %s)' % (classname, ".".join(arguments[0:2]))]
 
         # Lectura del self.iface.__init() al nuevo estilo yeboyebo
         if len(arguments) >= 2 and arguments[0:1] == ["_i"] and arguments[1].startswith("__"):
@@ -997,7 +997,7 @@ class Member(ASTPython):
                 else:
                     classname = full_fun_name.split("_")[0]
                 arguments[1] = arguments[1][2:]
-                arguments[0:1] = ["super(%s, %s)" % (classname, ".".join(arguments[0:1]))]
+                arguments[0:1] = ['super(getattr(self._module, "%s"), %s)' % (classname, ".".join(arguments[0:1]))]
 
         replace_members = [
             "toString()",
