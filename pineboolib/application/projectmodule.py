@@ -241,8 +241,9 @@ class Project(object):
                         continue
 
                 elif file_name.endswith(".mtd"):
-                    if os.path.exists("%s_model.py" % _dir("cache", fileobj.filekey[:-4])):
-                        continue
+                    if not config.value("ebcomportamiento/orm_parser_disabled", False):
+                        if os.path.exists("%s_model.py" % _dir("cache", fileobj.filekey[:-4])):
+                            continue
                 else:
                     continue
 
@@ -275,9 +276,10 @@ class Project(object):
                     f2.close()
 
             if nombre.endswith(".mtd"):
-                from pineboolib.mtdparser.pnmtdparser import mtd_parse
+                if not config.value("ebcomportamiento/orm_parser_disabled", False):
+                    from pineboolib.mtdparser.pnmtdparser import mtd_parse
 
-                mtd_parse(fileobj)
+                    mtd_parse(fileobj)
 
             if self.parseProject and nombre.endswith(".qs") and settings.value("application/isDebuggerMode", False):
                 self.message_manager().send("splash", "showMessage", ["Convirtiendo %s ( %d/ ??) ..." % (nombre, pos_qs)])
@@ -301,9 +303,9 @@ class Project(object):
                     if self.parseProject and nombre.endswith(".qs"):
                         self.parseScript(_dir(root, nombre))
 
-        self.message_manager().send("splash", "showMessage", ["Cargando objetos ..."])
-
-        load_models()
+        if not config.value("ebcomportamiento/orm_load_disabled", False):
+            self.message_manager().send("splash", "showMessage", ["Cargando objetos ..."])
+            load_models()
 
         self.message_manager().send("splash", "showMessage", ["Cargando traducciones ..."])
 

@@ -9,7 +9,7 @@
             <x>0</x>
             <y>0</y>
             <width>615</width>
-            <height>632</height>
+            <height>622</height>
         </rect>
     </property>
     <property name="caption">
@@ -478,6 +478,35 @@
                                             </property>
                                             <property name="text">
                                                 <string>No usar el spacer en modo legacy (Abanq/Eneboo).</string>
+                                            </property>
+                                        </widget>
+                                    </vbox>
+                                </widget>
+                                <widget class="QGroupBox">
+                                    <property name="name">
+                                        <cstring>groupBox16</cstring>
+                                    </property>
+                                    <property name="title">
+                                        <string>ORM sqlAlchemy</string>
+                                    </property>
+                                    <vbox>
+                                        <property name="name">
+                                            <cstring>unnamed</cstring>
+                                        </property>
+                                        <widget class="QCheckBox">
+                                            <property name="name">
+                                                <cstring>cb_disable_mtdparser</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Desactivar conversor de ficheros MTD a model ORM.</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QCheckBox">
+                                            <property name="name">
+                                                <cstring>cb_disable_orm_load</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Desacivar carga de models ORM en QSA.</string>
                                             </property>
                                         </widget>
                                     </vbox>

@@ -60,6 +60,8 @@ class FormInternalObj(FormDBWidget):
         w.child("cb_imagenes").checked = self.leerValorLocal("no_img_cached")
         w.child("cb_dbadmin").checked = self.leerValorLocal("dbadmin_enabled")
         w.child("cb_std_query").checked = self.leerValorLocal("std_query")
+        w.child("cb_disable_mtdparser").checked = self.leerValorLocal("orm_parser_disabled")
+        w.child("cb_disable_orm_load").checked = self.leerValorLocal("orm_load_disabled")
         autoComp = self.leerValorLocal("autoComp")
         if not autoComp or autoComp == "OnDemandF4":
             autoComp = "Bajo Demanda (F4)"
@@ -182,6 +184,9 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("no_img_cached", w.child("cb_imagenes").checked)
         self.grabarValorLocal("dbadmin_enabled", w.child("cb_dbadmin").checked)
         self.grabarValorLocal("std_query", w.child("cb_std_query").checked)
+        self.grabarValorLocal("orm_parser_disabled", w.child("cb_disable_mtdparser").checked)
+        self.grabarValorLocal("orm_load_disabled", w.child("cb_disable_orm_load").checked)
+
         autoComp = w.child(u"cbAutoComp").currentText()
         if autoComp == "Nunca":
             autoComp = "NeverAuto"
