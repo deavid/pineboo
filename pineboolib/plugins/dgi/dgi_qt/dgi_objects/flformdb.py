@@ -511,20 +511,9 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     """
 
     def exec_(self):
-        if self.loop:
-            self.logger.warning("%s::exec(): Se ha detectado una llamada recursiva", __class__)
-
-        self.loop = True
-        self.show()
-        if self.eventloop:
-            self.eventloop.exec_()
-        self.loop = False
+        super().show()
 
     def hide(self):
-        if self.loop:
-            self.loop = False
-            self.eventloop.exit()
-
         super().hide()
 
     # public slots:
@@ -827,8 +816,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
             # if hasattr(self.script, "form"):
             #    print("Borrando self.script.form", self.script.form)
             #    self.script.form = None
-
-            if self.widget is not None:
+            if self.widget is not None and type(self).__name__ != "FLFormSearchDB":
                 self.widget.close()
                 self.widget = None
                 # del self.widget

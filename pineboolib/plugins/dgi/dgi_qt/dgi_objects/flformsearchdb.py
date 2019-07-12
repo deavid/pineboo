@@ -298,7 +298,7 @@ class FLFormSearchDB(FLFormDB):
             # self.saveGeometry()
             # self.closed.emit()
             super().closeEvent(e)
-            self.deleteLater()
+            # self.deleteLater()
         else:
             self.reject()
 
@@ -316,6 +316,10 @@ class FLFormSearchDB(FLFormDB):
 
     @QtCore.pyqtSlot()
     def hide(self):
+        if self.loop:
+            self.loop = False
+            self.eventloop.exit()
+
         if self.isHidden():
             return
 
