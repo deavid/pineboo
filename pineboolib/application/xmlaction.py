@@ -162,7 +162,7 @@ class XMLAction(XMLStruct):
         # w.init()
         if w:
             if self.project._DGI.localDesktop():
-                w.exec_()
+                w.show()
 
     def openDefaultForm(self) -> None:
         self.logger.info("Opening default form for Action %s", self.name)
