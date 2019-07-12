@@ -1770,7 +1770,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.sortColumn3_ = 2
             self.checkColumnVisible_ = False
 
-        self.tableRecords_.setFunctionGetColor(self.functionGetColor())
+        self.tableRecords_.setFunctionGetColor(self.functionGetColor(), getattr(self.topWidget, "iface", None))
 
         if refreshHead:
             if not self.tableRecords().header().isHidden():
@@ -1925,7 +1925,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @QtCore.pyqtSlot(bool)
-    def insertRecord(self, unknown=None):
+    def insertRecord(self, wait: bool = True):
 
         w = self.sender()
         # if (w and (not self.cursor() or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor().cursorRelation()
@@ -1940,14 +1940,14 @@ class FLTableDB(QtWidgets.QWidget):
             return
 
         if self.cursor():
-            self.cursor().insertRecord()
+            self.cursor().insertRecord(wait)
 
     """
     Invoca al método FLSqlCursor::editRecord()
     """
 
     @QtCore.pyqtSlot(bool)
-    def editRecord(self, unknown=None):
+    def editRecord(self, wait: bool = True):
         w = self.sender()
         if isinstance(w, FLDataTable):
             w = None
@@ -1970,7 +1970,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @QtCore.pyqtSlot(bool)
-    def browseRecord(self, unknown):
+    def browseRecord(self, wait: bool = True):
 
         w = self.sender()
         if isinstance(w, FLDataTable):
@@ -1980,14 +1980,14 @@ class FLTableDB(QtWidgets.QWidget):
             return
 
         if self.cursor():
-            self.cursor().browseRecord()
+            self.cursor().browseRecord(wait)
 
     """
     Invoca al método FLSqlCursor::deleteRecord()
     """
 
     @QtCore.pyqtSlot(bool)
-    def deleteRecord(self, unknown=None):
+    def deleteRecord(self, wait: bool = True):
         w = self.sender()
         if isinstance(w, FLDataTable):
             w = None
@@ -2003,7 +2003,7 @@ class FLTableDB(QtWidgets.QWidget):
             return
 
         if self.cursor():
-            self.cursor().deleteRecord()
+            self.cursor().deleteRecord(wait)
 
     """
     Invoca al método FLSqlCursor::copyRecord()
