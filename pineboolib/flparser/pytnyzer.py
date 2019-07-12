@@ -1273,7 +1273,7 @@ class DictObject(ASTPython):
             child.set("parent_", self.elem)
             for dtype, data in parse_ast(child).generate():
                 if key:
-                    yield dtype, "'%s'" % data
+                    yield dtype, "'%s'" % data if not data.startswith("'") else "%s" % data
                     key = False
                 else:
                     yield dtype, data
