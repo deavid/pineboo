@@ -117,29 +117,31 @@ class Array(object):
     Objeto tipo Array
     """
 
+    dict_: Dict[Any, Any]
+
     def __init__(self, *args) -> None:
         self.pos_iter = 0
-
-        self.dict_: Dict[Any, Any] = collections.OrderedDict()
+        self.dict_ = collections.OrderedDict()
 
         if not len(args):
             return
-        elif isinstance(args[0], int) and len(args) == 1:
-            return
-        elif isinstance(args[0], list):
-            for field in args[0]:
+        elif len(args) == 1:
+            if isinstance(args[0], list):
+                for f in args[0]:
+                    self.__setitem__(f, f)
 
-                field_key = field
-                while field_key in self.dict_.keys():
-                    field_key = "%s_bis" % field_key
+            elif isinstance(args[0], dict):
+                dict_ = args[0]
+                for f in dict_.keys():
+                    self.__setitem__(f, dict_[f])
 
-                self.dict_[field_key] = field
+            elif isinstance(args[0], int):
+                return
 
         elif isinstance(args[0], str):
+
             for f in args:
                 self.__setitem__(f, f)
-        else:
-            self.dict_ = collections.OrderedDict(enumerate(args))
 
     def __iter__(self):
         """
@@ -175,8 +177,11 @@ class Array(object):
         @param key. Nombre del registro
         @param value. Valor del registro
         """
+        field_key = key
+        while field_key in self.dict_.keys():
+            field_key = "%s_bis" % field_key
 
-        self.dict_[key] = value
+        self.dict_[field_key] = value
 
     def __getitem__(self, key):
         """

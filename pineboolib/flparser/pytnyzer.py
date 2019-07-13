@@ -1267,21 +1267,25 @@ class OpTernary(ASTPython):
 
 class DictObject(ASTPython):
     def generate(self, isolate=False, **kwargs):
-        yield "expr", "{"
+        yield "expr", "Array({"
         key = True
         for child in self.elem:
             child.set("parent_", self.elem)
+            empty = True
             for dtype, data in parse_ast(child).generate():
+                empty = False
                 if key:
                     yield dtype, "'%s'" % data if not data.startswith("'") else "%s" % data
                     key = False
                 else:
                     yield dtype, data
             # Como en Python la coma final la ignora, pues la ponemos.
-            yield "expr", ","
+
+            if not empty:
+                yield "expr", ","
             key = True
 
-        yield "expr", "}"
+        yield "expr", "})"
 
 
 class DictElem(ASTPython):
