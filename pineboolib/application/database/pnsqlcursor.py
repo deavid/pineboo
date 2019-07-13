@@ -675,8 +675,8 @@ class PNSqlCursor(QtCore.QObject):
         if not self.model():
             return None
 
-        if not self.d.buffer_:
-            self.primeInsert()
+        # if not self.d.buffer_:
+        #    self.primeInsert()
 
         self._selection = QtCore.QItemSelectionModel(self.model())
         self.selection().currentRowChanged.connect(self.selection_currentRowChanged)
@@ -1745,9 +1745,12 @@ class PNSqlCursor(QtCore.QObject):
         if not metadata.field(fN).type() == "unlock":
             logger.warning("setUnLock sólo permite modificar campos del tipo Unlock")
             return
-        buffer = self.d.buffer_ = self.primeUpdate()
+
+        if not self.buffer():
+            self.primeUpdate()
+
         self.setModeAccess(self.Edit)
-        buffer.setValue(fN, v)
+        self.buffer().setValue(fN, v)
         self.update()
         self.refreshBuffer()
 
@@ -2222,6 +2225,7 @@ class PNSqlCursor(QtCore.QObject):
                 return
 
             if not fN or self.relation().foreignField() == fN:
+
                 self.d.buffer_ = None
                 self.refreshDelayed()
                 return
@@ -2288,19 +2292,17 @@ class PNSqlCursor(QtCore.QObject):
                     self.cursorRelation().setValueBuffer(self.relation().foreignField(), v)
 
     def primeInsert(self):
-        buffer = self.buffer()
-        if not buffer:
-            buffer = self.d.buffer_ = PNBuffer(self)
+        if not self.buffer():
+            self.d.buffer_ = PNBuffer(self)
 
-        buffer.primeInsert()
+        self.buffer().primeInsert()
 
     def primeUpdate(self):
-        buffer = self.buffer()
-        if not buffer:
-            buffer = self.d.buffer_ = PNBuffer(self)
-
-        buffer.primeUpdate(self.at())
-        return buffer
+        if not self.buffer():
+            self.d.buffer_ = PNBuffer(self)
+        # logger.warning("Realizando primeUpdate en pos %s y estado %s , filtro %s", self.at(), self.modeAccess(), self.filter())
+        self.buffer().primeUpdate(self.at())
+        return self.buffer()
 
     def editBuffer(self, b=None):
         # if not self.buffer():
@@ -3090,7 +3092,7 @@ class PNSqlCursor(QtCore.QObject):
                 return False
 
             if not self.buffer():
-                self.d.buffer_ = self.primeUpdate()
+                self.primeUpdate()
 
             fieldList = self.metadata().fieldList()
 
