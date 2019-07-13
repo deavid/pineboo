@@ -177,6 +177,17 @@ class PNBuffer(object):
         if row is None or row < 0:
             row = self.cursor_.currentRegister()
 
+        if row == -1 and self.cursor_.filter() == "":
+            logger.warning(
+                "PrimeUpdate sobre posición inválida de %s, size: %s, filtro: %s, row: %s",
+                self.cursor_.metadata().name(),
+                self.cursor_.size(),
+                self.cursor_.filter(),
+                row,
+                stack_info=True,
+            )
+            return
+
         for field in self.fieldsList():
             value = self.cursor_.model().value(row, field.name)
             if value is not None:
@@ -194,7 +205,6 @@ class PNBuffer(object):
 
             field.value = value
             field.originalValue = copy.copy(value)
-
         # self.cursor_.bufferChanged.emit(field.name)
         self.setRow(row)
 
