@@ -1546,7 +1546,7 @@ class FLTableDB(QtWidgets.QWidget):
             if not cond:
                 continue
 
-            condType = self.decodeCondType(cond.currentText())
+            condType = self.decodeCondType(cond.currentText)
             if condType == self.All:
                 continue
 
@@ -1579,11 +1579,11 @@ class FLTableDB(QtWidgets.QWidget):
                     if condType == self.FromTo:
                         editorOp1 = self.tdbFilter.cellWidget(i, 3)
                         editorOp2 = self.tdbFilter.cellWidget(i, 4)
-                        arg2 = self.cursor().db().manager().formatValue(type, editorOp1.currentText(), True)
-                        arg4 = self.cursor().db().manager().formatValue(type, editorOp2.currentText(), True)
+                        arg2 = self.cursor().db().manager().formatValue(type, editorOp1.currentText, True)
+                        arg4 = self.cursor().db().manager().formatValue(type, editorOp2.currentText, True)
                     else:
                         editorOp1 = self.tdbFilter.cellWidget(i, 2)
-                        arg2 = self.cursor().db().manager().formatValue(type, editorOp1.currentText(), True)
+                        arg2 = self.cursor().db().manager().formatValue(type, editorOp1.currentText, True)
                 else:
                     if condType == self.FromTo:
                         editorOp1 = self.tdbFilter.cellWidget(i, 3)

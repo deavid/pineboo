@@ -38,4 +38,11 @@ class QComboBox(QtWidgets.QComboBox):
 
         return super().setCurrentIndex(pos)
 
+    def getCurrentText(self):
+        return super().currentText()
+
+    def setCurrentText(self, value):
+        super().setCurrentText(value)
+
     currentItem = property(getCurrentItem, setCurrentItem, None, "get/set current item index")
+    currentText = property(getCurrentText, setCurrentText, None, "get/set current text")

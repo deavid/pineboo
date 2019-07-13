@@ -589,7 +589,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.cursor_.setValueBuffer(self.fieldName_, data)
 
         elif isinstance(self.editor_, pncontrolsfactory.QComboBox):
-            data = str(self.editor_.currentText())
+            data = str(self.editor_.currentText)
 
             if not self.cursor_.bufferIsNull(self.fieldName_):
                 if data == self.cursor_.valueBuffer(self.fieldName_):
@@ -692,7 +692,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.logger.warning("No se encuentra el valor %s en las opciones %s", v, field.optionsList())
             if idxItem == -1:
                 self.editor_.setCurrentItem(v)
-            self.updateValue(self.editor_.currentText())
+            self.updateValue(self.editor_.currentText)
             return
 
         """
@@ -1442,7 +1442,7 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "string":
             doHome = False
             if ol:
-                if str(v) == self.editor_.currentText():
+                if str(v) == self.editor_.currentText:
                     return
             else:
                 if str(v) == self.editor_.text():

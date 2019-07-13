@@ -69,7 +69,7 @@ class FormInternalObj(FormDBWidget):
             autoComp = "Nunca"
         else:
             autoComp = "Siempre"
-        w.child(u"cbAutoComp").setCurrentText(autoComp)
+        w.child(u"cbAutoComp").setCurrentText = autoComp
 
         w.child(u"leCO").hide()
         self.colorActual_ = self.leerValorLocal("colorObligatorio")
@@ -187,7 +187,7 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("orm_parser_disabled", w.child("cb_disable_mtdparser").checked)
         self.grabarValorLocal("orm_load_disabled", w.child("cb_disable_orm_load").checked)
 
-        autoComp = w.child(u"cbAutoComp").currentText()
+        autoComp = w.child(u"cbAutoComp").currentText
         if autoComp == "Nunca":
             autoComp = "NeverAuto"
         elif autoComp == "Bajo Demanda (F4)":
