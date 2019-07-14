@@ -635,7 +635,7 @@ class PNSqlCursor(QtCore.QObject):
         else:
             action = a
 
-        if not self._action:
+        if self._action is None:
             self._action = action
         else:
 
@@ -654,12 +654,10 @@ class PNSqlCursor(QtCore.QObject):
                 self._action = action
                 return
 
-            if self.action() is not None:
-                self._action = None
+            if self.action() is not None:  # La action previa existe y no es la misma tabla
+                self._action = action
                 self.d.buffer_ = None
                 self.d.metadata_ = None
-
-                self._action = action
 
         if not self._action.table():
             return None
@@ -1784,20 +1782,14 @@ class PNSqlCursor(QtCore.QObject):
         """
         Devuelve el contenido del buffer
         """
-        if self.d.buffer_:
-            return self.d.buffer_
-        else:
-            return None
+        return self.d.buffer_
 
     """
     Devuelve el contenido del bufferCopy
     """
 
-    def bufferCopy(self):
-        if self.d.bufferCopy_:
-            return self.d.bufferCopy_
-        else:
-            return None
+    def bufferCopy(self) -> Optional[PNBuffer]:
+        return self.d.bufferCopy_
 
     """
     Devuelve si el contenido de un campo en el buffer es nulo.
@@ -2225,8 +2217,8 @@ class PNSqlCursor(QtCore.QObject):
                 return
 
             if not fN or self.relation().foreignField() == fN:
-
-                self.d.buffer_ = None
+                if self.buffer():
+                    self.buffer().clear_buffer()
                 self.refreshDelayed()
                 return
         else:
@@ -2237,7 +2229,8 @@ class PNSqlCursor(QtCore.QObject):
                 pos = self.size() - 1
 
             if not self.seek(pos, False, True):
-                self.d.buffer_ = None
+                if self.buffer():
+                    self.buffer().clear_buffer()
                 self.newBuffer.emit()
 
     """
@@ -2304,11 +2297,6 @@ class PNSqlCursor(QtCore.QObject):
         self.buffer().primeUpdate(self.at())
         return self.buffer()
 
-    def editBuffer(self, b=None):
-        # if not self.buffer():
-        # self.d.buffer_ = PNBuffer(self.d)
-        return self.primeUpdate()
-
     """
     Refresca el buffer segun el modo de acceso establecido.
 
@@ -2342,6 +2330,7 @@ class PNSqlCursor(QtCore.QObject):
 
             if not self.buffer():
                 self.d.buffer_ = PNBuffer(self)
+
             self.setNotGenerateds()
 
             fieldList = self.metadata().fieldList()
@@ -2409,17 +2398,13 @@ class PNSqlCursor(QtCore.QObject):
                 self.d.modeAccess_ = self.Browse
                 return False
 
-            if not self.buffer():
-                self.d.buffer_ = PNBuffer(self)
-
-            if self.buffer():
-
-                # self.buffer().primeDelete()
-                self.setNotGenerateds()
-                self.updateBufferCopy()
+            self.primeUpdate()
+            self.setNotGenerateds()
+            self.updateBufferCopy()
 
         elif self.d.modeAccess_ == self.Browse:
-            self.editBuffer(True)
+
+            self.primeUpdate()
             self.setNotGenerateds()
             self.newBuffer.emit()
 

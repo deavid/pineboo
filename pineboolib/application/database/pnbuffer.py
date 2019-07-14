@@ -161,6 +161,10 @@ class PNBuffer(object):
         """
         return len(self.fieldList_)
 
+    def clear_buffer(self):
+        self.clearValues(True)
+        self.setNoModifiedFields()
+
     def primeInsert(self, row: int = None) -> None:
         """Actualización inicial de los campos del buffer
         @param row = Linea del cursor
@@ -177,7 +181,9 @@ class PNBuffer(object):
         if row is None or row < 0:
             row = self.cursor_.currentRegister()
 
-        if row == -1 and self.cursor_.filter() == "":
+        self.clear_buffer()
+
+        if row == -1:
             logger.warning(
                 "PrimeUpdate sobre posición inválida de %s, size: %s, filtro: %s, row: %s",
                 self.cursor_.metadata().name(),
