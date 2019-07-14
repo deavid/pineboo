@@ -735,15 +735,28 @@ class FLFieldDB(QtWidgets.QWidget):
         #v.cast(fltype_) FIXME
 
         """
-        if type_ in ("uint", "int", "string"):
+        if type_ in ("uint", "int"):
             if self.editor_:
                 doHome = False
                 if not self.editor_.text():
                     doHome = True
-                if v is not None:
+                if v:
                     self.editor_.setText(v)
-                # else:
-                #    self.editor_.setText("0")
+                else:
+                    self.editor_.setText("0")
+
+                if doHome:
+                    self.editor_.home(False)
+
+        elif type_ == "string":
+            if self.editor_:
+                doHome = False
+                if not self.editor_.text():
+                    doHome = True
+                if v:
+                    self.editor_.setText(v)
+                else:
+                    self.editor_.setText("")
 
                 if doHome:
                     self.editor_.home(False)
@@ -1247,7 +1260,10 @@ class FLFieldDB(QtWidgets.QWidget):
                     if dv is not None:
                         self.editor_.setText(dv)
             else:
-                self.editor_.setText(v)
+                if v in (None, 0):
+                    self.editor_.setText("")
+                else:
+                    self.editor_.setText(v)
 
             self.editor_.textChanged.connect(self.updateValue)
 
