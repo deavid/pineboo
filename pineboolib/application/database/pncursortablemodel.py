@@ -12,7 +12,6 @@ from PyQt5 import QtWidgets  # type: ignore  # FIXME: Not allowed here! this is 
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils import logging
 from pineboolib.application.utils.date_conversion import date_amd_to_dma
-from pineboolib.fllegacy.flapplication import aqApp
 from typing import Any, Iterable, Optional, Union, List, Dict, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -323,10 +322,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             elif _type == "double":
                 if d is not None:
-                    d = aqApp.localeSystem().toString(float(d), "f", field.partDecimal())
+                    d = QtCore.QLocale.system().localeSystem().toString(float(d), "f", field.partDecimal())
             elif _type in ("int", "uint"):
                 if d is not None:
-                    d = aqApp.localeSystem().toString(int(d))
+                    d = QtCore.QLocale.system().localeSystem().toString(int(d))
 
             self.parent_view.resize_column(col, d)
 

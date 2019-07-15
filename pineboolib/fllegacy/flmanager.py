@@ -11,7 +11,6 @@ from pineboolib.application.utils.xpm import cacheXPM
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
 from pineboolib.fllegacy.flutil import FLUtil
 
@@ -24,6 +23,7 @@ from PyQt5.QtXml import QDomElement  # type: ignore
 
 from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
 from pineboolib.application.database.pnsqlquery import PNSqlQuery, PNGroupByQuery
+from pineboolib.application.database.pnsqlcursor import PNSqlCursor
 
 from typing import Optional, Union, Any, TYPE_CHECKING
 
@@ -1387,7 +1387,7 @@ class FLManager(QtCore.QObject, IManager):
         while q.next():
             self.dictKeyMetaData_[str(q.value(0))] = str(q.value(1))
 
-        c = FLSqlCursor("flmetadata", True, self.db_.dbAux())
+        c = PNSqlCursor("flmetadata", True, self.db_.dbAux())
 
         q2 = PNSqlQuery(None, self.db_.dbAux())
         q2.exec_("SELECT nombre,sha FROM flfiles WHERE nombre LIKE '%.mtd' and nombre not like '%%alteredtable%'")
@@ -1512,9 +1512,9 @@ class FLManager(QtCore.QObject, IManager):
         if not refKey[0:3] == "RK@":
             return None
 
-        from pineboolib.fllegacy.flapplication import aqApp
+        from pineboolib import pncontrolsfactory
 
-        tableName = "fllarge" if aqApp.singleFLLarge() else "fllarge_" + refKey.split("@")[1]
+        tableName = "fllarge" if pncontrolsfactory.aqApp.singleFLLarge() else "fllarge_" + refKey.split("@")[1]
 
         if not self.existsTable(tableName):
             return None

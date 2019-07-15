@@ -11,7 +11,6 @@ from pineboolib.application.utils.xpm import cacheXPM
 
 from pineboolib.core import decorators
 from pineboolib.core.utils import logging
-from pineboolib.fllegacy.flapplication import aqApp
 
 from .pnbuffer import PNBuffer
 
@@ -735,7 +734,6 @@ class PNSqlCursor(QtCore.QObject):
 
     def setAtomicValueBuffer(self, fN, functionName) -> None:
         from pineboolib import pncontrolsfactory
-        from pineboolib import qsa  # FIXME: Should not import QSA at all
 
         metadata = self.metadata()
         buffer = self.buffer()
@@ -766,7 +764,7 @@ class PNSqlCursor(QtCore.QObject):
             arglist = []
             arglist.append(fN)
             arglist.append(buffer.value(fN))
-            v = aqApp.call(functionName, arglist, self.context())
+            v = project.call(functionName, arglist, self.context())
 
             q = PNSqlQuery(None, self.db().dbAux())
             ret = q.exec_(
@@ -792,6 +790,8 @@ class PNSqlCursor(QtCore.QObject):
                 if bch_model and bch_model(fN, self) is False:
                     return
 
+                from pineboolib import qsa  # FIXME: Should not import QSA at all
+
                 script = getattr(qsa, "formRecord%s" % self.action(), None)
                 if script is not None:
                     bChCursor = getattr(script.iface, "bChCursor", None)
@@ -811,7 +811,6 @@ class PNSqlCursor(QtCore.QObject):
 
     def setValueBuffer(self, fN, v):
         from pineboolib import pncontrolsfactory
-        from pineboolib import qsa  # FIXME: Should not import QSA at all
 
         buffer, metadata = self.buffer(), self.metadata()
         if not buffer or not fN or not metadata:
@@ -878,6 +877,8 @@ class PNSqlCursor(QtCore.QObject):
                 bch_model = getattr(self.meta_model(), "bChCursor", None)
                 if bch_model and bch_model(fN, self) is False:
                     return
+
+                from pineboolib import qsa  # FIXME: Should not import QSA at all
 
                 script = getattr(qsa, "formRecord%s" % self.action(), None)
                 if script is not None:
