@@ -29,9 +29,7 @@ def mtd_parse(table_name: str) -> None:
         return
 
     mtd_file = _path("%s.mtd" % table_name)
-    print("*", mtd_file, table_name)
     dest_file = "%s_model.py" % mtd_file[: len(mtd_file) - 4]
-    print("**", dest_file)
 
     if not os.path.exists(dest_file):
         lines = generate_model(dest_file, mtd)
