@@ -21,9 +21,7 @@ class AQUnpacker(QtCore.QObject):
         return err_msgs_
 
     def getText(self) -> Any:
-        from pineboolib import pncontrolsfactory
-
-        ba = pncontrolsfactory.QByteArray(self.stream_.readBytes())
+        ba = QtCore.QByteArray(self.stream_.readBytes())
         uncompress_ = QtCore.qUncompress(ba)
         data_ = uncompress_.data()
         try:
@@ -34,9 +32,7 @@ class AQUnpacker(QtCore.QObject):
         return data_
 
     def getBinary(self) -> Any:
-        from pineboolib import pncontrolsfactory
-
-        ba = pncontrolsfactory.QByteArray(self.stream_.readBytes())
+        ba = QtCore.QByteArray(self.stream_.readBytes())
         return QtCore.qUncompress(ba)
 
     def getVersion(self) -> Any:
