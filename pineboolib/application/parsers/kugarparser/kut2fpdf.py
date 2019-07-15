@@ -7,6 +7,8 @@ from pineboolib.application import project
 from pineboolib import logging
 from pineboolib.core.utils.utils_base import filedir, load2xml
 from pineboolib.application.utils.check_dependencies import check_dependencies
+from pineboolib.application.parsers.kugarparser.parsertools import KParserTools
+from pineboolib.core.settings import config
 
 
 from typing import Any, Mapping, Optional, Sized, SupportsInt, SupportsRound, Union, List
@@ -52,8 +54,6 @@ class Kut2FPDF(object):
 
         self.logger = logging.getLogger("kut2fpdf")
         check_dependencies({"fpdf": "fpdf2"})
-        from pineboolib.application.parsers.kugarparser.parsertools import KParserTools
-        from pineboolib.core.settings import config
 
         self._parser_tools = KParserTools()
         self._avalible_fonts = []
