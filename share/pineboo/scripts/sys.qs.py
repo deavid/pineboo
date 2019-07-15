@@ -18,7 +18,7 @@ from pineboolib.qsa import AQSqlCursor, RegExp, QCheckBox, QString, String, Grou
 from pineboolib.qsa import util, decorators, Process, filedir
 from pineboolib.application import project
 from pineboolib import logging, qsa
-from pineboolib.error_manager import error_manager
+from pineboolib.core.error_manager import error_manager
 from pineboolib.pncontrolsfactory import SysType
 
 qsa_sys = SysType()
