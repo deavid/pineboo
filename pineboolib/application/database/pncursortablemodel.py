@@ -322,7 +322,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             elif _type == "double":
                 if d is not None:
-                    d = QtCore.QLocale.system().localeSystem().toString(float(d), "f", field.partDecimal())
+                    d = QtCore.QLocale.system().toString(float(d), "f", field.partDecimal())
             elif _type in ("int", "uint"):
                 if d is not None:
                     d = QtCore.QLocale.system().localeSystem().toString(int(d))
