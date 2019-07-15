@@ -325,7 +325,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     d = QtCore.QLocale.system().toString(float(d), "f", field.partDecimal())
             elif _type in ("int", "uint"):
                 if d is not None:
-                    d = QtCore.QLocale.system().localeSystem().toString(int(d))
+                    d = QtCore.QLocale.system().toString(int(d))
 
             self.parent_view.resize_column(col, d)
 
