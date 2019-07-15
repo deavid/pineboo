@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pineboolib.core.utils import logging
+from .utils import logging
 import re
 from typing import TypeVar
 
@@ -16,7 +16,7 @@ def translate(mod, txt: _T1) -> _T1:
 
 
 def error_manager(e: str) -> str:
-    from pineboolib.core.utils.utils_base import filedir
+    from .utils.utils_base import filedir
 
     tmpdir = filedir("../tempdata")
     e = e.replace(tmpdir, "...")
