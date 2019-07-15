@@ -277,7 +277,7 @@ class Project(object):
 
             if nombre.endswith(".mtd"):
                 if not config.value("ebcomportamiento/orm_parser_disabled", False):
-                    from pineboolib.mtdparser.pnmtdparser import mtd_parse
+                    from pineboolib.application.parsers.mtdparser.pnmtdparser import mtd_parse
 
                     mtd_parse(fileobj)
 
@@ -431,7 +431,7 @@ class Project(object):
 
             # clean_no_python = self._DGI.clean_no_python() # FIXME: No longer needed. Applied on the go.
 
-            from pineboolib.flparser import postparse
+            from pineboolib.application.parsers.qsaparser import postparse
 
             try:
                 postparse.pythonify([scriptname])

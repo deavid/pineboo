@@ -103,7 +103,7 @@ class FLReportEngine(object):
         self.relDpi_ = 78.0
         self.rd = None
         self.logger = logging.getLogger("FLReportEngine")
-        from pineboolib.application.kugar.kut2fpdf import Kut2FPDF
+        from pineboolib.application.parsers.kugarparser.kut2fpdf import Kut2FPDF
 
         self.parser_ = Kut2FPDF()
 

@@ -52,7 +52,7 @@ class Kut2FPDF(object):
 
         self.logger = logging.getLogger("kut2fpdf")
         check_dependencies({"fpdf": "fpdf2"})
-        from pineboolib.application.kugar.parsertools import KParserTools
+        from pineboolib.application.parsers.kugarparser.parsertools import KParserTools
         from pineboolib.core.settings import config
 
         self._parser_tools = KParserTools()
