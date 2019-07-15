@@ -695,6 +695,7 @@ class FLDataTable(QtWidgets.QTableView):
             self.cursor().refresh()
 
             self.marcaRow(last_pk)
+            self.cursor().refreshBuffer()
             self.show()
             self.refreshing_ = False
 
