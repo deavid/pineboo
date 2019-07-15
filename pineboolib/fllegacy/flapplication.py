@@ -846,9 +846,7 @@ class FLApplication(QtCore.QObject):
 
     def aboutPineboo(self) -> None:
         if project._DGI.localDesktop():
-            from pineboolib.dlgabout.about_pineboo import about_pineboo
-
-            about_pineboo()
+            project._DGI.about_pineboo()
 
     def statusHelpMsg(self, text) -> None:
         from pineboolib.core.settings import config

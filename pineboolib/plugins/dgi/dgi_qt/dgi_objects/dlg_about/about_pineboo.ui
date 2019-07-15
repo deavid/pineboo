@@ -79,7 +79,7 @@ https://github.com/deavid/pineboo</string>
             <string/>
            </property>
            <property name="pixmap">
-            <pixmap>../../share/icono_pi/Symbol_pi_1024.png</pixmap>
+            <pixmap>../../../../../../share/icono_pi/Symbol_pi_1024.png</pixmap>
            </property>
            <property name="scaledContents">
             <bool>true</bool>

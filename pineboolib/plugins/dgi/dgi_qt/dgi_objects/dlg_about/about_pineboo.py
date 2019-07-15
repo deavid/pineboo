@@ -2,7 +2,7 @@
 from PyQt5.QtWidgets import QWidget  # type: ignore
 
 
-class about_pineboo(QWidget):
+class AboutPineboo(QWidget):
 
     ui = None
 
@@ -14,9 +14,9 @@ class about_pineboo(QWidget):
         from pineboolib.application import project
         from pineboolib.core.utils.utils_base import filedir
 
-        dlg_ = filedir("dlgabout/about_pineboo.ui")
+        dlg_ = filedir("plugins/dgi/dgi_qt/dgi_objects/dlg_about/about_pineboo.ui")
         version_ = project.version
-        self.ui = project._DGI.createUI(dlg_, None, self)  # FIXME: Letting FL* to create Pineboo interface?
+        self.ui = project._DGI.createUI(dlg_, None, self)
         if self.ui is None:
             raise Exception("Error creating UI About Dialog")
         self.ui.lbl_version.setText("Pineboo v%s" % str(version_))

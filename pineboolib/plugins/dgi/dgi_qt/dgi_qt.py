@@ -105,3 +105,9 @@ class dgi_qt(dgi_schema):
             uic.loadUi(form_path, w_)
 
         return w_
+
+    def about_pineboo(self):
+        from .dgi_objects.dlg_about.about_pineboo import AboutPineboo
+
+        about_ = AboutPineboo()
+        about_.show()
