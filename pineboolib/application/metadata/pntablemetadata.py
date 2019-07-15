@@ -152,7 +152,7 @@ class PNTableMetaData(ITableMetaData):
     @param f Objeto FLFieldMetaData con la descripción del campo a añadir
     """
 
-    def addFieldMD(self, f: "FLFieldMetaData") -> None:
+    def addFieldMD(self, f: "PNFieldMetaData") -> None:
         if f is None:
             return
         if not f.metadata():
