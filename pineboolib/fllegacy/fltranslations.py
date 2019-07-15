@@ -4,7 +4,6 @@ from pineboolib import logging
 
 from PyQt5 import QtCore, Qt  # type: ignore
 from typing import Any, Mapping, Union
-from pineboolib.translator.metatranslator import metaTranslator
 
 
 """
@@ -33,7 +32,7 @@ class FLTranslations(object):
     @return Boolean. Proceso realizado correctamente
     """
 
-    def loadTsFile(self, tor, ts_file_name: Union[metaTranslator, bytes, int, str], verbose) -> Any:
+    def loadTsFile(self, tor, ts_file_name: Union[bytes, int, str], verbose) -> Any:
         # qm_file_name = "%s.qm" % ts_file_name[:-3]
         ok = False
         if os.path.exists(ts_file_name):
@@ -42,26 +41,6 @@ class FLTranslations(object):
         if not ok:
             self.logger.warning("For some reason, I cannot load '%s'", ts_file_name)
         return ok
-
-    """
-    Comprueba si el .qm se ha creado
-    @param tor. Metatranslator
-    @param qmFileName. Nombre del fichero .qm a comprobar
-    @param verbose. Muestra verbose (True, False)
-    @param stripped. No usado
-    """
-
-    def releaseMetaTranslator(self, tor, qm_file_name, verbose, stripped) -> None:
-        from pineboolib.fllegacy.flsettings import FLSettings
-
-        if verbose:
-            self.logger.debug("Updating '%s'...", qm_file_name)
-
-        settings = FLSettings()
-        if settings.readBoolEntry("ebcomportamiento/translations_from_qm", False):
-            print("*** FAKE :: ", qm_file_name)
-            if not tor.release(qm_file_name, verbose, "Stripped" if stripped else "Everything"):
-                self.logger.warning("For some reason, i cannot save '%s'", qm_file_name)
 
     """
     Libera el fichero .ts
@@ -86,12 +65,10 @@ class FLTranslations(object):
     """
 
     def lrelease(self, ts_input_file: Union[str, bytes, int, str, Mapping[slice, Any]], qm_output_file, stripped=True) -> None:
-        from pineboolib.translator.metatranslator import metaTranslator
         from pineboolib.application import project
 
         verbose = False
         metTranslations = False
-        tor = metaTranslator()
 
         f = Qt.QFile(ts_input_file)
         if not f.open(QtCore.QIODevice.ReadOnly):
@@ -103,11 +80,7 @@ class FLTranslations(object):
         f.close()
 
         if full_text.find("<!DOCTYPE TS>") >= 0:
-            if qm_output_file is None:
-                self.releaseTsFile(ts_input_file, verbose, stripped)
-            else:
-                if not self.loadTsFile(tor, ts_input_file, verbose):
-                    return
+            self.releaseTsFile(ts_input_file, verbose, stripped)
 
         else:
             # modId = self.db_.managerModules().idModuleOfFile(tsInputFile)
@@ -126,9 +99,6 @@ class FLTranslations(object):
 
             if not metTranslations:
                 self.logger.warning("Met no 'TRANSLATIONS' entry in project file '%s'", ts_input_file)
-
-        if qm_output_file:
-            self.releaseMetaTranslator(tor, qm_output_file, verbose, stripped)
 
 
 """
