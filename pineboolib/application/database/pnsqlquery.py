@@ -248,7 +248,6 @@ class PNSqlQuery(object):
                         del mtd
 
             else:
-                print("*", field, f)
                 self.d.fieldList_.append(f)
 
             self.d.select_ = ",".join(self.d.fieldList_)
