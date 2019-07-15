@@ -564,7 +564,7 @@ def print_stack(maxsize=1) -> None:
 # Usadas solo por import *
 # FIXME: No se debe usar import * !!!
 from pineboolib.packager.aqunpacker import AQUnpacker  # noqa:
-from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData  # noqa:
+
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
 
 # aqApp -- imported from loader.main after reload_from_DGI() call, as it is a cyclic dependency

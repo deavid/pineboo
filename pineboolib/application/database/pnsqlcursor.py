@@ -16,8 +16,7 @@ from .pnbuffer import PNBuffer
 
 # FIXME: Removde dependency: Should not import from fllegacy.*
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  # FIXME: Removde dependency
-
-from pineboolib.fllegacy import fltablemetadata
+from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
 
 if TYPE_CHECKING:
     from .pncursortablemodel import PNCursorTableModel
@@ -47,7 +46,7 @@ class PNCursorPrivate(QtCore.QObject):
     """
     Metadatos de la tabla asociada al cursor.
     """
-    metadata_: "fltablemetadata.FLTableMetaData" = None
+    metadata_: "PNTableMetaData.PNTableMetaData" = None
 
     """
     Mantiene el modo de acceso actual del cursor, ver FLSqlCursor::Mode.
@@ -562,7 +561,7 @@ class PNSqlCursor(QtCore.QObject):
     """
     Para obtener los metadatos de la tabla.
 
-    @return Objeto FLTableMetaData con los metadatos de la tabla asociada al cursor
+    @return Objeto PNTableMetaData con los metadatos de la tabla asociada al cursor
     """
 
     def metadata(self):
@@ -2780,7 +2779,7 @@ class PNSqlCursor(QtCore.QObject):
         self.d._model.where_filters["filter"] = finalFilter
 
     """
-    Abre el formulario de edicion de registro definido en los metadatos (FLTableMetaData) listo
+    Abre el formulario de edicion de registro definido en los metadatos (PNTableMetaData) listo
     para insertar un nuevo registro en el cursor.
     """
 
@@ -2790,7 +2789,7 @@ class PNSqlCursor(QtCore.QObject):
         self.openFormInMode(self.Insert, wait)
 
     """
-    Abre el formulario de edicion de registro definido en los metadatos (FLTableMetaData) listo
+    Abre el formulario de edicion de registro definido en los metadatos (PNTableMetaData) listo
     para editar el registro activo del cursor.
     """
 
@@ -2808,7 +2807,7 @@ class PNSqlCursor(QtCore.QObject):
         self.openFormInMode(self.Edit, wait)
 
     """
-    Abre el formulario de edicion de registro definido en los metadatos (FLTableMetaData) listo
+    Abre el formulario de edicion de registro definido en los metadatos (PNTableMetaData) listo
     para sólo visualizar el registro activo del cursor.
     """
 

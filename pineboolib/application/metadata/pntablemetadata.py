@@ -2,14 +2,11 @@
 from pineboolib.core import decorators
 
 from pineboolib.interfaces.itablemetadata import ITableMetaData
-from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
 from pineboolib import logging
 import copy
 
-from typing import Any, Optional, List, Dict, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
+from typing import Any, Optional, List, Dict
+from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
 
 """
 Mantiene la definicion de una tabla.
@@ -25,7 +22,7 @@ los metadatos de una consulta, ver FLTableMetaData::query().
 """
 
 
-class FLTableMetaData(ITableMetaData):
+class PNTableMetaData(ITableMetaData):
     logger = logging.getLogger("CursorTableModel")
     d: "FLTableMetaDataPrivate"
 
@@ -38,7 +35,7 @@ class FLTableMetaData(ITableMetaData):
     """
 
     def __init__(self, n, a=None, q: str = None) -> None:
-        super(FLTableMetaData, self).__init__(n, a, q)
+        super().__init__(n, a, q)
         # tmp = None
 
         if not a and not q:
@@ -51,17 +48,19 @@ class FLTableMetaData(ITableMetaData):
             self.inicializeNewFLTableMetaData(n, a, q)
 
     def inicializeFLTableMetaData(self, other) -> None:
-        self.d = FLTableMetaDataPrivate()
+        self.d = PNTableMetaDataPrivate()
         self.d.fieldNames_ = []
         self.copy(other)
 
     def inicializeNewFLTableMetaData(self, n, a, q: str = None) -> None:
-        self.d = FLTableMetaDataPrivate(n, a, q)
+        self.d = PNTableMetaDataPrivate(n, a, q)
         self.d.fieldNames_ = []
 
     def inicializeFLTableMetaDataP(self, name) -> None:
-        self.d = FLTableMetaDataPrivate(name)
-        self.d.compoundKey_ = FLCompoundKey()
+        self.d = PNTableMetaDataPrivate(name)
+        from pineboolib.application.database.pncompounkey import PNCompoundKey
+
+        self.d.compoundKey_ = PNCompoundKey()
         self.d.fieldNames_ = []
 
         """
@@ -161,9 +160,8 @@ class FLTableMetaData(ITableMetaData):
         self.d.fieldList_.append(f)
         self.d.addFieldName(f.name())
         self.d.formatAlias(f)
-        from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 
-        if f.type() == FLFieldMetaData.Unlock:
+        if f.type() == PNFieldMetaData.Unlock:
             self.d.fieldNamesUnlock_.append(f.name())
         if f.d.isPrimaryKey_:
             self.d.primaryKey_ = f.name().lower()
@@ -351,15 +349,9 @@ class FLTableMetaData(ITableMetaData):
         if not fN:
             return False
 
-        field = None
-
         for f in self.d.fieldList_:
             if f.name() == fN.lower():
-                field = f
-                break
-
-        if field:
-            return field.d.allowNull_
+                return f.allowNull()
 
         return False
 
@@ -373,15 +365,9 @@ class FLTableMetaData(ITableMetaData):
         if not fN:
             return False
 
-        field = None
-
         for f in self.d.fieldList_:
             if f.name() == fN.lower():
-                field = f
-                break
-
-        if field:
-            return field.d.isUnique_
+                return f.isUnique()
 
         return False
 
@@ -710,7 +696,7 @@ class FLTableMetaData(ITableMetaData):
         return ret
 
 
-class FLTableMetaDataPrivate:
+class PNTableMetaDataPrivate:
 
     """
     Nombre de la tabla

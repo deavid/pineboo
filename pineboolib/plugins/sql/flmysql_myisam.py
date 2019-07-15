@@ -10,7 +10,7 @@ from pineboolib.core.utils.utils_base import text2bool
 from pineboolib.application.utils.check_dependencies import check_dependencies
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
+from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
 
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.application import project
@@ -975,7 +975,7 @@ class FLMYSQL_MYISAM(object):
                 if oldField is None or not result_set or oldField.name() not in result_set[0].keys():
                     if oldField is None:
                         oldField = it2
-                    if it2.type() != FLFieldMetaData.Serial:
+                    if it2.type() != PNFieldMetaData.Serial:
                         v = it2.defaultValue()
                         step += 1
                         default_values[str(step)] = v
@@ -1013,7 +1013,7 @@ class FLMYSQL_MYISAM(object):
                         if (
                             (not oldField.allowNull() or not newField.allowNull())
                             and (v is None)
-                            and newField.type() != FLFieldMetaData.Serial
+                            and newField.type() != PNFieldMetaData.Serial
                         ):
                             defVal = newField.defaultValue()
                             if defVal is not None:
@@ -1023,7 +1023,7 @@ class FLMYSQL_MYISAM(object):
                         v = v[: newField.length()]
 
                     if (not oldField.allowNull() or not newField.allowNull()) and v is None:
-                        if oldField.type() == FLFieldMetaData.Serial:
+                        if oldField.type() == PNFieldMetaData.Serial:
                             v = int(self.nextSerialVal(newMTD.name(), newField.name()))
                         elif oldField.type() in ["int", "uint", "bool", "unlock"]:
                             v = 0

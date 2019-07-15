@@ -9,8 +9,10 @@ from pineboolib.core import decorators
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldatatable import FLDataTable
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformsearchdb import FLFormSearchDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
-from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
+
+from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData
+from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
+
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flapplication import aqApp
@@ -479,7 +481,7 @@ class FLTableDB(QtWidgets.QWidget):
         checkIntegrity = False
         if not rMD:
             if testM1:
-                if testM1.cardinality() == FLRelationMetaData.RELATION_M1:
+                if testM1.cardinality() == PNRelationMetaData.RELATION_M1:
                     checkIntegrity = True
             fMD = self.cursor().metadata().field(self.foreignField_)
             if fMD is not None:
@@ -489,7 +491,7 @@ class FLTableDB(QtWidgets.QWidget):
                 if tmdAux and not tmdAux.inCache():
                     del tmdAux
 
-                rMD = FLRelationMetaData(self.tableName_, self.fieldRelation_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
+                rMD = PNRelationMetaData(self.tableName_, self.fieldRelation_, PNRelationMetaData.RELATION_1M, False, False, checkIntegrity)
                 fMD.addRelationMD(rMD)
                 logger.warning(
                     "FLTableDB : La relación entre la tabla del formulario %s y esta tabla %s de este campo no existe, "
@@ -518,7 +520,7 @@ class FLTableDB(QtWidgets.QWidget):
         if not rMD:
             fMD = tMD.field(self.fieldRelation_)
             if fMD is not None:
-                rMD = FLRelationMetaData(curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, False)
+                rMD = PNRelationMetaData(curName, self.foreignField_, PNRelationMetaData.RELATION_1M, False, False, False)
                 fMD.addRelationMD(rMD)
                 if DEBUG:
                     logger.trace(
@@ -1461,7 +1463,7 @@ class FLTableDB(QtWidgets.QWidget):
                         timeNow = QtCore.QTime.currentTime()
                         editor_.setTime(timeNow)
 
-                    if type_ in (FLFieldMetaData.Unlock, "bool"):
+                    if type_ in (PNFieldMetaData.Unlock, "bool"):
                         editor_ = pncontrolsfactory.FLCheckBox(self)
 
                     if editor_:
@@ -1720,12 +1722,12 @@ class FLTableDB(QtWidgets.QWidget):
                     self.fieldNameCheckColumn_ = "%s_check_column" % tMD.name()
 
                     if self.fieldNameCheckColumn_ not in tMD.fieldNames():
-                        fieldCheck = FLFieldMetaData(
+                        fieldCheck = PNFieldMetaData(
                             self.fieldNameCheckColumn_,
                             self.tr(self.aliasCheckColumn_),
                             True,
                             False,
-                            FLFieldMetaData.Check,
+                            PNFieldMetaData.Check,
                             0,
                             False,
                             True,

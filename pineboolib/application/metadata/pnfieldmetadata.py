@@ -6,14 +6,16 @@ from pineboolib.interfaces import IFieldMetaData
 
 from typing import List, Optional, Union, Any, TYPE_CHECKING
 
+from .pnrelationmetadata import PNRelationMetaData
+
 if TYPE_CHECKING:
     from pineboolib.interfaces import ITableMetaData
-    from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
-
-logger = logging.getLogger("FLFieldMetadata")
 
 
-class FLFieldMetaData(IFieldMetaData):
+logger = logging.getLogger("PNFieldMetadata")
+
+
+class PNFieldMetaData(IFieldMetaData):
     """
   @param n Nombre del campo
   @param a Alias del campo, utilizado en etiquetas de los formularios
@@ -53,7 +55,7 @@ class FLFieldMetaData(IFieldMetaData):
         ++self.count_
 
     def inicializeFLFieldMetaData(self, other) -> None:
-        self.d = FLFieldMetaDataPrivate()
+        self.d = PNFieldMetaDataPrivate()
         self.copy(other)
 
     def inicializeNewFLFieldMetaData(
@@ -79,7 +81,7 @@ class FLFieldMetaData(IFieldMetaData):
         gen: bool = True,
         iCK: bool = False,
     ) -> None:
-        self.d = FLFieldMetaDataPrivate(
+        self.d = PNFieldMetaDataPrivate(
             n, a, aN, isPrimaryKey, t, length_, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK
         )
 
@@ -318,13 +320,12 @@ class FLFieldMetaData(IFieldMetaData):
     @param r Objeto FlRelationMetaData con la definicion de la
          relacion a añadir """
 
-    def addRelationMD(self, r: "FLRelationMetaData") -> None:
+    def addRelationMD(self, r: "PNRelationMetaData") -> None:
 
         isRelM1 = False
         # print("FLFieldMetadata(%s).addRelationMD(card %s)" % (self.name(), r.cardinality()))
-        from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 
-        if r.cardinality() == FLRelationMetaData.RELATION_M1:
+        if r.cardinality() == PNRelationMetaData.RELATION_M1:
             isRelM1 = True
         if isRelM1 and self.d.relationM1_:
             print("FLFieldMetaData: Se ha intentado crear más de una relación muchos a uno para el mismo campo")
@@ -348,7 +349,7 @@ class FLFieldMetaData(IFieldMetaData):
     @return Objeto con la lista de deficiones de la relaciones del campo
     """
 
-    def relationList(self) -> List["FLRelationMetaData"]:
+    def relationList(self) -> List["PNRelationMetaData"]:
         return self.d.relationList_
 
     """
@@ -360,7 +361,7 @@ class FLFieldMetaData(IFieldMetaData):
         muchos a uno para este campo
     """
 
-    def relationM1(self) -> Optional["FLRelationMetaData"]:
+    def relationM1(self) -> Optional["PNRelationMetaData"]:
         return self.d.relationM1_
 
     """
@@ -691,7 +692,7 @@ class FLFieldMetaData(IFieldMetaData):
         return self.d.length_
 
 
-class FLFieldMetaDataPrivate(object):
+class PNFieldMetaDataPrivate(object):
     """
     Nombre del campo en la tabla
     """

@@ -2,7 +2,7 @@
 
 from PyQt5 import QtCore  # type: ignore
 
-from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
+from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
 from pineboolib.fllegacy.flaccesscontrol import FLAccessControl
 
 from pineboolib.application import project
@@ -146,7 +146,7 @@ class FLAccessControlTable(FLAccessControl):
     def type(self):
         return "table"
 
-    def processObject(self, obj: "FLTableMetaData") -> None:
+    def processObject(self, obj: "PNTableMetaData") -> None:
         if not obj:
             return
 
@@ -197,7 +197,7 @@ class FLAccessControlTable(FLAccessControl):
                 field.setVisible(True)
                 field.setEditable(True)
 
-    def setFromObject(self, obj: "FLTableMetaData") -> None:
+    def setFromObject(self, obj: "PNTableMetaData") -> None:
         tm = obj
         if not tm:
             return
@@ -248,7 +248,7 @@ class FLAccessControlFactory(object):
 
         if isinstance(obj, pncontrolsfactory.QMainWindow):
             ret_ = "mainwindow"
-        elif isinstance(obj, FLTableMetaData):
+        elif isinstance(obj, PNTableMetaData):
             ret_ = "table"
         elif isinstance(obj, pncontrolsfactory.FLFormDB):
             ret_ = "form"

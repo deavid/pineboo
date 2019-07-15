@@ -5,7 +5,7 @@
 from pineboolib.core import decorators
 
 
-class FLRelationMetaData:
+class PNRelationMetaData:
 
     """
     Constantes de tipos de cardinalidades de una relacion
@@ -38,11 +38,11 @@ class FLRelationMetaData:
     """
 
     def inicializeNewFLRelationMetaData(self, fT: str, fF: str, rC: str, dC: bool = False, uC: bool = False, cI: bool = True) -> None:
-        self.d = FLRelationMetaDataPrivate(fT, fF, rC, dC, uC, cI)
+        self.d = PNRelationMetaDataPrivate(fT, fF, rC, dC, uC, cI)
 
     @decorators.BetaImplementation
     def inicializeFromFLRelationMetaData(self, *other):
-        self.d = FLRelationMetaDataPrivate()
+        self.d = PNRelationMetaDataPrivate()
         self.copy(other)
 
     """
@@ -142,7 +142,7 @@ class FLRelationMetaData:
         self.d.checkIn_ = other.d.checkIn_
 
 
-class FLRelationMetaDataPrivate:
+class PNRelationMetaDataPrivate:
 
     """
     Nombre del campo a relacionar

@@ -9,8 +9,10 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.core.utils.utils_base import filedir, aqtt
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
-from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
+
+from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
+from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData
+
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformsearchdb import FLFormSearchDB
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
@@ -1665,12 +1667,12 @@ class FLFieldDB(QtWidgets.QWidget):
             checkIntegrity = False
             testM1 = self.cursor_.metadata().relation(self.foreignField_, self.fieldRelation_, self.tableName_)
             if testM1:
-                if testM1.cardinality() == FLRelationMetaData.RELATION_1M:
+                if testM1.cardinality() == PNRelationMetaData.RELATION_1M:
                     checkIntegrity = True
             fMD = tMD.field(self.fieldRelation_)
 
             if fMD is not None:
-                rMD = FLRelationMetaData(curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
+                rMD = PNRelationMetaData(curName, self.foreignField_, PNRelationMetaData.RELATION_1M, False, False, checkIntegrity)
 
                 fMD.addRelationMD(rMD)
                 self.logger.trace(
@@ -2664,7 +2666,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         if not self.fieldName_:
             return
-        tMD = FLTableMetaData(self.cursor_.metadata())
+        tMD = PNTableMetaData(self.cursor_.metadata())
         if not tMD:
             return
 

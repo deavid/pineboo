@@ -3,7 +3,7 @@
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
+    from .pnfieldmetadata import PNFieldMetaData
 
 """
 Clase para definir claves compuestas.
@@ -16,7 +16,7 @@ es decir objetos FLFieldMetaData.
 """
 
 
-class FLCompoundKey(object):
+class PNCompoundKeyMetaData(object):
 
     """
     Lista de con los metadatos de los campos que componen la clave
@@ -25,7 +25,7 @@ class FLCompoundKey(object):
     fieldList_ = []
 
     def __init__(self, other: None = None) -> None:
-        super(FLCompoundKey, self).__init__()
+        super().__init__()
         self.fieldList_ = []
         if other:
             self.copy(other)
@@ -39,7 +39,7 @@ class FLCompoundKey(object):
     @param f Objeto FLFieldMetaData con la descripción del campo a añadir
     """
 
-    def addFieldMD(self, f: "FLFieldMetaData") -> None:
+    def addFieldMD(self, f: "PNFieldMetaData") -> None:
         self.fieldList_.append(f)
 
     """
