@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib import logging
 from typing import List
-from pineboolib.application.utils.path import _dir
+from pineboolib.application.utils.path import _path
 from pineboolib.application import project
 import os
 
@@ -28,8 +28,10 @@ def mtd_parse(table_name: str) -> None:
     if mtd.isQuery():
         return
 
-    mtd_file = _dir("cache", table_name)
-    dest_file = "%s_model.py" % table_name
+    mtd_file = _path("%s.mtd" % table_name)
+    print("*", mtd_file, table_name)
+    dest_file = "%s_model.py" % mtd_file[: len(mtd_file) - 4]
+    print("**", dest_file)
 
     if not os.path.exists(dest_file):
         lines = generate_model(dest_file, mtd)
