@@ -5,10 +5,11 @@ from pineboolib import logging
 import datetime
 import fnmatch
 import xml.etree.ElementTree
-from PyQt5.QtGui import QPixmap  # type: ignore
+
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.utils.xpm import cacheXPM
-from pineboolib.fllegacy.flapplication import aqApp
+from pineboolib.application import project
+
 
 from typing import Any, Iterable, Optional, SupportsInt, TypeVar, Union, List, TYPE_CHECKING
 
@@ -128,7 +129,9 @@ class KParserTools(object):
         if data_type == 2:  # Double
             if value in (None, "None"):
                 return
-            ret_ = aqApp.localeSystem().toString(float(value), "f", p)
+            from PyQt5 import QtCore
+
+            ret_ = QtCore.QLocale.system().toString(float(value), "f", p)
         elif data_type == 0:
             pass
         elif data_type == 3:
@@ -156,31 +159,41 @@ class KParserTools(object):
         ret = None
         table_name = "fllarge"
         if ref_key is not None:
+            from pineboolib import pncontrolsfactory
+
             value = None
-            tmp_dir = aqApp.tmp_dir()
+            tmp_dir = project.tmpdir
             img_file = "%s/%s.png" % (tmp_dir, ref_key)
 
             if not os.path.exists(img_file) and ref_key[0:3] == "RK@":
-                if not aqApp.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
-                    table_name += "_%s" % ref_key.split("@")[1]
                 from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
+                single_query = PNSqlQuery()
+                single_query.exec_("SELECT valor FROM flsettings WHERE flkey='FLLargeMode'")
+                single_fllarge = True
+
+                if single_query.next():
+                    if single_query.value(0) == "True":
+                        single_fllarge = False
+
+                if not single_fllarge:  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
+                    table_name += "_%s" % ref_key.split("@")[1]
+
                 q = PNSqlQuery()
-                # q.setForwardOnly(True)
                 q.exec_("SELECT contenido FROM %s WHERE refkey='%s'" % (table_name, ref_key))
                 if q.next():
                     value = cacheXPM(q.value(0))
 
                 if value:
                     ret = img_file
-                    pix = QPixmap(value)
+                    pix = pncontrolsfactory.QPixmap(value)
                     if not pix.save(img_file):
                         self.logger.warning("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
                         ret = None
                     else:
                         ret = img_file
             elif ref_key.endswith(".xpm"):
-                pix = QPixmap(ref_key)
+                pix = pncontrolsfactory.QPixmap(ref_key)
                 img_file = ref_key.replace(".xpm", ".png")
                 if not pix.save(img_file):
                     self.logger.warning("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))

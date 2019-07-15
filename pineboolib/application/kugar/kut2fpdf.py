@@ -3,7 +3,7 @@ import datetime
 import re
 import os
 from xml.etree.ElementTree import Element
-
+from pineboolib.application import project
 from pineboolib import logging
 from pineboolib.core.utils.utils_base import filedir, load2xml
 from pineboolib.application.utils.check_dependencies import check_dependencies
@@ -91,14 +91,8 @@ class Kut2FPDF(object):
             self.logger.exception("KUT2FPDF: Problema al procesar xml_data")
             return False
 
-        from pineboolib.fllegacy.flutil import FLUtil
-
-        util = FLUtil()
-        from pineboolib.application import project
-
-        if project._DGI.localDesktop():
-            util.createProgressDialog("Pineboo", len(self._xml_data))
-            util.setLabelText("Creando informe ...")
+        project.message_manager().send("progress_dialog_manager", "create", ["Pineboo", len(self._xml_data), "kugar"])
+        project.message_manager().send("progress_dialog_manager", "setLabelText", ["Creando informe ...", "kugar"])
 
         self.name_ = name
         self.setPageFormat(self._xml)
@@ -163,8 +157,6 @@ class Kut2FPDF(object):
 
     def get_file_name(self) -> Any:
         import os
-
-        from pineboolib.application import project
 
         pdf_name = project.tmpdir
         pdf_name += "/%s_%s.pdf" % (self.name_, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
@@ -240,17 +232,13 @@ class Kut2FPDF(object):
 
     def processDetails(self, keep_page=None) -> None:
         # Procesamos la cabecera si procede ..
+
         top_level = 0
         level = 0
         first_page_created = keep_page if keep_page is not None and self._document.page_no() > 0 else False
 
         rows_array = self._xml_data.findall("Row")
         i = 0
-
-        from pineboolib.fllegacy.flutil import FLUtil
-        from pineboolib.application import project
-
-        util = FLUtil()
 
         for data in rows_array:
             self._actual_data_line = data
@@ -283,16 +271,14 @@ class Kut2FPDF(object):
 
             self.prev_level = level
 
-            if project._DGI.localDesktop():
-                util.setProgress(i)
+            project.message_manager().send("progress_dialog_manager", "setProgress", [i, "kugar"])
             i += 1
 
         if not self._no_print_footer:
             for l in reversed(range(top_level + 1)):
                 self.processData("DetailFooter", self.last_data_processed, l)
 
-        if project._DGI.localDesktop():
-            util.destroyProgressDialog()
+        project.message_manager().send("progress_dialog_manager", "destroy", ["kugar"])
 
     """
     Paso intermedio que calcula si detailHeader + detail + detailFooter entran en el resto de la ṕagina. Si no es así crea nueva página.
@@ -547,7 +533,6 @@ class Kut2FPDF(object):
                 function_name = xml.get("FunctionName")
                 try:
                     nodo = self._parser_tools.convertToNode(data_row)
-                    from pineboolib.application import project
 
                     ret_ = project.call(function_name, [nodo, field_name], None, False)
                     if ret_ is False:
@@ -972,7 +957,6 @@ class Kut2FPDF(object):
         if text == "None":
             return
         from pineboolib import pncontrolsfactory
-        from pineboolib.application import project
 
         file_name = project.tmpdir
         file_name += "/%s.png" % (text)
