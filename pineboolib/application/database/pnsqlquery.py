@@ -240,14 +240,15 @@ class PNSqlQuery(object):
             except Exception:
                 pass
 
-            if field == "*":
+            if field == "*" and not table:
                 mtd = self.db().manager().metadata(table, True)
-                if mtd:
-                    self.d.fieldList_ = mtd.fieldList(True)
+                if mtd is not None:
+                    self.d.fieldList_ = mtd.fieldNames()
                     if not mtd.inCache():
                         del mtd
 
             else:
+                print("*", field, f)
                 self.d.fieldList_.append(f)
 
             self.d.select_ = ",".join(self.d.fieldList_)
