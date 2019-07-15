@@ -70,4 +70,8 @@ class QGroupBox(QtWidgets.QGroupBox):
     def setFrameShape(self, fs):
         pass
 
+    @decorators.NotImplementedWarn
+    def newColumn(self):
+        pass
+
     enabled = property(get_enabled, set_enabled)
