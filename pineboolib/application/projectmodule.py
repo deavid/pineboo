@@ -139,7 +139,7 @@ class Project(object):
         if not self.conn or not self.conn.conn:
             raise NotConnectedError("Cannot execute Pineboo Project without a connection in place")
 
-        from pineboolib.pnobjectsfactory import load_models
+        from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import load_models
 
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
@@ -274,12 +274,6 @@ class Project(object):
                     txt = contenido.encode(encode_, "replace")
                     f2.write(txt)
                     f2.close()
-
-            if nombre.endswith(".mtd"):
-                if not config.value("ebcomportamiento/orm_parser_disabled", False):
-                    from pineboolib.application.parsers.mtdparser.pnmtdparser import mtd_parse
-
-                    mtd_parse(fileobj)
 
             if self.parseProject and nombre.endswith(".qs") and settings.value("application/isDebuggerMode", False):
                 self.message_manager().send("splash", "showMessage", ["Convirtiendo %s ( %d/ ??) ..." % (nombre, pos_qs)])

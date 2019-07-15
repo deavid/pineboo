@@ -17,14 +17,22 @@ reserved_words = ["pass"]
 """
 
 
-def mtd_parse(fileobj) -> None:
-    mtd_file = _dir("cache", fileobj.filekey)
-    metadata_name = fileobj.filename[:-4]
-    dest_file = "%s_model.py" % mtd_file[:-4]
-    mtd = project.conn.manager().metadata(metadata_name)
-    if not os.path.exists(dest_file) and not mtd.isQuery():
+def mtd_parse(table_name: str) -> None:
+    if table_name.find("alteredtable") > -1 or table_name.startswith("fllarge_"):
+        return
 
-        lines = generate_model(dest_file, mtd) if mtd and not mtd.isQuery() else []
+    mtd = project.conn.manager().metadata(table_name)
+    if mtd is None:
+        return
+
+    if mtd.isQuery():
+        return
+
+    mtd_file = _dir("cache", table_name)
+    dest_file = "%s_model.py" % table_name
+
+    if not os.path.exists(dest_file):
+        lines = generate_model(dest_file, mtd)
 
         if lines:
             f = open(dest_file, "w")
@@ -41,12 +49,12 @@ def generate_model(dest_file, mtd_table) -> List[str]:
     # data.append("from sqlalchemy.ext.declarative import declarative_base")
     data.append("from sqlalchemy import Column, Integer, Numeric, String, BigInteger, Boolean, DateTime, ForeignKey, LargeBinary")
     data.append("from sqlalchemy.orm import relationship, validates")
-    data.append("from pineboolib.pnobjectsfactory import Calculated, load_model")
-    data.append("from pineboolib.pncontrolsfactory import aqApp")
+    data.append("from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import Calculated, load_model")
+    data.append("from pineboolib.application import project")
     data.append("")
     # data.append("Base = declarative_base()")
-    data.append("Base = aqApp.db().declarative_base()")
-    data.append("engine = aqApp.db().engine()")
+    data.append("Base = project.conn.declarative_base()")
+    data.append("engine = project.conn.engine()")
     data.append("")
     # for field in mtd_table.fieldList():
     #    if field.relationM1():
@@ -106,31 +114,6 @@ def generate_model(dest_file, mtd_table) -> List[str]:
     data.append("")
     data.append("# <--- Relations 1:M --- ")
     data.append("")
-
-    """
-    data.append("")
-    data.append("# --- Relations M:1 ---> ")
-    data.append("")
-
-
-    for field in mtd_table.fieldList(): #Creamos relaciones M1
-        rel = field.relationM1()
-        if rel:
-            foreign_table_mtd = aqApp.db().manager().metadata(rel.foreignTable())
-            if foreign_table_mtd:
-                foreign_object = "%s%s" % (rel.foreignTable()[0].upper(), rel.foreignTable()[1:])
-                relation_ = "    %s_%s = relationship('%s'" % (rel.foreignTable(), rel.foreignField(), foreign_object)
-                relation_ += ", foreign_keys='%s.%s'" % (foreign_object, rel.foreignField())
-                relation_ += ")"
-
-                data.append(relation_)
-
-
-
-    data.append("")
-    data.append("# <--- Relations M:1 --- ")
-    data.append("")
-    """
     data.append("")
     data.append("")
     data.append("    @validates('%s')" % "','".join(validator_list))

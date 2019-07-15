@@ -241,6 +241,12 @@ def exec_main(options: Values) -> int:
         logger.warning("No connection was provided. Aborting Pineboo load.")
         return -99
 
+    if not config.value("ebcomportamiento/orm_parser_disabled", False):
+        from pineboolib.application.parsers.mtdparser.pnmtdparser import mtd_parse
+
+        for table in project.conn.tables():
+            mtd_parse(table)
+
     aqApp.loadTranslations()
 
     from .init_project import init_project
