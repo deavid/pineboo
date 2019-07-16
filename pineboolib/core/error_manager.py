@@ -63,6 +63,9 @@ def process_error(error_str: str) -> str:
     elif "'QDomElement' object has no attribute 'toString'" in error_str:
         error = "'QDomElement' object has no attribute 'toString'"
         ret += translate("scripts", "toString() ya no está disponible , usa otro método")
+    elif "can only concatenate" in error_str:
+        error = "can only concatenate"
+        ret += translate("scripts", "Estas intentado añadir a una cadena de texto un tipo de dato no str.")
 
     else:
         ret += translate("scripts", "Información no disponible.")

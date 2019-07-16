@@ -3025,10 +3025,16 @@ class PNSqlCursor(QtCore.QObject):
 
             if functionBefore:
                 fn = getattr(module_script.iface, functionBefore, None)
-                if fn is not None:
+                v = None
+                try:
                     v = fn(self)
-                    if v and not isinstance(v, bool) or v is False:
-                        return False
+                except Exception:
+                    from pineboolib.core.error_manager import error_manager
+                    import traceback
+
+                    pncontrolsfactory.aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
+                if v and not isinstance(v, bool) or v is False:
+                    return False
 
         pKN = self.metadata().primaryKey()
         updated = False
@@ -3143,7 +3149,14 @@ class PNSqlCursor(QtCore.QObject):
             if functionAfter:
                 fn = getattr(module_script.iface, functionAfter, None)
                 if fn is not None:
-                    v = fn(self)
+                    v = None
+                    try:
+                        v = fn(self)
+                    except Exception:
+                        from pineboolib.core.error_manager import error_manager
+                        import traceback
+
+                        pncontrolsfactory.aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
                     if v and not isinstance(v, bool) or v is False:
                         return False
 
