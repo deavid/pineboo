@@ -3026,15 +3026,16 @@ class PNSqlCursor(QtCore.QObject):
             if functionBefore:
                 fn = getattr(module_script.iface, functionBefore, None)
                 v = None
-                try:
-                    v = fn(self)
-                except Exception:
-                    from pineboolib.core.error_manager import error_manager
-                    import traceback
+                if fn is not None:
+                    try:
+                        v = fn(self)
+                    except Exception:
+                        from pineboolib.core.error_manager import error_manager
+                        import traceback
 
-                    pncontrolsfactory.aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
-                if v and not isinstance(v, bool) or v is False:
-                    return False
+                        pncontrolsfactory.aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
+                    if v and not isinstance(v, bool) or v is False:
+                        return False
 
         pKN = self.metadata().primaryKey()
         updated = False
