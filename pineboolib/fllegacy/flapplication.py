@@ -993,7 +993,7 @@ class FLApplication(QtCore.QObject):
 
         time = QtCore.QTimer()
         time.singleShot(0, self.reinitP)
-        from pineboolib.pnobjectsfactory import empty_base
+        from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import empty_base
 
         empty_base()
 
