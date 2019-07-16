@@ -383,7 +383,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         if self.topWidget is not None:
             if not self.topWidget.cursor():
-                print("FLTableDB : Uno de los padres o antecesores de FLTableDB deber ser de la clase FLFormDB o heredar de ella")
+                logger.warning("FLTableDB : Uno de los padres o antecesores de FLTableDB deber ser de la clase FLFormDB o heredar de ella")
                 return
 
             self.cursor_ = self.topWidget.cursor()
@@ -407,7 +407,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.showWidget()
 
         if DEBUG:
-            print("**FLTableDB::name: %r cursor: %r" % (self.objectName(), self.cursor().d.nameCursor_))
+            logger.warning("**FLTableDB::name: %r cursor: %r", self.objectName(), self.cursor().d.nameCursor_)
 
     def loaded(self) -> bool:
         return self._loaded
@@ -2380,7 +2380,6 @@ class FLTableDB(QtWidgets.QWidget):
                                     row.coveredCell()
 
                             else:
-                                print("Pixmap inválido", val)
                                 row.coveredCell()
                         else:
                             row.coveredCell()
