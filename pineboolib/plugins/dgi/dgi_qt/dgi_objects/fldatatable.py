@@ -628,16 +628,16 @@ class FLDataTable(QtWidgets.QTableView):
 
     def focusInEvent(self, e) -> None:
         obj = self
-        refresh = True
+        # refresh = True
         while obj.parent():
             if getattr(obj, "inExec_", False):
-                refresh = False
+                # refresh = False
                 break
             else:
                 obj = obj.parent()
 
-        if refresh:
-            self.refresh()
+        # if refresh:
+        #    self.refresh()
         super().focusInEvent(e)
 
     """
