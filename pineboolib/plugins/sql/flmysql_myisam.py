@@ -238,12 +238,9 @@ class FLMYSQL_MYISAM(object):
                 s = "'%s'" % v
 
         elif type_ == "pixmap":
-            if v is None:
-                s = v
-            else:
-                if v.find("'") > -1:
-                    s = self.normalizeValue(v)
-                s = "'%s'" % s
+            if v.find("'") > -1:
+                v = self.normalizeValue(v)
+            s = "'%s'" % v
 
         else:
             s = v

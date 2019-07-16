@@ -243,12 +243,10 @@ class FLMYSQL_MYISAM2(object):
                 s = "'%s'" % v
 
         elif type_ == "pixmap":
-            if v is None:
-                s = v
-            else:
-                if v.find("'") > -1:
-                    s = self.normalizeValue(s)
-                s = "'%s'" % s
+            if v.find("'") > -1:
+                v = self.normalizeValue(v)
+            s = "'%s'" % v
+
         else:
             s = v
         # print ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))

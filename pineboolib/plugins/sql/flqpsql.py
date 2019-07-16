@@ -260,12 +260,9 @@ class FLQPSQL(object):
                 s = "'%s'" % v
 
         elif type_ == "pixmap":
-            if s is None:
-                s = v
-
-            if s.find("'") > -1:
-                s = self.normalizeValue(s)
-            s = "'%s'" % s
+            if v.find("'") > -1:
+                v = self.normalizeValue(v)
+            s = "'%s'" % v
 
         else:
             s = v
