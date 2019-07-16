@@ -7,7 +7,7 @@ from PyQt5.QtXml import QDomDocument  # type: ignore
 from pineboolib.fllegacy.aqsobjects.aqs import AQS
 from pineboolib import pncontrolsfactory
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQUtil, AQSettings
-from pineboolib.fllegacy.flapplication import aqApp
+from pineboolib.pncontrolsfactory import aqApp
 from pineboolib import logging
 from typing import Any
 
@@ -36,7 +36,6 @@ class MainForm(QtWidgets.QMainWindow):
 
         super(MainForm, self).__init__()
 
-        self.ui_ = None
         self.qsa_sys = pncontrolsfactory.SysType()
 
         aqApp.main_widget_ = self
@@ -453,11 +452,6 @@ class MainForm(QtWidgets.QMainWindow):
         self.dck_mod_.update(self.ag_menu_)
         self.dck_rec_.update(self.ag_rec_)
         self.dck_mar_.update(self.ag_mar_)
-        try:
-            self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.disconnect(aqApp.aboutQt)
-            self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.disconnect(aqApp.aboutPineboo)
-        except Exception:
-            logger.exception("Unexpected exception on updateMenuAndDocks")
         self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.connect(aqApp.aboutQt)
         self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.connect(aqApp.aboutPineboo)
         self.w_.findChild(QtWidgets.QAction, "fontAction").triggered.connect(aqApp.chooseFont)
@@ -787,7 +781,7 @@ class MainForm(QtWidgets.QMainWindow):
         from pineboolib.core.utils.utils_base import filedir
 
         mw = mainWindow
-        mw.createUi(filedir("plugins/mainform/mobile/mainform.ui"))
+        mw.createUi(filedir("plugins/mainform/eneboo/mainform.ui"))
 
         mw.init()
 
@@ -807,6 +801,8 @@ class MainForm(QtWidgets.QMainWindow):
         # mw.initFormWidget(main_wid)
         mw.writeState()
         mw.removeAllPages()
+        mw.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.disconnect(aqApp.aboutQt)
+        mw.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.disconnect(aqApp.aboutPineboo)
         mw.updateMenuAndDocks()
         mw.initModule("sys")
         mw.readState()
@@ -970,14 +966,21 @@ class DockListView(QtCore.QObject):
         height = settings.readNumEntry("%sheight" % key, self.w_.height())
         self.lw_.resize(width, height)
         # self.w_.resize(width, height)
-        visible = settings.readBoolEntry("%svisible" % key, True)
-        if visible:
-            self.w_.show()
+        from pineboolib.application import project
 
+        if not project._DGI.mobilePlatform():
+            visible = settings.readBoolEntry("%svisible" % key, True)
+            if visible:
+                self.w_.show()
+
+            else:
+                self.w_.hide()
+
+            self.set_visible.emit(not self.w_.isHidden())
         else:
             self.w_.hide()
-
-        self.set_visible.emit(not self.w_.isHidden())
+            self.set_visible.emit(False)
+            self.w_.close()
 
     def initFromWidget(self, w) -> None:
         self.w_ = w

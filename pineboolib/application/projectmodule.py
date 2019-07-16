@@ -93,12 +93,7 @@ class Project(object):
         if config.value("ebcomportamiento/mdi_mode"):
             self.main_form_name = "eneboo_mdi"  # FIXME: Belongs to loader.main .. or dgi-qt5
 
-        if self._DGI.mobilePlatform():
-            self.main_form_name = "mobile"  # FIXME: Belongs to loader.main .. or dgi-qt5
-
-        if not self._DGI.localDesktop():
-            # FIXME: Maybe it is a good idea to call this regardless of localDesktop
-            self._DGI.extraProjectInit()
+        self._DGI.extraProjectInit()
 
     def load_modules(self) -> None:
         for module_name, mod_obj in self.modules.items():
