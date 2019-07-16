@@ -2992,6 +2992,7 @@ class PNSqlCursor(QtCore.QObject):
         functionBefore = None
         functionAfter = None
         model_module: Any = None
+        module_script = None
 
         idMod = self.db().managerModules().idModuleOfFile("%s.mtd" % self.metadata().name())
 
@@ -3004,12 +3005,13 @@ class PNSqlCursor(QtCore.QObject):
 
         if not self.modeAccess() == PNSqlCursor.Browse and self.activatedCommitActions():
 
-            if idMod:
-                functionBefore = "%s.iface.beforeCommit_%s" % (idMod, self.metadata().name())
-                functionAfter = "%s.iface.afterCommit_%s" % (idMod, self.metadata().name())
+            if idMod in project.actions.keys():
+                module_script = project.actions[idMod].load()
             else:
-                functionBefore = "sys.iface.beforeCommit_%s" % self.metadata().name()
-                functionAfter = "sys.iface.afterCommit_%s" % self.metadata().name()
+                module_script = project.actions["sys"].load()
+
+            functionBefore = "beforeCommit_%s" % (self.metadata().name())
+            functionAfter = "afterCommit_%s" % (self.metadata().name())
 
             if model_module is not None:
                 function_model_before = getattr(model_module.iface, "beforeCommit_%s" % self.metadata().name(), None)
@@ -3019,9 +3021,11 @@ class PNSqlCursor(QtCore.QObject):
                         return ret
 
             if functionBefore:
-                v = project.call(functionBefore, [self], None, False)
-                if v and not isinstance(v, bool) or v is False:
-                    return False
+                fn = getattr(module_script.iface, functionBefore, None)
+                if fn is not None:
+                    v = fn(self)
+                    if v and not isinstance(v, bool) or v is False:
+                        return False
 
         pKN = self.metadata().primaryKey()
         updated = False
@@ -3134,9 +3138,11 @@ class PNSqlCursor(QtCore.QObject):
                         return ret
 
             if functionAfter:
-                v = project.call(functionAfter, [self], None, False)
-                if v and not isinstance(v, bool) or v is False:
-                    return False
+                fn = getattr(module_script.iface, functionAfter, None)
+                if fn is not None:
+                    v = fn(self)
+                    if v and not isinstance(v, bool) or v is False:
+                        return False
 
         if self.modeAccess() in (self.Del, self.Edit):
             self.setModeAccess(self.Browse)
