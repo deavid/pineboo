@@ -607,7 +607,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         if self._initialized is None and self.parent_view:  # Si es el primer refresh y estoy conectado a un FLDatatable()
             self._initialized = True
             timer = QtCore.QTimer()
-            timer.singleShot(50, self.refresh)
+            timer.singleShot(5, self.refresh)
             return
 
         if self._initialized:  # Si estoy inicializando y no me ha enviado un sender, cancelo el refesh
