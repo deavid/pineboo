@@ -58,9 +58,9 @@ class PNTableMetaData(ITableMetaData):
 
     def inicializeFLTableMetaDataP(self, name) -> None:
         self.d = PNTableMetaDataPrivate(name)
-        from pineboolib.application.database.pncompounkey import PNCompoundKey
+        from .pncompoundkeymetadata import PNCompoundKeyMetaData
 
-        self.d.compoundKey_ = PNCompoundKey()
+        self.d.compoundKey_ = PNCompoundKeyMetaData()
         self.d.fieldNames_ = []
 
         """
