@@ -1494,7 +1494,7 @@ class FLManager(QtCore.QObject, IManager):
                     return None
         else:
             sql = "INSERT INTO %s (contenido,refkey) VALUES ('%s','%s')" % (tableLarge, largeValue, refKey)
-            if not util.execSql(sql):
+            if not util.execSql(sql, "Aux"):
                 logger.warning("FLManager::ERROR:StoreLargeValue.Insert %s.%s", tableLarge, refKey)
                 return None
 
@@ -1519,7 +1519,7 @@ class FLManager(QtCore.QObject, IManager):
         if not self.existsTable(tableName):
             return None
 
-        q = PNSqlQuery()
+        q = PNSqlQuery(None, "Aux")
         q.setSelect("contenido")
         q.setFrom(tableName)
         q.setWhere(" refkey = '%s'" % refKey)
