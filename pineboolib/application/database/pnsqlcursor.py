@@ -811,9 +811,12 @@ class PNSqlCursor(QtCore.QObject):
     def setValueBuffer(self, fN, v):
         from pineboolib import pncontrolsfactory
 
+        if not self.buffer():
+            return
+
         buffer, metadata = self.buffer(), self.metadata()
-        if not buffer or not fN or not metadata:
-            logger.warning("setValueBuffer(): No buffer, or no fieldName, or no metadata found")
+        if not fN or not metadata:
+            logger.warning("setValueBuffer(): No fieldName, or no metadata found")
             return
 
         field = metadata.field(fN)
