@@ -62,9 +62,9 @@ function anon(%s) {
     )
 
     # print("Compilando QS en línea: ", qs_source)
-    from pineboolib.flparser import flscriptparse
-    from pineboolib.flparser import postparse
-    from pineboolib.flparser.pytnyzer import write_python_file
+    from .parsers.qsaparser import flscriptparse
+    from .parsers.qsaparser import postparse
+    from .parsers.qsaparser.pytnyzer import write_python_file
 
     from . import project
 
