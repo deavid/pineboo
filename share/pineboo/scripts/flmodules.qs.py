@@ -101,7 +101,7 @@ class FormInternalObj(FormDBWidget):
         log = self.child(u"log")
         i = 0
         from pineboolib.fllegacy.flsettings import FLSettings
-        from pineboolib.flparser import postparse
+        from pineboolib.application.parsers.qsaparser import postparse
 
         settings = FLSettings()
         while_pass = True
