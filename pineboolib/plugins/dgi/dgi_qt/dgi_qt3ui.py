@@ -143,6 +143,11 @@ def loadUi(form_path: str, widget, parent=None) -> None:
             receiver = getattr(qsa, receiv_name, None)
 
         if receiver is None:
+            if receiv_name == "FLWidgetApplication":
+                if sender_name in project.actions.keys():
+                    receiver = project.actions[sender_name]
+
+        if receiver is None:
             logger.warning("Connection receiver not found:%s", receiv_name)
         if sender is None or receiver is None:
             continue
