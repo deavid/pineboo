@@ -244,7 +244,7 @@ def exec_main(options: Values) -> int:
     if not config.value("ebcomportamiento/orm_parser_disabled", False):
         from pineboolib.application.parsers.mtdparser.pnmtdparser import mtd_parse
 
-        for table in project.conn.tables():
+        for table in project.conn.tables("Tables"):
             mtd_parse(table)
 
     aqApp.loadTranslations()
