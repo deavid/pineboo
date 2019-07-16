@@ -146,6 +146,9 @@ def loadUi(form_path: str, widget, parent=None) -> None:
             if receiv_name == "FLWidgetApplication":
                 if sender_name in project.actions.keys():
                     receiver = project.actions[sender_name]
+                else:
+                    logger.warning("Sender action %s not found.Connection skiped", sender_name)
+                    continue
 
         if receiver is None:
             logger.warning("Connection receiver not found:%s", receiv_name)
