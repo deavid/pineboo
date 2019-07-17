@@ -218,7 +218,7 @@ class FLFormSearchDB(FLFormDB):
         if self.iface:
             try:
                 timer1 = QtCore.QTimer(self)
-                timer1.singleShot(300, self.iface.init)
+                timer1.singleShot(50, self.iface.init)
             except Exception:
                 pass
 
