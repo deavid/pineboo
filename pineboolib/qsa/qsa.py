@@ -43,6 +43,7 @@ def parseFloat(x):
     @param x. valor a convertir
     @return Valor tipo float, o parametro x , si no es convertible
     """
+    orig_ = x
     ret = 0.00
     try:
         if isinstance(x, str) and x.find(":") > -1:
@@ -58,6 +59,11 @@ def parseFloat(x):
             except Exception:
                 x = x.replace(".", "")
                 x = x.replace(",", ".")
+                try:
+                    ret = float(x)
+                except:
+                    return orig_
+
         else:
             ret = 0 if x in (None, "") else float(x)
 
