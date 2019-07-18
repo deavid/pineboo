@@ -357,6 +357,8 @@ class KParserTools(object):
         val = 0.0
         for l in xml_list:
             lev_ = int(l.get("level"))
+            if lev_ == 0:
+                val = 0.0
             if lev_ > level:
                 val += float(l.get(field_name))
             if l is line:
