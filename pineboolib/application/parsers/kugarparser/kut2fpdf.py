@@ -725,9 +725,11 @@ class Kut2FPDF(object):
                 if tl[0] == " " and tl[1] != " ":
                     tl = tl[1:]
             str_width = self._document.get_string_width(tl)
-            if str_width > W + 2 and xml.tag != "Label" and resizeable:  # Una linea es mas larga que el ancho del campo(Dejando 2 de juego)
+            if (
+                str_width > W - 10 and xml.tag != "Label" and resizeable
+            ):  # Una linea es mas larga que el ancho del campo(Le quito 10 al ancho maximo para que corte parecido a kugar original)
                 # height_resized = True
-                array_text = self.split_text(tl, W)
+                array_text = self.split_text(tl, W - 10)
             else:
 
                 array_text.append(tl)
@@ -816,7 +818,6 @@ class Kut2FPDF(object):
             linea_ += "%s " % t
 
         list_.append(linea_)
-
         return list_
 
     """
