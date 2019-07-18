@@ -356,10 +356,9 @@ class KParserTools(object):
     def calculate_sum(self, field_name, line, xml_list: Iterable, level: Union[bytes, str, SupportsInt]) -> float:
         val = 0.0
         for l in xml_list:
-            if int(l.get("level")) <= int(level):
-                val = 0.0
-                continue
-            val += float(l.get(field_name))
+            lev_ = int(l.get("level"))
+            if lev_ > level:
+                val += float(l.get(field_name))
             if l is line:
                 break
 
