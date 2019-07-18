@@ -177,11 +177,10 @@ class Array(object):
         @param key. Nombre del registro
         @param value. Valor del registro
         """
-        field_key = key
-        while field_key in self.dict_.keys():
-            field_key = "%s_bis" % field_key
-
-        self.dict_[field_key] = value
+        # field_key = key
+        # while field_key in self.dict_.keys():
+        #    field_key = "%s_bis" % field_key
+        self.dict_[key] = value
 
     def __getitem__(self, key):
         """
