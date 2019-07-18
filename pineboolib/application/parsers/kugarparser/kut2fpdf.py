@@ -301,7 +301,7 @@ class Kut2FPDF(object):
             if dF.get("Level") == str(data_level) and show not in ("None", "False"):
 
                 if section_name in ("DetailHeader", "Detail"):
-                    heightCalculated = self._parser_tools.getHeight(dF) + self.topSection()
+                    heightCalculated = self._parser_tools.getHeight(dF) + self.topSection() + self.increase_section_size
 
                     if section_name == "DetailHeader":
                         for detail in self._xml.findall("Detail"):
