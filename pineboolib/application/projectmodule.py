@@ -208,7 +208,6 @@ class Project(object):
         if not os.path.exists(_dir("cache")):
             raise AssertionError
         p = 0
-        pos_qs = 1
         from pineboolib.application.file import File
 
         for idmodulo, nombre, sha in cursor_:
@@ -249,7 +248,6 @@ class Project(object):
                 self.conn.driver().formatValue("string", sha, False),
             )
             cur2.execute(sql)
-            # qs_count = 0
             for (contenido,) in cur2:
 
                 encode_ = "ISO-8859-15"
@@ -271,12 +269,10 @@ class Project(object):
                     f2.close()
 
             if self.parseProject and nombre.endswith(".qs") and settings.value("application/isDebuggerMode", False):
-                self.message_manager().send("splash", "showMessage", ["Convirtiendo %s ( %d/ ??) ..." % (nombre, pos_qs)])
+                self.message_manager().send("splash", "showMessage", ["Convirtiendo %s ( %d/ %d) ..." % (nombre, p, size_)])
                 if os.path.exists(file_name):
 
                     self.parseScript(file_name, "(%d de %d)" % (p, size_))
-
-                pos_qs += 1
 
         tiempo_fin = time.time()
         self.logger.info("Descarga del proyecto completo a disco duro: %.3fs", (tiempo_fin - tiempo_ini))
