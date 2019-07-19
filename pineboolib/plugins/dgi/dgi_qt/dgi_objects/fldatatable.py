@@ -28,6 +28,7 @@ class FLDataTable(QtWidgets.QTableView):
     _parent = None
     filter_ = None
     sort_ = None
+    fltable_iface = None
 
     """
     Numero de la fila (registro) seleccionada actualmente
@@ -140,7 +141,7 @@ class FLDataTable(QtWidgets.QTableView):
         self.setAlternatingRowColors(True)
         self.setSortingEnabled(True)
         self.sortByColumn(0, QtCore.Qt.AscendingOrder)
-
+        self.fltable_iface = None
         self.popup_ = popup
 
     """
