@@ -36,6 +36,7 @@ def mtd_parse(table_name: str) -> None:
         sys_dir = dest_file[: dest_file.find("/file.mtd")]
         if not os.path.exists(sys_dir):
             os.mkdir(sys_dir)
+        if not os.path.exists("%s/file.mtd" % sys_dir):
             os.mkdir("%s/file.mtd" % sys_dir)
 
     if not os.path.exists(dest_file):
