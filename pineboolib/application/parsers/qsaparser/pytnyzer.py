@@ -1496,7 +1496,7 @@ class Member(ASTPython):
 
                     elif member == "join":
                         value = arg[5:]
-                        value = value[: len(value) - 1]
+                        value = value[: len(value) - 1] or '""'
                         arguments = ["%s.join(%s)" % (value, ".".join(part1))] + part2
                     elif member == "match":
                         value = arg[6:]
