@@ -76,8 +76,7 @@ def parse_options() -> Values:
 
     logging.basicConfig(format=log_format, level=options.loglevel)
     # logger.debug("LOG LEVEL: %s  DEBUG LEVEL: %s", options.loglevel, options.debug_level)
-
-    disable_loggers = ["PyQt5.uic.uiparser", "PyQt5.uic.properties"]
+    disable_loggers = ["PyQt5.uic.uiparser", "PyQt5.uic.properties", "blib2to3.pgen2.driver"]
     for loggername in disable_loggers:
         modlogger = logging.getLogger(loggername)
         modlogger.setLevel(logging.WARN)

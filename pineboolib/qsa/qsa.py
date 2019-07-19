@@ -37,6 +37,30 @@ LogText = 0
 RichText = 1
 
 
+# from: http://code.activestate.com/recipes/410692/
+# This class provides the functionality we want. You only need to look at
+# this if you want to know how this works. It only needs to be defined
+# once, no need to muck around with its internals.
+class switch(object):
+    def __init__(self, value):
+        self.value = value
+        self.fall = False
+
+    def __iter__(self):
+        """Return the match method once, then stop"""
+        yield self.match
+
+    def match(self, *args):
+        """Indicate whether or not to enter a case suite"""
+        if self.fall or not args:
+            return True
+        elif self.value in args:
+            self.fall = True
+            return True
+        else:
+            return False
+
+
 def parseFloat(x):
     """
     Convierte a float un valor dado
@@ -61,7 +85,7 @@ def parseFloat(x):
                 x = x.replace(",", ".")
                 try:
                     ret = float(x)
-                except:
+                except Exception:
                     return orig_
 
         else:
@@ -121,7 +145,7 @@ def isNaN(x):
         return True
 
 
-def qsa_length(obj):
+def length(obj):
     """
     Parser para recoger el length de un campo
     @param obj, objeto a obtener longitud
@@ -140,7 +164,7 @@ def qsa_length(obj):
             return len(obj)
 
 
-def qsa_text(obj):
+def text(obj):
     """
     Parser para recoger valor text de un objeto dado
     @param obj. Objeto a procesar
@@ -517,6 +541,16 @@ def debug(txt):
     from pineboolib.application import project
 
     project.message_manager().send("debug", None, [ustr(txt)])
+
+
+def from_project(scriptname):
+    """
+    Devuelve el objeto de proyecto que coincide con el nombre dado
+    """
+    from pineboolib import qsa as qsa_dict_modules
+
+    # FIXME: Esto debería estar guardado en Project.
+    return getattr(qsa_dict_modules, scriptname, None)
 
 
 # Usadas solo por import *

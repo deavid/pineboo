@@ -595,8 +595,9 @@ def parseArgs(argv):
 
 def main():
     log_format = "%(asctime)s - %(levelname)s: %(name)s: %(message)s"
-
     logging.basicConfig(format=log_format, level=0)
+    blib_logger = logging.getLogger("blib2to3.pgen2.driver")
+    blib_logger.setLevel(logging.WARNING)
 
     options, args = parseArgs(sys.argv[1:])
     execute(options, args)
