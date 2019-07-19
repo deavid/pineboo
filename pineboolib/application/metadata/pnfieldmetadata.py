@@ -328,7 +328,7 @@ class PNFieldMetaData(IFieldMetaData):
         if r.cardinality() == PNRelationMetaData.RELATION_M1:
             isRelM1 = True
         if isRelM1 and self.d.relationM1_:
-            print("FLFieldMetaData: Se ha intentado crear más de una relación muchos a uno para el mismo campo")
+            logger.warning("FLFieldMetaData: Se ha intentado crear más de una relación muchos a uno para el mismo campo")
             return
 
         r.setField(self.d.fieldName_)
