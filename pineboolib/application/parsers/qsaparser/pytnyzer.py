@@ -6,7 +6,7 @@ import os
 import os.path
 import re
 from xml.etree import ElementTree
-from typing import Any, Generator, Optional, Tuple, Type, List, Dict
+from typing import Any, Generator, Optional, Tuple, Type, List, Dict, Set
 from pathlib import Path
 
 try:
@@ -218,7 +218,8 @@ QSA_KNOWN_ATTRS = [
 ]
 
 
-def id_translate(name) -> Any:
+def id_translate(name: str, qsa_exclude: set = None) -> str:
+    orig_name = name
     python_keywords = [
         "and",
         "del",
@@ -256,20 +257,18 @@ def id_translate(name) -> Any:
         raise ValueError("Parenthesis not allowed in ID for translation")
     if "." in name:
         raise ValueError("Dot not allowed in ID for translation")
-    if name in python_keywords:
-        return name + "_"
     if name == "false":
-        name = "False"
+        return "False"
     if name == "true":
-        name = "True"
+        return "True"
     if name == "null":
-        name = "None"
+        return "None"
     if name == "unknown":
-        name = "None"
+        return "None"
     if name == "undefined":
-        name = "None"
+        return "None"
     if name == "this":
-        name = "self"
+        return "self"
 
     if name == "startsWith":
         name = "startswith"
@@ -289,9 +288,18 @@ def id_translate(name) -> Any:
         name = "upper"
     # if name == "Process":
     #    name = "qsatype.Process"
-    if name in QSA_KNOWN_ATTRS:
-        return "qsa.%s" % name
-    return name
+    if name in python_keywords:
+        name = name + "_"
+
+    if qsa_exclude is not None:
+        if orig_name in qsa_exclude:
+            return name
+        if name in QSA_KNOWN_ATTRS:
+            return "qsa.%s" % name
+
+        return "__undef__" + name
+    else:
+        return name
 
 
 cont_switch = 0
@@ -303,16 +311,25 @@ class ASTPythonBase(object):
 
     def __init__(self, elem) -> None:
         self.elem = elem
+        self.parent: "ASTPythonBase" = None
+        self.source: "Source" = None
 
     @classmethod
     def can_process_tag(self, tagname) -> Any:
         return False
 
-    def polish(self) -> "ASTPythonBase":
-        return self
-
     def generate(self, break_mode=False, include_pass=True, **kwargs) -> Generator[Tuple[str, str], None, None]:
         yield "type", "value"
+
+    def local_var(self, name: str, is_member=False) -> str:
+        if is_member:
+            locals = None
+        else:
+            locals = self.source.locals if self.source else set()
+        return id_translate(name, qsa_exclude=locals)
+
+    def other_var(self, name: str) -> str:
+        return id_translate(name, qsa_exclude=None)
 
 
 class ASTPythonFactory(type):
@@ -334,6 +351,8 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
     numline = 0
     DEBUGFILE_LEVEL = 10
     _last_retlen = 0
+    source: "Source"
+    parent: "ASTPythonBase"
 
     @classmethod
     def can_process_tag(self, tagname) -> Any:
@@ -383,6 +402,12 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
 
 
 class Source(ASTPython):
+    locals: Set[str]
+
+    def __init__(self, elem) -> None:
+        super().__init__(elem)
+        self.locals = set()
+
     def generate(self, break_mode=False, include_pass=True, **kwargs):
         elems = 0
         after_lines = []
@@ -390,7 +415,7 @@ class Source(ASTPython):
         for child in self.elem:
             # yield "debug", "<%s %s>" % (child.tag, repr(child.attrib))
             child.set("parent_", self.elem)
-            ast_python = parse_ast(child)
+            ast_python = parse_ast(child, parent=self)
             ast_type = ast_python.__class__.__name__
             # print(ast_type)
             if ast_type == "Function" and prev_ast_type != ast_type:
@@ -428,6 +453,7 @@ class Class(ASTPython):
     def generate(self, **kwargs):
         name = self.elem.get("name")
         extends = self.elem.get("extends", "object")
+        self.source.locals.add(name)
 
         yield "line", "# /** @class_declaration %s */" % name
         yield "line", "class %s(%s):" % (name, extends)
@@ -435,7 +461,7 @@ class Class(ASTPython):
         for source in self.elem.findall("Source"):
             source.set("parent_", self.elem)
             classesDefined.clear()
-            ast_python = parse_ast(source)
+            ast_python = parse_ast(source, parent=self)
             for obj in ast_python.generate():
                 yield obj
         yield "end", "block-class-%s" % (name)
@@ -445,7 +471,7 @@ class Function(ASTPython):
     def generate(self, **kwargs):
         _name = self.elem.get("name")
         if _name:
-            name = id_translate(_name)
+            name = self.other_var(_name)
         else:
             # Anonima:
             name = "_"
@@ -476,9 +502,9 @@ class Function(ASTPython):
         for n, arg in enumerate(self.elem.findall("Arguments/*")):
             expr = []
             arg.set("parent_", self.elem)
-            for dtype, data in parse_ast(arg).generate():
+            for dtype, data in parse_ast(arg, parent=self).generate():
                 if dtype == "expr":
-                    expr.append(id_translate(data))
+                    expr.append(self.local_var(data))
                 else:
                     yield dtype, data
             if len(expr) == 0:
@@ -495,7 +521,7 @@ class Function(ASTPython):
         # if returns:  yield "debug", "Returns: %s" % returns
         for source in self.elem.findall("Source"):
             source.set("parent_", self.elem)
-            for obj in parse_ast(source).generate():
+            for obj in parse_ast(source, parent=self).generate():
                 yield obj
         yield "end", "block-def-%s" % (name)
 
@@ -505,15 +531,15 @@ class FunctionAnon(Function):
 
 
 class FunctionCall(ASTPython):
-    def generate(self, **kwargs):
-        name = id_translate(self.elem.get("name"))
+    def generate(self, is_member=False, **kwargs):
+        name = self.local_var(self.elem.get("name"), is_member=is_member)
         parent = self.elem.get("parent_")
         # data_ = None
         if name == "":
             arg = self.elem[0]
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 # data_ = data
                 if dtype == "expr":
                     expr.append(data)
@@ -553,7 +579,7 @@ class FunctionCall(ASTPython):
         for n, arg in enumerate(self.elem.findall("CallArguments/*")):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 # data_ = data
                 if dtype == "expr":
                     expr.append(data)
@@ -582,7 +608,7 @@ class If(ASTPython):
         for n, arg in enumerate(self.elem.findall("Condition/*")):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 if dtype == "line+1":
                     yield "debug", "Inline update inside IF condition not allowed. Unexpected behavior."
                     dtype = "line"
@@ -601,7 +627,7 @@ class If(ASTPython):
         for source in self.elem.findall("Source"):
             source.set("parent_", self.elem)
             yield "begin", "block-if"
-            for obj in parse_ast(source).generate(break_mode=break_mode):
+            for obj in parse_ast(source, parent=self).generate(break_mode=break_mode):
                 yield obj
             yield "end", "block-if"
 
@@ -609,7 +635,7 @@ class If(ASTPython):
             source.set("parent_", self.elem)
             yield "line", "else:"
             yield "begin", "block-else"
-            for obj in parse_ast(source).generate(break_mode=break_mode):
+            for obj in parse_ast(source, parent=self).generate(break_mode=break_mode):
                 yield obj
             yield "end", "block-else"
 
@@ -622,7 +648,7 @@ class TryCatch(ASTPython):
         catchblock.set("parent_", self.elem)
         yield "line", "try:"
         yield "begin", "block-try"
-        for obj in parse_ast(tryblock).generate():
+        for obj in parse_ast(tryblock, parent=self).generate():
             yield obj
         yield "end", "block-try"
 
@@ -630,7 +656,7 @@ class TryCatch(ASTPython):
         for ident in self.elem.findall("Identifier"):
             ident.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(ident).generate(isolate=False):
+            for dtype, data in parse_ast(ident, parent=self).generate(isolate=False):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -644,7 +670,7 @@ class TryCatch(ASTPython):
         if identifier:
             # yield "line", "%s = str(%s)" % (identifier, identifier)
             yield "line", "%s = traceback.format_exc()" % (identifier)
-        for obj in parse_ast(catchblock).generate(include_pass=identifier is None):
+        for obj in parse_ast(catchblock, parent=self).generate(include_pass=identifier is None):
             yield obj
         yield "end", "block-except"
 
@@ -655,7 +681,7 @@ class While(ASTPython):
         for n, arg in enumerate(self.elem.findall("Condition/*")):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -671,7 +697,7 @@ class While(ASTPython):
         for source in self.elem.findall("Source"):
             source.set("parent_", self.elem)
             yield "begin", "block-while"
-            for obj in parse_ast(source).generate():
+            for obj in parse_ast(source, parent=self).generate():
                 yield obj
             yield "end", "block-while"
 
@@ -682,7 +708,7 @@ class DoWhile(ASTPython):
         for n, arg in enumerate(self.elem.findall("Condition/*")):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -705,7 +731,7 @@ class DoWhile(ASTPython):
             source.set("parent_", self.elem)
             yield "begin", "block-while"
             yield "line", "%s = False" % (name1st)
-            for obj in parse_ast(source).generate():
+            for obj in parse_ast(source, parent=self).generate():
                 yield obj
             yield "end", "block-while"
 
@@ -716,7 +742,7 @@ class For(ASTPython):
         for n, arg in enumerate(self.elem.findall("ForInitialize/*")):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -734,7 +760,7 @@ class For(ASTPython):
         for n, arg in enumerate(self.elem.findall("ForIncrement/*")):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 if dtype == "expr":
                     expr.append(data)
                 elif dtype in ["line", "line+1"]:
@@ -748,7 +774,7 @@ class For(ASTPython):
         for n, arg in enumerate(self.elem.findall("ForCompare/*")):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -772,7 +798,7 @@ class For(ASTPython):
 
         for source in self.elem.findall("Source"):
             source.set("parent_", self.elem)
-            for obj in parse_ast(source).generate(include_pass=False):
+            for obj in parse_ast(source, parent=self).generate(include_pass=False):
                 yield obj
             if incr_lines:
                 for line in incr_lines:
@@ -801,7 +827,7 @@ class ForIn(ASTPython):
             if e.tag == "ForInitialize":
                 e = list(e)[0]
             expr = []
-            for dtype, data in parse_ast(e).generate(isolate=False):
+            for dtype, data in parse_ast(e, parent=self).generate(isolate=False):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -812,7 +838,7 @@ class ForIn(ASTPython):
         yield "line", "for %s in %s:" % (list_elem, main_list)
         for source in self.elem.findall("Source"):
             yield "begin", "block-for-in"
-            for obj in parse_ast(source).generate(include_pass=False):
+            for obj in parse_ast(source, parent=self).generate(include_pass=False):
                 yield obj
             yield "end", "block-for-in"
 
@@ -829,7 +855,7 @@ class Switch(ASTPython):
         for n, arg in enumerate(self.elem.findall("Condition/*")):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -848,7 +874,7 @@ class Switch(ASTPython):
             for n, arg in enumerate(scase.findall("Value")):
                 arg.set("parent_", self.elem)
                 expr = []
-                for dtype, data in parse_ast(arg).generate(isolate=False):
+                for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                     if dtype == "expr":
                         expr.append(data)
                     else:
@@ -869,7 +895,7 @@ class Switch(ASTPython):
             count = 0
             for source in scase.findall("Source"):
                 source.set("parent_", self.elem)
-                for obj in parse_ast(source).generate(break_mode=True):
+                for obj in parse_ast(source, parent=self).generate(break_mode=True):
                     if obj[0] == "break":
                         yield "line", "%s = %s  # BREAK" % (name_pr, "False")
                         count += 1
@@ -890,7 +916,7 @@ class Switch(ASTPython):
             yield "begin", "block-if"
             for source in scasedefault.findall("Source"):
                 source.set("parent_", self.elem)
-                for obj in parse_ast(source).generate(break_mode=True):
+                for obj in parse_ast(source, parent=self).generate(break_mode=True):
                     if obj[0] == "break":
                         yield "line", "%s = %s  # BREAK" % (name_pr, "False")
                     else:
@@ -933,7 +959,7 @@ class With(ASTPython):
         # yield "debug", "WITH: %s" % key
         variable, source = [obj for obj in self.elem]
         var_expr = []
-        for dtype, data in parse_ast(variable).generate(isolate=False):
+        for dtype, data in parse_ast(variable, parent=self).generate(isolate=False):
             if dtype == "expr":
                 var_expr.append(data)
             else:
@@ -944,7 +970,7 @@ class With(ASTPython):
 
         # yield "line", "%s = %s #WITH" % (name, " ".join(var_expr))
         yield "line", " #WITH_START"
-        for obj in parse_ast(source).generate(break_mode=True):
+        for obj in parse_ast(source, parent=self).generate(break_mode=True):
             obj_ = None
 
             # para sustituir los this sueltos por var_expr
@@ -975,7 +1001,8 @@ class Variable(ASTPython):
     def generate(self, force_value=False, **kwargs):
         name = self.elem.get("name")
         # if name.startswith("colorFun"): print(name)
-        yield "expr", id_translate(name)
+        self.source.locals.add(name)
+        yield "expr", self.local_var(name)
         values = 0
         # for value in self.elem.findall("Value|Expression"):
         for value in self.elem:
@@ -985,7 +1012,7 @@ class Variable(ASTPython):
             values += 1
             yield "expr", "="
             expr = 0
-            for dtype, data in parse_ast(value).generate(isolate=False):
+            for dtype, data in parse_ast(value, parent=self).generate(isolate=False):
 
                 # if self.elem.get("type",None) == "Array" and data == "[]":
                 if data == "[]":
@@ -1019,7 +1046,7 @@ class Variable(ASTPython):
                 if dtype in ("FLSqlCursor", "FLTableDB"):
                     yield "expr", "None"
                 else:
-                    yield "expr", "%s()" % id_translate(dtype)
+                    yield "expr", "%s()" % self.local_var(dtype)
 
         # if dtype and force_value == False: yield "debug", "Variable %s:%s" % (name,dtype)
 
@@ -1030,7 +1057,7 @@ class InstructionUpdate(ASTPython):
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 if dtype == "expr":
                     if data is None:
                         raise ValueError(ElementTree.tostring(arg))
@@ -1055,7 +1082,7 @@ class InlineUpdate(ASTPython):
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -1088,7 +1115,7 @@ class InstructionCall(ASTPython):
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate():
+            for dtype, data in parse_ast(arg, parent=self).generate():
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -1108,7 +1135,7 @@ class Instruction(ASTPython):
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate():
+            for dtype, data in parse_ast(arg, parent=self).generate():
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -1130,7 +1157,7 @@ class InstructionFlow(ASTPython):
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -1169,7 +1196,7 @@ class Member(ASTPython):
         for n, arg in enumerate(self.elem):
             expr = []
             arg.set("parent_", self.elem)
-            for dtype, data in parse_ast(arg).generate():
+            for dtype, data in parse_ast(arg, parent=self).generate(is_member=n > 0):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -1183,6 +1210,9 @@ class Member(ASTPython):
             arguments.append(txtarg)
             arg_expr.append(expr)
 
+        # Deteccion de llamada a modulo externo
+        if len(arguments) >= 3 and arguments[1] == "iface" and arguments[0] != "self" and arguments[0] not in self.source.locals:
+            arguments[0] = 'qsa.from_project("%s")' % arguments[0].replace("__undef__", "")
         # Lectura del self.iface.__init
         if len(arguments) >= 3 and arguments[0:2] == ["self", "iface"] and arguments[2].startswith("__"):
             # From: self.iface.__function()
@@ -1416,7 +1446,7 @@ class ArrayMember(ASTPython):
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 # if data.find(".") > -1:
                 #    l = data.split(".")
                 #    data = "%s['%s']" % (l[0], l[1])
@@ -1442,7 +1472,7 @@ class Value(ASTPython):
             yield "expr", "("
         for child in self.elem:
             child.set("parent_", self.elem)
-            for dtype, data in parse_ast(child).generate():
+            for dtype, data in parse_ast(child, parent=self).generate():
                 if data is None:
                     raise ValueError(ElementTree.tostring(child))
                 yield dtype, data
@@ -1470,7 +1500,7 @@ class Expression(ASTPython):
                     yield "expr", ","
                     continue
 
-            for dtype, data in parse_ast(child).generate():
+            for dtype, data in parse_ast(child, parent=self).generate():
                 yield dtype, data
 
         if coerce_string_mode:
@@ -1484,7 +1514,7 @@ class Parentheses(ASTPython):
         yield "expr", "("
         for child in self.elem:
             child.set("parent_", self.elem)
-            for dtype, data in parse_ast(child).generate(isolate=False):
+            for dtype, data in parse_ast(child, parent=self).generate(isolate=False):
                 yield dtype, data
         yield "expr", ")"
 
@@ -1494,7 +1524,7 @@ class Delete(ASTPython):
         yield "expr", "del"
         for child in self.elem:
             child.set("parent_", self.elem)
-            for dtype, data in parse_ast(child).generate(isolate=False):
+            for dtype, data in parse_ast(child, parent=self).generate(isolate=False):
                 yield dtype, data
 
 
@@ -1518,13 +1548,13 @@ class OpTernary(ASTPython):
         then_val = self.elem[1]
         else_val = self.elem[2]
         yield "expr", "("  # Por seguridad, unos paréntesis
-        for dtype, data in parse_ast(then_val).generate():
+        for dtype, data in parse_ast(then_val, parent=self).generate():
             yield dtype, data
         yield "expr", "if"
-        for dtype, data in parse_ast(if_cond).generate():
+        for dtype, data in parse_ast(if_cond, parent=self).generate():
             yield dtype, data
         yield "expr", "else"
-        for dtype, data in parse_ast(else_val).generate():
+        for dtype, data in parse_ast(else_val, parent=self).generate():
             yield dtype, data
         yield "expr", ")"  # Por seguridad, unos paréntesis
 
@@ -1536,7 +1566,7 @@ class DictObject(ASTPython):
         for child in self.elem:
             child.set("parent_", self.elem)
             empty = True
-            for dtype, data in parse_ast(child).generate():
+            for dtype, data in parse_ast(child, parent=self).generate():
                 empty = False
                 if key:
                     yield dtype, "'%s'" % data if not data.startswith("'") else "%s" % data
@@ -1555,11 +1585,11 @@ class DictObject(ASTPython):
 class DictElem(ASTPython):
     def generate(self, isolate=False, **kwargs):
         # Clave:
-        for dtype, data in parse_ast(self.elem[0]).generate():
+        for dtype, data in parse_ast(self.elem[0], parent=self).generate():
             yield dtype, data
         yield "expr", ":"
         # Valor:
-        for dtype, data in parse_ast(self.elem[1]).generate():
+        for dtype, data in parse_ast(self.elem[1], parent=self).generate():
             yield dtype, data
 
 
@@ -1580,7 +1610,7 @@ class OpUnary(ASTPython):
             yield "expr", "("
         for child in self.elem:
             child.set("parent_", self.elem)
-            for dtype, data in parse_ast(child).generate():
+            for dtype, data in parse_ast(child, parent=self).generate():
                 yield dtype, data
         if isolate:
             yield "expr", ")"
@@ -1590,7 +1620,7 @@ class New(ASTPython):
     def generate(self, **kwargs):
         for child in self.elem:
             child.set("parent_", self.elem)
-            for dtype, data in parse_ast(child).generate():
+            for dtype, data in parse_ast(child, parent=self).generate():
                 if dtype != "expr":
                     yield dtype, data
                     continue
@@ -1628,7 +1658,7 @@ class Constant(ASTPython):
 
                 elif child.tag == "regex":
                     val = ""
-                    for dtype, data in parse_ast(child).generate(isolate=False):
+                    for dtype, data in parse_ast(child, parent=self).generate(isolate=False):
                         if data:
                             val += data
                     yield "expr", 're.compile("/%s/i")' % val
@@ -1637,7 +1667,7 @@ class Constant(ASTPython):
                     arguments = []
                     for n, arg in enumerate(child):
                         expr = []
-                        for dtype, data in parse_ast(arg).generate(isolate=False):
+                        for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                             if dtype == "expr":
                                 expr.append(data)
                             else:
@@ -1669,8 +1699,8 @@ class Constant(ASTPython):
 class Identifier(ASTPython):
     DEBUGFILE_LEVEL = 0
 
-    def generate(self, **kwargs):
-        name = id_translate(self.elem.get("name"))
+    def generate(self, is_member=False, **kwargs):
+        name = self.local_var(self.elem.get("name"), is_member=is_member)
         yield "expr", name
 
 
@@ -1682,7 +1712,7 @@ class regex(ASTPython):
             return
 
         for arg in child:
-            for dtype, data in parse_ast(arg).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 yield "expr", data
 
 
@@ -1821,7 +1851,7 @@ class DeclarationBlock(ASTPython):
         for var in self.elem:
             var.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(var).generate(force_value=True):
+            for dtype, data in parse_ast(var, parent=self).generate(force_value=True):
                 if dtype == "expr":
                     if data is None:
                         raise ValueError(ElementTree.tostring(var))
@@ -1850,9 +1880,23 @@ def astparser_for(elem) -> Optional[ASTPythonBase]:
     return None
 
 
-def parse_ast(elem) -> "ASTPythonBase":
+def parse_ast(elem, parent=None) -> "ASTPythonBase":
     elemparser = astparser_for(elem)
-    return elemparser.polish()
+    elemparser.parent = parent
+
+    if isinstance(parent, Source):
+        elemparser.source = parent
+    elif parent:
+        elemparser.source = parent.source
+    else:
+        elemparser.source = None
+
+    if isinstance(elemparser, Source):
+        if elemparser.source:
+            elemparser.locals = elemparser.source.locals.copy()
+        elemparser.source = elemparser
+
+    return elemparser
 
 
 def file_template(ast: Any) -> Generator[Tuple[Any, Any], Any, None]:

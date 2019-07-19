@@ -61,7 +61,7 @@ def parseFloat(x):
                 x = x.replace(",", ".")
                 try:
                     ret = float(x)
-                except:
+                except Exception:
                     return orig_
 
         else:
@@ -517,6 +517,16 @@ def debug(txt):
     from pineboolib.application import project
 
     project.message_manager().send("debug", None, [ustr(txt)])
+
+
+def from_project(scriptname):
+    """
+    Devuelve el objeto de proyecto que coincide con el nombre dado
+    """
+    from pineboolib import qsa as qsa_dict_modules
+
+    # FIXME: Esto debería estar guardado en Project.
+    return getattr(qsa_dict_modules, scriptname, None)
 
 
 # Usadas solo por import *
