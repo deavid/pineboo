@@ -1473,7 +1473,8 @@ class Member(ASTPython):
                             part_list.append(value[4:])
                         else:
                             part_list = value.split(",")
-
+                            if part_list[1] == ' "':
+                                part_list[1] = '","'
                         if part_list[0].find("re.compile") > -1:
                             arguments = ["%s.sub(%s,%s)" % (part_list[0], part_list[1], ".".join(part1))] + part2
                         else:
