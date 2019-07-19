@@ -2629,7 +2629,7 @@ class PNSqlCursor(QtCore.QObject):
                 self.rollbackOpened(-1, msg)
         else:
 
-            if not project._DGI.use_model():
+            if project._DGI and not project._DGI.use_model():
                 logger.warning("Se está eliminando un cursor Huerfano (%s)", self)
 
         self.destroyed.emit()

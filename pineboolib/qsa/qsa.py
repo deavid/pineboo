@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import traceback
 import os
 import re
 import math
@@ -551,6 +551,10 @@ def from_project(scriptname):
 
     # FIXME: Esto debería estar guardado en Project.
     return getattr(qsa_dict_modules, scriptname, None)
+
+
+def format_exc(exc):
+    return traceback.format_exc(exc)
 
 
 # Usadas solo por import *

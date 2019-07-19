@@ -23,7 +23,7 @@ else:
 # In [1]: from pineboolib import qsa
 # In [2]: dir(qsa)
 
-QSA_KNOWN_ATTRS = [
+QSA_KNOWN_ATTRS = {
     "AQBoolFlagState",
     "AQBoolFlagStateList",
     "AQFormDB",
@@ -215,7 +215,7 @@ QSA_KNOWN_ATTRS = [
     "ustr1",
     "util",
     "weakref",
-]
+}
 
 
 def id_translate(name: str, qsa_exclude: set = None) -> str:
@@ -292,10 +292,23 @@ def id_translate(name: str, qsa_exclude: set = None) -> str:
         name = name + "_"
 
     if qsa_exclude is not None:
+        qsa_lower = {x.lower(): x for x in qsa_exclude | QSA_KNOWN_ATTRS if x.lower() != x and x.lower() not in qsa_exclude}
+        if orig_name.lower() in qsa_lower:
+            new_name = qsa_lower[orig_name.lower()]
+            count_diff_chars = len([1 for a, b in zip(new_name, orig_name) if a != b])
+            if count_diff_chars <= 2:
+                orig_name = name = new_name
+                if name in python_keywords:
+                    name = name + "_"
+
         if orig_name in qsa_exclude:
             return name
+
         if name in QSA_KNOWN_ATTRS:
             return "qsa.%s" % name
+
+        if name.startswith("formRecord"):
+            return 'qsa.from_project("%s")' % name
 
         return "__undef__" + name
     else:
@@ -408,10 +421,12 @@ class Source(ASTPython):
         super().__init__(elem)
         self.locals = set()
 
-    def generate(self, break_mode=False, include_pass=True, **kwargs):
+    def generate(self, break_mode=False, include_pass=True, declare_identifiers: Set = None, **kwargs):
         elems = 0
         after_lines = []
         prev_ast_type = None
+        if declare_identifiers:
+            self.locals |= declare_identifiers
         for child in self.elem:
             # yield "debug", "<%s %s>" % (child.tag, repr(child.attrib))
             child.set("parent_", self.elem)
@@ -499,12 +514,14 @@ class Function(ASTPython):
                         name = "__init__"
             else:
                 arguments.append("self")
+        id_list: Set[str] = set()
         for n, arg in enumerate(self.elem.findall("Arguments/*")):
             expr = []
             arg.set("parent_", self.elem)
             for dtype, data in parse_ast(arg, parent=self).generate():
                 if dtype == "expr":
-                    expr.append(self.local_var(data))
+                    id_list.add(data)
+                    expr.append(self.local_var(data, is_member=True))
                 else:
                     yield dtype, data
             if len(expr) == 0:
@@ -521,7 +538,7 @@ class Function(ASTPython):
         # if returns:  yield "debug", "Returns: %s" % returns
         for source in self.elem.findall("Source"):
             source.set("parent_", self.elem)
-            for obj in parse_ast(source, parent=self).generate():
+            for obj in parse_ast(source, parent=self).generate(declare_identifiers=id_list):
                 yield obj
         yield "end", "block-def-%s" % (name)
 
@@ -608,6 +625,7 @@ class If(ASTPython):
         for n, arg in enumerate(self.elem.findall("Condition/*")):
             arg.set("parent_", self.elem)
             expr = []
+            condition_yield = []
             for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 if dtype == "line+1":
                     yield "debug", "Inline update inside IF condition not allowed. Unexpected behavior."
@@ -615,12 +633,30 @@ class If(ASTPython):
                 if dtype == "expr":
                     expr.append(data)
                 else:
-                    yield dtype, data
+                    condition_yield.append((dtype, data))
+            if condition_yield:
+                yield "debug", "Unexpected IF condition: %r" % condition_yield
+
+            for t, d in condition_yield:
+                yield t, d
+
             if len(expr) == 0:
                 main_expr.append("False")
                 yield "debug", "Expression %d not understood" % n
                 yield "debug", ElementTree.tostring(arg)
             else:
+                if len(expr) == 3:
+                    if expr[1] == "==":
+                        if expr[2] == "True":
+                            expr = [expr[0]]
+                        elif expr[2] == "False":
+                            expr = ["not", expr[0]]
+                        elif expr[2] == "None":
+                            expr = [expr[0], "is", "None"]
+                    elif expr[1] == "!=":
+                        if expr[2] == "None":
+                            expr = [expr[0], "is not", "None"]
+
                 main_expr.append(" ".join(expr))
 
         yield "line", "if %s:" % (" ".join(main_expr))
@@ -656,20 +692,18 @@ class TryCatch(ASTPython):
         for ident in self.elem.findall("Identifier"):
             ident.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(ident, parent=self).generate(isolate=False):
+            for dtype, data in parse_ast(ident, parent=self).generate(isolate=False, is_member=True):
                 if dtype == "expr":
                     expr.append(data)
                 else:
                     yield dtype, data
             identifier = " ".join(expr)
-        if identifier:
-            yield "line", "except Exception as %s:" % (identifier)
-        else:
-            yield "line", "except Exception:"
+        yield "line", "except Exception:"
         yield "begin", "block-except"
         if identifier:
+            self.source.locals.add(identifier)
             # yield "line", "%s = str(%s)" % (identifier, identifier)
-            yield "line", "%s = traceback.format_exc()" % (identifier)
+            yield "line", "%s = qsa.format_exc()" % (identifier)
         for obj in parse_ast(catchblock, parent=self).generate(include_pass=identifier is None):
             yield obj
         yield "end", "block-except"
@@ -1079,8 +1113,7 @@ class Variable(ASTPython):
     def generate(self, force_value=False, **kwargs):
         name = self.elem.get("name")
         # if name.startswith("colorFun"): print(name)
-        self.source.locals.add(name)
-        yield "expr", self.local_var(name)
+        yield "expr", self.local_var(name, is_member=True)
         values = 0
         # for value in self.elem.findall("Value|Expression"):
         for value in self.elem:
@@ -1126,32 +1159,39 @@ class Variable(ASTPython):
                 else:
                     yield "expr", "%s()" % self.local_var(dtype)
 
+        self.source.locals.add(name)
         # if dtype and force_value == False: yield "debug", "Variable %s:%s" % (name,dtype)
 
 
 class InstructionUpdate(ASTPython):
     def generate(self, **kwargs):
         arguments = []
+        identifier = None
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False, is_member=(n == 0)):
                 if dtype == "expr":
                     if data is None:
                         raise ValueError(ElementTree.tostring(arg))
                     if data == "[]":
-                        data = "Array()"
+                        data = "qsa.Array()"
                     expr.append(data)
                 else:
                     yield dtype, data
+
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
                 yield "debug", ElementTree.tostring(arg)
             else:
+                if len(expr) == 1:
+                    identifier = expr[0]
                 arguments.append(" ".join(expr))
 
         yield "line", " ".join(arguments)
+        if identifier:
+            self.source.locals.add(identifier)
 
 
 class InlineUpdate(ASTPython):
@@ -1289,10 +1329,15 @@ class Member(ASTPython):
             arg_expr.append(expr)
 
         # Deteccion de llamada a modulo externo
-        if len(arguments) >= 3 and arguments[1] == "iface" and arguments[0] != "self" and arguments[0] not in self.source.locals:
+        if len(arguments) >= 3 and arguments[1] == "iface" and arguments[0] != "self" and arguments[0].startswith("__undef__"):
             arguments[0] = 'qsa.from_project("%s")' % arguments[0].replace("__undef__", "")
         # Lectura del self.iface.__init
-        if len(arguments) >= 3 and arguments[0:2] == ["self", "iface"] and arguments[2].startswith("__"):
+        if (
+            len(arguments) >= 3
+            and arguments[0:2] == ["self", "iface"]
+            and arguments[2].startswith("__")
+            and "__undef__" not in arguments[0]
+        ):
             # From: self.iface.__function()
             # to: super(className, self.iface).function()
             parent = self.elem.get("parent_")
@@ -1779,7 +1824,8 @@ class Identifier(ASTPython):
     DEBUGFILE_LEVEL = 0
 
     def generate(self, is_member=False, **kwargs):
-        name = self.local_var(self.elem.get("name"), is_member=is_member)
+        varname = self.elem.get("name")
+        name = self.local_var(varname, is_member=is_member)
         yield "expr", name
 
 
@@ -1972,7 +2018,12 @@ def parse_ast(elem, parent=None) -> "ASTPythonBase":
 
     if isinstance(elemparser, Source):
         if elemparser.source:
-            elemparser.locals = elemparser.source.locals.copy()
+            if isinstance(parent, (Switch, If)):
+                # For certain elements, use the same locals, don't copy.
+                # this will share locals.
+                elemparser.locals = elemparser.source.locals
+            else:
+                elemparser.locals = elemparser.source.locals.copy()
         elemparser.source = elemparser
 
     return elemparser
@@ -1980,7 +2031,7 @@ def parse_ast(elem, parent=None) -> "ASTPythonBase":
 
 def file_template(ast: Any) -> Generator[Tuple[Any, Any], Any, None]:
     yield "line", "# -*- coding: utf-8 -*-"
-    yield "line", "from pineboolib.qsa import *  # noqa: F403"
+    # yield "line", "from pineboolib.qsa import *  # noqa: F403"
     yield "line", "from pineboolib import qsa"
     # yield "line", "from pineboolib.qsaglobals import *"
     yield "line", ""
