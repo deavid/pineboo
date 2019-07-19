@@ -1378,7 +1378,7 @@ class Member(ASTPython):
                     except IndexError:
                         part2 = []  # Para los que son últimos y no tienen parte adicional
                     if member == "toString()":
-                        arguments = ["parseString(%s)" % ".".join(part1)] + part2
+                        arguments = ["qsa.parseString(%s)" % ".".join(part1)] + part2
                     #    arguments = ["str(%s)" % (".".join(part1))] + part2
                     elif member == "isEmpty()":
                         arguments = ["%s == ''" % (".".join(part1))] + part2
