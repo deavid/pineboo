@@ -6,7 +6,7 @@ import os
 import os.path
 import re
 from xml.etree import ElementTree
-from typing import Any, Generator, Optional, Tuple, Type, List, Dict, Set
+from typing import Any, Generator, Optional, Tuple, Type, List, Dict, Set, cast
 from pathlib import Path
 
 try:
@@ -1069,7 +1069,7 @@ class With(ASTPython):
         # key = "%02x" % random.randint(0, 255)
         # name = "w%s_obj" % key
         # yield "debug", "WITH: %s" % key
-        variable, source = [obj for obj in self.elem]
+        variable, source_elem = [obj for obj in self.elem]
         var_expr = []
         for dtype, data in parse_ast(variable, parent=self).generate(isolate=False):
             if dtype == "expr":
@@ -1082,7 +1082,9 @@ class With(ASTPython):
 
         # yield "line", "%s = %s #WITH" % (name, " ".join(var_expr))
         yield "line", " #WITH_START"
-        for obj in parse_ast(source, parent=self).generate(break_mode=True):
+        source = cast(Source, parse_ast(source_elem, parent=self))
+        source.locals |= set(With.python_keywords)
+        for obj in source.generate(break_mode=True):
             obj_ = None
 
             # para sustituir los this sueltos por var_expr
