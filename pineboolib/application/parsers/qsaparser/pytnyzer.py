@@ -843,7 +843,7 @@ class ForIn(ASTPython):
             yield "end", "block-for-in"
 
 
-class Switch(ASTPython):
+class OldSwitch(ASTPython):
     def generate(self, **kwargs):
         global cont_switch
         cont_switch += 1
@@ -924,6 +924,84 @@ class Switch(ASTPython):
             yield "end", "block-if"
         # yield "line", "assert( not %s )" % name_pr
         # yield "line", "assert( %s )" % name_pr2
+
+
+class Switch(ASTPython):
+    def generate(self, **kwargs):
+        """Should generate a switch using qsa.switch() like this:
+
+        v = 'ten'
+        for case in qsa.switch(v):
+            if case('one'):
+                print 1
+                break
+            if case('two'):
+                print 2
+                break
+            if case('ten'):
+                print 10
+                break
+            if case('eleven'):
+                print 11
+                break
+            if case(): # default, could also just omit condition or 'if True'
+                print "something else!"
+                # No need to break here, it'll stop anyway
+        """
+
+        main_expr = []
+        for n, arg in enumerate(self.elem.findall("Condition/*")):
+            arg.set("parent_", self.elem)
+            expr = []
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
+                if dtype == "expr":
+                    expr.append(data)
+                else:
+                    yield dtype, data
+            if len(expr) == 0:
+                main_expr.append("False")
+                yield "debug", "Expression %d not understood" % n
+                yield "debug", ElementTree.tostring(arg)
+            else:
+                main_expr.append(" ".join(expr))
+        yield "line", "for case in qsa.switch(%s):" % (" ".join(main_expr))
+        yield "begin", "block-for"
+        for scase in self.elem.findall("Case"):
+            scase.set("parent_", self.elem)
+            value_expr = []
+            for n, arg in enumerate(scase.findall("Value")):
+                arg.set("parent_", self.elem)
+                expr = []
+                for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
+                    if dtype == "expr":
+                        expr.append(data)
+                    else:
+                        yield dtype, data
+                if len(expr) == 0:
+                    value_expr.append("False")
+                    yield "debug", "Expression %d not understood" % n
+                    yield "debug", ElementTree.tostring(arg)
+                else:
+                    value_expr.append(" ".join(expr))
+
+            yield "line", "if case(%s):" % (" ".join(value_expr))
+            yield "begin", "block-if"
+            for source in scase.findall("Source"):
+                source.set("parent_", self.elem)
+                for obj in parse_ast(source, parent=self).generate(break_mode=True):
+                    yield obj
+            yield "end", "block-if"
+
+        for scasedefault in self.elem.findall("CaseDefault"):
+            scasedefault.set("parent_", self.elem)
+            yield "line", "if case():"
+            yield "begin", "block-if"
+            for source in scasedefault.findall("Source"):
+                source.set("parent_", self.elem)
+                for obj in parse_ast(source, parent=self).generate(break_mode=True):
+                    yield obj
+            yield "end", "block-if"
+        yield "end", "block-for"
 
 
 class With(ASTPython):
