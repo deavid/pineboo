@@ -558,6 +558,10 @@ def format_exc(exc):
     return traceback.format_exc(exc)
 
 
+def isnan(n):
+    return math.isnan(n)
+
+
 # Usadas solo por import *
 from pineboolib.fllegacy.flposprinter import FLPosPrinter  # noqa
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery  # noqa

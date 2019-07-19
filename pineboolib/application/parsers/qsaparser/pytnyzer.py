@@ -269,6 +269,8 @@ def id_translate(name: str, qsa_exclude: set = None) -> str:
         return "None"
     if name == "this":
         return "self"
+    if name == "NaN":
+        return 'float("nan")'
 
     if name == "startsWith":
         name = "startswith"
@@ -646,6 +648,7 @@ class If(ASTPython):
                 yield "debug", ElementTree.tostring(arg)
             else:
                 if len(expr) == 3:
+                    # FIXME: This works if the pattern is alone in the IF. But if it has AND/Or does not work
                     if expr[1] == "==":
                         if expr[2] == "True":
                             expr = [expr[0]]
@@ -653,9 +656,13 @@ class If(ASTPython):
                             expr = ["not", expr[0]]
                         elif expr[2] == "None":
                             expr = [expr[0], "is", "None"]
+                        elif expr[2] == 'float("nan")':
+                            expr = ["qsa.isnan(%s)" % expr[0]]
                     elif expr[1] == "!=":
                         if expr[2] == "None":
                             expr = [expr[0], "is not", "None"]
+                        elif expr[2] == 'float("nan")':
+                            expr = ["not", "qsa.isnan(%s)" % expr[0]]
 
                 main_expr.append(" ".join(expr))
 
@@ -1187,7 +1194,7 @@ class InstructionUpdate(ASTPython):
                 yield "debug", "Argument %d not understood" % n
                 yield "debug", ElementTree.tostring(arg)
             else:
-                if len(expr) == 1:
+                if n == 0 and len(expr) == 1:
                     identifier = expr[0]
                 arguments.append(" ".join(expr))
 
@@ -1572,7 +1579,7 @@ class ArrayMember(ASTPython):
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False, is_member=(n == 0)):
                 # if data.find(".") > -1:
                 #    l = data.split(".")
                 #    data = "%s['%s']" % (l[0], l[1])
@@ -1805,7 +1812,7 @@ class Constant(ASTPython):
                         else:
                             arguments.append(" ".join(expr))
 
-                    yield "expr", "Array([%s])" % (", ".join(arguments))
+                    yield "expr", "qsa.Array([%s])" % (", ".join(arguments))
             return
         if ctype == "String":
             delim = self.elem.get("delim")
