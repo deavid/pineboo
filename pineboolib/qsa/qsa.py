@@ -121,7 +121,7 @@ def isNaN(x):
         return True
 
 
-def qsa_length(obj):
+def length(obj):
     """
     Parser para recoger el length de un campo
     @param obj, objeto a obtener longitud
@@ -140,7 +140,7 @@ def qsa_length(obj):
             return len(obj)
 
 
-def qsa_text(obj):
+def text(obj):
     """
     Parser para recoger valor text de un objeto dado
     @param obj. Objeto a procesar

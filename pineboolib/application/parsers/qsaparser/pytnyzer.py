@@ -7,6 +7,215 @@ import os.path
 import re
 from xml.etree import ElementTree
 from typing import Any, Generator, Optional, Tuple, Type, List, Dict
+from pathlib import Path
+
+try:
+    import black
+except ImportError:
+    black = None
+
+if black:
+    BLACK_FILEMODE = black.FileMode(line_length=160)
+else:
+    BLACK_FILEMODE = None
+
+# To get the following list updated, do:
+# In [1]: from pineboolib import qsa
+# In [2]: dir(qsa)
+
+QSA_KNOWN_ATTRS = [
+    "AQBoolFlagState",
+    "AQBoolFlagStateList",
+    "AQFormDB",
+    "AQOdsColor",
+    "AQOdsGenerator",
+    "AQOdsImage",
+    "AQOdsRow",
+    "AQOdsSheet",
+    "AQOdsSpreadSheet",
+    "AQOdsStyle",
+    "AQS",
+    "AQSettings",
+    "AQSmtpClient",
+    "AQSql",
+    "AQSqlCursor",
+    "AQSqlQuery",
+    "AQUnpacker",
+    "AQUtil",
+    "Any",
+    "AnyStr",
+    "Array",
+    "Boolean",
+    "Callable",
+    "CheckBox",
+    "Color",
+    "ComboBox",
+    "Date",
+    "DateEdit",
+    "Dialog",
+    "Dict",
+    "Dir",
+    "FLApplication",
+    "FLCheckBox",
+    "FLCodBar",
+    "FLDataTable",
+    "FLDateEdit",
+    "FLDomDocument",
+    "FLDomElement",
+    "FLDomNode",
+    "FLDomNodeList",
+    "FLDoubleValidator",
+    "FLFieldDB",
+    "FLFormDB",
+    "FLFormRecordDB",
+    "FLFormSearchDB",
+    "FLIntValidator",
+    "FLLineEdit",
+    "FLListViewItem",
+    "FLNetwork",
+    "FLPixmapView",
+    "FLPosPrinter",
+    "FLReportViewer",
+    "FLSpinBox",
+    "FLSqlCursor",
+    "FLSqlQuery",
+    "FLTable",
+    "FLTableDB",
+    "FLTextEditOutput",
+    "FLTimeEdit",
+    "FLUIntValidator",
+    "FLUtil",
+    "FLVar",
+    "FLWidget",
+    "FLWorkSpace",
+    "File",
+    "FileDialog",
+    "FormDBWidget",
+    "Function",
+    "GroupBox",
+    "Input",
+    "Label",
+    "Line",
+    "LineEdit",
+    "List",
+    "LogText",
+    "Math",
+    "MessageBox",
+    "NumberEdit",
+    "Object",
+    "ObjectNotFoundDGINotLoaded",
+    "ObjectNotFoundInCurrentDGI",
+    "Optional",
+    "Process",
+    "ProxySlot",
+    "QAction",
+    "QActionGroup",
+    "QApplication",
+    "QBrush",
+    "QButtonGroup",
+    "QByteArray",
+    "QCheckBox",
+    "QColor",
+    "QComboBox",
+    "QDataView",
+    "QDateEdit",
+    "QDialog",
+    "QDockWidget",
+    "QDomDocument",
+    "QEventLoop",
+    "QFile",
+    "QFileDialog",
+    "QFontDialog",
+    "QFrame",
+    "QGroupBox",
+    "QHBoxLayout",
+    "QIcon",
+    "QImage",
+    "QInputDialog",
+    "QKeySequence",
+    "QLabel",
+    "QLayoutWidget",
+    "QLineEdit",
+    "QListView",
+    "QListViewWidget",
+    "QListWidgetItem",
+    "QMainWindow",
+    "QMdiArea",
+    "QMdiSubWindow",
+    "QMenu",
+    "QMessageBox",
+    "QPainter",
+    "QPixmap",
+    "QProcess",
+    "QProgressDialog",
+    "QPushButton",
+    "QRadioButton",
+    "QSignalMapper",
+    "QSize",
+    "QSizePolicy",
+    "QSpinBox",
+    "QString",
+    "QStyleFactory",
+    "QTabWidget",
+    "QTable",
+    "QTextEdit",
+    "QTimeEdit",
+    "QToolBar",
+    "QToolBox",
+    "QToolButton",
+    "QTreeWidget",
+    "QTreeWidgetItem",
+    "QTreeWidgetItemIterator",
+    "QVBoxLayout",
+    "QWidget",
+    "QtCore",
+    "QtWidgets",
+    "RadioButton",
+    "RegExp",
+    "RichText",
+    "SpinBox",
+    "String",
+    "SysType",
+    "System",
+    "System_class",
+    "TextEdit",
+    "TimeEdit",
+    "Tuple",
+    "TypeVar",
+    "aqApp",
+    "auth",
+    "connect",
+    "debug",
+    "decorators",
+    "disconnect",
+    "filedir",
+    "input",
+    "inspect",
+    "isNaN",
+    "killTimer",
+    "logger",
+    "parseFloat",
+    "parseInt",
+    "parseString",
+    "print_",
+    "print_stack",
+    "project",
+    "proxy_fn",
+    "qApp",
+    "qsa",
+    "qsaRegExp",
+    "resolveObject",
+    "slot_done",
+    "solve_connection",
+    "startTimer",
+    "sys",
+    "types",
+    "undefined",
+    "ustr",
+    "ustr1",
+    "util",
+    "weakref",
+]
 
 
 def id_translate(name) -> Any:
@@ -43,6 +252,10 @@ def id_translate(name) -> Any:
         "print",
         "str",
     ]
+    if "(" in name:
+        raise ValueError("Parenthesis not allowed in ID for translation")
+    if "." in name:
+        raise ValueError("Dot not allowed in ID for translation")
     if name in python_keywords:
         return name + "_"
     if name == "false":
@@ -76,6 +289,8 @@ def id_translate(name) -> Any:
         name = "upper"
     # if name == "Process":
     #    name = "qsatype.Process"
+    if name in QSA_KNOWN_ATTRS:
+        return "qsa.%s" % name
     return name
 
 
@@ -96,6 +311,9 @@ class ASTPythonBase(object):
     def polish(self) -> "ASTPythonBase":
         return self
 
+    def generate(self, break_mode=False, include_pass=True, **kwargs) -> Generator[Tuple[str, str], None, None]:
+        yield "type", "value"
+
 
 class ASTPythonFactory(type):
     ast_class_types: List[Type[ASTPythonBase]] = []
@@ -114,6 +332,8 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
     debug_file = None
     generate_depth = 0
     numline = 0
+    DEBUGFILE_LEVEL = 10
+    _last_retlen = 0
 
     @classmethod
     def can_process_tag(self, tagname) -> Any:
@@ -125,6 +345,7 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
     def __init__(self, elem) -> None:
         super().__init__(elem)
         self.internal_generate = self.generate
+        ASTPython._last_retlen = 0
         if self.debug_file:
             self.generate = self._generate
 
@@ -136,31 +357,47 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
         if splen > self.generate_depth:
             retlen, splen = splen - self.generate_depth, self.generate_depth
         if retlen > 0:
+            # Reduce callstack to just one
+            if ASTPython._last_retlen == retlen + 1:
+                ASTPython._last_retlen = retlen
+                return
             sp = " " * (splen - 1) + "<" + "-" * retlen
         else:
             sp = " " * splen
+        ASTPython._last_retlen = retlen
         cname = self.__class__.__name__
-        self.debug_file.write("%04d%s%s: %s\n" % (ASTPython.numline, sp, cname, text.encode("UTF-8")))
+        self.debug_file.write("%04d%s%s: %s\n" % (ASTPython.numline, sp, cname, text))
 
     def _generate(self, **kwargs) -> Generator[Tuple[str, str], Any, None]:
-        self.debug("begin-gen")
+        if self.DEBUGFILE_LEVEL > 5:
+            self.debug("begin-gen")
         ASTPython.generate_depth += 1
         self.generate_depth = ASTPython.generate_depth
         for dtype, data in self.internal_generate(**kwargs):
-            self.debug("%s: %r" % (dtype, data))
             yield dtype, data
+            if self.DEBUGFILE_LEVEL > 2:
+                self.debug("%s: %s" % (dtype, data))
         ASTPython.generate_depth -= 1
-        self.debug("end-gen")
+        if self.DEBUGFILE_LEVEL > 5:
+            self.debug("end-gen")
 
 
 class Source(ASTPython):
     def generate(self, break_mode=False, include_pass=True, **kwargs):
         elems = 0
         after_lines = []
+        prev_ast_type = None
         for child in self.elem:
             # yield "debug", "<%s %s>" % (child.tag, repr(child.attrib))
             child.set("parent_", self.elem)
-            for dtype, data in parse_ast(child).generate(break_mode=break_mode, plusplus_as_instruction=True):
+            ast_python = parse_ast(child)
+            ast_type = ast_python.__class__.__name__
+            # print(ast_type)
+            if ast_type == "Function" and prev_ast_type != ast_type:
+                yield "line", ""
+            prev_ast_type = ast_type
+
+            for dtype, data in ast_python.generate(break_mode=break_mode, plusplus_as_instruction=True):
                 if dtype == "line+1":
                     after_lines.append(data)
                     continue
@@ -192,13 +429,14 @@ class Class(ASTPython):
         name = self.elem.get("name")
         extends = self.elem.get("extends", "object")
 
-        yield "line", "#/** @class_declaration %s */" % name
+        yield "line", "# /** @class_declaration %s */" % name
         yield "line", "class %s(%s):" % (name, extends)
         yield "begin", "block-class-%s" % (name)
         for source in self.elem.findall("Source"):
             source.set("parent_", self.elem)
             classesDefined.clear()
-            for obj in parse_ast(source).generate():
+            ast_python = parse_ast(source)
+            for obj in ast_python.generate():
                 yield obj
         yield "end", "block-class-%s" % (name)
 
@@ -221,11 +459,9 @@ class Function(ASTPython):
             className = name.split("_")[0]
             if className not in classesDefined:
                 if className == "":
-                    yield "line", ""
                     className = "FormInternalObj"
-                yield "line", "#/** @class_definition %s */" % className
+                yield "line", "# /** @class_definition %s */" % className
                 classesDefined.append(className)
-
         # returns = self.elem.get("returns", None)
 
         arguments = []
@@ -328,7 +564,10 @@ class FunctionCall(ASTPython):
                 yield "debug", "Argument %d not understood" % n
                 yield "debug", ElementTree.tostring(arg)
             else:
-                arguments.append(" ".join(expr))
+                arg = " ".join(expr)
+                arg = arg.replace("( ", "(")
+                arg = arg.replace(" )", ")")
+                arguments.append(arg)
 
         yield "expr", "%s(%s)" % (name, ", ".join(arguments))
 
@@ -731,6 +970,8 @@ class With(ASTPython):
 
 
 class Variable(ASTPython):
+    DEBUGFILE_LEVEL = 4
+
     def generate(self, force_value=False, **kwargs):
         name = self.elem.get("name")
         # if name.startswith("colorFun"): print(name)
@@ -748,7 +989,7 @@ class Variable(ASTPython):
 
                 # if self.elem.get("type",None) == "Array" and data == "[]":
                 if data == "[]":
-                    yield "expr", "Array()"
+                    yield "expr", "qsa.Array()"
                     expr += 1
                     continue
 
@@ -778,7 +1019,7 @@ class Variable(ASTPython):
                 if dtype in ("FLSqlCursor", "FLTableDB"):
                     yield "expr", "None"
                 else:
-                    yield "expr", "%s()" % dtype
+                    yield "expr", "%s()" % id_translate(dtype)
 
         # if dtype and force_value == False: yield "debug", "Variable %s:%s" % (name,dtype)
 
@@ -1071,7 +1312,7 @@ class Member(ASTPython):
                     elif member == "length":
                         value = arg[7:]
                         value = value[: len(value) - 1]
-                        arguments = ["qsa_length(%s)" % (".".join(part1))] + part2
+                        arguments = ["qsa.length(%s)" % (".".join(part1))] + part2
                     elif member == "charAt":
                         value = arg[7:]
                         value = value[: len(value) - 1]
@@ -1132,7 +1373,8 @@ class Member(ASTPython):
                                 if ".".join(part1):
 
                                     # arguments = [
-                                    #    "%s.%s if isinstance(%s, str) else %s.replace(%s, %s) #FIXME necesita ser mejorado. No soporta int como segundo parámetro"
+                                    #    "%s.%s if isinstance(%s, str) else %s.replace(%s, %s)
+                                    #    FIXME necesita ser mejorado. No soporta int como segundo parámetro"
                                     #    % (".".join(part1), arg, part_list[0], part_list[0], ".".join(part1), part_list[1])
                                     # ] + part2
 
@@ -1209,6 +1451,7 @@ class Value(ASTPython):
 
 
 class Expression(ASTPython):
+    DEBUGFILE_LEVEL = 10
     tags = ["base_expression", "math_expression"]
 
     def generate(self, isolate=True, **kwargs):
@@ -1219,7 +1462,7 @@ class Expression(ASTPython):
             if self.elem.findall('Constant[@type="String"]'):
                 coerce_string_mode = True
         if coerce_string_mode:
-            yield "expr", "ustr("
+            yield "expr", "qsa.ustr("
         for child in self.elem:
             child.set("parent_", self.elem)
             if coerce_string_mode and child.tag == "OpMath":
@@ -1256,6 +1499,8 @@ class Delete(ASTPython):
 
 
 class OpTernary(ASTPython):
+    DEBUGFILE_LEVEL = 3
+
     def generate(self, isolate=False, **kwargs):
         """
             Ejemplo op. ternario
@@ -1319,6 +1564,8 @@ class DictElem(ASTPython):
 
 
 class OpUnary(ASTPython):
+    DEBUGFILE_LEVEL = 3
+
     def generate(self, isolate=False, **kwargs):
         ctype = self.elem.get("type")
         if ctype == "LNOT":
@@ -1365,6 +1612,8 @@ class New(ASTPython):
 
 
 class Constant(ASTPython):
+    DEBUGFILE_LEVEL = 0
+
     def generate(self, **kwargs):
         ctype = self.elem.get("type")
         value = self.elem.get("value")
@@ -1418,6 +1667,8 @@ class Constant(ASTPython):
 
 
 class Identifier(ASTPython):
+    DEBUGFILE_LEVEL = 0
+
     def generate(self, **kwargs):
         name = id_translate(self.elem.get("name"))
         yield "expr", name
@@ -1484,6 +1735,8 @@ class regexchar(ASTPython):
 
 
 class OpUpdate(ASTPython):
+    DEBUGFILE_LEVEL = 3
+
     def generate(self, **kwargs):
         ctype = self.elem.get("type")
         if ctype == "EQUALS":
@@ -1532,6 +1785,8 @@ class Compare(ASTPython):
 
 
 class OpMath(ASTPython):
+    DEBUGFILE_LEVEL = 3
+
     def generate(self, **kwargs):
         ctype = self.elem.get("type")
         if ctype == "PLUS":
@@ -1595,24 +1850,26 @@ def astparser_for(elem) -> Optional[ASTPythonBase]:
     return None
 
 
-def parse_ast(elem) -> Any:
+def parse_ast(elem) -> "ASTPythonBase":
     elemparser = astparser_for(elem)
     return elemparser.polish()
 
 
 def file_template(ast: Any) -> Generator[Tuple[Any, Any], Any, None]:
     yield "line", "# -*- coding: utf-8 -*-"
-    yield "line", "from pineboolib.qsa import *"
+    yield "line", "from pineboolib.qsa import *  # noqa: F403"
+    yield "line", "from pineboolib import qsa"
     # yield "line", "from pineboolib.qsaglobals import *"
     yield "line", ""
-    yield "line", "#/** @file */"
+    yield "line", "# /** @file */"
+    yield "line", ""
     yield "line", ""
     sourceclasses = ElementTree.Element("Source")
     for cls in ast.findall("Class"):
         cls.set("parent_", ast)
         sourceclasses.append(cls)
 
-    mainclass = ElementTree.SubElement(sourceclasses, "Class", name="FormInternalObj", extends="FormDBWidget")
+    mainclass = ElementTree.SubElement(sourceclasses, "Class", name="FormInternalObj", extends="qsa.FormDBWidget")
     mainsource = ElementTree.SubElement(mainclass, "Source")
 
     constructor = ElementTree.SubElement(mainsource, "Function", name="_class_init")
@@ -1653,7 +1910,7 @@ def write_python_file(fobj, ast) -> None:
                 lines_since_last_indent = 0
             if lines_since_last_indent > 4:
                 ASTPython.numline += 1
-                fobj.write((len(indent) * indent_text) + "\n")
+                fobj.write("\n")
             last_line_for_indent[len(indent)] = numline
         if dtype == "debug":
             line = "# DEBUG:: %s" % data
@@ -1681,12 +1938,13 @@ def write_python_file(fobj, ast) -> None:
 
         if line is not None:
             ASTPython.numline += 1
-            fobj.write((len(indent) * indent_text) + line + "\n")
+            txtline = (len(indent) * indent_text) + line
+            fobj.write(txtline.rstrip() + "\n")
 
         if dtype == "end":
             if data.split("-")[1] in ["class", "def", "else", "except"]:
                 ASTPython.numline += 1
-                fobj.write((len(indent) * indent_text) + "\n")
+                fobj.write("\n")
                 last_line_for_indent[len(indent)] = numline
         last_dtype = dtype
 
@@ -1705,6 +1963,11 @@ def pythonize(filename, destfilename, debugname=None) -> None:
     f1 = open(destfilename, "w", encoding="UTF-8")
     write_python_file(f1, ast)
     f1.close()
+    if black:
+        new_code = black.format_file_contents(Path(destfilename).read_text(), fast=True, mode=BLACK_FILEMODE)
+        f1 = open(destfilename, "w", encoding="UTF-8")
+        f1.write(new_code)
+        f1.close()
 
 
 def main() -> None:
