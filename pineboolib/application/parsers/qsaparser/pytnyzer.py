@@ -1640,7 +1640,7 @@ class OpTernary(ASTPython):
 
 class DictObject(ASTPython):
     def generate(self, isolate=False, **kwargs):
-        yield "expr", "{"
+        yield "expr", "qsa.AttributeDict({"
         key = True
         for child in self.elem:
             child.set("parent_", self.elem)
@@ -1658,7 +1658,7 @@ class DictObject(ASTPython):
                 yield "expr", ","
             key = True
 
-        yield "expr", "}"
+        yield "expr", "})"
 
 
 class DictElem(ASTPython):

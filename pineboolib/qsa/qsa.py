@@ -25,6 +25,7 @@ Function = types.Function
 Object = types.Object
 Array = types.Array
 Date = types.Date
+AttributeDict = types.AttributeDict
 
 logger = logging.getLogger(__name__)
 
