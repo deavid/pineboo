@@ -57,11 +57,16 @@ Ejemplo de uso:
 
 def base_model(name: str) -> Any:
     # print("Base", name)
+    from pineboolib.application import project
+
     path = _path("%s.mtd" % name, False)
+    if path.find("share/pineboo/tables") > -1:
+        path = path.replace("share/pineboo/tables", "tempdata/cache/%s/sys/file.mtd" % project.conn.DBName())
     if path:
         path = "%s_model.py" % path[:-4]
         if os.path.exists(path):
             try:
+
                 # FIXME: load_module is deprecated!
                 # https://docs.python.org/3/library/importlib.html#importlib.machinery.SourceFileLoader.load_module
                 loader = machinery.SourceFileLoader(name, path)
@@ -161,7 +166,6 @@ def load_models() -> None:
         for nombre in files:  # Buscamos los presonalizados
             if nombre.endswith("pyc"):
                 continue
-
             nombre = nombre.replace("_model.py", "")
             mod = load_model(nombre)
             if mod is not None:

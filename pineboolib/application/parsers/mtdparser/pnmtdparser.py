@@ -29,7 +29,14 @@ def mtd_parse(table_name: str) -> None:
         return
 
     mtd_file = _path("%s.mtd" % table_name)
+
     dest_file = "%s_model.py" % mtd_file[: len(mtd_file) - 4]
+    if dest_file.find("share/pineboo/tables") > -1:
+        dest_file = dest_file.replace("share/pineboo/tables", "tempdata/cache/%s/sys/file.mtd" % project.conn.DBName())
+        sys_dir = dest_file[: dest_file.find("/file.mtd")]
+        if not os.path.exists(sys_dir):
+            os.mkdir(sys_dir)
+            os.mkdir("%s/file.mtd" % sys_dir)
 
     if not os.path.exists(dest_file):
         lines = generate_model(dest_file, mtd)
