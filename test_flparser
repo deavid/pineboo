@@ -77,7 +77,7 @@ except ImportError:
     sys.exit(32)
 
 
-# import pineboolib.emptyscript
+# import pineboolib.qsa.emptyscript
 from pineboolib.application.parsers.qsaparser import postparse
 
 if __name__ == "__main__":
