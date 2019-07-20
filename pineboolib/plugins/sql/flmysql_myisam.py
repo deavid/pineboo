@@ -1097,7 +1097,7 @@ class FLMYSQL_MYISAM(object):
                 fList.append(field.name())
                 value = f[5]
                 if field.type() in ("string", "stringlist"):
-                    value = self.db_.normalizeValue(value)
+                    value = self.normalizeValue(value)
                 value = self.formatValue(field.type(), value, False)
                 vList.append(value)
 
@@ -1312,9 +1312,7 @@ class FLMYSQL_MYISAM(object):
 
         return ret
 
-    def normalizeValue(self, text) -> Optional[str]:
-        if text is None:
-            return None
+    def normalizeValue(self, text) -> str:
 
         import MySQLdb
 
