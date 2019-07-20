@@ -1663,7 +1663,7 @@ class Delete(ASTPython):
             child.set("parent_", self.elem)
             for dtype, data in parse_ast(child, parent=self).generate(isolate=False):
                 if dtype == "expr":
-                    expr.append(self.local_var(data, is_member=True))  # FIXME: is_member should be false
+                    expr.append(data)
                 else:
                     yield dtype, data
         yield "line", "del %s" % (" ".join(expr))
