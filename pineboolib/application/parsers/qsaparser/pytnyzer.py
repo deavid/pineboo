@@ -1539,7 +1539,7 @@ class Member(ASTPython):
                                     arguments = [
                                         "qsa.replace(%s, %s, %s)" % (".".join(part1), part_list[0], ",".join(part_list[1:]))
                                     ] + part2
-                                    print("%s: %r >> %r" % (member, orig_arguments, arguments))
+
                             # Es un regexpr
                         # else:
                         #    if ".".join(part1):
