@@ -92,6 +92,15 @@ class FieldStruct(object):
 
                     list_ = value.split("-")
                     return datetime.date(int(list_[0]), int(list_[1]), int(list_[2]))
+        elif self.type_ in ("unlock", "bool"):
+            if isinstance(value, str):
+                if value == "true":
+                    value = True
+                elif value == "false":
+                    value = False
+                else:
+                    raise ValueError("bool type can't accept %s" % value)
+
         return value
 
     """
