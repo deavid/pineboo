@@ -253,6 +253,7 @@ def id_translate(name: str, qsa_exclude: Set[str] = None, transform: Dict[str, s
         "in",
         "print",
         "str",
+        "qsa",
     ]
     if "(" in name:
         raise ValueError("Parenthesis not allowed in ID for translation")
@@ -372,7 +373,7 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
     debug_file = None
     generate_depth = 0
     numline = 0
-    DEBUGFILE_LEVEL = 10
+    DEBUGFILE_LEVEL = 6
     _last_retlen = 0
     source: "Source"
     parent: "ASTPythonBase"
@@ -400,7 +401,7 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
             retlen, splen = splen - self.generate_depth, self.generate_depth
         if retlen > 0:
             # Reduce callstack to just one
-            if ASTPython._last_retlen == retlen + 1:
+            if ASTPython._last_retlen == retlen + 1 and self.DEBUGFILE_LEVEL < 10:
                 ASTPython._last_retlen = retlen
                 return
             sp = " " * (splen - 1) + "<" + "-" * retlen
@@ -642,7 +643,9 @@ class If(ASTPython):
             arg.set("parent_", self.elem)
             expr = []
             condition_yield = []
-            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
+            condition = parse_ast(arg, parent=self)
+            # yield "debug", repr(condition)
+            for dtype, data in condition.generate(isolate=False):
                 if dtype == "line+1":
                     yield "debug", "Inline update inside IF condition not allowed. Unexpected behavior."
                     dtype = "line"
@@ -1531,7 +1534,7 @@ class Member(ASTPython):
                     elif member == "match":
                         value = arg[6:]
                         value = value[: len(value) - 1]
-                        arguments = ["re.match(%s, %s)" % (value, ".".join(part1))] + part2
+                        arguments = ["qsa.re.match(%s, %s)" % (value, ".".join(part1))] + part2
                     elif member == "push":
                         value = arg[5:]
                         value = value[: len(value) - 1]
@@ -1609,7 +1612,8 @@ class Value(ASTPython):
             yield "expr", "("
         for child in self.elem:
             child.set("parent_", self.elem)
-            for dtype, data in parse_ast(child, parent=self).generate():
+            child_ast = parse_ast(child, parent=self)
+            for dtype, data in child_ast.generate():
                 if data is None:
                     raise ValueError(ElementTree.tostring(child))
                 yield dtype, data
@@ -1783,7 +1787,7 @@ class New(ASTPython):
 
 
 class Constant(ASTPython):
-    DEBUGFILE_LEVEL = 0
+    DEBUGFILE_LEVEL = 10
 
     def generate(self, **kwargs):
         ctype = self.elem.get("type")
@@ -1802,7 +1806,14 @@ class Constant(ASTPython):
                     for dtype, data in parse_ast(child, parent=self).generate(isolate=False):
                         if data:
                             val += data
-                    yield "expr", 're.compile("/%s/i")' % val
+                    yield "expr", 're.compile(r"/%s/i")' % val
+
+                elif child.tag == "regexbody":
+                    val = ""
+                    for dtype, data in parse_ast(child, parent=self).generate(isolate=False):
+                        if data:
+                            val += data
+                    yield "expr", 'r"%s"' % val
 
                 elif child.tag == "CallArguments":
                     arguments = []
@@ -1821,6 +1832,9 @@ class Constant(ASTPython):
                             arguments.append(" ".join(expr))
 
                     yield "expr", "qsa.Array([%s])" % (", ".join(arguments))
+                else:
+                    for dtype, data in parse_ast(child, parent=self).generate(isolate=False):
+                        yield dtype, data
             return
         if ctype == "String":
             delim = self.elem.get("delim")
@@ -1847,6 +1861,8 @@ class Identifier(ASTPython):
 
 
 class regex(ASTPython):
+    DEBUGFILE_LEVEL = 10
+
     def generate(self, **kwargs):
         child = self.elem.find("regexbody")
         # args_ = self.elem.items()
@@ -1858,7 +1874,18 @@ class regex(ASTPython):
                 yield "expr", data
 
 
+class regexbody(ASTPython):
+    DEBUGFILE_LEVEL = 10
+
+    def generate(self, **kwargs):
+        for arg in self.elem:
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
+                yield "expr", data
+
+
 class regexchar(ASTPython):
+    DEBUGFILE_LEVEL = 10
+
     def generate(self, **kwargs):
         val = self.elem.get("arg00")
         ret = None
