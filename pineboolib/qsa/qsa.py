@@ -554,6 +554,13 @@ def from_project(scriptname):
     return getattr(qsa_dict_modules, scriptname, None)
 
 
+class Application:
+    """El modulo "Datos" usa Application.formRecorddat_procesos para leer el módulo"""
+
+    def __getattr__(self, name):
+        return from_project(name)
+
+
 def format_exc(exc):
     return traceback.format_exc(exc)
 

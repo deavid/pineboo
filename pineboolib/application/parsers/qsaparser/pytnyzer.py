@@ -24,6 +24,7 @@ else:
 # In [2]: dir(qsa)
 
 QSA_KNOWN_ATTRS = {
+    "Application",
     "AQBoolFlagState",
     "AQBoolFlagStateList",
     "AQFormDB",
