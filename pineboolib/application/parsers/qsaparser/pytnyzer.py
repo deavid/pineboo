@@ -1546,9 +1546,14 @@ class Member(ASTPython):
                         else:
                             if not part2:
                                 if ".".join(part1):
-                                    arguments = [
-                                        "qsa.replace(%s, %s, %s)" % (".".join(part1), part_list[0], ",".join(part_list[1:]))
-                                    ] + part2
+                                    # arguments = ['numeroCSV', 'replace(".", ",")']
+                                    rep_str = arguments[0]
+                                    rep_from_to = arguments[1].replace("replace", "").strip()
+                                    if rep_from_to[0] == "(" and rep_from_to[-1] == ")":
+                                        rep_from_to = rep_from_to[1:-1]
+
+                                    rep_extra = arguments[2:]
+                                    arguments = ["qsa.replace(%s, %s)" % (rep_str, rep_from_to)] + rep_extra
 
                             # Es un regexpr
                         # else:
