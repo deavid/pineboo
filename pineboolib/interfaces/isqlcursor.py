@@ -35,6 +35,9 @@ class ISqlCursor(object):
     def modeAccess(self) -> Any:
         pass
 
+    def filter(self) -> str:
+        return ""
+
     def mainFilter(self) -> Any:
         pass
 

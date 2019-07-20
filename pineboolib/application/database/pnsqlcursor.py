@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import weakref
 import importlib
+import traceback
 from typing import Any, Optional, TYPE_CHECKING
 
 from PyQt5 import QtCore  # type: ignore
+from pineboolib.core.error_manager import error_manager
 from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
 from pineboolib.application.database.pnsqlquery import PNSqlQuery
 from pineboolib.application import project
@@ -2788,7 +2790,7 @@ class PNSqlCursor(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def insertRecord(self, wait: bool = True):
-        logger.trace("insertRecord %s", self._action.name())
+        logger.trace("insertRecord %s", self._action and self._action.name())
         self.openFormInMode(self.Insert, wait)
 
     """
@@ -3030,9 +3032,6 @@ class PNSqlCursor(QtCore.QObject):
                     try:
                         v = fn(self)
                     except Exception:
-                        from pineboolib.core.error_manager import error_manager
-                        import traceback
-
                         pncontrolsfactory.aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
                     if v and not isinstance(v, bool) or v is False:
                         return False
@@ -3526,7 +3525,7 @@ class PNSqlCursor(QtCore.QObject):
     def list(self):
         return None
 
-    def filter(self):
+    def filter(self) -> str:
         return self.model().where_filters["filter"] if "filter" in self.model().where_filters else ""
 
     def field(self, name):
