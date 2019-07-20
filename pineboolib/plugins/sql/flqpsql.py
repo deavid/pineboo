@@ -53,6 +53,7 @@ class FLQPSQL(object):
         self.engine_ = None
         self.session_ = None
         self.declarative_base_ = None
+        self.lastError_ = None
 
     def useThreads(self) -> bool:
         return True
