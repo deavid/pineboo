@@ -219,7 +219,7 @@ QSA_KNOWN_ATTRS = {
 }
 
 
-def id_translate(name: str, qsa_exclude: set = None) -> str:
+def id_translate(name: str, qsa_exclude: Set[str] = None, transform: Dict[str, str] = None) -> str:
     orig_name = name
     python_keywords = [
         "and",
@@ -310,11 +310,17 @@ def id_translate(name: str, qsa_exclude: set = None) -> str:
         if name in QSA_KNOWN_ATTRS:
             return "qsa.%s" % name
 
+        if transform is not None and name in transform:
+            return transform[name]
+
         if name.startswith("formRecord"):
             return 'qsa.from_project("%s")' % name
 
         return "__undef__" + name
     else:
+        if transform is not None and name in transform:
+            return transform[name]
+
         return name
 
 
@@ -338,11 +344,12 @@ class ASTPythonBase(object):
         yield "type", "value"
 
     def local_var(self, name: str, is_member=False) -> str:
-        if is_member:
-            locals = None
-        else:
+        locals = None
+        transform = None
+        if not is_member:
             locals = self.source.locals if self.source else set()
-        return id_translate(name, qsa_exclude=locals)
+            transform = self.source.locals_transform
+        return id_translate(name, qsa_exclude=locals, transform=transform)
 
     def other_var(self, name: str) -> str:
         return id_translate(name, qsa_exclude=None)
@@ -419,10 +426,12 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
 
 class Source(ASTPython):
     locals: Set[str]
+    locals_transform: Dict[str, str]
 
     def __init__(self, elem) -> None:
         super().__init__(elem)
         self.locals = set()
+        self.locals_transform = {}
 
     def generate(self, break_mode=False, include_pass=True, declare_identifiers: Set = None, **kwargs):
         elems = 0
@@ -1091,7 +1100,9 @@ class With(ASTPython):
         # yield "line", "%s = %s #WITH" % (name, " ".join(var_expr))
         yield "line", " #WITH_START"
         source = cast(Source, parse_ast(source_elem, parent=self))
-        source.locals |= set(With.python_keywords)
+        source.locals.add(" ".join(var_expr))
+        source.locals_transform = {x: "%s.%s" % (" ".join(var_expr), x) for x in With.python_keywords}
+
         for obj in source.generate(break_mode=True):
             obj_ = None
 
@@ -1531,33 +1542,12 @@ class Member(ASTPython):
                             if part_list[1] == ' "':
                                 part_list[1] = '","'
                         if part_list[0].find("re.compile") > -1:
-                            arguments = ["%s.sub(%s,%s)" % (part_list[0], part_list[1], ".".join(part1))] + part2
+                            arguments = ["%s.sub(%s,%s)" % (part_list[0], ",".join(part_list[1:]), ".".join(part1))] + part2
                         else:
                             if not part2:
                                 if ".".join(part1):
-
-                                    # arguments = [
-                                    #    "%s.%s if isinstance(%s, str) else %s.replace(%s, %s)
-                                    #    FIXME necesita ser mejorado. No soporta int como segundo parámetro"
-                                    #    % (".".join(part1), arg, part_list[0], part_list[0], ".".join(part1), part_list[1])
-                                    # ] + part2
-
                                     arguments = [
-                                        '%s.replace(%s, %s) if hasattr(%s,"match") else %s.replace(%s,str(%s))'
-                                        % (
-                                            part_list[0],
-                                            ".".join(part1),
-                                            part_list[1],
-                                            part_list[0],
-                                            ".".join(part1),
-                                            part_list[0],
-                                            part_list[1],
-                                            # arg,
-                                            # part_list[0],
-                                            # part_list,
-                                            # part1,
-                                            # arg,
-                                        )
+                                        "qsa.replace(%s, %s, %s)" % (".".join(part1), part_list[0], ",".join(part_list[1:]))
                                     ] + part2
 
                             # Es un regexpr
@@ -1570,7 +1560,6 @@ class Member(ASTPython):
                             arguments = ["%s.%s" % (".".join(part1), arg)] + part2
                         else:
                             arguments = ["%s" % arg] + part2
-
         yield "expr", ".".join(arguments)
 
 
@@ -1938,7 +1927,7 @@ class Compare(ASTPython):
         elif ctype == "EQQ":
             yield "expr", "is"
         elif ctype == "NEQ":
-            yield "expr", "not is"
+            yield "expr", "is not"
         elif ctype == "IN":
             yield "expr", "in"
         elif ctype == "LOR":
@@ -2028,12 +2017,14 @@ def parse_ast(elem, parent=None) -> "ASTPythonBase":
 
     if isinstance(elemparser, Source):
         if elemparser.source:
-            if isinstance(parent, (Switch, If)):
+            if isinstance(parent, (Switch, If, While, With)):
                 # For certain elements, use the same locals, don't copy.
                 # this will share locals.
                 elemparser.locals = elemparser.source.locals
+                elemparser.locals_transform = elemparser.source.locals_transform
             else:
                 elemparser.locals = elemparser.source.locals.copy()
+                elemparser.locals_transform = elemparser.source.locals_transform.copy()
         elemparser.source = elemparser
 
     return elemparser
