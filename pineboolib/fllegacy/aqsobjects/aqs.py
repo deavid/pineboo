@@ -122,7 +122,7 @@ class AQS(object):
     """
 
     @staticmethod
-    def pixmap_fromMimeSource(name) -> Any:
+    def pixmap_fromMimeSource(name: str) -> Any:
         from pineboolib.core.utils.utils_base import pixmap_fromMimeSource
 
         return pixmap_fromMimeSource(name)

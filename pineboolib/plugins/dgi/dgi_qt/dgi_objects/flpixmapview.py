@@ -55,7 +55,7 @@ class FLPixmapView(QtWidgets.QScrollArea):
             return
 
         new_pix = self.pixmap_
-        if self.autoScaled_ and self.pixmap_ is not None:
+        if self.autoScaled_ is not None and self.pixmap_ is not None:
             if self.pixmap_.height() > self.pixmapView_.height() or self.pixmap_.width() > self.pixmapView_.width():
                 new_pix = self.pixmap_.scaled(self.pixmapView_.size(), QtCore.Qt.KeepAspectRatio)
 

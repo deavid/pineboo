@@ -41,7 +41,7 @@ class IConnection:
     def isOpen(self) -> None:
         return
 
-    def tables(self) -> List[str]:
+    def tables(self, type_: str) -> List[str]:
         return []
 
     def database(self, name=None) -> "IConnection":

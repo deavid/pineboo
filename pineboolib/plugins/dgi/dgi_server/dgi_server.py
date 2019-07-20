@@ -8,19 +8,19 @@ from PyQt5 import QtCore  # type: ignore
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 
-from jsonrpc import JSONRPCResponseManager, dispatcher
+from jsonrpc import JSONRPCResponseManager, dispatcher  # type: ignore
 
 from pineboolib import logging
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 
 
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar, Union, Dict, List
 
 _T0 = TypeVar("_T0")
 
 logger = logging.getLogger(__name__)
 
-cursor_dict = {}
+cursor_dict: Dict[str, Any]
 
 
 class parser_options(object):
@@ -41,7 +41,7 @@ parser_server = parser_options()
 
 def normalize_data(data: _T0) -> Union[list, _T0]:
     if isinstance(data, (list, tuple)):
-        new_data = []
+        new_data: List[Union[str, Any]] = []
         for line in data:
             if isinstance(line, (datetime.date, datetime.time)):
                 # print("premio!!", type(line), line, type(data))
@@ -50,9 +50,7 @@ def normalize_data(data: _T0) -> Union[list, _T0]:
                 # print(type(line), line)
                 new_data.append(normalize_data(line))
 
-        data = new_data
-
-    return data
+    return new_data
 
 
 class parser(object):
@@ -216,8 +214,6 @@ class parser(object):
 
 class dgi_server(dgi_schema):
     _par = None
-    _W = {}
-    _WJS = {}
 
     def __init__(self) -> None:
         # desktopEnabled y mlDefault a True
@@ -244,6 +240,8 @@ class dgi_server(dgi_schema):
 
     def launchServer(self) -> None:
         # run_simple('localhost', self._listenSocket, self._par.receive, ssl_context="adhoc")
+        if self._par is None:
+            raise Exception("parser not found")
         run_simple("0.0.0.0", self._listenSocket, self._par.receive)
 
     def __getattr__(self, name) -> Any:

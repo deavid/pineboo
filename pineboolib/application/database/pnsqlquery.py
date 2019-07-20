@@ -4,7 +4,7 @@ from pineboolib.core.settings import config
 from pineboolib.application.utils import sql_tools
 from pineboolib.application import project
 from pineboolib.interfaces.ifieldmetadata import IFieldMetaData
-from typing import Any, Union, List, Dict, Optional
+from typing import Any, Union, List, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -194,7 +194,7 @@ class PNSqlQuery(object):
               se utiliza la coma.
     """
 
-    def setSelect(self, s: Optional[str], sep: str = ",") -> None:
+    def setSelect(self, s: str, sep: str = ",") -> None:
         self.d.select_ = s
 
         if isinstance(s, str) and sep in s:
@@ -298,7 +298,7 @@ class PNSqlQuery(object):
     @return Cadena de texto con la sentencia completa SQL que genera la consulta
     """
 
-    def sql(self) -> Optional[str]:
+    def sql(self) -> str:
         # for tableName in self.d.tablesList_:
         #    if not self.d.db_.manager().existsTable(tableName) and not self.d.db_.manager().createTable(tableName):
         #        return
@@ -718,7 +718,7 @@ class PNSqlQuery(object):
         separados por comas, p.e. "tabla1,tabla2,tabla3"
     """
 
-    def setTablesList(self, tl: Optional[str]) -> None:
+    def setTablesList(self, tl: str) -> None:
         self.d.tablesList_ = []
         tl = tl.replace(" ", "")
         for tabla in tl.split(","):

@@ -3112,10 +3112,14 @@ class FLFieldDB(QtWidgets.QWidget):
                             if tMD:
                                 v = self.cursorAux.valueBuffer(self.foreignField_)
                                 # print("El valor de %s.%s es %s" % (tMD.name(), self.foreignField_, v))
+                                if self.tableName_ is None:
+                                    raise ValueError("tableName_ no puede ser Nulo")
 
+                                if self.fieldName_ is None:
+                                    raise ValueError("fieldName_ no puede ser Nulo")
                                 # FIXME q = FLSqlQuery(False,
                                 # self.cursor_.db().connectionName())
-                                q = FLSqlQuery()
+                                q = FLSqlQuery(None, self.cursor_.db().connectionName())
                                 q.setForwardOnly(True)
                                 q.setTablesList(self.tableName_)
                                 q.setSelect(self.fieldName_)

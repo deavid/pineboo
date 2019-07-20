@@ -30,6 +30,10 @@ def mtd_parse(table_name: str) -> None:
 
     mtd_file = _path("%s.mtd" % table_name)
 
+    if mtd_file is None:
+        logger.warning("No se encuentra %s.mtd", table_name)
+        return
+
     dest_file = "%s_model.py" % mtd_file[: len(mtd_file) - 4]
     if dest_file.find("share/pineboo/tables") > -1:
         dest_file = dest_file.replace("share/pineboo/tables", "tempdata/cache/%s/sys/file.mtd" % project.conn.DBName())
