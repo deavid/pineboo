@@ -23,73 +23,6 @@ def base_create_dict(method: str, fun: str, id: int, arguments: List[Any] = []) 
     return {"method": method, "params": data, "jsonrpc": "2.0", "id": id}
 
 
-class cursor_class(object):
-    driver_: FLREMOTECLIENT
-    id_ = None
-    data_ = None
-    current_ = None
-    last_sql = None
-
-    def __init__(self, driver, n) -> None:
-        self.driver_ = driver
-        self.id_ = n
-        self.current_ = None
-        self.last_sql = None
-        self.description = None
-
-    def __getattr__(self, name) -> None:
-        logger.info("cursor_class: cursor(%s).%s !!", self.id_, name)
-        logger.trace("Detalle:", stack_info=True)
-
-    def execute(self, sql) -> None:
-        self.last_sql = sql
-        self.data_ = self.driver_.send_to_server(self.driver_.create_dict("execute", {"cursor_id": self.id_, "sql": sql}))
-        self.current_ = 0
-
-    def close(self) -> None:
-        self.driver_.send_to_server(self.driver_.create_dict("close", {"cursor_id": self.id_}))
-
-    def fetchone(self) -> Any:
-        ret_ = self.driver_.send_to_server(self.driver_.create_dict("fetchone", {"cursor_id": self.id_}))
-        # print(self.id_, "**", self.last_sql, ret_)
-        return ret_
-
-    def fetchall(self) -> Any:
-        ret_ = self.driver_.send_to_server(self.driver_.create_dict("fetchall", {"cursor_id": self.id_}))
-        # print(self.id_, "**", self.last_sql, ret_)
-        return ret_
-
-    def __iter__(self) -> "cursor_class":
-        return self
-
-    def __next__(self) -> Any:
-        ret = self.driver_.send_to_server(self.driver_.create_dict("fetchone", {"cursor_id": self.id_}))
-        if ret is None:
-            raise StopIteration
-        return ret
-
-
-class conn_class(object):
-
-    db_name_ = None
-    driver_: FLREMOTECLIENT
-    list_cursor: List[cursor_class]
-
-    def __init__(self, db_name, driver) -> None:
-        self.db_name_ = db_name
-        self.driver_ = driver
-        self.list_cursor = []
-
-    def is_valid(self) -> Any:
-        db_name_server = self.driver_.send_to_server(self.driver_.create_dict("db_name"))
-        return self.db_name_ == db_name_server
-
-    def cursor(self) -> cursor_class:
-        cur = cursor_class(self.driver_, len(self.list_cursor))
-        self.list_cursor.append(cur)
-        return cur
-
-
 class FLREMOTECLIENT(object):
 
     version_: str
@@ -236,6 +169,73 @@ class FLREMOTECLIENT(object):
                 },
             )
         )
+
+
+class cursor_class(object):
+    driver_: FLREMOTECLIENT
+    id_ = None
+    data_ = None
+    current_ = None
+    last_sql = None
+
+    def __init__(self, driver, n) -> None:
+        self.driver_ = driver
+        self.id_ = n
+        self.current_ = None
+        self.last_sql = None
+        self.description = None
+
+    def __getattr__(self, name) -> None:
+        logger.info("cursor_class: cursor(%s).%s !!", self.id_, name)
+        logger.trace("Detalle:", stack_info=True)
+
+    def execute(self, sql) -> None:
+        self.last_sql = sql
+        self.data_ = self.driver_.send_to_server(self.driver_.create_dict("execute", {"cursor_id": self.id_, "sql": sql}))
+        self.current_ = 0
+
+    def close(self) -> None:
+        self.driver_.send_to_server(self.driver_.create_dict("close", {"cursor_id": self.id_}))
+
+    def fetchone(self) -> Any:
+        ret_ = self.driver_.send_to_server(self.driver_.create_dict("fetchone", {"cursor_id": self.id_}))
+        # print(self.id_, "**", self.last_sql, ret_)
+        return ret_
+
+    def fetchall(self) -> Any:
+        ret_ = self.driver_.send_to_server(self.driver_.create_dict("fetchall", {"cursor_id": self.id_}))
+        # print(self.id_, "**", self.last_sql, ret_)
+        return ret_
+
+    def __iter__(self) -> "cursor_class":
+        return self
+
+    def __next__(self) -> Any:
+        ret = self.driver_.send_to_server(self.driver_.create_dict("fetchone", {"cursor_id": self.id_}))
+        if ret is None:
+            raise StopIteration
+        return ret
+
+
+class conn_class(object):
+
+    db_name_ = None
+    driver_: FLREMOTECLIENT
+    list_cursor: List[cursor_class]
+
+    def __init__(self, db_name, driver) -> None:
+        self.db_name_ = db_name
+        self.driver_ = driver
+        self.list_cursor = []
+
+    def is_valid(self) -> Any:
+        db_name_server = self.driver_.send_to_server(self.driver_.create_dict("db_name"))
+        return self.db_name_ == db_name_server
+
+    def cursor(self) -> cursor_class:
+        cur = cursor_class(self.driver_, len(self.list_cursor))
+        self.list_cursor.append(cur)
+        return cur
 
 
 class virtual_function(object):
