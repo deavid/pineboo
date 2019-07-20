@@ -18,10 +18,10 @@ from .pnbuffer import PNBuffer
 
 # FIXME: Removde dependency: Should not import from fllegacy.*
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  # FIXME: Removde dependency
-from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
 
 if TYPE_CHECKING:
     from .pncursortablemodel import PNCursorTableModel
+    from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
 
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ class PNCursorPrivate(QtCore.QObject):
     """
     Metadatos de la tabla asociada al cursor.
     """
-    metadata_: "PNTableMetaData.PNTableMetaData" = None
+    metadata_: "PNTableMetaData" = None
 
     """
     Mantiene el modo de acceso actual del cursor, ver FLSqlCursor::Mode.
@@ -819,6 +819,10 @@ class PNSqlCursor(QtCore.QObject):
         buffer, metadata = self.buffer(), self.metadata()
         if not fN or not metadata:
             logger.warning("setValueBuffer(): No fieldName, or no metadata found")
+            return
+
+        if not buffer:
+            logger.warning("setValueBuffer(): No buffer")
             return
 
         field = metadata.field(fN)
@@ -1749,11 +1753,14 @@ class PNSqlCursor(QtCore.QObject):
             logger.warning("setUnLock sólo permite modificar campos del tipo Unlock")
             return
 
-        if not self.buffer():
+        if not self.d.buffer_:
             self.primeUpdate()
 
+        if not self.d.buffer_:
+            raise Exception("Unexpected null buffer")
+
         self.setModeAccess(self.Edit)
-        self.buffer().setValue(fN, v)
+        self.d.buffer_.setValue(fN, v)
         self.update()
         self.refreshBuffer()
 
@@ -2289,18 +2296,18 @@ class PNSqlCursor(QtCore.QObject):
                 if foreignFieldValueBuffer != v and foreignFieldValueBuffer is not None:
                     self.cursorRelation().setValueBuffer(self.relation().foreignField(), v)
 
-    def primeInsert(self):
-        if not self.buffer():
+    def primeInsert(self) -> None:
+        if not self.d.buffer_:
             self.d.buffer_ = PNBuffer(self)
 
-        self.buffer().primeInsert()
+        self.d.buffer_.primeInsert()
 
-    def primeUpdate(self):
-        if not self.buffer():
+    def primeUpdate(self) -> PNBuffer:
+        if not self.d.buffer_:
             self.d.buffer_ = PNBuffer(self)
         # logger.warning("Realizando primeUpdate en pos %s y estado %s , filtro %s", self.at(), self.modeAccess(), self.filter())
-        self.buffer().primeUpdate(self.at())
-        return self.buffer()
+        self.d.buffer_.primeUpdate(self.at())
+        return self.d.buffer_
 
     """
     Refresca el buffer segun el modo de acceso establecido.
@@ -3153,9 +3160,6 @@ class PNSqlCursor(QtCore.QObject):
                     try:
                         v = fn(self)
                     except Exception:
-                        from pineboolib.core.error_manager import error_manager
-                        import traceback
-
                         pncontrolsfactory.aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
                     if v and not isinstance(v, bool) or v is False:
                         return False
