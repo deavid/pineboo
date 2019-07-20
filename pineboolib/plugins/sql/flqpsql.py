@@ -31,7 +31,7 @@ class FLQPSQL(object):
     name_: str
     alias_: str
     errorList = None
-    lastError_: Optional[str, None]
+    lastError_: Optional[str]
     db_ = None
     mobile_: bool = False
     pure_python_: bool = False
