@@ -49,13 +49,15 @@ class FLTranslations(object):
     @param stripped. no usado
     """
 
-    def releaseTsFile(self, ts_file_name: Union[str, bytes, int, str, Mapping[slice, Any]], verbose, stripped) -> None:
+    def releaseTsFile(self, ts_file_name: str, verbose, stripped) -> None:
         tor = None
 
         if self.loadTsFile(tor, ts_file_name, verbose):
-            qm_file_name = "%s.qm" % ts_file_name[:-3]
-            if not os.path.exists(qm_file_name):
-                self.releaseMetaTranslator(tor, qm_file_name, verbose, stripped)
+            pass
+            # qm_file_name = "%s.qm" % ts_file_name[:-3]
+            # FIXME: self.releaseMetaTranslator - does not exist in this class
+            # if not os.path.exists(qm_file_name):
+            #     self.releaseMetaTranslator(tor, qm_file_name, verbose, stripped)
 
     """
     Convierte el fichero .ts en .qm

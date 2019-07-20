@@ -135,7 +135,7 @@ class PNConnection(QtCore.QObject, IConnection):
     def isOpen(self) -> bool:
         return self._isOpen
 
-    def tables(self, t_: Optional[str] = None) -> Any:
+    def tables(self, t_: Optional[str] = None) -> List[str]:
         return self.driver().tables(t_)
 
     def database(self, name=None) -> "IConnection":

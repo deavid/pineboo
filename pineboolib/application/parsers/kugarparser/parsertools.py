@@ -129,7 +129,7 @@ class KParserTools(object):
         if data_type == 2:  # Double
             if value in (None, "None"):
                 return
-            from PyQt5 import QtCore
+            from PyQt5 import QtCore  # type: ignore
 
             ret_ = QtCore.QLocale.system().toString(float(value), "f", p)
         elif data_type == 0:

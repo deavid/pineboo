@@ -835,8 +835,8 @@ class PNSqlCursor(QtCore.QObject):
             raise Exception("no db or no manager")
 
         type_ = field.type()
-
-        if not buffer.field(fN).has_changed(v):
+        buff_field = buffer.field(fN)
+        if buff_field and not buff_field.has_changed(v):
             return
 
         # if not self.buffer():  # Si no lo pongo malo....

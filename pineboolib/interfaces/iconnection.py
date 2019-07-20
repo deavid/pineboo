@@ -30,7 +30,7 @@ class IConnection:
         return
 
     def connectionName(self) -> str:
-        return
+        return ""
 
     def useConn(self, name="default") -> None:
         return
@@ -41,11 +41,11 @@ class IConnection:
     def isOpen(self) -> None:
         return
 
-    def tables(self, type_: str) -> List[str]:
+    def tables(self, t_: Optional[str] = None) -> List[str]:
         return []
 
     def database(self, name=None) -> "IConnection":
-        return
+        ...
 
     def DBName(self) -> str:
         return ""

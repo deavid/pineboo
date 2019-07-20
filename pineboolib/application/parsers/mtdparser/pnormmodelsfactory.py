@@ -60,6 +60,8 @@ def base_model(name: str) -> Any:
     from pineboolib.application import project
 
     path = _path("%s.mtd" % name, False)
+    if path is None:
+        raise Exception("File %s.mtd not found" % name)
     if path.find("share/pineboo/tables") > -1:
         path = path.replace("share/pineboo/tables", "tempdata/cache/%s/sys/file.mtd" % project.conn.DBName())
     if path:

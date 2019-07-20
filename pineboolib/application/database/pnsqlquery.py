@@ -306,7 +306,8 @@ class PNSqlQuery(object):
         res = None
 
         if not self.d.select_:
-            return None
+            logger.warning("sql(): No select yet. Returning empty")
+            return ""
 
         if not self.d.from_:
             res = "SELECT %s" % self.d.select_
