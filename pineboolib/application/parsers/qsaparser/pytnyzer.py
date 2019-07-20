@@ -1879,6 +1879,8 @@ class regexchar(ASTPython):
             ret = "?"
         elif val == "AT":
             ret = "@"
+        elif val == "OR":
+            ret = "|"
         elif val == "RPAREN":
             ret = ")"
         elif val == "LPAREN":
