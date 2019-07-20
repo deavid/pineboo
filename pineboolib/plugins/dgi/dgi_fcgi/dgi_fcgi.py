@@ -6,7 +6,7 @@ from pineboolib.application.utils.check_dependencies import check_dependencies
 
 from pineboolib.application import project
 
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping
 
 
 logger = logging.getLogger(__name__)

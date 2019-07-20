@@ -2,7 +2,7 @@
 from PyQt5 import QtCore, QtWidgets  # type: ignore
 from pineboolib import logging
 from pineboolib.fllegacy.flapplication import aqApp
-from typing import Any, Optional
+from typing import Any
 
 
 class FLLineEdit(QtWidgets.QLineEdit):

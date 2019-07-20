@@ -24,7 +24,7 @@ los metadatos de una consulta, ver FLTableMetaData::query().
 
 class PNTableMetaData(ITableMetaData):
     logger = logging.getLogger("CursorTableModel")
-    d: "FLTableMetaDataPrivate"
+    d: "PNTableMetaDataPrivate"
 
     """
     constructor

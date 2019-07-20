@@ -131,8 +131,8 @@ class PNRelationMetaData:
     def copy(self, other):
         if other == self:
             return
-        if not isinstance(other, FLRelationMetaData):
-            raise ValueError("FLRelationMetaData::copy requires an instance to a FLRelationMetaData class")
+        if not isinstance(other, PNRelationMetaData):
+            raise ValueError("FLRelationMetaData::copy requires an instance to a PNRelationMetaData class")
         self.d.field_ = other.d.field_
         self.d.foreignTable_ = other.d.foreignTable_
         self.d.foreignField_ = other.d.foreignField_
