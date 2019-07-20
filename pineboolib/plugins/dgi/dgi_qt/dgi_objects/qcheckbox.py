@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets, QtCore  # type: ignore
+from PyQt5 import QtWidgets
 
 
 class QCheckBox(QtWidgets.QCheckBox):
@@ -20,5 +20,3 @@ class QCheckBox(QtWidgets.QCheckBox):
         super().setChecked(b)
 
     checked = property(get_checked, set_checked)
-    # if not project._DGI.localDesktop():
-    #    project._DGI._par.addQueque("%s_setChecked" % self._parent.objectName(), b)

@@ -20,10 +20,7 @@ import traceback
 from pineboolib import logging
 from PyQt5.QtCore import QTime, QDate, QDateTime, Qt  # type: ignore
 
-from typing import Any, Iterable, Optional, Union, List, Dict, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    import pymysql  # noqa: F401
+from typing import Any, Iterable, Optional, Union, List, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +83,7 @@ class FLMYSQL_MYISAM2(object):
     def DBName(self) -> Any:
         return self._dbname
 
-    def connect(self, db_name, db_host, db_port, db_userName, db_password) -> Union[bool, "pymysql.connections.Connection"]:
+    def connect(self, db_name, db_host, db_port, db_userName, db_password) -> Any:
         self._dbname = db_name
         check_dependencies({"pymysql": "PyMySQL", "sqlalchemy": "sqlAlchemy"})
         from sqlalchemy import create_engine  # type: ignore
