@@ -24,7 +24,7 @@ def base_create_dict(method: str, fun: str, id: int, arguments: List[Any] = []) 
 
 
 class cursor_class(object):
-    driver_ = None
+    driver_: FLREMOTECLIENT
     id_ = None
     data_ = None
     current_ = None
@@ -72,8 +72,8 @@ class cursor_class(object):
 class conn_class(object):
 
     db_name_ = None
-    driver_ = None
-    list_cursor = None
+    driver_: FLREMOTECLIENT
+    list_cursor: List[cursor_class]
 
     def __init__(self, db_name, driver) -> None:
         self.db_name_ = db_name
@@ -92,16 +92,16 @@ class conn_class(object):
 
 class FLREMOTECLIENT(object):
 
-    version_ = None
+    version_: str
     conn_ = None
-    name_ = None
-    alias_ = None
-    errorList = None
-    lastError_ = None
+    name_: str
+    alias_: str
+    errorList: List[str]
+    lastError_: str
     db_ = None
-    mobile_ = True
-    pure_python_ = True
-    defaultPort_ = None
+    mobile_: bool
+    pure_python_: bool
+    defaultPort_: int
 
     def __init__(self) -> None:
         self.version_ = "0.6"
@@ -156,7 +156,8 @@ class FLREMOTECLIENT(object):
         import requests
 
         headers = {"content-type": "application/json"}
-
+        if self.url is None:
+            raise Exception("send_to_server. self.url is None")
         req = requests.post(self.url, data=json.dumps(js), headers=headers).json()
         res_ = req["result"] if "result" in req.keys() else None
         # if res_ is None:
@@ -238,10 +239,10 @@ class FLREMOTECLIENT(object):
 
 
 class virtual_function(object):
-    name_ = None
-    driver_ = None
+    name_: str
+    driver_: FLREMOTECLIENT
 
-    def __init__(self, name, driver) -> None:
+    def __init__(self, name: str, driver: FLREMOTECLIENT) -> None:
         self.name_ = name
         self.driver_ = driver
 

@@ -18,25 +18,25 @@ import traceback
 import os
 from pineboolib import logging
 
-from typing import Optional, Union, Any, List
+from typing import Optional, Union, Any, List, Dict
 
 
 class FLSQLITE(object):
 
-    version_ = None
+    version_: str
     conn_ = None
-    name_ = None
+    name_: str
     cursor_ = None
-    alias_ = None
-    errorList = None
-    lastError_ = None
+    alias_: str
+    errorList: List[str]
+    lastError_: str
     declare = None
-    db_filename = None
-    sql = None
-    rowsFetched = None
+    db_filename: str
+    sql: str
+    rowsFetched: Dict[Any, Any]
     db_ = None
-    mobile_ = True
-    pure_python_ = False
+    mobile_: bool
+    pure_python_: bool
     # True por defecto, convierte los datos de entrada y salida a UTF-8 desde
     # Latin1
     parseFromLatin = None
@@ -86,7 +86,9 @@ class FLSQLITE(object):
         return self.open_
 
     def cursor(self) -> Any:
-        if not self.cursor_:
+        if self.cursor_ is None:
+            if self.conn_ is None:
+                raise Exception("cursor. self.conn_ is None")
             self.cursor_ = self.conn_.cursor()
             # self.cursor_.execute("PRAGMA journal_mode = WAL")
             # self.cursor_.execute("PRAGMA synchronous = NORMAL")
@@ -313,6 +315,8 @@ class FLSQLITE(object):
         return True
 
     def inTransaction(self) -> Any:
+        if self.conn_ is None:
+            raise Exception("inTransaction. self.conn_ is None")
         return self.conn_.in_transaction
 
     def fix_query(self, query: str) -> str:
@@ -596,6 +600,9 @@ class FLSQLITE(object):
         if not self.isOpen():
             raise Exception("recordInfo2: Cannot proceed: SQLLITE not open")
 
+        if self.conn_ is None:
+            raise Exception("recordInfo2. self.conn_ is None")
+
         sql = "PRAGMA table_info('%s')" % tablename
         conn = self.conn_
         cursor = conn.execute(sql)
@@ -606,7 +613,10 @@ class FLSQLITE(object):
         if not self.isOpen():
             return None
 
-        info = []
+        info: List[Any] = []
+
+        if self.db_ is None:
+            raise Exception("recordInfo. self.db_ is None")
 
         if isinstance(tablename_or_query, str):
             tablename = tablename_or_query
@@ -924,6 +934,9 @@ class FLSQLITE(object):
     def Mr_Proper(self) -> None:
         self.logger.warning("FLSQLITE: FIXME: Mr_Proper no regenera tablas")
         util = FLUtil()
+        if self.db_ is None:
+            raise Exception("MR_Proper. self.db_ is None")
+
         self.db_.dbAux().transaction()
         rx = QRegExp("^.*[\\d][\\d][\\d][\\d].[\\d][\\d].*[\\d][\\d]$")
         rx2 = QRegExp("^.*alteredtable[\\d][\\d][\\d][\\d].*$")

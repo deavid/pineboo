@@ -26,16 +26,16 @@ logger = logging.getLogger(__name__)
 
 class FLQPSQL(object):
 
-    version_ = None
+    version_: str
     conn_: Any = None
-    name_ = None
-    alias_ = None
+    name_: str
+    alias_: str
     errorList = None
-    lastError_ = None
+    lastError_: Optional[str, None]
     db_ = None
-    mobile_ = False
-    pure_python_ = False
-    defaultPort_ = None
+    mobile_: bool = False
+    pure_python_: bool = False
+    defaultPort_: int
     engine_ = None
     session_ = None
     declarative_base_ = None
@@ -84,8 +84,8 @@ class FLQPSQL(object):
     def connect(self, db_name, db_host, db_port, db_userName, db_password) -> Any:
         self._dbname = db_name
         check_dependencies({"psycopg2": "python3-psycopg2", "sqlalchemy": "sqlAlchemy"})
-        import psycopg2
-        from psycopg2.extras import LoggingConnection
+        import psycopg2  # type: ignore
+        from psycopg2.extras import LoggingConnection  # type: ignore
 
         logger = logging.getLogger(self.alias_)
         logger.debug = logger.trace  # Send Debug output to Trace
@@ -106,7 +106,7 @@ class FLQPSQL(object):
             if project._splash:
                 project._splash.hide()
 
-            if not project._DGI.localDesktop():
+            if project._DGI and not project._DGI.localDesktop():
                 return False
 
             if "does not exist" in str(e) or "no existe" in str(e):
@@ -181,7 +181,7 @@ class FLQPSQL(object):
 
     def declarative_base(self) -> Any:
         if self.declarative_base_ is None:
-            from sqlalchemy.ext.declarative import declarative_base
+            from sqlalchemy.ext.declarative import declarative_base  # type : ignore
 
             self.declarative_base_ = declarative_base()
 
@@ -218,7 +218,7 @@ class FLQPSQL(object):
 
         util = FLUtil()
 
-        s = None
+        s: Any = None
 
         # if v == None:
         #    v = ""
@@ -550,6 +550,9 @@ class FLQPSQL(object):
                 recMtd = self.recordInfo(tmd_or_table2)
                 recBd = self.recordInfo2(table1)
                 # fieldBd = None
+                if recMtd is None:
+                    raise ValueError("recordInfo no ha retornado valor")
+
                 for fieldMtd in recMtd:
                     # fieldBd = None
                     found = False
@@ -642,12 +645,14 @@ class FLQPSQL(object):
         if not self.isOpen():
             return None
 
-        info = []
-
+        info: List[list] = []
         if isinstance(tablename_or_query, str):
             tablename = tablename_or_query
 
             doc = QDomDocument(tablename)
+            if self.db_ is None:
+                raise Exception("recordInfo. self.db_ es Nulo")
+
             stream = self.db_.managerModules().contentCached("%s.mtd" % tablename)
             util = FLUtil()
             if not util.domDocumentSetContent(doc, stream):
@@ -747,6 +752,9 @@ class FLQPSQL(object):
     def constraintExists(self, name) -> bool:
         sql = "SELECT constraint_name FROM information_schema.table_constraints where constraint_name='%s'" % name
 
+        if self.db_ is None:
+            raise Exception("constraintExists. self.db_ is None")
+
         q = PNSqlQuery(None, self.db_.dbAux())
 
         return q.exec_(sql) and q.size() > 0
@@ -771,6 +779,9 @@ class FLQPSQL(object):
         fieldList = oldMTD.fieldList()
 
         renameOld = "%salteredtable%s" % (oldMTD.name()[0:5], QDateTime().currentDateTime().toString("ddhhssz"))
+
+        if self.db_ is None:
+            raise Exception("alterTable3. self.db_ is None")
 
         self.db_.dbAux().transaction()
 
@@ -925,10 +936,14 @@ class FLQPSQL(object):
         doc = QDomDocument("doc")
         docElem = None
 
+        if self.db_ is None:
+            raise Exception("alterTable2. self.db_ is None")
+
         if not util.domDocumentSetContent(doc, mtd1):
             logger.warning("FLManager::alterTable : " + util.translate("application", "Error al cargar los metadatos."))
         else:
             docElem = doc.documentElement()
+
             oldMTD = self.db_.manager().metadata(docElem, True)
 
         if oldMTD and oldMTD.isQuery():
@@ -1239,6 +1254,9 @@ class FLQPSQL(object):
         if not records:
             return False
 
+        if self.db_ is None:
+            raise Exception("insertMulti. self.db_ is None")
+
         mtd = self.db_.manager().metadata(table_name)
         fList = []
         vList = []
@@ -1270,6 +1288,10 @@ class FLQPSQL(object):
 
     def Mr_Proper(self) -> None:
         util = FLUtil()
+
+        if self.db_ is None:
+            raise Exception("Mr_Proper. self.db_ is None")
+
         self.db_.dbAux().transaction()
 
         qry = PNSqlQuery(None, "dbAux")
