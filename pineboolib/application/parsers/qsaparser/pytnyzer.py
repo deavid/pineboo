@@ -6,7 +6,7 @@ import os
 import os.path
 import re
 from xml.etree import ElementTree
-from typing import Any, Generator, Optional, Tuple, Type, List, Dict, Set, cast
+from typing import Any, Generator, Tuple, Type, List, Dict, Set, cast
 from pathlib import Path
 
 try:
@@ -1997,14 +1997,14 @@ class Unknown(ASTPython):
 # -----------------
 
 
-def astparser_for(elem) -> Optional[ASTPythonBase]:
+def astparser_for(elem) -> ASTPythonBase:
     for cls in ASTPythonFactory.ast_class_types:
         if cls.can_process_tag(elem.tag):
             return cls(elem)
-    return None
+    raise ValueError("No suitable class for %r" % elem.tag)
 
 
-def parse_ast(elem, parent=None) -> "ASTPythonBase":
+def parse_ast(elem, parent=None) -> ASTPythonBase:
     elemparser = astparser_for(elem)
     elemparser.parent = parent
 
@@ -2015,8 +2015,8 @@ def parse_ast(elem, parent=None) -> "ASTPythonBase":
     else:
         elemparser.source = None
 
-    if isinstance(elemparser, Source):
-        if elemparser.source:
+    if elemparser is not None and isinstance(elemparser, Source):
+        if elemparser.source is not None:
             if isinstance(parent, (Switch, If, While, With)):
                 # For certain elements, use the same locals, don't copy.
                 # this will share locals.
