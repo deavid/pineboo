@@ -16,7 +16,9 @@ class AboutPineboo(QWidget):
 
         dlg_ = filedir("plugins/dgi/dgi_qt/dgi_objects/dlg_about/about_pineboo.ui")
         version_ = project.version
-        self.ui = project._DGI.createUI(dlg_, None, self)
+        self.ui = None
+        if project._DGI:
+            self.ui = project._DGI.createUI(dlg_, None, self)
         if self.ui is None:
             raise Exception("Error creating UI About Dialog")
         self.ui.lbl_version.setText("Pineboo v%s" % str(version_))

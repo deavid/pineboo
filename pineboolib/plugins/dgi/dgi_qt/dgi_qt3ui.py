@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
-from typing import Any
 from xml.etree import ElementTree as ET
 from binascii import unhexlify
 from pineboolib import logging
@@ -11,9 +10,9 @@ from pineboolib.application import project
 
 from pineboolib import pncontrolsfactory
 
-from typing import Optional, Tuple, Callable, List, Dict
+from typing import Optional, Tuple, Callable, List, Dict, Any
 
-ICONS = {}
+ICONS: Dict[str, Any]
 root = None
 logger = logging.getLogger("pnqt3ui")
 
@@ -83,6 +82,15 @@ def loadUi(form_path: str, widget, parent=None) -> None:
         signal_name = signal_elem.text
         receiv_name = receiv_elem.text
         slot_name = slot_elem.text
+
+        if sender_name is None:
+            raise ValueError("no se encuentra sender_name")
+        if signal_name is None:
+            raise ValueError("no se encuentra signal_name")
+        if receiv_name is None:
+            raise ValueError("no se encuentra receiv_name")
+        if slot_name is None:
+            raise ValueError("no se encuentra slot_name")
 
         receiver = None
         if isinstance(widget, pncontrolsfactory.QMainWindow):
@@ -175,7 +183,7 @@ def loadUi(form_path: str, widget, parent=None) -> None:
         # toolbar = widget.addToolBar(nameTB_)
         loadToolBar(xmltoolbar, widget)
 
-    if not project._DGI.localDesktop():
+    if project._DGI and not project._DGI.localDesktop():
         project._DGI.showWidget(widget)
     else:
         widget.show()
@@ -226,11 +234,13 @@ def loadMenuBar(xml: ET.Element, widget) -> None:
                     ex, ey, ew, eh = geo_.find("x"), geo_.find("y"), geo_.find("width"), geo_.find("height")
                     if ex is None or ey is None or ew is None or eh is None:
                         continue
-                    x1 = int(ex.text)
-                    y1 = int(ey.text)
-                    w1 = int(ew.text)
-                    h1 = int(eh.text)
-                    mB.setGeometry(x1, y1, w1, h1)
+                    x1 = ex.text
+                    y1 = ey.text
+                    w1 = ew.text
+                    h1 = eh.text
+                    if x1 is None or y1 is None or w1 is None or h1 is None:
+                        continue
+                    mB.setGeometry(int(x1), int(y1), int(w1), int(h1))
             elif name == "acceptDrops":
                 bool_elem = x.find("bool")
                 if bool_elem is not None:
@@ -584,6 +594,8 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
                         lay_name = lay_name_e.text
                 elif p_name == "margin":
                     if number_elem is not None:
+                        if number_elem.text is None:
+                            raise ValueError("margin no contiene valor")
                         lay_margin = int(number_elem.text)
 
                     if c.tag == "hbox":
@@ -595,6 +607,8 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
 
                 elif p_name == "spacing":
                     if number_elem is not None:
+                        if number_elem.text is None:
+                            raise ValueError("spacing no contiene valor")
                         lay_spacing = int(number_elem.text)
                 elif p_name == "sizePolicy":
                     widget.setSizePolicy(loadVariant(p, widget))
@@ -641,7 +655,7 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
             loadWidget(c, new_widget, parent, origWidget)
             prop_name = c.find("./property[@name='name']/cstring")
             path = prop_name.text if prop_name is not None else ""
-            if not project._DGI.localDesktop():
+            if project._DGI and not project._DGI.localDesktop():
                 origWidget.ui_[path] = new_widget
             new_widget.setContentsMargins(0, 0, 0, 0)
             new_widget.show()
@@ -672,6 +686,9 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
 
         if c.tag == "action":
             acName = c.get("name")
+            if root is None:
+                raise Exception("No se encuentra root")
+
             for xmlaction in root.findall("actions//action"):
                 prop_name = xmlaction.find("./property[@name='name']/cstring")
                 if prop_name is not None and prop_name.text == acName:
@@ -723,6 +740,10 @@ def loadIcon(xml: "ET.Element") -> None:
         logger.warning("loadIcon: provided xml lacks <data>")
         return
     img_format = xmldata.get("format")
+    if xmldata.text is None:
+        logger.warning("loadIcon: text is empty")
+        return
+
     data = unhexlify(xmldata.text.strip())
     pixmap = QtGui.QPixmap()
     if img_format == "XPM.GZ":
@@ -818,7 +839,7 @@ def _loadVariant(variant, widget=None) -> Any:
         p = QtGui.QFont()
         for c in variant:
             value = c.text.strip()
-            bv = False
+            bv: Optional[bool] = False
             if c.tag not in ("family", "pointsize"):
                 bv = b(value)
             try:

@@ -2,7 +2,7 @@
 from PyQt5 import QtWidgets, QtGui  # type: ignore
 from pineboolib.core import decorators
 from PyQt5.QtCore import pyqtSignal  # type: ignore
-from typing import Any
+from typing import Any, List
 
 
 class QListView(QtWidgets.QWidget):
@@ -12,10 +12,10 @@ class QListView(QtWidgets.QWidget):
     _root_is_decorated = None
     _default_rename_action = None
     _tree = None
-    _cols_labels = None
+    _cols_labels: List[str]
     _key = None
     _root_item = None
-    _current_row = None
+    _current_row: int
 
     doubleClicked = pyqtSignal(object)
     selectionChanged = pyqtSignal(object)
@@ -57,8 +57,8 @@ class QListView(QtWidgets.QWidget):
         item = pncontrolsfactory.FLListViewItem()
         item.setEditable(False)
         item.setText(t)
-
-        self._tree.model().setItem(self._current_row, 0, item)
+        if self._tree is not None:
+            self._tree.model().setItem(self._current_row, 0, item)
 
     @decorators.NotImplementedWarn
     def setItemMargin(self, m):
@@ -68,7 +68,8 @@ class QListView(QtWidgets.QWidget):
         if isinstance(labels, str):
             labels = [labels]
 
-        self._tree.model().setHorizontalHeaderLabels(labels)
+        if self._tree is not None:
+            self._tree.model().setHorizontalHeaderLabels(labels)
         self._cols_labels = labels
 
     def setColumnText(self, col, new_value) -> None:
@@ -109,4 +110,7 @@ class QListView(QtWidgets.QWidget):
         self._default_rename_action = b
 
     def model(self) -> Any:
-        return self._tree.model()
+        if self._tree is not None:
+            return self._tree.model()
+        else:
+            raise Exception("No hay _tree")
