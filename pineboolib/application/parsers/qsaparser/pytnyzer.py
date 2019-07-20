@@ -1927,7 +1927,7 @@ class Compare(ASTPython):
         elif ctype == "EQQ":
             yield "expr", "is"
         elif ctype == "NEQ":
-            yield "expr", "not is"
+            yield "expr", "is not"
         elif ctype == "IN":
             yield "expr", "in"
         elif ctype == "LOR":
