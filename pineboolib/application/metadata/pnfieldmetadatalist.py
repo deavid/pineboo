@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .PNfieldmetadata import PNFieldMetaData
+from .pnfieldmetadata import PNFieldMetaData
 from typing import List
 
 # Completa Si
