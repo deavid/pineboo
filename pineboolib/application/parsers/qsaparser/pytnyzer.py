@@ -1492,6 +1492,9 @@ class Member(ASTPython):
                         value = value[: len(value) - 1]
                         arguments = ["%s[%s]" % (".".join(part1), value)] + part2
                     elif member == "search":
+                        if not part1:
+                            # Algunas veces ve una variable "search" y cree que es una llamada
+                            continue
                         value = arg[7:]
                         value = value[: len(value) - 1]
                         arguments = ["%s.find('%s')" % (".".join(part1), value)] + part2
