@@ -497,11 +497,13 @@ class Class(ASTPython):
 class Function(ASTPython):
     def generate(self, **kwargs):
         _name = self.elem.get("name")
+        anonymous = False
         if _name:
             name = self.other_var(_name)
         else:
             # Anonima:
-            name = "_"
+            name = "_anonymous_fn_"
+            anonymous = True
         withoutself = self.elem.get("withoutself")
         parent = self.elem.get("parent_")
         grandparent = None
@@ -553,6 +555,8 @@ class Function(ASTPython):
             for obj in parse_ast(source, parent=self).generate(declare_identifiers=id_list):
                 yield obj
         yield "end", "block-def-%s" % (name)
+        if anonymous:
+            yield "expr", name
 
 
 class FunctionAnon(Function):
@@ -878,7 +882,7 @@ class ForIn(ASTPython):
             if e.tag == "ForInitialize":
                 e = list(e)[0]
             expr = []
-            for dtype, data in parse_ast(e, parent=self).generate(isolate=False):
+            for dtype, data in parse_ast(e, parent=self).generate(isolate=False, is_member=True):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -887,9 +891,11 @@ class ForIn(ASTPython):
         list_elem, main_list = myelems
         yield "debug", "FOR-IN: " + repr(myelems)
         yield "line", "for %s in %s:" % (list_elem, main_list)
-        for source in self.elem.findall("Source"):
+        for source_elem in self.elem.findall("Source"):
+            source = cast(Source, parse_ast(source_elem, parent=self))
+            source.locals.add(list_elem)
             yield "begin", "block-for-in"
-            for obj in parse_ast(source, parent=self).generate(include_pass=False):
+            for obj in source.generate(include_pass=False):
                 yield obj
             yield "end", "block-for-in"
 
@@ -1652,11 +1658,15 @@ class Parentheses(ASTPython):
 
 class Delete(ASTPython):
     def generate(self, **kwargs):
-        yield "expr", "del"
+        expr = []
         for child in self.elem:
             child.set("parent_", self.elem)
             for dtype, data in parse_ast(child, parent=self).generate(isolate=False):
-                yield dtype, data
+                if dtype == "expr":
+                    expr.append(self.local_var(data, is_member=True))  # FIXME: is_member should be false
+                else:
+                    yield dtype, data
+        yield "line", "del %s" % (" ".join(expr))
 
 
 class OpTernary(ASTPython):
