@@ -1100,7 +1100,7 @@ class With(ASTPython):
         # yield "line", "%s = %s #WITH" % (name, " ".join(var_expr))
         yield "line", " #WITH_START"
         source = cast(Source, parse_ast(source_elem, parent=self))
-        # source.locals |= set(With.python_keywords)
+        source.locals.add(" ".join(var_expr))
         source.locals_transform = {x: "%s.%s" % (" ".join(var_expr), x) for x in With.python_keywords}
 
         for obj in source.generate(break_mode=True):
@@ -2017,12 +2017,14 @@ def parse_ast(elem, parent=None) -> "ASTPythonBase":
 
     if isinstance(elemparser, Source):
         if elemparser.source:
-            if isinstance(parent, (Switch, If, While)):
+            if isinstance(parent, (Switch, If, While, With)):
                 # For certain elements, use the same locals, don't copy.
                 # this will share locals.
                 elemparser.locals = elemparser.source.locals
+                elemparser.locals_transform = elemparser.source.locals_transform
             else:
                 elemparser.locals = elemparser.source.locals.copy()
+                elemparser.locals_transform = elemparser.source.locals_transform.copy()
         elemparser.source = elemparser
 
     return elemparser
