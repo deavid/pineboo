@@ -1426,6 +1426,7 @@ class Member(ASTPython):
         for member in replace_members:
             for idx, arg in enumerate(arguments):
                 if member == arg or arg.startswith(member + "("):
+                    orig_arguments = arguments[:]
                     expr = arg_expr[idx]
                     part1 = arguments[:idx]
                     try:
@@ -1531,35 +1532,14 @@ class Member(ASTPython):
                             if part_list[1] == ' "':
                                 part_list[1] = '","'
                         if part_list[0].find("re.compile") > -1:
-                            arguments = ["%s.sub(%s,%s)" % (part_list[0], part_list[1], ".".join(part1))] + part2
+                            arguments = ["%s.sub(%s,%s)" % (part_list[0], ",".join(part_list[1:]), ".".join(part1))] + part2
                         else:
                             if not part2:
                                 if ".".join(part1):
-
-                                    # arguments = [
-                                    #    "%s.%s if isinstance(%s, str) else %s.replace(%s, %s)
-                                    #    FIXME necesita ser mejorado. No soporta int como segundo parámetro"
-                                    #    % (".".join(part1), arg, part_list[0], part_list[0], ".".join(part1), part_list[1])
-                                    # ] + part2
-
                                     arguments = [
-                                        '%s.replace(%s, %s) if hasattr(%s,"match") else %s.replace(%s,str(%s))'
-                                        % (
-                                            part_list[0],
-                                            ".".join(part1),
-                                            part_list[1],
-                                            part_list[0],
-                                            ".".join(part1),
-                                            part_list[0],
-                                            part_list[1],
-                                            # arg,
-                                            # part_list[0],
-                                            # part_list,
-                                            # part1,
-                                            # arg,
-                                        )
+                                        "qsa.replace(%s, %s, %s)" % (".".join(part1), part_list[0], ",".join(part_list[1:]))
                                     ] + part2
-
+                                    print("%s: %r >> %r" % (member, orig_arguments, arguments))
                             # Es un regexpr
                         # else:
                         #    if ".".join(part1):
@@ -1570,7 +1550,6 @@ class Member(ASTPython):
                             arguments = ["%s.%s" % (".".join(part1), arg)] + part2
                         else:
                             arguments = ["%s" % arg] + part2
-
         yield "expr", ".".join(arguments)
 
 

@@ -569,6 +569,14 @@ def isnan(n):
     return math.isnan(n)
 
 
+def replace(source, search, replace):
+    """Replace for QSA where detects if "search" is a Regexp"""
+    if hasattr(search, "match"):
+        return search.replace(source, replace)
+    else:
+        return source.replace(search, str(replace))
+
+
 # Usadas solo por import *
 from pineboolib.fllegacy.flposprinter import FLPosPrinter  # noqa
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery  # noqa
