@@ -45,7 +45,7 @@ class IConnection:
         return []
 
     def database(self, name=None) -> "IConnection":
-        ...
+        return self
 
     def DBName(self) -> str:
         return ""
