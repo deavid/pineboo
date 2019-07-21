@@ -3,7 +3,7 @@ from pineboolib.application.utils.path import _path
 from pineboolib.core.utils.utils_base import filedir
 from importlib import machinery
 
-from sqlalchemy import String
+from sqlalchemy import String  # type: ignore
 
 import importlib
 import traceback
@@ -15,7 +15,7 @@ from typing import Any
 
 logger = logging.getLogger("PNControlsFactory")
 
-processed_ = []
+# processed_: List[str] = []
 
 """
 Esta librería crea y registra modelos sqlAlchemy en el arbol qsa.

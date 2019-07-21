@@ -8,7 +8,7 @@ from typing import Optional, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.interfaces import IFormDB, IFormRecordDB
-    from .moduleaction import ModuleAction
+    from .moduleactions import ModuleActions  # noqa: F401
 
 
 class XMLMainFormAction(XMLStruct):
@@ -46,7 +46,7 @@ class XMLAction(XMLStruct):
     """
 
     logger = logging.getLogger("main.XMLAction")
-    mod: "ModuleAction"
+    mod: Optional["ModuleActions"]
     alias: str
 
     def __init__(self, *args, project, name=None, **kwargs) -> None:

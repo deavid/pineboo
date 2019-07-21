@@ -212,7 +212,6 @@ class PNCursorPrivate(QtCore.QObject):
 
     _model: "PNCursorTableModel"
 
-    _currentregister = None
     edition_states_ = None
 
     # filter_ = None
@@ -578,7 +577,7 @@ class PNSqlCursor(QtCore.QObject):
     @retunr int con el número de registro
     """
 
-    def currentRegister(self):
+    def currentRegister(self) -> int:
         return self.d._currentregister
 
     """

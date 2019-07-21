@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 ACCEPTABLE_VALUES = (int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, decimal.Decimal)
-T_VALUE = TypeVar("T_VALUE", int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray)
-T_VALUE2 = Union[int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray]
+T_VALUE = TypeVar("T_VALUE", int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, None)
+T_VALUE2 = Union[int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, None]
 
 
 class FieldStruct(object):
@@ -41,6 +41,7 @@ class FieldStruct(object):
 
     def parse_value_input(self, value: T_VALUE) -> T_VALUE2:
         """Given an user-provided input, it parses and reformats it suitable for database use"""
+        txtvalue: str
         if self.type_ == "double" and value and value not in ("", "-"):
             if isinstance(value, str):
                 if value.find(":") > -1:
@@ -65,39 +66,46 @@ class FieldStruct(object):
         elif self.type_ == "time":
             if value is not None:
                 if isinstance(value, types.Date):
-                    value = value.toString()
+                    txtvalue = value.toString()
                 elif isinstance(value, datetime.timedelta):
-                    value = str(value)
+                    txtvalue = str(value)
+                elif isinstance(value, str):
+                    txtvalue = value
+                else:
+                    return None
 
-                if isinstance(value, str):
-                    if value.find("T") > -1:
-                        value = value[value.find("T") + 1 :]
+                if txtvalue.find("T") > -1:
+                    txtvalue = txtvalue[txtvalue.find("T") + 1 :]
 
-                    if value.find(".") > -1:
-                        value = value[0 : value.find(".")]
+                if txtvalue.find(".") > -1:
+                    txtvalue = txtvalue[0 : txtvalue.find(".")]
 
-                    elif value.find("+") > -1:
-                        value = value[0 : value.find("+")]
+                elif txtvalue.find("+") > -1:
+                    txtvalue = txtvalue[0 : txtvalue.find("+")]
+                return txtvalue
 
         elif self.type_ == "date":
+            if value is None:
+                return None
             if isinstance(value, types.Date):
-                value = value.toString()
+                txtvalue = value.toString()
+            else:
+                txtvalue = str(value)
 
-            if isinstance(value, str):
-                if value == "NAN":
-                    pass
-                else:
-                    if value.find("T") > -1:
-                        value = value[: value.find("T")]
+            if txtvalue.upper() == "NAN":
+                return "NAN"
+            else:
+                if txtvalue.find("T") > -1:
+                    txtvalue = txtvalue[: txtvalue.find("T")]
 
-                    list_ = value.split("-")
-                    return datetime.date(int(list_[0]), int(list_[1]), int(list_[2]))
+                list_ = txtvalue.split("-")
+                return datetime.date(int(list_[0]), int(list_[1]), int(list_[2]))
         elif self.type_ in ("unlock", "bool"):
             if isinstance(value, str):
                 if value == "true":
-                    value = True
+                    return True
                 elif value == "false":
-                    value = False
+                    return False
                 else:
                     raise ValueError("bool type can't accept %s" % value)
 
@@ -129,7 +137,7 @@ class FieldStruct(object):
             return str(self.value) != str(val)
         elif self.type_ == "double":
             try:
-                return float(self.value) != float(val)
+                return float(self.value) != float(val)  # type: ignore
             except Exception:
                 logger.trace("has_changed: Error converting %s != %s to floats", self.value, val)
                 return True
@@ -150,7 +158,7 @@ class PNBuffer(object):
         self.cursor_ = cursor
         self.fieldList_: List[FieldStruct] = []
         self.fieldDict_: Dict[str, FieldStruct] = {}
-        self.line_: int = None
+        self.line_: int = -1
         self.inicialized_: bool = False
 
         tmd = self.cursor_.metadata()
@@ -190,7 +198,8 @@ class PNBuffer(object):
         """
         if row is None or row < 0:
             row = self.cursor_.currentRegister()
-
+        if row is None:
+            raise Exception("Unexpected: No currentRegister")
         self.clear_buffer()
 
         if row == -1:
@@ -299,7 +308,7 @@ class PNBuffer(object):
         # FIXME: This confuses empty with Null
         return field.value in (None, "")
 
-    def value(self, n: Union[str, int]) -> T_VALUE:
+    def value(self, n: Union[str, int]) -> T_VALUE2:
         """Retorna el valor de un campo
         @param n (str,int) del campo a recoger valor
         @return valor del campo

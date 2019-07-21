@@ -68,8 +68,11 @@ class Module(object):
             if not tablefile.endswith(".mtd") or tablefile.find("alteredtable") > -1:
                 continue
             name, ext = os.path.splitext(tablefile)
+            path = _path(tablefile)
+            if path is None:
+                raise Exception("Cannot find %s" % tablefile)
             try:
-                contenido = str(open(_path(tablefile), "rb").read(), "ISO-8859-15")
+                contenido = str(open(path, "rb").read(), "ISO-8859-15")
             except UnicodeDecodeError as e:
                 self.logger.error("Error al leer el fichero %s %s", tablefile, e)
                 continue
