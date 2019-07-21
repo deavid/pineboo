@@ -1,11 +1,7 @@
 from .imanager import IManager
 from .iapicursor import IApiCursor
 
-from typing import Any, List, Dict, Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from pineboolib.application.database.pnsqlsavepoint import PNSqlSavePoint  # noqa: F401
-    from pineboolib.application.database.pnconnection import PNConnection  # noqa: F401
+from typing import Any, List, Dict, Optional
 
 
 class IConnection:
@@ -22,9 +18,9 @@ class IConnection:
     transaction_: int
     _managerModules = None
     _manager = None
-    currentSavePoint_: Optional["PNSqlSavePoint"]
-    stackSavePoints_: List["PNSqlSavePoint"]
-    queueSavePoints_: List["PNSqlSavePoint"]
+    currentSavePoint_: Optional[Any]  # Optional["PNSqlSavePoint"]
+    stackSavePoints_: List[Any]  # List["PNSqlSavePoint"]
+    queueSavePoints_: List[Any]  # List["PNSqlSavePoint"]
     interactiveGUI_: bool
     driverName_: str
     _dbAux = None

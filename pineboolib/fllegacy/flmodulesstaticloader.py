@@ -143,7 +143,7 @@ class FLStaticLoaderWarning(QtCore.QObject):
         self.paths_.clear()
 
 
-warn_: FLStaticLoaderWarning
+warn_: Optional[FLStaticLoaderWarning] = None
 
 
 class FLStaticLoader(QtCore.QObject):

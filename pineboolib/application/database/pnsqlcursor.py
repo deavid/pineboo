@@ -780,7 +780,7 @@ class PNSqlCursor(QtCore.QObject):
             if ret:
                 self.db().dbAux().commit()
             else:
-                self.db().dbAux().rollback()
+                self.db().dbAux().rollbackTransaction()
         else:
             logger.warning("No se puede actualizar el campo de forma atómica, porque no existe clave primaria")
 
@@ -830,7 +830,7 @@ class PNSqlCursor(QtCore.QObject):
             logger.warning("setValueBuffer(): No existe el campo %s:%s", self.curName(), fN)
             return
         db = self.db()
-        manager = db and db.manager()
+        manager = db.manager() if db is not None else None
         if db is None or manager is None:
             raise Exception("no db or no manager")
 

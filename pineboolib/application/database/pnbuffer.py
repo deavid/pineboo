@@ -1,7 +1,7 @@
 import copy
 import datetime
 import decimal
-from typing import Dict, List, Union, Optional, Any, TypeVar, TYPE_CHECKING
+from typing import Dict, List, Union, Optional, Any, TYPE_CHECKING
 
 from pineboolib import logging
 from pineboolib.application import types
@@ -13,7 +13,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 ACCEPTABLE_VALUES = (int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, decimal.Decimal)
-T_VALUE = TypeVar("T_VALUE", int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, None)
 T_VALUE2 = Union[int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, None]
 
 
@@ -39,7 +38,7 @@ class FieldStruct(object):
         self.originalValue = None
         self.generated = field.generated()
 
-    def parse_value_input(self, value: T_VALUE) -> T_VALUE2:
+    def parse_value_input(self, value: T_VALUE2) -> T_VALUE2:
         """Given an user-provided input, it parses and reformats it suitable for database use"""
         txtvalue: str
         if self.type_ == "double" and value and value not in ("", "-"):
@@ -116,7 +115,7 @@ class FieldStruct(object):
     @return True si ha cambiado, False si es el mismo valor
     """
 
-    def has_changed(self, val: T_VALUE) -> bool:
+    def has_changed(self, val: T_VALUE2) -> bool:
 
         if self.value is None:
             if val is None:
@@ -346,7 +345,7 @@ class PNBuffer(object):
         # logger.trace("---->retornando %s %s %s",v , type(v), field.value, field.name)
         return v
 
-    def setValue(self, name: str, value: T_VALUE, mark_: bool = True) -> bool:
+    def setValue(self, name: str, value: T_VALUE2, mark_: bool = True) -> bool:
         """Setea el valor de un campo del buffer
         @param name. Nombre del campo
         @param value. Valor a asignar al campo
