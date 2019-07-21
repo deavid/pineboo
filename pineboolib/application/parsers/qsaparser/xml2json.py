@@ -550,7 +550,7 @@ def autodetectXmlEncoding(rawtext):
         return "ISO-8859-15"
 
     try:
-        import chardet
+        import chardet  # type: ignore
 
         dictEncoding = chardet.detect(rawtext)
         encoding = dictEncoding["encoding"]

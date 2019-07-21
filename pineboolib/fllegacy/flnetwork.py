@@ -72,6 +72,8 @@ class FLNetwork(QtCore.QObject):
     #    self.data.emit(b)
 
     def _slotNetworkProgress(self, bDone, bTotal) -> None:
+        if self.reply is None:
+            raise Exception("No reply in progress")
         self.dataTransferProgress.emit(bDone, bTotal)
         data_ = None
         reply_ = self.reply.readAll().data()

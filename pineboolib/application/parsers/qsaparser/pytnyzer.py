@@ -6,11 +6,11 @@ import os
 import os.path
 import re
 from xml.etree import ElementTree
-from typing import Any, Generator, Tuple, Type, List, Dict, Set, cast
+from typing import Any, Generator, Tuple, Type, List, Dict, Set, cast, Optional, TextIO
 from pathlib import Path
 
 try:
-    import black
+    import black  # type: ignore
 except ImportError:
     black = None
 
@@ -330,12 +330,12 @@ cont_do_while = 0
 
 
 class ASTPythonBase(object):
-    elem = None
+    elem: ElementTree.Element
 
     def __init__(self, elem) -> None:
         self.elem = elem
-        self.parent: "ASTPythonBase" = None
-        self.source: "Source" = None
+        self.parent: Optional["ASTPythonBase"] = None
+        self.source: Optional["Source"] = None
 
     @classmethod
     def can_process_tag(self, tagname) -> Any:
@@ -347,7 +347,7 @@ class ASTPythonBase(object):
     def local_var(self, name: str, is_member=False) -> str:
         locals = None
         transform = None
-        if not is_member:
+        if not is_member and self.source is not None:
             locals = self.source.locals if self.source else set()
             transform = self.source.locals_transform
         return id_translate(name, qsa_exclude=locals, transform=transform)
@@ -369,8 +369,8 @@ class ASTPythonFactory(type):
 
 
 class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
-    tags = []
-    debug_file = None
+    tags: List[str] = []
+    debug_file: Optional[TextIO] = None
     generate_depth = 0
     numline = 0
     DEBUGFILE_LEVEL = 6
@@ -382,15 +382,15 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
     def can_process_tag(self, tagname) -> Any:
         return self.__name__ == tagname or tagname in self.tags
 
-    def generate(self, **kwargs):
-        yield "debug", "* not-known-seq * %s" % ElementTree.tostring(self.elem, encoding="UTF-8")
-
     def __init__(self, elem) -> None:
         super().__init__(elem)
         self.internal_generate = self.generate
         ASTPython._last_retlen = 0
         if self.debug_file:
-            self.generate = self._generate
+            self.generate = self._generate  # type: ignore
+
+    def generate(self, **kwargs):
+        yield "debug", "* not-known-seq * %s" % ElementTree.tostring(self.elem, encoding="UTF-8")
 
     def debug(self, text) -> None:
         if self.debug_file is None:
@@ -442,7 +442,7 @@ class Source(ASTPython):
             self.locals |= declare_identifiers
         for child in self.elem:
             # yield "debug", "<%s %s>" % (child.tag, repr(child.attrib))
-            child.set("parent_", self.elem)
+            child.set("parent_", str(self.elem))
             ast_python = parse_ast(child, parent=self)
             ast_type = ast_python.__class__.__name__
             # print(ast_type)
@@ -474,7 +474,7 @@ class Source(ASTPython):
             yield "line", "pass"
 
 
-classesDefined = []
+classesDefined: List[str] = []
 
 
 class Class(ASTPython):
