@@ -12,7 +12,7 @@ from pineboolib import pncontrolsfactory
 
 from typing import Optional, Tuple, Callable, List, Dict, Any
 
-ICONS: Dict[str, Any]
+ICONS: Dict[str, Any] = {}
 root = None
 logger = logging.getLogger("pnqt3ui")
 

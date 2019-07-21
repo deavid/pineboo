@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 from pineboolib import logging
-
-# import os
 from PyQt5 import QtCore  # type: ignore
-from pineboolib import pncontrolsfactory
-from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
+from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData
 from typing import Any
 
-# FIXME: This module uses pncontrolsfactory to access objects in fllegacy. Please avoid doing that.
 logger = logging.getLogger(__name__)
 
 
@@ -53,7 +49,7 @@ class DelayedObjectProxyLoader(object):
             self.loaded_obj = None
             return self.loaded_obj
 
-        if isinstance(field_relation, pncontrolsfactory.FLRelationMetaData):
+        if isinstance(field_relation, PNRelationMetaData):
             relation_table_name = field_relation.foreignTable()
             relation_field_name = field_relation.foreignField()
 
@@ -62,8 +58,8 @@ class DelayedObjectProxyLoader(object):
             if key_ not in self.cursor_tree_dict.keys():
                 # rel_mtd = aqApp.db().manager().metadata(relation_table_name)
 
-                relation_mtd = pncontrolsfactory.FLRelationMetaData(
-                    relation_table_name, field_relation.field(), FLRelationMetaData.RELATION_1M, False, False, True
+                relation_mtd = PNRelationMetaData(
+                    relation_table_name, field_relation.field(), PNRelationMetaData.RELATION_1M, False, False, True
                 )
                 relation_mtd.setField(relation_field_name)
 
@@ -291,7 +287,7 @@ class meta_model(object):
             field_relation = field.relationM1()
             # value = self._cursor.valueBuffer(field.name())
 
-            if isinstance(field_relation, pncontrolsfactory.FLRelationMetaData):
+            if isinstance(field_relation, PNRelationMetaData):
                 relation_table_name = field_relation.foreignTable()
                 relation_field_name = field_relation.foreignField()
 
@@ -300,8 +296,8 @@ class meta_model(object):
                 if key_ not in self.cursor_tree_dict.keys():
                     # rel_mtd = aqApp.db().manager().metadata(relation_table_name)
 
-                    relation_mtd = pncontrolsfactory.FLRelationMetaData(
-                        relation_table_name, field_relation.field(), pncontrolsfactory.FLRelationMetaData.RELATION_1M, False, False, True
+                    relation_mtd = PNRelationMetaData(
+                        relation_table_name, field_relation.field(), PNRelationMetaData.RELATION_1M, False, False, True
                     )
                     relation_mtd.setField(relation_field_name)
 
