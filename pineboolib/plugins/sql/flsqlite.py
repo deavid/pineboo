@@ -118,7 +118,7 @@ class FLSQLITE(object):
 
         import sqlite3
 
-        if self.db_filename == getattr(project.conn, "db_name", None):
+        if project.conn is not None and self.db_filename == getattr(project.conn, "db_name", None):
             self.conn_ = project.conn.conn
         else:
             self.conn_ = sqlite3.connect("%s" % self.db_filename)

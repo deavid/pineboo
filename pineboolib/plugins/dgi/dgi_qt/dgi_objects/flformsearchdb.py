@@ -54,6 +54,9 @@ class FLFormSearchDB(FLFormDB):
 
         from pineboolib.application import project
 
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
+
         parent = parent or aqApp.mainWidget()
         if isinstance(name_or_cursor, str):
             action = project.conn.manager().action(name_or_cursor)
@@ -69,6 +72,7 @@ class FLFormSearchDB(FLFormDB):
 
         self.accepted_ = False
         self.inExec_ = False
+        self.loop = False
         self.load()
         self.initForm()
         self.setFocusPolicy(QtCore.Qt.NoFocus)

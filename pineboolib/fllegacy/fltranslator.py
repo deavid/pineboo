@@ -46,6 +46,8 @@ class FLTranslator(QTranslator):
     """
 
     def loadTsContent(self, key) -> Any:
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         if self.idM_ == "sys":
             ts_file = filedir("../share/pineboo/translations/%s.%s" % (self.idM_, self.lang_))
         else:

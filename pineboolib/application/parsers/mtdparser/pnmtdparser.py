@@ -21,6 +21,8 @@ def mtd_parse(table_name: str) -> None:
     if table_name.find("alteredtable") > -1 or table_name.startswith("fllarge_"):
         return
 
+    if project.conn is None:
+        raise Exception("Project is not connected yet")
     mtd = project.conn.manager().metadata(table_name)
     if mtd is None:
         return
@@ -107,10 +109,12 @@ def generate_model(dest_file, mtd_table) -> List[str]:
     data.append("")
     data.append("# --- Relations 1:M ---> ")
     data.append("")
-
+    if project.conn is None:
+        raise Exception("Project is not connected yet")
+    manager = project.conn.manager()
     for field in mtd_table.fieldList():  # Creamos relaciones 1M
         for r in field.relationList():
-            foreign_table_mtd = project.conn.manager().metadata(r.foreignTable())
+            foreign_table_mtd = manager.metadata(r.foreignTable())
             # if project.conn.manager().existsTable(r.foreignTable()):
             if foreign_table_mtd:
                 # comprobamos si existe el campo...
@@ -213,6 +217,8 @@ def field_type(field) -> str:
         ret = "Desconocido %s" % field.type()
 
     if field.relationM1() is not None:
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         rel = field.relationM1()
         if project.conn.manager().existsTable(rel.foreignTable()):
             ret += ", ForeignKey('%s.%s'" % (rel.foreignTable(), rel.foreignField())

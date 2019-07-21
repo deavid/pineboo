@@ -1589,6 +1589,8 @@ class FLFieldDB(QtWidgets.QWidget):
         Inicia el cursor segun este campo sea de la tabla origen o de
         una tabla relacionada
         """
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
 
         if self.tableName_ and not self.foreignField_ and not self.fieldRelation_:
             self.cursorBackup_ = self.cursor_

@@ -239,6 +239,9 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         if self._uiName:
             from pineboolib.application import project
 
+            if project.conn is None:
+                raise Exception("Project is not connected yet")
+
             project.conn.managerModules().createUI(self._uiName, None, self)
 
         self._loaded = True
@@ -619,6 +622,9 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
     def emitFormClosed(self) -> None:
         from pineboolib.application import project
+
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
 
         if "fltesttest" in project.conn.managerModules().listAllIdModules():
             project.call("fltesttest.iface.recibeEvento", ["formClosed", self.actionName_], None)

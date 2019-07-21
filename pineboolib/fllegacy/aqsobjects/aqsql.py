@@ -28,6 +28,8 @@ class AQSql(object):
     """
 
     def database(self, connection_name="default") -> Any:
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         return project.conn.useConn(connection_name)
 
     """

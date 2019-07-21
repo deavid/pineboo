@@ -4,7 +4,7 @@ from PyQt5 import QtCore  # type: ignore
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
 from pineboolib import logging
-from typing import Any, List, Dict
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +71,9 @@ class FLAccessControlLists(object):
         if aclXml is None:
             from pineboolib.application import project
 
+            if project.conn is None:
+                raise Exception("Project is not connected yet")
+
             aclXml = project.conn.managerModules().content("acl.xml")
 
         doc = QDomDocument("ACL")
@@ -123,6 +126,9 @@ class FLAccessControlLists(object):
 
         from pineboolib.application import project
 
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
+
         user = project.conn.user()
         if type == "" or name == "" or user == "":
             return
@@ -167,6 +173,9 @@ class FLAccessControlLists(object):
                 # progress.setProgress(++step)
 
             from pineboolib.application import project
+
+            if project.conn is None:
+                raise Exception("Project is not connected yet")
 
             project.conn.managerModules().setContent("acl.xml", "sys", doc.toString())
 

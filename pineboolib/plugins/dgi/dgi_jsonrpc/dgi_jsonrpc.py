@@ -497,6 +497,8 @@ class json_mainWindow(object):
 
             project.call("%s.iface.init" % module, [], None, False)
 
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         mng = project.conn.managerModules()
         mng.setActiveIdModule(module)
 

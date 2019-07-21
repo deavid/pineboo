@@ -323,6 +323,9 @@ class FLStaticLoader(QtCore.QObject):
                 else:
                     from pineboolib.application import project
 
+                    if project.conn is None:
+                        raise Exception("Project is not connected yet")
+
                     return project.conn.managerModules().contentFS(info.path_ + separator + n)
 
         return None

@@ -126,6 +126,8 @@ class PNSqlQuery(object):
     def __init__(self, cx=None, connection_name: str = "default") -> None:
         # super(FLSqlQuery, self).__init__()
 
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         self.d = PNSqlQueryPrivate(cx)
         self.d.db_ = project.conn.useConn(connection_name)
 

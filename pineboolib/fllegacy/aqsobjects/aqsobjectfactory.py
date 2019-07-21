@@ -25,6 +25,9 @@ def AQFormDB(action_name, parent, other) -> Any:
     from pineboolib.application.utils.convert_flaction import convertFLAction
     from pineboolib.application import project
 
+    if project.conn is None:
+        raise Exception("Project is not connected yet")
+
     ac_flaction = project.conn.manager().action(action_name)
     ac_xml = convertFLAction(ac_flaction)
     ac_xml.load()
