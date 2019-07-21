@@ -20,7 +20,7 @@ class XMLMainFormAction(XMLStruct):
     mainform = None
     mod: Any = None
     prj = None
-    slot = None
+    slot: Optional[str] = None
     logger = logging.getLogger("main.XMLMainFormAction")
 
     def run(self) -> None:
@@ -29,6 +29,8 @@ class XMLMainFormAction(XMLStruct):
         """
         if self.mod is None:
             raise Exception("No module set")
+        if self.slot is None:
+            raise Exception("No slot set")
         self.logger.debug("Running: %s %s %s", self.name, self.text, self.slot)
         try:
             action = self.mod.actions[self.name]
@@ -61,8 +63,8 @@ class XMLAction(XMLStruct):
         self.mainscript = self._v("mainscript")
         self.formrecord = self._v("formrecord")
         self.scriptformrecord = self._v("scriptformrecord")
-        self.mainform_widget: IFormDB = None
-        self.formrecord_widget: IFormDB = None
+        self.mainform_widget: Optional[IFormDB] = None
+        self.formrecord_widget: Optional[IFormRecordDB] = None
         self._loaded = False
 
     """
@@ -74,7 +76,7 @@ class XMLAction(XMLStruct):
     def loadRecord(self, cursor: None) -> "IFormRecordDB":
         self._loaded = getattr(self.formrecord_widget, "_loaded", False)
         if not self._loaded:
-            if getattr(self.formrecord_widget, "widget", None):
+            if self.formrecord_widget and getattr(self.formrecord_widget, "widget", None):
                 self.formrecord_widget.widget.doCleanUp()
                 # self.formrecord_widget.widget = None
 
@@ -87,19 +89,22 @@ class XMLAction(XMLStruct):
                 # if isinstance(self.script, str) or self.script is None:
                 script = self.load_script(self.scriptformrecord, None)
                 self.formrecord_widget = script.form
+                if self.formrecord_widget is None:
+                    raise Exception("After loading script, no form was loaded")
                 self.formrecord_widget.widget = self.formrecord_widget
                 self.formrecord_widget.iface = self.formrecord_widget.widget.iface
                 self.formrecord_widget._loaded = True
             # self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
-            if self.formrecord_widget:
-                self.logger.debug(
-                    "End of record action load %s (iface:%s ; widget:%s)",
-                    self.name,
-                    getattr(self.formrecord_widget, "iface", None),
-                    getattr(self.formrecord_widget, "widget", None),
-                )
+            self.logger.debug(
+                "End of record action load %s (iface:%s ; widget:%s)",
+                self.name,
+                getattr(self.formrecord_widget, "iface", None),
+                getattr(self.formrecord_widget, "widget", None),
+            )
+        if self.formrecord_widget is None:
+            raise Exception("Unexpected: No formrecord loaded")
 
-        if cursor and self.formrecord_widget:
+        if cursor:
             self.formrecord_widget.setCursor(cursor)
 
         return self.formrecord_widget
@@ -107,7 +112,7 @@ class XMLAction(XMLStruct):
     def load(self) -> "IFormDB":
         self._loaded = getattr(self.mainform_widget, "_loaded", False)
         if not self._loaded:
-            if getattr(self.mainform_widget, "widget", None):
+            if self.mainform_widget is not None and getattr(self.mainform_widget, "widget", None):
                 self.mainform_widget.widget.doCleanUp()
             if self.project._DGI.useDesktop() and hasattr(self.project.main_window, "w_"):
                 self.logger.info("Loading action %s (createForm). . . ", self.name)
@@ -116,6 +121,8 @@ class XMLAction(XMLStruct):
                 self.logger.info("Loading action %s (load_script %s). . . ", self.name, self.scriptform)
                 script = self.load_script(self.scriptform, None)
                 self.mainform_widget = script.form  # FormDBWidget FIXME: Add interface for types
+                if self.mainform_widget is None:
+                    raise Exception("After loading script, no form was loaded")
                 self.mainform_widget.widget = self.mainform_widget
                 self.mainform_widget.iface = self.mainform_widget.widget.iface
                 self.mainform_widget._loaded = True
@@ -126,6 +133,8 @@ class XMLAction(XMLStruct):
                 getattr(self.mainform_widget, "iface", None),
                 getattr(self.mainform_widget, "widget", None),
             )
+        if self.mainform_widget is None:
+            raise Exception("Unexpected: No form loaded")
 
         return self.mainform_widget
 
@@ -149,6 +158,8 @@ class XMLAction(XMLStruct):
         if not getattr(self.formrecord_widget, "_loaded", None):
             self.loadRecord(None)
 
+        if self.formrecord_widget is None:
+            raise Exception("Unexpected: No form loaded")
         return self.formrecord_widget
 
     """
@@ -184,6 +195,9 @@ class XMLAction(XMLStruct):
         script = self.load_script(self.scriptform, None)
 
         self.mainform_widget = script.form
+        if self.mainform_widget is None:
+            raise Exception("Unexpected: No form loaded")
+
         if self.mainform_widget.iface:
             self.mainform_widget.iface.main()
         else:
@@ -195,7 +209,7 @@ class XMLAction(XMLStruct):
     @param parent. Objecto al que carga el script, si no se especifica es a self.script
     """
 
-    def load_script(self, scriptname: str, parent: Optional["IFormDB"] = None) -> Any:  # returns loaded script
+    def load_script(self, scriptname: Optional[str], parent: Optional["IFormDB"] = None) -> Any:  # returns loaded script
         # FIXME: Parent logic is broken. We're loading scripts to two completely different objects.
         from importlib import machinery
 
@@ -221,7 +235,7 @@ class XMLAction(XMLStruct):
         # primero default, luego sobreescribimos
         from pineboolib.qsa import emptyscript  # type: ignore
 
-        script_loaded = emptyscript
+        script_loaded: Any = emptyscript
 
         if scriptname is None:
             script_loaded.form = script_loaded.FormInternalObj(action=action_, project=self.project, parent=parent_object)
@@ -273,7 +287,7 @@ class XMLAction(XMLStruct):
                 self.logger.exception("ERROR al cargar script QS para la accion %s:", action_.name)
 
         script_loaded.form = script_loaded.FormInternalObj(action_, self.project, parent_object)
-        if parent_object:
+        if parent_object and parent:
             parent_object.widget = script_loaded.form
             if getattr(parent_object.widget, "iface", None):
                 parent_object.iface = parent.widget.iface
