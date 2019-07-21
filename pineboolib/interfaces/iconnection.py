@@ -1,30 +1,34 @@
 from .imanager import IManager
 from .iapicursor import IApiCursor
 
-from typing import Any, List, Dict, Optional
+from typing import Any, List, Dict, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.application.database.pnsqlsavepoint import PNSqlSavePoint
+    from pineboolib.application.database.pnconnection import PNConnection
 
 
 class IConnection:
     """Interface for database cursors which are used to emulate FLSqlCursor."""
 
-    db_name = None
-    db_host = None
-    db_port = None
-    db_userName = None
-    db_password = None
+    db_name: str
+    db_host: str
+    db_port: int
+    db_userName: str
+    db_password: str
     conn = None
-    connAux = None
+    connAux: Dict[str, "IConnection"]
     driverSql = None
-    transaction_ = None
+    transaction_: int
     _managerModules = None
     _manager = None
-    currentSavePoint_ = None
-    stackSavePoints_ = None
-    queueSavePoints_ = None
-    interactiveGUI_ = None
+    currentSavePoint_: Optional["PNSqlSavePoint"]
+    stackSavePoints_: List["PNSqlSavePoint"]
+    queueSavePoints_: List["PNSqlSavePoint"]
+    interactiveGUI_: bool
     _dbAux = None
-    name = None
-    _isOpen = False
+    name: str
+    _isOpen: bool
 
     def finish(self) -> None:
         return
@@ -32,13 +36,13 @@ class IConnection:
     def connectionName(self) -> str:
         return ""
 
-    def useConn(self, name="default") -> None:
+    def useConn(self, name: str = "default") -> "IConnection":
         return
 
-    def removeConn(self, name="default") -> None:
-        return
+    def removeConn(self, name="default") -> bool:
+        return True
 
-    def isOpen(self) -> None:
+    def isOpen(self) -> bool:
         return
 
     def tables(self, t_: Optional[str] = None) -> List[str]:
@@ -131,19 +135,19 @@ class IConnection:
     def canTransaction(self) -> None:
         return
 
-    def doTransaction(self, cursor) -> None:
+    def doTransaction(self, cursor) -> bool:
         return
 
-    def transactionLevel(self) -> None:
+    def transactionLevel(self) -> int:
         return
 
-    def doRollback(self, cur) -> None:
+    def doRollback(self, cur) -> bool:
         return
 
-    def interactiveGUI(self) -> None:
+    def interactiveGUI(self) -> bool:
         return
 
-    def doCommit(self, cur, notify=True) -> None:
+    def doCommit(self, cur, notify=True) -> bool:
         return
 
     def canDetectLocks(self) -> None:
@@ -182,23 +186,23 @@ class IConnection:
     def nextSerialVal(self, table, field) -> None:
         return
 
-    def existsTable(self, name) -> None:
+    def existsTable(self, name) -> bool:
         return
 
-    def createTable(self, tmd) -> None:
+    def createTable(self, tmd) -> bool:
         return
 
-    def mismatchedTable(self, tablename, tmd) -> None:
+    def mismatchedTable(self, tablename: str, tmd) -> bool:
         return
 
-    def normalizeValue(self, text) -> Optional[str]:
+    def normalizeValue(self, text: str) -> Optional[str]:
         return None
 
     def queryUpdate(self, name, update, filter) -> None:
         return
 
-    def execute_query(self, q) -> None:
+    def execute_query(self, q: str) -> None:
         return
 
-    def alterTable(self, mtd_1, mtd_2, key, force=False) -> None:
+    def alterTable(self, mtd_1, mtd_2, key, force=False) -> bool:
         return

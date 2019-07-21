@@ -22,9 +22,9 @@ AQ_USRHOME = "."  # FIXME
 
 class internalReportViewer(QObject):
 
-    rptEngine_ = None
+    rptEngine_: Any
     dpi_ = 0
-    report_ = []
+    report_: List[Any]
     num_copies = 1
 
     def __init__(self, parent) -> None:
@@ -43,6 +43,9 @@ class internalReportViewer(QObject):
         return self.report_
 
     def renderReport(self, init_row, init_col, flags) -> Any:
+        if self.rptEngine_ is None:
+            raise Exception("renderReport. self.rptEngine_ is empty!")
+
         return self.rptEngine_.renderReport(init_row, init_col, flags)
 
     def setNumCopies(self, num_copies) -> None:
@@ -54,10 +57,14 @@ class internalReportViewer(QObject):
 
 class FLReportViewer(QObject):
 
-    pdfFile = None
-    Append = None
-    Display = None
-    PageBreak = None
+    pdfFile: str
+    Append: int
+    Display: int
+    PageBreak: int
+    report_: List[Any]
+    qry_: Any
+    xmlData_: Any
+    template_: Any
 
     def __init__(self, parent=None, name=0, embedInParent=False, rptEngine=None) -> None:
         # pParam = 0 if parent and embedInParent else 0
@@ -70,10 +77,8 @@ class FLReportViewer(QObject):
         self.loop_ = False
         self.eventloop = QtCore.QEventLoop()
         self.reportPrinted_ = False
-        self.rptViewer_ = 0
         self.rptEngine_ = None
-        self.report_ = 0
-        self.qry_ = 0
+        self.report_ = []
         self.slotsPrintDisabled_ = False
         self.slotsExportedDisabled_ = False
         self.printing_ = False
@@ -135,6 +140,8 @@ class FLReportViewer(QObject):
         #        "rptViewer/dpi", str(self.rptViewer_.resolution()))))
         #    self.ui_["spnPixel"].setValue(float(util.readSettingEntry(
         #        "rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
+        if self.rptViewer_ is None:
+            raise Exception("self.rptViewer_ is empty!")
 
         self.report_ = self.rptViewer_.reportPages()
 
@@ -564,7 +571,7 @@ class FLReportViewer(QObject):
             return self.rptEngine_.setReportData(d)
         elif isinstance(d, QtXml.QDomNode):
             self.xmlData_ = d
-            self.qry_ = 0
+            self.qry_ = None
             if not self.rptEngine_:
                 return False
             return self.rptEngine_.setReportData(d)

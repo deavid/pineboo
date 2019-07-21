@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     import pineboolib.fllegacy.flfieldmetadata
     import pineboolib.fllegacy.flrelationmetadata
     import pineboolib.fllegacy.flsqlquery
+    from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
 
 class IManager(object):
@@ -48,7 +49,7 @@ class IManager(object):
     def existsTable(self, n: str, cache: bool = False) -> bool:
         return False
 
-    def fetchLargeValue(self, refKey: Mapping[slice, Any]) -> Optional[str]:
+    def fetchLargeValue(self, refKey: str) -> Optional[str]:
         return None
 
     def finish(self) -> None:
@@ -87,8 +88,8 @@ class IManager(object):
     def metadataRelation(self, relation) -> "pineboolib.fllegacy.flrelationmetadata.FLRelationMetaData":
         raise Exception("must be implemented")
 
-    def query(self, n, parent=...) -> Optional["pineboolib.fllegacy.flsqlquery.FLSqlQuery"]:
+    def query(self, n, parent=...) -> Optional["PNSqlQuery"]:
         return None
 
-    def storeLargeValue(self, mtd, largeValue: Mapping[slice, Any]) -> Optional[str]:
+    def storeLargeValue(self, mtd, largeValue: str) -> Optional[str]:
         return None
