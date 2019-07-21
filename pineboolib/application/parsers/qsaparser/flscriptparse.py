@@ -9,9 +9,11 @@ import sys
 import math
 import hashlib
 import re
-import ply.yacc as yacc
-import ply.lex as lex
-from typing import Any, Dict
+from typing import Any, Dict, List
+
+import ply.yacc as yacc  # type: ignore
+import ply.lex as lex  # type: ignore
+
 from . import flex
 
 tempDir = "/tmp"
@@ -24,6 +26,25 @@ reserv = ["nonassoc"]
 reserv += list(flex.reserved)
 
 endoffile = None
+
+hashes: List[Any] = []
+ranges: List[Any] = []
+
+seen_tokens = []
+tokelines: Dict[str, int] = {}
+last_lexspan = None
+
+precedence = (
+    ("nonassoc", "EQUALS", "TIMESEQUAL", "DIVEQUAL", "MODEQUAL", "PLUSEQUAL", "MINUSEQUAL"),
+    ("nonassoc", "MATHEXPRESSION"),
+    ("nonassoc", "TERNARY"),
+    ("left", "LOR", "LAND"),
+    ("right", "LT", "LE", "GT", "GE", "EQ", "NE", "EQQ", "NEQ"),
+    ("right", "LNOT"),
+    ("left", "PLUS", "MINUS"),
+    ("left", "TIMES", "DIVIDE", "MOD"),
+    ("left", "OR", "AND", "XOR", "LSHIFT", "RSHIFT"),
+)
 
 
 def cleanNoPython(data):
@@ -42,22 +63,6 @@ def cnvrt(val):
     val = val.replace("<", "&lt;")
     val = val.replace(">", "&gt;")
     return val
-
-
-precedence = (
-    ("nonassoc", "EQUALS", "TIMESEQUAL", "DIVEQUAL", "MODEQUAL", "PLUSEQUAL", "MINUSEQUAL"),
-    ("nonassoc", "MATHEXPRESSION"),
-    ("nonassoc", "TERNARY"),
-    ("left", "LOR", "LAND"),
-    ("right", "LT", "LE", "GT", "GE", "EQ", "NE", "EQQ", "NEQ"),
-    ("right", "LNOT"),
-    ("left", "PLUS", "MINUS"),
-    ("left", "TIMES", "DIVIDE", "MOD"),
-    ("left", "OR", "AND", "XOR", "LSHIFT", "RSHIFT"),
-)
-seen_tokens = []
-tokelines = {}
-last_lexspan = None
 
 
 def p_parse(token):
@@ -676,10 +681,6 @@ def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
     final_obj["has_objects"] = has_objects
 
     return final_obj
-
-
-hashes = []
-ranges = []
 
 
 def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):

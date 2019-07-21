@@ -16,7 +16,7 @@ class PNRelationMetaData:
 
     count_ = 0
 
-    d = None
+    d: "PNRelationMetaDataPrivate"
 
     def __init__(self, *args, **kwargs) -> None:
         if len(args) == 1:
@@ -44,14 +44,6 @@ class PNRelationMetaData:
     def inicializeFromFLRelationMetaData(self, *other):
         self.d = PNRelationMetaDataPrivate()
         self.copy(other)
-
-    """
-    destructor
-    """
-
-    def __del__(self) -> None:
-        --self.count_
-        del self.d
 
     """
     Establece el nombre del campo relacionado.

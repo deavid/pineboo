@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
-from .utils import logging
 import re
-from typing import TypeVar
-
-_T1 = TypeVar("_T1")
-
-_T1 = TypeVar("_T1")
+from .utils import logging
 
 logger = logging.getLogger(__name__)
 
 
-def translate(mod, txt: _T1) -> _T1:
+def translate(mod, txt: str) -> str:
     # FIXME: qsa_sys is not something we should import here
     return txt
 
