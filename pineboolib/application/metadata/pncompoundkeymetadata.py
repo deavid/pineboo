@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any, TYPE_CHECKING
+from typing import Any, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .pnfieldmetadata import PNFieldMetaData
@@ -22,16 +22,13 @@ class PNCompoundKeyMetaData(object):
     Lista de con los metadatos de los campos que componen la clave
     """
 
-    fieldList_ = []
+    fieldList_: List["PNFieldMetaData"] = []
 
     def __init__(self, other: None = None) -> None:
         super().__init__()
         self.fieldList_ = []
         if other:
             self.copy(other)
-
-    def __del__(self) -> None:
-        self.fieldList_ = None
 
     """
     Añade la descripción de un campo a lista  de campos que componen la clave.

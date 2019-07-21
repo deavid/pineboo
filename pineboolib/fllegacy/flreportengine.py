@@ -9,15 +9,23 @@ from typing import Any, Optional
 
 class FLReportEngine(object):
 
-    parser_ = None
     report_ = None
     rt: str = ""  # KUGAR *.kut template data as a string
 
+    def __init__(self, parent) -> None:
+        self.d_ = FLReportEngine.FLReportEnginePrivate(self)
+        self.relDpi_ = 78.0
+        self.rd = None
+        self.logger = logging.getLogger("FLReportEngine")
+        from pineboolib.application.parsers.kugarparser.kut2fpdf import Kut2FPDF
+
+        self.parser_: Kut2FPDF = Kut2FPDF()
+
     class FLReportEnginePrivate(object):
         def __init__(self, q):
-            self.qry_ = 0
-            self.qFieldMtdList_ = 0
-            self.qGroupDict_ = 0
+            self.qry_ = None
+            self.qFieldMtdList_ = None
+            self.qGroupDict_ = None
             self.q_ = q
             self.template_ = ""
 
@@ -97,15 +105,6 @@ class FLReportEngine(object):
                 self.qImgFields_.clear()
                 self.qFieldMtdList_ = []
                 self.qGroupDict_ = {}
-
-    def __init__(self, parent) -> None:
-        self.d_ = FLReportEngine.FLReportEnginePrivate(self)
-        self.relDpi_ = 78.0
-        self.rd = None
-        self.logger = logging.getLogger("FLReportEngine")
-        from pineboolib.application.parsers.kugarparser.kut2fpdf import Kut2FPDF
-
-        self.parser_ = Kut2FPDF()
 
     def rptXmlData(self) -> Any:
         return self.rd
@@ -209,7 +208,7 @@ class FLReportEngine(object):
         # super(FLReportEngine, self).exportToOds(pages.pageCollection())
 
     def renderReport(self, init_row=0, init_col=0, flags=False, pages=None) -> bool:
-        if self.rt and self.rt.find("KugarTemplate") > -1:
+        if self.rd and self.rt and self.rt.find("KugarTemplate") > -1:
             data = self.rd.toString(1)
             self.report_ = self.parser_.parse(self.d_.template_, self.rt, data, self.report_, flags)
 
@@ -260,6 +259,8 @@ class FLReportEngine(object):
         """
 
     def initData(self) -> None:
+        if not self.rd:
+            raise Exception("RD is missing. Initialize properly before calling initData")
         n = self.rd.firstChild()
         while not n.isNull():
             if n.nodeName() == "KugarData":

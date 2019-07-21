@@ -786,7 +786,7 @@ class PNFieldMetaDataPrivate(object):
     """
     Lista de relaciones para este campo
     """
-    relationList_ = []
+    relationList_: List["PNRelationMetaData"] = []
 
     """
     Mantiene, si procede, la relación M1 (muchos a uno)

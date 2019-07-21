@@ -2,7 +2,7 @@
 
 # Completada Si
 from pineboolib.core import decorators
-from typing import Any
+from typing import Any, List
 
 
 """
@@ -118,7 +118,7 @@ class PNSqlSavePoint:
     Pila para almacenar informacion de las operaciones.
     """
 
-    opInfos = []
+    opInfos: List[opInfo] = []
 
     """
     Identificador del punto de salvaguarda

@@ -30,7 +30,7 @@ class PNConnection(QtCore.QObject, IConnection):
     db_port: int
     db_userName: str
     db_password: str
-    conn = None
+    conn: Any = None  # Connection from the actual driver
     driverSql = None
     transaction_: int
     _managerModules = None

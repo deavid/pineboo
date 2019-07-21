@@ -1,6 +1,6 @@
 from pineboolib.core.utils import logging
 
-from typing import Any, Iterable, Mapping, Sized, Union
+from typing import Any, Union, List
 
 
 logger = logging.getLogger("database.utils")
@@ -228,7 +228,7 @@ def quickSqlSelect(f: str, s: str, w: str, connName="default") -> Any:
     return q.value(0) if q.first() else False
 
 
-def sqlInsert(t, fL: Union[Iterable, Sized], vL: Union[Sized, Mapping[int, Any]], connName="default") -> Any:
+def sqlInsert(t, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connName="default") -> Any:
     """
     Realiza la inserción de un registro en una tabla mediante un objeto FLSqlCursor
 
@@ -239,8 +239,8 @@ def sqlInsert(t, fL: Union[Iterable, Sized], vL: Union[Sized, Mapping[int, Any]]
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
 
-    fL = fL.split(",") if isinstance(fL, str) else fL
-    vL = vL.split(",") if isinstance(vL, str) else vL
+    fL: List[str] = fL_.split(",") if isinstance(fL_, str) else fL_
+    vL: List[str] = vL_.split(",") if isinstance(vL_, str) else vL_
 
     if not len(fL) == len(vL):
         return False
@@ -263,7 +263,7 @@ def sqlInsert(t, fL: Union[Iterable, Sized], vL: Union[Sized, Mapping[int, Any]]
     return c.commitBuffer()
 
 
-def sqlUpdate(t, fL: Iterable, vL: Mapping[int, Any], w, connName="default") -> bool:
+def sqlUpdate(t, fL: Union[str, List[str]], vL: Union[str, List[str]], w, connName="default") -> bool:
     """
     Realiza la modificación de uno o más registros en una tabla mediante un objeto FLSqlCursor
 

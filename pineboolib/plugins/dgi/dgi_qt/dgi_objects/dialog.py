@@ -6,13 +6,13 @@ from typing import Any
 
 
 class Dialog(QDialog):
-    _layout = None
-    buttonBox = None
+    _layout: QtWidgets.QVBoxLayout
+    buttonBox: QtWidgets.QDialogButtonBox
     okButtonText = None
     cancelButtonText = None
-    okButton = None
-    cancelButton = None
-    _tab = None
+    okButton: QPushButton
+    cancelButton: QPushButton
+    _tab: QTabWidget
 
     def __init__(self, title=None, f=None, desc=None) -> None:
         # FIXME: f no lo uso , es qt.windowsflg

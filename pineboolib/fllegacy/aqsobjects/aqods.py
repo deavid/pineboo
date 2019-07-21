@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from typing import Union, List, Any, Tuple
 
-import odf
-from odf import table, style
+import odf  # type: ignore
+from odf import table, style  # type: ignore
 
 from pineboolib import logging
 
@@ -32,6 +32,8 @@ class AQOdsGenerator_class(object):
     """
 
     def generateOds(self, file_name: str) -> None:
+        if self.doc_ is None:
+            raise Exception("Document not set, cannot generate")
         file_name = file_name.replace(".ods", "")
         self.doc_.save(file_name, True)
 
@@ -58,7 +60,7 @@ class AQOdsSpreadSheet(object):
     """
 
     def __init__(self, generator) -> None:
-        from odf.opendocument import OpenDocumentSpreadsheet
+        from odf.opendocument import OpenDocumentSpreadsheet  # type: ignore
 
         self.generator_ = generator
         self.spread_sheet = OpenDocumentSpreadsheet()
@@ -95,9 +97,7 @@ Hoja dentro del documento
 
 
 class AQOdsSheet(object):
-    sheet_ = None
-    spread_sheet_parent = None
-    num_rows_ = None
+    num_rows_: int
 
     """
     Constructor
@@ -108,7 +108,7 @@ class AQOdsSheet(object):
     def __init__(self, spread_sheet, sheet_name) -> None:
         self.spread_sheet_parent_ = spread_sheet.spread_sheet
         self.num_rows_ = 0
-        from odf.table import Table
+        from odf.table import Table  # type: ignore
 
         self.sheet_ = Table(name=sheet_name)
 
@@ -134,7 +134,7 @@ Linea dentro de una hoja
 
 class AQOdsRow(object):
     sheet_: Any
-    row_ = None
+    row_: table.TableRow
     cells_list_: List[Any]
     style_cell_text_ = None
     fix_precision_ = None
@@ -170,8 +170,8 @@ class AQOdsRow(object):
     """
 
     def opIn(self, opt: Union[float, str, "odf.element.Element", List, "AQOdsImage"]):
-        from odf.text import P, Span
-        from odf.draw import Frame, Image
+        from odf.text import P, Span  # type: ignore
+        from odf.draw import Frame, Image  # type: ignore
 
         if isinstance(opt, float):
             if self.fix_precision_ is not None:
@@ -289,7 +289,7 @@ class AQOdsStyle_class(object):
     """
 
     def alignCenter(self) -> Any:
-        from odf import style
+        from odf import style  # type: ignore
 
         return style.ParagraphProperties(textalign="center")
 
@@ -298,7 +298,7 @@ class AQOdsStyle_class(object):
     """
 
     def alignRight(self) -> Any:
-        from odf import style
+        from odf import style  # type: ignore
 
         return style.ParagraphProperties(textalign="right")
 
@@ -307,7 +307,7 @@ class AQOdsStyle_class(object):
     """
 
     def alignLeft(self) -> Any:
-        from odf import style
+        from odf import style  # type: ignore
 
         return style.ParagraphProperties(textalign="left")
 
@@ -316,7 +316,7 @@ class AQOdsStyle_class(object):
     """
 
     def textBold(self) -> Any:
-        from odf.style import Style, TextProperties
+        from odf.style import Style, TextProperties  # type: ignore
 
         bold_style = Style(name="Bold", family="text")
         bold_style.addElement(TextProperties(fontweight="bold"))
@@ -327,7 +327,7 @@ class AQOdsStyle_class(object):
     """
 
     def textItalic(self) -> Any:
-        from odf.style import Style, TextProperties
+        from odf.style import Style, TextProperties  # type: ignore
 
         italic_style = Style(name="Italic", family="text")
         italic_style.addElement(TextProperties(fontstyle="italic"))
@@ -338,7 +338,7 @@ class AQOdsStyle_class(object):
     """
 
     def borderBottom(self) -> Any:
-        from odf import style
+        from odf import style  # type: ignore
 
         return style.TableCellProperties(borderbottom="1pt solid #000000")
 
@@ -347,7 +347,7 @@ class AQOdsStyle_class(object):
     """
 
     def borderLeft(self) -> Any:
-        from odf import style
+        from odf import style  # type: ignore
 
         return style.TableCellProperties(borderleft="1pt solid #000000")
 
@@ -356,7 +356,7 @@ class AQOdsStyle_class(object):
     """
 
     def borderRight(self) -> Any:
-        from odf import style
+        from odf import style  # type: ignore
 
         return style.TableCellProperties(borderright="1pt solid #000000")
 
@@ -365,7 +365,7 @@ class AQOdsStyle_class(object):
     """
 
     def borderTop(self) -> Any:
-        from odf import style
+        from odf import style  # type: ignore
 
         return style.TableCellProperties(bordertop="1pt solid #000000")
 

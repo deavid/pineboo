@@ -5,11 +5,11 @@ import os.path
 import sys
 import imp
 from xml.etree import ElementTree
-from xml.dom import minidom
+from xml.dom import minidom  # type: ignore
 import logging
 
 from . import flscriptparse
-from typing import List, Type, Optional
+from typing import List, Type, Optional, Dict, Tuple, Any
 
 logger = logging.getLogger("flparser.postparse")
 
@@ -53,7 +53,7 @@ def getxmltagname(tagname):
 
 
 class TagObjectBase:
-    tags = []
+    tags: List[str] = []
 
     @classmethod
     def can_process_tag(cls, tagname):
@@ -89,9 +89,9 @@ class TagObject(TagObjectBase, metaclass=TagObjectFactory):
     set_child_argn = False
     name_is_first_id = False
     debug_other = True
-    adopt_childs_tags = []
+    adopt_childs_tags: List[str] = []
     omit_tags = ["empty"]
-    callback_subelem = {}
+    callback_subelem: Dict[Type["TagObject"], str] = {}
     promote_child_if_alone = False
 
     @classmethod
@@ -102,8 +102,8 @@ class TagObject(TagObjectBase, metaclass=TagObjectFactory):
         super().__init__(tagname)
         self.xml = ElementTree.Element(self.tagname(tagname))
         self.xmlname = None
-        self.subelems = []
-        self.values = []
+        self.subelems: List[Any] = []
+        self.values: List[Tuple[str, str]] = []
         if self.name_is_first_id:
             self.xml.set("name", "")
 

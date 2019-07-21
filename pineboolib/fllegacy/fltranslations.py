@@ -3,7 +3,7 @@ import os
 from pineboolib import logging
 
 from PyQt5 import QtCore, Qt  # type: ignore
-from typing import Any, Mapping, Union
+from typing import Any, Union
 
 
 """
@@ -66,7 +66,7 @@ class FLTranslations(object):
     @param stripped. No usado
     """
 
-    def lrelease(self, ts_input_file: Union[str, bytes, int, str, Mapping[slice, Any]], qm_output_file, stripped=True) -> None:
+    def lrelease(self, ts_input_file: str, qm_output_file, stripped=True) -> None:
         from pineboolib.application import project
 
         verbose = False

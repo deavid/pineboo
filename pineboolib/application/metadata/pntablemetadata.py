@@ -712,7 +712,7 @@ class PNTableMetaDataPrivate:
     """
     Lista de campos que tiene esta tabla
     """
-    fieldList_: List["FLFieldMetaData"]
+    fieldList_: List["PNFieldMetaData"]
 
     """
     Clave compuesta que tiene esta tabla

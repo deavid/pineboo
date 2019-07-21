@@ -7,12 +7,7 @@ from pineboolib.core.utils.utils_base import format_double
 
 from PyQt5.QtWidgets import QAbstractItemView  # type: ignore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
-from typing import Optional
-from typing import Any, TypeVar
-
-_T0 = TypeVar("_T0")
-
-_T0 = TypeVar("_T0")
+from typing import Optional, Any, List
 
 
 class QTable(QtWidgets.QTableWidget):
@@ -22,9 +17,9 @@ class QTable(QtWidgets.QTableWidget):
     doubleClicked = QtCore.pyqtSignal(int, int)
     clicked = QtCore.pyqtSignal(int, int)
     valueChanged = QtCore.pyqtSignal(int, int)
-    read_only_cols = None
-    read_only_rows = None
-    cols_list = None
+    read_only_cols: List[str]
+    read_only_rows: List[str]
+    cols_list: List[str]
     resize_policy = None
 
     Default = 0

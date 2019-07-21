@@ -1,5 +1,8 @@
-from typing import List, Optional, Union
-from .itablemetadata import ITableMetaData
+from typing import List, Optional, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .itablemetadata import ITableMetaData  # noqa: F401
+    from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData  # noqa: F401
 
 
 class IFieldMetaData:
@@ -21,8 +24,8 @@ class IFieldMetaData:
     def allowNull(self) -> bool:
         return False
 
-    def associatedField(self) -> None:
-        return
+    def associatedField(self) -> Optional["ITableMetaData"]:
+        return None
 
     def associatedFieldFilterTo(self) -> str:
         return ""
@@ -48,7 +51,32 @@ class IFieldMetaData:
     def hasOptionsList(self) -> bool:
         return False
 
-    def inicializeNewFLFieldMetaData(self, *args, **kwargs) -> None:
+    def inicializeFLFieldMetaData(self, other) -> None:
+        return
+
+    def inicializeNewFLFieldMetaData(
+        self,
+        n: str,
+        a: str,
+        aN: bool,
+        isPrimaryKey: bool,
+        t: str,
+        length_: int = 0,
+        c: bool = False,
+        v: bool = True,
+        ed: bool = True,
+        pI: int = 4,
+        pD: int = 0,
+        iNX: bool = False,
+        uNI: bool = False,
+        coun: bool = False,
+        defValue: Optional[str] = None,
+        oT: bool = False,
+        rX: Optional[str] = None,
+        vG: bool = True,
+        gen: bool = True,
+        iCK: bool = False,
+    ) -> None:
         return
 
     def isCompoundKey(self) -> bool:
@@ -60,8 +88,8 @@ class IFieldMetaData:
     def length(self) -> int:
         return 0
 
-    def metadata(self) -> ITableMetaData:
-        return ITableMetaData("", None, None)
+    def metadata(self) -> Optional["ITableMetaData"]:
+        return None
 
     def name(self) -> str:
         return ""
@@ -81,8 +109,8 @@ class IFieldMetaData:
     def regExpValidator(self) -> Optional[str]:
         return None
 
-    def relationM1(self) -> None:
-        return
+    def relationM1(self) -> Optional["PNRelationMetaData"]:
+        return None
 
     def setAssociatedField(self, r_or_name, f: str) -> None:
         return

@@ -228,7 +228,10 @@ class sql_inspector(object):
         elif type_ == "pixmap":
             from pineboolib.application import project
 
-            if raw or not project.conn.manager().isSystemTable(mtd.metadata().name()):
+            metadata = mtd.metadata()
+            if metadata is None:
+                raise Exception("Metadata not found")
+            if raw or not project.conn.manager().isSystemTable(metadata.name()):
                 ret_ = project.conn.manager().fetchLargeValue(ret_)
         elif type_ == "date":
             from pineboolib.application import types

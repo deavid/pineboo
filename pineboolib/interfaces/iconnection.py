@@ -4,8 +4,8 @@ from .iapicursor import IApiCursor
 from typing import Any, List, Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib.application.database.pnsqlsavepoint import PNSqlSavePoint
-    from pineboolib.application.database.pnconnection import PNConnection
+    from pineboolib.application.database.pnsqlsavepoint import PNSqlSavePoint  # noqa: F401
+    from pineboolib.application.database.pnconnection import PNConnection  # noqa: F401
 
 
 class IConnection:
@@ -16,7 +16,7 @@ class IConnection:
     db_port: int
     db_userName: str
     db_password: str
-    conn = None
+    conn: Any  # connection from the actual driver
     connAux: Dict[str, "IConnection"]
     driverSql = None
     transaction_: int
@@ -37,13 +37,13 @@ class IConnection:
         return ""
 
     def useConn(self, name: str = "default") -> "IConnection":
-        return
+        return self
 
     def removeConn(self, name="default") -> bool:
         return True
 
     def isOpen(self) -> bool:
-        return
+        return False
 
     def tables(self, t_: Optional[str] = None) -> List[str]:
         return []
@@ -136,19 +136,19 @@ class IConnection:
         return
 
     def doTransaction(self, cursor) -> bool:
-        return
+        return False
 
     def transactionLevel(self) -> int:
-        return
+        return 0
 
     def doRollback(self, cur) -> bool:
-        return
+        return False
 
     def interactiveGUI(self) -> bool:
-        return
+        return False
 
     def doCommit(self, cur, notify=True) -> bool:
-        return
+        return False
 
     def canDetectLocks(self) -> None:
         return
@@ -187,13 +187,13 @@ class IConnection:
         return
 
     def existsTable(self, name) -> bool:
-        return
+        return False
 
     def createTable(self, tmd) -> bool:
-        return
+        return False
 
     def mismatchedTable(self, tablename: str, tmd) -> bool:
-        return
+        return False
 
     def normalizeValue(self, text: str) -> Optional[str]:
         return None
@@ -205,4 +205,4 @@ class IConnection:
         return
 
     def alterTable(self, mtd_1, mtd_2, key, force=False) -> bool:
-        return
+        return False
