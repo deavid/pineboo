@@ -9,15 +9,15 @@ from pineboolib.core import decorators
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flapplication import aqApp
-from typing import Any
+from typing import Any, List, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class AQStaticDirInfo(object):
 
-    active_ = None
-    path_ = None
+    active_: bool
+    path_: str
 
     def __init__(self, *args) -> None:
 
@@ -31,8 +31,8 @@ class AQStaticDirInfo(object):
 
 class AQStaticBdInfo(object):
 
-    enabled_ = None
-    dirs_ = []
+    enabled_: bool
+    dirs_: List[AQStaticDirInfo]
     key_ = None
 
     def __init__(self, database) -> None:
@@ -42,7 +42,7 @@ class AQStaticBdInfo(object):
         settings = FLSettings()
         self.enabled_ = settings.readBoolEntry("%senabled" % self.key_, False)
 
-    def findPath(self, p) -> None:
+    def findPath(self, p) -> Optional[AQStaticDirInfo]:
 
         for info in self.dirs_:
             if info.path_ == p:
@@ -81,7 +81,69 @@ class AQStaticBdInfo(object):
         settings.writeEntry("%sactiveDirs" % self.key_, ",".join(active_dirs))
 
 
-warn_ = []
+class FLStaticLoaderWarning(QtCore.QObject):
+
+    warns_: List[str]
+    paths_: List[Any]
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.warns_ = []
+        self.paths_ = []
+
+    def popupWarnings(self) -> None:
+        if not self.warns_:
+            return
+
+        msg = '<p><img source="about.png" align="right"><b><u>CARGA ESTATICA ACTIVADA</u></b><br><br><font face="Monospace">'
+
+        for it in self.warns_:
+            msg += "%s<br>" % it
+
+        msg += "</font><br></p>"
+        self.warns_.clear()
+
+        aqApp.popupWarn(msg)
+
+    @decorators.NotImplementedWarn
+    def scriptBaseFileName(self, name):
+
+        scripts = aqApp.project().scripts()
+        for it in scripts:
+            if it.baseFileName() == name:
+                return it
+
+        return None
+
+    def updateScripts(self) -> None:
+        if not self.paths_:
+            return
+
+        suf_mn = "::Main"
+        suf_fm = "::Form"
+        suf_fr = "::FormRecod"
+
+        for it in self.paths_:
+            n = it.section(":", 0, 0)
+            if not n.endswith(".qs") or not n.endswith(".qs.py"):
+                continue
+
+            src = self.scriptBaseFileName(n + suf_mn)
+            if src:
+                src.__setFilename(it.section(":", 1, 1) + n)
+
+            src = self.scriptBaseFileName(n + suf_fm)
+            if src:
+                src.__setFilename(it.section(":", 1, 1) + n)
+
+            src = self.scriptBaseFileName(n + suf_fr)
+            if src:
+                src.__setFilename(it.section(":", 1, 1) + n)
+
+        self.paths_.clear()
+
+
+warn_: FLStaticLoaderWarning
 
 
 class FLStaticLoader(QtCore.QObject):
@@ -267,65 +329,3 @@ class FLStaticLoader(QtCore.QObject):
 
     def __getattr__(self, name) -> Any:
         return self.ui_.findChild(QtWidgets.QWidget, name)
-
-
-class FLStaticLoaderWarning(QtCore.QObject):
-
-    warns_ = None
-    paths_ = None
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.warns_ = []
-        self.paths_ = []
-
-    def popupWarnings(self) -> None:
-        if not self.warns_:
-            return
-
-        msg = '<p><img source="about.png" align="right"><b><u>CARGA ESTATICA ACTIVADA</u></b><br><br><font face="Monospace">'
-
-        for it in self.warns_:
-            msg += "%s<br>" % it
-
-        msg += "</font><br></p>"
-        self.warns_.clear()
-
-        aqApp.popupWarn(msg)
-
-    @decorators.NotImplementedWarn
-    def scriptBaseFileName(self, name):
-
-        scripts = aqApp.project().scripts()
-        for it in scripts:
-            if it.baseFileName() == name:
-                return it
-
-        return None
-
-    def updateScripts(self) -> None:
-        if not self.paths_:
-            return
-
-        suf_mn = "::Main"
-        suf_fm = "::Form"
-        suf_fr = "::FormRecod"
-
-        for it in self.paths_:
-            n = it.section(":", 0, 0)
-            if not n.endswith(".qs") or not n.endswith(".qs.py"):
-                continue
-
-            src = self.scriptBaseFileName(n + suf_mn)
-            if src:
-                src.__setFilename(it.section(":", 1, 1) + n)
-
-            src = self.scriptBaseFileName(n + suf_fm)
-            if src:
-                src.__setFilename(it.section(":", 1, 1) + n)
-
-            src = self.scriptBaseFileName(n + suf_fr)
-            if src:
-                src.__setFilename(it.section(":", 1, 1) + n)
-
-        self.paths_.clear()

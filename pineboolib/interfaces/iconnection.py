@@ -84,20 +84,20 @@ class IConnection:
     def driverAlias(self) -> None:
         return
 
-    def driverNameToDriverAlias(self, name) -> None:
-        return
+    def driverNameToDriverAlias(self, name) -> str:
+        return ""
 
-    def lastError(self) -> None:
-        return
+    def lastError(self) -> str:
+        return ""
 
-    def host(self) -> None:
-        return
+    def host(self) -> str:
+        return ""
 
-    def port(self) -> None:
-        return
+    def port(self) -> int:
+        return 0
 
-    def user(self) -> None:
-        return
+    def user(self) -> str:
+        return ""
 
     def returnword(self) -> None:
         return

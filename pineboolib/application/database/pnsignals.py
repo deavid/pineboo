@@ -1,7 +1,7 @@
 class PNSignals(object):
-    notify_begin_transaction_ = None
-    notify_end_transaction_ = None
-    notify_roll_back_transaction_ = None
+    notify_begin_transaction_: bool
+    notify_end_transaction_: bool
+    notify_roll_back_transaction_: bool
 
     def __init__(self):
         super().__init__()
