@@ -2,14 +2,14 @@
 
 from PyQt5 import QtWidgets, QtCore  # type: ignore
 from pineboolib.core import decorators
-from typing import Any, Mapping
+from typing import Any, Union
 
 
 class QDateEdit(QtWidgets.QDateEdit):
 
     _parent = None
     _date = None
-    separator_ = None
+    separator_ = "-"
 
     def __init__(self, parent=None, name=None) -> None:
         super(QDateEdit, self).__init__(parent)
@@ -29,7 +29,7 @@ class QDateEdit(QtWidgets.QDateEdit):
         else:
             return None
 
-    def setDate(self, v: Mapping[slice, Any]) -> None:
+    def setDate(self, v: Union[str, Any]) -> None:
         if not isinstance(v, str):
             if hasattr(v, "toString"):
                 v = v.toString("yyyy%sMM%sdd" % (self.separator(), self.separator()))

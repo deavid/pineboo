@@ -1,6 +1,5 @@
 from builtins import zip
 from builtins import range
-from past.utils import old_div
 from builtins import object
 import os
 import os.path
@@ -403,7 +402,7 @@ class FindEquivalences(object):
                     sz2 = sz2b - sz2a + 1
                     sz1a, sz1b = self.pfA.idxtree[pA]
                     sz1 = sz1b - sz1a + 1
-                    lev2 = 1.0 + old_div(sz1, float(sz2))
+                    lev2 = 1.0 + sz1 / float(sz2)
                     # lev2 = 2**(len(pkA) - len(pA))
                     # lev2_list = [ pC for pC in self.pfA.idxtree if len(pC) >= len(pA) and pC[:len(pA)] == pA ]
                     # lev2_plist = set([])
@@ -411,7 +410,7 @@ class FindEquivalences(object):
                     #    lev2_plist |= set(tree_parents(l)[1:])
                     # lev2 = len(set(lev2_list) - set(lev2_plist))
 
-                    pEq = (pB, old_div(float(punt), lev2))
+                    pEq = (pB, float(punt) / lev2)
                     if pA not in self.parent_equivalences:
                         self.parent_equivalences[pA] = []
                     self.parent_equivalences[pA].append(pEq)
@@ -508,7 +507,7 @@ class FindEquivalences(object):
 
     def addEquivalences(self, lpkA, lpkB):
         lstEquivalences = self.multiplyEquivalences(lpkA, lpkB)
-        base_probability = old_div(1.0, len(lstEquivalences))
+        base_probability = 1.0 / len(lstEquivalences)
         if base_probability < 0.01:
             return
 
@@ -518,7 +517,7 @@ class FindEquivalences(object):
             parent_prob, parentB = self.getMaxKnown(parentA)
             if parentB:
                 if parentB != pkB[:-1]:
-                    parent_prob = old_div((1 - parent_prob), 2.0)
+                    parent_prob = (1 - parent_prob) / 2.0
                 probability *= parent_prob
 
             parentB = pkB[:-1]

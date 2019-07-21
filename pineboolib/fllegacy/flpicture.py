@@ -52,7 +52,7 @@ class FLPicturePrivate(QtCore.QObject):
 
 
 class FLPicture(QObject):
-    d_: FLPicturePrivate = None
+    d_: FLPicturePrivate
 
     class FLPenStyle(Enum):
         NoPen = 0
@@ -130,11 +130,11 @@ class FLPicture(QObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
+        self.d_ = FLPicturePrivate()
         if len(args) and isinstance(args[0], FLPicture):
             super(FLPicture, self).__init__()
             otherPic = args[0]
             if otherPic and otherPic != self and otherPic.d_ and otherPic.d_.pic_:
-                self.d_ = FLPicturePrivate()
                 self.d_.pic_ = otherPic.d_.pic_
 
         elif len(args) and isinstance(args[0], QtGui.QPicture):

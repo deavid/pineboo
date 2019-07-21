@@ -20,7 +20,7 @@ _T0 = TypeVar("_T0")
 
 logger = logging.getLogger(__name__)
 
-cursor_dict: Dict[str, Any]
+cursor_dict: Dict[str, Any] = {}
 
 
 class parser_options(object):

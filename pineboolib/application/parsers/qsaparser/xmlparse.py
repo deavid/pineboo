@@ -4,10 +4,10 @@ import re
 import ast
 from typing import Iterable, List
 
-elements = []
+elements: List[str] = []
 show_end = True
 lasttextdata = ""
-lstelements = []
+lstelements: List[str] = []
 
 
 def reset() -> None:
@@ -58,7 +58,7 @@ def char_data(data: str) -> None:
         # print "/".join(elements)+ "(%s)" % repr(data)
 
 
-def unmap(lines: Iterable) -> List[str]:
+def unmap(lines: Iterable[str]) -> List[str]:
 
     runmap = re.compile(r"^(?P<depth>/*)(?P<tagname>\w+)(?P<attrs>&[^\(]+)*(?P<txt>\(.+\))?$")
     # depthlevel

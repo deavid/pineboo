@@ -5,8 +5,8 @@ from typing import Any
 
 
 class LineEdit(QWidget):
-    _label = None
-    _line = None
+    _label: QtWidgets.QLabel
+    _line: QtWidgets.QLineEdit
 
     def __init__(self) -> None:
         super(LineEdit, self).__init__()

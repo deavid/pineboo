@@ -2,12 +2,11 @@ from typing import Any, Callable, Dict, Mapping, Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
     import pineboolib.application.database.pnconnection
+    import pineboolib.application.metadata.pnfieldmetadata
+    import pineboolib.application.metadata.pntablemetadata
+    import pineboolib.application.metadata.pnrelationmetadata
+    import pineboolib.application.database.pnsqlquery
     import pineboolib.fllegacy.flaction
-    import pineboolib.fllegacy.fltablemetadata
-    import pineboolib.fllegacy.flfieldmetadata
-    import pineboolib.fllegacy.flrelationmetadata
-    import pineboolib.fllegacy.flsqlquery
-    from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
 
 class IManager(object):
@@ -79,16 +78,16 @@ class IManager(object):
     def loadTables(self) -> None:
         return None
 
-    def metadata(self, n, quick: bool = False) -> Optional["pineboolib.fllegacy.fltablemetadata.FLTableMetaData"]:
+    def metadata(self, n, quick: bool = False) -> Optional["pineboolib.application.metadata.pntablemetadata.PNTableMetaData"]:
         return None
 
-    def metadataField(self, field, v: bool = False, ed: bool = False) -> "pineboolib.fllegacy.flfieldmetadata.FLFieldMetaData":
+    def metadataField(self, field, v: bool = False, ed: bool = False) -> "pineboolib.application.metadata.pnfieldmetadata.PNFieldMetaData":
         raise Exception("must be implemented")
 
-    def metadataRelation(self, relation) -> "pineboolib.fllegacy.flrelationmetadata.FLRelationMetaData":
+    def metadataRelation(self, relation) -> "pineboolib.application.metadata.pnrelationmetadata.PNRelationMetaData":
         raise Exception("must be implemented")
 
-    def query(self, n, parent=...) -> Optional["PNSqlQuery"]:
+    def query(self, n, parent=...) -> Optional["pineboolib.application.database.pnsqlquery.PNSqlQuery"]:
         return None
 
     def storeLargeValue(self, mtd, largeValue: str) -> Optional[str]:

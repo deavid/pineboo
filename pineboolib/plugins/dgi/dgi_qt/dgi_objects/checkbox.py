@@ -6,8 +6,8 @@ from typing import Any
 
 
 class CheckBox(QWidget):
-    _label = None
-    _cb = None
+    _label: QtWidgets.QLabel
+    _cb: QtWidgets.QCheckBox
 
     def __init__(self) -> None:
         super(CheckBox, self).__init__()
