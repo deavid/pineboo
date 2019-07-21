@@ -339,6 +339,9 @@ def execSql(sql, connName="default") -> bool:
     """
     from pineboolib.application import project
 
+    if project.conn is None:
+        raise Exception("Project is not connected yet")
+
     conn_ = project.conn.useConn(connName)
     cur = conn_.cursor()
     try:

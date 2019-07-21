@@ -228,6 +228,9 @@ class sql_inspector(object):
         elif type_ == "pixmap":
             from pineboolib.application import project
 
+            if project.conn is None:
+                raise Exception("Project is not connected yet")
+
             metadata = mtd.metadata()
             if metadata is None:
                 raise Exception("Metadata not found")
@@ -256,6 +259,9 @@ class sql_inspector(object):
 
     def _create_mtd_fields(self, fields_list: Iterable, tables_list: Iterable) -> None:
         from pineboolib.application import project
+
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
 
         _filter = ["sum(", "max(", "distint("]
 
@@ -296,6 +302,9 @@ def resolve_query(table_name, params: Dict[str, str]) -> Tuple[str, str]:
     where = ""
     order_by = ""
     from pineboolib.application import project
+
+    if project.conn is None:
+        raise Exception("Project is not connected yet")
 
     mtd = project.conn.manager().metadata(table_name)
 

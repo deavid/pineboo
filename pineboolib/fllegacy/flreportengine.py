@@ -168,6 +168,8 @@ class FLReportEngine(object):
         if not self.d_.qry_:
             from pineboolib.application import project
 
+            if project.conn is None:
+                raise Exception("Project is not connected yet")
             mgr = project.conn.managerModules()
 
         else:

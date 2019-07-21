@@ -25,6 +25,9 @@ def convert2FLAction(action: Union[str, "XMLAction"]) -> "FLAction":
 
     from pineboolib.application import project
 
+    if project.conn is None:
+        raise Exception("Project is not connected yet")
+
     logger.trace("convert2FLAction: Load action from db manager")
     flaction = project.conn.manager().action(name)
     logger.trace("convert2FLAction: done")

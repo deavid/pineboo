@@ -22,6 +22,8 @@ class SysType(object, metaclass=Singleton):
 
     def nameUser(self) -> str:
         ret_ = None
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
 
         if not project._DGI:
             raise Exception("project._DGI is empty!")
@@ -61,6 +63,8 @@ class SysType(object, metaclass=Singleton):
         return not self.isDebuggerEnabled()
 
     def isLoadedModule(self, modulename: str) -> bool:
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         return modulename in project.conn.managerModules().listAllIdModules()
 
     def translate(self, *args) -> str:
@@ -92,6 +96,8 @@ class SysType(object, metaclass=Singleton):
             return platform.system()
 
     def nameBD(self) -> Any:
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         return project.conn.DBName()
 
     def toUnicode(self, val: str, format: str) -> str:
@@ -101,6 +107,8 @@ class SysType(object, metaclass=Singleton):
         return val.encode("utf-8").decode(format, "replace")
 
     def Mr_Proper(self) -> None:
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         project.conn.Mr_Proper()
 
     def installPrefix(self) -> str:
@@ -141,6 +149,8 @@ class SysType(object, metaclass=Singleton):
         f.close()
 
     def cleanupMetaData(self, connName="default") -> None:
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         project.conn.useConn(connName).manager().cleanupMetaData()
 
     def updateAreas(self) -> None:
@@ -159,14 +169,20 @@ class SysType(object, metaclass=Singleton):
         aqApp.setCaptionMainWidget(t)
 
     def nameDriver(self, connName="default") -> Any:
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         return project.conn.useConn(connName).driverName()
 
     def nameHost(self, connName="default") -> Any:
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         return project.conn.useConn(connName).host()
 
     def addDatabase(self, *args) -> bool:
         # def addDatabase(self, driver_name = None, db_name = None, db_user_name = None,
         #                 db_password = None, db_host = None, db_port = None, connName="default"):
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         if len(args) == 1:
             conn_db = project.conn.useConn(args[0])
             if not conn_db.isOpen():
@@ -199,6 +215,8 @@ class SysType(object, metaclass=Singleton):
         return True
 
     def removeDatabase(self, connName="default") -> Any:
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         return project.conn.useConn(connName).removeConn(connName)
 
     def idSession(self) -> Any:

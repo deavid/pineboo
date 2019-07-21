@@ -85,6 +85,8 @@ class FLTranslations(object):
             self.releaseTsFile(ts_input_file, verbose, stripped)
 
         else:
+            if project.conn is None:
+                raise Exception("Project has no connection yet")
             # modId = self.db_.managerModules().idModuleOfFile(tsInputFile)
             key = project.conn.managerModules().shaOfFile(ts_input_file)
             # dir = filedir("../tempdata/cache/%s/%s/file.ts/%s" %

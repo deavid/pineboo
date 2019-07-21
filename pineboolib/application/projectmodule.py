@@ -1,7 +1,6 @@
 import os
 import time
 from typing import List, Optional, Union, Any, Dict, TYPE_CHECKING
-from optparse import Values
 
 # from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists # FIXME: Not allowed yet
 from PyQt5 import QtCore  # type: ignore
@@ -30,9 +29,9 @@ class Project(object):
 
     logger = logging.getLogger("main.Project")
     app: QtCore.QCoreApplication = None
-    conn: "IConnection" = None  # Almacena la conexión principal a la base de datos
+    conn: Optional["IConnection"] = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
-    options: Values = None
+    # options: Values = None
     modules: Dict[str, "Module"]
 
     # _initModules = None

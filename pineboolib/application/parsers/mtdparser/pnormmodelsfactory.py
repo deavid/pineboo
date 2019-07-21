@@ -59,6 +59,9 @@ def base_model(name: str) -> Any:
     # print("Base", name)
     from pineboolib.application import project
 
+    if project.conn is None:
+        raise Exception("Project is not connected yet")
+
     path = _path("%s.mtd" % name, False)
     if path is None:
         raise Exception("File %s.mtd not found" % name)
@@ -135,6 +138,9 @@ def load_model(nombre):
 def empty_base():
     from pineboolib.application import project
 
+    if project.conn is None:
+        raise Exception("Project is not connected yet")
+
     # FIXME: Not a good idea to delete from other module
     del project.conn.driver().declarative_base_
     project.conn.driver().declarative_base_ = None
@@ -144,6 +150,9 @@ def load_models() -> None:
 
     from pineboolib import qsa as qsa_dict_modules
     from pineboolib.application import project
+
+    if project.conn is None:
+        raise Exception("Project is not connected yet")
 
     db_name = project.conn.DBName()
     tables = project.conn.tables()

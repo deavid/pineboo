@@ -13,6 +13,9 @@ def saveGeometryForm(name: str, geo: "QSize") -> None:
     """
     from pineboolib.application import project  # FIXME
 
+    if project.conn is None:
+        raise Exception("Project is not connected yet")
+
     name = "geo/%s/%s" % (project.conn.DBName(), name)
     settings.set_value(name, geo)
 
@@ -24,6 +27,9 @@ def loadGeometryForm(name: str) -> "QSize":
     @return QSize con los datos de la geometríca de la ventana guardados.
     """
     from pineboolib.application import project  # FIXME
+
+    if project.conn is None:
+        raise Exception("Project is not connected yet")
 
     name = "geo/%s/%s" % (project.conn.DBName(), name)
     return settings.value(name, None)
