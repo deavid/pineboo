@@ -6,6 +6,7 @@ from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
 from pineboolib.fllegacy.flaccesscontrol import FLAccessControl
 
 from pineboolib.application import project
+from typing import Dict
 
 
 class FLAccessControlMainWindow(FLAccessControl):
@@ -123,7 +124,7 @@ class FLAccessControlForm(FLAccessControl):
             if w:
                 perm = self.acosPerms_[it]
                 if perm in ("-w", "--"):
-                    if project._DGI.localDesktop():
+                    if project._DGI and project._DGI.localDesktop():
                         w.setPalette(self.pal)
                     w.setDisabled(True)
                     w.hide()
@@ -142,6 +143,7 @@ class FLAccessControlForm(FLAccessControl):
 class FLAccessControlTable(FLAccessControl):
     def __init__(self) -> None:
         super().__init__()
+        self.acosPerms_: Dict[str, str] = {}
 
     def type(self):
         return "table"

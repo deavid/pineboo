@@ -58,7 +58,6 @@ como el selector de módulos, o cada una de las ventanas principales de los mód
 
 
 from typing import List, Dict, Any
-from typing import NoReturn
 
 
 class FLAccessControl(object):
@@ -299,10 +298,10 @@ class FLAccessControl(object):
 
         return acos
 
-    def processObject(self, o) -> NoReturn:
+    def processObject(self, o) -> None:
         raise ValueError("Cannot access base class")
 
-    def setFromObject(self, obj: object) -> None:
+    def setFromObject(self, obj: Any) -> None:
         raise ValueError("Cannot access base class")
 
 

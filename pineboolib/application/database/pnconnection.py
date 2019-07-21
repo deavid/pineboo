@@ -105,9 +105,11 @@ class PNConnection(QtCore.QObject, IConnection):
         if name in ("default", None):
             return self
 
-        connection: IConnection = self.connAux.get(name, None)
+        connection = self.connAux.get(name, None)
 
         if connection is None:
+            if self.driverSql is None:
+                raise Exception("No driver selected")
             connection = PNConnection(
                 self.db_name,
                 self.db_host,

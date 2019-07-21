@@ -1,6 +1,7 @@
 import os
 import time
 from typing import List, Optional, Union, Any, Dict, TYPE_CHECKING
+from optparse import Values
 
 # from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists # FIXME: Not allowed yet
 from PyQt5 import QtCore  # type: ignore
@@ -31,7 +32,7 @@ class Project(object):
     app: QtCore.QCoreApplication = None
     conn: Optional["IConnection"] = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
-    # options: Values = None
+    options: Values
     modules: Dict[str, "Module"]
 
     # _initModules = None
@@ -55,7 +56,7 @@ class Project(object):
         self._DGI = None
         self.tree = None
         self.root = None
-        self.apppath = None
+        self.apppath = ""
         self.tmpdir = filedir("../tempdata")
         self.parser = None
         self.main_form_name: Optional[str] = None
@@ -65,9 +66,7 @@ class Project(object):
         self.actions: Dict[Any, XMLAction] = {}  # FIXME: Add proper type
         self.tables: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.files: Dict[Any, Any] = {}  # FIXME: Add proper type
-        self.apppath = None
-        self.deleteCache = None
-        self.parseProject = None
+        self.options = Values()
 
     def init_conn(self, connection: "IConnection") -> None:
         self.conn = connection
@@ -129,6 +128,9 @@ class Project(object):
 
         self.actions = {}
         self.tables = {}
+
+        if self._DGI is None:
+            raise Exception("DGI not loaded")
 
         if not self.conn or not self.conn.conn:
             raise NotConnectedError("Cannot execute Pineboo Project without a connection in place")
@@ -300,7 +302,7 @@ class Project(object):
         return True
 
     def call(
-        self, function: str, aList: List[Union[List[str], str, bool]], object_context: None = None, showException: bool = True
+        self, function: str, aList: List[Union[List[str], str, bool]], object_context: Any = None, showException: bool = True
     ) -> Optional[bool]:
         """
         LLama a una función del projecto.
@@ -398,8 +400,8 @@ class Project(object):
             raise IOError
         python_script_path = (scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or self.no_python_cache:
-            file_name = scriptname.split(os.sep)  # FIXME: is a bad idea to split by os.sep
-            file_name = file_name[len(file_name) - 2]
+            file_name_l = scriptname.split(os.sep)  # FIXME: is a bad idea to split by os.sep
+            file_name = file_name_l[len(file_name_l) - 2]
 
             msg = "Convirtiendo a Python . . . %s.qs %s" % (file_name, txt_)
             self.logger.info(msg)

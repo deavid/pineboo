@@ -44,7 +44,7 @@ class IFormDB(object):
     show: Callable
     main: Callable  # Just for QSA to add here the main() method for execDefaultScript
 
-    def __init__(self, parent, action: Any, load=False) -> None:
+    def __init__(self, parent=None, action: Any = None, load=False) -> None:
         return
 
     def accepted(self) -> Any:
@@ -71,8 +71,8 @@ class IFormDB(object):
     def emitFormReady(self) -> None:
         return
 
-    def exec_(self) -> None:
-        return
+    def exec_(self) -> bool:
+        return False
 
     def focusInEvent(self, f) -> None:
         return

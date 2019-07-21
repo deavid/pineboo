@@ -517,7 +517,7 @@ class FLManager(QtCore.QObject, IManager):
 
         @param n Nombre de la accion
         @return Un objeto FLAction con la descripcion de la accion
-        
+
         """
         if not self.db_:
             raise Exception("action. self.db_ is empty!")
@@ -1417,14 +1417,14 @@ class FLManager(QtCore.QObject, IManager):
         self.db_.managerModules().loadAllIdModules()
         self.db_.managerModules().loadIdAreas()
 
-        q = PNSqlQuery(None, self.db_.dbAux())
+        q = PNSqlQuery(None, "dbAux")
         q.exec_("SELECT tabla,xml FROM flmetadata")
         while q.next():
             self.dictKeyMetaData_[str(q.value(0))] = str(q.value(1))
 
-        c = PNSqlCursor("flmetadata", True, self.db_.dbAux())
+        c = PNSqlCursor("flmetadata", True, "dbAux")
 
-        q2 = PNSqlQuery(None, self.db_.dbAux())
+        q2 = PNSqlQuery(None, "dbAux")
         q2.exec_("SELECT nombre,sha FROM flfiles WHERE nombre LIKE '%.mtd' and nombre not like '%%alteredtable%'")
         while q2.next():
             table = str(q2.value(0))
@@ -1520,7 +1520,7 @@ class FLManager(QtCore.QObject, IManager):
         sha = str(util.sha1(largeValue))
         # print("-->", tableName, sha)
         refKey = "RK@%s@%s" % (tableName, sha)
-        q = PNSqlQuery(None, self.db_.dbAux())
+        q = PNSqlQuery(None, "dbAux")
         q.setSelect("refkey")
         q.setFrom("fllarge")
         q.setWhere(" refkey = '%s'" % refKey)

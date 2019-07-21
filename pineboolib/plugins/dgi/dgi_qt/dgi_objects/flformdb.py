@@ -168,7 +168,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
         # if project._DGI.localDesktop():  # Si es local Inicializa
         #    super(QtWidgets.QWidget, self).__init__(parent)
-        super(QtWidgets.QWidget, self).__init__(parent)
+        super().__init__(parent)
 
         self._loaded = False
         self.known_instances[(self.__class__, action.name())] = self
@@ -513,10 +513,11 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Sólo para compatibilizar con FLFormSearchDB. Por defecto sólo llama QWidget::show
     """
 
-    def exec_(self):
+    def exec_(self) -> bool:
         super().show()
+        return True
 
-    def hide(self):
+    def hide(self) -> None:
         super().hide()
 
     # public slots:

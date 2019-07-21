@@ -11,7 +11,7 @@ from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
 from pineboolib.fllegacy.flutil import FLUtil
 
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine  # type: ignore
 
 import traceback
 from pineboolib.application import project
@@ -89,7 +89,7 @@ class FLQPSQL(object):
         from psycopg2.extras import LoggingConnection  # type: ignore
 
         logger = logging.getLogger(self.alias_)
-        logger.debug = logger.trace  # Send Debug output to Trace
+        logger.debug = logger.trace  # type: ignore  # Send Debug output to Trace
 
         conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (
             db_name,
@@ -168,7 +168,7 @@ class FLQPSQL(object):
 
     def session(self) -> Any:
         if self.session_ is None:
-            from sqlalchemy.orm import sessionmaker
+            from sqlalchemy.orm import sessionmaker  # type: ignore
 
             # from sqlalchemy import event
             # from pineboolib.pnobjectsfactory import before_commit, after_commit, after_flush
@@ -182,7 +182,7 @@ class FLQPSQL(object):
 
     def declarative_base(self) -> Any:
         if self.declarative_base_ is None:
-            from sqlalchemy.ext.declarative import declarative_base  # type : ignore
+            from sqlalchemy.ext.declarative import declarative_base  # type: ignore
 
             self.declarative_base_ = declarative_base()
 
@@ -327,7 +327,7 @@ class FLQPSQL(object):
     def setLastError(self, text, command) -> None:
         self.lastError_ = "%s (%s)" % (text, command)
 
-    def lastError(self) -> str:
+    def lastError(self) -> Optional[str]:
         return self.lastError_
 
     def commitTransaction(self) -> bool:

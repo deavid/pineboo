@@ -12,7 +12,7 @@ from pineboolib.application.database.pnsqlquery import PNSqlQuery
 # from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flutil import FLUtil
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine  # type: ignore
 
 import traceback
 import os
@@ -141,7 +141,7 @@ class FLSQLITE(object):
 
     def session(self) -> None:
         if self.session_ is None:
-            from sqlalchemy.orm import sessionmaker
+            from sqlalchemy.orm import sessionmaker  # type: ignore
 
             # from sqlalchemy import event
             # from pineboolib.pnobjectsfactory import before_commit, after_commit
@@ -152,7 +152,7 @@ class FLSQLITE(object):
 
     def declarative_base(self) -> Any:
         if self.declarative_base_ is None:
-            from sqlalchemy.ext.declarative import declarative_base
+            from sqlalchemy.ext.declarative import declarative_base  # type: ignore
 
             self.declarative_base_ = declarative_base()
 

@@ -11,21 +11,11 @@ from PyQt5 import QtCore  # type: ignore
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import ustr, filedir
 
-from pineboolib.application import types
-
 
 # from pineboolib.pnobjectsfactory import load_model, Calculated
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.pncontrolsfactory import qsa_sys
 
-Boolean = types.Boolean
-QString = types.QString
-String = types.String
-Function = types.Function
-Object = types.Object
-Array = types.Array
-Date = types.Date
-AttributeDict = types.AttributeDict
 
 logger = logging.getLogger(__name__)
 
@@ -578,13 +568,15 @@ def replace(source, search, replace):
 
 
 # Usadas solo por import *
-from pineboolib.fllegacy.flposprinter import FLPosPrinter  # noqa
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery  # noqa
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor  # noqa
-from pineboolib.fllegacy.flnetwork import FLNetwork  # noqa
-from pineboolib.fllegacy.flreportviewer import FLReportViewer  # noqa
-from pineboolib.fllegacy.flapplication import FLApplication  # noqa
-from pineboolib.fllegacy.flvar import FLVar  # noqa
-from pineboolib.core.utils.utils_base import ustr, ustr1, filedir  # noqa
-from .input import Input  # noqa
-from pineboolib.pncontrolsfactory import *  # noqa
+from pineboolib.fllegacy.flposprinter import FLPosPrinter  # noqa: F401
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery  # noqa: F401
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor  # noqa: F401
+from pineboolib.fllegacy.flnetwork import FLNetwork  # noqa: F401
+from pineboolib.fllegacy.flreportviewer import FLReportViewer  # noqa: F401
+from pineboolib.fllegacy.flapplication import FLApplication  # noqa: F401
+from pineboolib.fllegacy.flvar import FLVar  # noqa: F401
+
+# from pineboolib.core.utils.utils_base import ustr, ustr1, filedir  # noqa: F401
+from pineboolib.application.types import Boolean, QString, String, Function, Object, Array, Date, AttributeDict  # noqa: F401
+from .input import Input  # noqa: F401
+from pineboolib.pncontrolsfactory import *  # noqa: F401
