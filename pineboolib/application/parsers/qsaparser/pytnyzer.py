@@ -19,6 +19,8 @@ if black:
 else:
     BLACK_FILEMODE = None
 
+STRICT_MODE = True
+
 # To get the following list updated, do:
 # In [1]: from pineboolib import qsa
 # In [2]: dir(qsa)
@@ -316,8 +318,10 @@ def id_translate(name: str, qsa_exclude: Set[str] = None, transform: Dict[str, s
 
         if name.startswith("formRecord"):
             return 'qsa.from_project("%s")' % name
-
-        return "__undef__" + name
+        if STRICT_MODE:
+            return "__undef__" + name
+        else:
+            return name
     else:
         if transform is not None and name in transform:
             return transform[name]
@@ -2079,7 +2083,8 @@ def parse_ast(elem, parent=None) -> ASTPythonBase:
 
 def file_template(ast: Any) -> Generator[Tuple[Any, Any], Any, None]:
     yield "line", "# -*- coding: utf-8 -*-"
-    # yield "line", "from pineboolib.qsa import *  # noqa: F403"
+    if not STRICT_MODE:
+        yield "line", "from pineboolib.qsa import *  # noqa: F403"
     yield "line", "from pineboolib import qsa"
     # yield "line", "from pineboolib.qsaglobals import *"
     yield "line", ""

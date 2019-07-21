@@ -44,6 +44,7 @@ class IFormDB(object):
     show: Callable
     main: Callable  # Just for QSA to add here the main() method for execDefaultScript
 
+    __init__: Callable
     # def __init__(self, parent=None, action: Any = None, load=False) -> None:
     #     return
 

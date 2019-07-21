@@ -1,8 +1,9 @@
 from .iformdb import IFormDB
-from typing import Any
+from typing import Any, Callable
 
 
 class IFormRecordDB(IFormDB):
+    __init__: Callable
     # def __init__(self, parent_or_cursor, action, load=False) -> None:
     #     ...
 

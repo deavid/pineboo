@@ -125,6 +125,9 @@ def exec_main(options: Values) -> int:
 
     # TODO: Refactorizar función en otras más pequeñas
     from pineboolib.application import project  # FIXME: next time, proper singleton
+    from pineboolib.application.parsers.qsaparser import pytnyzer
+
+    pytnyzer.STRICT_MODE = False
 
     project.load_version()
     project.setDebugLevel(options.debug_level)
