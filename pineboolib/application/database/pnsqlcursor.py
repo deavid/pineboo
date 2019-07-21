@@ -3175,7 +3175,7 @@ class PNSqlCursor(QtCore.QObject):
                     self.bufferCopy().setGenerated(fieldNameCheck, True)
 
             self.setFilter(None)
-            self.clearMapCalcFields()
+            # self.clearMapCalcFields()
 
             if emite:
                 self.cursorUpdated.emit()
