@@ -238,6 +238,7 @@ class PNCursorPrivate(QtCore.QObject):
         self.idCond_ = 0
         self.id_ = "000"
         self.aclDone_ = False
+        self.browse_states_ = []
 
     def __del__(self):
 

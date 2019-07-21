@@ -4,7 +4,7 @@ from pineboolib.core.settings import config
 from pineboolib.application.utils import sql_tools
 from pineboolib.application import project
 from pineboolib.interfaces.ifieldmetadata import IFieldMetaData
-from typing import Any, Union, List, Dict, TYPE_CHECKING
+from typing import Any, Union, List, Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.interfaces.iconnection import IConnection
@@ -314,11 +314,12 @@ class PNSqlQuery(object):
         # for f in s:
         #    f = str(f).strip()
 
-        table: str
-        field: str
+        table: Optional[str]
+        field: Optional[str]
         self.d.fieldList_.clear()
 
         for f in list_fields:
+            table = field = None
             try:
                 if f.startswith(" "):
                     f = f[1:]

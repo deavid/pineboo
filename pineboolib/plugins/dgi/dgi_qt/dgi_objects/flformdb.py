@@ -165,10 +165,9 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
         if not parent:
             parent = aqApp.mainWidget()
-
         # if project._DGI.localDesktop():  # Si es local Inicializa
-        #    super(QtWidgets.QWidget, self).__init__(parent)
-        super().__init__(parent)
+        QtWidgets.QWidget.__init__(self, parent)  # FIXME: Porqué pide dos argumentos extra??
+        # super(QtWidgets.QWidget, self).__init__(parent)
 
         self._loaded = False
         self.known_instances[(self.__class__, action.name())] = self

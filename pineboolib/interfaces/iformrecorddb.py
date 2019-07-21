@@ -3,8 +3,8 @@ from typing import Any
 
 
 class IFormRecordDB(IFormDB):
-    def __init__(self, parent_or_cursor, action, load=False) -> None:
-        ...
+    # def __init__(self, parent_or_cursor, action, load=False) -> None:
+    #     ...
 
     def setMainWidget(self, w=None):
         ...

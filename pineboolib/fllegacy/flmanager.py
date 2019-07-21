@@ -1013,7 +1013,7 @@ class FLManager(QtCore.QObject, IManager):
         ck = False
         n: bool
         a: str
-        ol: str
+        ol: Optional[str] = None
         rX = None
         assocBy = None
         assocWith = None
@@ -1030,7 +1030,7 @@ class FLManager(QtCore.QObject, IManager):
         fullCalc = False
         trimm = False
 
-        t: str
+        t: Optional[str] = None
         length = 0
         pI = 4
         pD = 0
