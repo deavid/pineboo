@@ -495,10 +495,4 @@ class Date(object):
         return not self.__eq__(other)
 
 
-# https://stackoverflow.com/questions/4984647/accessing-dict-keys-like-an-attribute
-class AttributeDict(dict):
-    def __getattr__(self, attr):
-        return self[attr]
-
-    def __setattr__(self, attr, value):
-        self[attr] = value
+AttributeDict = StructMyDict
