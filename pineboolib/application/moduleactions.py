@@ -48,6 +48,9 @@ class ModuleActions(object):
         self.root = self.tree.getroot()
 
         action = XMLAction(project=self.project, name=self.mod.name)
+        if action is None:
+            raise Exception("action is empty!")
+
         action.mod = self
         action.alias = self.mod.name
         # action.form = self.mod.name

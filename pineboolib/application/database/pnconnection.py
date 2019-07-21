@@ -35,6 +35,7 @@ class PNConnection(QtCore.QObject, IConnection):
     transaction_: int
     _managerModules = None
     _manager = None
+    driverName_: str
     currentSavePoint_: Optional[PNSqlSavePoint]
     stackSavePoints_: List[PNSqlSavePoint]
     queueSavePoints_: List[PNSqlSavePoint]

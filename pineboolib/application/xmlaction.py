@@ -8,6 +8,7 @@ from typing import Optional, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.interfaces import IFormDB, IFormRecordDB
+    from .moduleaction import ModuleAction
 
 
 class XMLMainFormAction(XMLStruct):
@@ -43,12 +44,15 @@ class XMLAction(XMLStruct):
     """
 
     logger = logging.getLogger("main.XMLAction")
+    mod: "ModuleAction"
+    alias: str
 
     def __init__(self, *args, project, name=None, **kwargs) -> None:
         """
         Constructor
         """
         super(XMLAction, self).__init__(*args, **kwargs)
+        self.mod = None
         self.project = project
         if not self.project:
             raise ValueError("XMLActions must belong to a project")

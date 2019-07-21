@@ -26,9 +26,11 @@ class IConnection:
     stackSavePoints_: List["PNSqlSavePoint"]
     queueSavePoints_: List["PNSqlSavePoint"]
     interactiveGUI_: bool
+    driverName_: str
     _dbAux = None
     name: str
     _isOpen: bool
+    driver_ = None
 
     def finish(self) -> None:
         return

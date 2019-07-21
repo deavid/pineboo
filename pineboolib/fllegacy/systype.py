@@ -22,6 +22,10 @@ class SysType(object, metaclass=Singleton):
 
     def nameUser(self) -> str:
         ret_ = None
+
+        if not project._DGI:
+            raise Exception("project._DGI is empty!")
+
         if project._DGI.use_alternative_credentials():
             ret_ = project._DGI.get_nameuser()
         else:
@@ -30,6 +34,8 @@ class SysType(object, metaclass=Singleton):
         return ret_
 
     def interactiveGUI(self) -> str:
+        if not project._DGI:
+            raise Exception("project._DGI is empty!")
         return project._DGI.interactiveGUI()
 
     def isUserBuild(self) -> bool:
@@ -120,6 +126,9 @@ class SysType(object, metaclass=Singleton):
         return str(project.version)
 
     def processEvents(self) -> None:
+        if not project._DGI:
+            raise Exception("project._DGI is empty!")
+
         return project._DGI.processEvents()
 
     def write(self, encode_: str, dir_: str, contenido: str) -> None:
@@ -161,7 +170,7 @@ class SysType(object, metaclass=Singleton):
         if len(args) == 1:
             conn_db = project.conn.useConn(args[0])
             if not conn_db.isOpen():
-                if conn_db.driverName_ and conn_db.driverSql.loadDriver(conn_db.driverName_):
+                if conn_db.driverName_ and conn_db.driverSql and conn_db.driverSql.loadDriver(conn_db.driverName_):
                     conn_db.driver_ = conn_db.driverSql.driver()
                     conn_db.conn = conn_db.conectar(
                         project.conn.db_name, project.conn.db_host, project.conn.db_port, project.conn.db_userName, project.conn.db_password
@@ -174,6 +183,8 @@ class SysType(object, metaclass=Singleton):
         else:
             conn_db = project.conn.useConn(args[6])
             if not conn_db.isOpen():
+                if conn_db.driverSql is None:
+                    raise Exception("driverSql not loaded!")
                 conn_db.driverName_ = conn_db.driverSql.aliasToName(args[0])
                 if conn_db.driverName_ and conn_db.driverSql.loadDriver(conn_db.driverName_):
                     conn_db.conn = conn_db.conectar(args[1], args[4], args[5], args[2], args[3])
