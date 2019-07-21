@@ -33,14 +33,12 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     USE_TIMER = False
     CURSOR_COUNT = itertools.count()
     rowsLoaded = 0
-    where_filter = None
-    where_filters = {}
+    where_filter: str
+    where_filters: Dict[str, str] = {}
     _metadata = None
     _sortOrder = None
     _disable_refresh = None
     color_function_ = None
-    _parent = None
-    parent_view = None
     need_update = False
     _driver_sql = None
     _size = None
@@ -54,9 +52,11 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         @param parent. FLSqlCursor relacionado
         """
         super(PNCursorTableModel, self).__init__()
-
+        if parent is None:
+            raise ValueError("Parent is mandatory")
         self._cursorConn = conn
-        self._parent = parent
+        self._parent: Any = parent
+        self.parent_view: Any = None
 
         # self._metadata = self._parent.metadata()
         if not self.metadata():
@@ -149,7 +149,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         col_name = field_mtd.name()
 
-        order_list = []
+        order_list: List[str] = []
         found_ = False
         if self._sortOrder:
             for column in self._sortOrder.split(","):
@@ -206,7 +206,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         col = index.column()
         field = self.metadata().indexFieldObject(col)
         _type = field.type()
-        res_color_function = []
+        res_color_function: List[str] = []
 
         if _type != "check":
             r = [x for x in self._data[row]]
@@ -672,6 +672,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         if self.metadata().isQuery():
             qry = self.db().manager().query(self.metadata().query())
+            if qry is None:
+                raise Exception("No query found")
             from_ = qry.from_()
         else:
             qry = None
@@ -695,7 +697,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         # print("rows:", self.rows)
         self.pendingRows = 0
 
-        self._column_hints = [120.0] * len(self.sql_fields)
+        self._column_hints = [120] * len(self.sql_fields)
         # self.threadFetcher = threading.Thread(target=self.threadFetch)
         # self.threadFetcherStop = threading.Event()
         # self.threadFetcher.start()
@@ -888,7 +890,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param value. Valor a asignar. Puede ser texto, pixmap, etc...
     """
 
-    def setValue(self, row: Union[int, slice], fieldname, value) -> None:
+    def setValue(self, row: int, fieldname, value) -> None:
         # Reimplementación para que todo pase por el método genérico.
         self.setValuesDict(row, {fieldname: value})
 
@@ -897,7 +899,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param buffer . PNBuffer a añadir
     """
 
-    def Insert(self, fl_cursor) -> Optional[bool]:
+    def Insert(self, fl_cursor) -> bool:
         # Metemos lineas en la tabla de la bd
         pKValue = None
         buffer = fl_cursor.buffer()
@@ -941,6 +943,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             # conn.commit()
 
             return True
+        return False
 
     """
     Borra una linea en el tableModel
@@ -1075,7 +1078,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             from_ = self.metadata().name()
 
             if mtd.isQuery():
-                from_ = self.db().manager().query(self.metadata().query()).from_()
+                qry = self.db().manager().query(self.metadata().query())
+                if qry is None:
+                    raise Exception("Query not found")
+                from_ = qry.from_()
 
             if self.where_filter.find("ORDER BY") > -1:
                 where_ = self.where_filter[: self.where_filter.find("ORDER BY")]
