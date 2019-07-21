@@ -18,7 +18,7 @@ from .pnbuffer import PNBuffer
 
 # FIXME: Removde dependency: Should not import from fllegacy.*
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  # FIXME: Removde dependency
-from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQBoolFlagStateList, AQBoolFlagState  # FIXME: Should not depend on AQS
+from pineboolib.fllegacy.aqsobjects.aqboolflagstate import AQBoolFlagStateList, AQBoolFlagState  # FIXME: Should not depend on AQS
 
 if TYPE_CHECKING:
     from .pncursortablemodel import PNCursorTableModel

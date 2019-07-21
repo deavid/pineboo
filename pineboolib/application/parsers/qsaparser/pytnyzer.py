@@ -442,7 +442,7 @@ class Source(ASTPython):
             self.locals |= declare_identifiers
         for child in self.elem:
             # yield "debug", "<%s %s>" % (child.tag, repr(child.attrib))
-            child.set("parent_", str(self.elem))
+            child.set("parent_", self.elem)  # type: ignore
             ast_python = parse_ast(child, parent=self)
             ast_type = ast_python.__class__.__name__
             # print(ast_type)
