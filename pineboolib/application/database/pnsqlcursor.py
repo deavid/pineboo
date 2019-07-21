@@ -18,11 +18,11 @@ from .pnbuffer import PNBuffer
 
 # FIXME: Removde dependency: Should not import from fllegacy.*
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  # FIXME: Removde dependency
+from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQBoolFlagStateList, AQBoolFlagState  # FIXME: Should not depend on AQS
 
 if TYPE_CHECKING:
     from .pncursortablemodel import PNCursorTableModel
     from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
-    from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQBoolFlagStateList
 
 
 logger = logging.getLogger(__name__)
@@ -1043,8 +1043,6 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def setEdition(self, b, m: bool = None):
-        from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQBoolFlagStateList, AQBoolFlagState  # FIXME: Should not depend on AQS
-
         if m is None:
             self.d.edition_ = b
             return
@@ -1093,8 +1091,6 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def setBrowse(self, b, m=None):
-        from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQBoolFlagStateList, AQBoolFlagState  # FIXME: Should not depend on AQS
-
         if not m:
             self.d.browse_ = b
             return

@@ -3,7 +3,6 @@ from pineboolib.application.utils.mobilemode import is_mobile_mode
 from importlib import import_module
 
 from pineboolib import logging
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 

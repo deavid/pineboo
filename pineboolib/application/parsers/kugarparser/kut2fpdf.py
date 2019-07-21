@@ -11,7 +11,7 @@ from pineboolib.application.parsers.kugarparser.parsertools import KParserTools
 from pineboolib.core.settings import config
 
 
-from typing import Any, Mapping, Optional, Sized, SupportsInt, SupportsRound, Union, List, Dict, TYPE_CHECKING
+from typing import Any, Optional, Union, List, Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from fpdf import FPDF  # type: ignore
@@ -471,7 +471,7 @@ class Kut2FPDF(object):
     @return Valor corregido, si procede.
     """
 
-    def calculateLeftStart(self, x: Union[bytes, str, SupportsInt]) -> Any:
+    def calculateLeftStart(self, x: Union[str, int, float]) -> Any:
         return self._parser_tools.ratio_correction_w(int(x)) + self._left_margin
 
     """
@@ -890,12 +890,12 @@ class Kut2FPDF(object):
 
     def write_cords_debug(
         self,
-        x: Union[float, SupportsRound],
-        y: Union[float, SupportsRound],
-        w: Union[float, SupportsRound],
-        h: Union[float, SupportsRound],
-        ox: Union[float, SupportsRound],
-        ow: Union[float, SupportsRound],
+        x: Union[float, int],
+        y: Union[float, int],
+        w: Union[float, int],
+        h: Union[float, int],
+        ox: Union[float, int],
+        ow: Union[float, int],
     ) -> None:
         self.write_debug(
             x,
