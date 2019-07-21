@@ -25,31 +25,31 @@ logger = logging.getLogger(__name__)
 class PNConnection(QtCore.QObject, IConnection):
     """Wrapper for database cursors which are used to emulate FLSqlCursor."""
 
-    db_name = None
-    db_host = None
-    db_port = None
-    db_userName = None
-    db_password = None
+    db_name: str
+    db_host: str
+    db_port: int
+    db_userName: str
+    db_password: str
     conn = None
     driverSql = None
-    transaction_ = None
+    transaction_: int
     _managerModules = None
     _manager = None
-    currentSavePoint_: Optional[PNSqlSavePoint] = None
-    stackSavePoints_: List[PNSqlSavePoint] = None
-    queueSavePoints_: List[PNSqlSavePoint] = None
-    interactiveGUI_ = None
+    currentSavePoint_: Optional[PNSqlSavePoint]
+    stackSavePoints_: List[PNSqlSavePoint]
+    queueSavePoints_: List[PNSqlSavePoint]
+    interactiveGUI_: bool
     _dbAux = None
-    _isOpen = False
+    _isOpen: bool
     driver_ = None
 
     def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name=None) -> None:
         from .pnsqldrivers import PNSqlDrivers
 
         super(PNConnection, self).__init__()
-        self.currentSavePoint_: Optional[PNSqlSavePoint] = None
+        self.currentSavePoint_ = None
         self.driverSql = PNSqlDrivers()
-        self.connAux: Dict[str, "PNConnection"] = {}
+        self.connAux: Dict[str, "IConnection"] = {}
         if name is None:
             self.name = "default"
         else:
@@ -124,8 +124,10 @@ class PNConnection(QtCore.QObject, IConnection):
 
     def removeConn(self, name="default") -> bool:
         try:
-            self.useConn(name).conn.close()
-            self.connAux[name] = None
+            conn_ = self.useConn(name).conn
+            if conn_ is not None:
+                conn_.close()
+
             del self.connAux[name]
         except Exception:
             pass
@@ -165,6 +167,9 @@ class PNConnection(QtCore.QObject, IConnection):
         return self.driver().declarative_base()
 
     def cursor(self) -> "IApiCursor":
+        if self.conn is None:
+            raise Exception("cursor. Empty conn!!")
+
         return self.conn.cursor()
 
     def conectar(self, db_name, db_host, db_port, db_userName, db_password) -> Any:
@@ -186,6 +191,9 @@ class PNConnection(QtCore.QObject, IConnection):
         return self.driver().alias_
 
     def driverNameToDriverAlias(self, name) -> Any:
+        if self.driverSql is None:
+            raise Exception("driverNameoDriverAlias. Sql driver manager is not defined")
+
         return self.driverSql.nameToAlias(name)
 
     def lastError(self) -> Any:
@@ -204,6 +212,9 @@ class PNConnection(QtCore.QObject, IConnection):
         return self.db_password
 
     def seek(self, offs, whence=0) -> Any:
+        if self.conn is None:
+            raise Exception("seek. Empty conn!!")
+
         return self.conn.seek(offs, whence)
 
     def manager(self) -> "flmanager.FLManager":
@@ -324,7 +335,7 @@ class PNConnection(QtCore.QObject, IConnection):
             and cur.d.askForCancelChanges_
         ):
 
-            if project._DGI.localDesktop():
+            if project._DGI and project._DGI.localDesktop():
                 res = QtWidgets.QMessageBox.information(
                     QtWidgets.QApplication.activeWindow(),
                     "Cancelar Cambios",

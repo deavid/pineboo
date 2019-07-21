@@ -4,7 +4,7 @@ from PyQt5 import QtCore  # type: ignore
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
 from pineboolib import logging
-from typing import Any
+from typing import Any, List, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class FLAccessControlLists(object):
     \\endcode
     """
 
-    accessControlList_ = []
+    accessControlList_: Dict[str, Any]
 
     def __init__(self):
         """
@@ -77,7 +77,7 @@ class FLAccessControlLists(object):
         if self.accessControlList_:
             self.accessControlList_.clear()
             del self.accessControlList_
-            self.accessControlList_ = []
+            self.accessControlList_ = {}
 
         if aclXml and not util.domDocumentSetContent(doc, aclXml):
             QtCore.qWarning("FLAccessControlList : " + FLUtil().tr("Lista de control de acceso errónea"))

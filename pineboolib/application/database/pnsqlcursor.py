@@ -2,7 +2,7 @@
 import weakref
 import importlib
 import traceback
-from typing import Any, Optional, TYPE_CHECKING
+from typing import Any, Optional, List, TYPE_CHECKING
 
 from PyQt5 import QtCore  # type: ignore
 from pineboolib.core.error_manager import error_manager
@@ -22,6 +22,7 @@ from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  #
 if TYPE_CHECKING:
     from .pncursortablemodel import PNCursorTableModel
     from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
+    from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQBoolFlagStateList
 
 
 logger = logging.getLogger(__name__)
@@ -48,7 +49,7 @@ class PNCursorPrivate(QtCore.QObject):
     """
     Metadatos de la tabla asociada al cursor.
     """
-    metadata_: "PNTableMetaData" = None
+    metadata_: "PNTableMetaData"
 
     """
     Mantiene el modo de acceso actual del cursor, ver FLSqlCursor::Mode.
@@ -78,7 +79,7 @@ class PNCursorPrivate(QtCore.QObject):
     nada. Por defecto esta bandera está a TRUE
     """
     browse_ = True
-    browse_states_ = []
+    browse_states_: List["AQBoolFlagStateList"]
 
     """
     Filtro principal para el cursor.
@@ -148,7 +149,7 @@ class PNCursorPrivate(QtCore.QObject):
     """
     Pila de los niveles de transacción que han sido iniciados por este cursor
     """
-    transactionsOpened_ = []
+    transactionsOpened_: List[int]
 
     """
     Filtro persistente para incluir en el cursor los registros recientemente insertados aunque estos no
@@ -202,14 +203,14 @@ class PNCursorPrivate(QtCore.QObject):
     """ Uso interno """
     isQuery_ = None
     isSysTable_ = None
-    mapCalcFields_ = []
+    # mapCalcFields_ = []
     rawValues_ = None
 
     md5Tuples_ = None
 
     countRefCursor = None
 
-    _model: "PNCursorTableModel" = None
+    _model: "PNCursorTableModel"
 
     _currentregister = None
     edition_states_ = None
@@ -753,7 +754,7 @@ class PNSqlCursor(QtCore.QObject):
         type = field.type()
         # fltype = FLFieldMetaData.FlDecodeType(type)
         pK = metadata.primaryKey()
-        v = None
+        v: Any
 
         if self.cursorRelation() and self.modeAccess() == self.Browse:
             self.cursorRelation().commit(False)
@@ -786,7 +787,7 @@ class PNSqlCursor(QtCore.QObject):
 
         buffer.setValue(fN, v)
         if self.activatedBufferChanged():
-            if project._DGI.use_model() and self.meta_model():
+            if project._DGI and project._DGI.use_model() and self.meta_model():
                 bch_model = getattr(self.meta_model(), "bChCursor", None)
                 if bch_model and bch_model(fN, self) is False:
                     return
@@ -1301,8 +1302,9 @@ class PNSqlCursor(QtCore.QObject):
             return
 
         self.d.modeAccess_ = m
-        if self.buffer():
-            self.buffer().clearValues(True)
+        buffer = self.buffer()
+        if buffer:
+            buffer.clearValues(True)
 
         # if not self.d._action:
         # self.d.action_ = self.db().manager().action(self.metadata().name())
@@ -3515,8 +3517,8 @@ class PNSqlCursor(QtCore.QObject):
     def setExtraFieldAttributes(self):
         return True
 
-    def clearMapCalcFields(self):
-        self.d.mapCalcFields_ = []
+    # def clearMapCalcFields(self):
+    #    self.d.mapCalcFields_ = []
 
     @decorators.NotImplementedWarn
     def valueBufferRaw(self, fN):

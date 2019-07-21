@@ -48,10 +48,10 @@ class KParserTools(object):
     @return Número corregido.
     """
 
-    def ratio_correction_h(self, value) -> Any:
+    def ratio_correction_h(self, value) -> int:
         return value * self._fix_ratio_h
 
-    def ratio_correction_w(self, value) -> Any:
+    def ratio_correction_w(self, value) -> int:
         return value * self._fix_ratio_w
 
     """
@@ -288,11 +288,16 @@ class KParserTools(object):
     @return Path del fichero ".ttf" o None
     """
 
-    def find_font(self, font_name: str, font_style) -> Optional[Union[bool, str]]:
+    def find_font(self, font_name: str, font_style) -> Union[bool, str]:
         fonts_folders: List[str] = []
         if sys.platform.find("win") > -1:
             windir = os.environ.get("WINDIR")
-            fonts_folders = [os.path.join(windir, "fonts")]
+            if windir is None:
+                raise Exception("WINDIR environ not found!")
+
+            folders_ = os.path.join(windir, "fonts")
+            if folders_:
+                fonts_folders = fonts_folders
         elif sys.platform.find("linux") > -1:
             lindirs = os.environ.get("XDG_DATA_DIRS", "")
             if not lindirs:
@@ -351,9 +356,9 @@ class KParserTools(object):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
-        return None
+        return False
 
-    def calculate_sum(self, field_name, line, xml_list: Iterable, level: Union[bytes, str, SupportsInt]) -> float:
+    def calculate_sum(self, field_name, line, xml_list: Iterable, level: int) -> str:
         val = 0.0
         for l in xml_list:
             lev_ = int(l.get("level"))
@@ -364,7 +369,7 @@ class KParserTools(object):
             if l is line:
                 break
 
-        return val
+        return str(val)
 
     def restore_text(self, t: str) -> Any:
         ret_ = t

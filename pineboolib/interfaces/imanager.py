@@ -48,7 +48,7 @@ class IManager(object):
     def existsTable(self, n: str, cache: bool = False) -> bool:
         return False
 
-    def fetchLargeValue(self, refKey: Mapping[slice, Any]) -> Optional[str]:
+    def fetchLargeValue(self, refKey: str) -> Optional[str]:
         return None
 
     def finish(self) -> None:
@@ -90,5 +90,5 @@ class IManager(object):
     def query(self, n, parent=...) -> Optional["pineboolib.application.database.pnsqlquery.PNSqlQuery"]:
         return None
 
-    def storeLargeValue(self, mtd, largeValue: Mapping[slice, Any]) -> Optional[str]:
+    def storeLargeValue(self, mtd, largeValue: str) -> Optional[str]:
         return None

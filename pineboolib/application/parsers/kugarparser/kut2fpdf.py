@@ -11,7 +11,10 @@ from pineboolib.application.parsers.kugarparser.parsertools import KParserTools
 from pineboolib.core.settings import config
 
 
-from typing import Any, Mapping, Optional, Sized, SupportsInt, SupportsRound, Union, List
+from typing import Any, Mapping, Optional, Sized, SupportsInt, SupportsRound, Union, List, Dict, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from fpdf import FPDF  # type: ignore
 
 """
 Conversor de kuts a pyFPDF
@@ -20,35 +23,35 @@ Conversor de kuts a pyFPDF
 
 class Kut2FPDF(object):
 
-    _document = None  # Aquí se irán guardando los datos del documento
-    logger = None
-    _xml: Element = None
-    _xml_data: Element = None
-    _page_orientation = None
-    _page_size = None
-    _bottom_margin = None
-    _left_margin = None
-    _right_margin = None
-    _top_margin = None
-    _page_top = {}
-    _data_row = None  # Apunta a la fila actual en data
-    _parser_tools = None
-    _avalible_fonts = None
-    _unavalible_fonts = None
-    design_mode = None
-    _actual_data_line = None
-    _no_print_footer = False
-    _actual_section_size = None
-    increase_section_size = None
-    last_detail = False
-    actual_data_level = None
-    last_data_processed = None
-    prev_level = None
-    draws_at_header = None
-    detailn = None
-    name_ = None
-    _actual_append_page_no = None
-    reset_page_count = None
+    _document: "FPDF"
+
+    _xml: Element
+    _xml_data: Element
+    _page_orientation: str
+    _page_size: List[int]
+    _bottom_margin: int
+    _left_margin: int
+    _right_margin: int
+    _top_margin: int
+    _page_top: Dict[str, int]
+    _data_row: Element
+    _parser_tools: KParserTools
+    _avalible_fonts: List[str]
+    _unavalible_fonts: List[str]
+    design_mode: bool
+    _actual_data_line: Element
+    _no_print_footer: bool
+    _actual_section_size: int
+    increase_section_size: int
+    last_detail: bool
+    actual_data_level: int
+    last_data_processed: Element
+    prev_level: int
+    draws_at_header: Dict[str, str]
+    detailn: Dict[str, int]
+    name_: str
+    _actual_append_page_no: int
+    reset_page_count: bool
 
     def __init__(self):
 
@@ -79,7 +82,7 @@ class Kut2FPDF(object):
     @return Ruta a fichero pdf.
     """
 
-    def parse(self, name, kut: str, data: str, report=None, flags: Union[Sized, Mapping[int, Any]] = []) -> Any:
+    def parse(self, name, kut: str, data: str, report=None, flags: List[int] = []) -> Any:
         try:
             self._xml = self._parser_tools.loadKut(kut).getroot()
         except Exception:
@@ -99,7 +102,7 @@ class Kut2FPDF(object):
         # self._page_orientation =
         # self._page_size =
         if report is None:
-            from fpdf import FPDF
+            from fpdf import FPDF  # type: ignore
 
             self._actual_append_page_no = 0
             self._document = FPDF(self._page_orientation, "pt", self._page_size)
@@ -477,17 +480,18 @@ class Kut2FPDF(object):
     @return Valor corregido, si procede.
     """
 
-    def calculateWidth(self, width: Union[bytes, str, SupportsInt], pos_x: Union[bytes, str, SupportsInt], fix_ratio=True) -> Any:
-        width = int(width)
-        ret_ = width
+    def calculateWidth(self, width: int, pos_x: int, fix_ratio: bool = True) -> int:
         limit = self._document.w - self._right_margin
+        ret_: int
 
         if fix_ratio:
-            width = self._parser_tools.ratio_correction_w(int(width))
-            pos_x = self._parser_tools.ratio_correction_w(int(pos_x))
+            width = self._parser_tools.ratio_correction_w(width)
+            pos_x = self._parser_tools.ratio_correction_w(pos_x)
             ret_ = width
             if pos_x + width > limit:
                 ret_ = limit - pos_x
+        else:
+            ret_ = width
 
         return ret_
 
@@ -563,8 +567,7 @@ class Kut2FPDF(object):
 
         if xml.get("BlankZero") == "1" and text is not None:
             res_ = re.findall(r"\d+", text)
-            res_ = "".join(res_)
-            if int(res_) == 0:
+            if res_ == "0":
                 return
 
         if text is not None and isinstance(text, str) and text.startswith(filedir("../tempdata")):
@@ -609,7 +612,7 @@ class Kut2FPDF(object):
     @param txt. Texto calculado de la etiqueta a crear.
     """
 
-    def drawText(self, x: Union[bytes, str, int], y, W: Union[bytes, str, int], H, xml, txt: str) -> None:
+    def drawText(self, x: int, y, W: int, H, xml, txt: str) -> None:
 
         if txt in ("None", None):
             # return
@@ -675,7 +678,7 @@ class Kut2FPDF(object):
         font_full_name = "%s%s" % (font_name, font_style)
 
         if font_full_name not in self._avalible_fonts:
-            font_found = False
+            font_found: Union[str, bool] = False
             if font_full_name not in self._unavalible_fonts:
                 font_found = self._parser_tools.find_font(font_full_name, font_style)
             if font_found:
@@ -708,7 +711,7 @@ class Kut2FPDF(object):
         result_section_size = 0
         # Miramos si el texto sobrepasa el ancho
 
-        array_text: List[str] = []
+        array_text: List[Optional[str]] = []
         array_n = []
         text_lines = []
         if txt.find("\n") > -1:
@@ -844,9 +847,7 @@ class Kut2FPDF(object):
 
         return [r, g, b]
 
-    def drawRect(
-        self, x: Union[float, SupportsRound], y: Union[float, SupportsRound], W: float, H: Union[float, SupportsRound], xml=None
-    ) -> None:
+    def drawRect(self, x: int, y: int, W: int, H: int, xml=None) -> None:
         style_ = ""
         border_color = None
         bg_color = None

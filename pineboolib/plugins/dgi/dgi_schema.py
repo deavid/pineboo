@@ -10,16 +10,16 @@ logger = logging.getLogger(__name__)
 
 class dgi_schema(object):
 
-    _desktopEnabled = False
-    _mLDefault = False
-    _name: Optional[str] = None
-    _alias: Optional[str] = None
-    _localDesktop = True
-    _mobile = False
-    _clean_no_python = True
+    _desktopEnabled: bool
+    _mLDefault: bool
+    _name: str
+    _alias: str
+    _localDesktop: bool
+    _mobile: bool
+    _clean_no_python: bool
     # FIXME: Guess this is because there is conditional code we don't want to run on certain DGI
     # .... this is really obscure. Please avoid at all costs. Having __NO_PYTHON__ is bad enough.
-    _alternative_content_cached = False
+    _alternative_content_cached: bool
 
     def __init__(self):
         # FIXME: This init is intended to be called only on certain conditions.
