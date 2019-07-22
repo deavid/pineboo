@@ -256,10 +256,12 @@ class PNCursorPrivate(QtCore.QObject):
 
         if self.edition_states_:
             del self.edition_states_
+            self.edition_states_ = []
             # logger.trace("AQBoolFlagState count %s", self.count_)
 
         if self.browse_states_:
             del self.browse_states_
+            self.browse_states_ = []
             # logger.trace("AQBoolFlagState count %s", self.count_)
         if self.transactionsOpened_:
             del self.transactionsOpened_
