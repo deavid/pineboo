@@ -3,7 +3,7 @@
 import os
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.fltranslations import FLTranslations
-from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.core.settings import config
 from pineboolib.application import project
 
 from PyQt5.Qt import QTranslator  # type: ignore
@@ -32,8 +32,7 @@ class FLTranslator(QTranslator):
         self.lang_ = name[name.rfind("_") + 1 :]
         self.mulTiLang_ = multiLang
         self.sysTrans_ = sysTrans
-        settings = FLSettings()
-        self.translation_from_qm = settings.readBoolEntry("ebcomportamiento/translations_from_qm", False)
+        self.translation_from_qm = config.value("ebcomportamiento/translations_from_qm", False)
 
     """
     Carga en el traductor el contenido de un fichero de traducciones existente en la caché de disco

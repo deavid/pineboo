@@ -671,9 +671,9 @@ class FLUtil(QtCore.QObject):
 
         @return Valor del setting
         """
-        from pineboolib.fllegacy.flsettings import FLSettings
+        from pineboolib.core.settings import settings
 
-        return FLSettings().readEntry(key, def_)
+        return settings.value(key, def_)
 
     def writeSettingEntry(self, key, value):
         """
@@ -684,9 +684,9 @@ class FLUtil(QtCore.QObject):
 
         @return Indicador de si la escritura del settings se realiza correctamente
         """
-        from pineboolib.fllegacy.flsettings import FLSettings
+        from pineboolib.core.settings import settings
 
-        FLSettings().writeEntry(key, value)
+        return settings.set_value(key, value)
 
     def readDBSettingEntry(self, key):
         """

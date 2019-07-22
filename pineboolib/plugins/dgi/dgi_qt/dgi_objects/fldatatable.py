@@ -3,7 +3,7 @@ from PyQt5 import QtCore, QtWidgets, Qt  # type: ignore
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.core.settings import config
 from PyQt5.QtWidgets import QCheckBox  # type: ignore
 from pineboolib import logging
 from typing import Any, Optional, TypeVar, List, Dict
@@ -411,7 +411,7 @@ class FLDataTable(QtWidgets.QTableView):
                     chk.animateClick()
 
             settings = FLSettings()
-            if not settings.readBoolEntry("ebcomportamiento/FLTableShortCut", False):
+            if not config.value("ebcomportamiento/FLTableShortCut", False):
                 if key_event.key() == QtCore.Qt.Key_A and not self.popup_:
                     if self.cursor_ and not self.readonly_ and not self.editonly_ and not self.onlyTable_:
 

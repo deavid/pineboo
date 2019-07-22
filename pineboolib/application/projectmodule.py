@@ -269,7 +269,7 @@ class Project(object):
                     f2.write(txt)
                     f2.close()
 
-            if self.parseProject and nombre.endswith(".qs") and settings.value("application/isDebuggerMode", False):
+            if self.parseProject and nombre.endswith(".qs") and config.value("application/isDebuggerMode", False):
                 self.message_manager().send("splash", "showMessage", ["Convirtiendo %s ( %d/ %d) ..." % (nombre, p, size_)])
                 if os.path.exists(file_name):
 

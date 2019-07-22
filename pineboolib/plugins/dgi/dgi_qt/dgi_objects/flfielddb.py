@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, QDateTime  # type: ignore
 from pineboolib.core import decorators
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.core.utils.utils_base import filedir, aqtt
-from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.core.settings import config
 from pineboolib.fllegacy.flutil import FLUtil
 
 from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
@@ -105,8 +105,8 @@ class FLFieldDB(QtWidgets.QWidget):
         self.cursorInit_ = False
         self.cursorAuxInit_ = False
 
-        self.maxPixImages_ = FLSettings().readEntry("ebcomportamiento/maxPixImages", None)
-        self.autoCompMode_ = FLSettings().readEntry("ebcomportamiento/autoComp", "OnDemandF4")
+        self.maxPixImages_ = config.value("ebcomportamiento/maxPixImages", None)
+        self.autoCompMode_ = config.value("ebcomportamiento/autoComp", "OnDemandF4")
         if self.maxPixImages_ in (None, ""):
             self.maxPixImages_ = 600
         self.maxPixImages_ = int(self.maxPixImages_)
@@ -3244,7 +3244,7 @@ class FLFieldDB(QtWidgets.QWidget):
     def notNullColor(self) -> Any:
         if not self.initNotNullColor_:
             self.initNotNullColor_ = True
-        self.notNullColor_ = FLSettings().readEntry("ebcomportamiento/colorObligatorio", None)
+        self.notNullColor_ = config.value("ebcomportamiento/colorObligatorio", None)
         if self.notNullColor_ is None:
             self.notNullColor_ = QtGui.QColor(255, 233, 173).name()
         return self.notNullColor_

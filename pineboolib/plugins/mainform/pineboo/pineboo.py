@@ -5,7 +5,7 @@ from pineboolib import logging
 
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils.struct import AreaStruct
-from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.core.settings import config
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.application import project
 
@@ -138,8 +138,7 @@ class MainForm(QMainWindow):
             self.loadModule(module)
 
         # Cargando Area desarrollo si procede ...
-        sett_ = FLSettings()
-        if sett_.readBoolEntry("application/isDebuggerMode", False):
+        if config.value("application/isDebuggerMode", False):
             areaDevelop = AreaStruct(idarea="dvl", descripcion="Desarrollo")
             self.loadArea(areaDevelop)
 
@@ -284,13 +283,12 @@ class MainForm(QMainWindow):
 
     def saveState(self) -> None:
         if self:
-            sett_ = FLSettings()
-            sett_.writeEntryList("application/mainForm/tabsOpened", self.openTabs)
-            sett_.writeEntry("application/mainForm/viewFavorites", self.dockFavoritos.isVisible())
-            sett_.writeEntry("application/mainForm/FavoritesSize", self.dockFavoritos.size())
-            sett_.writeEntry("application/mainForm/viewAreas", self.dockAreasTab.isVisible())
-            sett_.writeEntry("application/mainForm/AreasSize", self.dockFavoritos.size())
-            sett_.writeEntry("application/mainForm/mainFormSize", self.size())
+            settings.set_value("mainForm/tabsOpened", self.openTabs)
+            settings.set_value("mainForm/viewFavorites", self.dockFavoritos.isVisible())
+            settings.set_value("mainForm/FavoritesSize", self.dockFavoritos.size())
+            settings.set_value("mainForm/viewAreas", self.dockAreasTab.isVisible())
+            settings.set_value("mainForm/AreasSize", self.dockFavoritos.size())
+            settings.set_value("mainForm/mainFormSize", self.size())
 
     def addToMenuPineboo(self, ac, mod) -> None:
         # print(mod.name, ac.name, project.areas[mod.areaid].descripcion)
@@ -320,8 +318,7 @@ class MainForm(QMainWindow):
 
     def restoreOpenedTabs(self) -> None:
         # Cargamos pestañas abiertas
-        sett_ = FLSettings()
-        tabsOpened_ = sett_.readListEntry("application/mainForm/tabsOpened")
+        tabsOpened_ = settings.value("mainForm/tabsOpened")
         if tabsOpened_:
             for t in tabsOpened_:
                 for k, module in sorted(project.modules.items()):
@@ -331,12 +328,11 @@ class MainForm(QMainWindow):
                             break
 
     def loadState(self) -> None:
-        sett_ = FLSettings()
         # viewFavorites_ = sett_.readBoolEntry("application/mainForm/viewFavorites", True)
         # viewAreas_ = sett_.readBoolEntry("application/mainForm/viewAreas", True)
-        sizeF_ = sett_.readEntry("application/mainForm/FavoritesSize", None)
-        sizeA_ = sett_.readEntry("application/mainForm/AreasSize", None)
-        sizeMF_ = sett_.readEntry("application/mainForm/mainFormSize", None)
+        sizeF_ = settings.value("mainForm/FavoritesSize", None)
+        sizeA_ = settings.value("mainForm/AreasSize", None)
+        sizeMF_ = settings.value("mainForm/mainFormSize", None)
         if sizeF_ is not None:
             self.dockFavoritos.resize(sizeF_)
 
@@ -358,8 +354,7 @@ class MainForm(QMainWindow):
     def changeStateDockFavoritos(self) -> None:
         visible_ = self.actionFavoritos.isChecked()
         if visible_:
-            sett_ = FLSettings()
-            sizeF_ = sett_.readEntry("application/mainForm/FavoritesSize", None)
+            sizeF_ = settings.value("mainForm/FavoritesSize", None)
             if sizeF_ is not None:
                 self.dockFavoritos.resize(sizeF_)
 
@@ -374,8 +369,7 @@ class MainForm(QMainWindow):
     def changeStateDockAreas(self) -> None:
         visible_ = self.actionModulos.isChecked()
         if visible_:
-            sett_ = FLSettings()
-            sizeA_ = sett_.readEntry("application/mainForm/AreasSize", None)
+            sizeA_ = settings.value("mainForm/AreasSize", None)
             if sizeA_ is not None:
                 self.dockAreasTab.resize(sizeA_)
         self.dockAreasTab.setVisible(visible_)

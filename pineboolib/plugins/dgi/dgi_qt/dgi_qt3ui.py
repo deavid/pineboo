@@ -7,6 +7,7 @@ import zlib
 from PyQt5.QtCore import QObject  # type: ignore
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application import project
+from pineboolib.core.settings import config
 
 from pineboolib import pncontrolsfactory
 
@@ -506,10 +507,7 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
 
                     elif pname == "sizeType":
                         # print("Convirtiendo %s a %s" % (p.find("enum").text, value))
-                        from pineboolib.fllegacy.flsettings import FLSettings
-
-                        settings = FLSettings()
-                        if settings.readBoolEntry("ebcomportamiento/spacerLegacy", False) or orient_ == 1:
+                        if config.value("ebcomportamiento/spacerLegacy", False) or orient_ == 1:
                             policy_ = QtWidgets.QSizePolicy.Policy(value)
                         else:
                             policy_ = 7  # Siempre Expanding
@@ -570,9 +568,6 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
                 # El primer layout que se define es el que se respeta
                 continue
 
-            # from pineboolib.fllegacy.flsettings import FLSettings
-
-            # settings = FLSettings()
             if c.tag.find("box") > -1:
                 layout_type = "Q%s%sLayout" % (c.tag[0:2].upper(), c.tag[2:])
             else:
