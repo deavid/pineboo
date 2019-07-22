@@ -21,7 +21,7 @@ class FormDBWidget(QtWidgets.QWidget):
             super().__init__(parent)
 
             self._module = sys.modules[self.__module__]
-            self._module.connect = self._connect
+            self._module.connect = self._connect  # FIXME: Please don't write to the module. Fails flake8/mypy.
             self._module.disconnect = self._disconnect
             self._action = action
             self.cursor_ = None
