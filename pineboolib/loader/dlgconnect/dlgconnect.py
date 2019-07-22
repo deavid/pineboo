@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QMessageBox  # type: ignore
 from PyQt5.QtCore import QSize  # type: ignore
 
 from pineboolib.core.utils.utils_base import filedir, indent
-from pineboolib.fllegacy.flsettings import FLSettings  # FIXME: Use pineboolib.core.settings
+from pineboolib.core.settings import config, settings
 
 from typing import Optional
 
@@ -32,7 +32,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.optionsShowed = True
         self.minSize = QSize(350, 140)
         self.maxSize = QSize(350, 495)
-        self.profile_dir: str = FLSettings().readEntry("ebcomportamiento/profiles_folder", filedir("../profiles"))
+        self.profile_dir: str = config.value("ebcomportamiento/profiles_folder", filedir("../profiles"))
         from pineboolib.application.database.pnsqldrivers import PNSqlDrivers
 
         self.pNSqlDrivers = PNSqlDrivers()
@@ -102,8 +102,7 @@ class DlgConnect(QtWidgets.QWidget):
             fileName = file.split(".")[0]
             self.ui.cbProfiles.addItem(fileName)
 
-        settings = FLSettings()
-        last_profile = settings.readEntry("DBA/last_profile", None)
+        last_profile = settings.value("DBA/last_profile", None)
         if last_profile:
             self.ui.cbProfiles.setCurrentText(last_profile)
 
@@ -150,8 +149,7 @@ class DlgConnect(QtWidgets.QWidget):
 
         last_profile = self.ui.cbProfiles.currentText()
         if last_profile not in (None, ""):
-            settings = FLSettings()
-            settings.writeEntry("DBA/last_profile", last_profile)
+            settings.set_value("DBA/last_profile", last_profile)
 
         for profile in root.findall("profile-data"):
             if getattr(profile.find("password"), "text", None):
@@ -408,6 +406,6 @@ class DlgConnect(QtWidgets.QWidget):
         )
 
         if new_dir and new_dir is not self.profile_dir:
-            FLSettings().writeEntry("ebcomportamiento/profiles_folder", new_dir)
+            config.set_value("ebcomportamiento/profiles_folder", new_dir)
             self.profile_dir = new_dir
             self.loadProfiles()

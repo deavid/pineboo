@@ -7,11 +7,11 @@ from PyQt5.Qt import QKeySequence  # type: ignore
 from pineboolib import logging
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
+from pineboolib.core.settings import config
 from pineboolib.interfaces import IFormRecordDB
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flapplication import aqApp
 from typing import Any
 
@@ -244,9 +244,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
 
         pbSize = self.iconSize
 
-        settings = FLSettings()
-
-        if settings.readBoolEntry("application/isDebuggerMode", False):
+        if config.value("application/isDebuggerMode", False):
 
             pushButtonExport = QtWidgets.QToolButton()
             pushButtonExport.setObjectName("pushButtonExport")
@@ -261,7 +259,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
             self.bottomToolbar.layout.addWidget(pushButtonExport)
             pushButtonExport.clicked.connect(self.exportToXml)
 
-            if settings.readBoolEntry("ebcomportamiento/show_snaptshop_button", False):
+            if config.value("ebcomportamiento/show_snaptshop_button", False):
                 push_button_snapshot = QtWidgets.QToolButton()
                 push_button_snapshot.setObjectName("pushButtonSnapshot")
                 push_button_snapshot.setSizePolicy(sizePolicy)

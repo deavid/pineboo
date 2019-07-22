@@ -71,17 +71,13 @@ def setup_gui(app: QtCore.QCoreApplication, options: Values):
     for fontfile in noto_fonts:
         QtGui.QFontDatabase.addApplicationFont(filedir("../share/fonts/Noto_Sans", fontfile))
 
-    from pineboolib.fllegacy.flsettings import FLSettings
-
-    sett_ = FLSettings()
-
-    styleA = sett_.readEntry("application/style", None)
+    styleA = config.value("application/style", None)
     if styleA is None:
         styleA = "Fusion"
 
     app.setStyle(styleA)
 
-    fontA = sett_.readEntry("application/font", None)
+    fontA = config.value("application/font", None)
     if fontA is None:
         if is_mobile_mode():
             font = QtGui.QFont("Noto Sans", 14)

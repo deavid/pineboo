@@ -6,11 +6,13 @@ from PyQt5.QtGui import QCursor  # type: ignore
 
 from pineboolib import logging
 from pineboolib.core import decorators
+from pineboolib.core.settings import config, settings
 
 from pineboolib.application import project
 from pineboolib.application.database import db_signals
 
 from pineboolib.fllegacy.fltranslator import FLTranslator
+
 
 from typing import Any, Optional, Union, Dict, List, TYPE_CHECKING
 
@@ -482,7 +484,6 @@ class FLApplication(QtCore.QObject):
 
     def chooseFont(self) -> None:
         from pineboolib import pncontrolsfactory
-        from pineboolib.fllegacy.flsettings import FLSettings
 
         font_ = pncontrolsfactory.QFontDialog().getFont()
         if font_:
@@ -493,8 +494,7 @@ class FLApplication(QtCore.QObject):
             save_.append(font_[0].weight())
             save_.append(font_[0].italic())
 
-            sett_ = FLSettings()
-            sett_.writeEntryList("application/font", save_)
+            config.set_value("application/font", save_)
 
     def showStyles(self) -> None:
         if not self.style:
@@ -508,7 +508,6 @@ class FLApplication(QtCore.QObject):
 
     def initToolBox(self) -> None:
         from pineboolib import pncontrolsfactory
-        from pineboolib.core.settings import config
         from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQS
 
         if self.main_widget_ is None:
@@ -790,11 +789,9 @@ class FLApplication(QtCore.QObject):
             mw.setCentralWidget(view_back)
 
     def setStyle(self, style_: Optional[Union[int, str]]) -> None:
-        from pineboolib.fllegacy.flsettings import FLSettings
 
         if style_:
-            sett_ = FLSettings()
-            sett_.writeEntry("application/style", style_)
+            config.set_value("application/style", style_)
             from pineboolib import pncontrolsfactory
 
             pncontrolsfactory.QApplication.setStyle(style_)
@@ -1380,11 +1377,9 @@ class FLApplication(QtCore.QObject):
 
     def writeState(self) -> None:
         from pineboolib import pncontrolsfactory
-        from pineboolib.fllegacy.flsettings import FLSettings
 
-        settings = FLSettings()
-        settings.writeEntry("MultiLang/Enabled", self.multi_lang_enabled_)
-        settings.writeEntry("MultiLang/LangId", self.multi_lang_id_)
+        settings.set_value("MultiLang/Enabled", self.multi_lang_enabled_)
+        settings.set_value("MultiLang/LangId", self.multi_lang_id_)
 
         if self.container_ is not None:
             windows_opened = []
@@ -1405,26 +1400,24 @@ class FLApplication(QtCore.QObject):
                     if it != self.container_ and it.isVisible() and it.objectName() in self.dict_main_widgets_.keys():
                         windows_opened.append(it.objectName())
 
-            settings.writeEntryList("windowsOpened/Main", windows_opened)
-            settings.writeEntry("Geometry/MainWindowMaximized", self.container_.isMaximized())
+            settings.set_value("windowsOpened/Main", windows_opened)
+            settings.set_value("Geometry/MainWindowMaximized", self.container_.isMaximized())
             if not self.container_.isMaximized():
-                settings.writeEntry("Geometry/MainWindowX", self.container_.x())
-                settings.writeEntry("Geometry/MainWindowY", self.container_.y())
-                settings.writeEntry("Geometry/MainWindowWidth", self.container_.width())
-                settings.writeEntry("Geometry/MainWindowHeight", self.container_.height())
+                settings.set_value("Geometry/MainWindowX", self.container_.x())
+                settings.set_value("Geometry/MainWindowY", self.container_.y())
+                settings.set_value("Geometry/MainWindowWidth", self.container_.width())
+                settings.set_value("Geometry/MainWindowHeight", self.container_.height())
 
-        for map in self.map_geometry_form_:
+        for map in self.map_geometry_form_:  # FIXME esto no se rellena nunca
             k = "Geometry/%s/" % map.key()
-            settings.writeEntry("%s/X" % k, map.x())
-            settings.writeEntry("%s/Y" % k, map.y())
-            settings.writeEntry("%s/Width" % k, map.width())
-            settings.writeEntry("%s/Height" % k, map.height())
+            settings.set_value("%s/X" % k, map.x())
+            settings.set_value("%s/Y" % k, map.y())
+            settings.set_value("%s/Width" % k, map.width())
+            settings.set_value("%s/Height" % k, map.height())
 
     def writeStateModule(self) -> None:
         from pineboolib import pncontrolsfactory
-        from pineboolib.fllegacy.flsettings import FLSettings
 
-        settings = FLSettings()
         idm = self.db().managerModules().activeIdModule()
         if not idm:
             return
@@ -1438,19 +1431,16 @@ class FLApplication(QtCore.QObject):
                 if s is not None:
                     windows_opened.append(s.idMDI())
 
-        settings.writeEntryList("windowsOpened/%s" % idm, windows_opened)
+        settings.set_value("windowsOpened/%s" % idm, windows_opened)
 
         k = "Geometry/%s" % idm
-        settings.writeEntry("%s/Maximized" % k, self.main_widget_.isMaximized())
-        settings.writeEntry("%s/X" % k, self.main_widget_.x())
-        settings.writeEntry("%s/Y" % k, self.main_widget_.y())
-        settings.writeEntry("%s/Width" % k, self.main_widget_.width())
-        settings.writeEntry("%s/Height" % k, self.main_widget_.height())
+        settings.set_value("%s/Maximized" % k, self.main_widget_.isMaximized())
+        settings.set_value("%s/X" % k, self.main_widget_.x())
+        settings.set_value("%s/Y" % k, self.main_widget_.y())
+        settings.set_value("%s/Width" % k, self.main_widget_.width())
+        settings.set_value("%s/Height" % k, self.main_widget_.height())
 
     def readState(self) -> None:
-        from pineboolib.fllegacy.flsettings import FLSettings
-
-        settings = FLSettings()
         self.initializing_ = False
         self.dict_main_widgets_ = {}
 
@@ -1458,14 +1448,14 @@ class FLApplication(QtCore.QObject):
 
         if self.container_:
             r = QtCore.QRect(self.container_.pos(), self.container_.size())
-            self.multi_lang_enabled_ = settings.readBoolEntry("MultiLang/Enabled", False)
-            self.multi_lang_id_ = settings.readEntry("MultiLang/LangId", QtCore.QLocale().name()[:2].upper())
+            self.multi_lang_enabled_ = settings.value("MultiLang/Enabled", False)
+            self.multi_lang_id_ = settings.value("MultiLang/LangId", QtCore.QLocale().name()[:2].upper())
 
-            if not settings.readBoolEntry("Geometry/MainWindowMaximized", False):
-                r.setX(settings.readNumEntry("Geometry/MainWindowX", r.x()))
-                r.setY(settings.readNumEntry("Geometry/MainWindowY", r.y()))
-                r.setWidth(settings.readNumEntry("Geometry/MainWindowWidth", r.width()))
-                r.setHeight(settings.readNumEntry("Geometry/MainWindowHeight", r.height()))
+            if not settings.value("Geometry/MainWindowMaximized", False):
+                r.setX(settings.value("Geometry/MainWindowX", r.x()))
+                r.setY(settings.value("Geometry/MainWindowY", r.y()))
+                r.setWidth(settings.value("Geometry/MainWindowWidth", r.width()))
+                r.setHeight(settings.value("Geometry/MainWindowHeight", r.height()))
 
                 desk = pncontrolsfactory.QApplication.desktop().availableGeometry(self.container_)
                 inter = desk.intersected(r)
@@ -1478,7 +1468,7 @@ class FLApplication(QtCore.QObject):
 
             active_id_module = self.db().managerModules().activeIdModule()
 
-            windows_opened = settings.readListEntry("windowsOpened/Main")
+            windows_opened = settings.value("windowsOpened/Main", None)
 
             for it in windows_opened:
                 if it in self.db().managerModules().listAllIdModules():
@@ -1523,7 +1513,6 @@ class FLApplication(QtCore.QObject):
             self.activateModule(active_id_module)
 
     def readStateModule(self) -> None:
-        from pineboolib.fllegacy.flsettings import FLSettings
         from pineboolib import pncontrolsfactory
 
         idm = self.db().managerModules().activeIdModule()
@@ -1533,9 +1522,7 @@ class FLApplication(QtCore.QObject):
         if self.main_widget_ is None or self.main_widget_.objectName() != idm:
             return
 
-        settings = FLSettings()
-
-        windows_opened = settings.readListEntry("windowsOpened/%s" % idm)
+        windows_opened = settings.value("windowsOpened/%s" % idm, None)
         if windows_opened:
             for it in windows_opened:
                 act = self.main_widget_.findChild(QObject, it)
@@ -1544,11 +1531,11 @@ class FLApplication(QtCore.QObject):
 
         r = QRect(self.main_widget_.pos(), self.main_widget_.size())
         k = "Geometry/%s" % idm
-        if not settings.readBoolEntry("%s/Maximized" % k, False):
-            r.setX(settings.readNumEntry("%s/X" % k, r.x()))
-            r.setY(settings.readNumEntry("%s/Y" % k, r.y()))
-            r.setWidth(settings.readNumEntry("%s/Width" % k, r.width()))
-            r.setHeight(settings.readNumEntry("%s/Height" % k, r.height()))
+        if not settings.value("%s/Maximized" % k, False):
+            r.setX(settings.value("%s/X" % k, r.x()))
+            r.setY(settings.value("%s/Y" % k, r.y()))
+            r.setWidth(settings.value("%s/Width" % k, r.width()))
+            r.setHeight(settings.value("%s/Height" % k, r.height()))
             desk = pncontrolsfactory.QApplication.desktop().availableGeometry(self.main_widget_)
             inter = desk.intersected(r)
             self.main_widget_.resize(r.size())

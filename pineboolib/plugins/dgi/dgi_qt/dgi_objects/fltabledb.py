@@ -14,7 +14,7 @@ from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaDat
 from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
 
 from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.core.settings import config
 from pineboolib.fllegacy.flapplication import aqApp
 
 
@@ -1150,7 +1150,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.pbOdf.setWhatsThis("Exportar a hoja de cálculo")
         self.buttonsLayout.addWidget(self.pbOdf)
         self.pbOdf.clicked.connect(self.exportToOds)
-        if FLSettings().readEntry("ebcomportamiento/FLTableExport2Calc", "false") == "true":
+        if config.value("ebcomportamiento/FLTableExport2Calc", "false") == "true":
             self.pbOdf.setDisabled(True)
 
         self.pbClean = QtWidgets.QPushButton(self)
@@ -2274,8 +2274,7 @@ class FLTableDB(QtWidgets.QWidget):
         cursor.select(filter_)
         from pineboolib import pncontrolsfactory
 
-        settings = FLSettings()
-        if settings.readBoolEntry("ebcomportamiento/FLTableExport2Calc", False):
+        if config.value("ebcomportamiento/FLTableExport2Calc", False):
             pncontrolsfactory.QMessageBox.information(
                 self.topWidget,
                 self.tr("Opción deshabilitada"),

@@ -6,7 +6,7 @@ from PyQt5 import QtWidgets, Qt, QtCore  # type: ignore
 from pineboolib import logging
 from pineboolib.core import decorators
 
-from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.core.settings import config
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flapplication import aqApp
 from typing import Any, List, Optional
@@ -39,8 +39,7 @@ class AQStaticBdInfo(object):
         self.db_ = database.DBName()
 
         self.key_ = "StaticLoader/%s/" % self.db_
-        settings = FLSettings()
-        self.enabled_ = settings.readBoolEntry("%senabled" % self.key_, False)
+        self.enabled_ = config.value("%senabled" % self.key_, False)
 
     def findPath(self, p) -> Optional[AQStaticDirInfo]:
 
@@ -51,10 +50,9 @@ class AQStaticBdInfo(object):
         return None
 
     def readSettings(self) -> None:
-        settings = FLSettings()
-        self.enabled_ = settings.readBoolEntry("%senabled" % self.key_, False)
+        self.enabled_ = config.value("%senabled" % self.key_, False)
         self.dirs_.clear()
-        dirs = settings.readListEntry("%sdirs" % self.key_)
+        dirs = config.value("%sdirs" % self.key_)
         i = 0
 
         while i < len(dirs):
@@ -65,9 +63,8 @@ class AQStaticBdInfo(object):
             self.dirs_.append(AQStaticDirInfo(active_, path_))
 
     def writeSettings(self) -> None:
-        settings = FLSettings()
 
-        settings.writeEntry("%senabled" % self.key_, self.enabled_)
+        config.set_value("%senabled" % self.key_, self.enabled_)
         dirs = []
         active_dirs = []
 
@@ -77,8 +74,8 @@ class AQStaticBdInfo(object):
             if info.active_:
                 active_dirs.append(info.path_)
 
-        settings.writeEntryList("%sdirs" % self.key_, dirs)
-        settings.writeEntry("%sactiveDirs" % self.key_, ",".join(active_dirs))
+        config.set_value("%sdirs" % self.key_, dirs)
+        config.set_value("%sactiveDirs" % self.key_, ",".join(active_dirs))
 
 
 class FLStaticLoaderWarning(QtCore.QObject):
@@ -303,8 +300,7 @@ class FLStaticLoader(QtCore.QObject):
                     warn_ = FLStaticLoaderWarning()
 
                 timer = QtCore.QTimer()
-                settings = FLSettings()
-                if not warn_.warns_ and settings.readBoolEntry("ebcomportamiento/SLInterface", True):
+                if not warn_.warns_ and config.value("ebcomportamiento/SLInterface", True):
                     timer.singleShot(500, warn_.popupWarnings)
 
                 if not warn_.paths_:
@@ -315,7 +311,7 @@ class FLStaticLoader(QtCore.QObject):
                 if msg not in warn_.warns_:
                     warn_.warns_.append(msg)
                     warn_.paths_.append("%s:%s" % (n, info.path_))
-                    if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
+                    if config.value("ebcomportamiento/SLConsola", False):
                         logger.warning("CARGA ESTATICA ACTIVADA:%s -> %s", n, info.path_)
 
                 if only_path:

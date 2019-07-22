@@ -9,7 +9,7 @@ from pineboolib.core.utils.utils_base import filedir
 from pineboolib.interfaces import IFormDB
 from pineboolib.application.utils.geometry import loadGeometryForm, saveGeometryForm
 from pineboolib.fllegacy.flaction import FLAction
-from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.core.settings import config
 from pineboolib.fllegacy.flapplication import aqApp
 from typing import Any, Union, Dict, Optional, Tuple, Type
 
@@ -705,8 +705,8 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         sizePolicy.setHeightForWidth(True)
 
         pbSize = self.iconSize
-        settings = FLSettings()
-        if settings.readBoolEntry("application/isDebuggerMode", False):
+
+        if config.value("application/isDebuggerMode", False):
 
             pushButtonExport = QtWidgets.QToolButton()
             pushButtonExport.setObjectName("pushButtonExport")
@@ -721,7 +721,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
             self.bottomToolbar.layout.addWidget(pushButtonExport)
             pushButtonExport.clicked.connect(self.exportToXml)
 
-            if settings.readBoolEntry("ebcomportamiento/show_snaptshop_button", False):
+            if config.value("ebcomportamiento/show_snaptshop_button", False):
                 push_button_snapshot = QtWidgets.QToolButton()
                 push_button_snapshot.setObjectName("pushButtonSnapshot")
                 push_button_snapshot.setSizePolicy(sizePolicy)
@@ -949,7 +949,6 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         #    self.tiempo_ini = time.time()
         super(FLFormDB, self).show()
         # tiempo_fin = time.time()
-        # settings = FLSettings()
 
         if self.parent().parent() is None:
             from PyQt5.QtWidgets import QDesktopWidget  # type: ignore # Centrado
