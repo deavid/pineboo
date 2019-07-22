@@ -654,4 +654,4 @@ class PNConnection(QtCore.QObject, IConnection):
         return self.dbAux().driver().alterTable(mtd_1, mtd_2, key, force)
 
     def __str__(self):
-        return self.name
+        return self.DBName()
