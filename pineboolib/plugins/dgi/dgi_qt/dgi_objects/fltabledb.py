@@ -753,7 +753,7 @@ class FLTableDB(QtWidgets.QWidget):
 
     @decorators.BetaImplementation
     def orderCols(self):
-        list_ = []
+        list_: List[str] = []
 
         if not self.cursor():
             return list_
@@ -1802,7 +1802,7 @@ class FLTableDB(QtWidgets.QWidget):
                 id_mod = self.cursor().db().managerModules().idModuleOfFile("%s.mtd" % self.cursor().metadata().name())
                 function_qsa = "%s.tableDB_setSort_%s" % (id_mod, self.cursor().metadata().name())
 
-                vars = []
+                vars: List[Any] = []
                 vars.append(s)
                 if field_1:
                     vars.append(field_1.name())

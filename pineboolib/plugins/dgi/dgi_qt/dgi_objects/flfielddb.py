@@ -2388,6 +2388,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
         if self.autoComPopup_:
             cur = self.autoComPopup_.cursor()
+            if cur is None:
+                raise Exception("Unexpected: No cursor could be obtained")
             tMD = cur.metadata()
             field = tMD.field(self.autoComFieldName_) if tMD else None
 

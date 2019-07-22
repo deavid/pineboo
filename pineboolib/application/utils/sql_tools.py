@@ -1,6 +1,6 @@
 from pineboolib.core.utils import logging
 import datetime
-from typing import Dict, Iterable, Tuple, Union, Any, Optional, List, TYPE_CHECKING
+from typing import Dict, Iterable, Tuple, Union, Any, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.interfaces.ifieldmetadata import IFieldMetaData  # noqa: F401
@@ -400,26 +400,26 @@ def resolve_where_params(key: str, valor: str, mtd_table) -> str:
     return where
 
 
-def resolve_pagination(query: Dict[str, Any]) -> Tuple[Optional[Any], Optional[Any]]:
+def resolve_pagination(query: Dict[str, Any]) -> Tuple[str, str]:
     init = 0
     limit = 0
-    for k in query.keys():
+    for k, v in query.items():
         if k.startswith("p_"):
             if k.endswith("l"):
-                limit = query[k]
+                limit = v
             elif k.endswith("o"):
-                init = query[k]
+                init = v
 
                 # if query[k] == "true":
                 #    page = 0
                 # else:
-                #    page = int(query[k])
+                #    page = int(v)
 
     if limit != 0:
         # init = page * limit
-        return (init, limit)
+        return (str(init), str(limit))
     else:
-        return (None, "50")
+        return ("0", "50")
 
 
 def get_tipo_aqnext(tipo) -> int:

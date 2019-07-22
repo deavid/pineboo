@@ -50,7 +50,7 @@ class parser(object):
     def mainWindow(*args):
         from pineboolib.application import project
 
-        if project._DGI._par._queqe:
+        if project.DGI._par._queqe:
             return "queqePending"
         if not args:
             return "needArguments"
@@ -65,12 +65,12 @@ class parser(object):
     def mainForm(*args):
         from pineboolib.application import project
 
-        if project._DGI._par._queqe:
+        if project.DGI._par._queqe:
             return "queqePending"
         if not args:
             return "needArguments"
         try:
-            obj_ = project._DGI.mainForm()
+            obj_ = project.DGI.mainForm()
             return obj_.json_process(args)
         except Exception:
             print(traceback.format_exc())
@@ -80,16 +80,16 @@ class parser(object):
     def callFunction(*args):
         from pineboolib.application import project
 
-        if project._DGI._par._queqe:
+        if project.DGI._par._queqe:
             return "queqePending"
 
         fun_ = args[0]
-        param_ = None
+        param_: List[str] = []
         # fn = None
         if len(args) > 1:
-            param_ = ",".join(args[1:])
+            param_ = [",".join(args[1:])]
         else:
-            param_ = args[0]
+            param_ = []
 
         try:
             project.call(fun_, param_)
@@ -107,19 +107,19 @@ class parser(object):
         ret: Any
         if len(args) == 1:
             if args[0] == "clean":
-                project._DGI._par._queqe = {}
+                project.DGI._par._queqe = {}
                 return True
-            elif args[0] in project._DGI._par._queqe.keys():
+            elif args[0] in project.DGI._par._queqe.keys():
                 ret = []
-                for q in project._DGI._par._queqe.keys():
+                for q in project.DGI._par._queqe.keys():
                     if q.find(args[0]) > -1:
-                        ret.append((q, project._DGI._par._queqe[q]))
-                        del project._DGI._par._queqe[q]
+                        ret.append((q, project.DGI._par._queqe[q]))
+                        del project.DGI._par._queqe[q]
             else:
                 ret = "Not Found"
         else:
-            ret = project._DGI._par._queqe
-            project._DGI._par._queqe = {}
+            ret = project.DGI._par._queqe
+            project.DGI._par._queqe = {}
 
         return ret
 
@@ -128,14 +128,14 @@ class parser(object):
         from pineboolib.application import project
         from pineboolib import pncontrolsfactory
 
-        if project._DGI._par._queqe:
+        if project.DGI._par._queqe:
             return "queqePending"
         arguments = args
         actionName = arguments[0]
         control = arguments[1]
         emite = arguments[2]
-        if actionName in project._DGI._WJS.keys():
-            ac = project._DGI._W[actionName]
+        if actionName in project.DGI._WJS.keys():
+            ac = project.DGI._W[actionName]
 
             cr = ac.child(control)
             if cr:

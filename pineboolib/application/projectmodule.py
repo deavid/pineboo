@@ -1,6 +1,6 @@
 import os
 import time
-from typing import List, Optional, Union, Any, Dict, TYPE_CHECKING
+from typing import List, Optional, Any, Dict, TYPE_CHECKING
 from optparse import Values
 
 # from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists # FIXME: Not allowed yet
@@ -30,7 +30,7 @@ class Project(object):
 
     logger = logging.getLogger("main.Project")
     app: QtCore.QCoreApplication = None
-    conn: Optional["IConnection"] = None  # Almacena la conexión principal a la base de datos
+    _conn: Optional["IConnection"] = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
     options: Values
     modules: Dict[str, "Module"]
@@ -52,7 +52,7 @@ class Project(object):
         """
         Constructor
         """
-        self.conn = None
+        self._conn = None
         self._DGI = None
         self.tree = None
         self.root = None
@@ -68,8 +68,20 @@ class Project(object):
         self.files: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.options = Values()
 
+    @property
+    def conn(self) -> "IConnection":
+        if self._conn is None:
+            raise Exception("Project is not initialized")
+        return self._conn
+
+    @property
+    def DGI(self) -> "dgi_schema":
+        if self._DGI is None:
+            raise Exception("Project is not initialized")
+        return self._DGI
+
     def init_conn(self, connection: "IConnection") -> None:
-        self.conn = connection
+        self._conn = connection
         self.apppath = filedir("..")
         self.tmpdir = config.value("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))
         if not os.path.exists(self.tmpdir):
@@ -301,9 +313,7 @@ class Project(object):
 
         return True
 
-    def call(
-        self, function: str, aList: List[Union[List[str], str, bool]], object_context: Any = None, showException: bool = True
-    ) -> Optional[bool]:
+    def call(self, function: str, aList: List[Any], object_context: Any = None, showException: bool = True) -> Optional[bool]:
         """
         LLama a una función del projecto.
         @param function. Nombre de la función a llamar.

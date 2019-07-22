@@ -3323,8 +3323,8 @@ class PNSqlCursor(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def commitOpened(self, count=-1, msg=None):
-        ct = None
-        t = None
+        ct: int
+        t: str
         if count < 0:
             ct = len(self.d.transactionsOpened_)
         else:

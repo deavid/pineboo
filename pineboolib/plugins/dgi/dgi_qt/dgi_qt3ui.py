@@ -347,7 +347,7 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
     #    origWidget.ui_ = {}
 
     def process_property(xmlprop, widget=widget):
-        set_fn: Callable = None
+        set_fn: Optional[Callable] = None
         pname = xmlprop.get("name")
         if pname in translate_properties:
             pname = translate_properties[pname]
@@ -451,7 +451,7 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
                 row = int(c.get("row")) or 0
                 col = int(c.get("column")) or 0
             except Exception:
-                row = col = None
+                row = col = 0
 
             if c.tag == "property":  # Ya se han procesado previamente ...
                 continue
@@ -523,7 +523,7 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
                 # print("Nuevo spacer %s (%s,%s,(%s,%s), %s, %s" % (spacer_name, "Horizontal" if orient_ ==
                 #                                                  1 else "Vertical", policy_name, width, height, hPolicy, vPolicy))
                 new_spacer = QtWidgets.QSpacerItem(width, height, hPolicy, vPolicy)
-                if row is not None or col is not None and mode == "grid":
+                if mode == "grid":
                     widget.layout.addItem(new_spacer, row, col, int(rowSpan), int(colSpan))
                 else:
                     widget.layout.addItem(new_spacer)
