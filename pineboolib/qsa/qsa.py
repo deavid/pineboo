@@ -171,14 +171,15 @@ def text(obj: Any) -> str:
 
 class qsaRegExp(object):
     logger = logging.getLogger("qsaRegExp")
-    result_: Optional[Match]
+    result_: Optional[Match[str]]
 
     def __init__(self, strRE: str, is_global: bool = False):
         self.strRE_ = strRE
         self.pattern = re.compile(self.strRE_)
         self.is_global = is_global
+        self.result_ = None
 
-    def search(self, text: str) -> Optional[Match]:
+    def search(self, text: str) -> Optional[Match[str]]:
         self.result_ = None
         if self.pattern is not None:
             self.result_ = self.pattern.search(text)
