@@ -684,6 +684,10 @@ class If(ASTPython):
                             expr = [expr[0], "is not", "None"]
                         elif expr[2] == 'float("nan")':
                             expr = ["not", "qsa.isnan(%s)" % expr[0]]
+                        elif expr[2] == "True":
+                            expr = ["not", expr[0]]
+                        elif expr[2] == "False":
+                            expr = [expr[0]]
 
                 main_expr.append(" ".join(expr))
 
@@ -1052,7 +1056,7 @@ class Switch(ASTPython):
             yield "begin", "block-if"
             for source in scase.findall("Source"):
                 source.set("parent_", self.elem)
-                for obj in parse_ast(source, parent=self).generate(break_mode=True):
+                for obj in parse_ast(source, parent=self).generate():
                     yield obj
             yield "end", "block-if"
 
@@ -1062,7 +1066,7 @@ class Switch(ASTPython):
             yield "begin", "block-if"
             for source in scasedefault.findall("Source"):
                 source.set("parent_", self.elem)
-                for obj in parse_ast(source, parent=self).generate(break_mode=True):
+                for obj in parse_ast(source, parent=self).generate():
                     yield obj
             yield "end", "block-if"
         yield "end", "block-for"
@@ -1327,9 +1331,11 @@ class InstructionFlow(ASTPython):
             kw = "return"
         if ctype == "BREAK":
             kw = "break"
-            if break_mode:
-                yield "break", kw + " " + ", ".join(arguments)
-                return
+            yield "break", kw + " " + ", ".join(arguments)
+
+            # if break_mode:
+            #     yield "break", kw + " " + ", ".join(arguments)
+            #     return
         if ctype == "CONTINUE":
             kw = "continue"
 
