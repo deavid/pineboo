@@ -2255,7 +2255,7 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     @QtCore.pyqtSlot()
-    def refreshDelayed(self, msec=50):
+    def refreshDelayed(self, msec=20):
         # if self.buffer():
         #    return
         if not self.d.timer_:
@@ -2981,7 +2981,7 @@ class PNSqlCursor(QtCore.QObject):
 
         fieldNameCheck = None
 
-        if self.modeAccess() == self.Edit or self.modeAccess() == self.Insert:
+        if self.modeAccess() in [self.Edit, self.Insert]:
             fieldList = self.metadata().fieldList()
 
             for field in fieldList:
