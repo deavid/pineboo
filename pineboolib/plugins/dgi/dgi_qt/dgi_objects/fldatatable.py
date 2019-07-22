@@ -410,7 +410,6 @@ class FLDataTable(QtWidgets.QTableView):
                 if chk:
                     chk.animateClick()
 
-            settings = FLSettings()
             if not config.value("ebcomportamiento/FLTableShortCut", False):
                 if key_event.key() == QtCore.Qt.Key_A and not self.popup_:
                     if self.cursor_ and not self.readonly_ and not self.editonly_ and not self.onlyTable_:
