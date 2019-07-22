@@ -27,7 +27,8 @@ class ObjectNotFoundInCurrentDGI(object):
 
 
 class ObjectNotFoundDGINotLoaded(object):
-    pass
+    def __init__(self, *args):
+        pass
 
 
 aqApp: Any = ObjectNotFoundDGINotLoaded

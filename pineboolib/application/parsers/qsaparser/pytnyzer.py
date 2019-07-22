@@ -187,10 +187,10 @@ QSA_KNOWN_ATTRS = {
     "TypeVar",
     "aqApp",
     "auth",
-    # "connect",
+    "connect",  # <---
+    "disconnect",  # <---
     "debug",
     "decorators",
-    # "disconnect",
     "filedir",
     "input",
     "inspect",
@@ -209,7 +209,7 @@ QSA_KNOWN_ATTRS = {
     "qsaRegExp",
     "resolveObject",
     "slot_done",
-    "solve_connection",
+    # "solve_connection",
     "startTimer",
     "sys",
     "types",
@@ -219,6 +219,8 @@ QSA_KNOWN_ATTRS = {
     "util",
     "weakref",
 }
+
+DISALLOW_CONVERSION_FOR_NONSTRICT = {"connect", "disconnect"}
 
 
 def id_translate(name: str, qsa_exclude: Set[str] = None, transform: Dict[str, str] = None) -> str:
@@ -311,6 +313,8 @@ def id_translate(name: str, qsa_exclude: Set[str] = None, transform: Dict[str, s
             return name
 
         if name in QSA_KNOWN_ATTRS:
+            if not STRICT_MODE and name in DISALLOW_CONVERSION_FOR_NONSTRICT:
+                return name
             return "qsa.%s" % name
 
         if transform is not None and name in transform:
