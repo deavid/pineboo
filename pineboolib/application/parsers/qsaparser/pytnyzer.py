@@ -15,7 +15,7 @@ except ImportError:
     black = None
 
 if black:
-    BLACK_FILEMODE = black.FileMode(line_length=160)
+    BLACK_FILEMODE = black.FileMode(line_length=120)
 else:
     BLACK_FILEMODE = None
 
