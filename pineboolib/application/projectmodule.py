@@ -478,7 +478,7 @@ class Project(object):
         # return self.tmpdir
 
     def load_version(self):
-        self.version = "0.11"
+        self.version = "0.12"
         if config.value("application/dbadmin_enabled", False):
             self.version = "DBAdmin v%s" % self.version
         else:
