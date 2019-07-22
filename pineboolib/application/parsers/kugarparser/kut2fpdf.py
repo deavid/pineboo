@@ -60,6 +60,7 @@ class Kut2FPDF(object):
 
         self._parser_tools = KParserTools()
         self._avalible_fonts = []
+        self._page_top = {}
         self._unavalible_fonts = []
         self.design_mode = config.value("ebcomportamiento/kugar_debug_mode", False)
         self._actual_data_line = None
