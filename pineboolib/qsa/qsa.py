@@ -551,7 +551,7 @@ class Application:
         return from_project(name)
 
 
-def format_exc(exc):
+def format_exc(exc=None):
     return traceback.format_exc(exc)
 
 
