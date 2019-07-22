@@ -16,6 +16,8 @@ from pineboolib.core.utils.utils_base import ustr, filedir
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.pncontrolsfactory import qsa_sys
 
+from typing import Any, Optional, Union, Match, List, Pattern
+
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +43,7 @@ class switch(object):
         """Return the match method once, then stop"""
         yield self.match
 
-    def match(self, *args):
+    def match(self, *args) -> bool:
         """Indicate whether or not to enter a case suite"""
         if self.fall or not args:
             return True
@@ -52,7 +54,7 @@ class switch(object):
             return False
 
 
-def parseFloat(x):
+def parseFloat(x: Any) -> Any:
     """
     Convierte a float un valor dado
     @param x. valor a convertir
@@ -91,7 +93,7 @@ def parseFloat(x):
         return x
 
 
-def parseString(obj):
+def parseString(obj: Any) -> str:
     """
     Convierte a str un objeto dado
     @param obj. valor a convertir
@@ -100,7 +102,7 @@ def parseString(obj):
     return obj.toString() if hasattr(obj, "toString") else str(obj)
 
 
-def parseInt(x):
+def parseInt(x: Union[float, int, str]) -> int:
     """
     Convierte en int un valor dado
     @param x. Valor a convertir
@@ -117,7 +119,7 @@ def parseInt(x):
     return ret_
 
 
-def isNaN(x):
+def isNaN(x: Any) -> bool:
     """
     Comprueba si un valor dado en numerico
     @param x. Valor numérico
@@ -136,7 +138,7 @@ def isNaN(x):
         return True
 
 
-def length(obj):
+def length(obj: Any) -> int:
     """
     Parser para recoger el length de un campo
     @param obj, objeto a obtener longitud
@@ -155,7 +157,7 @@ def length(obj):
             return len(obj)
 
 
-def text(obj):
+def text(obj: Any) -> str:
     """
     Parser para recoger valor text de un objeto dado
     @param obj. Objeto a procesar
@@ -167,7 +169,45 @@ def text(obj):
         return obj.text
 
 
-def RegExp(strRE):
+class qsaRegExp(object):
+    logger = logging.getLogger("qsaRegExp")
+    result_: Optional[Match]
+
+    def __init__(self, strRE: str, is_global: bool = False):
+        self.strRE_ = strRE
+        self.pattern = re.compile(self.strRE_)
+        self.is_global = is_global
+
+    def search(self, text: str) -> Optional[Match]:
+        self.result_ = None
+        if self.pattern is not None:
+            self.result_ = self.pattern.search(text)
+        return self.result_
+
+    def replace(self, target: str, new_value: str) -> str:
+        count = 1 if not self.is_global else 0
+        return self.pattern.sub(new_value, target, count)
+
+    def cap(self, i: int) -> Optional[str]:
+        if self.result_ is None:
+            return None
+
+        try:
+            return self.result_.group(i)
+        except Exception:
+            self.logger.exception("Error calling cap(%s)" % i)
+            return None
+
+    def get_global(self) -> bool:
+        return self.is_global
+
+    def set_global(self, b: bool) -> None:
+        self.is_global = b
+
+    global_ = property(get_global, set_global)
+
+
+def RegExp(strRE: str) -> qsaRegExp:
     """
     Regexp
     @param strRE. Cadena de texto
@@ -186,61 +226,25 @@ def RegExp(strRE):
     return qsaRegExp(strRE, is_global)
 
 
-class qsaRegExp(object):
-    logger = logging.getLogger("qsaRegExp")
-
-    def __init__(self, strRE, is_global=False):
-        self.strRE_ = strRE
-        self.pattern = re.compile(self.strRE_)
-        self.is_global = is_global
-        self.result_ = None
-
-    def search(self, text):
-        self.result_ = self.pattern.search(text)
-        return self.result_
-
-    def replace(self, target, new_value):
-        count = 1 if not self.is_global else 0
-        return self.pattern.sub(new_value, target, count)
-
-    def cap(self, i):
-        if self.result_ is None:
-            return None
-
-        try:
-            return self.result_.group(i)
-        except Exception:
-            self.logger.exception("Error calling cap(%s)" % i)
-            return None
-
-    def get_global(self):
-        return self.is_global
-
-    def set_global(self, b):
-        self.is_global = b
-
-    global_ = property(get_global, set_global)
-
-
 class Math(object):
     @staticmethod
-    def abs(x):
+    def abs(x: Union[int, float]) -> Union[int, float]:
         return math.fabs(x)
 
     @staticmethod
-    def ceil(x):
+    def ceil(x: float) -> int:
         return math.ceil(x)
 
     @staticmethod
-    def floor(x):
+    def floor(x: float) -> int:
         return math.floor(x)
 
     @staticmethod
-    def pow(x, y):
+    def pow(x: Union[int, float], y: Union[int, float]) -> Union[int, float]:
         return math.pow(x, y)
 
     @staticmethod
-    def round(x):
+    def round(x: Union[int, float]) -> float:
         return round(float(x), 2)
 
 
@@ -259,16 +263,19 @@ class Dir(object):
     def __init__(self, path=None):
         self.path_ = path
 
-    def entryList(self, patron, type_=None):
+    def entryList(self, patron: str, type_: Optional[str] = None) -> list:
         """
         Lista de ficheros que coinciden con un patron dado
         @param patron. Patron a usa para identificar los ficheros
         @return lista con los ficheros que coinciden con el patrón
         """
         # p = os.walk(self.path_)
-        retorno = []
+        retorno: List[str] = []
         try:
             import fnmatch
+
+            if self.path_ is None:
+                raise ValueError("self.path_ is not defined!")
 
             if os.path.exists(self.path_):
                 for file in os.listdir(self.path_):
@@ -279,7 +286,7 @@ class Dir(object):
 
         return retorno
 
-    def fileExists(self, file_name):
+    def fileExists(self, file_name: str) -> bool:
         """
         Retorna si existe el fichero dado o no
         @param file_name. Nombre del fichero
@@ -287,7 +294,8 @@ class Dir(object):
         """
         return os.path.exists(file_name)
 
-    def cleanDirPath(name):
+    @staticmethod
+    def cleanDirPath(name: str) -> str:
         """
         Devuelve la ruta del ficehro limpia
         @param name. Rtua del ficehro a limpiar
@@ -295,26 +303,30 @@ class Dir(object):
         """
         return str(name)
 
+    @staticmethod
     @decorators.Deprecated
-    def convertSeparators(filename):
+    def convertSeparators(filename: str) -> str:
         """
         Retona el mismo valor
         """
         return filename
 
-    def setCurrent(self, val=None):
+    def setCurrent(self, val: Optional[str] = None) -> None:
         """
         Especifica la ruta como path actual
         @param val. Ruta especificada
         """
         os.chdir(val or filedir("."))
 
-    def mkdir(self, name=None):
+    def mkdir(self, name: Optional[str] = None) -> None:
         """
         Crea un directorio
         @param name. Nombre de la ruta a crear
         """
         if name is None:
+            if self.path_ is None:
+                raise ValueError("self.path_ is not defined!")
+
             name = self.path_
         try:
             os.stat(name)
@@ -327,7 +339,7 @@ class File(QtCore.QFile):
     Para gestionar un fichero
     """
 
-    fichero = None
+    fichero: str
     mode = None
     path = None
 
@@ -336,10 +348,10 @@ class File(QtCore.QFile):
     ReadOnly = QIODevice.ReadOnly
     WriteOnly = QIODevice.WriteOnly
     ReadWrite = QIODevice.ReadWrite
-    encode_ = None
+    encode_: str
     last_seek = None
 
-    def __init__(self, rutaFichero=None, encode=None):
+    def __init__(self, rutaFichero: Optional[str] = None, encode: Optional[str] = None):
         self.encode_ = "iso-8859-15"
         if rutaFichero:
             if isinstance(rutaFichero, tuple):
@@ -353,21 +365,30 @@ class File(QtCore.QFile):
         if encode is not None:
             self.encode_ = encode
 
-    def read(self, byte=False):
+    def read(self, bytes: bool = False) -> Union[str, bytes]:
         """
         Lee el fichero al completo
-        @param byte. Especifica si se lee en modo texto o en bytes
+        @param bytes. Especifica si se lee en modo texto o en bytess
         @retunr contenido del fichero
         """
+        file_: str
+        encode: str
+
         if isinstance(self, str):
             file_ = self
             encode = "iso-8859-15"
         else:
+            if self.fichero is None:
+                raise ValueError("self.fichero is not defined!")
+
             file_ = self.fichero
             encode = self.encode_
         import codecs
 
-        f = codecs.open(file_, "r" if not byte else "rb", encoding=encode)
+        if file_ is None:
+            raise ValueError("file is empty!")
+
+        f = codecs.open(file_, "r" if not bytes else "rb", encoding=encode)
         ret = ""
         for l in f:
             ret = ret + l
@@ -375,33 +396,47 @@ class File(QtCore.QFile):
         f.close()
         return ret
 
-    def write(self, data, length=-1):
+    def write(self, data: Union[str, bytes], length: int = -1) -> None:
         """
         Escribe datos en el fichero
         @param data. Valores a guardar en el fichero
         @param length. Tamaño de data. (No se usa)
         """
+        encode: str
+        file_: str
+
         if isinstance(self, str):
             file_ = self
             encode = "utf-8"
         else:
+            if self.fichero is None:
+                raise ValueError("self.fichero is empty!")
             file_ = self.fichero
             encode = self.encode_
 
-        byte_ = data.encode(encode)
+        if encode is None:
+            raise ValueError("encode is empty!")
+
+        if isinstance(data, str):
+            bytes_ = data.encode(encode)
+        else:
+            bytes_ = data
 
         with open(file_, "wb") as file:
-            file.write(byte_)
+            file.write(bytes_)
 
         file.close()
 
-    def writeBlock(self, byte_array):
+    def writeBlock(self, bytes_array: bytes) -> None:
+        if self.fichero is None:
+            raise ValueError("self.fichero is empty!")
+
         with open(self.fichero, "wb") as file:
-            file.write(byte_array)
+            file.write(bytes_array)
 
         file.close()
 
-    def exists(name):
+    def exists(name: str) -> bool:
         """
         Comprueba si un fichero exite
         @param name. Nombre del fichero.
@@ -409,7 +444,7 @@ class File(QtCore.QFile):
         """
         return QtCore.QFile.exists(name)
 
-    def isDir(dir_name):
+    def isDir(dir_name: str) -> bool:
         """
         Indica si la ruta data es un directorio
         @param. Nombre del directorio
@@ -417,7 +452,7 @@ class File(QtCore.QFile):
         """
         return os.path.isdir(dir_name)
 
-    def isFile(file_name):
+    def isFile(file_name: str) -> bool:
         """
         Indica si la ruta data es un fichero
         @param. Nombre del fichero
@@ -425,26 +460,32 @@ class File(QtCore.QFile):
         """
         return os.path.isfile(file_name)
 
-    def getName(self):
+    def getName(self) -> str:
         """
         Retorna el nombre del fichero
         @return Nombre del fichero
         """
+        if self.fichero is None:
+            raise ValueError("self.fichero is empty!")
+
         path_, file_name = os.path.split(self.fichero)
         return file_name
 
-    def writeLine(self, data):
+    def writeLine(self, data: str) -> None:
         """
         Escribe un nueva linea en un fichero
         @param data. Datos a añadir en el fichero
         """
         import codecs
 
+        if self.fichero is None:
+            raise ValueError("self.fichero is empty!")
+
         f = codecs.open(self.fichero, encoding=self.encode_, mode="a")
         f.write("%s\n" % data)
         f.close()
 
-    def readLine(self):
+    def readLine(self) -> str:
         """
         Lee una linea de un fichero dado
         @return cadena de texto con los datos de la linea actual
@@ -454,18 +495,21 @@ class File(QtCore.QFile):
 
         import codecs
 
+        if self.fichero is None:
+            raise ValueError("self.fichero is empty!")
+
         f = codecs.open(self.fichero, "r", encoding=self.encode_)
         ret = f.readline(self.last_seek)
         self.last_seek += 1
         f.close()
         return ret
 
-    def readLines(self):
+    def readLines(self) -> List[str]:
         """
         Lee todas las lineas de un fichero y devuelve un array
         @return array con las lineas del fichero.
         """
-        ret = None
+        ret: List[str]
         import codecs
 
         f = codecs.open(self.fichero, encoding=self.encode_, mode="a")
@@ -475,14 +519,18 @@ class File(QtCore.QFile):
         f.close()
         return ret
 
-    def readByte(self):
+    def readbytes(self) -> bytes:
         """
-        Lee una linea (bytes) de un fichero dado
-        @return Bytes con los datos de la linea actual
+        Lee una linea (bytess) de un fichero dado
+        @return bytess con los datos de la linea actual
         """
-        return self.read(True)
+        ret_ = self.read(True)
+        if isinstance(ret_, str):
+            raise ValueError("expected bytes")
 
-    def writeByte(self, data_b):
+        return ret_
+
+    def writebytes(self, data_b: str) -> None:
         """
         Escribe un nueva linea en un fichero
         @param data_b. Datos a añadir en el fichero
@@ -494,7 +542,7 @@ class File(QtCore.QFile):
         f.write(data_b)
         f.close()
 
-    def remove(self):
+    def remove(self) -> bool:
         """
         Borra el fichero dado
         @return Boolean . True si se ha borrado el fichero, si no False.
@@ -511,20 +559,20 @@ class File(QtCore.QFile):
 QFile = File
 
 
-def startTimer(time, fun):
+def startTimer(time: int, fun: Any) -> "QtCore.QTimer":
     timer = QtCore.QTimer()
     timer.timeout.connect(fun)
     timer.start(time)
     return timer
 
 
-def killTimer(t=None):
+def killTimer(t: Optional["QtCore.QTimer"] = None) -> None:
     if t is not None:
         t.stop()
         t = None
 
 
-def debug(txt):
+def debug(txt: str) -> None:
     """
     Mensajes debug en qsa
     @param txt. Mensaje.
@@ -534,7 +582,7 @@ def debug(txt):
     project.message_manager().send("debug", None, [ustr(txt)])
 
 
-def from_project(scriptname):
+def from_project(scriptname: str) -> Any:
     """
     Devuelve el objeto de proyecto que coincide con el nombre dado
     """
@@ -547,19 +595,19 @@ def from_project(scriptname):
 class Application:
     """El modulo "Datos" usa Application.formRecorddat_procesos para leer el módulo"""
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         return from_project(name)
 
 
-def format_exc(exc=None):
+def format_exc(exc: Optional[int] = None) -> str:
     return traceback.format_exc(exc)
 
 
-def isnan(n):
+def isnan(n: Any) -> bool:
     return math.isnan(n)
 
 
-def replace(source, search, replace):
+def replace(source: str, search: Any, replace: str) -> Union[str, Pattern]:
     """Replace for QSA where detects if "search" is a Regexp"""
     if hasattr(search, "match"):
         return search.replace(source, replace)
