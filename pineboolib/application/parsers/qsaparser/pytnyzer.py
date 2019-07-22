@@ -1820,7 +1820,7 @@ class Constant(ASTPython):
                     for dtype, data in parse_ast(child, parent=self).generate(isolate=False):
                         if data:
                             val += data
-                    yield "expr", 're.compile(r"/%s/i")' % val
+                    yield "expr", 'qsa.re.compile(r"/%s/i")' % val
 
                 elif child.tag == "regexbody":
                     val = ""
