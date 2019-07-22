@@ -8,13 +8,13 @@ from typing import Any, Union, List, Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.interfaces.iconnection import IConnection
+    from pineboolib.application.types import Array
 
 logger = logging.getLogger(__name__)
 
 
 class PNSqlQueryPrivate(object):
     name_: str
-    select_: str
     from_: str
     where_: str
     orderBy_: str
@@ -45,11 +45,6 @@ class PNSqlQueryPrivate(object):
     Nombre de la consulta
     """
     name_ = None
-
-    """
-    Parte SELECT de la consulta
-    """
-    select_ = None
 
     """
     Parte FROM de la consulta
@@ -248,7 +243,7 @@ class PNSqlQuery(object):
     """
 
     def select(self) -> Any:
-        return self.d.select_
+        return ",".join(self.d.fieldList_)
 
     """
     Para obtener la parte FROM de la sentencia SQL de la consulta
@@ -283,31 +278,35 @@ class PNSqlQuery(object):
               se utiliza la coma.
     """
 
-    def setSelect(self, s: str, sep: str = ",") -> None:
-        self.d.select_ = s
+    def setSelect(self, select: Union[str, List, "Array"], sep: str = ",") -> None:
         list_fields = []
 
-        if isinstance(s, str) and sep in s:
-            # s = s.replace(" ", "")
+        if isinstance(select, str):
+            if sep in select:
+                # s = s.replace(" ", "")
 
-            prev = ""
-            for f in s.split(sep):
+                prev = ""
+                for f in select.split(sep):
 
-                field_ = prev + f
-                if field_.count("(") == field_.count(")"):
-                    list_fields.append(field_)
-                    prev = ""
-                else:
-                    prev = "%s," % field_
+                    field_ = prev + f
+                    if field_.count("(") == field_.count(")"):
+                        list_fields.append(field_)
+                        prev = ""
+                    else:
+                        prev = "%s," % field_
+
+        else:
+            for k, v in select:
+                list_fields.append(v)
 
             # s = s.split(sep)
 
         # self.d.select_ = s.strip_whitespace()
         # self.d.select_ = self.d.select_.simplifyWhiteSpace()
 
-        if not list_fields and not "*" == s:
+        if not list_fields and isinstance(select, str) and not "*" == select:
             self.d.fieldList_.clear()
-            self.d.fieldList_.append(s)
+            self.d.fieldList_.append(select)
             return
 
         # fieldListAux = s.split(sep)
@@ -338,7 +337,7 @@ class PNSqlQuery(object):
             else:
                 self.d.fieldList_.append(f)
 
-            self.d.select_ = ",".join(self.d.fieldList_)
+            # self.d.select_ = ",".join(self.d.fieldList_)
 
     """
     Para establecer la parte FROM de la sentencia SQL de la consulta.
@@ -393,16 +392,18 @@ class PNSqlQuery(object):
 
         res = None
 
-        if not self.d.select_:
+        if not self.d.fieldList_:
             logger.warning("sql(): No select yet. Returning empty")
             return ""
 
+        select = ",".join(self.d.fieldList_)
+
         if not self.d.from_:
-            res = "SELECT %s" % self.d.select_
+            res = "SELECT %s" % select
         elif not self.d.where_:
-            res = "SELECT %s FROM %s" % (self.d.select_, self.d.from_)
+            res = "SELECT %s FROM %s" % (select, self.d.from_)
         else:
-            res = "SELECT %s FROM %s WHERE %s" % (self.d.select_, self.d.from_, self.d.where_)
+            res = "SELECT %s FROM %s WHERE %s" % (select, self.d.from_, self.d.where_)
 
         if self.d.groupDict_ and not self.d.orderBy_:
             res = res + " ORDER BY "
