@@ -10,7 +10,7 @@ from pineboolib.core.utils import logging
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils.struct import AreaStruct
 from pineboolib.core.exceptions import CodeDoesNotBelongHereException, NotConnectedError
-from pineboolib.core.settings import config, settings
+from pineboolib.core.settings import config
 
 from pineboolib.application.module import Module
 
