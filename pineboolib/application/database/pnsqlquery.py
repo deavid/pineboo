@@ -295,6 +295,8 @@ class PNSqlQuery(object):
                     else:
                         prev = "%s," % field_
 
+        elif isinstance(select, list):
+            list_fields = list(select)
         else:
             for k, v in select:
                 list_fields.append(v)
