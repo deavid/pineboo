@@ -589,6 +589,8 @@ def parseArgs(argv):
 
     parser.add_option("--cache", action="store_true", dest="cache", default=False, help="If dest file exists, don't regenerate it")
 
+    parser.add_option("--strict", action="store_true", dest="strict", default=False, help="Enable STRICT_MODE on pytnyzer")
+
     (options, args) = parser.parse_args(argv)
     return (options, args)
 
@@ -612,6 +614,10 @@ def pythonify(filelist):
 
 
 def execute(options, args):
+    from pineboolib.application.parsers.qsaparser import pytnyzer
+
+    pytnyzer.STRICT_MODE = options.strict
+
     if options.full:
         execpython = options.exec_python
         options.exec_python = False
