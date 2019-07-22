@@ -28,8 +28,8 @@ class SysType(object, metaclass=Singleton):
         if not project._DGI:
             raise Exception("project._DGI is empty!")
 
-        if project._DGI.use_alternative_credentials():
-            ret_ = project._DGI.get_nameuser()
+        if project.DGI.use_alternative_credentials():
+            ret_ = project.DGI.get_nameuser()
         else:
             ret_ = project.conn.user()
 
@@ -38,7 +38,7 @@ class SysType(object, metaclass=Singleton):
     def interactiveGUI(self) -> str:
         if not project._DGI:
             raise Exception("project._DGI is empty!")
-        return project._DGI.interactiveGUI()
+        return project.DGI.interactiveGUI()
 
     def isUserBuild(self) -> bool:
         return self.version().upper().find("USER") > -1
@@ -137,7 +137,7 @@ class SysType(object, metaclass=Singleton):
         if not project._DGI:
             raise Exception("project._DGI is empty!")
 
-        return project._DGI.processEvents()
+        return project.DGI.processEvents()
 
     def write(self, encode_: str, dir_: str, contenido: str) -> None:
         import codecs

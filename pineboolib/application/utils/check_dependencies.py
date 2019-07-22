@@ -66,7 +66,7 @@ def check_dependencies(dict_: Dict[str, str], exit: bool = True) -> bool:
                     msg += "\n\n\n Use pip3 install -i https://test.pypi.org/simple/ pyfpdf==1.7.3"
 
             if exit:
-                if project._DGI and project._DGI.useDesktop() and project._DGI.localDesktop():
+                if project.DGI.useDesktop() and project.DGI.localDesktop():
                     from pineboolib import pncontrolsfactory
 
                     pncontrolsfactory.QMessageBox.warning(

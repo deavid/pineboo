@@ -4,6 +4,7 @@ from os.path import basename
 from pineboolib import logging
 
 import smtplib
+import socket
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -307,10 +308,10 @@ class FLSmtpClient(QtCore.QObject):
             status_msg = "El servidor no ha respondido correctamente al saludo."
             self.changeStatus(status_msg, State.ClientError)
             return False
-        except smtplib.SMTPNotSupportedError:
-            status_msg = "El tipo de autenticación no está soportada por el servidor."
-            self.changeStatus(status_msg, State.ClientError)
-            return False
+        # except smtplib.SMTPNotSupportedError:
+        #     status_msg = "El tipo de autenticación no está soportada por el servidor."
+        #     self.changeStatus(status_msg, State.ClientError)
+        #     return False
         except smtplib.SMTPConnectError:
             status_msg = "No se puede conectar al servidor SMTP."
             self.changeStatus(status_msg, State.ServerError)
@@ -335,7 +336,7 @@ class FLSmtpClient(QtCore.QObject):
             status_msg = "Error desconocido"
             self.changeStatus(status_msg, State.ClientError)
             return False
-        except smtplib.socket.gaierror:
+        except socket.gaierror:
             status_msg = "Servidor SMTP no encontrado.Verifique el nombre de host de su servidor SMTP."
             self.changeStatus(status_msg, State.SmtpError)
             return False

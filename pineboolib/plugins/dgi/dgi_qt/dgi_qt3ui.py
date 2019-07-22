@@ -48,7 +48,7 @@ def loadUi(form_path: str, widget, parent=None) -> None:
     if parent is None:
         parent = widget
 
-    # if project._DGI.localDesktop():
+    # if project.DGI.localDesktop():
     widget.hide()
 
     for xmlimage in root.findall("images//image"):
@@ -103,7 +103,7 @@ def loadUi(form_path: str, widget, parent=None) -> None:
         else:
             sender = widget.findChild(QObject, sender_name, QtCore.Qt.FindChildrenRecursively)
 
-        # if not project._DGI.localDesktop():
+        # if not project.DGI.localDesktop():
         #    wui = hasattr(widget, "ui_") and sender_name in widget.ui_
         #    if sender is None and wui:
         #        sender = widget.ui_[sender_name]
@@ -184,8 +184,8 @@ def loadUi(form_path: str, widget, parent=None) -> None:
         # toolbar = widget.addToolBar(nameTB_)
         loadToolBar(xmltoolbar, widget)
 
-    if project._DGI and not project._DGI.localDesktop():
-        project._DGI.showWidget(widget)
+    if project._DGI and not project.DGI.localDesktop():
+        project.DGI.showWidget(widget)
     else:
         widget.show()
 
@@ -340,7 +340,7 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
         parent = widget
     if origWidget is None:
         origWidget = widget
-    # if project._DGI.localDesktop():
+    # if project.DGI.localDesktop():
     #    if not hasattr(origWidget, "ui_"):
     #        origWidget.ui_ = {}
     # else:
@@ -467,9 +467,9 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
 
                 loadWidget(c, new_widget, parent, origWidget)
                 # path = c.find("./property[@name='name']/cstring").text
-                # if not project._DGI.localDesktop():
+                # if not project.DGI.localDesktop():
                 #    origWidget.ui_[path] = new_widget
-                # if project._DGI.localDesktop():
+                # if project.DGI.localDesktop():
                 #    new_widget.show()
                 if mode == "box":
                     try:
@@ -650,7 +650,7 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
             loadWidget(c, new_widget, parent, origWidget)
             prop_name = c.find("./property[@name='name']/cstring")
             path = prop_name.text if prop_name is not None else ""
-            if project._DGI and not project._DGI.localDesktop():
+            if project._DGI and not project.DGI.localDesktop():
                 origWidget.ui_[path] = new_widget
             new_widget.setContentsMargins(0, 0, 0, 0)
             new_widget.show()
@@ -721,7 +721,7 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
         f.setItalic(False)
         new_widget.setFont(f)
 
-    # if not project._DGI.localDesktop():
+    # if not project.DGI.localDesktop():
     #    if nwidget is not None and origWidget.objectName() not in origWidget.ui_:
     #        origWidget.ui_[origWidget.objectName()] = nwidget
 

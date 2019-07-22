@@ -354,7 +354,7 @@ class FLTableDB(QtWidgets.QWidget):
         from pineboolib.application import project
 
         if project._DGI is not None:
-            self.iconSize = project._DGI.iconSize()
+            self.iconSize = project.DGI.iconSize()
 
         self.tabControlLayout = QtWidgets.QHBoxLayout()
         self.tabFilter = QtWidgets.QFrame()  # contiene filtros

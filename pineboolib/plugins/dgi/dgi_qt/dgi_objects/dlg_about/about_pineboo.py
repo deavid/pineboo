@@ -18,7 +18,7 @@ class AboutPineboo(QWidget):
         version_ = project.version
         self.ui = None
         if project._DGI:
-            self.ui = project._DGI.createUI(dlg_, None, self)
+            self.ui = project.DGI.createUI(dlg_, None, self)
         if self.ui is None:
             raise Exception("Error creating UI About Dialog")
         self.ui.lbl_version.setText("Pineboo v%s" % str(version_))

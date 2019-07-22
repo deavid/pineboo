@@ -86,7 +86,7 @@ class XMLAction(XMLStruct):
                 # self.formrecord_widget.widget = None
 
             self.logger.debug("Loading record action %s . . . ", self.name)
-            if self.project._DGI.useDesktop():
+            if self.project.DGI.useDesktop():
                 # FIXME: looks like code duplication. Bet both sides of the IF do the same.
                 self.formrecord_widget = self.project.conn.managerModules().createFormRecord(self, None, cursor, None)
             else:
@@ -119,7 +119,7 @@ class XMLAction(XMLStruct):
         if not self._loaded:
             if self.mainform_widget is not None and getattr(self.mainform_widget, "widget", None):
                 self.mainform_widget.widget.doCleanUp()
-            if self.project._DGI.useDesktop() and hasattr(self.project.main_window, "w_"):
+            if self.project.DGI.useDesktop() and hasattr(self.project.main_window, "w_"):
                 self.logger.info("Loading action %s (createForm). . . ", self.name)
                 self.mainform_widget = self.project.conn.managerModules().createForm(action=self, parent=self.project.main_window.w_)
             else:
@@ -177,7 +177,7 @@ class XMLAction(XMLStruct):
         w = self.loadRecord(cursor)
         # w.init()
         if w:
-            if self.project._DGI.localDesktop():
+            if self.project.DGI.localDesktop():
                 if wait:
                     w.show_and_wait()
                 else:
@@ -188,7 +188,7 @@ class XMLAction(XMLStruct):
         w = self.load()
 
         if w:
-            if self.project._DGI.localDesktop():
+            if self.project.DGI.localDesktop():
                 w.show()
 
     """
@@ -249,7 +249,7 @@ class XMLAction(XMLStruct):
                 parent.iface = parent.widget.iface
             return script_loaded
 
-        script_path_py = self.project._DGI.alternative_script_path("%s.py" % scriptname)
+        script_path_py = self.project.DGI.alternative_script_path("%s.py" % scriptname)
 
         if script_path_py is None:
             script_path_qs = _path("%s.qs" % scriptname, False)

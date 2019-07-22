@@ -521,7 +521,9 @@ def create_xml(tagname) -> Optional[TagObject]:
 
 
 def parse_unknown(tagname, treedata):
-    xmlelem: TagObject = create_xml(tagname)
+    xmlelem = create_xml(tagname)
+    if xmlelem is None:
+        raise Exception("No class for parsing tagname %s" % tagname)
     i = 0
     for k, v in treedata["content"]:
         if type(v) is dict:

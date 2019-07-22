@@ -1454,7 +1454,7 @@ class FLManager(QtCore.QObject, IManager):
         """
         from pineboolib.application import project
 
-        if project._DGI and n in project._DGI.sys_mtds():
+        if project._DGI and n in project.DGI.sys_mtds():
             return True
 
         if n[0:2] != "fl":

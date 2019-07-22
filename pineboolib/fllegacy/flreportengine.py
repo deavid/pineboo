@@ -4,6 +4,7 @@ from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # type: ignore # FIXME
 
 from pineboolib.core import decorators
 from pineboolib import logging
+from pineboolib.application.database.pnsqlquery import PNSqlQuery
 from typing import Any, Optional
 
 
@@ -23,7 +24,7 @@ class FLReportEngine(object):
 
     class FLReportEnginePrivate(object):
         def __init__(self, q):
-            self.qry_ = None
+            self.qry_: Optional[PNSqlQuery] = None
             self.qFieldMtdList_ = None
             self.qGroupDict_ = None
             self.q_ = q
@@ -183,7 +184,7 @@ class FLReportEngine(object):
 
         return True
 
-    def rptQueryData(self) -> int:
+    def rptQueryData(self) -> Optional[PNSqlQuery]:
         return self.d_.qry_
 
     def rptNameTemplate(self) -> str:

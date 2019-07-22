@@ -165,7 +165,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
         if not parent:
             parent = aqApp.mainWidget()
-        # if project._DGI.localDesktop():  # Si es local Inicializa
+        # if project.DGI.localDesktop():  # Si es local Inicializa
         QtWidgets.QWidget.__init__(self, parent)  # FIXME: Porqué pide dos argumentos extra??
         # super(QtWidgets.QWidget, self).__init__(parent)
 
@@ -205,7 +205,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
         # if not getattr(self._action, "alias", None):
         #    qWarning("FLFormDB::Cargando un action XML")
-        # elif project._DGI.localDesktop():
+        # elif project.DGI.localDesktop():
         # self.setWindowTitle(self._action.alias)
 
         self.idMDI_ = self._action.name()
@@ -216,7 +216,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         self.iface = self.widget.iface
 
         if project._DGI is not None:
-            self.iconSize = project._DGI.iconSize()
+            self.iconSize = project.DGI.iconSize()
         self.init_thread_script = None
         if load:
             self.load()

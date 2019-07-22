@@ -33,8 +33,8 @@ class FLDateEdit(QDateEdit):
             date = convert_to_qdate(d)
 
         super().setDate(date)
-        # if not project._DGI.localDesktop():
-        #    project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), date.toString())
+        # if not project.DGI.localDesktop():
+        #    project.DGI._par.addQueque("%s_setDate" % self._parent.objectName(), date.toString())
         # else:
         self.setStyleSheet("color: black")
 

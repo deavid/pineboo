@@ -338,7 +338,7 @@ class PNConnection(QtCore.QObject, IConnection):
             and cur.d.askForCancelChanges_
         ):
 
-            if project._DGI and project._DGI.localDesktop():
+            if project.DGI.localDesktop():
                 res = QtWidgets.QMessageBox.information(
                     QtWidgets.QApplication.activeWindow(),
                     "Cancelar Cambios",

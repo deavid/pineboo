@@ -117,7 +117,7 @@ class FLFieldDB(QtWidgets.QWidget):
         from pineboolib.application import project
 
         if project._DGI:
-            self.iconSize = project._DGI.iconSize()
+            self.iconSize = project.DGI.iconSize()
 
         self.FLLayoutH = QtWidgets.QVBoxLayout(self)
         self.FLLayoutH.setContentsMargins(0, 0, 0, 0)
@@ -159,7 +159,7 @@ class FLFieldDB(QtWidgets.QWidget):
         self.FLWidgetFieldDBLayout.addWidget(self.textLabelDB)
 
         self.pushButtonDB = pncontrolsfactory.QPushButton()
-        if project._DGI and project._DGI.localDesktop():
+        if project.DGI.localDesktop():
             self.setFocusProxy(self.pushButtonDB)
         # self.pushButtonDB.setFlat(True)
         PBSizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
@@ -1820,10 +1820,10 @@ class FLFieldDB(QtWidgets.QWidget):
         from pineboolib.application import project
         from pineboolib import pncontrolsfactory
 
-        if project._DGI and not project._DGI.localDesktop():
-            project._DGI._par.addQueque("%s_setType" % self.objectName(), type_)
+        if project._DGI and not project.DGI.localDesktop():
+            project.DGI._par.addQueque("%s_setType" % self.objectName(), type_)
             if self.showAlias():
-                project._DGI._par.addQueque("%s_setAlias" % self.objectName(), self.fieldAlias_)
+                project.DGI._par.addQueque("%s_setAlias" % self.objectName(), self.fieldAlias_)
 
         if type_ in ("uint", "int", "double", "string"):
             if ol:
@@ -1852,8 +1852,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 for olN in olNoTranslated:
                     olTranslated.append(olN)
                 self.editor_.addItems(olTranslated)
-                if project._DGI and not project._DGI.localDesktop():
-                    project._DGI._par.addQueque("%s_setOptionsList" % self.objectName(), olTranslated)
+                if project._DGI and not project.DGI.localDesktop():
+                    project.DGI._par.addQueque("%s_setOptionsList" % self.objectName(), olTranslated)
                 self.editor_.installEventFilter(self)
                 if self.showed:
                     try:
@@ -1923,8 +1923,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.textChanged.connect(self.emitTextChanged)
 
                 if hasPushButtonDB and self.pushButtonDB:
-                    if project._DGI and not project._DGI.localDesktop():
-                        project._DGI._par.addQueque("%s_setHasPushButton" % self.objectName(), True)
+                    if project._DGI and not project.DGI.localDesktop():
+                        project.DGI._par.addQueque("%s_setHasPushButton" % self.objectName(), True)
                     if self.showed:
                         try:
                             self.KeyF2Pressed.disconnect(self.pushButtonDB.animateClick())
@@ -3196,7 +3196,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.textLabelDB.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Fixed)
             # self.editor_.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
             self.editor_.setMinimumWidth(100)
-            if project._DGI and project._DGI.mobilePlatform():
+            if project.DGI.mobilePlatform():
                 self.editor_.setMinimumHeight(60)
 
             if self.FLWidgetFieldDBLayout:

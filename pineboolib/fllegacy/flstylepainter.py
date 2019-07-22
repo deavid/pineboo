@@ -8,6 +8,8 @@ from PyQt5.QtCore import Qt  # type: ignore
 from pineboolib.core import decorators
 from pineboolib.application import project
 
+from typing import Dict, List, Any, Union
+
 
 class FLStylePainter(object):
 
@@ -58,16 +60,15 @@ class FLStylePainter(object):
             self.sw_ = None
             self.saves_ = 0
             self.transStack_ = QtCore.QStringListModel().stringList()
-            self.objBasesMap_ = {}  # QMAP FIXME
 
             self.doc_ = QtXml.QDomDocument()
-            self.objNodesMap_ = {}  # QMAP FIXME
+            self.objNodesMap_: Dict[str, Any] = {}  # QMAP FIXME
 
-            self.stack_ = []
+            self.stack_: List[Dict[str, Any]] = []
             self.curr_ = {"textx": None, "texty": None, "textalign": None}
-            self.svgTypeMap_ = {}  # QMAP FIXME
-            self.svgColMap_ = {}  # QMAP FIXME
-            self.clipPathTable_ = {}  # QMAP FIXME
+            self.svgTypeMap_: Dict[str, int] = {}  # QMAP FIXME
+            self.svgColMap_: Dict[Union[int, str], Union[int, str]] = {}  # QMAP FIXME
+            self.clipPathTable_: Dict[str, QtCore.QRegion] = {}  # QMAP FIXME
 
             self.relDpi_ = 0.0
 
@@ -121,10 +122,10 @@ class FLStylePainter(object):
                 elif dadNode.attribute("aqnorm") == "true":
                     dadTrans = dadNode.attribute("transform")
                     if dadTrans != elem.attribute("transform"):
-                        tx1 = 0
-                        tx2 = 0
-                        ty1 = 0
-                        ty2 = 0
+                        tx1 = 0.0
+                        tx2 = 0.0
+                        ty1 = 0.0
+                        ty2 = 0.0
 
                         params = self.paramsTransform(dadNode.attribute("transform"))
                         if params[0] == "translate":
@@ -138,7 +139,7 @@ class FLStylePainter(object):
                             s = "translate({},{})".format(tx2 - tx1, ty2 - ty1)
                             elem.setAttribute("transform", s)
                         elif params[0] == "matrix":
-                            m = []
+                            m: List[float] = []
                             for i in range(6):
                                 m[i] = float(params[i + 1])
                             s = "matrix({},{},{},{},{},{})"
@@ -232,7 +233,7 @@ class FLStylePainter(object):
                     "blue": "#0000ff",
                     "teal": "#008080",
                     "aqua": "#00ffff",
-                    0: 0,
+                    0: 0,  # WHY 0 (zero) as an integer??
                 }
 
                 for k, v in coltab.items():
@@ -245,7 +246,7 @@ class FLStylePainter(object):
             c.replace(QtCore.QRegExp("\\s*"), "")
             reg = QtCore.QRegExp("^rgb\\((\\d+)(%?),(\\d+)(%?),(\\d+)(%?)\\)$")
             if reg.search(c) >= 0:
-                comp = []
+                comp: List[int] = []
                 for i in range(3):
                     comp[i] = int(reg.cap(2 * i + 1))
                     cap2 = reg.cap(2 * i + 1)
@@ -438,7 +439,7 @@ class FLStylePainter(object):
 
                 if command == "translate":
                     tx = float(plist[0])
-                    ty = 0
+                    ty = 0.0
                     if plist.count() >= 2:
                         ty = float(plist[1])
                     self.painter_.translate(tx, ty)
@@ -450,7 +451,7 @@ class FLStylePainter(object):
                         sy = float(plist[1])
                     self.painter_.scale(sx, sy)
                 elif command == "matrix" and plist.count() >= 6:
-                    m = []
+                    m: List[float] = []
                     for i in range(6):
                         m[i] = float(plist[i])
                     wm = QtCore.QWMatrix(m[0], m[1], m[2], m[3], m[4], m[5])
@@ -874,7 +875,7 @@ class FLStylePainter(object):
                         QtCore.qWarning("FLStylePainterPrivate::drawPath: Unknown command")
                         return
 
-                arg = []
+                arg: List[float] = []
                 numArgs = cmdArgs[cmd]
                 for i in range(numArgs):
                     pos = reg.search(data, idx)
@@ -891,8 +892,8 @@ class FLStylePainter(object):
                     if x != x0 or y != y0:
                         path.setPoint(pcount, int(x0), int(y0))
                         pcount += 1
-                    x = x0 = arg[0] + offsetX
-                    y = y0 = arg[1] + offsetY
+                    x = x0 = int(arg[0] + offsetX)
+                    y = y0 = int(arg[1] + offsetY)
                     subIndex.append(pcount)
                     path.setPoint(pcount, int(x0), int(y0))
                     pcount += 1
@@ -904,16 +905,16 @@ class FLStylePainter(object):
                     y = y0
                     mode = 0
                 elif mode == 2:
-                    x = arg[0] + offsetX
-                    y = arg[1] + offsetY
+                    x = int(arg[0] + offsetX)
+                    y = int(arg[1] + offsetY)
                     path.setPoint(pcount, int(x), int(y))
                     pcount += 1
                 elif mode == 3:
-                    x = arg[0] + offsetX
+                    x = int(arg[0] + offsetX)
                     path.setPoint(pcount, int(x), int(y))
                     pcount += 1
                 elif mode == 4:
-                    y = arg[0] + offsetY
+                    y = int(arg[0] + offsetY)
                     path.setPoint(pcount, int(x), int(y))
                     pcount += 1
                 elif mode == 5 or mode == 6 or mode == 7 or mode == 8:
@@ -928,8 +929,8 @@ class FLStylePainter(object):
                         quad.setPoint(1, int(x), int(y))
                         quad.setPoint(2, int(x), int(y))
                     for j in range(numArgs // 2):
-                        x = arg[2 * j] + offsetX
-                        y = arg[2 * j + 1] + offsetY
+                        x = int(arg[2 * j] + offsetX)
+                        y = int(arg[2 * j + 1] + offsetY)
                         quad.setPoint(j + 4 - numArgs / 2, int(x), int(y))
 
                     controlX = quad[2].x()
@@ -961,8 +962,8 @@ class FLStylePainter(object):
                     cury = y
                     pcount = self.pathArc(path, pcount, rx, ry, xAxisRotation, int(largeArcFlag), int(sweepFlag), ex, ey, curx, cury)
                     pcount += 1
-                    x = ex
-                    y = ey
+                    x = int(ex)
+                    y = int(ey)
 
                 lastMode = mode
                 if pcount >= path.size() - 4:
@@ -1063,8 +1064,8 @@ class FLStylePainter(object):
             if node.attributes().contains("transform"):
                 xx = x
                 yy = y
-                tx = 0
-                ty = 0
+                tx = 0.0
+                ty = 0.0
 
                 if self.d_.objBasesMap_.contains(objName):
                     pa = self.d_.objBasesMap_[objName]
@@ -1080,7 +1081,7 @@ class FLStylePainter(object):
                     s = "translate({},{})".format(tx + x - xx, ty + y - yy)
                     self.d_.transStack_.push_back(objName + ":" + s)
                 elif params[0] == "matrix":
-                    m = []
+                    m: List[float] = []
                     for i in range(6):
                         m[i] = float(params[i + 1])
                     s = "matrix({},{},{},{},{},{})"

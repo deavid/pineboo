@@ -1941,8 +1941,8 @@ class regexchar(ASTPython):
             ret = "("
         else:
             if val.find(":") > -1:
-                ret = val.split(":")[1]
-                ret = ret.replace("'", "")
+                val_l: str = val.split(":")[1]
+                ret = val_l.replace("'", "")
             else:
                 print("regexchar:: item desconocido %s" % val)
 

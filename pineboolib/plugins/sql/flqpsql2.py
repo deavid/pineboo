@@ -45,7 +45,7 @@ class FLQPSQL2(FLQPSQL):
         except Exception as e:
             from pineboolib.application import project
 
-            if project._DGI and not project._DGI.localDesktop():
+            if project._DGI and not project.DGI.localDesktop():
                 if repr(traceback.format_exc()).find("the database system is starting up") > -1:
                     raise
 
