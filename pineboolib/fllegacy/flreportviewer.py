@@ -246,7 +246,9 @@ class FLReportViewer(QtWidgets.QWidget):
                 if inter.width() * inter.height() > (geodim / 20):
                     self.move(geo.topLeft())
 
-    def renderReport(self, init_row=0, init_col=0, append_or_flags: Union[Sized, Mapping[int, Any]] = None, display_report=None) -> Any:
+    def renderReport(
+        self, init_row=0, init_col=0, append_or_flags: Union[bool, Sized, Mapping[int, Any]] = None, display_report=None
+    ) -> Any:
 
         if not self.rptEngine_:
             return False
