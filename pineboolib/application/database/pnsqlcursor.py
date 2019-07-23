@@ -99,7 +99,7 @@ class PNSqlCursor(QtCore.QObject):
         autopopulate: bool = True,
         connectionName_or_db: Optional[Union[str, "IConnection"]] = None,
         cR: Optional["PNSqlCursor"] = None,
-        r: Optional[PNRelationMetaData] = None,
+        r: Optional["PNRelationMetaData"] = None,
         parent=None,
     ) -> None:
 
@@ -268,7 +268,7 @@ class PNSqlCursor(QtCore.QObject):
     @return Objeto PNTableMetaData con los metadatos de la tabla asociada al cursor
     """
 
-    def metadata(self) -> PNTableMetaData:
+    def metadata(self) -> "PNTableMetaData":
         if self.d.metadata_ is None:
             raise Exception("metadata is empty!")
 
@@ -326,7 +326,7 @@ class PNSqlCursor(QtCore.QObject):
     @param a Objeto FLAction
     """
 
-    def setAction(self, a: Union[str, FLAction]) -> bool:
+    def setAction(self, a: Union[str, "FLAction"]) -> bool:
         action = None
 
         if isinstance(a, str):
@@ -1806,7 +1806,7 @@ class PNSqlCursor(QtCore.QObject):
                     Si es cero usa la tabla foránea definida por la relación M1 de 'fieldName'
     """
 
-    def filterAssoc(self, fieldName: str, tableMD: Optional[PNTableMetaData] = None) -> Optional[str]:
+    def filterAssoc(self, fieldName: str, tableMD: Optional["PNTableMetaData"] = None) -> Optional[str]:
         fieldName = fieldName
 
         mtd = self.metadata()
@@ -3523,7 +3523,7 @@ class PNCursorPrivate(QtCore.QObject):
     """
     Cronómetro interno
     """
-    timer_: QtCore.QTimer
+    timer_: Optional[QtCore.QTimer]
 
     """
     Cuando el cursor proviene de una consulta indica si ya se han agregado al mismo
@@ -3544,7 +3544,7 @@ class PNCursorPrivate(QtCore.QObject):
     """
     Base de datos sobre la que trabaja
     """
-    db_: Optional[IConnection]
+    db_: Optional["IConnection"]
 
     """
     Pila de los niveles de transacción que han sido iniciados por este cursor
@@ -3633,6 +3633,12 @@ class PNCursorPrivate(QtCore.QObject):
         self.aclDone_ = False
         self.edition_ = True
         self.browse_ = True
+        self.acTable_ = None
+        self.timer_ = None
+        self.ctxt_ = None
+        self.rawValues_ = False
+        self.relation_ = None
+        self.persistentFilter_ = None
 
     def __del__(self) -> None:
 

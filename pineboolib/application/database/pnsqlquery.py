@@ -36,7 +36,7 @@ class PNSqlQueryPrivate(object):
     """
     Parte ORDER BY de la consulta
     """
-    orderBy_: str
+    orderBy_: Optional[str]
 
     """
     Base de datos sobre la que trabaja
@@ -69,11 +69,13 @@ class PNSqlQueryPrivate(object):
     """
     fieldMetaDataList_: Dict[str, IFieldMetaData]
 
-    def __init__(self, name=None) -> None:
-        self.name_ = name
+    def __init__(self, name: Optional[str] = None) -> None:
+        if name:
+            self.name_ = name
         self.parameterDict_ = {}
         self.groupDict_ = {}
         self.fieldMetaDataList_ = {}
+        self.orderBy_ = None
 
 
 class PNSqlQuery(object):
@@ -96,7 +98,7 @@ class PNSqlQuery(object):
     _posicion: int
     _cursor: "IApiCursor"
 
-    def __init__(self, cx=None, connection_name: Union[str, IConnection] = "default") -> None:
+    def __init__(self, cx=None, connection_name: Union[str, "IConnection"] = "default") -> None:
         # super(FLSqlQuery, self).__init__()
 
         if project.conn is None:
@@ -241,7 +243,7 @@ class PNSqlQuery(object):
     Para obtener la parte ORDER BY de la sentencia SQL de la consulta
     """
 
-    def orderBy(self) -> str:
+    def orderBy(self) -> Optional[str]:
         return self.d.orderBy_
 
     """
