@@ -2272,6 +2272,8 @@ class PNSqlCursor(QtCore.QObject):
         topLeft = self.model().index(row, 0)
         bottomRight = self.model().index(row, self.model().cols - 1)
         new_selection = QtCore.QItemSelection(topLeft, bottomRight)
+        if self._selection is None:
+            raise Exception("Call setAction first.")
         self._selection.select(new_selection, QtCore.QItemSelectionModel.ClearAndSelect)
         self.d._currentregister = row
         # self.d._current_changed.emit(self.at())

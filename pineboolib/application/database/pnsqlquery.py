@@ -7,11 +7,11 @@ from pineboolib.interfaces.ifieldmetadata import IFieldMetaData
 from typing import Any, Union, List, Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib.interfaces.iconnection import IConnection
-    from pineboolib.interfaces.iapicursor import IApiCursor
-    from pineboolib.application.types import Array
-    from .pnparameterquery import PNParameterQuery
-    from .pngroupbyquery import PNGroupByQuery
+    from pineboolib.interfaces.iconnection import IConnection  # noqa: F401
+    from pineboolib.interfaces.iapicursor import IApiCursor  # noqa: F401
+    from pineboolib.application.types import Array  # noqa: F401
+    from .pnparameterquery import PNParameterQuery  # noqa: F401
+    from .pngroupbyquery import PNGroupByQuery  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
