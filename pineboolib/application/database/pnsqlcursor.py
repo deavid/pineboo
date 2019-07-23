@@ -166,8 +166,8 @@ class PNSqlCursor(QtCore.QObject):
     def init(self, name: str, autopopulate: bool, cR: Optional["PNSqlCursor"], r: Optional["PNRelationMetaData"]) -> None:
         # logger.warning("FLSqlCursor(%s): Init() %s (%s, %s)" , name, self, cR, r, stack_info=True)
 
-        # if self.metadata() and not self.metadata().aqWasDeleted() and not
-        # self.metadata().inCache():
+        # if self.d.metadata_ and not self.d.metadata_.aqWasDeleted() and not
+        # self.d.metadata_.inCache():
 
         self.d.curName_ = name
         if self.setAction(name):
@@ -187,47 +187,47 @@ class PNSqlCursor(QtCore.QObject):
             self.d.relation_ = r
         else:
             self.d.relation_ = None
-        metadata = self.metadata()
-        if not metadata:
+
+        if not self.d.metadata_:
             return
 
         # if project.DGI.use_model():
         #    self.build_cursor_tree_dict()
 
-        self.d.isQuery_ = metadata.isQuery()
+        self.d.isQuery_ = self.d.metadata_.isQuery()
         if (name[len(name) - 3 :]) == "sys" or self.db().manager().isSystemTable(name):
             self.d.isSysTable_ = True
         else:
             self.d.isSysTable_ = False
 
         # if self.d.isQuery_:
-        #     qry = self.db().manager().query(self.metadata().query(), self)
+        #     qry = self.db().manager().query(self.d.metadata_.query(), self)
         #     self.d.query_ = qry.sql()
         #     if qry and self.d.query_:
         #         self.exec_(self.d.query_)
         #     if qry:
         #         self.qry.deleteLater()
         # else:
-        #     self.setName(self.metadata().name(), autopopulate)
-        self.setName(metadata.name(), autopopulate)
+        #     self.setName(self.d.metadata_.name(), autopopulate)
+        self.setName(self.d.metadata_.name(), autopopulate)
 
         self.d.modeAccess_ = self.Browse
         if cR and r:
             try:
                 cR.bufferChanged.disconnect(self.refresh)
-                cR.newBuffer.disconnect(self.refresh)
+                cR.newself.d.buffer_.disconnect(self.refresh)
                 # cR.d._current_changed.disconnect(self.refresh)
             except Exception:
                 pass
             cR.bufferChanged.connect(self.refresh)
-            cR.newBuffer.connect(self.refresh)
+            cR.newself.d.buffer_.connect(self.refresh)
             # cR.d._current_changed.connect(self.refresh)
             try:
-                cR.newBuffer.disconnect(self.clearPersistentFilter)
+                cR.newself.d.buffer_.disconnect(self.clearPersistentFilter)
 
             except Exception:
                 pass
-            cR.newBuffer.connect(self.clearPersistentFilter)
+            cR.newself.d.buffer_.connect(self.clearPersistentFilter)
             if (
                 project.DGI.use_model() and cR.meta_model()
             ):  # Si el cursor_relation tiene un model asociado , este cursor carga el propio también
@@ -251,7 +251,7 @@ class PNSqlCursor(QtCore.QObject):
         return self.db()
 
     def table(self) -> str:
-        m = self.metadata()
+        m = self.d.metadata_
         if m:
             return m.name()
         else:
@@ -302,8 +302,8 @@ class PNSqlCursor(QtCore.QObject):
 
     def mainFilter(self) -> str:
         ret_ = None
-        if hasattr(self.model(), "where_filters"):
-            ret_ = self.model().where_filters["main-filter"]
+        if hasattr(self.d._model, "where_filters"):
+            ret_ = self.d._model.where_filters["main-filter"]
 
         if ret_ is None:
             ret_ = ""
@@ -374,13 +374,13 @@ class PNSqlCursor(QtCore.QObject):
         from .pncursortablemodel import PNCursorTableModel
 
         self.d._model = PNCursorTableModel(self.conn(), self)
-        if not self.model():
+        if not self.d._model:
             return False
 
         # if not self.d.buffer_:
         #    self.primeInsert()
 
-        self._selection = QtCore.QItemSelectionModel(self.model())
+        self._selection = QtCore.QItemSelectionModel(self.d._model)
         self.selection().currentRowChanged.connect(self.selection_currentRowChanged)
         self._currentregister = self.selection().currentIndex().row()
         self.d.metadata_ = self.db().manager().metadata(self._action.table())
@@ -400,8 +400,8 @@ class PNSqlCursor(QtCore.QObject):
         #    f = "1 = 1"
 
         # logger.trace("--------------------->Añadiendo filtro",  f)
-        if self.model() and getattr(self.model(), "where_filters", None):
-            self.model().where_filters["main-filter"] = f
+        if self.d._model and getattr(self.d._model, "where_filters", None):
+            self.d._model.where_filters["main-filter"] = f
             if doRefresh:
                 self.refresh()
 
@@ -440,47 +440,43 @@ class PNSqlCursor(QtCore.QObject):
     def setAtomicValueBuffer(self, fN: str, functionName: str) -> None:
         from pineboolib import pncontrolsfactory
 
-        metadata = self.metadata()
-        buffer = self.buffer()
-        if not buffer or not fN or not metadata:
+        if not sefl.d.buffer_ or not fN or not self.d.metadata_:
             return
 
-        field = metadata.field(fN)
+        field = self.d.metadata_.field(fN)
 
         if field is None:
-            logger.warning("setAtomicValueBuffer(): No existe el campo %s:%s", metadata.name(), fN)
+            logger.warning("setAtomicValueBuffer(): No existe el campo %s:%s", self.d.metadata_.name(), fN)
             return
 
         if not self.db().dbAux():
             return
 
         type = field.type()
-        # fltype = FLFieldMetaData.FlDecodeType(type)
-        pK = metadata.primaryKey()
+        # fltype = FLFieldself.d.metadata_.FlDecodeType(type)
+        pK = self.d.metadata_.primaryKey()
         v: Any
 
-        cur_relation = self.cursorRelation()
-
-        if cur_relation and self.modeAccess() == self.Browse:
-            self.cur_relation.commit(False)
+        if self.d.cursorRelation_ and self.modeAccess() == self.Browse:
+            self.self.d.cursorRelation_.commit(False)
 
         if pK and self.db().db() is not self.db().dbAux():
-            pKV = buffer.value(pK)
+            pKV = self.d.buffer_.value(pK)
             self.db().dbAux().transaction()
 
             arglist: List[Any] = []
             arglist.append(fN)
-            arglist.append(buffer.value(fN))
+            arglist.append(self.d.buffer_.value(fN))
             v = project.call(functionName, arglist, self.context())
 
             q = PNSqlQuery(None, self.db().dbAux())
             ret = q.exec_(
                 "UPDATE  %s SET %s = %s WHERE %s"
                 % (
-                    metadata.name(),
+                    self.d.metadata_.name(),
                     fN,
                     self.db().manager().formatValue(type, v),
-                    self.db().manager().formatAssignValue(metadata.field(pK), pKV),
+                    self.db().manager().formatAssignValue(self.d.metadata_.field(pK), pKV),
                 )
             )
             if ret:
@@ -490,7 +486,7 @@ class PNSqlCursor(QtCore.QObject):
         else:
             logger.warning("No se puede actualizar el campo de forma atómica, porque no existe clave primaria")
 
-        buffer.setValue(fN, v)
+        self.d.buffer_.setValue(fN, v)
         if self.activatedBufferChanged():
             if project.DGI.use_model() and self.meta_model():
                 bch_model = getattr(self.meta_model(), "bChCursor", None)
@@ -522,16 +518,16 @@ class PNSqlCursor(QtCore.QObject):
         if not self.buffer():
             return
 
-        buffer, metadata = self.buffer(), self.metadata()
-        if not fN or not metadata:
+        buffer, metadata = self.buffer(), self.d.metadata_
+        if not fN or not self.d.metadata_:
             logger.warning("setValueBuffer(): No fieldName, or no metadata found")
             return
 
-        if not buffer:
+        if not self.d.buffer_:
             logger.warning("setValueBuffer(): No buffer")
             return
 
-        field = metadata.field(fN)
+        field = self.d.metadata_.field(fN)
         if field is None:
             logger.warning("setValueBuffer(): No existe el campo %s:%s", self.curName(), fN)
             return
@@ -541,19 +537,19 @@ class PNSqlCursor(QtCore.QObject):
             raise Exception("no db or no manager")
 
         type_ = field.type()
-        buff_field = buffer.field(fN)
+        buff_field = self.d.buffer_.field(fN)
         if buff_field and not buff_field.has_changed(v):
             return
 
         # if not self.buffer():  # Si no lo pongo malo....
         #    self.primeUpdate()
 
-        # if not fN or not self.metadata():
+        # if not fN or not self.d.metadata_:
         #    return
 
-        # field = self.metadata().field(fN)
+        # field = self.d.metadata_.field(fN)
         # if field is None:
-        #    logger.warning("PNSqlCursor::setValueBuffer() : No existe el campo %s:%s", self.metadata().name(), fN)
+        #    logger.warning("PNSqlCursor::setValueBuffer() : No existe el campo %s:%s", self.d.metadata_.name(), fN)
         #    return
 
         # fltype = field.flDecodeType(type_)
@@ -561,28 +557,33 @@ class PNSqlCursor(QtCore.QObject):
 
         if vv and type_ == "pixmap" and not manager.isSystemTable(self.table()):
             vv = db.normalizeValue(vv)
-            largeValue = manager.storeLargeValue(self.metadata(), vv)
+            largeValue = manager.storeLargeValue(self.d.metadata_, vv)
             if largeValue:
                 vv = largeValue
 
         if field.outTransaction() and db.db() is not db.dbAux() and self.modeAccess() != self.Insert:
-            pK = metadata.primaryKey()
-            cur_relation = self.cursorRelation()
-            if cur_relation is not None and self.modeAccess() != self.Browse:
-                cur_relation.commit(False)
+            pK = self.d.metadata_.primaryKey()
+
+            if self.d.cursorRelation_ is not None and self.modeAccess() != self.Browse:
+                self.d.cursorRelation_.commit(False)
 
             if pK:
-                pKV = buffer.value(pK)
+                pKV = self.d.buffer_.value(pK)
                 q = PNSqlQuery(None, "dbAux")
                 q.exec_(
                     "UPDATE %s SET %s = %s WHERE %s;"
-                    % (metadata.name(), fN, manager.formatValue(type_, vv), manager.formatAssignValue(metadata.field(pK), pKV))
+                    % (
+                        self.d.metadata_.name(),
+                        fN,
+                        manager.formatValue(type_, vv),
+                        manager.formatAssignValue(self.d.metadata_.field(pK), pKV),
+                    )
                 )
             else:
                 logger.warning("FLSqlCursor : No se puede actualizar el campo fuera de transaccion, porque no existe clave primaria")
 
         else:
-            buffer.setValue(fN, vv)
+            self.d.buffer_.setValue(fN, vv)
 
         # logger.trace("(%s)bufferChanged.emit(%s)" % (self.curName(),fN))
         if self.activatedBufferChanged():
@@ -604,7 +605,7 @@ class PNSqlCursor(QtCore.QObject):
         pncontrolsfactory.SysType.processEvents(self)
 
     """
-    Devuelve el valor de un campo del buffer.
+    Devuelve el valor de un campo del self.d.buffer_.
 
     @param fN Nombre del campo
     """
@@ -624,37 +625,37 @@ class PNSqlCursor(QtCore.QObject):
         if self.d.rawValues_:
             return self.valueBufferRaw(fN)
 
-        if not self.metadata():
+        if not self.d.metadata_:
             return None
 
-        if (self.model().rows > 0 and not self.modeAccess() == PNSqlCursor.Insert) or not self.buffer():
+        if (self.d._model.rows > 0 and not self.modeAccess() == PNSqlCursor.Insert) or not self.buffer():
             if not self.buffer():
                 self.refreshBuffer()
 
             if not self.buffer():
                 return None
 
-        field = self.metadata().field(fN)
+        field = self.d.metadata_.field(fN)
         if field is None:
-            logger.warning("valueBuffer(): No existe el campo %s:%s en la tabla %s", self.curName(), fN, self.metadata().name())
+            logger.warning("valueBuffer(): No existe el campo %s:%s en la tabla %s", self.curName(), fN, self.d.metadata_.name())
             return None
 
         type_ = field.type()
 
         v = None
         if field.outTransaction() and self.db().db() is not self.db().dbAux() and self.modeAccess() != self.Insert:
-            pK = self.metadata().primaryKey()
-            buffer = self.buffer()
+            pK = self.d.metadata_.primaryKey()
+
             if buffer is None:
                 return None
             if pK:
 
-                pKV = buffer.value(pK)
+                pKV = self.d.buffer_.value(pK)
                 q = PNSqlQuery(None, "dbAux")
                 sql_query = "SELECT %s FROM %s WHERE %s" % (
                     fN,
-                    self.metadata().name(),
-                    self.db().manager().formatAssignValue(self.metadata().field(pK), pKV),
+                    self.d.metadata_.name(),
+                    self.db().manager().formatAssignValue(self.d.metadata_.field(pK), pKV),
                 )
                 # q.exec_(self.db().dbAux(), sql_query)
                 q.exec_(sql_query)
@@ -664,10 +665,10 @@ class PNSqlCursor(QtCore.QObject):
                 logger.warning("No se puede obtener el campo fuera de transacción porque no existe clave primaria")
 
         else:
-            buffer = self.buffer()
+
             if buffer is None:
                 return None
-            v = buffer.value(fN)
+            v = self.d.buffer_.value(fN)
 
         if v is not None:
             if type_ in ("date"):
@@ -705,17 +706,17 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def valueBufferCopy(self, fN: str) -> Any:
-        if not self.bufferCopy() and fN is None or not self.metadata():
+        if not self.bufferCopy() and fN is None or not self.d.metadata_:
             return None
 
-        field = self.metadata().field(fN)
+        field = self.d.metadata_.field(fN)
         if field is None:
-            logger.warning("FLSqlCursor::valueBufferCopy() : No existe el campo " + self.metadata().name() + ":" + fN)
+            logger.warning("FLSqlCursor::valueBufferCopy() : No existe el campo " + self.d.metadata_.name() + ":" + fN)
             return None
 
         type_ = field.type()
         bufferCopy = self.bufferCopy()
-        if not bufferCopy:
+        if not sefl.d.self.d.bufferCopy_:
             raise Exception("no bufferCopy")
         v: Any = None
         if bufferCopy.isNull(fN):
@@ -887,12 +888,11 @@ class PNSqlCursor(QtCore.QObject):
 
     def fieldDisabled(self, fN: str) -> bool:
         if self.modeAccess() in (self.Insert, self.Edit):
-            cur_relation = self.cursorRelation()
-            relation = self.relation()
-            if cur_relation is not None and relation is not None:
-                if not cur_relation.metadata():
+
+            if self.d.cursorRelation_ is not None and relation is not None:
+                if not self.d.cursorRelation_.metadata():
                     return False
-                if relation.field().lower() == fN.lower():
+                if self.d.relation_.field().lower() == fN.lower():
                     return True
                 else:
                     return False
@@ -964,7 +964,7 @@ class PNSqlCursor(QtCore.QObject):
         return r
 
     def size(self) -> int:
-        return self.model().size()
+        return self.d._model.size()
 
     """
     Abre el formulario asociado a la tabla origen en el modo indicado.
@@ -976,7 +976,7 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def openFormInMode(self, m: int, wait: bool = True, cont: bool = True) -> None:
-        if not self.metadata():
+        if not self.d.metadata_:
             return
         from pineboolib import pncontrolsfactory
 
@@ -1012,12 +1012,12 @@ class PNSqlCursor(QtCore.QObject):
             return
 
         self.d.modeAccess_ = m
-        buffer = self.buffer()
-        if buffer:
-            buffer.clearValues(True)
+
+        if self.d.buffer_:
+            self.d.buffer_.clearValues(True)
 
         # if not self.d._action:
-        # self.d.action_ = self.db().manager().action(self.metadata().name())
+        # self.d.action_ = self.db().manager().action(self.d.metadata_.name())
 
         if not self._action:
             logger.warning(
@@ -1044,16 +1044,16 @@ class PNSqlCursor(QtCore.QObject):
             #     self.updateBufferCopy()
 
     def isNull(self, fN: str) -> bool:
-        buffer = self.buffer()
-        if not buffer:
+
+        if not self.d.buffer_:
             raise Exception("No buffer set")
-        return buffer.isNull(fN)
+        return self.d.buffer_.isNull(fN)
 
     def isCopyNull(self, fN: str) -> bool:
-        buffer_copy = self.bufferCopy()
-        if not buffer_copy:
+
+        if not sefl.d.buffer__copy:
             raise Exception("No buffer_copy set")
-        return buffer_copy.isNull(fN)
+        return self.d.bufferCopy_.isNull(fN)
 
     """
     Copia el contenido del FLSqlCursor::buffer_ actual en FLSqlCursor::bufferCopy_.
@@ -1087,11 +1087,11 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def isModifiedBuffer(self) -> bool:
-        buffer = self.buffer()
+
         if buffer is None:
             return False
 
-        modifiedFields = buffer.modifiedFields()
+        modifiedFields = self.d.buffer_.modifiedFields()
         if modifiedFields:
             return True
         else:
@@ -1150,9 +1150,7 @@ class PNSqlCursor(QtCore.QObject):
 
     def msgCheckIntegrity(self) -> str:
         msg = ""
-        buffer = self.buffer()
-        buffer_copy = self.bufferCopy()
-        metadata = self.metadata()
+
         if buffer is None or metadata is None:
             msg = "\nBuffer vacío o no hay metadatos"
             return msg
@@ -1160,7 +1158,7 @@ class PNSqlCursor(QtCore.QObject):
         if self.d.modeAccess_ in [self.Insert, self.Edit]:
             if not self.isModifiedBuffer() and self.d.modeAccess_ == self.Edit:
                 return msg
-            fieldList = metadata.fieldList()
+            fieldList = self.d.metadata_.fieldList()
             checkedCK = False
 
             if not fieldList:
@@ -1169,19 +1167,19 @@ class PNSqlCursor(QtCore.QObject):
             for field in fieldList:
 
                 fiName = field.name()
-                if not buffer.isGenerated(fiName):
+                if not self.d.buffer_.isGenerated(fiName):
                     continue
 
                 s = None
-                if not buffer.isNull(fiName):
-                    s = buffer.value(fiName)
+                if not self.d.buffer_.isNull(fiName):
+                    s = self.d.buffer_.value(fiName)
 
                 fMD = field.associatedField()
                 if fMD and s is not None:
                     if not field.relationM1():
                         msg = (
                             msg + "\n" + "FLSqlCursor : Error en metadatos, el campo %s tiene un campo asociado pero no existe "
-                            "relación muchos a uno:%s" % (metadata.name(), fiName)
+                            "relación muchos a uno:%s" % (self.d.metadata_.name(), fiName)
                         )
                         continue
 
@@ -1193,8 +1191,8 @@ class PNSqlCursor(QtCore.QObject):
                         continue
                     fmdName = fMD.name()
                     ss = None
-                    if not buffer.isNull(fmdName):
-                        ss = buffer.value(fmdName)
+                    if not self.d.buffer_.isNull(fmdName):
+                        ss = self.d.buffer_.value(fmdName)
                         # if not ss:
                         #     ss = None
                     if ss:
@@ -1210,37 +1208,37 @@ class PNSqlCursor(QtCore.QObject):
                         q.setForwardOnly(True)
                         q.exec_()
                         if not q.next():
-                            msg = msg + "\n" + metadata.name() + ":" + field.alias() + " : %s no pertenece a %s" % (s, ss)
+                            msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + " : %s no pertenece a %s" % (s, ss)
                         else:
-                            buffer.setValue(fmdName, q.value(0))
+                            self.d.buffer_.setValue(fmdName, q.value(0))
 
                     else:
-                        msg = msg + "\n" + metadata.name() + ":" + field.alias() + " : %s no se puede asociar a un valor NULO" % s
+                        msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + " : %s no se puede asociar a un valor NULO" % s
                     if not tMD.inCache():
                         del tMD
 
                 if self.d.modeAccess_ == self.Edit:
-                    if buffer and buffer_copy:
-                        if buffer.value(fiName) == buffer_copy.value(fiName):
+                    if buffer and self.d.bufferCopy_:
+                        if self.d.buffer_.value(fiName) == self.d.bufferCopy_.value(fiName):
                             continue
 
-                if buffer.isNull(fiName) and not field.allowNull() and not field.type() == "serial":
-                    msg = msg + "\n" + metadata.name() + ":" + field.alias() + " : No puede ser nulo"
+                if self.d.buffer_.isNull(fiName) and not field.allowNull() and not field.type() == "serial":
+                    msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + " : No puede ser nulo"
 
                 if field.isUnique():
-                    pK = metadata.primaryKey()
-                    if not buffer.isNull(pK) and s is not None:
-                        pKV = buffer.value(pK)
+                    pK = self.d.metadata_.primaryKey()
+                    if not self.d.buffer_.isNull(pK) and s is not None:
+                        pKV = self.d.buffer_.value(pK)
                         q = PNSqlQuery(None, self.db().connectionName())
-                        q.setTablesList(metadata.name())
+                        q.setTablesList(self.d.metadata_.name())
                         q.setSelect(fiName)
-                        q.setFrom(metadata.name())
+                        q.setFrom(self.d.metadata_.name())
                         q.setWhere(
                             "%s AND %s <> %s"
                             % (
                                 self.db().manager().formatAssignValue(field, s, True),
-                                metadata.primaryKey(self.d.isQuery_),
-                                self.db().manager().formatValue(metadata.field(pK).type(), pKV),
+                                self.d.metadata_.primaryKey(self.d.isQuery_),
+                                self.db().manager().formatValue(self.d.metadata_.field(pK).type(), pKV),
                             )
                         )
                         q.setForwardOnly(True)
@@ -1249,7 +1247,7 @@ class PNSqlCursor(QtCore.QObject):
                             msg = (
                                 msg
                                 + "\n"
-                                + metadata.name()
+                                + self.d.metadata_.name()
                                 + ":"
                                 + field.alias()
                                 + " : Requiere valores únicos, y ya hay otro registro con el valor %s en este campo" % s
@@ -1257,9 +1255,9 @@ class PNSqlCursor(QtCore.QObject):
 
                 if field.isPrimaryKey() and self.d.modeAccess_ == self.Insert and s is not None:
                     q = PNSqlQuery(None, self.db().connectionName())
-                    q.setTablesList(metadata.name())
+                    q.setTablesList(self.d.metadata_.name())
                     q.setSelect(fiName)
-                    q.setFrom(metadata.name())
+                    q.setFrom(self.d.metadata_.name())
                     q.setWhere(self.db().manager().formatAssignValue(field, s, True))
                     q.setForwardOnly(True)
                     q.exec_()
@@ -1267,14 +1265,14 @@ class PNSqlCursor(QtCore.QObject):
                         msg = (
                             msg
                             + "\n"
-                            + metadata.name()
+                            + self.d.metadata_.name()
                             + ":"
                             + field.alias()
                             + " : Es clave primaria y requiere valores únicos, y ya hay otro registro con el valor %s en este campo" % s
                         )
 
                 if field.relationM1() and s:
-                    if field.relationM1().checkIn() and not field.relationM1().foreignTable() == metadata.name():
+                    if field.relationM1().checkIn() and not field.relationM1().foreignTable() == self.d.metadata_.name():
                         r = field.relationM1()
                         tMD = self.db().manager().metadata(r.foreignTable())
                         if not tMD:
@@ -1291,25 +1289,25 @@ class PNSqlCursor(QtCore.QObject):
                             msg = (
                                 msg
                                 + "\n"
-                                + metadata.name()
+                                + self.d.metadata_.name()
                                 + ":"
                                 + field.alias()
                                 + " : El valor %s no existe en la tabla %s" % (s, r.foreignTable())
                             )
                         else:
-                            buffer.setValue(fiName, q.value(0))
+                            self.d.buffer_.setValue(fiName, q.value(0))
 
                         if not tMD.inCache():
                             del tMD
 
-                fieldListCK = metadata.fieldListOfCompoundKey(fiName)
+                fieldListCK = self.d.metadata_.fieldListOfCompoundKey(fiName)
                 if fieldListCK and not checkedCK and self.d.modeAccess_ == self.Insert:
                     if fieldListCK:
                         filterCK: Optional[str] = None
                         field = None
                         valuesFields = None
                         for fieldCK in fieldListCK:
-                            sCK = buffer.value(fieldCK.name())
+                            sCK = self.d.buffer_.value(fieldCK.name())
                             if filterCK is None:
                                 filterCK = self.db().manager().formatAssignValue(fieldCK, sCK, True)
                             else:
@@ -1324,9 +1322,9 @@ class PNSqlCursor(QtCore.QObject):
                                 valuesFields = "%s+%s" % (valuesFields, str(sCK))
 
                         q = PNSqlQuery(None, self.db().connectionName())
-                        q.setTablesList(metadata.name())
+                        q.setTablesList(self.d.metadata_.name())
                         q.setSelect(fiName)
-                        q.setFrom(metadata.name())
+                        q.setFrom(self.d.metadata_.name())
                         if filterCK is not None:
                             q.setWhere(filterCK)
                         q.setForwardOnly(True)
@@ -1335,25 +1333,25 @@ class PNSqlCursor(QtCore.QObject):
                             msg = msg + "\n%s : Requiere valor único, y ya hay otro registro con el valor %s en la tabla %s" % (
                                 field,
                                 valuesFields,
-                                metadata.name(),
+                                self.d.metadata_.name(),
                             )
 
                         checkedCK = True
 
         elif self.d.modeAccess_ == self.Del:
-            fieldList = metadata.fieldList()
+            fieldList = self.d.metadata_.fieldList()
             fiName = None
             s = None
 
             for field in fieldList:
                 # fiName = field.name()
-                if not buffer.isGenerated(field.name()):
+                if not self.d.buffer_.isGenerated(field.name()):
                     continue
 
                 s = None
 
-                if not buffer.isNull(field.name()):
-                    s = buffer.value(field.name())
+                if not self.d.buffer_.isNull(field.name()):
+                    s = self.d.buffer_.value(field.name())
                     # if s:
                     #    s = None
 
@@ -1389,7 +1387,7 @@ class PNSqlCursor(QtCore.QObject):
                                 msg
                                 + "\n"
                                 + "FLSqlCursor : Error en metadatos, %s.%s no es válido.\nCampo relacionado con %s.%s."
-                                % (mtd.name(), r.foreignField(), metadata.name(), field.name())
+                                % (mtd.name(), r.foreignField(), self.d.metadata_.name(), field.name())
                             )
                             if not mtd.inCache():
                                 del mtd
@@ -1406,7 +1404,7 @@ class PNSqlCursor(QtCore.QObject):
                             msg = (
                                 msg
                                 + "\n"
-                                + metadata.name()
+                                + self.d.metadata_.name()
                                 + ":"
                                 + field.alias()
                                 + " : Con el valor %s hay registros en la tabla %s:%s" % (s, mtd.name(), mtd.alias())
@@ -1432,7 +1430,7 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def checkIntegrity(self, showError: bool = True) -> bool:
-        if not self.buffer() or not self.metadata():
+        if not self.buffer() or not self.d.metadata_:
             return False
         if not self.d.activatedCheckIntegrity_:
             return True
@@ -1464,10 +1462,10 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def setUnLock(self, fN: str, v: bool) -> None:
-        metadata = self.metadata()
+
         if not metadata or not self.modeAccess() == self.Browse:
             return
-        if not metadata.field(fN).type() == "unlock":
+        if not self.d.metadata_.field(fN).type() == "unlock":
             logger.warning("setUnLock sólo permite modificar campos del tipo Unlock")
             return
 
@@ -1490,22 +1488,21 @@ class PNSqlCursor(QtCore.QObject):
 
     def isLocked(self) -> bool:
 
-        if not self.metadata():
+        if not self.d.metadata_:
             return False
 
         ret_ = False
         if self.d.modeAccess_ is not self.Insert:
             row = self.currentRegister()
 
-            for field in self.metadata().fieldNamesUnlock():
+            for field in self.d.metadata_.fieldNamesUnlock():
                 if row > -1:
-                    if self.model().value(row, field) not in ("True", True, 1, "1"):
+                    if self.d._model.value(row, field) not in ("True", True, 1, "1"):
                         ret_ = True
                         break
 
-        cur_relation = self.cursorRelation()
-        if not ret_ and cur_relation is not None:
-            ret_ = cur_relation.isLocked()
+        if not ret_ and self.d.cursorRelation_ is not None:
+            ret_ = self.d.cursorRelation_.isLocked()
 
         return ret_
 
@@ -1529,9 +1526,9 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def bufferIsNull(self, pos_or_name: Union[int, str]) -> bool:
-        buffer = self.buffer()
+
         if buffer is not None:
-            return buffer.isNull(pos_or_name)
+            return self.d.buffer_.isNull(pos_or_name)
 
         return True
 
@@ -1543,9 +1540,8 @@ class PNSqlCursor(QtCore.QObject):
 
     def bufferSetNull(self, pos_or_name: Union[int, str]) -> None:
 
-        buffer = self.buffer()
         if buffer is not None:
-            buffer.setNull(pos_or_name)
+            self.d.buffer_.setNull(pos_or_name)
 
     """
     Devuelve si el contenido de un campo en el bufferCopy en nulo.
@@ -1554,9 +1550,9 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def bufferCopyIsNull(self, pos_or_name: Union[int, str]) -> bool:
-        buffer_copy = self.bufferCopy()
+
         if buffer_copy is not None:
-            return buffer_copy.isNull(pos_or_name)
+            return self.d.bufferCopy_.isNull(pos_or_name)
         return True
 
     """
@@ -1567,12 +1563,11 @@ class PNSqlCursor(QtCore.QObject):
 
     def bufferCopySetNull(self, pos_or_name: Union[int, str]) -> None:
 
-        buffer_copy = self.bufferCopy()
         if buffer_copy is not None:
-            buffer_copy.setNull(pos_or_name)
+            self.d.bufferCopy_.setNull(pos_or_name)
 
     """
-    Obtiene la posición del registro actual, según la clave primaria contenida en el buffer.
+    Obtiene la posición del registro actual, según la clave primaria contenida en el self.d.buffer_.
 
     La posición del registro actual dentro del cursor se calcula teniendo en cuenta el
     filtro actual ( FLSqlCursor::curFilter() ) y el campo o campos de ordenamiento
@@ -1584,7 +1579,7 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def atFrom(self) -> int:
-        if not self.buffer() or not self.metadata():
+        if not self.buffer() or not self.d.metadata_:
             return 0
         # Faster version for this function::
         if self.isValid():
@@ -1595,7 +1590,7 @@ class PNSqlCursor(QtCore.QObject):
         # --- the following function is awfully slow when there is a lot of data
         # ... why we do need to do this, exactly?
 
-        pKN = self.metadata().primaryKey()
+        pKN = self.d.metadata_.primaryKey()
         pKValue = self.valueBuffer(pKN)
 
         pos = -99
@@ -1616,11 +1611,11 @@ class PNSqlCursor(QtCore.QObject):
 
             if not self.d.isQuery_ or "." in pKN:
                 sqlPriKey = pKN
-                sqlFrom = self.metadata().name()
-                field = self.metadata().field(pKN)
+                sqlFrom = self.d.metadata_.name()
+                field = self.d.metadata_.field(pKN)
                 sql = "SELECT %s FROM %s" % (sqlPriKey, sqlFrom)
             else:
-                qry = self.db().manager().query(self.metadata().query(), self)
+                qry = self.db().manager().query(self.d.metadata_.query(), self)
                 if qry:
                     # Buscamos la tabla que contiene el campo:
                     for t in qry.tablesList():
@@ -1742,14 +1737,14 @@ class PNSqlCursor(QtCore.QObject):
         mid = None
         comp = None
         midVal = None
-        metadata = self.metadata()
-        if not metadata:
+
+        if not self.d.metadata_:
             raise Exception("Metadata is not set")
 
-        if fN in metadata.fieldNames():
+        if fN in self.d.metadata_.fieldNames():
             while ini <= fin:
                 mid = int((ini + fin) / 2)
-                midVal = str(self.model().value(mid, fN))
+                midVal = str(self.d._model.value(mid, fN))
                 if v == midVal:
                     ret = mid
                     break
@@ -1811,7 +1806,7 @@ class PNSqlCursor(QtCore.QObject):
     def filterAssoc(self, fieldName: str, tableMD: Optional["PNTableMetaData"] = None) -> Optional[str]:
         fieldName = fieldName
 
-        mtd = self.metadata()
+        mtd = self.d.metadata_
         if not mtd:
             return None
 
@@ -1835,17 +1830,16 @@ class PNSqlCursor(QtCore.QObject):
             return None
 
         fieldBy = field.associatedFieldFilterTo()
-        buffer = self.buffer()
 
         if buffer is None:
             return None
 
-        if not tableMD.field(fieldBy) or buffer.isNull(fieldAc.name()):
+        if not tableMD.field(fieldBy) or self.d.buffer_.isNull(fieldAc.name()):
             # if ownTMD and not tableMD.inCache():
             # del tableMD
             return None
 
-        vv = buffer.value(fieldAc.name())
+        vv = self.d.buffer_.value(fieldAc.name())
         if vv:
             # if ownTMD and not tableMD.inCache():
             # del tableMD
@@ -1895,11 +1889,11 @@ class PNSqlCursor(QtCore.QObject):
             return False
 
         i = 0
-        buffer = self.buffer()
-        if not buffer:
+
+        if not self.d.buffer_:
             raise Exception("Buffer not set")
-        while i <= self.model().rowCount():
-            if self.model().value(i, buffer.pK()) == value:
+        while i <= self.d._model.rowCount():
+            if self.d._model.value(i, self.d.buffer_.pK()) == value:
                 return self.move(i)
 
             i = i + 1
@@ -1915,7 +1909,7 @@ class PNSqlCursor(QtCore.QObject):
         if row < 0:
             return -1
 
-        if row >= self.model().rows:
+        if row >= self.d._model.rows:
             return -2
         # logger.debug("%s.Row %s ----> %s" % (self.curName(), row, self))
         return row
@@ -1945,27 +1939,23 @@ class PNSqlCursor(QtCore.QObject):
     @pyqtSlot()
     @pyqtSlot(str)
     def refresh(self, fN: Optional[str] = None) -> None:
-        if not self.metadata():
+        if not self.d.metadata_:
             return
 
-        cur_relation = self.cursorRelation()
-        relation = self.relation()
-        buffer = self.buffer()
-
-        if cur_relation is not None and relation is not None:
+        if self.d.cursorRelation_ is not None and relation is not None:
             self.d.persistentFilter_ = None
-            if not cur_relation.metadata():
+            if not self.d.cursorRelation_.metadata():
                 return
-            if cur_relation.metadata().primaryKey() == fN and cur_relation.modeAccess() == self.Insert:
+            if self.d.cursorRelation_.metadata().primaryKey() == fN and self.d.cursorRelation_.modeAccess() == self.Insert:
                 return
 
-            if not fN or relation.foreignField() == fN:
+            if not fN or self.d.relation_.foreignField() == fN:
                 if buffer is not None:
-                    buffer.clear_buffer()
+                    self.d.buffer_.clear_buffer()
                 self.refreshDelayed()
                 return
         else:
-            self.model().refresh()  # Hay que hacer refresh previo pq si no no recoge valores de un commitBuffer paralelo
+            self.d._model.refresh()  # Hay que hacer refresh previo pq si no no recoge valores de un commitBuffer paralelo
             # self.select()
             pos = self.atFrom()
             if pos > self.size():
@@ -1974,8 +1964,8 @@ class PNSqlCursor(QtCore.QObject):
             if not self.seek(pos, False, True):
 
                 if buffer is not None:
-                    buffer.clear_buffer()
-                self.newBuffer.emit()
+                    self.d.buffer_.clear_buffer()
+                self.newself.d.buffer_.emit()
 
     """
     Actualiza el conjunto de registros con un retraso.
@@ -2009,16 +1999,15 @@ class PNSqlCursor(QtCore.QObject):
         self.select()
         pos = self.atFrom()
         if not self.seek(pos, False, True):
-            self.newBuffer.emit()
+            self.newself.d.buffer_.emit()
         else:
-            cur_relation = self.cursorRelation()
-            relation = self.relation()
-            if cur_relation and relation and cur_relation.metadata():
-                v = self.valueBuffer(relation.field())
-                foreignFieldValueBuffer = cur_relation.valueBuffer(relation.foreignField())
+
+            if self.d.cursorRelation_ and relation and self.d.cursorRelation_.metadata():
+                v = self.valueBuffer(self.d.relation_.field())
+                foreignFieldValueBuffer = self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField())
 
                 if foreignFieldValueBuffer != v and foreignFieldValueBuffer is not None:
-                    cur_relation.setValueBuffer(relation.foreignField(), v)
+                    self.d.cursorRelation_.setValueBuffer(self.d.relation_.foreignField(), v)
 
     def primeInsert(self) -> None:
         if not self.d.buffer_:
@@ -2026,7 +2015,7 @@ class PNSqlCursor(QtCore.QObject):
 
         self.d.buffer_.primeInsert()
 
-    def primeUpdate(self) -> PNBuffer:
+    def primeUpdate(self) -> PNself.d.buffer_:
         if self.d.buffer_ is None:
             self.d.buffer_ = PNBuffer(self)
         # logger.warning("Realizando primeUpdate en pos %s y estado %s , filtro %s", self.at(), self.modeAccess(), self.filter())
@@ -2051,7 +2040,7 @@ class PNSqlCursor(QtCore.QObject):
     def refreshBuffer(self) -> bool:
         from pineboolib import qsa as qsa_tree
 
-        if not self.metadata():
+        if not self.d.metadata_:
             return False
 
         if isinstance(self.sender(), QtCore.QTimer) and self.d.modeAccess_ != self.Browse:
@@ -2069,30 +2058,30 @@ class PNSqlCursor(QtCore.QObject):
 
             self.setNotGenerateds()
 
-            fieldList = self.metadata().fieldList()
+            fieldList = self.d.metadata_.fieldList()
             if fieldList:
                 for field in fieldList:
                     field_name = field.name()
-                    buffer = self.buffer()
+
                     if buffer is None:
                         raise Exception("buffer is empty!")
 
-                    buffer.setNull(field_name)
-                    if not buffer.isGenerated(field_name):
+                    self.d.buffer_.setNull(field_name)
+                    if not self.d.buffer_.isGenerated(field_name):
                         continue
                     type_ = field.type()
-                    # fltype = FLFieldMetaData.flDecodeType(type_)
-                    # fltype = self.metadata().field(fiName).flDecodeType(type_)
+                    # fltype = FLFieldself.d.metadata_.flDecodeType(type_)
+                    # fltype = self.d.metadata_.field(fiName).flDecodeType(type_)
                     defVal = field.defaultValue()
                     if defVal is not None:
                         # defVal.cast(fltype)
-                        buffer.setValue(field_name, defVal)
+                        self.d.buffer_.setValue(field_name, defVal)
 
                     if type_ == "serial":
-                        val = self.db().nextSerialVal(self.metadata().name(), field_name)
+                        val = self.db().nextSerialVal(self.d.metadata_.name(), field_name)
                         if val is None:
                             val = 0
-                        buffer.setValue(field_name, val)
+                        self.d.buffer_.setValue(field_name, val)
 
                     if field.isCounter():
                         from pineboolib.application.database.utils import nextCounter
@@ -2109,17 +2098,14 @@ class PNSqlCursor(QtCore.QObject):
                             siguiente = nextCounter(field_name, self)
 
                         if siguiente:
-                            buffer.setValue(field_name, siguiente)
+                            self.d.buffer_.setValue(field_name, siguiente)
 
-            cur_relation = self.cursorRelation()
-            relation = self.relation()
-
-            if cur_relation is not None and relation is not None and cur_relation.metadata():
-                self.setValueBuffer(relation.field(), cur_relation.valueBuffer(relation.foreignField()))
+            if self.d.cursorRelation_ is not None and relation is not None and self.d.cursorRelation_.metadata():
+                self.setValueBuffer(self.d.relation_.field(), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
 
             self.d.undoAcl()
             self.updateBufferCopy()
-            self.newBuffer.emit()
+            self.newself.d.buffer_.emit()
 
         elif self.d.modeAccess_ == self.Edit:
             if not self.commitBufferCursorRelation():
@@ -2132,7 +2118,7 @@ class PNSqlCursor(QtCore.QObject):
 
             self.setNotGenerateds()
             self.updateBufferCopy()
-            self.newBuffer.emit()
+            self.newself.d.buffer_.emit()
 
         elif self.d.modeAccess_ == self.Del:
 
@@ -2149,7 +2135,7 @@ class PNSqlCursor(QtCore.QObject):
 
             self.primeUpdate()
             self.setNotGenerateds()
-            self.newBuffer.emit()
+            self.newself.d.buffer_.emit()
 
         else:
             logger.error("refreshBuffer(). No hay definido modeAccess()")
@@ -2262,24 +2248,24 @@ class PNSqlCursor(QtCore.QObject):
         if row is None:
             row = -1
 
-        if not self.model():
+        if not self.d._model:
             return False
 
         if row < 0:
             row = -1
-        if row >= self.model().rows:
-            row = self.model().rows
+        if row >= self.d._model.rows:
+            row = self.d._model.rows
         if self.currentRegister() == row:
             return False
-        topLeft = self.model().index(row, 0)
-        bottomRight = self.model().index(row, self.model().cols - 1)
+        topLeft = self.d._model.index(row, 0)
+        bottomRight = self.d._model.index(row, self.d._model.cols - 1)
         new_selection = QtCore.QItemSelection(topLeft, bottomRight)
         if self._selection is None:
             raise Exception("Call setAction first.")
         self._selection.select(new_selection, QtCore.QItemSelectionModel.ClearAndSelect)
         self.d._currentregister = row
         # self.d._current_changed.emit(self.at())
-        if row < self.model().rows and row >= 0:
+        if row < self.d._model.rows and row >= 0:
             return True
         else:
             return False
@@ -2347,13 +2333,13 @@ class PNSqlCursor(QtCore.QObject):
     def __del__(self, invalidate: bool = True) -> None:
         # logger.trace("FLSqlCursor(%s). Eliminando cursor" % self.curName(), self)
         # delMtd = None
-        # if self.metadata():
-        #     if not self.metadata().inCache():
+        # if self.d.metadata_:
+        #     if not self.d.metadata_.inCache():
         #         delMtd = True
 
         if self.d is not None:
             msg = None
-            mtd = self.metadata()
+            mtd = self.d.metadata_
 
             # FIXME: Pongo que tiene que haber mas de una trasaccion abierta
             if len(self.d.transactionsOpened_) > 0:
@@ -2385,7 +2371,7 @@ class PNSqlCursor(QtCore.QObject):
     @pyqtSlot()
     def select(self, _filter: str = None, sort: str = None) -> bool:  # sort = QtCore.QSqlIndex()
         _filter = _filter if not None else self.filter()
-        if not self.metadata():
+        if not self.d.metadata_:
             return False
 
         bFilter = self.baseFilter()
@@ -2400,27 +2386,26 @@ class PNSqlCursor(QtCore.QObject):
             else:
                 finalFilter = _filter
 
-        cur_relation = self.cursorRelation()
-        if cur_relation and cur_relation.modeAccess() == self.Insert and not self.curFilter():
+        if self.d.cursorRelation_ and self.d.cursorRelation_.modeAccess() == self.Insert and not self.curFilter():
             finalFilter = "1 = 0"
 
         if finalFilter:
             self.setFilter(finalFilter)
 
         if sort:
-            self.model().setSortOrder(sort)
+            self.d._model.setSortOrder(sort)
 
-        self.model().refresh()
+        self.d._model.refresh()
 
         self.d._currentregister = -1
 
-        if cur_relation and self.modeAccess() == self.Browse:
+        if self.d.cursorRelation_ and self.modeAccess() == self.Browse:
             self.d._currentregister = self.atFrom()
 
         self.refreshBuffer()
         # if self.modeAccess() == self.Browse:
         #    self.d._currentregister = -1
-        self.newBuffer.emit()
+        self.newself.d.buffer_.emit()
 
         return True
 
@@ -2433,7 +2418,7 @@ class PNSqlCursor(QtCore.QObject):
         if not sortO:
             return
 
-        self.model().setSortOrder(sortO)
+        self.d._model.setSortOrder(sortO)
 
     """
     Obtiene el filtro base
@@ -2444,18 +2429,14 @@ class PNSqlCursor(QtCore.QObject):
         relationFilter = None
         finalFilter = ""
 
-        cur_relation = self.cursorRelation()
-        relation = self.relation()
-        metadata = self.metadata()
-
-        if cur_relation and relation and metadata and cur_relation.metadata():
-            fgValue = cur_relation.valueBuffer(relation.foreignField())
-            field = metadata.field(relation.field())
+        if self.d.cursorRelation_ and relation and metadata and self.d.cursorRelation_.metadata():
+            fgValue = self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField())
+            field = self.d.metadata_.field(self.d.relation_.field())
 
             if field is not None and fgValue is not None:
 
                 relationFilter = self.db().manager().formatAssignValue(field, fgValue, True)
-                filterAc = cur_relation.filterAssoc(relation.foreignField(), metadata)
+                filterAc = self.d.cursorRelation_.filterAssoc(self.d.relation_.foreignField(), metadata)
                 if filterAc:
                     if not relationFilter:
                         relationFilter = filterAc
@@ -2547,7 +2528,7 @@ class PNSqlCursor(QtCore.QObject):
     def editRecord(self, wait: bool = True) -> None:
         logger.trace("editRecord %s", self.actionName())
         if self.d.needUpdate():
-            pKN = self.metadata().primaryKey()
+            pKN = self.d.metadata_.primaryKey()
             pKValue = self.valueBuffer(pKN)
             self.refresh()
             pos = self.atFromBinarySearch(pKN, pKValue)
@@ -2565,7 +2546,7 @@ class PNSqlCursor(QtCore.QObject):
     def browseRecord(self, wait: bool = True) -> None:
         logger.trace("browseRecord %s", self.actionName())
         if self.d.needUpdate():
-            pKN = self.metadata().primaryKey()
+            pKN = self.d.metadata_.primaryKey()
             pKValue = self.valueBuffer(pKN)
             self.refresh()
             pos = self.atFromBinarySearch(pKN, pKValue)
@@ -2633,7 +2614,7 @@ class PNSqlCursor(QtCore.QObject):
                 self.d.buffer_.setValue(it.name(), buffer_aux.value(it.name()))
 
             del buffer_aux
-            self.newBuffer.emit()
+            self.newself.d.buffer_.emit()
 
     """
     Realiza la acción asociada a elegir un registro del cursor, por defecto se abre el formulario de
@@ -2662,10 +2643,10 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def setForwardOnly(self, b: bool) -> None:
-        if not self.model():
+        if not self.d._model:
             return
 
-        self.model().disable_refresh(b)
+        self.d._model.disable_refresh(b)
 
     """
     Manda el contenido del buffer al cursor, o realiza la acción oportuna para el cursor.
@@ -2690,9 +2671,8 @@ class PNSqlCursor(QtCore.QObject):
 
     @pyqtSlot()
     def commitBuffer(self, emite: bool = True, checkLocks: bool = False) -> bool:
-        buffer = self.buffer()
-        metadata = self.metadata()
-        if not buffer or not metadata:
+
+        if not self.d.buffer_ or not self.d.metadata_:
             return False
 
         if not self.activatedBufferCommited():
@@ -2700,7 +2680,7 @@ class PNSqlCursor(QtCore.QObject):
 
         from pineboolib import pncontrolsfactory
 
-        if self.db().interactiveGUI() and self.db().canDetectLocks() and (checkLocks or metadata.detectLocks()):
+        if self.db().interactiveGUI() and self.db().canDetectLocks() and (checkLocks or self.d.metadata_.detectLocks()):
             self.checkRisksLocks()
             if self.d.inRisksLocks_:
                 ret = pncontrolsfactory.QMessageBox.warning(
@@ -2721,18 +2701,18 @@ class PNSqlCursor(QtCore.QObject):
         fieldNameCheck = None
 
         if self.modeAccess() in [self.Edit, self.Insert]:
-            fieldList = metadata.fieldList()
+            fieldList = self.d.metadata_.fieldList()
 
             for field in fieldList:
                 if field.isCheck():
                     fieldNameCheck = field.name()
-                    buffer.setGenerated(field, False)
-                    buffer_copy = self.bufferCopy()
-                    if buffer_copy:
-                        buffer_copy.setGenerated(field, False)
+                    self.d.buffer_.setGenerated(field, False)
+
+                    if self.d.bufferCopy_:
+                        self.d.bufferCopy_.setGenerated(field, False)
                     continue
 
-                if not buffer.isGenerated(field.name()):
+                if not self.d.buffer_.isGenerated(field.name()):
                     continue
 
                 if self.context() and hasattr(self.context(), "calculateField") and field.calculated():
@@ -2745,7 +2725,7 @@ class PNSqlCursor(QtCore.QObject):
         functionAfter = None
         model_module: Any = None
 
-        idMod = self.db().managerModules().idModuleOfFile("%s.mtd" % metadata.name())
+        idMod = self.db().managerModules().idModuleOfFile("%s.mtd" % self.d.metadata_.name())
 
         module_script: "IFormDB" = project.actions[idMod].load() if idMod in project.actions.keys() else project.actions["sys"].load()
 
@@ -2758,11 +2738,11 @@ class PNSqlCursor(QtCore.QObject):
 
         if not self.modeAccess() == PNSqlCursor.Browse and self.activatedCommitActions():
 
-            functionBefore = "beforeCommit_%s" % (metadata.name())
-            functionAfter = "afterCommit_%s" % (metadata.name())
+            functionBefore = "beforeCommit_%s" % (self.d.metadata_.name())
+            functionAfter = "afterCommit_%s" % (self.d.metadata_.name())
 
             if model_module is not None:
-                function_model_before = getattr(model_module.iface, "beforeCommit_%s" % metadata.name(), None)
+                function_model_before = getattr(model_module.iface, "beforeCommit_%s" % self.d.metadata_.name(), None)
                 if function_model_before:
                     ret = function_model_before(self)
                     if not ret:
@@ -2779,26 +2759,23 @@ class PNSqlCursor(QtCore.QObject):
                     if v and not isinstance(v, bool) or v is False:
                         return False
 
-        pKN = metadata.primaryKey()
+        pKN = self.d.metadata_.primaryKey()
         updated = False
         savePoint = None
 
-        cur_relation = self.cursorRelation()
-        relation = self.relation()
-
         if self.modeAccess() == self.Insert:
-            if cur_relation and relation:
-                if cur_relation.metadata() and cur_relation.valueBuffer(relation.foreignField()):
-                    self.setValueBuffer(relation.field(), cur_relation.valueBuffer(relation.foreignField()))
-                    cur_relation.setAskForCancelChanges(True)
+            if self.d.cursorRelation_ and self.d.relation_:
+                if self.d.cursorRelation_.metadata() and self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()):
+                    self.setValueBuffer(self.d.relation_.field(), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
+                    self.d.cursorRelation_.setAskForCancelChanges(True)
 
-            self.model().Insert(self)
-            self.model().refresh()
-            pk_name = buffer.pK()
+            self.d._model.Insert(self)
+            self.d._model.refresh()
+            pk_name = self.d.buffer_.pK()
             if pk_name is None:
                 raise ValueError("primery key is not defined!")
 
-            pk_row = self.model().findPKRow((buffer.value(pk_name),))
+            pk_row = self.d._model.findPKRow((self.d.buffer_.value(pk_name),))
             if pk_row is None:
                 raise Exception("pk_row not found aflter insert!")
             self.move(pk_row)
@@ -2821,9 +2798,9 @@ class PNSqlCursor(QtCore.QObject):
                     savePoint = pnsqlsavepoint.PNSqlSavePoint(None)
                 savePoint.saveEdit(pKN, self.bufferCopy(), self)
 
-            if cur_relation and relation:
-                if cur_relation.metadata():
-                    cur_relation.setAskForCancelChanges(True)
+            if self.d.cursorRelation_ and self.d.relation_:
+                if self.d.cursorRelation_.metadata():
+                    self.d.cursorRelation_.setAskForCancelChanges(True)
             logger.trace("commitBuffer -- Edit . 20 . ")
             if self.isModifiedBuffer():
 
@@ -2838,29 +2815,29 @@ class PNSqlCursor(QtCore.QObject):
 
         elif self.modeAccess() == self.Del:
 
-            if cur_relation and relation:
-                if cur_relation.metadata():
-                    cur_relation.setAskForCancelChanges(True)
+            if self.d.cursorRelation_ and self.d.relation_:
+                if self.d.cursorRelation_.metadata():
+                    self.d.cursorRelation_.setAskForCancelChanges(True)
 
-            recordDelBefore = "recordDelBefore%s" % metadata.name()
+            recordDelBefore = "recordDelBefore%s" % self.d.metadata_.name()
             v = project.call(recordDelBefore, [self], self.context(), False)
             if v and not isinstance(v, bool):
                 return False
 
-            if not buffer:
+            if not self.d.buffer_:
                 self.primeUpdate()
 
-            fieldList = self.metadata().fieldList()
+            fieldList = self.d.metadata_.fieldList()
 
             for field in fieldList:
 
                 fiName = field.name()
-                if not buffer.isGenerated(fiName):
+                if not self.d.buffer_.isGenerated(fiName):
                     continue
 
                 s = None
-                if not buffer.isNull(fiName):
-                    s = buffer.value(fiName)
+                if not self.d.buffer_.isNull(fiName):
+                    s = self.d.buffer_.value(fiName)
 
                 if s is None:
                     continue
@@ -2885,9 +2862,9 @@ class PNSqlCursor(QtCore.QObject):
                                 if not c.commitBuffer(False):
                                     return False
 
-            self.model().Delete(self)
+            self.d._model.Delete(self)
 
-            recordDelAfter = "recordDelAfter%s" % metadata.name()
+            recordDelAfter = "recordDelAfter%s" % self.d.metadata_.name()
             v = project.call(recordDelAfter, [self], self.context(), False)
 
             updated = True
@@ -2898,7 +2875,7 @@ class PNSqlCursor(QtCore.QObject):
         if not self.modeAccess() == self.Browse and self.activatedCommitActions():
 
             if model_module is not None:
-                function_model_after = getattr(model_module.iface, "afterCommit_%s" % metadata.name(), None)
+                function_model_after = getattr(model_module.iface, "afterCommit_%s" % self.d.metadata_.name(), None)
                 if function_model_after:
                     ret = function_model_after(self)
                     if not ret:
@@ -2923,10 +2900,10 @@ class PNSqlCursor(QtCore.QObject):
 
         if updated:
             if fieldNameCheck:
-                buffer.setGenerated(fieldNameCheck, True)
-                buffer_copy = self.bufferCopy()
-                if buffer_copy:
-                    buffer_copy.setGenerated(fieldNameCheck, True)
+                self.d.buffer_.setGenerated(fieldNameCheck, True)
+
+                if self.d.bufferCopy_:
+                    self.d.bufferCopy_.setGenerated(fieldNameCheck, True)
 
             self.setFilter("")
             # self.clearMapCalcFields()
@@ -2935,7 +2912,7 @@ class PNSqlCursor(QtCore.QObject):
                 self.cursorUpdated.emit()
 
         if model_module is not None:
-            function_model_buffer_commited = getattr(model_module.iface, "bufferCommited_%s" % metadata.name(), None)
+            function_model_buffer_commited = getattr(model_module.iface, "bufferCommited_%s" % self.d.metadata_.name(), None)
             if function_model_buffer_commited:
                 ret = function_model_buffer_commited(self)
                 if not ret:
@@ -2956,9 +2933,8 @@ class PNSqlCursor(QtCore.QObject):
         ok = True
         activeWidEnabled = False
         activeWid = None
-        cur_relation = self.cursorRelation()
 
-        if cur_relation is None or self.relation() is None:
+        if self.d.cursorRelation_ is None or self.relation() is None:
             return ok
 
         if project.DGI.localDesktop():
@@ -2974,35 +2950,35 @@ class PNSqlCursor(QtCore.QObject):
                 activeWidEnabled = activeWid.isEnabled()
 
         if self.d.modeAccess_ == self.Insert:
-            if cur_relation.metadata() and cur_relation.modeAccess() == self.Insert:
+            if self.d.cursorRelation_.metadata() and self.d.cursorRelation_.modeAccess() == self.Insert:
 
                 if activeWid and activeWidEnabled:
                     activeWid.setEnabled(False)
 
-                if not cur_relation.commitBuffer():
+                if not self.d.cursorRelation_.commitBuffer():
                     self.d.modeAccess_ = self.Browse
                     ok = False
                 else:
                     self.setFilter("")
-                    cur_relation.refresh()
-                    cur_relation.setModeAccess(self.Edit)
-                    cur_relation.refreshBuffer()
+                    self.d.cursorRelation_.refresh()
+                    self.d.cursorRelation_.setModeAccess(self.Edit)
+                    self.d.cursorRelation_.refreshBuffer()
 
                 if activeWid and activeWidEnabled:
                     activeWid.setEnabled(True)
 
         elif self.d.modeAccess_ in [self.Browse, self.Edit]:
-            if cur_relation.metadata() and cur_relation.modeAccess() == self.Insert:
+            if self.d.cursorRelation_.metadata() and self.d.cursorRelation_.modeAccess() == self.Insert:
                 if activeWid and activeWidEnabled:
                     activeWid.setEnabled(False)
 
-                if not cur_relation.commitBuffer():
+                if not self.d.cursorRelation_.commitBuffer():
                     self.d.modeAccess_ = self.Browse
                     ok = False
                 else:
-                    cur_relation.refresh()
-                    cur_relation.setModeAccess(self.Edit)
-                    cur_relation.refreshBuffer()
+                    self.d.cursorRelation_.refresh()
+                    self.d.cursorRelation_.setModeAccess(self.Edit)
+                    self.d.cursorRelation_.refreshBuffer()
 
                 if activeWid and activeWidEnabled:
                     activeWid.setEnabled(True)
@@ -3046,7 +3022,7 @@ class PNSqlCursor(QtCore.QObject):
         ct: int = len(self.d.transactionsOpened_) if count < 0 else count
 
         if ct > 0 and msg:
-            t: str = self.metadata().name() if self.metadata() else self.curName()
+            t: str = self.d.metadata_.name() if self.d.metadata_ else self.curName()
             m = "%sSqLCursor::rollbackOpened: %s %s" % (msg, count, t)
             self.d.msgBoxWarning(m, False)
         elif ct > 0:
@@ -3069,7 +3045,7 @@ class PNSqlCursor(QtCore.QObject):
     @pyqtSlot()
     def commitOpened(self, count: int = -1, msg: str = None) -> None:
         ct: int = len(self.d.transactionsOpened_) if count < 0 else count
-        t: str = self.metadata().name() if self.metadata() else self.curName()
+        t: str = self.d.metadata_.name() if self.d.metadata_ else self.curName()
 
         if ct and msg:
             m = "%sSqlCursor::commitOpened: %s %s" % (msg, str(count), t)
@@ -3189,7 +3165,7 @@ class PNSqlCursor(QtCore.QObject):
             return
 
         if self.d.transactionsOpened_:
-            mtd = self.metadata()
+            mtd = self.d.metadata_
             t = None
             if mtd:
                 t = mtd.name()
@@ -3238,10 +3214,10 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def setNotGenerateds(self) -> None:
-        buffer = self.buffer()
-        if self.metadata() and self.d.isQuery_ and buffer:
-            for f in self.metadata().fieldList():
-                buffer.setGenerated(f, False)
+
+        if self.d.metadata_ and self.d.isQuery_ and self.d.buffer_:
+            for f in self.d.metadata_.fieldList():
+                self.d.buffer_.setGenerated(f, False)
 
     """
     Uso interno
@@ -3259,18 +3235,18 @@ class PNSqlCursor(QtCore.QObject):
         return True
 
     def sort(self) -> str:
-        return self.model().getSortOrder()
+        return self.d._model.getSortOrder()
 
     # @decorators.NotImplementedWarn
     # def list(self):
     #    return None
 
     def filter(self) -> str:
-        return self.model().where_filters["filter"] if "filter" in self.model().where_filters else ""
+        return self.d._model.where_filters["filter"] if "filter" in self.d._model.where_filters else ""
 
     def field(self, name: str) -> Optional["FieldStruct"]:
-        buffer = self.buffer()
-        return buffer.field(name) if buffer else None
+
+        return self.d.buffer_.field(name) if buffer else None
 
     """
     Actualiza tableModel con el buffer
@@ -3279,46 +3255,46 @@ class PNSqlCursor(QtCore.QObject):
     def update(self, notify: bool = True) -> None:
         logger.trace("PNSqlCursor.update --- BEGIN:")
         if self.modeAccess() == PNSqlCursor.Edit:
-            buffer = self.buffer()
-            if not buffer:
+
+            if not self.d.buffer_:
                 raise Exception("Buffer is not set. Cannot update")
             # solo los campos modified
-            lista = buffer.modifiedFields()
-            buffer.setNoModifiedFields()
+            lista = self.d.buffer_.modifiedFields()
+            self.d.buffer_.setNoModifiedFields()
             # TODO: pKVaue debe ser el valueBufferCopy, es decir, el antiguo. Para
             # .. soportar updates de PKey, que, aunque inapropiados deberían funcionar.
-            pk_name = buffer.pK()
+            pk_name = self.d.buffer_.pK()
             if pk_name is None:
                 raise Exception("PrimaryKey is not defined!")
 
-            pKValue = buffer.value(pk_name)
+            pKValue = self.d.buffer_.value(pk_name)
 
-            dict_update = {fieldName: buffer.value(fieldName) for fieldName in lista}
+            dict_update = {fieldName: self.d.buffer_.value(fieldName) for fieldName in lista}
             try:
-                update_successful = self.model().updateValuesDB(pKValue, dict_update)
+                update_successful = self.d._model.updateValuesDB(pKValue, dict_update)
             except Exception:
                 logger.exception("PNSqlCursor.update:: Unhandled error on model updateRowDB:: ")
                 update_successful = False
             # TODO: En el futuro, si no se puede conseguir un update, hay que
             # "tirar atrás" todo.
             if update_successful:
-                row = self.model().findPKRow([pKValue])
+                row = self.d._model.findPKRow([pKValue])
                 if row is not None:
-                    if self.model().value(row, self.model().pK()) != pKValue:
+                    if self.d._model.value(row, self.d._model.pK()) != pKValue:
                         raise AssertionError(
                             "Los indices del CursorTableModel devolvieron un registro erroneo: %r != %r"
-                            % (self.model().value(row, self.model().pK()), pKValue)
+                            % (self.d._model.value(row, self.d._model.pK()), pKValue)
                         )
-                    self.model().setValuesDict(row, dict_update)
+                    self.d._model.setValuesDict(row, dict_update)
 
                 else:
                     # Método clásico
                     logger.warning("update :: WARN :: Los indices del CursorTableModel no funcionan o el PKey no existe.")
                     row = 0
-                    while row < self.model().rowCount():
-                        if self.model().value(row, self.model().pK()) == pKValue:
+                    while row < self.d._model.rowCount():
+                        if self.d._model.value(row, self.d._model.pK()) == pKValue:
                             for fieldName in lista:
-                                self.model().setValue(row, fieldName, buffer.value(fieldName))
+                                self.d._model.setValue(row, fieldName, self.d.buffer_.value(fieldName))
 
                             break
 
@@ -3350,15 +3326,15 @@ class PNSqlCursor(QtCore.QObject):
         return list_[self._iter_current]
 
     def primaryKey(self) -> Optional[str]:
-        if self.metadata():
-            return self.metadata().primaryKey()
+        if self.d.metadata_:
+            return self.d.metadata_.primaryKey()
         else:
             return None
 
     def fieldType(self, field_name: str = None) -> Optional[int]:
-        metadata = self.metadata()
-        if field_name and metadata:
-            return metadata.fieldType(field_name)
+
+        if field_name and self.d.metadata_:
+            return self.d.metadata_.fieldType(field_name)
         else:
             return None
 
