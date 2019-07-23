@@ -1601,10 +1601,12 @@ class FLApplication(QtCore.QObject):
 
     @decorators.BetaImplementation
     def trMulti(self, s, l):
-        backMultiEnabled = self.multi_lang_enabled_
-        ret = self.tr("%s_MULTILANG" % l.upper(), s)
-        self.multi_lang_enabled_ = backMultiEnabled
-        return ret
+        return s
+        # FIXME: self.tr does not support two arguments.
+        # backMultiEnabled = self.multi_lang_enabled_
+        # ret = self.tr("%s_MULTILANG" % l.upper(), s)
+        # self.multi_lang_enabled_ = backMultiEnabled
+        # return ret
 
     """
     Cambia el estado de la opción MultiLang

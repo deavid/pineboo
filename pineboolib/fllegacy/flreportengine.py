@@ -204,6 +204,11 @@ class FLReportEngine(object):
         return self.rt if self.rt else QtXml.QDomDocument()
 
     @decorators.NotImplementedWarn
+    def csvData(self) -> str:
+        # FIXME: Should return the report converted to CSV
+        return ""
+
+    @decorators.NotImplementedWarn
     def exportToOds(self, pages):
         if not pages or not pages.pageCollection():
             return

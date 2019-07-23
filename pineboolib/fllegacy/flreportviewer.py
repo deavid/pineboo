@@ -7,7 +7,8 @@ from PyQt5.Qt import QFileDialog, QMessageBox  # type: ignore
 from pineboolib.core import decorators
 
 from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.fllegacy.flpicture import FLPicture
+
+# from pineboolib.fllegacy.flpicture import FLPicture
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flstylepainter import FLStylePainter
@@ -55,7 +56,7 @@ class internalReportViewer(QObject):
         return getattr(self.rptEngine_, name, None)
 
 
-class FLReportViewer(QObject):
+class FLReportViewer(QtWidgets.QWidget):
 
     pdfFile: str
     Append: int
@@ -89,8 +90,13 @@ class FLReportViewer(QObject):
         self.Append = 1
         self.PageBreak = 1
         self.stylepainter: FLStylePainter = FLStylePainter()
+        from pineboolib.plugins.dgi.dgi_qt.dgi_qt3ui import loadUi
+        from pineboolib.core.utils.utils_base import filedir
 
-        # qt3ui.loadUi(filedir('forms/FLWidgetReportViewer.ui'), self)
+        loadUi(filedir("forms/FLWidgetReportViewer.ui"), self)
+        self.ui_["FLWidgetReportViewer"] = self.child("FLWidgetReportViewer")
+        self.ui_["frEMail"] = self.child("frEMail")
+        self.ui_["ledStyle"] = self.child("ledStyle")
 
         # if not name:
         #    self.setName("FLReportViewer")
@@ -370,7 +376,7 @@ class FLReportViewer(QObject):
     @decorators.BetaImplementation
     @QtCore.pyqtSlot()
     def sendEMailPDF(self):
-        t = self.ui_.leDocumento.text()
+        t = self.ui_["leDocumento"].text()
         util = FLUtil()
         name = "informe.pdf" if not t or t == "" else t
         fileName = QtCore.QFileDialog.getSaveFileName(
@@ -477,15 +483,15 @@ class FLReportViewer(QObject):
             self.updateReport()
             self.stylepainter.setSVGMode(False)
 
-            fileNames = []
-
-            for i in range(self.report_.pageCount()):
-                fname = fileName + str(i)
-                fileNames.append(fname)
-                page = self.report_.getPageAt(i)
-                psize = self.report_.pageDimensions()
-                page.setBoundingRect(QtCore.QRect(QtCore.QPoint(0, 0), psize))
-                page.save(fname, "svg")
+            fileNames: List[str] = []
+            # FIXME: self.report_ is just a List[]
+            # for i in range(self.report_.pageCount()):
+            #     fname = fileName + str(i)
+            #     fileNames.append(fname)
+            #     page = self.report_.getPageAt(i)
+            #     psize = self.report_.pageDimensions()
+            #     page.setBoundingRect(QtCore.QRect(QtCore.QPoint(0, 0), psize))
+            #     page.save(fname, "svg")
 
             self.stylepainter.normalizeSVGFile(fileName, fileNames)
 
@@ -682,38 +688,44 @@ class FLReportViewer(QObject):
 
     @decorators.BetaImplementation
     def getCurrentPage(self):
-        if self.report_:
-            return FLPicture(self.report_.getCurrentPage(), self)
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     return FLPicture(self.report_.getCurrentPage(), self)
         return 0
 
     @decorators.BetaImplementation
     def getFirstPage(self):
-        if self.report_:
-            return FLPicture(self.report_.getFirstPage(), self)
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     return FLPicture(self.report_.getFirstPage(), self)
         return 0
 
     @decorators.BetaImplementation
     def getPreviousPage(self):
-        if self.report_:
-            return FLPicture(self.report_.getPreviousPage(), self)
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     return FLPicture(self.report_.getPreviousPage(), self)
         return 0
 
     @decorators.BetaImplementation
     def getNextPage(self):
-        if self.report_:
-            return FLPicture(self.report_.getNextPage(), self)
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     return FLPicture(self.report_.getNextPage(), self)
         return 0
 
     @decorators.BetaImplementation
     def getLastPage(self):
-        if self.report_:
-            return FLPicture(self.report_.getLastPage(), self)
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     return FLPicture(self.report_.getLastPage(), self)
         return 0
 
     @decorators.BetaImplementation
     def getPageAt(self, i):
-        if self.report_:
-            return FLPicture(self.report_.getPageAt(i), self)
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     return FLPicture(self.report_.getPageAt(i), self)
         return 0
 
     @decorators.BetaImplementation
@@ -722,50 +734,65 @@ class FLReportViewer(QObject):
 
     @decorators.BetaImplementation
     def clearPages(self):
-        if self.report_:
-            self.report_.clear()
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     self.report_.clear()
+        pass
 
     @decorators.BetaImplementation
     def appendPage(self):
-        if self.report_:
-            self.report_.appendPage()
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     self.report_.appendPage()
+        pass
 
     @decorators.BetaImplementation
     def getCurrentIndex(self):
-        if self.report_:
-            return self.report_.getCurrentIndex()
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     return self.report_.getCurrentIndex()
         return -1
 
     @decorators.BetaImplementation
     def setCurrentPage(self, idx):
-        if self.report_:
-            self.report_.setCurrentPage(idx)
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     self.report_.setCurrentPage(idx)
+        pass
 
     @decorators.BetaImplementation
     def setPageSize(self, s):
-        if self.report_:
-            self.report_.setPageSize(s)
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     self.report_.setPageSize(s)
+        pass
 
     @decorators.BetaImplementation
     def setPageOrientation(self, o):
-        if self.report_:
-            self.report_.setPageOrientation(o)
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     self.report_.setPageOrientation(o)
+        pass
 
     @decorators.BetaImplementation
     def setPageDimensions(self, dim):
-        if self.report_:
-            self.report_.setPageDimensions(dim)
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     self.report_.setPageDimensions(dim)
+        pass
 
     @decorators.BetaImplementation
     def pageSize(self):
-        if self.report_:
-            return self.report_.pageSize()
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     return self.report_.pageSize()
         return -1
 
     @decorators.BetaImplementation
     def pageOrientation(self):
-        if self.report_:
-            return self.report_.pageOrientation()
+        # FIXME: self.report_ is just a List[]
+        # if self.report_:
+        #     return self.report_.pageOrientation()
         return -1
 
     def pageDimensions(self) -> Any:

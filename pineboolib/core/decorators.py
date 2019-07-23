@@ -8,7 +8,7 @@ Esta libreria se usa para especificar estados de una función que no son final
 """
 from typing import Callable, Any, Dict, TypeVar, cast
 
-T_FN = TypeVar("T_FN", bound=Callable)
+T_FN = TypeVar("T_FN", bound=Callable[..., Any])
 
 logger = logging.getLogger(__name__)
 MSG_EMITTED: Dict[str, float] = {}
@@ -38,7 +38,7 @@ def NotImplementedWarn(fn: T_FN) -> T_FN:
             logger.trace("Not yet impl.: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret), stack_info=True)
         return ret
 
-    mock_fn: T_FN = cast(T_FN, newfn)
+    mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
     return mock_fn
 
 
@@ -59,7 +59,7 @@ def NotImplementedDebug(fn: T_FN) -> T_FN:
             logger.debug("Not yet impl.: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
-    mock_fn: T_FN = cast(T_FN, newfn)
+    mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
     return mock_fn
 
 
@@ -80,7 +80,7 @@ def WorkingOnThis(fn: T_FN) -> T_FN:
             logger.info("WARN: In Progress: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
-    mock_fn: T_FN = cast(T_FN, newfn)
+    mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
     return mock_fn
 
 
@@ -101,7 +101,7 @@ def BetaImplementation(fn: T_FN) -> T_FN:
             logger.info("WARN: Beta impl.: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
-    mock_fn: T_FN = cast(T_FN, newfn)
+    mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
     return mock_fn
 
 
@@ -122,7 +122,7 @@ def Empty(fn: T_FN) -> T_FN:
             logger.info("WARN: Empty: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
-    mock_fn: T_FN = cast(T_FN, newfn)
+    mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
     return mock_fn
 
 
@@ -143,7 +143,7 @@ def Incomplete(fn: T_FN) -> T_FN:
             logger.info("WARN: Incomplete: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
-    mock_fn: T_FN = cast(T_FN, newfn)
+    mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
     return mock_fn
 
 
@@ -164,7 +164,7 @@ def needRevision(fn: T_FN) -> T_FN:
             logger.info("WARN: Needs help: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
-    mock_fn: T_FN = cast(T_FN, newfn)
+    mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
     return mock_fn
 
 
@@ -185,5 +185,5 @@ def Deprecated(fn: T_FN) -> T_FN:
             logger.info("WARN: Deprecated: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret), stack_info=False)
         return ret
 
-    mock_fn: T_FN = cast(T_FN, newfn)
+    mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
     return mock_fn

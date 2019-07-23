@@ -3460,8 +3460,8 @@ class PNCursorPrivate(QtCore.QObject):
 
     """
     Cursor relacionado con este.
-    """
     cursorRelation_: Optional[PNSqlCursor]
+    """
 
     """
     Relación que determina como se relaciona con el cursor relacionado.
@@ -3627,7 +3627,6 @@ class PNCursorPrivate(QtCore.QObject):
         self.askForCancelChanges_ = True
         self.populated_ = False
         self.transactionsOpened_ = []
-        self.cursorRelation_ = None
         self.idAc_ = 0
         self.idAcos_ = 0
         self.idCond_ = 0
@@ -3636,6 +3635,7 @@ class PNCursorPrivate(QtCore.QObject):
         self.edition_ = True
         self.browse_ = True
         self.cursor_: Optional["PNSqlCursor"] = None
+        self.cursorRelation_: Optional["PNSqlCursor"] = None
         self.acTable_ = None
         self.timer_ = None
         self.ctxt_ = None
