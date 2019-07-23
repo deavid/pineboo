@@ -517,7 +517,7 @@ class FLUtil(QtCore.QObject):
         @return La secuencia en el formato facilitado.
         @author Andrés Otón Urbano
         """
-        pass
+        return ""
 
     def isFLDefFile(self, head: str) -> bool:
         """
@@ -969,7 +969,7 @@ class FLUtil(QtCore.QObject):
         @param letter Cadena con la serie.
         @return Una cadena pero que contiene numeros.
         """
-        pass
+        return ""
 
     @decorators.NotImplementedWarn
     def serialNumbertoLetter(self, number: Union[int, float]) -> str:
@@ -978,7 +978,7 @@ class FLUtil(QtCore.QObject):
 
         @param number Número a convertir
         """
-        pass
+        return ""
 
     @decorators.NotImplementedWarn
     def findFiles(self, paths: str, filter_: str = "*", break_on_first_match: bool = False) -> List[str]:
