@@ -8,7 +8,7 @@ from pineboolib.fllegacy.systype import SysType
 from pineboolib.core import decorators
 from pineboolib import logging
 
-from typing import List, Optional, Union, TYPE_CHECKING
+from typing import List, Optional, Union, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.application.types import Date
@@ -118,7 +118,7 @@ class FLUtil(QtCore.QObject):
         d = d * 100
         return int(d)
 
-    def unidades(self, n: float) -> int:
+    def unidades(self, n: int) -> str:
         """
         Enunciado de las unidades de un número.
 
@@ -158,7 +158,7 @@ class FLUtil(QtCore.QObject):
 
         return buffer
 
-    def decenas(self, n: int) -> str:
+    def decenas(self, n: Union[int, float]) -> str:
         """
         Enunciado de las decenas de un número.
 
@@ -178,7 +178,7 @@ class FLUtil(QtCore.QObject):
 
         return buffer
 
-    def centenas(self, n: int) -> str:
+    def centenas(self, n: Union[int, float]) -> str:
         """
         Enunciado de las centenas de un número.
 
@@ -360,16 +360,18 @@ class FLUtil(QtCore.QObject):
         @param n Número del que se debe obtener el dígito de control
         @return Caracter con el dígito de control asociado al número dado
         """
-        Tabla = [6, 3, 7, 9, 10, 5, 8, 4, 2, 1]
+        Tabla: List[int] = [6, 3, 7, 9, 10, 5, 8, 4, 2, 1]
 
         DC = None
         Suma = 0
-        nDigitos = len(n) - 1
+        nDigitos = len(str(n)) - 1
 
         ct = 1
 
-        while ct <= len(n):
-            Suma = Suma + (Tabla[nDigitos] * (int(n[ct - 1]) - 0))
+        while ct <= len(str(n)):
+            valor_tabla: int = Tabla[nDigitos]
+            valor_n = str(n)[ct - 1]
+            Suma += valor_tabla * int(valor_n)
             nDigitos = nDigitos - 1
             ct = ct + 1
 
@@ -382,7 +384,7 @@ class FLUtil(QtCore.QObject):
         char = chr(DC + 48)
         return char
 
-    def dateDMAtoAMD(self, f) -> str:
+    def dateDMAtoAMD(self, f) -> Optional[str]:
         """
         Convierte fechas del tipo DD-MM-AAAA, DD/MM/AAAA o
         DDMMAAAA al tipo AAAA-MM-DD.
@@ -394,7 +396,7 @@ class FLUtil(QtCore.QObject):
 
         return date_dma_to_amd(f)
 
-    def dateAMDtoDMA(self, f) -> str:
+    def dateAMDtoDMA(self, f) -> Optional[str]:
         """
         Convierte fechas del tipo AAAA-MM-DD, AAAA-MM-DD o
         AAAAMMDD al tipo DD-MM-AAAA.
@@ -551,7 +553,7 @@ class FLUtil(QtCore.QObject):
 
         return ret
 
-    def addDays(self, fecha: Any, offset: int) -> "Date":
+    def addDays(self, fecha: Any, offset: int) -> Optional["Date"]:
         """
         Suma dias a una fecha.
 
@@ -569,7 +571,7 @@ class FLUtil(QtCore.QObject):
             return None
         return fecha.addDays(offset)
 
-    def addMonths(self, fecha: Any, offset: int) -> "Date":
+    def addMonths(self, fecha: Any, offset: int) -> Optional["Date"]:
         """
         Suma meses a una fecha.
 
@@ -587,7 +589,7 @@ class FLUtil(QtCore.QObject):
             return None
         return fecha.addMonths(offset)
 
-    def addYears(self, fecha: Any, offset: int) -> "Date":
+    def addYears(self, fecha: Any, offset: int) -> Optional["Date"]:
         """
         Suma años a una fecha.
 
@@ -601,9 +603,10 @@ class FLUtil(QtCore.QObject):
             fecha = Date(fecha)
         if not isinstance(fecha, Date):
             logger.error("addYears: No reconozco el tipo de dato %s", type(fecha), stack_info=True)
+            return None
         return fecha.addYears(offset)
 
-    def daysTo(self, d1: Any, d2: Any) -> int:
+    def daysTo(self, d1: Any, d2: Any) -> Optional[int]:
         """
         Diferencia de dias desde una fecha a otra.
 
@@ -658,11 +661,11 @@ class FLUtil(QtCore.QObject):
         if not v:
             v = 0
 
-        v = str(v)
-        if v.endswith("5"):
-            v += "1"
+        val_str: str = str(v)
+        if val_str.endswith("5"):
+            val_str += "1"
 
-        ret = round(float(v)) if partDecimal == 0 else round(float(v), partDecimal)
+        ret = round(float(val_str)) if partDecimal == 0 else round(float(val_str), partDecimal)
         """
         d = float(v) * 10**partDecimal
         d = round(d)
@@ -730,7 +733,7 @@ class FLUtil(QtCore.QObject):
 
         return ret
 
-    def writeDBSettingEntry(self, key: str, value: Any) -> None:
+    def writeDBSettingEntry(self, key: str, value: Any) -> bool:
         """
         Establece el valor de un setting en la tabla flsettings
 
@@ -780,7 +783,7 @@ class FLUtil(QtCore.QObject):
         fmd = tmd.field(field_name)
         return float(self.buildNumber(value, "float", fmd.partDecimal())) if fmd is not None else 0
 
-    def sqlSelect(self, f: str, s: str, w: str, tL: Optional[Union[List, str]] = None, size: int = 0, connName: str = "default") -> Any:
+    def sqlSelect(self, f: str, s: str, w: str, tL: str = None, size: int = 0, connName: str = "default") -> Any:
         from pineboolib.application.database.utils import sqlSelect
 
         return sqlSelect(f, s, w, tL, size, connName)
@@ -790,12 +793,12 @@ class FLUtil(QtCore.QObject):
 
         return quickSqlSelect(f, s, w, connName)
 
-    def sqlInsert(self, t: str, fL: Union[str, List], vL: Union[str, List], connName: str = "default") -> Any:
+    def sqlInsert(self, t: str, fL: str, vL: str, connName: str = "default") -> Any:
         from pineboolib.application.database.utils import sqlInsert
 
         return sqlInsert(t, fL, vL, connName)
 
-    def sqlUpdate(self, t: str, fL: Union[str, List], vL: Union[str, List], w: str, connName: str = "default") -> Any:
+    def sqlUpdate(self, t: str, fL: str, vL: str, w: str, connName: str = "default") -> Any:
         from pineboolib.application.database.utils import sqlUpdate
 
         return sqlUpdate(t, fL, vL, w, connName)
@@ -1016,7 +1019,7 @@ class FLUtil(QtCore.QObject):
         """
         pass
 
-    def fieldType(self, fn: str, tn: str, conn_name: str = "default") -> str:
+    def fieldType(self, fn: str, tn: str, conn_name: str = "default") -> Optional[str]:
         """
         Retorna el tipo numérico de un campo
         @param field_name. Nombre del campo
@@ -1068,7 +1071,7 @@ class FLUtil(QtCore.QObject):
 
         return fn if mtd is None else mtd.fieldNameToAlias(fn)
 
-    def tableNameToAlias(self, tn: str, conn_name: str = "default") -> str:
+    def tableNameToAlias(self, tn: str, conn_name: str = "default") -> Optional[str]:
         """
         Retorna el nombre de una tabla a partir de su alias
         @param tn. Nombre de la tabla
