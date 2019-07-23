@@ -22,7 +22,8 @@ from pineboolib.interfaces import IManager
 from PyQt5.QtXml import QDomElement  # type: ignore
 
 
-from pineboolib.application.database.pnsqlquery import PNSqlQuery, PNGroupByQuery
+from pineboolib.application.database.pnsqlquery import PNSqlQuery
+from pineboolib.application.database.pngroupbyquery import PNGroupByQuery
 from pineboolib.application.database.pnsqlcursor import PNSqlCursor
 
 from typing import Optional, Union, Any, List, Dict, TYPE_CHECKING
