@@ -313,7 +313,7 @@ class Project(object):
 
         return True
 
-    def call(self, function: str, aList: List[Any], object_context: Any = None, showException: bool = True) -> Optional[bool]:
+    def call(self, function: str, aList: List[Any], object_context: Any = None, showException: bool = True) -> Optional[Any]:
         """
         LLama a una función del projecto.
         @param function. Nombre de la función a llamar.
@@ -340,7 +340,7 @@ class Project(object):
                 else:
                     if showException:
                         self.logger.error("No existe la acción %s", aFunction[0])
-                return False
+                return None
 
             funAction = self.actions[aFunction[0]]
             if aFunction[1] == "iface" or len(aFunction) == 2:
@@ -367,7 +367,7 @@ class Project(object):
             if not object_context:
                 if showException:
                     self.logger.error("No existe el script para la acción %s en el módulo %s", aFunction[0], aFunction[0])
-                return False
+                return None
 
         fn = None
         if len(aFunction) == 1:  # Si no hay puntos en la llamada a functión
