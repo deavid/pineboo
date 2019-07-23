@@ -783,7 +783,7 @@ class FLUtil(QtCore.QObject):
         fmd = tmd.field(field_name)
         return float(self.buildNumber(value, "float", fmd.partDecimal())) if fmd is not None else 0
 
-    def sqlSelect(self, f: str, s: str, w: str, tL: str = None, size: int = 0, connName: str = "default") -> Any:
+    def sqlSelect(self, f: str, s: str, w: str, tL: Optional[Union[str, List]] = None, size: int = 0, connName: str = "default") -> Any:
         from pineboolib.application.database.utils import sqlSelect
 
         return sqlSelect(f, s, w, tL, size, connName)
@@ -793,12 +793,12 @@ class FLUtil(QtCore.QObject):
 
         return quickSqlSelect(f, s, w, connName)
 
-    def sqlInsert(self, t: str, fL: str, vL: str, connName: str = "default") -> Any:
+    def sqlInsert(self, t: str, fL: Union[str, List], vL: Union[str, List], connName: str = "default") -> Any:
         from pineboolib.application.database.utils import sqlInsert
 
         return sqlInsert(t, fL, vL, connName)
 
-    def sqlUpdate(self, t: str, fL: str, vL: str, w: str, connName: str = "default") -> Any:
+    def sqlUpdate(self, t: str, fL: Union[str, List], vL: Union[str, List], w: str, connName: str = "default") -> Any:
         from pineboolib.application.database.utils import sqlUpdate
 
         return sqlUpdate(t, fL, vL, w, connName)

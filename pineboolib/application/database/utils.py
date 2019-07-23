@@ -1,6 +1,6 @@
 from pineboolib.core.utils import logging
 
-from typing import Any, Union, List
+from typing import Any, Union, List, Optional
 
 
 logger = logging.getLogger("database.utils")
@@ -170,7 +170,7 @@ def nextCounter(*args) -> Any:
         return None
 
 
-def sqlSelect(f: str, s: str, w, tL: str = None, size=0, connName="default") -> Any:
+def sqlSelect(f: str, s: str, w, tL: Optional[Union[str, List]] = None, size: int = 0, connName: str = "default") -> Any:
     """
     Ejecuta una query de tipo select, devolviendo los resultados del primer registro encontrado
 
@@ -209,7 +209,7 @@ def sqlSelect(f: str, s: str, w, tL: str = None, size=0, connName="default") -> 
     return False
 
 
-def quickSqlSelect(f: str, s: str, w: str, connName="default") -> Any:
+def quickSqlSelect(f: str, s: str, w: str, connName: str = "default") -> Any:
     """
     Versión rápida de sqlSelect. Ejecuta directamente la consulta sin realizar comprobaciones.
     Usar con precaución.
@@ -228,7 +228,7 @@ def quickSqlSelect(f: str, s: str, w: str, connName="default") -> Any:
     return q.value(0) if q.first() else False
 
 
-def sqlInsert(t, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connName="default") -> Any:
+def sqlInsert(t, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connName: str = "default") -> Any:
     """
     Realiza la inserción de un registro en una tabla mediante un objeto FLSqlCursor
 
@@ -263,7 +263,7 @@ def sqlInsert(t, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connNam
     return c.commitBuffer()
 
 
-def sqlUpdate(t, fL: Union[str, List[str]], vL: Union[str, List[str]], w, connName="default") -> bool:
+def sqlUpdate(t, fL: Union[str, List[str]], vL: Union[str, List[str]], w, connName: str = "default") -> bool:
     """
     Realiza la modificación de uno o más registros en una tabla mediante un objeto FLSqlCursor
 
@@ -298,7 +298,7 @@ def sqlUpdate(t, fL: Union[str, List[str]], vL: Union[str, List[str]], w, connNa
     return True
 
 
-def sqlDelete(t, w, connName="default") -> bool:
+def sqlDelete(t: str, w: str, connName: str = "default") -> bool:
     """
     Borra uno o más registros en una tabla mediante un objeto FLSqlCursor
 
@@ -325,7 +325,7 @@ def sqlDelete(t, w, connName="default") -> bool:
     return True
 
 
-def quickSqlDelete(t, w, connName="default") -> None:
+def quickSqlDelete(t: str, w: str, connName: str = "default") -> None:
     """
     Versión rápida de sqlDelete. Ejecuta directamente la consulta sin realizar comprobaciones y sin disparar señales de commits.
     Usar con precaución.
@@ -333,7 +333,7 @@ def quickSqlDelete(t, w, connName="default") -> None:
     execSql("DELETE FROM %s WHERE %s" % (t, w))
 
 
-def execSql(sql, connName="default") -> bool:
+def execSql(sql: str, connName: str = "default") -> bool:
     """
     Uso interno
     """

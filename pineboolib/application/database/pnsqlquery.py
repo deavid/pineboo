@@ -793,11 +793,16 @@ class PNSqlQuery(object):
         separados por comas, p.e. "tabla1,tabla2,tabla3"
     """
 
-    def setTablesList(self, tl: str) -> None:
+    def setTablesList(self, tl: Union[str, List]) -> None:
         self.d.tablesList_ = []
-        tl = tl.replace(" ", "")
-        for tabla in tl.split(","):
-            if not self.db().manager().existsTable(tabla) and len(tl.split(",")) >= 1:
+        if isinstance(tl, list):
+            table_list = ",".join(tl)
+        else:
+            table_list = tl
+
+        table_list = table_list.replace(" ", "")
+        for tabla in table_list.split(","):
+            if not self.db().manager().existsTable(tabla) and len(table_list.split(",")) >= 1:
                 self.invalidTablesList = True
 
             self.d.tablesList_.append(tabla)
