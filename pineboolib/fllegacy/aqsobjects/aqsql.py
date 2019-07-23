@@ -85,7 +85,6 @@ class AQSql(object):
             if msgCheck != "":
                 ok = False
                 raise Exception(msgCheck)
-                break
 
             cur.setActivatedCheckIntegrity(False)
             ok = cur.commitBuffer()
@@ -119,9 +118,6 @@ class AQSql(object):
             cur = PNSqlCursor(table_or_cursor, conn)
         else:
             cur = table_or_cursor
-
-        if cur is None:
-            return False
 
         if not cur.metadata():
             return False
@@ -188,7 +184,7 @@ class AQSql(object):
                     break
 
                 msg_check = cur.msgCheckIntegrity()
-                if msg_check is None:
+                if not msg_check:
                     ok = False
                     logger.warning(msg_check, cur.db())
                     break

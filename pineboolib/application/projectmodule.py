@@ -37,7 +37,7 @@ class Project(object):
 
     # _initModules = None
     main_form: Any = None  # FIXME: How is this used? Which type?
-    main_window = None
+    main_window: Any = None
     acl_ = None
     _DGI: Optional["dgi_schema"] = None
     deleteCache = None

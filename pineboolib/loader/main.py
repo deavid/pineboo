@@ -236,7 +236,7 @@ def exec_main(options: Values) -> int:
 
     project.run()
 
-    if project.conn is None or project.conn.conn is False:
+    if not project.conn.conn:
         logger.warning("No connection was provided. Aborting Pineboo load.")
         return -99
 

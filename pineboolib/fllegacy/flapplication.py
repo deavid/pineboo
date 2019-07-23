@@ -30,23 +30,22 @@ class FLPopupWarn(QtCore.QObject):
 
 
 class FLApplication(QtCore.QObject):
-    initializing_ = None  # Inicializando
-    destroying_ = None  # Cerrandose
-    ted_output_ = None
-    not_exit_ = None  # No salir de la aplicación
+    initializing_ = False  # Inicializando
+    destroying_ = False  # Cerrandose
+    ted_output_: Any = None
+    not_exit_ = False  # No salir de la aplicación
     multi_lang_enabled_: bool  # Activado multiLang
     multi_lang_id_: str
     translator_: List[FLTranslator]
     dict_main_widgets_: Dict[str, Any]
-    container_ = None  # Contenedor actual??
+    container_: Optional[QtWidgets.QWidget] = None  # Contenedor actual??
     map_geometry_form_: List[Any]
-    main_widget_ = None
+    main_widget_: Optional[QtWidgets.QWidget] = None
     p_work_space_ = None
-    tool_box_ = None
-    toogle_bars_ = None
-    project_ = None
+    tool_box_: Any = None
+    toogle_bars_: Any = None
+    # project_ = None
     mdi_toolbuttons: List[QtWidgets.QToolButton]
-    wb_ = None
     form_alone_ = None
     acl_ = None
     popup_warn_ = None
@@ -55,7 +54,7 @@ class FLApplication(QtCore.QObject):
     fl_factory_ = None
     op_check_update_ = None
     style = None
-    timer_idle_ = None
+    timer_idle_: Optional[QtCore.QTimer] = None
     init_single_fl_large = None
     show_debug_ = None
     time_user_ = None
@@ -63,7 +62,7 @@ class FLApplication(QtCore.QObject):
     event_loop = None
     window_menu = None
     last_text_caption_ = None
-    modules_menu: List[Any]
+    modules_menu: Any
 
     def __init__(self) -> None:
         super(FLApplication, self).__init__()
@@ -72,7 +71,7 @@ class FLApplication(QtCore.QObject):
         self.container_ = None
         self.tool_box_ = None
         self.toogle_bars_ = None
-        self.project_ = None
+        # self.project_ = None
         self.wb_ = None
         self.dict_main_widgets_ = {}
         self.translator_ = []
@@ -129,7 +128,7 @@ class FLApplication(QtCore.QObject):
             self.dict_main_widgets_ = {}
 
         self.clearProject()
-        self.project_ = None
+        # self.project_ = None
         self.ted_output_ = None
 
         if app_db:
@@ -174,22 +173,22 @@ class FLApplication(QtCore.QObject):
         if obj != self.main_widget_ and not isinstance(obj, pncontrolsfactory.QMainWindow):
             return super().eventFilter(obj, ev)
 
-        aw = None
+        # aw = None
         # if self.p_work_space_ is not None:
         #    aw = QApplication.setActiveWindow(self.p_work_space_)
-        if aw is not None and aw != obj and evt not in (QEvent.Resize, QEvent.Close):
-            obj.removeEventFilter(self)
-            if evt == QEvent.WindowActivate:
-                if obj == self.container_:
-                    self.activateModule(None)
-                else:
-                    self.activateModule(obj.objectName())
-
-            if self.p_work_space_ and self.notify(self.p_work_space_, ev):
-                obj.installEventFilter(self)
-                return True
-
-            obj.installEventFilter(self)
+        # if aw is not None and aw != obj and evt not in (QEvent.Resize, QEvent.Close):
+        #     obj.removeEventFilter(self)
+        #     if evt == QEvent.WindowActivate:
+        #         if obj == self.container_:
+        #             self.activateModule(None)
+        #         else:
+        #             self.activateModule(obj.objectName())
+        #
+        #     if self.p_work_space_ and self.notify(self.p_work_space_, ev):
+        #         obj.installEventFilter(self)
+        #         return True
+        #
+        #     obj.installEventFilter(self)
 
         if evt == QEvent.KeyPress:
             if obj == self.container_:
@@ -263,7 +262,7 @@ class FLApplication(QtCore.QObject):
     def init(self) -> None:
         from pineboolib import pncontrolsfactory
         from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
-        from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQS
+        from pineboolib.fllegacy.aqsobjects.aqs import AQS
 
         self.dict_main_widgets_ = {}
 
@@ -271,7 +270,7 @@ class FLApplication(QtCore.QObject):
             raise Exception("init. self.container_ is empty")
 
         self.container_.setObjectName("container")
-        self.container_.setWindowIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("pineboo.png")))
+        self.container_.setWindowIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("pineboo.png")))
         if self.db() is not None:
             self.container_.setWindowTitle(self.db().database())
         else:
@@ -283,17 +282,17 @@ class FLApplication(QtCore.QObject):
         self.window_menu.setObjectName("windowMenu")
 
         self.window_cascade_action = pncontrolsfactory.QAction(
-            pncontrolsfactory.QIcon(AQS.Pixmap_fromMineSource("cascada.png")), self.tr("Cascada"), self.container_
+            pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("cascada.png")), self.tr("Cascada"), self.container_
         )
         self.window_menu.addAction(self.window_cascade_action)
 
         self.window_tile_action = pncontrolsfactory.QAction(
-            pncontrolsfactory.QIcon(AQS.Pixmap_fromMineSource("mosaico.png")), self.tr("Mosaico"), self.container_
+            pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("mosaico.png")), self.tr("Mosaico"), self.container_
         )
         self.window_menu.addAction(self.window_tile_action)
 
         self.window_close_action = pncontrolsfactory.QAction(
-            pncontrolsfactory.QIcon(AQS.Pixmap_fromMineSource("cerrar.png")), self.tr("Cerrar"), self.container_
+            pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("cerrar.png")), self.tr("Cerrar"), self.container_
         )
         self.window_menu.addAction(self.window_close_action)
 
@@ -306,7 +305,7 @@ class FLApplication(QtCore.QObject):
         vl = pncontrolsfactory.QVBoxLayout(w)
 
         self.exit_button = pncontrolsfactory.QPushButton(
-            pncontrolsfactory.QIcon(AQS.Pixmap_fromMineSource("exit.png")), self.tr("Salir"), w
+            pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("exit.png")), self.tr("Salir"), w
         )
         self.exit_button.setObjectName("pbSalir")
         self.exit_button.setShortcut(pncontrolsfactory.QKeySequence(self.tr("Ctrl+Q")))
@@ -567,7 +566,7 @@ class FLApplication(QtCore.QObject):
                         new_module_action.setObjectName("StaticLoadAction")
                         new_module_action.setText(self.tr(descript_module))
                         new_module_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
-                        new_module_action.setIcon(pncontrolsfactory.QIcon(AQS.Pixmap_fromMineSource("folder_update.png")))
+                        new_module_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("folder_update.png")))
                         new_area_bar.addAction(new_module_action)
                         new_module_action.triggered.connect(self.staticLoaderSetup)
                         ag.addAction(new_module_action)
@@ -578,7 +577,7 @@ class FLApplication(QtCore.QObject):
                         new_module_action.setObjectName("reinitScriptAction")
                         new_module_action.setText(self.tr(descript_module))
                         new_module_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
-                        new_module_action.setIcon(pncontrolsfactory.QIcon(AQS.Pixmap_fromMineSource("reload.png")))
+                        new_module_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("reload.png")))
                         new_area_bar.addAction(new_module_action)
                         new_module_action.triggered.connect(self.reinit)
                         ag.addAction(new_module_action)
@@ -589,7 +588,7 @@ class FLApplication(QtCore.QObject):
                         new_module_action.setObjectName("shConsoleAction")
                         new_module_action.setText(self.tr(descript_module))
                         new_module_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
-                        new_module_action.setIcon(pncontrolsfactory.QIcon(AQS.Pixmap_fromMineSource("consola.png")))
+                        new_module_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("consola.png")))
                         new_area_bar.addAction(new_module_action)
                         new_module_action.triggered.connect(self.showConsole)
                         ag.addAction(new_module_action)
@@ -631,7 +630,7 @@ class FLApplication(QtCore.QObject):
         font_action.setObjectName("fontAction")
         font_action.setText(self.tr(descript_module))
         # font_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
-        font_action.setIcon(pncontrolsfactory.QIcon(AQS.Pixmap_fromMineSource("font.png")))
+        font_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("font.png")))
         config_tool_bar.addAction(font_action)
         font_action.triggered.connect(self.chooseFont)
         ag.addAction(font_action)
@@ -641,7 +640,7 @@ class FLApplication(QtCore.QObject):
         style_action.setObjectName("styleAction")
         style_action.setText(self.tr(descript_module))
         # style_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
-        style_action.setIcon(pncontrolsfactory.QIcon(AQS.Pixmap_fromMineSource("estilo.png")))
+        style_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("estilo.png")))
         config_tool_bar.addAction(style_action)
         style_action.triggered.connect(self.showStyles)
         ag.addAction(style_action)
@@ -651,7 +650,7 @@ class FLApplication(QtCore.QObject):
         help_action.setObjectName("helpAction")
         help_action.setText(self.tr(descript_module))
         # help_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
-        help_action.setIcon(pncontrolsfactory.QIcon(AQS.Pixmap_fromMineSource("help_index.png")))
+        help_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("help_index.png")))
         config_tool_bar.addAction(help_action)
         help_action.triggered.connect(self.helpIndex)
         ag.addAction(help_action)
@@ -661,7 +660,7 @@ class FLApplication(QtCore.QObject):
         about_pineboo_action.setObjectName("aboutPinebooAction")
         about_pineboo_action.setText(self.tr(descript_module))
         # help_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
-        about_pineboo_action.setIcon(pncontrolsfactory.QIcon(AQS.Pixmap_fromMineSource("about.png")))
+        about_pineboo_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("about.png")))
         config_tool_bar.addAction(about_pineboo_action)
         about_pineboo_action.triggered.connect(self.aboutPineboo)
         ag.addAction(about_pineboo_action)
@@ -671,7 +670,7 @@ class FLApplication(QtCore.QObject):
         visit_pineboo_action.setObjectName("visitPinebooAction")
         visit_pineboo_action.setText(self.tr(descript_module))
         # help_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
-        visit_pineboo_action.setIcon(pncontrolsfactory.QIcon(AQS.Pixmap_fromMineSource("about.png")))
+        visit_pineboo_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("about.png")))
         config_tool_bar.addAction(visit_pineboo_action)
         visit_pineboo_action.triggered.connect(self.urlPineboo)
         ag.addAction(visit_pineboo_action)
@@ -681,7 +680,7 @@ class FLApplication(QtCore.QObject):
         about_qt_action.setObjectName("aboutQtAction")
         about_qt_action.setText(self.tr(descript_module))
         # help_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
-        about_qt_action.setIcon(pncontrolsfactory.QIcon(AQS.Pixmap_fromMineSource("aboutqt.png")))
+        about_qt_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("aboutqt.png")))
         config_tool_bar.addAction(about_qt_action)
         about_qt_action.triggered.connect(self.aboutQt)
         ag.addAction(about_qt_action)
@@ -872,7 +871,8 @@ class FLApplication(QtCore.QObject):
     def windowMenuAboutToShow(self) -> None:
         if not self.p_work_space_:
             return
-
+        if self.window_menu is None:
+            return
         self.window_menu.clear()
         self.window_menu.addAction(self.window_cascade_action)
         self.window_menu.addAction(self.window_tile_action)
@@ -1226,9 +1226,8 @@ class FLApplication(QtCore.QObject):
             from pineboolib import pncontrolsfactory
 
             if (
-                self.wb_
-                or not self.project_
-                or pncontrolsfactory.QApplication.activeModalWidget()
+                # not self.project_ or
+                pncontrolsfactory.QApplication.activeModalWidget()
                 or pncontrolsfactory.QApplication.activePopupWidget()
             ):
                 return
@@ -1566,11 +1565,10 @@ class FLApplication(QtCore.QObject):
 
         return pncontrolsfactory.QApplication.translate("system", text)
 
-        """
-    Instala las traducciones cargadas
-    """
-
     def loadTranslations(self) -> None:
+        """
+        Instala las traducciones cargadas
+        """
         translatorsCopy = []
         if self.translator_:
             for t in self.translator_:

@@ -897,7 +897,7 @@ class FLUtil(QtCore.QObject):
 
         return True
 
-    def sha1(self, str_: str) -> str:
+    def sha1(self, str_: Optional[str]) -> str:
         if str_ is None:
             str_ = ""
         """
@@ -1035,7 +1035,7 @@ class FLUtil(QtCore.QObject):
 
         return None if mtd is None else mtd.fieldType(fn)
 
-    def fieldLength(self, fn: str, tn: str, conn_name: str = "default") -> int:
+    def fieldLength(self, fn: str, tn: Optional[str], conn_name: str = "default") -> int:
         """
         Retorna la longitud de un campo
         @param fn. Nombre del campo
@@ -1053,7 +1053,7 @@ class FLUtil(QtCore.QObject):
 
         return 0 if mtd is None else mtd.fieldLength(fn)
 
-    def fieldNameToAlias(self, fn: str, tn: str, conn_name: str = "default") -> str:
+    def fieldNameToAlias(self, fn: str, tn: Optional[str], conn_name: str = "default") -> str:
         """
         Retorna el alias de un campo a partir de su nombre
         @param fn. Nombre del campo
@@ -1071,7 +1071,7 @@ class FLUtil(QtCore.QObject):
 
         return fn if mtd is None else mtd.fieldNameToAlias(fn)
 
-    def tableNameToAlias(self, tn: str, conn_name: str = "default") -> Optional[str]:
+    def tableNameToAlias(self, tn: Optional[str], conn_name: str = "default") -> Optional[str]:
         """
         Retorna el nombre de una tabla a partir de su alias
         @param tn. Nombre de la tabla
@@ -1089,7 +1089,7 @@ class FLUtil(QtCore.QObject):
 
         return None if mtd is None else mtd.alias()
 
-    def fieldAliasToName(self, an: str, tn: str, conn_name: str = "default") -> str:
+    def fieldAliasToName(self, an: str, tn: Optional[str], conn_name: str = "default") -> str:
 
         """
         Retorna el nombre de un campo a partir de su alias
@@ -1109,7 +1109,7 @@ class FLUtil(QtCore.QObject):
 
         return an if mtd is None else mtd.fieldAliasToName(an)
 
-    def fieldAllowNull(self, fn: str, tn: str, conn_name: str = "default") -> str:
+    def fieldAllowNull(self, fn: str, tn: Optional[str], conn_name: str = "default") -> bool:
         """
         Retorna si el campo permite dejarse en blanco
         @param fn. Nombre del campo
@@ -1128,7 +1128,7 @@ class FLUtil(QtCore.QObject):
 
         return False if mtd is None else mtd.fieldAllowNull(fn)
 
-    def fieldIsPrimaryKey(self, fn: str, tn: str, conn_name: str = "default") -> bool:
+    def fieldIsPrimaryKey(self, fn: str, tn: Optional[str], conn_name: str = "default") -> bool:
         """
         Retorna si el campo es clave primaria de la tabla
         @param fn. Nombre del campo
@@ -1146,7 +1146,7 @@ class FLUtil(QtCore.QObject):
 
         return False if mtd is None else mtd.fieldIsPrimaryKey(fn)
 
-    def fieldIsCompoundKey(self, fn: str, tn: str, conn_name: str = "default") -> bool:
+    def fieldIsCompoundKey(self, fn: str, tn: Optional[str], conn_name: str = "default") -> bool:
         """
         Retorna si el campo es clave compuesta de la tabla
         @param fn. Nombre del campo
@@ -1168,7 +1168,7 @@ class FLUtil(QtCore.QObject):
         # field = None  # FIXME: field is not defined anywhere
         # return False if field is None else field.isCompoundKey()
 
-    def fieldDefaultValue(self, fn: str, tn: str, conn_name: str = "default") -> Any:
+    def fieldDefaultValue(self, fn: str, tn: Optional[str], conn_name: str = "default") -> Any:
         """
         Retorna el valor por defecto de un campo
         @param fn. Nombre del campo
