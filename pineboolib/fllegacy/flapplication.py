@@ -1310,7 +1310,7 @@ class FLApplication(QtCore.QObject):
         return self.show_debug_
 
     def db(self) -> Any:
-        return project.conn
+        return project._conn
 
     @decorators.NotImplementedWarn
     def classType(self, n):
