@@ -27,6 +27,7 @@ class AQSql(object):
     @return La base de datos correspondiente al nombre de conexion indicado
     """
 
+    @classmethod
     def database(self, connection_name="default") -> Any:
         if project.conn is None:
             raise Exception("Project is not connected yet")
@@ -50,6 +51,7 @@ class AQSql(object):
     }
     """
 
+    @classmethod
     def update(self, table_or_cursor: Union[str, "FLSqlCursor"], fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
@@ -108,6 +110,7 @@ class AQSql(object):
             }
     """
 
+    @classmethod
     def insert(self, table_or_cursor: Union[str, "FLSqlCursor"], fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
@@ -159,6 +162,7 @@ class AQSql(object):
         }
     """
 
+    @classmethod
     def del_(self, cur_or_table: Union[str, "FLSqlCursor"], where="", conn_name="default"):
 
         if not isinstance(cur_or_table, str):

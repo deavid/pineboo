@@ -21,10 +21,10 @@ from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  #
 from pineboolib.fllegacy.aqsobjects.aqboolflagstate import AQBoolFlagStateList, AQBoolFlagState  # FIXME: Should not depend on AQS
 
 if TYPE_CHECKING:
-    from .pncursortablemodel import PNCursorTableModel
-    from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
-    from pineboolib.interfaces.iformdb import IFormDB
-    from pineboolib.interfaces.iconnection import IConnection
+    from .pncursortablemodel import PNCursorTableModel  # noqa: F401
+    from pineboolib.application.metadata.pntablemetadata import PNTableMetaData  # noqa: F401
+    from pineboolib.interfaces.iformdb import IFormDB  # noqa: F401
+    from pineboolib.interfaces.iconnection import IConnection  # noqa: F401
 
 
 logger = logging.getLogger(__name__)
@@ -146,7 +146,7 @@ class PNCursorPrivate(QtCore.QObject):
     """
     Base de datos sobre la que trabaja
     """
-    db_: Optional[IConnection] = None
+    db_: Optional["IConnection"] = None
 
     """
     Pila de los niveles de transacción que han sido iniciados por este cursor
