@@ -36,14 +36,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     where_filter: str
     where_filters: Dict[str, str] = {}
     _metadata = None
-    _sortOrder = None
+    _sortOrder = ""
     _disable_refresh = None
     color_function_ = None
     need_update = False
     _driver_sql = None
     _size = None
-    sql_str = None
-    _initialized = None
+    sql_str = ""
+    _initialized: bool = False
 
     def __init__(self, conn: "IConnection", parent) -> None:
         """
@@ -90,13 +90,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         # Establecer a False otra vez si el contenido de los indices es erróneo.
         self.indexes_valid = False
         self._data: List[List[Any]] = []
-        self._vdata: List[List[Any]] = []
+        self._vdata: List[Optional[List[Any]]] = []
         self._column_hints: List[int] = []
         self.updateColumnsCount()
         self.rows = 0
         self.rowsLoaded = 0
         self.pendingRows = 0
-        self.lastFetch = 0
+        self.lastFetch = 0.0
         self.fetchedRows = 0
         self._showPixmap = True
         self.color_function_ = None
@@ -106,7 +106,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.where_filters = {}
         self.where_filters["main-filter"] = ""
         self.where_filters["filter"] = ""
-        self.sql_str = None
+        self.sql_str = ""
 
         if self.USE_THREADS:
             self.fetchLock = threading.Lock()
@@ -122,7 +122,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self._disable_refresh = False
 
         self._cursor_db: IApiCursor = self.db().cursor()
-        self._initialized = None
+        self._initialized = False
         # self.refresh()
 
     def disable_refresh(self, disable) -> None:
@@ -519,8 +519,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     newlen = int(40 + math.tanh(ltxt / 3000.0) * 35000.0)
                     self._column_hints[r] += newlen
             for r in range(len(self._column_hints)):
-                self._column_hints[r] /= len(self._data[:200]) + 1
-            self._column_hints = [int(x) for x in self._column_hints]
+                self._column_hints[r] = int(self._column_hints[r] // (len(self._data[:200]) + 1))
+            # self._column_hints = [int(x) for x in self._column_hints]
 
         self.indexes_valid = True
         self.rowsLoaded = torow + 1
@@ -604,7 +604,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     def refresh(self) -> None:
 
-        if self._initialized is None and self.parent_view:  # Si es el primer refresh y estoy conectado a un FLDatatable()
+        if not self._initialized and self.parent_view:  # Si es el primer refresh y estoy conectado a un FLDatatable()
             self._initialized = True
             timer = QtCore.QTimer()
             timer.singleShot(5, self.refresh)
@@ -625,10 +625,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return
 
         """ FILTRO WHERE """
-        where_filter = None
+        where_filter = ""
         for k, wfilter in sorted(self.where_filters.items()):
-            if wfilter is None:
-                continue
+            # if wfilter is None:
+            #     continue
             wfilter = wfilter.strip()
 
             if not wfilter:
@@ -750,7 +750,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return Valor contenido
     """
 
-    def value(self, row: int, fieldName) -> Any:
+    def value(self, row: Optional[int], fieldName) -> Any:
         if row is None or row < 0 or row >= self.rows:
             return None
         col = None
@@ -905,8 +905,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         # Metemos lineas en la tabla de la bd
         pKValue = None
         buffer = fl_cursor.buffer()
-        campos = None
-        valores = None
+        campos = ""
+        valores = ""
         for b in buffer.fieldsList():
             value = None
             if buffer.value(b.name) is None:

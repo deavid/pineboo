@@ -24,7 +24,7 @@ class PNCompoundKeyMetaData(object):
 
     fieldList_: List["PNFieldMetaData"] = []
 
-    def __init__(self, other: None = None) -> None:
+    def __init__(self, other: "PNCompoundKeyMetaData" = None) -> None:
         super().__init__()
         self.fieldList_ = []
         if other:

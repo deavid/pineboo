@@ -78,7 +78,7 @@ class XMLAction(XMLStruct):
     @return widget con form inicializado
     """
 
-    def loadRecord(self, cursor: None) -> "IFormRecordDB":
+    def loadRecord(self, cursor: Optional[Any]) -> "IFormRecordDB":
         self._loaded = getattr(self.formrecord_widget, "_loaded", False)
         if not self._loaded:
             if self.formrecord_widget and getattr(self.formrecord_widget, "widget", None):
@@ -225,16 +225,17 @@ class XMLAction(XMLStruct):
             self.logger.info("No script to load on %s for action %s", parent, self.name)
 
         parent_object = parent
+        action_: Any  # XMLAction / FLAction
         if parent is None:
             action_ = self
         else:
-            action_ = parent._action if hasattr(parent, "_action") else self
+            possible_flaction_ = getattr(parent, "_action", None)
+            if not isinstance(possible_flaction_, XMLAction):
+                from .utils.convert_flaction import convertFLAction  # type: ignore
 
-        # import aqui para evitar dependencia ciclica
-        from .utils.convert_flaction import convertFLAction  # type: ignore
-
-        if not isinstance(action_, XMLAction):
-            action_ = convertFLAction(action_)
+                action_ = convertFLAction(possible_flaction_)
+            elif possible_flaction_ is not None:
+                action_ = possible_flaction_
 
         python_script_path = None
         # primero default, luego sobreescribimos

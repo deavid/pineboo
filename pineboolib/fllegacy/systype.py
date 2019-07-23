@@ -125,10 +125,12 @@ class SysType(object, metaclass=Singleton):
         return getattr(self.sys_widget, fun_, None)
 
     def installACL(self, idacl) -> None:
+        # FIXME: Add ACL later
         # acl_ = project.acl()
-        acl_ = None  # FIXME: Add ACL later
-        if acl_:
-            acl_.installACL(idacl)
+        # acl_ = None
+        # if acl_:
+        #     acl_.installACL(idacl)
+        pass
 
     def version(self) -> str:
         return str(project.version)

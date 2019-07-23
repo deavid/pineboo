@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Union, List, Any, Tuple
+from typing import Union, List, Any, Tuple, Optional
 
 import odf  # type: ignore
 from odf import table, style  # type: ignore
@@ -16,7 +16,7 @@ Generador de ficheros ODS
 
 class AQOdsGenerator_class(object):
 
-    doc_ = None
+    doc_: Any = None
     """
     Constructor
     """
@@ -136,8 +136,8 @@ class AQOdsRow(object):
     sheet_: Any
     row_: table.TableRow
     cells_list_: List[Any]
-    style_cell_text_ = None
-    fix_precision_ = None
+    style_cell_text_: Optional[str] = None
+    fix_precision_: Optional[int] = None
     row_color_ = None
     property_cell_: List[Any]
 

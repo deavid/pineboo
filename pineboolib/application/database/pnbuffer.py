@@ -12,8 +12,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-ACCEPTABLE_VALUES = (int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, decimal.Decimal)
-T_VALUE2 = Union[int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, None]
+ACCEPTABLE_VALUES = (int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, decimal.Decimal, datetime.timedelta)
+T_VALUE2 = Union[int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, datetime.timedelta, None]
 
 
 class FieldStruct(object):

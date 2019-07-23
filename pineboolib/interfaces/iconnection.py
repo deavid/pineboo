@@ -14,7 +14,7 @@ class IConnection:
     db_password: str
     conn: Any  # connection from the actual driver
     connAux: Dict[str, "IConnection"]
-    driverSql = None
+    driverSql: Any
     transaction_: int
     _managerModules = None
     _manager = None
@@ -73,7 +73,7 @@ class IConnection:
     def lastActiveCursor(self) -> Optional[Any]:  # returns FLSqlCuror
         return None
 
-    def conectar(self, db_name, db_host, db_port, db_userName, db_returnword) -> None:
+    def conectar(self, db_name, db_host, db_port, db_userName, db_returnword) -> Any:
         return
 
     def driverName(self) -> str:

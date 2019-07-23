@@ -7,6 +7,7 @@ import copy
 
 from typing import Any, Optional, List, Dict
 from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
+from pineboolib.application.metadata.pncompoundkeymetadata import PNCompoundKeyMetaData
 
 """
 Mantiene la definicion de una tabla.
@@ -58,7 +59,6 @@ class PNTableMetaData(ITableMetaData):
 
     def inicializeFLTableMetaDataP(self, name) -> None:
         self.d = PNTableMetaDataPrivate(name)
-        from .pncompoundkeymetadata import PNCompoundKeyMetaData
 
         self.d.compoundKey_ = PNCompoundKeyMetaData()
         self.d.fieldNames_ = []
@@ -153,8 +153,8 @@ class PNTableMetaData(ITableMetaData):
     """
 
     def addFieldMD(self, f: "PNFieldMetaData") -> None:
-        if f is None:
-            return
+        # if f is None:
+        #     return
         if not f.metadata():
             f.setMetadata(self)
         self.d.fieldList_.append(f)
@@ -173,8 +173,8 @@ class PNTableMetaData(ITableMetaData):
     """
 
     def removeFieldMD(self, fN: str) -> None:
-        if fN is None:
-            return
+        # if fN is None:
+        #     return
         # FIXME: FLFieldMetaData does not have .clear()
         # for key in self.d.fieldList_:
         #     if key.name().lower() == fN.lower():
@@ -187,7 +187,7 @@ class PNTableMetaData(ITableMetaData):
     @param cK Objeto FLCompoundKey con la descripción de la clave compuesta
     """
 
-    def setCompoundKey(self, cK) -> None:
+    def setCompoundKey(self, cK: Optional[PNCompoundKeyMetaData]) -> None:
         self.d.compoundKey_ = cK
 
     """
@@ -717,7 +717,7 @@ class PNTableMetaDataPrivate:
     """
     Clave compuesta que tiene esta tabla
     """
-    compoundKey_ = None
+    compoundKey_: Optional[PNCompoundKeyMetaData] = None
 
     """
     Nombre de la consulta (fichero .qry) de la que define los metadatos
@@ -743,7 +743,7 @@ class PNTableMetaDataPrivate:
     """
     Clave primaria
     """
-    primaryKey_ = None
+    primaryKey_: Optional[str] = None
 
     """
     Indica si se debe avisar de colisión de concurrencia entre sesiones.
@@ -799,7 +799,7 @@ class PNTableMetaDataPrivate:
     def inicializeNewFLTableMetaDataPrivate(self, n: str, a, q: str = None) -> None:
         self.name_ = n.lower()
         self.alias_ = a
-        self.compoundKey_ = 0
+        self.compoundKey_ = None
         self.query_ = q
         self.concurWarn_ = False
         self.detectLocks_ = False

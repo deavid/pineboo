@@ -39,7 +39,7 @@ class Project(object):
     main_form: Any = None  # FIXME: How is this used? Which type?
     main_window = None
     acl_ = None
-    _DGI = None
+    _DGI: Optional["dgi_schema"] = None
     deleteCache = None
     path = None
     _splash = None
@@ -326,14 +326,11 @@ class Project(object):
         # de hacer esto.
         self.logger.trace("JS.CALL: fn:%s args:%s ctx:%s", function, aList, object_context, stack_info=True)
 
-        if function is not None:
-            # Tipicamente flfactalma.iface.beforeCommit_articulos()
-            if function[-2:] == "()":
-                function = function[:-2]
+        # Tipicamente flfactalma.iface.beforeCommit_articulos()
+        if function[-2:] == "()":
+            function = function[:-2]
 
-            aFunction = function.split(".")
-        else:
-            aFunction = []
+        aFunction = function.split(".")
 
         if not object_context:
             if not aFunction[0] in self.actions:
@@ -460,7 +457,7 @@ class Project(object):
                 maxValue = t.maxValue()
                 value = t.run()
             except Exception:
-                result = False
+                self.logger.exception("While running tests")
         else:
 
             for test in testDict.keys():
@@ -471,8 +468,7 @@ class Project(object):
                 print("result", test, v, "/", t.maxValue)
                 value = value + v
 
-        if result is None and maxValue > 0:
-            resultValue = value
+        resultValue = value
 
         self.logger.warning("%s/%s", resultValue, maxValue)
 

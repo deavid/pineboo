@@ -1,6 +1,6 @@
 from pineboolib.core.utils import logging
 import datetime
-from typing import Dict, Iterable, Tuple, Union, Any, List, TYPE_CHECKING
+from typing import Dict, Iterable, Tuple, Union, Any, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.interfaces.ifieldmetadata import IFieldMetaData  # noqa: F401
@@ -200,7 +200,7 @@ class sql_inspector(object):
 
         return ret_
 
-    def resolve_value(self, pos, value: Union[bytes, float, str], raw=False) -> Any:
+    def resolve_value(self, pos, value: Union[bytes, float, str, datetime.time], raw=False) -> Any:
 
         if not self.mtd_fields():
             if isinstance(value, datetime.time):
@@ -343,7 +343,7 @@ def resolve_order_params(key, valor: str) -> Any:
     return valor
 
 
-def resolve_where_params(key: str, valor: str, mtd_table) -> str:
+def resolve_where_params(key: str, valor: Optional[str], mtd_table) -> str:
     list_params = key.split("__")
     campo = "_".join(list_params[0].split("_")[1:])
     tipo = list_params[1]

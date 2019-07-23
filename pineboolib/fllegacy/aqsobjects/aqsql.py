@@ -61,8 +61,8 @@ class AQSql(object):
         else:
             cur = table_or_cursor
 
-        if cur is None:
-            return False
+        # if cur is None:
+        #     return False
 
         if not cur.metadata():
             return False

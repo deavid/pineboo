@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from pineboolib.interfaces.iapicursor import IApiCursor
     from pineboolib.fllegacy import flmanager
     from pineboolib.fllegacy import flmanagermodules
+    from .pnsqldrivers import PNSqlDrivers
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class PNConnection(QtCore.QObject, IConnection):
     db_userName: str
     db_password: str
     conn: Any = None  # Connection from the actual driver
-    driverSql = None
+    driverSql: "PNSqlDrivers"
     transaction_: int
     _managerModules = None
     _manager = None
