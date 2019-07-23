@@ -1,8 +1,7 @@
 from typing import Any
-from pineboolib.interfaces.iparameterquery import IParameterQuery
 
 
-class PNParameterQuery(IParameterQuery):
+class PNParameterQuery(object):
 
     name_: str
     alias_: str
