@@ -898,7 +898,7 @@ class FLManager(QtCore.QObject, IManager):
 
             return "%s%s" % (field_name, format_value)
 
-    def formatValue(self, fMD_or_type: str, v: Optional[Union[str, int]], upper: bool = False) -> str:
+    def formatValue(self, fMD_or_type: str, v: Any, upper: bool = False) -> str:
         # FIXME: This function sometimes returns integers!
         if not self.db_:
             raise Exception("formatValue. self.db_ is empty!")
