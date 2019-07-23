@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from pineboolib.pncontrolsfactory import FormDBWidget
-from pineboolib.application.types import Object
 
 
 class interna(object):
-    ctx = Object()
+    ctx: FormDBWidget
 
-    def __init__(self, context=None) -> None:
+    def __init__(self, context: FormDBWidget) -> None:
         self.ctx = context
 
     def init(self) -> None:
@@ -14,23 +13,22 @@ class interna(object):
 
 
 class oficial(interna):
-    def __init__(self, context=None):
+    def __init__(self, context: FormDBWidget):
         super(oficial, self).__init__(context)
 
 
 class head(oficial):
-    def __init__(self, context=None):
+    def __init__(self, context: FormDBWidget):
         super(head, self).__init__(context)
 
 
 class ifaceCtx(head):
-    def __init__(self, context=None):
+    def __init__(self, context: FormDBWidget):
         super(ifaceCtx, self).__init__(context)
 
 
 class FormInternalObj(FormDBWidget):
     def _class_init(self) -> None:
-        # DEBUG:: Const Declaration:
         self.iface = ifaceCtx(self)
 
     def interna_init(self) -> None:
