@@ -18,7 +18,6 @@ def init_project(DGI, options, project, mainForm, app) -> Any:
     project.conn.managerModules().loadIdAreas()
     project.conn.managerModules().loadAllIdModules()
 
-    objaction = None
     project.load_modules()
 
     if options.preload:

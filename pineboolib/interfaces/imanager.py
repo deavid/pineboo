@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Optional, Union  # , TYPE_CHECKING
+from typing import Any, Callable, Dict, Optional  # , TYPE_CHECKING
 
 # if TYPE_CHECKING:
 #     import pineboolib.application.database.pnconnection

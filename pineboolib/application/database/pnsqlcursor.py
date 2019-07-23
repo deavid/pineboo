@@ -9,6 +9,7 @@ from pineboolib.core.error_manager import error_manager
 from pineboolib.core.decorators import pyqtSlot
 from pineboolib.core.utils import logging
 from pineboolib.core import decorators
+from pineboolib.core.utils.struct import TableStruct
 
 from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
 from pineboolib.application.database.pnsqlquery import PNSqlQuery
@@ -88,7 +89,7 @@ class PNSqlCursor(QtCore.QObject):
 
     _iter_current: Optional[int]
 
-    _action: "FLAction"
+    _action: Optional["FLAction"] = None
 
     ext_cursor = None
     _activatedBufferChanged: bool
@@ -97,8 +98,8 @@ class PNSqlCursor(QtCore.QObject):
 
     def __init__(
         self,
-        name: str = None,
-        autopopulate: bool = True,
+        name: Union[str, TableStruct] = None,
+        conn_or_autopopulate: Union[bool, str] = True,
         connectionName_or_db: Optional[Union[str, "IConnection"]] = None,
         cR: Optional["PNSqlCursor"] = None,
         r: Optional["PNRelationMetaData"] = None,
@@ -110,10 +111,11 @@ class PNSqlCursor(QtCore.QObject):
             logger.warning("Se está iniciando un cursor Huerfano (%s). Posiblemente sea una declaración en un qsa parseado", self)
             return
 
-        if isinstance(autopopulate, str):
-            connectionName_or_db = autopopulate
+        if isinstance(conn_or_autopopulate, str):
+            connectionName_or_db = conn_or_autopopulate
             autopopulate = True
-
+        elif isinstance(conn_or_autopopulate, bool):
+            autopopulate = conn_or_autopopulate
         self._meta_model = None
         name_action = None
         self.setActivatedBufferChanged(True)
@@ -123,8 +125,6 @@ class PNSqlCursor(QtCore.QObject):
             self.ext_cursor = ext_cursor(self, name)
         else:
             self.ext_cursor = None
-
-        from pineboolib.core.utils.struct import TableStruct
 
         if isinstance(name, TableStruct):
             logger.trace("FIXME::__init__ TableStruct %s", name.name, stack_info=True)
@@ -518,7 +518,6 @@ class PNSqlCursor(QtCore.QObject):
         if not self.buffer():
             return
 
-        buffer, metadata = self.buffer(), self.d.metadata_
         if not fN or not self.d.metadata_:
             logger.warning("setValueBuffer(): No fieldName, or no metadata found")
             return
@@ -532,9 +531,9 @@ class PNSqlCursor(QtCore.QObject):
             logger.warning("setValueBuffer(): No existe el campo %s:%s", self.curName(), fN)
             return
         db = self.db()
-        manager = db.manager() if db is not None else None
-        if db is None or manager is None:
-            raise Exception("no db or no manager")
+        manager = db.manager()
+        if manager is None:
+            raise Exception("no manager")
 
         type_ = field.type()
         buff_field = self.d.buffer_.field(fN)

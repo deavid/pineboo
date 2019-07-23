@@ -627,8 +627,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         """ FILTRO WHERE """
         where_filter = ""
         for k, wfilter in sorted(self.where_filters.items()):
-            if wfilter is None:
-                continue
+            # if wfilter is None:
+            #     continue
             wfilter = wfilter.strip()
 
             if not wfilter:

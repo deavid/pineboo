@@ -9,9 +9,9 @@ from pineboolib.core import decorators
 from pineboolib import logging
 
 from typing import List, Optional, Union, Any, TYPE_CHECKING
+from pineboolib.application.types import Date
 
 if TYPE_CHECKING:
-    from pineboolib.application.types import Date
     from PyQt5.QtXml import QDomDocument  # type: ignore
 
 logger = logging.getLogger(__name__)
@@ -482,7 +482,7 @@ class FLUtil(QtCore.QObject):
         @return Devuelve verdadero si el numero de tarjeta es valido
         """
         n_sum = 0
-        n_rest = n_card = int(num)
+        n_rest = int(num)
         i = 0
         while i < 10:
             n_sum += int(num[i])
@@ -561,7 +561,6 @@ class FLUtil(QtCore.QObject):
         @param offset Numero de dias que sumar. Si es negativo resta dias
         @return Fecha con el desplazamiento de dias
         """
-        from pineboolib.application.types import Date
 
         if isinstance(fecha, str):
             fecha = Date(fecha, "yyyy-MM-dd")
@@ -579,7 +578,6 @@ class FLUtil(QtCore.QObject):
         @param offset Numero de meses que sumar. Si es negativo resta meses
         @return Fecha con el desplazamiento de meses
         """
-        from pineboolib.application.types import Date
 
         if isinstance(fecha, str):
             fecha = Date(fecha)
@@ -597,7 +595,6 @@ class FLUtil(QtCore.QObject):
         @param offset Numero de años que sumar. Si es negativo resta años
         @return Fecha con el desplazamiento de años
         """
-        from pineboolib.application.types import Date
 
         if isinstance(fecha, str):
             fecha = Date(fecha)
@@ -614,7 +611,6 @@ class FLUtil(QtCore.QObject):
         @param d2 Fecha de destino
         @return Número de días entre d1 y d2. Será negativo si d2 es anterior a d1.
         """
-        from pineboolib.application.types import Date
         from datetime import date
 
         if isinstance(d1, Date):

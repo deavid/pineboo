@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 # Completada Si
-from typing import Optional
 from pineboolib.core import decorators
 
 
