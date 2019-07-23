@@ -88,6 +88,7 @@ class FLReportViewer(QObject):
         self.Display = 1
         self.Append = 1
         self.PageBreak = 1
+        self.stylepainter: FLStylePainter = FLStylePainter()
 
         # qt3ui.loadUi(filedir('forms/FLWidgetReportViewer.ui'), self)
 
@@ -472,9 +473,9 @@ class FLReportViewer(QObject):
             if QtCore.QFile.exists(fileName) and q:
                 return
 
-            FLStylePainter.setSVGMode(True)
+            self.stylepainter.setSVGMode(True)
             self.updateReport()
-            FLStylePainter.setSVGMode(False)
+            self.stylepainter.setSVGMode(False)
 
             fileNames = []
 
@@ -486,7 +487,7 @@ class FLReportViewer(QObject):
                 page.setBoundingRect(QtCore.QRect(QtCore.QPoint(0, 0), psize))
                 page.save(fname, "svg")
 
-            FLStylePainter.normalizeSVGFile(fileName, fileNames)
+            self.stylepainter.normalizeSVGFile(fileName, fileNames)
 
             self.updateReport()
 
