@@ -3706,7 +3706,7 @@ class PNCursorPrivate(QtCore.QObject):
 
                 return
 
-        elif self.cursor_.isLocked() or (self.cursorRelation_ and self.cursorRelation_.isLocked()):
+        elif cursor.isLocked() or (self.cursorRelation_ and self.cursorRelation_.isLocked()):
 
             if not self.acTable_.name() == self.id_:
                 self.acTable_.clear()
