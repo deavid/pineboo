@@ -31,7 +31,7 @@ class QTabWidget(QtWidgets.QTabWidget):
 
         return QtWidgets.QTabWidget.setCurrentIndex(self, idx)
 
-    def indexByName(self, tab: str) -> Optional[int]:
+    def indexByName(self, tab: Any) -> Optional[int]:
 
         idx = None
         if isinstance(tab, int):

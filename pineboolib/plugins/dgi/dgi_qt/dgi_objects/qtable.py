@@ -7,7 +7,7 @@ from pineboolib.core.utils.utils_base import format_double
 
 from PyQt5.QtWidgets import QAbstractItemView  # type: ignore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
-from typing import Optional, Any, List
+from typing import Optional, Any, List, Union
 
 
 class QTable(QtWidgets.QTableWidget):
@@ -28,7 +28,7 @@ class QTable(QtWidgets.QTableWidget):
     AutoOneFit = 3
     sort_column_ = None
 
-    def __init__(self, parent: Optional[QGroupBox] = None, name: None = None) -> None:
+    def __init__(self, parent: Optional[QGroupBox] = None, name: str = None) -> None:
         super(QTable, self).__init__(parent)
         if not parent:
             self.setParent(self.parentWidget())
@@ -101,7 +101,7 @@ class QTable(QtWidgets.QTableWidget):
     def selectionMode(self) -> Any:
         return super(QTable, self).selectionMode()
 
-    def setFocusStyle(self, m: str) -> None:
+    def setFocusStyle(self, m: Union[str, int]) -> None:
         if isinstance(m, int):
             return
         else:

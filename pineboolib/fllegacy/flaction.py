@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from pineboolib.application.xmlaction import XMLAction
+from typing import Union
 
 
 class FLAction(object):
@@ -56,18 +58,21 @@ class FLAction(object):
     constructor.
     """
 
-    def __init__(self, action: None = None) -> None:
+    def __init__(self, action: Union[str, XMLAction] = None) -> None:
         super(FLAction, self).__init__()
-        if action:
-            if isinstance(action, str):
-                self.setName(action)
-            else:
-                self.setName(action.name)
-                self.setScriptForm(action.mainscript)
-                self.setScriptFormRecord(action.script)
-                self.setForm(action.mainform)
-                self.setFormRecord(action.form)
-                self.setCaption(action.alias)
+        if action is None:
+            return
+        if isinstance(action, str):
+            self.setName(action)
+        elif isinstance(action, XMLAction):
+            self.setName(action.name)
+            self.setScriptForm(action.mainscript)
+            self.setScriptFormRecord(action.script)
+            self.setForm(action.mainform)
+            self.setFormRecord(action.form)
+            self.setCaption(action.alias)
+        else:
+            raise Exception("Unsupported action %r" % action)
 
     def __repr__(self):
         return "<FLAction name=%r scriptForm=%r scriptFormRecord=%r form=%r formRecord=%r caption=%r>" % (

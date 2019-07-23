@@ -1165,7 +1165,7 @@ class Variable(ASTPython):
             values += 1
             yield "expr", "="
             expr = 0
-            for dtype, data in parse_ast(value, parent=self).generate(isolate=False):
+            for dtype1, data in parse_ast(value, parent=self).generate(isolate=False):
 
                 # if self.elem.get("type",None) == "Array" and data == "[]":
                 if data == "[]":
@@ -1173,13 +1173,13 @@ class Variable(ASTPython):
                     expr += 1
                     continue
 
-                if dtype == "expr":
+                if dtype1 == "expr":
                     expr += 1
-                yield dtype, data
+                yield dtype1, data
             if expr == 0:
                 yield "expr", "None"
 
-        dtype = self.elem.get("type", None)
+        dtype: Optional[str] = self.elem.get("type", None)
         if (values == 0) and force_value:
             yield "expr", "="
             if dtype is None:
@@ -2079,7 +2079,7 @@ def parse_ast(elem, parent=None) -> ASTPythonBase:
     else:
         elemparser.source = None
 
-    if elemparser is not None and isinstance(elemparser, Source):
+    if isinstance(elemparser, Source):
         if elemparser.source is not None:
             if isinstance(parent, (Switch, If, While, With)):
                 # For certain elements, use the same locals, don't copy.

@@ -26,8 +26,8 @@ class PinebooSettings(QSettings):
             value = self.dump_qsize(value)
         return json.dumps(value)
 
-    def load_value(self, value: str) -> Any:
-        value = json.loads(value)
+    def load_value(self, value_text: str) -> Any:
+        value: Any = json.loads(value_text)
         if isinstance(value, dict) and "__class__" in value.keys():
             classname = value["__class__"]
             if classname == "QSize":

@@ -86,20 +86,14 @@ class PNFieldMetaData(IFieldMetaData):
         )
 
     """
-    desctructor
-    """
-
-    def __del__(self) -> None:
-        del self.d
-        --self.count_
-
-    """
     Obtiene el nombre del campo.
 
     @return Nombre del campo
     """
 
     def name(self) -> str:
+        if self.d.fieldName_ is None:
+            return ""
         return self.d.fieldName_
 
     """
@@ -127,6 +121,8 @@ class PNFieldMetaData(IFieldMetaData):
     """
 
     def allowNull(self) -> bool:
+        if self.d.allowNull_ is None:
+            return False
         return self.d.allowNull_
 
     """
@@ -136,6 +132,8 @@ class PNFieldMetaData(IFieldMetaData):
     """
 
     def isPrimaryKey(self) -> bool:
+        if self.d.isPrimaryKey_ is None:
+            return False
         return self.d.isPrimaryKey_
 
     def setIsPrimaryKey(self, b) -> None:
@@ -148,6 +146,8 @@ class PNFieldMetaData(IFieldMetaData):
     """
 
     def isCompoundKey(self) -> bool:
+        if self.d.isCompoundKey_ is None:
+            return False
         return self.d.isCompoundKey_
 
     """
@@ -166,7 +166,7 @@ class PNFieldMetaData(IFieldMetaData):
     """
 
     def length(self) -> int:
-        return int(self.d.length_)
+        return int(self.d.length_ or 0)
 
     """
     Obtiene si el campo es calculado.
@@ -193,7 +193,7 @@ class PNFieldMetaData(IFieldMetaData):
     """
 
     def editable(self) -> bool:
-        return self.d.editable_
+        return self.d.editable_ if self.d.editable_ is not None else False
 
     """
     Establece si el campo es editable.
@@ -212,7 +212,7 @@ class PNFieldMetaData(IFieldMetaData):
     """
 
     def visible(self) -> bool:
-        return self.d.visible_
+        return self.d.visible_ if self.d.visible_ is not None else False
 
     """
     Obtiene si el campo es visible en la rejilla de la tabla.
@@ -221,7 +221,7 @@ class PNFieldMetaData(IFieldMetaData):
     """
 
     def visibleGrid(self) -> bool:
-        return self.d.visibleGrid_
+        return self.d.visibleGrid_ if self.d.visibleGrid_ is not None else False
 
     """
     @return TRUE si el campo es generado, es decir, se incluye en las consultas
@@ -260,7 +260,7 @@ class PNFieldMetaData(IFieldMetaData):
     """
 
     def partInteger(self) -> int:
-        return int(self.d.partInteger_)
+        return int(self.d.partInteger_ or 0)
 
     """
     Obtiene el número de dígitos de la parte decimal.
@@ -269,7 +269,7 @@ class PNFieldMetaData(IFieldMetaData):
     """
 
     def partDecimal(self) -> int:
-        return int(self.d.partDecimal_)
+        return int(self.d.partDecimal_ or 0)
 
     """
     Obtiene si el campo es contador.
@@ -328,9 +328,11 @@ class PNFieldMetaData(IFieldMetaData):
         if r.cardinality() == PNRelationMetaData.RELATION_M1:
             isRelM1 = True
         if isRelM1 and self.d.relationM1_:
-            logger.warning("FLFieldMetaData: Se ha intentado crear más de una relación muchos a uno para el mismo campo")
+            logger.debug("addRelationMD: Se ha intentado crear más de una relación muchos a uno para el mismo campo")
             return
-
+        if self.d.fieldName_ is None:
+            logger.warning("addRelationMD: no fieldName")
+            return
         r.setField(self.d.fieldName_)
         if isRelM1:
             self.d.relationM1_ = r
@@ -454,7 +456,7 @@ class PNFieldMetaData(IFieldMetaData):
     """
 
     def outTransaction(self) -> bool:
-        return self.d.outTransaction_
+        return self.d.outTransaction_ if self.d.outTransaction_ is not None else False
 
     """
     Devuelve la expresion regular que sirve como mascara de validacion para el campo.
@@ -523,7 +525,7 @@ class PNFieldMetaData(IFieldMetaData):
     """
 
     def hasOptionsList(self) -> bool:
-        return self.d.hasOptionsList_
+        return self.d.hasOptionsList_ if self.d.hasOptionsList_ is not None else False
 
     """
     Ver FLFieldMetaData::fullyCaclulated_
@@ -654,7 +656,7 @@ class PNFieldMetaData(IFieldMetaData):
 
         # self = copy.deepcopy(other)
 
-    def formatAssignValue(self, fieldName: str, value: int, upper: bool) -> str:
+    def formatAssignValue(self, fieldName: str, value: Any, upper: bool) -> str:
         if value is None or not fieldName:
             return "1 = 1"
 
@@ -689,7 +691,7 @@ class PNFieldMetaData(IFieldMetaData):
         return "%s = %s" % (fName, formatV)
 
     def __len__(self) -> int:
-        return self.d.length_
+        return self.d.length_ if self.d.length_ is not None else 0
 
 
 class PNFieldMetaDataPrivate(object):
@@ -792,7 +794,7 @@ class PNFieldMetaDataPrivate(object):
     Mantiene, si procede, la relación M1 (muchos a uno)
     para el campo (solo puede haber una relacion de este tipo para un campo)
     """
-    relationM1_ = None
+    relationM1_: Any = None
 
     """
     Asocia este campo con otro, para efectuar filtros en búsquedas.
@@ -814,7 +816,7 @@ class PNFieldMetaDataPrivate(object):
     (ver FLFieldMetaData::associatedFieldFilterTo_) sea igual al valor de la empresa origen
     elegida (codemporig)
     """
-    associatedFieldName_ = None
+    associatedFieldName_ = ""
 
     """
     Nombre del campo que se debe filtra según el campo asociado.
@@ -831,7 +833,7 @@ class PNFieldMetaDataPrivate(object):
     los almacenes cuyo código de empresa (el campo indicado de filtro ) sea igual al valor de la empresa
     origen elegida (codemporig)
     """
-    associatedFieldFilterTo_ = None
+    associatedFieldFilterTo_ = ""
 
     """
     Valor por defecto para el campo
@@ -841,7 +843,7 @@ class PNFieldMetaDataPrivate(object):
     """
     Lista de opciones para el campo
     """
-    optionsList_ = None
+    optionsList_: List[str]
 
     """
     Indica si las modificaciones del campo se hacen fuera de cualquier transaccion.
@@ -887,17 +889,17 @@ class PNFieldMetaDataPrivate(object):
     """
     Contiene las distintas opciones de búsqueda
     """
-    searchOptions_ = None
+    searchOptions_: List[str]
 
     """
     Objeto FLTableMetaData al que pertenece
     """
-    mtd_ = None
+    mtd_: Optional["ITableMetaData"] = None
 
     def __init__(self, *args, **kwargs) -> None:
 
         self.regExpValidator_ = ""
-
+        self.searchOptions_ = []
         if not args:
             self.inicializeEmpty()
         else:
@@ -906,8 +908,8 @@ class PNFieldMetaDataPrivate(object):
     def inicializeEmpty(self) -> None:
         self.relationList_ = []
         self.relationM1_ = None
-        self.associatedFieldFilterTo_ = None
-        self.associatedFieldName_ = None
+        self.associatedFieldFilterTo_ = ""
+        self.associatedFieldName_ = ""
         self.mtd_ = None
 
     def inicialize(
@@ -916,7 +918,7 @@ class PNFieldMetaDataPrivate(object):
         a: str,
         aN: bool,
         iPK: bool,
-        t: str,
+        t: Optional[str],
         length_: int,
         c: bool,
         v: bool,
@@ -952,8 +954,8 @@ class PNFieldMetaDataPrivate(object):
         self.contador_ = coun
         self.relationList_ = []
         self.relationM1_ = None
-        self.associatedFieldFilterTo_ = None
-        self.associatedFieldName_ = None
+        self.associatedFieldFilterTo_ = ""
+        self.associatedFieldName_ = ""
         self.defaultValue_ = defValue
         self.outTransaction_ = oT
         self.regExpValidator_ = rX
@@ -964,6 +966,7 @@ class PNFieldMetaDataPrivate(object):
         self.mtd_ = None
         self.fullyCalculated_ = False
         self.trimmed_ = False
+        self.optionsList_ = []
 
         if self.type_ is None:
             if self.partDecimal_ > 0:
@@ -972,7 +975,7 @@ class PNFieldMetaDataPrivate(object):
                 self.type_ = "string"
             else:
                 self.type_ = "uint"
-            logger.debug("%s:: El campo %s no tiene especificado tipo y se especifica tipo %s", __name__, self.fieldName_, self.type_)
+            logger.info("%s:: El campo %s no tiene especificado tipo y se especifica tipo %s", __name__, self.fieldName_, self.type_)
 
         if int(length_) < 0:
             self.length_ = 0

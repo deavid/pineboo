@@ -8,8 +8,8 @@ from typing import Any
 class Dialog(QDialog):
     _layout: QtWidgets.QVBoxLayout
     buttonBox: QtWidgets.QDialogButtonBox
-    okButtonText = None
-    cancelButtonText = None
+    okButtonText = "Aceptar"
+    cancelButtonText = "Cancelar"
     okButton: QPushButton
     cancelButton: QPushButton
     _tab: QTabWidget
@@ -33,8 +33,6 @@ class Dialog(QDialog):
         self._tab = QTabWidget()
         self._tab.hide()
         self._layout.addWidget(self._tab)
-        self.oKButtonText = None
-        self.cancelButtonText = None
 
     def add(self, _object) -> None:
         self._layout.addWidget(_object)

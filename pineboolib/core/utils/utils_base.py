@@ -56,12 +56,14 @@ class DefFun:
         Tiene una doble funcionalidad. Por un lado, permite convertir llamadas a propiedades en llamadas a la función de verdad.
         Por otro, su principal uso, es omitir las llamadas a funciones inexistentes, de forma que nos advierta en consola
         pero que el código se siga ejecutando. (ESTO ES PELIGROSO)
+
+        ** EN DESUSO **
     """
 
-    def __init__(self, parent: Any, funname: str, realfun: None = None) -> None:
+    def __init__(self, parent: Any, funname: str, realfun: Any = None) -> None:
         self.parent = parent
         self.funname = funname
-        self.realfun = None
+        self.realfun = realfun
 
     def __str__(self) -> Any:
         if self.realfun:
@@ -269,32 +271,30 @@ def text2bool(text: str) -> bool:
 
 
 def ustr(*t1) -> str:
+    def ustr1(t: Union[bytes, str, int, None]) -> str:
+
+        if isinstance(t, str):
+            return t
+
+        if isinstance(t, float):
+            try:
+                t = int(t)
+            except Exception:
+                pass
+
+        # if isinstance(t, QtCore.QString): return str(t)
+        if isinstance(t, bytes):
+            return str(t, "UTF-8")
+        try:
+            if t is None:
+                t = ""
+
+            return "%s" % t
+        except Exception:
+            logger.exception("ERROR Coercing to string: %s", repr(t))
+            return repr(t)
 
     return "".join([ustr1(t) for t in t1])
-
-
-def ustr1(t: Union[str, int]) -> str:
-
-    if isinstance(t, str):
-        return t
-
-    if isinstance(t, float):
-        try:
-            t = int(t)
-        except Exception:
-            pass
-
-    # if isinstance(t, QtCore.QString): return str(t)
-    if isinstance(t, str):
-        return str(t, "UTF-8")
-    try:
-        if t is None:
-            t = ""
-
-        return "%s" % t
-    except Exception:
-        logger.exception("ERROR Coercing to string: %s", repr(t))
-        return repr(t)
 
 
 class StructMyDict(dict):
@@ -487,21 +487,20 @@ def format_double(d: Union[int, str, float], part_integer: int, part_decimal: in
     return ret_
 
 
-def format_int(value: Union[str, int, float], part_intenger=None) -> str:
-    if value is not None:
-        str_integer = "{:,d}".format(int(value))
-
-        if decimal_separator == ",":
-            str_integer = str_integer.replace(",", ".")
-        else:
-            str_integer = str_integer.replace(".", ",")
-
-        return str_integer
-    else:
+def format_int(value: Union[str, int, float, None], part_intenger=None) -> str:
+    if value is None:
         return ""
+    str_integer = "{:,d}".format(int(value))
+
+    if decimal_separator == ",":
+        str_integer = str_integer.replace(",", ".")
+    else:
+        str_integer = str_integer.replace(".", ",")
+
+    return str_integer
 
 
-def unformat_number(new_str: Union[str, str], old_str, type_) -> Any:
+def unformat_number(new_str: str, old_str: Optional[str], type_) -> Any:
     ret_ = new_str
     if old_str is not None:
 

@@ -32,6 +32,7 @@ def init_project(DGI, options, project, mainForm, app) -> Any:
     if options.action:
         list = options.action.split(":")
         action_name = list[0].split(".")[0]
+        # FIXME: Why is commented out?
         # objaction = project.conn.manager(options.action)
         if action_name in project.actions.keys():
 
@@ -61,8 +62,9 @@ def init_project(DGI, options, project, mainForm, app) -> Any:
         main_window.show()
         project.message_manager().send("splash", "showMessage", ["Listo ..."])
         project.message_manager().send("splash", "hide")
-    if objaction:
-        project.openDefaultForm(objaction.form())
+    # FIXME: Is always None because the earlier code is commented out
+    # if objaction:
+    #     project.openDefaultForm(objaction.form())
 
     if DGI.localDesktop():
         ret = app.exec_()

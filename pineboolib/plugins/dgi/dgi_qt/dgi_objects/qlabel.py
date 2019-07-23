@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtWidgets, QtCore, QtGui  # type: ignore
-from typing import Any
+from typing import Any, Union
 
 
 class QLabel(QtWidgets.QLabel):
     def get_text(self):
         return super().text()
 
-    def setText(self, text: str) -> None:
+    def setText(self, text: Union[str, int]) -> None:
         if not isinstance(text, str):
             text = str(text)
         super().setText(text)

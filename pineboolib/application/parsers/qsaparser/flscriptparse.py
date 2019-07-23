@@ -129,7 +129,7 @@ def p_parse(token):
     last_lexspan = lexspan
 
 
-last_ok_token = None
+last_ok_token: Any = None
 error_count = 0
 last_error_token: Any = None
 last_error_line = -1
@@ -639,7 +639,7 @@ def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
             print("ERROR: content is not a dict!:", repr(content))
             print(".. obj:", repr(obj))
             raise TypeError("content is not a dict")
-            continue
+
         ctype = content["01-type"]
         value = content["99-value"]
         if ctype in ctype_alias:
@@ -728,12 +728,13 @@ def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):
             # lines.append(sep * depth + "<!-- %d -->" % (len("".join(tlines))))
 
             if value["has_data"] > 0 and value["has_objects"] == 0 and False:
+                pass
                 # Do it inline!
-                if value["has_data"] == 1 and tname:
-                    lines.append(sep * depth + '<%s id="%s" />' % (ctype, tname))
-                else:
-                    txt = "".join([x.strip() for x in tlines])
-                    lines.append(sep * depth + "<%s>%s</%s>" % (ctype, txt, ctype))
+                # if value["has_data"] == 1 and tname:
+                #     lines.append(sep * depth + '<%s id="%s" />' % (ctype, tname))
+                # else:
+                #     txt = "".join([x.strip() for x in tlines])
+                #     lines.append(sep * depth + "<%s>%s</%s>" % (ctype, txt, ctype))
             else:
                 attrs = []
                 if tname:

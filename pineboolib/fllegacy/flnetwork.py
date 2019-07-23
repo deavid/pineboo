@@ -1,5 +1,7 @@
 # # -*- coding: utf-8 -*-
+from typing import Optional
 from PyQt5 import QtCore  # type: ignore
+from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager, QNetworkReply  # type: ignore
 from pineboolib.core import decorators
 
 
@@ -9,7 +11,7 @@ class FLNetwork(QtCore.QObject):
     request = None
     manager = None
 
-    reply = None
+    reply: Optional[QNetworkReply] = None
 
     finished = QtCore.pyqtSignal()
     start = QtCore.pyqtSignal()
@@ -19,7 +21,6 @@ class FLNetwork(QtCore.QObject):
     def __init__(self, url) -> None:
         super(FLNetwork, self).__init__()
         self.url = url
-        from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager  # type: ignore
 
         self.request = QNetworkRequest()
 

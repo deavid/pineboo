@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Completada Si
-
+from typing import Optional
 from pineboolib.core import decorators
 
 
@@ -60,7 +60,7 @@ class PNRelationMetaData:
     @return Devuelve el nombre del campo relacionado
     """
 
-    def field(self) -> str:
+    def field(self) -> Optional[str]:
         return self.d.field_
 
     """
@@ -69,7 +69,7 @@ class PNRelationMetaData:
     @return Devuelve el nombre de la tabla de la base de datos con la que se está relacionada
     """
 
-    def foreignTable(self) -> str:
+    def foreignTable(self) -> Optional[str]:
         return self.d.foreignTable_
 
     """
@@ -78,7 +78,7 @@ class PNRelationMetaData:
     @return Devuelve el nombre del campo de la tabla foránea con la que está relacionada
     """
 
-    def foreignField(self) -> str:
+    def foreignField(self) -> Optional[str]:
         return self.d.foreignField_
 
     """
@@ -88,7 +88,7 @@ class PNRelationMetaData:
         define este objeto hacia la foránea
     """
 
-    def cardinality(self) -> str:
+    def cardinality(self) -> Optional[str]:
         return self.d.cardinality_
 
     """
@@ -140,7 +140,7 @@ class PNRelationMetaDataPrivate:
     Nombre del campo a relacionar
     """
 
-    field_ = None
+    field_: Optional[str] = None
 
     """
     Nombre de la tabla foránea a relacionar

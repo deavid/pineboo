@@ -263,16 +263,8 @@ class FLAccessControl(object):
     """
 
     def setAcos(self, acos: List[str]) -> None:
-        if acos is None:
-            return
+        self.acosPerms_.clear()
 
-        if self.acosPerms_:
-            self.acosPerms_.clear()
-            del self.acosPerms_
-
-        self.acosPerms_ = {}
-
-        # nameAcos = None
         i = 0
         while i < len(acos):
             self.acosPerms_[acos[i]] = acos[i + 1]

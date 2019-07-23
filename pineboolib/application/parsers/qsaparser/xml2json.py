@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from json import dumps as json_dumps
 from json import loads as json_loads
+from pineboolib.core.utils import logging
 
 import xml.parsers.expat
 from optparse import OptionParser
@@ -8,16 +9,11 @@ from typing import List
 
 #  json_string = json.dumps(python_variable)
 #  python_var = json.loads("string_encoded_jsonvar")
+logger = logging.getLogger("xml2json")
 
 
 def printr(*args):
-    return
-    print(args[0], end=" ")
-    for arg in args[1:]:
-        if type(arg) is str:
-            arg = arg.encode("utf-8")
-        print(repr(arg), end=" ")
-    print()
+    logger.debug(*args)
 
 
 def entity_rep(txt, entities=""):
