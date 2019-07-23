@@ -16,13 +16,15 @@ class FLReportEngine(object):
     def __init__(self, parent) -> None:
         self.d_ = FLReportEngine.FLReportEnginePrivate(self)
         self.relDpi_ = 78.0
-        self.rd = None
+        self.rd: Optional[QtXml.QDomDocument] = None
         self.logger = logging.getLogger("FLReportEngine")
         from pineboolib.application.parsers.kugarparser.kut2fpdf import Kut2FPDF
 
         self.parser_: Kut2FPDF = Kut2FPDF()
 
     class FLReportEnginePrivate(object):
+        rows_: Optional[Any]
+
         def __init__(self, q):
             self.qry_: Optional[PNSqlQuery] = None
             self.qFieldMtdList_ = None
@@ -120,11 +122,11 @@ class FLReportEngine(object):
         if isinstance(q, FLDomNodeInterface):
             return self.setFLReportData(q)
         if q is None:
-            return
+            return None
 
         self.rd = QtXml.QDomDocument("KugarData")
 
-        self.d_.rows_ = self.rd.createDocumentFragment()
+        self.d_.rows_ = self.rd.createDocumentFragment()  # FIXME: Don't set the private from the public.
         self.d_.setQuery(q)
         q.setForwardOnly(True)
         if q.exec_() and q.next():

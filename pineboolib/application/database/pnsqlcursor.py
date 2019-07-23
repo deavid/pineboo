@@ -440,7 +440,7 @@ class PNSqlCursor(QtCore.QObject):
     def setAtomicValueBuffer(self, fN: str, functionName: str) -> None:
         from pineboolib import pncontrolsfactory
 
-        if not sefl.d.buffer_ or not fN or not self.d.metadata_:
+        if not self.d.buffer_ or not fN or not self.d.metadata_:
             return
 
         field = self.d.metadata_.field(fN)
@@ -646,7 +646,7 @@ class PNSqlCursor(QtCore.QObject):
         if field.outTransaction() and self.db().db() is not self.db().dbAux() and self.modeAccess() != self.Insert:
             pK = self.d.metadata_.primaryKey()
 
-            if buffer is None:
+            if self.d.buffer_ is None:
                 return None
             if pK:
 
@@ -666,7 +666,7 @@ class PNSqlCursor(QtCore.QObject):
 
         else:
 
-            if buffer is None:
+            if self.d.buffer_ is None:
                 return None
             v = self.d.buffer_.value(fN)
 
@@ -716,7 +716,7 @@ class PNSqlCursor(QtCore.QObject):
 
         type_ = field.type()
         bufferCopy = self.bufferCopy()
-        if not sefl.d.self.d.bufferCopy_:
+        if bufferCopy is None:
             raise Exception("no bufferCopy")
         v: Any = None
         if bufferCopy.isNull(fN):
@@ -889,10 +889,11 @@ class PNSqlCursor(QtCore.QObject):
     def fieldDisabled(self, fN: str) -> bool:
         if self.modeAccess() in (self.Insert, self.Edit):
 
-            if self.d.cursorRelation_ is not None and relation is not None:
+            if self.d.cursorRelation_ is not None and self.d.relation_ is not None:
                 if not self.d.cursorRelation_.metadata():
                     return False
-                if self.d.relation_.field().lower() == fN.lower():
+                field = self.d.relation_.field()
+                if field is not None and field.lower() == fN.lower():
                     return True
                 else:
                     return False
@@ -1051,7 +1052,7 @@ class PNSqlCursor(QtCore.QObject):
 
     def isCopyNull(self, fN: str) -> bool:
 
-        if not sefl.d.buffer__copy:
+        if not self.d.bufferCopy_:
             raise Exception("No buffer_copy set")
         return self.d.bufferCopy_.isNull(fN)
 
@@ -1088,7 +1089,7 @@ class PNSqlCursor(QtCore.QObject):
 
     def isModifiedBuffer(self) -> bool:
 
-        if buffer is None:
+        if self.d.buffer_ is None:
             return False
 
         modifiedFields = self.d.buffer_.modifiedFields()
@@ -1151,7 +1152,7 @@ class PNSqlCursor(QtCore.QObject):
     def msgCheckIntegrity(self) -> str:
         msg = ""
 
-        if buffer is None or metadata is None:
+        if self.d.buffer_ is None or self.d.metadata_ is None:
             msg = "\nBuffer vacío o no hay metadatos"
             return msg
 
@@ -1218,7 +1219,7 @@ class PNSqlCursor(QtCore.QObject):
                         del tMD
 
                 if self.d.modeAccess_ == self.Edit:
-                    if buffer and self.d.bufferCopy_:
+                    if self.d.buffer_ and self.d.bufferCopy_:
                         if self.d.buffer_.value(fiName) == self.d.bufferCopy_.value(fiName):
                             continue
 
@@ -1463,7 +1464,7 @@ class PNSqlCursor(QtCore.QObject):
 
     def setUnLock(self, fN: str, v: bool) -> None:
 
-        if not metadata or not self.modeAccess() == self.Browse:
+        if not self.d.metadata_ or not self.modeAccess() == self.Browse:
             return
         if not self.d.metadata_.field(fN).type() == "unlock":
             logger.warning("setUnLock sólo permite modificar campos del tipo Unlock")
@@ -1527,7 +1528,7 @@ class PNSqlCursor(QtCore.QObject):
 
     def bufferIsNull(self, pos_or_name: Union[int, str]) -> bool:
 
-        if buffer is not None:
+        if self.d.buffer_ is not None:
             return self.d.buffer_.isNull(pos_or_name)
 
         return True
@@ -1540,7 +1541,7 @@ class PNSqlCursor(QtCore.QObject):
 
     def bufferSetNull(self, pos_or_name: Union[int, str]) -> None:
 
-        if buffer is not None:
+        if self.d.buffer_ is not None:
             self.d.buffer_.setNull(pos_or_name)
 
     """
@@ -1551,7 +1552,7 @@ class PNSqlCursor(QtCore.QObject):
 
     def bufferCopyIsNull(self, pos_or_name: Union[int, str]) -> bool:
 
-        if buffer_copy is not None:
+        if self.d.bufferCopy_ is not None:
             return self.d.bufferCopy_.isNull(pos_or_name)
         return True
 
@@ -1563,7 +1564,7 @@ class PNSqlCursor(QtCore.QObject):
 
     def bufferCopySetNull(self, pos_or_name: Union[int, str]) -> None:
 
-        if buffer_copy is not None:
+        if self.d.bufferCopy_ is not None:
             self.d.bufferCopy_.setNull(pos_or_name)
 
     """
@@ -3246,7 +3247,7 @@ class PNSqlCursor(QtCore.QObject):
 
     def field(self, name: str) -> Optional["FieldStruct"]:
 
-        return self.d.buffer_.field(name) if buffer else None
+        return self.d.buffer_.field(name)
 
     """
     Actualiza tableModel con el buffer
