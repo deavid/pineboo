@@ -1046,11 +1046,11 @@ class FLQPSQL(object):
         if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
             logger.warning(
                 "FLManager : "
-                + util.translate("application", "En método alterTable, no se ha podido borrar el índice %1_pkey de la tabla antigua.").arg(
-                    oldMTD.name()
+                + util.translate(
+                    "application", "En método alterTable, no se ha podido borrar el índice %s_pkey de la tabla antigua." % oldMTD.name()
                 )
             )
-            self.db_.dbAux().rollback()
+            self.db_.dbAux().rollbackTransaction()
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:

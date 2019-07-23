@@ -215,19 +215,19 @@ class PNSqlCursor(QtCore.QObject):
         if cR and r:
             try:
                 cR.bufferChanged.disconnect(self.refresh)
-                cR.newself.d.buffer_.disconnect(self.refresh)
+                cR.newBuffer.disconnect(self.refresh)
                 # cR.d._current_changed.disconnect(self.refresh)
             except Exception:
                 pass
             cR.bufferChanged.connect(self.refresh)
-            cR.newself.d.buffer_.connect(self.refresh)
+            cR.newBuffer.connect(self.refresh)
             # cR.d._current_changed.connect(self.refresh)
             try:
-                cR.newself.d.buffer_.disconnect(self.clearPersistentFilter)
+                cR.newBuffer.disconnect(self.clearPersistentFilter)
 
             except Exception:
                 pass
-            cR.newself.d.buffer_.connect(self.clearPersistentFilter)
+            cR.newBuffer.connect(self.clearPersistentFilter)
             if (
                 project.DGI.use_model() and cR.meta_model()
             ):  # Si el cursor_relation tiene un model asociado , este cursor carga el propio también
@@ -1966,7 +1966,7 @@ class PNSqlCursor(QtCore.QObject):
 
                 if self.d.buffer_:
                     self.d.buffer_.clear_buffer()
-                self.newself.d.buffer_.emit()
+                self.newBuffer.emit()
 
     """
     Actualiza el conjunto de registros con un retraso.
@@ -2000,7 +2000,7 @@ class PNSqlCursor(QtCore.QObject):
         self.select()
         pos = self.atFrom()
         if not self.seek(pos, False, True):
-            self.newself.d.buffer_.emit()
+            self.newBuffer.emit()
         else:
 
             if self.d.cursorRelation_ and self.d.relation_ and self.d.cursorRelation_.metadata():
@@ -2106,7 +2106,7 @@ class PNSqlCursor(QtCore.QObject):
 
             self.d.undoAcl()
             self.updateBufferCopy()
-            self.newself.d.buffer_.emit()
+            self.newBuffer.emit()
 
         elif self.d.modeAccess_ == self.Edit:
             if not self.commitBufferCursorRelation():
@@ -2119,7 +2119,7 @@ class PNSqlCursor(QtCore.QObject):
 
             self.setNotGenerateds()
             self.updateBufferCopy()
-            self.newself.d.buffer_.emit()
+            self.newBuffer.emit()
 
         elif self.d.modeAccess_ == self.Del:
 
@@ -2136,7 +2136,7 @@ class PNSqlCursor(QtCore.QObject):
 
             self.primeUpdate()
             self.setNotGenerateds()
-            self.newself.d.buffer_.emit()
+            self.newBuffer.emit()
 
         else:
             logger.error("refreshBuffer(). No hay definido modeAccess()")
@@ -2406,7 +2406,7 @@ class PNSqlCursor(QtCore.QObject):
         self.refreshBuffer()
         # if self.modeAccess() == self.Browse:
         #    self.d._currentregister = -1
-        self.newself.d.buffer_.emit()
+        self.newBuffer.emit()
 
         return True
 
@@ -2620,7 +2620,7 @@ class PNSqlCursor(QtCore.QObject):
                 self.d.buffer_.setValue(it.name(), buffer_aux.value(it.name()))
 
             del buffer_aux
-            self.newself.d.buffer_.emit()
+            self.newBuffer.emit()
 
     """
     Realiza la acción asociada a elegir un registro del cursor, por defecto se abre el formulario de
@@ -2783,7 +2783,7 @@ class PNSqlCursor(QtCore.QObject):
 
             pk_row = self.d._model.findPKRow((self.d.buffer_.value(pk_name),))
             if pk_row is None:
-                raise Exception("pk_row not found aflter insert!")
+                raise Exception("pk_row not found after insert!")
             self.move(pk_row)
 
             updated = True
