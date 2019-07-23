@@ -769,7 +769,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         if model:
             for column in range(model.columnCount()):
-                list_.append(self.tableRecords._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+                list_.append(self.tableRecords_._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
 
         return list_
 
@@ -822,7 +822,7 @@ class FLTableDB(QtWidgets.QWidget):
 
     @decorators.BetaImplementation
     def aliasCheckColumn(self):
-        return self.tableRecords._model.headerData(
+        return self.tableRecords_._model.headerData(
             self.tableRecords_.selectionModel().selectedColumns(), QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole
         )
 
