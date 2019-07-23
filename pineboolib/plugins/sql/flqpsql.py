@@ -200,7 +200,10 @@ class FLQPSQL(object):
                 res = "='f'"
 
         elif type_ == "date":
-            res = "::text LIKE '%%" + util.dateDMAtoAMD(str(v)) + "'"
+            dateamd = util.dateDMAtoAMD(str(v))
+            if dateamd is None:
+                dateamd = ""
+            res = "::text LIKE '%%" + dateamd + "'"
 
         elif type_ == "time":
             t = v.toTime()

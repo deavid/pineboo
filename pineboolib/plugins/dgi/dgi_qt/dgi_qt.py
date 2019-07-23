@@ -80,11 +80,16 @@ class dgi_qt(dgi_schema):
         root_ = tree.getroot()
 
         UIVersion = root_.get("version")
+        if UIVersion is None:
+            UIVersion = "1.0"
         if parent is None:
             wid = root_.find("widget")
             if wid is None:
                 raise Exception("No parent provided and also no <widget> found")
-            parent = getattr(pineboolib.pncontrolsfactory, wid.get("class"))()
+            xclass = wid.get("class")
+            if xclass is None:
+                raise Exception("class was expected")
+            parent = getattr(pineboolib.pncontrolsfactory, xclass)()
 
         if hasattr(parent, "widget"):
             w_ = parent.widget

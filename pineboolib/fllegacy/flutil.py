@@ -681,7 +681,7 @@ class FLUtil(QtCore.QObject):
         """
         return str(ret)
 
-    def readSettingEntry(self, key: str, def_: str = u"") -> Any:
+    def readSettingEntry(self, key: str, def_: Any = u"") -> Any:
         """
         Lee el valor de un setting en el directorio de la instalación de AbanQ
 

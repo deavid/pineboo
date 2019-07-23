@@ -308,8 +308,14 @@ class FLCodBar(object):
 
         svg = bar_.render(render_options)
         xml_svg = load2xml(svg.decode("utf-8")).getroot()
-        svg_w = 3.779 * float(xml_svg.get("width")[0:6])
-        svg_h = 3.779 * float(xml_svg.get("height")[0:6])
+        xwidth, xheight = xml_svg.get("width"), xml_svg.get("height")
+        if xwidth and xheight:
+            svg_w = 3.779 * float(xwidth[0:6])
+            svg_h = 3.779 * float(xheight[0:6])
+        else:
+            logger.warning("width or height missing")
+            svg_w = 0.0
+            svg_h = 0.0
         self.p = QPixmap(svg_w, svg_h)
         render = QSvgRenderer(svg)
         self.p.fill(QtCore.Qt.transparent)

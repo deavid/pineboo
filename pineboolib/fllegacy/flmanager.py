@@ -178,7 +178,7 @@ class FLManager(QtCore.QObject, IManager):
             raise Exception("metadata. self.db_ is empty!")
 
         if quick is None:
-            quick = False if util.readSettingEntry("application/dbadmin_enabled", False) else True
+            quick = bool(util.readSettingEntry("application/dbadmin_enabled", False))
 
         if isinstance(n, str):
             if not n:
@@ -533,7 +533,7 @@ class FLManager(QtCore.QObject, IManager):
         util = FLUtil()
         doc = QDomDocument(n)
         list_modules = self.db_.managerModules().listAllIdModules()
-        content_actions = None
+        content_actions = ""
 
         for it in list_modules:
 

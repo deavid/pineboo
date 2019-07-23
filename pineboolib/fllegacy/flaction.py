@@ -66,11 +66,16 @@ class FLAction(object):
             self.setName(action)
         elif isinstance(action, XMLAction):
             self.setName(action.name)
-            self.setScriptForm(action.mainscript)
-            self.setScriptFormRecord(action.script)
-            self.setForm(action.mainform)
-            self.setFormRecord(action.form)
-            self.setCaption(action.alias)
+            if action.mainscript is not None:
+                self.setScriptForm(action.mainscript)
+            if action.scriptformrecord is not None:
+                self.setScriptFormRecord(action.scriptformrecord)
+            if action.mainform is not None:
+                self.setForm(action.mainform)
+            if action.form is not None:
+                self.setFormRecord(action.form)
+            if action.alias is not None:
+                self.setCaption(action.alias)
         else:
             raise Exception("Unsupported action %r" % action)
 

@@ -538,10 +538,8 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
 
     nwidget = None
     if widget == origWidget:
-        class_ = None
-        if xml.get("class"):
-            class_ = xml.get("class")
-        else:
+        class_ = xml.get("class")
+        if class_ is None:
             class_ = type(widget).__name__
 
         nwidget = createWidget(class_, parent=origWidget)
@@ -554,7 +552,10 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
     for c in xml:
         if c.tag == "layout":
             # logger.warning("Trying to replace layout. Ignoring. %s, %s", repr(c.tag), widget.layout)
-            lay_ = getattr(QtWidgets, c.get("class"))()
+            classname = c.get("class")
+            if classname is None:
+                raise Exception("Expected class attr")
+            lay_ = getattr(QtWidgets, classname)()
             lay_.setObjectName(c.get("name"))
             widget.setLayout(lay_)
             continue
@@ -644,7 +645,10 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
             # que estamos dentro de un contenedor.
             # Según el tipo de contenedor, los widgets
             # se agregan de una forma u otra.
-            new_widget = createWidget(c.get("class"), parent=parent)
+            classname = c.get("class")
+            if classname is None:
+                raise Exception("Expected class attr")
+            new_widget = createWidget(classname, parent=parent)
             new_widget.hide()
             new_widget._attrs = {}
             loadWidget(c, new_widget, parent, origWidget)
@@ -731,6 +735,9 @@ def loadIcon(xml: "ET.Element") -> None:
 
     name = xml.get("name")
     xmldata = xml.find("data")
+    if name is None:
+        logger.warning("loadIcon: provided xml lacks attr name")
+        return
     if xmldata is None:
         logger.warning("loadIcon: provided xml lacks <data>")
         return

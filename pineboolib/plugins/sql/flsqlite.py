@@ -170,7 +170,10 @@ class FLSQLITE(object):
 
         elif type_ == "date":
             util = FLUtil()
-            res = "LIKE '%%" + util.dateDMAtoAMD(str(v)) + "'"
+            dateamd = util.dateDMAtoAMD(str(v))
+            if dateamd is None:
+                dateamd = ""
+            res = "LIKE '%%" + dateamd + "'"
 
         elif type_ == "time":
             t = v.toTime()
