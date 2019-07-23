@@ -3563,8 +3563,8 @@ class PNCursorPrivate(QtCore.QObject):
 
     """
     Cursor propietario
+    cursor_: "PNSqlCursor"
     """
-    cursor_: PNSqlCursor
 
     """
     Nombre del cursor
@@ -3635,6 +3635,7 @@ class PNCursorPrivate(QtCore.QObject):
         self.aclDone_ = False
         self.edition_ = True
         self.browse_ = True
+        self.cursor_: Optional["PNSqlCursor"] = None
 
     def __del__(self) -> None:
 
@@ -3669,8 +3670,10 @@ class PNCursorPrivate(QtCore.QObject):
             self.acosBackupTable_ = self.acTable_.getAcos()
             self.acPermBackupTable_ = self.acTable_.perm()
             self.acTable_.clear()
-
-        if self.modeAccess_ == PNSqlCursor.Insert or (not self.lastAt_ == -1 and self.lastAt_ == self.cursor_.at()):
+        cursor = self.cursor_
+        if cursor is None:
+            raise Exception("Cursor not created yet")
+        if self.modeAccess_ == PNSqlCursor.Insert or (not self.lastAt_ == -1 and self.lastAt_ == cursor.at()):
             return
 
         if self.acosCondName_ is not None:
