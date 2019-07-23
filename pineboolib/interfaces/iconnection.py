@@ -76,11 +76,11 @@ class IConnection:
     def conectar(self, db_name, db_host, db_port, db_userName, db_returnword) -> None:
         return
 
-    def driverName(self) -> None:
-        return
+    def driverName(self) -> str:
+        return ""
 
-    def driverAlias(self) -> None:
-        return
+    def driverAlias(self) -> str:
+        return ""
 
     def driverNameToDriverAlias(self, name) -> str:
         return ""

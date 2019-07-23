@@ -43,8 +43,8 @@ class FLLineEdit(QtWidgets.QLineEdit):
 
     def setText(self, text_, check_focus=True) -> None:
         text_ = str(text_)
-        # if not project._DGI.localDesktop():
-        #    project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text_)
+        # if not project.DGI.localDesktop():
+        #    project.DGI._par.addQueque("%s_setText" % self._parent.objectName(), text_)
         # else:
         if check_focus:
 

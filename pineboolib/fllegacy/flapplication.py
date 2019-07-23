@@ -855,8 +855,8 @@ class FLApplication(QtCore.QObject):
         pncontrolsfactory.QMessageBox.aboutQt(self.mainWidget())
 
     def aboutPineboo(self) -> None:
-        if project._DGI and project._DGI.localDesktop():
-            project._DGI.about_pineboo()
+        if project.DGI.localDesktop():
+            project.DGI.about_pineboo()
 
     def statusHelpMsg(self, text) -> None:
         from pineboolib.core.settings import config
@@ -1222,7 +1222,7 @@ class FLApplication(QtCore.QObject):
         pass
 
     def aqAppIdle(self) -> None:
-        if project._DGI and project._DGI.localDesktop():
+        if project.DGI.localDesktop():
             from pineboolib import pncontrolsfactory
 
             if (

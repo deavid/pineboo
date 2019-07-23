@@ -431,7 +431,7 @@ class PNSqlQuery(object):
                 if not v:
                     if not project._DGI:
                         raise Exception("project._DGI is empty!")
-                    dialog = project._DGI.QInputDialog
+                    dialog = project.DGI.QInputDialog
 
                     if dialog is not None:
                         v = dialog.getText(None, "Entrada de parámetros de la consulta", pD)

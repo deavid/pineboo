@@ -268,8 +268,8 @@ class FLManagerModules(object):
         if not project._DGI:
             raise Exception("DGI not loaded")
 
-        if project._DGI.alternative_content_cached():
-            data = project._DGI.content_cached(project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey)
+        if project.DGI.alternative_content_cached():
+            data = project.DGI.content_cached(project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey)
             if data is not None:
                 return data
 
@@ -341,7 +341,7 @@ class FLManagerModules(object):
 
         if not project._DGI:
             raise Exception("DGI not loaded")
-        return project._DGI.createUI(n, connector, parent, name)
+        return project.DGI.createUI(n, connector, parent, name)
 
     """
     Crea el formulario maestro de una acción a partir de su fichero de descripción.
@@ -721,7 +721,7 @@ class FLManagerModules(object):
         from pineboolib.application import project
 
         if n.endswith(".mtd") and project._DGI:
-            if n[: n.find(".mtd")] in project._DGI.sys_mtds() or n == "flfiles.mtd":
+            if n[: n.find(".mtd")] in project.DGI.sys_mtds() or n == "flfiles.mtd":
                 return "sys"
 
         cursor = self.conn_.execute_query("SELECT idmodulo FROM flfiles WHERE nombre='%s'" % n)

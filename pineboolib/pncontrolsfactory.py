@@ -153,7 +153,7 @@ def resolveObject(name: str) -> Any:
     if obj_:
         return obj_
 
-    logger.warning("resolveObject: class <%s> not found in dgi <%s>", name, project._DGI.alias().lower())
+    logger.warning("resolveObject: class <%s> not found in dgi <%s>", name, project.DGI.alias().lower())
     return ObjectNotFoundInCurrentDGI
 
 

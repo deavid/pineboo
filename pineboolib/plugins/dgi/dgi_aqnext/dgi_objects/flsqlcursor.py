@@ -250,7 +250,7 @@ class FLSqlCursor(QtCore.QObject):
         # mtd = cursor.metadata()
         if module_name is None:
             module_name = cursor.curName()
-        model = meta_model(project._DGI.load_meta_model(module_name), cursor)
+        model = meta_model(project.DGI.load_meta_model(module_name), cursor)
         if model:
             cursor._meta_model = model
             # setattr(cursor.meta_model(), "_cursor", cursor)

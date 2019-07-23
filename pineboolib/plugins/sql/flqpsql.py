@@ -107,7 +107,7 @@ class FLQPSQL(object):
             if project._splash:
                 project._splash.hide()
 
-            if project._DGI and not project._DGI.localDesktop():
+            if project._DGI and not project.DGI.localDesktop():
                 return False
 
             if "does not exist" in str(e) or "no existe" in str(e):

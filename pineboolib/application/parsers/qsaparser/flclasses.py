@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List, Dict
 
 debug = 0
 
@@ -89,11 +89,11 @@ class cBaseList(cBase):
     def __init__(self):
         cBase.__init__(self)
         self.type = ("List", "Unknown")
-        self.slice = []
-        self.hidden = []
-        self.byType = {}
-        self.bySubtype = {}
-        self.byDefName = {}
+        self.slice: List[cBase] = []
+        self.hidden: List[cBase] = []
+        self.byType: Dict[str, List[cBase]] = {}
+        self.bySubtype: Dict[str, List[cBase]] = {}
+        self.byDefName: Dict[str, cBase] = {}
 
     def __len__(self):
         return len(self.slice)

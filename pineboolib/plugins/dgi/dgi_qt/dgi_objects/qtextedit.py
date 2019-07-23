@@ -14,8 +14,8 @@ class QTextEdit(QtWidgets.QTextEdit):
 
     def setText(self, text) -> None:
         super(QTextEdit, self).setText(text)
-        # if not project._DGI.localDesktop():
-        #    project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text)
+        # if not project.DGI.localDesktop():
+        #    project.DGI._par.addQueque("%s_setText" % self._parent.objectName(), text)
 
     def getText(self) -> Any:
         return super(QTextEdit, self).toPlainText()

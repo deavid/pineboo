@@ -49,9 +49,10 @@ class dgi_aqnext(dgi_schema):
 
         qsa_sys = pncontrolsfactory.SysType()
         logger.warning("DGI_%s se ha inicializado correctamente" % self._alias)
-        logger.warning("Driver  DB: %s", project.conn.driverAlias())
-        logger.warning("Usuario DB: %s", qsa_sys.nameUser())
-        logger.warning("Nombre  DB: %s", qsa_sys.nameBD())
+        if project.conn:
+            logger.warning("Driver  DB: %s", project.conn.driverAlias())
+            logger.warning("Usuario DB: %s", qsa_sys.nameUser())
+            logger.warning("Nombre  DB: %s", qsa_sys.nameBD())
 
     def processEvents(self):
         return QtCore.QCoreApplication.processEvents()
@@ -79,7 +80,7 @@ class dgi_aqnext(dgi_schema):
         data_ = None
         if module_id == "sys" and file_name in self.sys_mtds():
             path_ = filedir("./plugins/dgi/dgi_aqnext/system_files/%s/%s.%s" % (file_ext, file_name, file_ext))
-            if os.path.exists(path_):
+            if os.path.exists(path_) and project.conn:
                 data_ = project.conn.managerModules().contentFS(path_, False)
 
         return data_
@@ -102,6 +103,8 @@ class dgi_aqnext(dgi_schema):
     def __content_cached__old__(self, tmp_dir, db_name, module_id, ext_, name_, sha_key):
         data = None
         utf8_ = False
+        if not project.conn:
+            raise Exception
         if ext_ == "qs":
             from django.conf import settings  # type: ignore
 
@@ -199,7 +202,7 @@ class dgi_aqnext(dgi_schema):
                 delattr(qsa_dict_modules, action_xml.name)
 
             action_xml.table = action_xml.name
-            action_xml.script = script_name
+            action_xml.scriptformrecord = script_name
             project.actions[action_xml.name] = action_xml
             delayed_action = DelayedObjectProxyLoader(
                 action_xml.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (app, action_xml.name)

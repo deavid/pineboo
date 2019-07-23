@@ -8,6 +8,7 @@ from pineboolib.core.utils.struct import AreaStruct
 from pineboolib.core.settings import config
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.application import project
+from pineboolib.core.settings import settings
 
 from PyQt5.QtWidgets import (  # type: ignore
     QToolButton,

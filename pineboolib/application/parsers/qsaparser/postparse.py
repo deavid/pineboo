@@ -521,7 +521,9 @@ def create_xml(tagname) -> Optional[TagObject]:
 
 
 def parse_unknown(tagname, treedata):
-    xmlelem: TagObject = create_xml(tagname)
+    xmlelem = create_xml(tagname)
+    if xmlelem is None:
+        raise Exception("No class for parsing tagname %s" % tagname)
     i = 0
     for k, v in treedata["content"]:
         if type(v) is dict:
@@ -591,6 +593,8 @@ def parseArgs(argv):
 
     parser.add_option("--strict", action="store_true", dest="strict", default=False, help="Enable STRICT_MODE on pytnyzer")
 
+    parser.add_option("--python-ext", dest="python_ext", default=".qs.py", help="Change Python file extension (default: '.qs.py')")
+
     (options, args) = parser.parse_args(argv)
     return (options, args)
 
@@ -642,7 +646,7 @@ def execute(options, args):
             logger.info("Pass 3 - Test PY file load . . .")
             options.topython = False
             try:
-                execute(options, [(arg + ".xml.py").replace(".qs.xml.py", ".qs.py") for arg in args])
+                execute(options, [(arg + ".xml.py").replace(".qs.xml.py", options.python_ext) for arg in args])
             except Exception:
                 logger.exception("Error al ejecutar Python:")
         logger.debug("Done.")
@@ -668,8 +672,8 @@ def execute(options, args):
             args = [
                 x
                 for x in args
-                if not os.path.exists((x + ".py").replace(".qs.xml.py", ".qs.py"))
-                or os.path.getmtime(x) > os.path.getctime((x + ".py").replace(".qs.xml.py", ".qs.py"))
+                if not os.path.exists((x + ".py").replace(".qs.xml.py", options.python_ext))
+                or os.path.getmtime(x) > os.path.getctime((x + ".py").replace(".qs.xml.py", options.python_ext))
             ]
 
         nfs = len(args)
@@ -679,7 +683,7 @@ def execute(options, args):
                 destname = os.path.join(options.storepath, bname + ".py")
             else:
                 destname = filename + ".py"
-            destname = destname.replace(".qs.xml.py", ".qs.py")
+            destname = destname.replace(".qs.xml.py", options.python_ext)
             if not os.path.exists(filename):
                 logger.error("Fichero %r no encontrado" % filename)
                 continue

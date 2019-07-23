@@ -4,6 +4,7 @@ from json import loads as json_loads
 
 import xml.parsers.expat
 from optparse import OptionParser
+from typing import List
 
 #  json_string = json.dumps(python_variable)
 #  python_var = json.loads("string_encoded_jsonvar")
@@ -45,7 +46,7 @@ class xmlElement(object):
         self.ttype = ttype
         self.tdata = tdata
 
-        self.children = []
+        self.children: List["xmlElement"] = []
 
         if self.parent:
             self.depth = parent.depth + 1
@@ -143,7 +144,7 @@ class JSON_Base(object):
 class JSON_Reverter(JSON_Base):
     def init_vars(self):
         self.cElement = None
-        self.rootXML = []
+        self.rootXML: List[xmlElement] = []
 
     def processCmd(self, key, val):
         if key == "encoding":
@@ -191,7 +192,7 @@ class JSON_Reverter(JSON_Base):
             depth = int(depth)
             text = ""
             ttype = "text"
-            attrs = {}
+            attrs: dict = {}
 
             # self.foutput.write("%d\t%s\n" % (depth, tag))
             for field in fields[1:]:
@@ -216,7 +217,8 @@ class JSON_Reverter(JSON_Base):
                     text = fvalue
                     ttype = "cdata"
                 if ftype == "attrs":
-                    attrs = fvalue
+                    if isinstance(fvalue, dict):
+                        attrs = fvalue
 
             self.newElement(depth, tag, text, ttype, attrs)
 
@@ -371,7 +373,7 @@ class JSON_Converter(JSON_Base):
     def init_vars(self):
         self.real_encoding = self.getRealEncoding()
         self.xmltag = None
-        self.taglist = []
+        self.taglist: List[xmlElement] = []
         self.p = xml.parsers.expat.ParserCreate(self.real_encoding)
 
         self.p.StartElementHandler = self.StartElementHandler
@@ -585,19 +587,19 @@ def main():
     if action == "convert":
         for fname in args:
 
-            fhandler = open(fname, "rb")
-            fw = open(fname + ".json", "wb")
-            rawtext = fhandler.read()
-            fhandler.seek(0)
+            fhandlerb = open(fname, "rb")
+            fwb = open(fname + ".json", "wb")
+            rawtext = fhandlerb.read()
+            fhandlerb.seek(0)
             if options.encoding == "auto":
                 encoding = autodetectXmlEncoding(rawtext)
             else:
                 encoding = options.encoding
-            jconv = JSON_Converter(fhandler, fw, encoding)
+            jconv = JSON_Converter(fhandlerb, fwb, encoding)
             jconv.process()
 
-            fhandler.close()
-            fw.close()
+            fhandlerb.close()
+            fwb.close()
     elif action == "revert":
         for fname in args:
             lExt = fname.split(".")

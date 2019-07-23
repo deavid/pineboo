@@ -60,7 +60,7 @@ class FLAccessControlMainWindow(FLAccessControl):
 class FLAccessControlForm(FLAccessControl):
     def __init__(self):
         super().__init__()
-        if project._DGI.localDesktop():
+        if project.DGI.localDesktop():
             from PyQt5.Qt import qApp  # type: ignore
             from PyQt5 import QtGui  # type: ignore
 
@@ -124,7 +124,7 @@ class FLAccessControlForm(FLAccessControl):
             if w:
                 perm = self.acosPerms_[it]
                 if perm in ("-w", "--"):
-                    if project._DGI and project._DGI.localDesktop():
+                    if project.DGI.localDesktop():
                         w.setPalette(self.pal)
                     w.setDisabled(True)
                     w.hide()

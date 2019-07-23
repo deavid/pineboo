@@ -968,7 +968,7 @@ class DockListView(QtCore.QObject):
         # self.w_.resize(width, height)
         from pineboolib.application import project
 
-        if not project._DGI.mobilePlatform():
+        if not project.DGI.mobilePlatform():
             visible = settings.readBoolEntry("%svisible" % key, True)
             if visible:
                 self.w_.show()
