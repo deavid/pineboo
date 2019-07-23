@@ -2526,6 +2526,8 @@ class FLFieldDB(QtWidgets.QWidget):
         else:
             a = self.actionName_
 
+        if a is None:
+            raise Exception("action is empty!")
         c.setAction(a)
 
         self.modeAccess = self.cursor_.modeAccess()
