@@ -46,6 +46,12 @@ precedence = (
     ("left", "OR", "AND", "XOR", "LSHIFT", "RSHIFT"),
 )
 
+last_ok_token: Any = None
+error_count = 0
+last_error_token: Any = None
+last_error_line = -1
+ok_count = 0
+
 
 def cleanNoPython(data):
     return re.sub(r"\/\/___NOPYTHON\[\[.*?\/\/\]\]___NOPYTHON\s*", "", data, flags=re.DOTALL)
@@ -127,13 +133,6 @@ def p_parse(token):
         tokelines[lexspan[0]] = token.lexer.lineno
     global last_lexspan
     last_lexspan = lexspan
-
-
-last_ok_token: Any = None
-error_count = 0
-last_error_token: Any = None
-last_error_line = -1
-ok_count = 0
 
 
 def p_error(t):
