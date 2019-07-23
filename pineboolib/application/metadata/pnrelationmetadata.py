@@ -140,32 +140,32 @@ class PNRelationMetaDataPrivate:
     Nombre del campo a relacionar
     """
 
-    field_: Optional[str] = None
+    field_: str
 
     """
     Nombre de la tabla foránea a relacionar
     """
-    foreignTable_ = None
+    foreignTable_: str
 
     """
     Nombre del campo foráneo relacionado
     """
-    foreignField_ = None
+    foreignField_: str
 
     """
     Cardinalidad de la relación
     """
-    cardinality_ = None
+    cardinality_: str
 
     """
     Indica si los borrados serán en cascada, en relaciones M1
     """
-    deleteCascade_ = None
+    deleteCascade_: bool
 
     """
     Indica si las modificaciones serán en cascada, en relaciones M1
     """
-    updateCascade_ = None
+    updateCascade_: bool
 
     """
     Indica si se deben aplicar la reglas de integridad en esta relación
