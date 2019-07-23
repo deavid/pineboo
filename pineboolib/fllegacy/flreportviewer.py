@@ -15,7 +15,7 @@ from pineboolib.fllegacy.flstylepainter import FLStylePainter
 from pineboolib.fllegacy.flreportengine import FLReportEngine
 from pineboolib import logging
 
-from typing import Any, List, Mapping, Sized, Union, Dict
+from typing import Any, List, Mapping, Sized, Union, Dict, Optional
 
 
 AQ_USRHOME = "."  # FIXME
@@ -23,7 +23,7 @@ AQ_USRHOME = "."  # FIXME
 
 class internalReportViewer(QObject):
 
-    rptEngine_: Any
+    rptEngine_: Optional[Any] = None
     dpi_ = 0
     report_: List[Any]
     num_copies = 1
@@ -78,7 +78,7 @@ class FLReportViewer(QtWidgets.QWidget):
         self.loop_ = False
         self.eventloop = QtCore.QEventLoop()
         self.reportPrinted_ = False
-        self.rptEngine_ = None
+        self.rptEngine_: Optional[Any] = None
         self.report_ = []
         self.slotsPrintDisabled_ = False
         self.slotsExportedDisabled_ = False
@@ -158,7 +158,7 @@ class FLReportViewer(QtWidgets.QWidget):
     def rptEngine(self) -> Any:
         return self.rptEngine_
 
-    def setReportEngine(self, r=None) -> None:
+    def setReportEngine(self, r: Optional[Any] = None) -> None:
         if self.rptEngine_ == r:
             return
 
@@ -192,7 +192,7 @@ class FLReportViewer(QtWidgets.QWidget):
         # if self.loop_:
         #    print("FLReportViewer::exec(): Se ha detectado una llamada recursiva")
         #    return
-        if hasattr(self.rptViewer_.rptEngine_, "parser_"):
+        if self.rptViewer_.rptEngine_ and hasattr(self.rptViewer_.rptEngine_, "parser_"):
             pdf_file = self.rptViewer_.rptEngine_.parser_.get_file_name()
             from pineboolib.application import project
 
@@ -651,16 +651,17 @@ class FLReportViewer(QtWidgets.QWidget):
 
     @decorators.BetaImplementation
     def setDefaults(self):
-        self.spnResolution_.setValue(300)
+        import platform
 
-        if True:
-            # Linux
+        self.spnResolution_.setValue(300)
+        system = platform.system()
+        if system == "Linux":
             self.spnPixel_.setValue(780)
-        elif False:
-            # WIN32 #FIXME
+        elif system == "Windows":
+            # FIXME
             pass
-        else:
-            # MAC #FIXME
+        elif system == "Darwin":
+            # FIXME
             pass
 
     @decorators.BetaImplementation
@@ -798,12 +799,12 @@ class FLReportViewer(QtWidgets.QWidget):
         return -1
 
     def pageDimensions(self) -> Any:
-        if hasattr(self.rptViewer_.rptEngine_, "parser_"):
+        if self.rptViewer_.rptEngine_ and hasattr(self.rptViewer_.rptEngine_, "parser_"):
             return self.rptViewer_.rptEngine_.parser_._page_size
         return -1
 
     def pageCount(self) -> Any:
-        if hasattr(self.rptViewer_, "rptEngine_"):
+        if self.rptViewer_.rptEngine_:
             return self.rptViewer_.rptEngine_.number_pages()
         return -1
 

@@ -412,10 +412,13 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
             value = "color:" + loadVariant(xmlprop).name()
 
         elif pname in ["windowIcon", "icon"]:
-            value = loadVariant(xmlprop, widget)
-            if isinstance(value, str):
-                logger.warning("Icono %s.%s no encontrado." % (widget.objectName(), value))
+            value1 = loadVariant(xmlprop, widget)
+            # FIXME: Not sure if it should return anyway
+            if isinstance(value1, str):
+                logger.warning("Icono %s.%s no encontrado." % (widget.objectName(), value1))
                 return
+            else:
+                value = value1
 
         else:
             value = loadVariant(xmlprop, widget)
