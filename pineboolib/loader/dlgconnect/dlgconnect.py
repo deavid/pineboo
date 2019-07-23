@@ -4,13 +4,13 @@ import base64
 import hashlib
 from xml.etree import ElementTree as ET
 
-from PyQt5 import QtWidgets, QtCore  # type: ignore
+from PyQt5 import QtWidgets  # type: ignore
 from PyQt5.QtWidgets import QMessageBox  # type: ignore
 from PyQt5.QtCore import QSize  # type: ignore
 
 from pineboolib.core.utils.utils_base import filedir, indent
 from pineboolib.core.settings import config, settings
-
+from pineboolib.core.decorators import pyqtSlot
 from typing import Optional
 
 
@@ -110,7 +110,7 @@ class DlgConnect(QtWidgets.QWidget):
     SLOTS
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def showOptions(self) -> None:
         """
         Muestra el frame opciones
@@ -132,7 +132,7 @@ class DlgConnect(QtWidgets.QWidget):
 
         self.optionsShowed = not self.optionsShowed
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def open(self) -> None:
         """
         Abre la conexión seleccionada
@@ -195,7 +195,7 @@ class DlgConnect(QtWidgets.QWidget):
 
         self.close()
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def saveProfile(self) -> None:
         """
         Guarda la conexión
@@ -271,7 +271,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.loadProfiles()
         self.ui.cbProfiles.setCurrentText(description)
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def deleteProfile(self) -> None:
         """
         Borra la conexión seleccionada
@@ -291,7 +291,7 @@ class DlgConnect(QtWidgets.QWidget):
             os.remove(os.path.join(self.profile_dir, fileName))
             self.loadProfiles()
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def editProfile(self) -> None:
         """
         Edita la conexión seleccionada
@@ -343,14 +343,14 @@ class DlgConnect(QtWidgets.QWidget):
 
         self.edit_mode = True
 
-    @QtCore.pyqtSlot(int)
+    @pyqtSlot(int)
     def updatePort(self) -> None:
         """
         Actualiza al puerto por defecto del driver
         """
         self.ui.lePort.setText(self.pNSqlDrivers.port(self.ui.cbDBType.currentText()))
 
-    @QtCore.pyqtSlot(int)
+    @pyqtSlot(int)
     def enablePassword(self, n: Optional[int] = None) -> None:
         """
         Comprueba si el perfil requiere password para login o no
@@ -388,7 +388,7 @@ class DlgConnect(QtWidgets.QWidget):
         """
         self.ui.leDBName.setText(self.ui.leDescription.text().replace(" ", "_"))
 
-    @QtCore.pyqtSlot(int)
+    @pyqtSlot(int)
     def enableProfilePassword(self) -> None:
         """
         Comprueba si el perfil requiere password

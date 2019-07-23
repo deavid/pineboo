@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import time
 import re
+import functools
 from .utils import logging
+from PyQt5 import QtCore  # type: ignore
 
 """
 Esta libreria se usa para especificar estados de una función que no son final
@@ -26,6 +28,7 @@ Aviso no implementado
 
 
 def NotImplementedWarn(fn: T_FN) -> T_FN:
+    @functools.wraps(fn)
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -48,6 +51,7 @@ Aviso no implementado. Igual que la anterior, pero solo informa en caso de debug
 
 
 def NotImplementedDebug(fn: T_FN) -> T_FN:
+    @functools.wraps(fn)
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -69,6 +73,7 @@ Avisa que hay otro desarollador trabajando en una función
 
 
 def WorkingOnThis(fn: T_FN) -> T_FN:
+    @functools.wraps(fn)
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -90,6 +95,7 @@ Aviso de implementación de una función en pruebas
 
 
 def BetaImplementation(fn: T_FN) -> T_FN:
+    @functools.wraps(fn)
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -111,6 +117,7 @@ Similar a NotImplemented, pero sin traceback. Para funciones que de momento no n
 
 
 def Empty(fn: T_FN) -> T_FN:
+    @functools.wraps(fn)
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -132,6 +139,7 @@ Avisa de que la funcionalidad está incompleta de desarrollo
 
 
 def Incomplete(fn: T_FN) -> T_FN:
+    @functools.wraps(fn)
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -174,6 +182,7 @@ Avisa de que la funcionalidad está dejando de ser usada, en pro de otra
 
 
 def Deprecated(fn: T_FN) -> T_FN:
+    @functools.wraps(fn)
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -187,3 +196,10 @@ def Deprecated(fn: T_FN) -> T_FN:
 
     mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
     return mock_fn
+
+
+def pyqtSlot(*args) -> Callable[[T_FN], T_FN]:
+    def _pyqtSlot(fn: T_FN) -> T_FN:
+        return QtCore.pyqtSlot(*args)(fn)
+
+    return _pyqtSlot

@@ -6,13 +6,15 @@ from typing import Any, Optional, List, Union, TYPE_CHECKING
 
 from PyQt5 import QtCore  # type: ignore
 from pineboolib.core.error_manager import error_manager
+from pineboolib.core.decorators import pyqtSlot
+from pineboolib.core.utils import logging
+from pineboolib.core import decorators
+
 from pineboolib.interfaces.cursoraccessmode import CursorAccessMode
 from pineboolib.application.database.pnsqlquery import PNSqlQuery
 from pineboolib.application import project
 from pineboolib.application.utils.xpm import cacheXPM
 
-from pineboolib.core import decorators
-from pineboolib.core.utils import logging
 
 from .pnbuffer import PNBuffer
 
@@ -1872,9 +1874,9 @@ class PNSqlCursor(QtCore.QObject):
     def selection(self) -> Any:
         return self._selection
 
-    @QtCore.pyqtSlot(QtCore.QModelIndex, QtCore.QModelIndex)
-    @QtCore.pyqtSlot(int, int)
-    @QtCore.pyqtSlot(int)
+    @pyqtSlot(QtCore.QModelIndex, QtCore.QModelIndex)
+    @pyqtSlot(int, int)
+    @pyqtSlot(int)
     def selection_currentRowChanged(self, current: Any, previous: Any = None) -> None:
         if self.currentRegister() == current.row():
             self.d.doAcl()
@@ -1940,8 +1942,8 @@ class PNSqlCursor(QtCore.QObject):
     @param fN Nombre del campo de buffer que ha cambiado
     """
 
-    @QtCore.pyqtSlot()
-    @QtCore.pyqtSlot(str)
+    @pyqtSlot()
+    @pyqtSlot(str)
     def refresh(self, fN: Optional[str] = None) -> None:
         if not self.metadata():
             return
@@ -1984,7 +1986,7 @@ class PNSqlCursor(QtCore.QObject):
     @param msec Cantidad de tiempo del lapsus, en milisegundos.
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def refreshDelayed(self, msec: int = 20) -> None:
         # if self.buffer():
         #    return
@@ -2045,7 +2047,7 @@ class PNSqlCursor(QtCore.QObject):
     @return TRUE si se ha podido realizar el refresco, FALSE en caso contrario
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def refreshBuffer(self) -> bool:
         from pineboolib import qsa as qsa_tree
 
@@ -2163,7 +2165,7 @@ class PNSqlCursor(QtCore.QObject):
     @return True si el cursor está en modo Edit o estaba en modo Insert y ha pasado con éxito a modo Edit
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def setEditMode(self) -> bool:
         if self.d.modeAccess_ == self.Insert:
             if not self.commitBuffer():
@@ -2184,7 +2186,7 @@ class PNSqlCursor(QtCore.QObject):
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def seek(self, i, relative: Optional[bool] = False, emite: bool = False) -> bool:
 
         ret_ = False
@@ -2206,8 +2208,8 @@ class PNSqlCursor(QtCore.QObject):
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
 
-    @QtCore.pyqtSlot()
-    @QtCore.pyqtSlot(bool)
+    @pyqtSlot()
+    @pyqtSlot(bool)
     def next(self, emite: bool = True) -> bool:
         # if self.d.modeAccess_ == self.Del:
         #    return False
@@ -2236,8 +2238,8 @@ class PNSqlCursor(QtCore.QObject):
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
 
-    @QtCore.pyqtSlot()
-    @QtCore.pyqtSlot(bool)
+    @pyqtSlot()
+    @pyqtSlot(bool)
     def prev(self, emite: bool = True) -> bool:
         # if self.d.modeAccess_ == self.Del:
         #    return False
@@ -2291,8 +2293,8 @@ class PNSqlCursor(QtCore.QObject):
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
 
-    @QtCore.pyqtSlot()
-    @QtCore.pyqtSlot(bool)
+    @pyqtSlot()
+    @pyqtSlot(bool)
     def first(self, emite: bool = True) -> bool:
         # if self.d.modeAccess_ == self.Del:
         #    return False
@@ -2318,8 +2320,8 @@ class PNSqlCursor(QtCore.QObject):
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
 
-    @QtCore.pyqtSlot()
-    @QtCore.pyqtSlot(bool)
+    @pyqtSlot()
+    @pyqtSlot(bool)
     def last(self, emite: bool = True) -> bool:
         # if self.d.modeAccess_ == self.Del:
         #    return False
@@ -2341,7 +2343,7 @@ class PNSqlCursor(QtCore.QObject):
     en cascada, en caso afirmativo borrar también los registros relacionados en cardinalidad 1M.
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def __del__(self, invalidate: bool = True) -> None:
         # logger.trace("FLSqlCursor(%s). Eliminando cursor" % self.curName(), self)
         # delMtd = None
@@ -2380,7 +2382,7 @@ class PNSqlCursor(QtCore.QObject):
     Redefinicion del método select() de QSqlCursor
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def select(self, _filter: str = None, sort: str = None) -> bool:  # sort = QtCore.QSqlIndex()
         _filter = _filter if not None else self.filter()
         if not self.metadata():
@@ -2426,7 +2428,7 @@ class PNSqlCursor(QtCore.QObject):
     Redefinicion del método sort() de QSqlCursor
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def setSort(self, sortO: str) -> None:
         if not sortO:
             return
@@ -2437,7 +2439,7 @@ class PNSqlCursor(QtCore.QObject):
     Obtiene el filtro base
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def baseFilter(self) -> str:
         relationFilter = None
         finalFilter = ""
@@ -2482,7 +2484,7 @@ class PNSqlCursor(QtCore.QObject):
     Obtiene el filtro actual
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def curFilter(self) -> str:
         f = self.filter()
         bFilter = self.baseFilter()
@@ -2505,7 +2507,7 @@ class PNSqlCursor(QtCore.QObject):
     Redefinicion del método setFilter() de QSqlCursor
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def setFilter(self, _filter: str) -> None:
 
         # self.d.filter_ = None
@@ -2531,7 +2533,7 @@ class PNSqlCursor(QtCore.QObject):
     para insertar un nuevo registro en el cursor.
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def insertRecord(self, wait: bool = True) -> None:
         logger.trace("insertRecord %s", self._action and self._action.name())
         self.openFormInMode(self.Insert, wait)
@@ -2541,7 +2543,7 @@ class PNSqlCursor(QtCore.QObject):
     para editar el registro activo del cursor.
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def editRecord(self, wait: bool = True) -> None:
         logger.trace("editRecord %s", self.actionName())
         if self.d.needUpdate():
@@ -2559,7 +2561,7 @@ class PNSqlCursor(QtCore.QObject):
     para sólo visualizar el registro activo del cursor.
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def browseRecord(self, wait: bool = True) -> None:
         logger.trace("browseRecord %s", self.actionName())
         if self.d.needUpdate():
@@ -2575,7 +2577,7 @@ class PNSqlCursor(QtCore.QObject):
     Borra, pidiendo confirmacion, el registro activo del cursor.
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def deleteRecord(self, wait: bool = True) -> None:
         logger.trace("deleteRecord %s", self.actionName())
         self.openFormInMode(self.Del, wait)
@@ -2639,7 +2641,7 @@ class PNSqlCursor(QtCore.QObject):
     indica TRUE, si indica FALSE este método no hace nada
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def chooseRecord(self) -> None:
         from pineboolib.core.settings import config
 
@@ -2686,7 +2688,7 @@ class PNSqlCursor(QtCore.QObject):
     @return TRUE si se ha podido entregar el buffer al cursor, y FALSE si ha fallado la entrega
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def commitBuffer(self, emite: bool = True, checkLocks: bool = False) -> bool:
         buffer = self.buffer()
         metadata = self.metadata()
@@ -2926,7 +2928,7 @@ class PNSqlCursor(QtCore.QObject):
                 if buffer_copy:
                     buffer_copy.setGenerated(fieldNameCheck, True)
 
-            self.setFilter(None)
+            self.setFilter("")
             # self.clearMapCalcFields()
 
             if emite:
@@ -2949,7 +2951,7 @@ class PNSqlCursor(QtCore.QObject):
     correspondiente que recibe los cambios.
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def commitBufferCursorRelation(self) -> bool:
         ok = True
         activeWidEnabled = False
@@ -2981,7 +2983,7 @@ class PNSqlCursor(QtCore.QObject):
                     self.d.modeAccess_ = self.Browse
                     ok = False
                 else:
-                    self.setFilter(None)
+                    self.setFilter("")
                     cur_relation.refresh()
                     cur_relation.setModeAccess(self.Edit)
                     cur_relation.refreshBuffer()
@@ -3011,7 +3013,7 @@ class PNSqlCursor(QtCore.QObject):
     @return El nivel actual de anidamiento de transacciones, 0 no hay transaccion
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def transactionLevel(self) -> int:
         if self.db():
             return self.db().transactionLevel()
@@ -3022,7 +3024,7 @@ class PNSqlCursor(QtCore.QObject):
     @return La lista con los niveles de las transacciones que ha iniciado este cursor y continuan abiertas
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def transactionsOpened(self) -> List[str]:
         lista = []
         for it in self.d.transactionsOpened_:
@@ -3038,7 +3040,7 @@ class PNSqlCursor(QtCore.QObject):
                 Si es vacía no muestra nada.
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     @decorators.BetaImplementation
     def rollbackOpened(self, count: int = -1, msg: str = None) -> None:
         ct: int = len(self.d.transactionsOpened_) if count < 0 else count
@@ -3064,7 +3066,7 @@ class PNSqlCursor(QtCore.QObject):
                 Si es vacía no muestra nada.
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def commitOpened(self, count: int = -1, msg: str = None) -> None:
         ct: int = len(self.d.transactionsOpened_) if count < 0 else count
         t: str = self.metadata().name() if self.metadata() else self.curName()
@@ -3091,7 +3093,7 @@ class PNSqlCursor(QtCore.QObject):
     @param  terminate True terminará el bucle de comprobaciones si está activo
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     @decorators.NotImplementedWarn
     def checkRisksLocks(self, terminate: bool = False) -> bool:
         return True
@@ -3104,7 +3106,7 @@ class PNSqlCursor(QtCore.QObject):
     @param  ac Permiso global; p.e.: "r-", "-w"
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def setAcTable(self, ac):
         self.d.idAc_ = self.d.idAc_ + 1
         self.d.id_ = "%s%s%s" % (self.d.idAc_, self.d.idAcos_, self.d.idCond_)
@@ -3122,7 +3124,7 @@ class PNSqlCursor(QtCore.QObject):
     @param acos Lista de cadenas de texto con los nombre de campos y permisos.
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def setAcosTable(self, acos):
         self.d.idAcos_ = self.d.idAcos_ + 1
         self.d.id_ = "%s%s%s" % (self.d.idAc_, self.d.idAcos_, self.d.idCond_)
@@ -3153,7 +3155,7 @@ class PNSqlCursor(QtCore.QObject):
     @param  condVal   Valor que hace que la condicion sea cierta
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def setAcosCondition(self, condName, cond, condVal):
         self.d.idCond_ = self.d.idCond_ + 1
         self.d.id_ = "%s%s%s" % (self.d.idAc_, self.d.idAcos_, self.d.idCond_)
@@ -3167,7 +3169,7 @@ class PNSqlCursor(QtCore.QObject):
     @return Lista con los nombres de los campos que colisionan
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     @decorators.NotImplementedWarn
     def concurrencyFields(self) -> List[str]:
         return []
@@ -3176,7 +3178,7 @@ class PNSqlCursor(QtCore.QObject):
     Cambia el cursor a otra conexión de base de datos
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def changeConnection(self, connName: str) -> None:
         curConnName = self.connectionName()
         if curConnName == connName:

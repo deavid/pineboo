@@ -1,6 +1,6 @@
 from pineboolib import logging
 
-from typing import Callable, TYPE_CHECKING
+from typing import Callable, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.interfaces.dgi_schema import dgi_schema
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def load_dgi(name: str, param: None) -> "dgi_schema":
+def load_dgi(name: str, param: Any) -> "dgi_schema":
     """Load a DGI module dynamically."""
 
     dgi_entrypoint = DGILoader.load_dgi(name)
