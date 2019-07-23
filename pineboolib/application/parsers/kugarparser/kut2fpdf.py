@@ -316,7 +316,7 @@ class Kut2FPDF(object):
                                 heightCalculated += self._parser_tools.getHeight(detail)
 
                     for dFooter in self._xml.findall("DetailFooter"):
-                        if dFooter.get("Level") == data_level:
+                        if dFooter.get("Level") == str(data_level):
                             heightCalculated += self._parser_tools.getHeight(dFooter)
 
                     aof_size = 0
@@ -571,7 +571,7 @@ class Kut2FPDF(object):
 
         if xml.get("BlankZero") == "1" and text is not None:
             res_ = re.findall(r"\d+", text)
-            if res_ == "0":
+            if res_ == ["0"]:
                 return
 
         if text is not None and isinstance(text, str) and text.startswith(filedir("../tempdata")):
