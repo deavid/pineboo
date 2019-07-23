@@ -16,7 +16,7 @@ from pineboolib.core.utils.utils_base import ustr, filedir
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.pncontrolsfactory import qsa_sys
 
-from typing import Any, Optional, Union, Match, List, Pattern
+from typing import Any, Optional, Union, Match, List, Pattern, Generator
 
 
 logger = logging.getLogger(__name__)
@@ -35,15 +35,15 @@ RichText = 1
 # this if you want to know how this works. It only needs to be defined
 # once, no need to muck around with its internals.
 class switch(object):
-    def __init__(self, value):
+    def __init__(self, value: Any):
         self.value = value
         self.fall = False
 
-    def __iter__(self):
+    def __iter__(self) -> Generator:
         """Return the match method once, then stop"""
         yield self.match
 
-    def match(self, *args) -> bool:
+    def match(self, *args: List[Any]) -> bool:
         """Indicate whether or not to enter a case suite"""
         if self.fall or not args:
             return True
@@ -254,15 +254,14 @@ class Dir(object):
     Gestiona un directorio
     """
 
-    path_ = None
-    Files = "*.*"
+    Files: str = "*.*"
 
     from os.path import expanduser
 
     home = expanduser("~")
 
-    def __init__(self, path=None):
-        self.path_ = path
+    def __init__(self, path: Optional[str] = None):
+        self.path_: Optional[str] = path
 
     def entryList(self, patron: str, type_: Optional[str] = None) -> list:
         """
@@ -355,8 +354,8 @@ class File(QtCore.QFile):
     def __init__(self, rutaFichero: Optional[str] = None, encode: Optional[str] = None):
         self.encode_ = "iso-8859-15"
         if rutaFichero:
-            if isinstance(rutaFichero, tuple):
-                rutaFichero = rutaFichero[0]
+            # if isinstance(rutaFichero, tuple):
+            #     rutaFichero = rutaFichero[0]
             self.fichero = str(rutaFichero)
             super().__init__(rutaFichero)
             self.path = os.path.dirname(os.path.abspath(self.fichero))
@@ -366,7 +365,7 @@ class File(QtCore.QFile):
         if encode is not None:
             self.encode_ = encode
 
-    def read(self, bytes: bool = False) -> Union[str, bytes]:
+    def read(self: Union["File", str], bytes: bool = False) -> Union[str, bytes]:
         """
         Lee el fichero al completo
         @param bytes. Especifica si se lee en modo texto o en bytess
@@ -397,7 +396,7 @@ class File(QtCore.QFile):
         f.close()
         return ret
 
-    def write(self, data: Union[str, bytes], length: int = -1) -> None:
+    def write(self: Union["File", str], data: Union[str, bytes], length: int = -1) -> None:
         """
         Escribe datos en el fichero
         @param data. Valores a guardar en el fichero
@@ -543,14 +542,14 @@ class File(QtCore.QFile):
         f.write(data_b)
         f.close()
 
-    def remove(self) -> bool:
+    def remove(self: Union["File", str]) -> bool:
         """
         Borra el fichero dado
         @return Boolean . True si se ha borrado el fichero, si no False.
         """
         if isinstance(self, str):
             file = File(self)
-            file.remove()
+            return file.remove()
         else:
             return super().remove()
 
