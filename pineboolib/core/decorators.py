@@ -6,7 +6,9 @@ from .utils import logging
 """
 Esta libreria se usa para especificar estados de una función que no son final
 """
-from typing import Callable, Any, Dict
+from typing import Callable, Any, Dict, TypeVar, cast
+
+T_FN = TypeVar("T_FN", bound=Callable)
 
 logger = logging.getLogger(__name__)
 MSG_EMITTED: Dict[str, float] = {}
@@ -23,7 +25,7 @@ Aviso no implementado
 """
 
 
-def NotImplementedWarn(fn: Callable) -> Callable:
+def NotImplementedWarn(fn: T_FN) -> T_FN:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -36,7 +38,8 @@ def NotImplementedWarn(fn: Callable) -> Callable:
             logger.trace("Not yet impl.: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret), stack_info=True)
         return ret
 
-    return newfn
+    mock_fn: T_FN = cast(T_FN, newfn)
+    return mock_fn
 
 
 """
@@ -44,7 +47,7 @@ Aviso no implementado. Igual que la anterior, pero solo informa en caso de debug
 """
 
 
-def NotImplementedDebug(fn: Callable) -> Callable:
+def NotImplementedDebug(fn: T_FN) -> T_FN:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -56,7 +59,8 @@ def NotImplementedDebug(fn: Callable) -> Callable:
             logger.debug("Not yet impl.: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
-    return newfn
+    mock_fn: T_FN = cast(T_FN, newfn)
+    return mock_fn
 
 
 """
@@ -64,7 +68,7 @@ Avisa que hay otro desarollador trabajando en una función
 """
 
 
-def WorkingOnThis(fn: Callable) -> Callable:
+def WorkingOnThis(fn: T_FN) -> T_FN:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -76,7 +80,8 @@ def WorkingOnThis(fn: Callable) -> Callable:
             logger.info("WARN: In Progress: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
-    return newfn
+    mock_fn: T_FN = cast(T_FN, newfn)
+    return mock_fn
 
 
 """
@@ -84,7 +89,7 @@ Aviso de implementación de una función en pruebas
 """
 
 
-def BetaImplementation(fn: Callable) -> Callable:
+def BetaImplementation(fn: T_FN) -> T_FN:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -96,7 +101,8 @@ def BetaImplementation(fn: Callable) -> Callable:
             logger.info("WARN: Beta impl.: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
-    return newfn
+    mock_fn: T_FN = cast(T_FN, newfn)
+    return mock_fn
 
 
 """
@@ -104,7 +110,7 @@ Similar a NotImplemented, pero sin traceback. Para funciones que de momento no n
 """
 
 
-def Empty(fn: Callable) -> Callable:
+def Empty(fn: T_FN) -> T_FN:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -116,7 +122,8 @@ def Empty(fn: Callable) -> Callable:
             logger.info("WARN: Empty: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
-    return newfn
+    mock_fn: T_FN = cast(T_FN, newfn)
+    return mock_fn
 
 
 """
@@ -124,7 +131,7 @@ Avisa de que la funcionalidad está incompleta de desarrollo
 """
 
 
-def Incomplete(fn: Callable) -> Callable:
+def Incomplete(fn: T_FN) -> T_FN:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -136,7 +143,8 @@ def Incomplete(fn: Callable) -> Callable:
             logger.info("WARN: Incomplete: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
-    return newfn
+    mock_fn: T_FN = cast(T_FN, newfn)
+    return mock_fn
 
 
 """
@@ -144,7 +152,7 @@ Avisa de que la funcionalidad tiene que ser revisada
 """
 
 
-def needRevision(fn: Callable) -> Callable:
+def needRevision(fn: T_FN) -> T_FN:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -156,7 +164,8 @@ def needRevision(fn: Callable) -> Callable:
             logger.info("WARN: Needs help: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
-    return newfn
+    mock_fn: T_FN = cast(T_FN, newfn)
+    return mock_fn
 
 
 """
@@ -164,7 +173,7 @@ Avisa de que la funcionalidad está dejando de ser usada, en pro de otra
 """
 
 
-def Deprecated(fn: Callable) -> Callable:
+def Deprecated(fn: T_FN) -> T_FN:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -176,4 +185,5 @@ def Deprecated(fn: Callable) -> Callable:
             logger.info("WARN: Deprecated: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret), stack_info=False)
         return ret
 
-    return newfn
+    mock_fn: T_FN = cast(T_FN, newfn)
+    return mock_fn
