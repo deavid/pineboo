@@ -60,7 +60,7 @@ class PNRelationMetaData:
     @return Devuelve el nombre del campo relacionado
     """
 
-    def field(self) -> Optional[str]:
+    def field(self) -> str:
         return self.d.field_
 
     """
@@ -69,7 +69,7 @@ class PNRelationMetaData:
     @return Devuelve el nombre de la tabla de la base de datos con la que se está relacionada
     """
 
-    def foreignTable(self) -> Optional[str]:
+    def foreignTable(self) -> str:
         return self.d.foreignTable_
 
     """
@@ -78,7 +78,7 @@ class PNRelationMetaData:
     @return Devuelve el nombre del campo de la tabla foránea con la que está relacionada
     """
 
-    def foreignField(self) -> Optional[str]:
+    def foreignField(self) -> str:
         return self.d.foreignField_
 
     """
@@ -88,7 +88,7 @@ class PNRelationMetaData:
         define este objeto hacia la foránea
     """
 
-    def cardinality(self) -> Optional[str]:
+    def cardinality(self) -> str:
         return self.d.cardinality_
 
     """

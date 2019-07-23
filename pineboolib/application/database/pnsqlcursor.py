@@ -1832,7 +1832,7 @@ class PNSqlCursor(QtCore.QObject):
 
         fieldBy = field.associatedFieldFilterTo()
 
-        if buffer is None:
+        if self.d.buffer_ is None:
             return None
 
         if not tableMD.field(fieldBy) or self.d.buffer_.isNull(fieldAc.name()):
@@ -1943,7 +1943,7 @@ class PNSqlCursor(QtCore.QObject):
         if not self.d.metadata_:
             return
 
-        if self.d.cursorRelation_ is not None and relation is not None:
+        if self.d.cursorRelation_ is not None and self.d.relation_ is not None:
             self.d.persistentFilter_ = None
             if not self.d.cursorRelation_.metadata():
                 return
@@ -1951,7 +1951,7 @@ class PNSqlCursor(QtCore.QObject):
                 return
 
             if not fN or self.d.relation_.foreignField() == fN:
-                if buffer is not None:
+                if self.d.buffer_:
                     self.d.buffer_.clear_buffer()
                 self.refreshDelayed()
                 return
@@ -1964,7 +1964,7 @@ class PNSqlCursor(QtCore.QObject):
 
             if not self.seek(pos, False, True):
 
-                if buffer is not None:
+                if self.d.buffer_:
                     self.d.buffer_.clear_buffer()
                 self.newself.d.buffer_.emit()
 
@@ -2003,7 +2003,7 @@ class PNSqlCursor(QtCore.QObject):
             self.newself.d.buffer_.emit()
         else:
 
-            if self.d.cursorRelation_ and relation and self.d.cursorRelation_.metadata():
+            if self.d.cursorRelation_ and self.d.relation_ and self.d.cursorRelation_.metadata():
                 v = self.valueBuffer(self.d.relation_.field())
                 foreignFieldValueBuffer = self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField())
 
@@ -2016,7 +2016,7 @@ class PNSqlCursor(QtCore.QObject):
 
         self.d.buffer_.primeInsert()
 
-    def primeUpdate(self) -> PNself.d.buffer_:
+    def primeUpdate(self) -> PNBuffer:
         if self.d.buffer_ is None:
             self.d.buffer_ = PNBuffer(self)
         # logger.warning("Realizando primeUpdate en pos %s y estado %s , filtro %s", self.at(), self.modeAccess(), self.filter())
@@ -2064,7 +2064,7 @@ class PNSqlCursor(QtCore.QObject):
                 for field in fieldList:
                     field_name = field.name()
 
-                    if buffer is None:
+                    if self.d.buffer_ is None:
                         raise Exception("buffer is empty!")
 
                     self.d.buffer_.setNull(field_name)
@@ -2101,7 +2101,7 @@ class PNSqlCursor(QtCore.QObject):
                         if siguiente:
                             self.d.buffer_.setValue(field_name, siguiente)
 
-            if self.d.cursorRelation_ is not None and relation is not None and self.d.cursorRelation_.metadata():
+            if self.d.cursorRelation_ is not None and self.d.relation_ is not None and self.d.cursorRelation_.metadata():
                 self.setValueBuffer(self.d.relation_.field(), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
 
             self.d.undoAcl()
@@ -2430,14 +2430,14 @@ class PNSqlCursor(QtCore.QObject):
         relationFilter = None
         finalFilter = ""
 
-        if self.d.cursorRelation_ and relation and metadata and self.d.cursorRelation_.metadata():
+        if self.d.cursorRelation_ and self.d.relation_ and self.d.metadata_ and self.d.cursorRelation_.metadata():
             fgValue = self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField())
             field = self.d.metadata_.field(self.d.relation_.field())
 
             if field is not None and fgValue is not None:
 
                 relationFilter = self.db().manager().formatAssignValue(field, fgValue, True)
-                filterAc = self.d.cursorRelation_.filterAssoc(self.d.relation_.foreignField(), metadata)
+                filterAc = self.d.cursorRelation_.filterAssoc(self.d.relation_.foreignField(), self.d.metadata_)
                 if filterAc:
                     if not relationFilter:
                         relationFilter = filterAc
@@ -2529,6 +2529,9 @@ class PNSqlCursor(QtCore.QObject):
     def editRecord(self, wait: bool = True) -> None:
         logger.trace("editRecord %s", self.actionName())
         if self.d.needUpdate():
+            if not self.d.metadata_:
+                raise Exception("self.d.metadata_ is not defined!")
+
             pKN = self.d.metadata_.primaryKey()
             pKValue = self.valueBuffer(pKN)
             self.refresh()
@@ -2547,6 +2550,8 @@ class PNSqlCursor(QtCore.QObject):
     def browseRecord(self, wait: bool = True) -> None:
         logger.trace("browseRecord %s", self.actionName())
         if self.d.needUpdate():
+            if not self.d.metadata_:
+                raise Exception("self.d.metadata_ is not defined!")
             pKN = self.d.metadata_.primaryKey()
             pKValue = self.valueBuffer(pKN)
             self.refresh()
@@ -3246,7 +3251,8 @@ class PNSqlCursor(QtCore.QObject):
         return self.d._model.where_filters["filter"] if "filter" in self.d._model.where_filters else ""
 
     def field(self, name: str) -> Optional["FieldStruct"]:
-
+        if not self.d.buffer_:
+            raise Exception("self.d.buffer_ is not defined!")
         return self.d.buffer_.field(name)
 
     """
