@@ -4,7 +4,7 @@ from typing import List, Optional
 
 
 class AQBoolFlagState(object):
-    modifier_: bool
+    modifier_: str
     prevValue_: bool
 
 

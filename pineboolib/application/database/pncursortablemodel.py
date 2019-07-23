@@ -787,14 +787,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param dict_update. Campos que se actualizarán
     """
 
-    def updateValuesDB(self, pKValue, dict_update) -> None:
+    def updateValuesDB(self, pKValue, dict_update) -> bool:
         self.logger.trace("updateValuesDB: init: pKValue %s, dict_update %s", pKValue, dict_update)
         row = self.findPKRow([pKValue])
         # if row is None:
         #    raise AssertionError(
         #        "Los indices del CursorTableModel no devolvieron un registro (%r)" % (pKValue))
         if row is None:
-            return
+            return False
 
         if self.value(row, self.pK()) != pKValue:
             raise AssertionError(
@@ -824,7 +824,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             update_set.append("%s = %s" % (key, value))
 
         if len(update_set) == 0:
-            return
+            return False
 
         update_set_txt = ", ".join(update_set)
         sql = self.driver_sql().queryUpdate(self.metadata().name(), update_set_txt, where_filter)
@@ -834,7 +834,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         except Exception:
             self.logger.exception("ERROR: CursorTableModel.Update %s:", self.metadata().name())
             # self._cursor.execute("ROLLBACK")
-            return
+            return False
 
         try:
             if self.cursorDB().description:
@@ -848,6 +848,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self.logger.exception("updateValuesDB: Error al assignar los valores de vuelta al buffer")
 
         self.need_update = True
+
+        return True
 
     """
     Asigna un valor una fila usando un diccionario

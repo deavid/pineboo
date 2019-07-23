@@ -8,17 +8,41 @@ from typing import Any, Union, List, Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.interfaces.iconnection import IConnection
+    from pineboolib.interfaces.iapicursor import IApiCursor
     from pineboolib.application.types import Array
+    from .pnparameterquery import PNParameterQuery
+    from .pngroupbyquery import PNGroupByQuery
 
 logger = logging.getLogger(__name__)
 
 
 class PNSqlQueryPrivate(object):
+    """
+    Nombre de la consulta
+    """
+
     name_: str
+
+    """
+    Parte FROM de la consulta
+    """
     from_: str
+
+    """
+    Parte WHERE de la consulta
+    """
     where_: str
+
+    """
+    Parte ORDER BY de la consulta
+    """
     orderBy_: str
+
+    """
+    Base de datos sobre la que trabaja
+    """
     db_: "IConnection"
+
     """
     Lista de parámetros
     """
@@ -28,38 +52,6 @@ class PNSqlQueryPrivate(object):
     Lista de grupos
     """
     groupDict_: Dict[int, Any] = {}
-
-    fieldMetaDataList_: Dict[str, IFieldMetaData]
-
-    def __init__(self, name=None) -> None:
-        self.name_ = name
-        # self.select_ = None
-        # self.from_ = None
-        # self.where_ = None
-        # self.orderBy_ = None
-        self.parameterDict_ = {}
-        self.groupDict_: Dict[int, Any] = {}
-        self.fieldMetaDataList_ = {}
-
-    """
-    Nombre de la consulta
-    """
-    name_ = None
-
-    """
-    Parte FROM de la consulta
-    """
-    from_ = None
-
-    """
-    Parte WHERE de la consulta
-    """
-    where_ = None
-
-    """
-    Parte ORDER BY de la consulta
-    """
-    orderBy_ = None
 
     """
     Lista de nombres de los campos
@@ -75,28 +67,13 @@ class PNSqlQueryPrivate(object):
     """
     Lista de con los metadatos de los campos de la consulta
     """
-    fieldMetaDataList_ = {}
+    fieldMetaDataList_: Dict[str, IFieldMetaData]
 
-    """
-    Base de datos sobre la que trabaja
-    """
-    db_ = None
-
-
-class PNGroupByQuery(object):
-
-    level_ = None
-    field_ = None
-
-    def __init__(self, n, v) -> None:
-        self.level_ = n
-        self.field_ = v
-
-    def level(self) -> Any:
-        return self.level_
-
-    def field(self) -> Any:
-        return self.field_
+    def __init__(self, name=None) -> None:
+        self.name_ = name
+        self.parameterDict_ = {}
+        self.groupDict_ = {}
+        self.fieldMetaDataList_ = {}
 
 
 class PNSqlQuery(object):
@@ -109,32 +86,33 @@ class PNSqlQuery(object):
     @author InfoSiAL S.L.
     """
 
-    countRefQuery = 0
+    countRefQuery: int = 0
     invalidTablesList = False
     _is_active: bool
     _fieldNameToPosDict: Dict[str, int]
-    _sql_inspector = None
+    _sql_inspector: sql_tools.sql_inspector
     _row: List[Any]
     _datos: List[Any]
     _posicion: int
+    _cursor: "IApiCursor"
 
-    def __init__(self, cx=None, connection_name: str = "default") -> None:
+    def __init__(self, cx=None, connection_name: Union[str, IConnection] = "default") -> None:
         # super(FLSqlQuery, self).__init__()
 
         if project.conn is None:
             raise Exception("Project is not connected yet")
         self.d = PNSqlQueryPrivate(cx)
-        self.d.db_ = project.conn.useConn(connection_name)
+        if isinstance(connection_name, str):
+            self.d.db_ = project.conn.useConn(connection_name)
+        else:
+            self.d.db_ = connection_name
 
         self.countRefQuery = self.countRefQuery + 1
         self._row = []
         self._datos = []
-        self._cursor = None
         self.invalidTablesList = False
         self.d.fieldList_ = []
         self._is_active = False
-        self._sql_inspector = None
-        # self.d.fieldMetaDataList_ = {}
 
         retornoQry = None
         if cx:
@@ -156,7 +134,7 @@ class PNSqlQuery(object):
         self.countRefQuery = self.countRefQuery - 1
 
     @property
-    def sql_inspector(self):
+    def sql_inspector(self) -> sql_tools.sql_inspector:
         if self._sql_inspector is None:
             logger.warning("sql_inspector: Query has not executed yet", stack_info=True)
             sql = self.sql()
@@ -167,7 +145,7 @@ class PNSqlQuery(object):
     Ejecuta la consulta
     """
 
-    def exec_(self, sql: str = None) -> bool:
+    def exec_(self, sql: Optional[str] = None) -> bool:
         if self.invalidTablesList:
             return False
 
@@ -205,7 +183,7 @@ class PNSqlQuery(object):
     @param p Objeto FLParameterQuery con la descripción del parámetro a añadir
     """
 
-    def addParameter(self, p=None) -> None:
+    def addParameter(self, p: Optional["PNParameterQuery"]) -> None:
         if p:
             self.d.parameterDict_[p.name()] = p
 
@@ -215,7 +193,7 @@ class PNSqlQuery(object):
     @param g Objeto FLGroupByQuery con la descripción del grupo a añadir
     """
 
-    def addGroup(self, g=None) -> None:
+    def addGroup(self, g: Optional["PNGroupByQuery"]) -> None:
         if g:
             if not self.d.groupDict_:
                 self.d.groupDict_ = {}
@@ -228,42 +206,42 @@ class PNSqlQuery(object):
     @param n Nombre de la consulta
     """
 
-    def setName(self, n) -> None:
+    def setName(self, n: str) -> None:
         self.d.name_ = n
 
     """
     Para obtener el nombre de la consulta
     """
 
-    def name(self) -> Any:
+    def name(self) -> str:
         return self.d.name_
 
     """
     Para obtener la parte SELECT de la sentencia SQL de la consulta
     """
 
-    def select(self) -> Any:
+    def select(self) -> str:
         return ",".join(self.d.fieldList_)
 
     """
     Para obtener la parte FROM de la sentencia SQL de la consulta
     """
 
-    def from_(self) -> Any:
+    def from_(self) -> str:
         return self.d.from_
 
     """
     Para obtener la parte WHERE de la sentencia SQL de la consulta
     """
 
-    def where(self) -> Any:
+    def where(self) -> str:
         return self.d.where_
 
     """
     Para obtener la parte ORDER BY de la sentencia SQL de la consulta
     """
 
-    def orderBy(self) -> Any:
+    def orderBy(self) -> str:
         return self.d.orderBy_
 
     """
@@ -348,7 +326,7 @@ class PNSqlQuery(object):
            genera la consulta
     """
 
-    def setFrom(self, f) -> None:
+    def setFrom(self, f: str) -> None:
         self.d.from_ = f
         # self.d.from_ = f.strip_whitespace()
         # self.d.from_ = self.d.from_.simplifyWhiteSpace()
@@ -360,7 +338,7 @@ class PNSqlQuery(object):
         genera la consulta
     """
 
-    def setWhere(self, w) -> None:
+    def setWhere(self, w: str) -> None:
         self.d.where_ = w
         # self.d.where_ = w.strip_whitespace()
         # self.d.where_ = self.d.where_.simplifyWhiteSpace()
@@ -448,7 +426,7 @@ class PNSqlQuery(object):
     @return Diccionario de parámetros
     """
 
-    def parameterDict(self) -> Any:
+    def parameterDict(self) -> Dict[str, Any]:
         return self.d.parameterDict_
 
     """
@@ -457,7 +435,7 @@ class PNSqlQuery(object):
     @return Diccionario de niveles de agrupamiento
     """
 
-    def groupDict(self) -> Any:
+    def groupDict(self) -> Dict[int, Any]:
         return self.d.groupDict_
 
     """
@@ -467,7 +445,7 @@ class PNSqlQuery(object):
           consulta
     """
 
-    def fieldList(self) -> Any:
+    def fieldList(self) -> List[str]:
         if self.d.fieldList_:
             return self.d.fieldList_
         else:
@@ -762,7 +740,7 @@ class PNSqlQuery(object):
       QString::null
     """
 
-    def posToFieldName(self, p) -> str:
+    def posToFieldName(self, p: int) -> str:
         return self.sql_inspector.posToFieldName(p)
         # if p < 0 or p >= len(self.d.fieldList_):
         #    return None
@@ -883,7 +861,7 @@ class PNSqlQuery(object):
     Para obtener la base de datos sobre la que trabaja
     """
 
-    def db(self) -> Any:
+    def db(self) -> "IConnection":
         return self.d.db_
 
     def isValid(self) -> bool:
@@ -933,7 +911,7 @@ class PNSqlQuery(object):
     def QSqlQuery_value(self, i):
         pass
 
-    def seek(self, i, relative=False) -> bool:
+    def seek(self, i: int, relative=False) -> bool:
         if not self._cursor:
             return False
 

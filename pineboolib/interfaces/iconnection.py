@@ -127,11 +127,11 @@ class IConnection:
     def formatValueLike(self, t, v, upper) -> str:
         return ""
 
-    def canSavePoint(self) -> None:
-        return
+    def canSavePoint(self) -> bool:
+        return True
 
-    def canTransaction(self) -> None:
-        return
+    def canTransaction(self) -> bool:
+        return True
 
     def doTransaction(self, cursor) -> bool:
         return False
@@ -148,8 +148,8 @@ class IConnection:
     def doCommit(self, cur, notify=True) -> bool:
         return False
 
-    def canDetectLocks(self) -> None:
-        return
+    def canDetectLocks(self) -> bool:
+        return False
 
     def commit(self) -> None:
         return
@@ -181,7 +181,7 @@ class IConnection:
     def rollbackTransaction(self) -> None:
         return
 
-    def nextSerialVal(self, table, field) -> None:
+    def nextSerialVal(self, table, field) -> Any:
         return
 
     def existsTable(self, name) -> bool:

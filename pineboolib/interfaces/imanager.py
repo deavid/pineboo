@@ -60,7 +60,7 @@ class IManager(object):
     def formatAssignValueLike(self, *args, **kwargs) -> str:
         return ""
 
-    def formatValue(self, fMD_or_type: str, v: Optional[Union[int, str]], upper: bool = False) -> str:
+    def formatValue(self, fMD_or_type: str, v: Any, upper: bool = False) -> str:
         return ""
 
     def formatValueLike(self, *args, **kwargs) -> str:
