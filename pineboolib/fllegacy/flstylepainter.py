@@ -55,9 +55,10 @@ class FLStylePainter(object):
             self.text_ = ""
             self.tf_ = None
             self.pix_ = QtGui.QPixmap()
-            self.sx_ = None
-            self.sy_ = None
-            self.sw_ = None
+            self.sx_ = 0
+            self.sy_ = 0
+            self.sw_ = -1
+            self.sh_ = -1
             self.saves_ = 0
             self.transStack_ = QtCore.QStringListModel().stringList()
 
@@ -194,11 +195,11 @@ class FLStylePainter(object):
                     }
 
                     for k, v in etab.items():
-                        self.svgTypeMap_.insert(k, v)
+                        self.svgTypeMap_[k] = v
 
                 st = {"textx": 0, "texty": 0, "textalign": Qt.AlignLeft}
                 self.stack_.append(st)
-                self.curr_ = self.stack_.last()
+                self.curr_ = self.stack_[-1]
 
         @decorators.BetaImplementation
         def saveAttributes(self):
@@ -421,7 +422,7 @@ class FLStylePainter(object):
                     prop = it[col:].simplifyWhiteSpace()
                     val = it[-(it.length() - col - 1) :]
                     val = val.lower().stripWhiteSpace()
-                    self.setStyleProperty(prop, val, pen, font, self.curr_.textalign)
+                    self.setStyleProperty(prop, val, pen, font, self.curr_["textalign"])
 
             self.painter_.setPen(pen)
             self.painter_.setFont(font)
@@ -474,7 +475,7 @@ class FLStylePainter(object):
         def play(self, node, elm):
             if isinstance(node, str):
                 objName = node
-                if self.objNodesMap_.contains(objName):
+                if objName in self.objNodesMap_:
                     node = self.objNodesMap_[objName]
                 if node.isNull():
                     self.errCode_ = FLStylePainter.ErrCode.IdNotFound
@@ -535,7 +536,7 @@ class FLStylePainter(object):
                     n = attr.item(i)
                     a = n.nodeName()
                     val = n.nodeValue().lower().stripWhiteSpace()
-                    self.setStyleProperty(a, val, pen, font, self.curr_.textalign)
+                    self.setStyleProperty(a, val, pen, font, self.curr_["textalign"])
                     i -= 1
 
                 self.painter_.setPen(pen)
@@ -648,19 +649,19 @@ class FLStylePainter(object):
                         pn.setColor(bcolor)
                         self.painter_.setPen(pn)
                         QtCore.QwtPainter.drawText(
-                            self.painter_, self.painter_.xFormDev(self.lastLabelRect_), self.curr_.textalign | self.tf_, self.text_
+                            self.painter_, self.painter_.xFormDev(self.lastLabelRect_), self.curr_["textalign"] | self.tf_, self.text_
                         )
                         pn.setColor(pcolor)
                         self.painter_.setPen(pn)
                         self.lastLabelRect_.setSize(QtCore.QSize(0, 0))
                     else:
                         if attr.contains("x"):
-                            self.curr_.textx = self.lenToInt(attr, "x")
+                            self.curr_["textx"] = self.lenToInt(attr, "x")
                         if attr.contains("y"):
-                            self.curr_.texty = self.lenToInt(attr, "y")
+                            self.curr_["texty"] = self.lenToInt(attr, "y")
                         if t == tse:
-                            self.curr_.textx += self.lenToInt(attr, "dx")
-                            self.curr_.texty += self.lenToInt(attr, "dy")
+                            self.curr_["textx"] += self.lenToInt(attr, "dx")
+                            self.curr_["texty"] += self.lenToInt(attr, "dy")
 
                         pn = self.painter_.pen()
                         pcolor = pn.color()
@@ -675,21 +676,21 @@ class FLStylePainter(object):
                                 if isSectionDraw:
                                     text = c.toText().nodeValue()
                                 w = self.painter_.fontMetrics().width(text)
-                                if self.curr_.textalign == Qt.AlignHCenter:
-                                    self.curr_.textx -= w / 2
-                                elif self.curr_.textalign == Qt.AlignRight:
-                                    self.curr_.textx -= w
-                                QtCore.QwtPainter.drawText(self.painter_, self.curr_.textx, self.curr_.texty, text)
+                                if self.curr_["textalign"] == Qt.AlignHCenter:
+                                    self.curr_["textx"] -= w / 2
+                                elif self.curr_["textalign"] == Qt.AlignRight:
+                                    self.curr_["textx"] -= w
+                                QtCore.QwtPainter.drawText(self.painter_, self.curr_["textx"], self.curr_["texty"], text)
                                 pn.setColor(pcolor)
                                 self.painter_.setPen(pn)
-                                self.curr_.textx += w
+                                self.curr_["textx"] += w
                             elif c.isElement() and tgnspan:
                                 self.play(c, elm)
                             c = c.nextSibling()
                         if t == tse:
-                            it = self.stack_.fromLast() - 1
-                            it.textx = self.curr_.textx
-                            it.texty = self.curr_.texty
+                            it = self.stack_[-1]
+                            it["textx"] = self.curr_["textx"]
+                            it["texty"] = self.curr_["texty"]
             elif t == ie:
                 if elm == ie or isSectionDraw:
                     x1 = self.lenToInt(attr, "x")
@@ -1131,7 +1132,7 @@ class FLStylePainter(object):
         self.d_.errCode_ = self.ErrCode.NoError
         st = self.d_.styleName_
 
-        if self.FLStylePainterPrivate.svgMode_ and self.d_.relDpi_ != 1.0:
+        if self.d_.svgMode_ and self.d_.relDpi_ != 1.0:
             fnt = QtGui.QFont(self.d_.painter_.font())
             fnt.setPointSizeFloat(fnt.pointSizeFloat() / self.d_.relDpi_)
             oldAscent = self.d_.painter_.fontMetrics().ascent()
@@ -1235,7 +1236,7 @@ class FLStylePainter(object):
                     eid = e.attribute("id")
                     if not idList.contains(eid):
                         idList.append(eid)
-                        self.FLStylePainterPrivate.normalizeTranslates(e, True)
+                        self.d_.normalizeTranslates(e, True)
                         docElemRes.appendChild(e.cloneNode())
                 n = n.nextSibling()
 
@@ -1251,5 +1252,5 @@ class FLStylePainter(object):
 
     @decorators.BetaImplementation
     def setSVGMode(self, mode):
-        self.FLStylePainterPrivate.svgMode_ = mode
+        self.d_.svgMode_ = mode
         QtCore.QwtPainter.setSVGMode(mode)
