@@ -487,7 +487,7 @@ class MainForm(QtWidgets.QMainWindow):
             ag_action = pncontrolsfactory.QAction(ag)
             ag_action.setObjectName("%s_actiongroup_name" % ag.objectName())
             ag_action.setText(mng.idAreaToDescription(ag.objectName()))
-            ag_action.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("folder.png")))
+            ag_action.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.pixmap_fromMimeSource("folder.png")))
 
             modules = mng.listIdModules(ag.objectName())
             for module in modules:
@@ -518,28 +518,28 @@ class MainForm(QtWidgets.QMainWindow):
                         staticLoad = pncontrolsfactory.QAction(ag)
                         staticLoad.setObjectName("staticLoaderSetupAction")
                         staticLoad.setText(self.qsa_sys.translate("Configurar carga estática"))
-                        staticLoad.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("folder_update.png")))
+                        staticLoad.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.pixmap_fromMimeSource("folder_update.png")))
                         staticLoad.triggered.connect(self.act_sig_map_.map)
                         self.act_sig_map_.setMapping(staticLoad, "triggered():staticLoaderSetup():%s" % staticLoad.objectName())
 
                         reInit = pncontrolsfactory.QAction(ag)
                         reInit.setObjectName("reinitAction")
                         reInit.setText(self.qsa_sys.translate("Recargar scripts"))
-                        reInit.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("reload.png")))
+                        reInit.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.pixmap_fromMimeSource("reload.png")))
                         reInit.triggered.connect(self.act_sig_map_.map)
                         self.act_sig_map_.setMapping(reInit, "triggered():reinit():%s" % reInit.objectName())
 
         shConsole = pncontrolsfactory.QAction(self.ag_menu_)
         shConsole.setObjectName("shConsoleAction")
         shConsole.setText(self.qsa_sys.translate("Mostrar Consola de mensajes"))
-        shConsole.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("consola.png")))
+        shConsole.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.pixmap_fromMimeSource("consola.png")))
         shConsole.triggered.connect(self.act_sig_map_.map)
         self.act_sig_map_.setMapping(shConsole, "triggered():shConsole():%s" % shConsole.objectName())
 
         exit = pncontrolsfactory.QAction(self.ag_menu_)
         exit.setObjectName("exitAction")
         exit.setText(self.qsa_sys.translate("&Salir"))
-        exit.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("exit.png")))
+        exit.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.pixmap_fromMimeSource("exit.png")))
         exit.triggered.connect(self.act_sig_map_.map)
         self.act_sig_map_.setMapping(exit, "triggered():exit():%s" % exit.objectName())
 
@@ -552,7 +552,7 @@ class MainForm(QtWidgets.QMainWindow):
         tb = self.tw_corner = QToolButton(tw, "tabWidgetCorner")
         tb.autoRaise = False
         tb.setFixedSize(16, 16)
-        tb.setIconSet(self.iconset16x16(AQS.Pixmap_fromMineSource("file_close.png")))
+        tb.setIconSet(self.iconset16x16(AQS.pixmap_fromMimeSource("file_close.png")))
         tb.clicked.connect(self.removeCurrentPage)
         tw.setCornerWidget(tb, AQS.TopRight)
         AQS.toolTip_add(tb, self.qsa_sys.translate("Cerrar pestaña"))
@@ -562,31 +562,31 @@ class MainForm(QtWidgets.QMainWindow):
     def initHelpMenu(self) -> None:
 
         aboutQt = self.w_.findChild(QtWidgets.QAction, "aboutQtAction")
-        aboutQt.setIcon(self.iconSet16x16(AQS.Pixmap_fromMineSource("aboutqt.png")))
+        aboutQt.setIcon(self.iconSet16x16(AQS.pixmap_fromMimeSource("aboutqt.png")))
         # aboutQt.triggered.connect(aqApp.aboutQt)
 
         aboutPineboo = self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction")
-        aboutPineboo.setIcon(self.iconSet16x16(AQS.Pixmap_fromMineSource("pineboo-logo-32.png")))
+        aboutPineboo.setIcon(self.iconSet16x16(AQS.pixmap_fromMimeSource("pineboo-logo-32.png")))
         # aboutPineboo.triggered.connect(aqApp.aboutPineboo)
 
         helpIndex = self.w_.findChild(QtWidgets.QAction, "helpIndexAction")
-        helpIndex.setIcon(self.iconSet16x16(AQS.Pixmap_fromMineSource("help_index.png")))
+        helpIndex.setIcon(self.iconSet16x16(AQS.pixmap_fromMimeSource("help_index.png")))
         # helpIndex.triggered.connect(aqApp.helpIndex)
 
         urlPineboo = self.w_.findChild(QtWidgets.QAction, "urlEnebooAction")
-        urlPineboo.setIcon(self.iconSet16x16(AQS.Pixmap_fromMineSource("pineboo-logo-32.png")))
+        urlPineboo.setIcon(self.iconSet16x16(AQS.pixmap_fromMimeSource("pineboo-logo-32.png")))
         # urlPineboo.triggered.connect(aqApp.urlPineboo)
 
     def initConfigMenu(self) -> None:
 
         font = self.w_.findChild(QtWidgets.QAction, "fontAction")
-        font.setIcon(self.iconSet16x16(AQS.Pixmap_fromMineSource("font.png")))
+        font.setIcon(self.iconSet16x16(AQS.pixmap_fromMimeSource("font.png")))
         # font.triggered.connect(aqApp.chooseFont)
 
         style = self.w_.findChild(QtWidgets.QMenu, "style")
 
         aqApp.initStyles()
-        style.setIcon(self.iconSet16x16(AQS.Pixmap_fromMineSource("estilo.png")))
+        style.setIcon(self.iconSet16x16(AQS.pixmap_fromMimeSource("estilo.png")))
         # style.triggered.connect(aqApp.showStyles)
 
     def initTextLabels(self) -> None:
@@ -713,7 +713,7 @@ class MainForm(QtWidgets.QMainWindow):
                 menu_ag_name = pncontrolsfactory.QAction(menu_ag)
                 menu_ag_name.setObjectName("%s_actiongroup_name" % ag.objectName())
                 menu_ag_name.setText(self.qsa_sys.translate("Más"))
-                menu_ag_name.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.Pixmap_fromMineSource("plus.png")))
+                menu_ag_name.setIcon(pncontrolsfactory.QIcon(pncontrolsfactory.AQS.pixmap_fromMimeSource("plus.png")))
 
             i = 0
             while i < items.length():

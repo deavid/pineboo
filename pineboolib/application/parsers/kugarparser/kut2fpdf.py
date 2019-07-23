@@ -325,7 +325,7 @@ class Kut2FPDF(object):
                         aof_size += self._parser_tools.getHeight(addFooter)
                         heightCalculated += self._parser_tools.getHeight(addFooter)
 
-                    pageFooter = self._xml.get("PageFooter")
+                    pageFooter: Any = self._xml.get("PageFooter")
                     if pageFooter is not None and isinstance(pageFooter, Element):
                         if self._document.page_no() == 1 or pageFooter.get("PrintFrecuency") == "1":
                             heightCalculated += self._parser_tools.getHeight(pageFooter)
@@ -574,7 +574,7 @@ class Kut2FPDF(object):
             if res_ == ["0"]:
                 return
 
-        if text is not None and isinstance(text, str) and text.startswith(filedir("../tempdata")):
+        if text.startswith(filedir("../tempdata")):
             is_image = True
 
         # negValueColor = xml.get("NegValueColor")
@@ -715,7 +715,7 @@ class Kut2FPDF(object):
         result_section_size = 0
         # Miramos si el texto sobrepasa el ancho
 
-        array_text: List[Optional[str]] = []
+        array_text: List[str] = []
         array_n = []
         text_lines = []
         if txt.find("\n") > -1:
@@ -747,8 +747,6 @@ class Kut2FPDF(object):
         processed_lines = 0
         extra_size = 0
         for actual_text in array_text:
-            if actual_text is None:
-                continue
 
             processed_lines += 1
 
@@ -807,9 +805,9 @@ class Kut2FPDF(object):
         if self.increase_section_size < extra_size:  # Si algun incremento extra hay superior se respeta
             self.increase_section_size = extra_size
 
-    def split_text(self, texto, limit_w) -> List[Optional[str]]:
+    def split_text(self, texto, limit_w) -> List[str]:
         list_ = []
-        linea_ = None
+        linea_: Optional[str] = None
 
         for t in texto.split(" "):
             if linea_ is None and t == "":
@@ -823,8 +821,8 @@ class Kut2FPDF(object):
                 linea_ = ""
 
             linea_ += "%s " % t
-
-        list_.append(linea_)
+        if linea_ is not None:
+            list_.append(linea_)
         return list_
 
     """
@@ -953,7 +951,7 @@ class Kut2FPDF(object):
         if not file_name.lower().endswith(".png"):
             file_name = self._parser_tools.parseKey(file_name)
 
-        if file_name is not None and os.path.exists(file_name):
+        if os.path.exists(file_name):
             x = self.calculateLeftStart(x)
             W = self.calculateWidth(W, x)
 

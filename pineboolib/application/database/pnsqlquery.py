@@ -91,8 +91,8 @@ class PNSqlQuery(object):
     countRefQuery: int = 0
     invalidTablesList = False
     _is_active: bool
-    _fieldNameToPosDict: Dict[str, int]
-    _sql_inspector: sql_tools.sql_inspector
+    _fieldNameToPosDict: Optional[Dict[str, int]]
+    _sql_inspector: Optional[sql_tools.sql_inspector]
     _row: List[Any]
     _datos: List[Any]
     _posicion: int
@@ -103,6 +103,8 @@ class PNSqlQuery(object):
 
         if project.conn is None:
             raise Exception("Project is not connected yet")
+        self._sql_inspector = None
+        self._fieldNameToPosDict = None
         self.d = PNSqlQueryPrivate(cx)
         if isinstance(connection_name, str):
             self.d.db_ = project.conn.useConn(connection_name)
@@ -389,7 +391,7 @@ class PNSqlQuery(object):
 
         if self.d.groupDict_ and not self.d.orderBy_:
             res = res + " ORDER BY "
-            initGD = None
+            initGD = False
             i = 0
             while i < len(self.d.groupDict_):
                 gD: str = self.d.groupDict_[i]
@@ -566,7 +568,7 @@ class PNSqlQuery(object):
             ret = self._value_std(n, raw)
         return ret
 
-    def _value_std(self, n: Union[str, int], raw: bool = False) -> Any:
+    def _value_std(self, n: Union[str, int, None], raw: bool = False) -> Any:
         if n is None:
             logger.trace("value::invalid use with n=None.", stack_info=True)
             return None

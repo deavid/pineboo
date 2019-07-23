@@ -5,7 +5,7 @@ from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # type: ignore # FIXME
 from pineboolib.core import decorators
 from pineboolib import logging
 from pineboolib.application.database.pnsqlquery import PNSqlQuery
-from typing import Any, Optional
+from typing import Any, Optional, Dict
 
 
 class FLReportEngine(object):
@@ -28,7 +28,7 @@ class FLReportEngine(object):
         def __init__(self, q):
             self.qry_: Optional[PNSqlQuery] = None
             self.qFieldMtdList_ = None
-            self.qGroupDict_ = None
+            self.qGroupDict_: Dict[int, str] = {}
             self.q_ = q
             self.template_ = ""
 
@@ -66,7 +66,7 @@ class FLReportEngine(object):
             if not self.qry_.isValid():
                 return
 
-            self.qGroupDict_
+            # self.qGroupDict_
             lev = 0
 
             while lev < levelMax and str(self.qry_.value(self.qGroupDict_[lev])) == str(vA[lev]):
@@ -137,7 +137,7 @@ class FLReportEngine(object):
                     if not q.next():
                         break
             else:
-                vA = []
+                vA: List[None] = []
                 for i in range(10):
                     vA.append(None)
 
@@ -226,47 +226,47 @@ class FLReportEngine(object):
 
         return False
 
-        # print(self.rd.toString(1))
-        """
-        fr = MReportEngine.RenderReportFlags.FillRecords.value
-
-        pgs = FLReportPages()
-        if pages:
-            pgs.setPageCollection(pages)
-
-        pgc = super(FLReportEngine, self).renderReport(
-            initRow,
-            initCol,
-            pgs,
-            fr if fRec else 0
-        )
-
-        pgs.setPageCollection(pgc)
-        if not fRec or not self.d_.qry_ or not self.d_.qFieldMtdList_ or not self.d_.qDoubleFieldList_:
-            return pgs
-
-        nl = QtXml.QDomNodeList(self.rd.elementsByTagName("Row"))
-        for i in range(nl.count()):
-            itm = nl.item(i)
-            if itm.isNull():
-                continue
-            nm = itm.attributes()
-
-            for it in self.d_.qDoubleFieldList_:
-                ita = nm.namedItem(it)
-                if ita.isNull():
-                    continue
-                sVal = ita.nodeValue()
-                if not sVal or sVal == "" or sVal.upper() == "NAN":
-                    continue
-                dVal = float(sVal)
-                if not dVal:
-                    dVal = 0
-                decimals = self.d_.qFieldMtdList_.find(
-                    it.section('.', 1, 1).lower()).partDecimal()
-                ita.setNodeValue(FLUtil.formatoMiles(round(dVal, decimals)))
-        return pgs
-        """
+        # # print(self.rd.toString(1))
+        # """
+        # fr = MReportEngine.RenderReportFlags.FillRecords.value
+        #
+        # pgs = FLReportPages()
+        # if pages:
+        #     pgs.setPageCollection(pages)
+        #
+        # pgc = super(FLReportEngine, self).renderReport(
+        #     initRow,
+        #     initCol,
+        #     pgs,
+        #     fr if fRec else 0
+        # )
+        #
+        # pgs.setPageCollection(pgc)
+        # if not fRec or not self.d_.qry_ or not self.d_.qFieldMtdList_ or not self.d_.qDoubleFieldList_:
+        #     return pgs
+        #
+        # nl = QtXml.QDomNodeList(self.rd.elementsByTagName("Row"))
+        # for i in range(nl.count()):
+        #     itm = nl.item(i)
+        #     if itm.isNull():
+        #         continue
+        #     nm = itm.attributes()
+        #
+        #     for it in self.d_.qDoubleFieldList_:
+        #         ita = nm.namedItem(it)
+        #         if ita.isNull():
+        #             continue
+        #         sVal = ita.nodeValue()
+        #         if not sVal or sVal == "" or sVal.upper() == "NAN":
+        #             continue
+        #         dVal = float(sVal)
+        #         if not dVal:
+        #             dVal = 0
+        #         decimals = self.d_.qFieldMtdList_.find(
+        #             it.section('.', 1, 1).lower()).partDecimal()
+        #         ita.setNodeValue(FLUtil.formatoMiles(round(dVal, decimals)))
+        # return pgs
+        # """
 
     def initData(self) -> None:
         if not self.rd:
