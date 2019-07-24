@@ -2788,7 +2788,6 @@ class PNSqlCursor(QtCore.QObject):
 
             self.d._model.Insert(self)
             self.d._model.refresh()
-
             pk_row = self.d._model.findPKRow((self.d.buffer_.value(pk_name),))
             if pk_row is None:
                 raise Exception("pk_row not found after insert!")

@@ -126,7 +126,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self._disable_refresh = False
 
         self._cursor_db: IApiCursor = self.db().cursor()
-        self._initialized = False
+        self._initialized = None
         # self.refresh()
 
     def disable_refresh(self, disable) -> None:
@@ -610,7 +610,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         if self._initialized is None and self.parent_view:  # Si es el primer refresh y estoy conectado a un FLDatatable()
             self._initialized = True
             timer = QtCore.QTimer()
-            timer.singleShot(5, self.refresh)
+            timer.singleShot(1, self.refresh)
             return
 
         if self._initialized:  # Si estoy inicializando y no me ha enviado un sender, cancelo el refesh
