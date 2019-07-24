@@ -23,7 +23,7 @@ from pineboolib import logging
 from pineboolib import pncontrolsfactory
 from pineboolib.application import project
 
-from typing import Any, Union, Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from PyQt5.Qt import QPixmap  # type: ignore

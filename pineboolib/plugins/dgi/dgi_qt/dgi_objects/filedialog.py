@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtWidgets import QFileDialog, QApplication  # type: ignore
 import os
-from typing import Any, Optional
+from typing import Any, Optional, List
 
 
 class FileDialog(object):
     @staticmethod
-    def getOpenFileName(*args) -> Optional[str]:
+    def getOpenFileName(*args: List[Any]) -> Optional[str]:
         obj = QFileDialog.getOpenFileName(QApplication.activeWindow(), *args)
         return obj[0] if obj is not None else None
 

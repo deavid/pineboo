@@ -8,11 +8,10 @@ from PyQt5 import QtGui  # type: ignore
 from pineboolib.core.utils import logging
 
 
-from typing import Type, Any, Optional, Union, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from PyQt5.QtWidgets import QWidget  # type : ignore
-    from PyQt5.Qt import QColor, QCursor  # type: ignore
+from typing import Type, Any, Optional, Union
+from PyQt5.Qt import QCursor  # type: ignore
+from PyQt5.QtWidgets import QWidget  # type : ignore
+from PyQt5.QtGui import QColor  # type: ignore
 
 logger = logging.getLogger("AQS")
 
@@ -50,10 +49,9 @@ class AQS(object):
     """
 
     def ColorDialog_getColor(
-        self, color: Optional[Union[str, "QColor"]] = None, parent: Optional["QWidget"] = None, name: Optional[str] = None
+        self, color: Optional[Union[str, QColor]] = None, parent: Optional["QWidget"] = None, name: Optional[str] = None
     ) -> Any:
         from PyQt5.QtWidgets import QColorDialog  # type: ignore
-        from PyQt5.QtGui import QColor  # type: ignore
 
         if color is None:
             color = QColor.black()
