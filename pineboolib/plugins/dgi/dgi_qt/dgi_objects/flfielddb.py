@@ -115,6 +115,10 @@ class FLFieldDB(QtWidgets.QWidget):
         self.keepDisabled_ = False
         self.initNotNullColor_ = False
         self.actionName_ = None
+        self.pbAux_ = None
+        self.pbAux2_ = None
+        self.pbAux3_ = None
+        self.pbAux4_ = None
 
         self.maxPixImages_ = config.value("ebcomportamiento/maxPixImages", None)
         self.autoCompMode_ = config.value("ebcomportamiento/autoComp", "OnDemandF4")
@@ -284,9 +288,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @return Nombre de la tabla
     """
 
-    def tableName(self) -> str:
-        if not self.tableName_:
-            raise ValueError("tableName is not defined!")
+    def tableName(self) -> Optional[str]:
         return self.tableName_
 
     """
