@@ -8,7 +8,7 @@ class AQUtil(object):
     util = None
     logger = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         from pineboolib.fllegacy.flutil import FLUtil
 
         self.util = FLUtil()
@@ -16,4 +16,6 @@ class AQUtil(object):
 
     def __getattr__(self, name: str) -> Any:
         # self.logger.info("Usando function FAKE %s de FLUtil()", name)
-        return getattr(self.util, name)
+        result = getattr(self.util, name, None)
+        if result is None:
+            raise Exception('AQUtil can\'t load "%s" attribute fom FLUtil!' % name)
