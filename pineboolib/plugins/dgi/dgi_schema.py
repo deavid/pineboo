@@ -108,7 +108,7 @@ class dgi_schema(object):
         """Returns True only if the code is running inside a PyInstaller bundle"""
         # FIXME: Delete me. This functionality DOES NOT DEPEND on which interface is being used.
         # .... a bundle is a bundle regardless of wether is running as jsonrpc or Qt.
-        # .... A copy of this function has been moved to pineboolib.is_deployed() for convenience
+        # .... A copy of this function has been moved to pineboolib.core.utils.utils_base.is_deployed() for convenience
         import sys
 
         return getattr(sys, "frozen", False)

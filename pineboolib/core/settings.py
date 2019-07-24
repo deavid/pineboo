@@ -5,7 +5,7 @@ from .utils import logging
 
 from PyQt5.QtCore import QSettings, QSize  # type: ignore
 
-from typing import Dict, List, Any, Union, Tuple
+from typing import Dict, List, Any, Union, Tuple, Type
 
 logger = logging.getLogger("core.settings")
 
@@ -22,10 +22,10 @@ class PinebooSettings(QSettings):
         super().__init__(format, scope, self.organization, self.application)
 
     @staticmethod
-    def dump_qsize(value: QSize) -> Dict:
+    def dump_qsize(value: QSize) -> Dict[str, Any]:
         return {"__class__": "QSize", "width": value.width(), "height": value.height()}
 
-    def dump_value(self, value: Union[QSize, str, bool, int, List[str]]) -> str:
+    def dump_value(self, value: Union[QSize, str, bool, int, List[str], Dict[Any, Any]]) -> str:
         if isinstance(value, QSize):
             value = self.dump_qsize(value)
         return json.dumps(value)
@@ -40,7 +40,7 @@ class PinebooSettings(QSettings):
                 raise ValueError("Unknown classname %r" % classname)
         return value
 
-    def value(self, key: str, default: Any = None) -> Any:
+    def value(self, key: str, defaultValue: Any = None, type: Type = None) -> Any:
         curtime = time.time()
         cachedVal = self.cache.get(key, None)
         if cachedVal:
@@ -48,7 +48,7 @@ class PinebooSettings(QSettings):
                 del self.cache[key]
             else:
                 return cachedVal[1]
-        val = self._value(key, default)
+        val = self._value(key, defaultValue)
         self.cache[key] = (curtime, val)
         return val
 

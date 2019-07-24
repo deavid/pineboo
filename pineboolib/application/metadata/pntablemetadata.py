@@ -570,7 +570,7 @@ class PNTableMetaData(ITableMetaData):
     @return Cadena de caracteres con los nombres de los campos separados por comas
     """
 
-    def fieldList(self) -> Any:
+    def fieldList(self) -> List[Any]:
         return self.d.fieldList_
 
     def fieldListArray(self, prefix_table=False) -> List[str]:
