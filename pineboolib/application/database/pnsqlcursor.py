@@ -405,7 +405,7 @@ class PNSqlCursor(QtCore.QObject):
         # logger.trace("--------------------->Añadiendo filtro",  f)
         none_f: Optional[str] = f
         if none_f is None:
-            logger.debug("setMainFilter: f does not accept 'None'. Use empty string instead.")
+            logger.warning("setMainFilter: f does not accept 'None'. Use empty string instead.")
             f = ""
         if self.d._model and getattr(self.d._model, "where_filters", None):
             self.d._model.where_filters["main-filter"] = f
@@ -2495,7 +2495,10 @@ class PNSqlCursor(QtCore.QObject):
 
     @pyqtSlot()
     def setFilter(self, _filter: str) -> None:
-
+        _filter_none: Optional[str] = _filter
+        if _filter_none is None:
+            logger.warning("setFilter: None is not allowed, use empty string")
+            _filter = ""
         # self.d.filter_ = None
 
         finalFilter = _filter
