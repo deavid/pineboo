@@ -2,7 +2,6 @@
 
 import os
 from pineboolib.core.utils.utils_base import filedir
-from pineboolib.fllegacy.fltranslations import FLTranslations
 from pineboolib.core.settings import config
 from pineboolib.application import project
 
@@ -68,6 +67,7 @@ class FLTranslator(QTranslator):
                     return False
 
             else:
+                from pineboolib.fllegacy.fltranslations import FLTranslations
 
                 trans = FLTranslations()
                 trans.lrelease("%s.ts" % ts_file, qm_file, not self.mulTiLang_)
