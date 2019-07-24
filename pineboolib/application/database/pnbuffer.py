@@ -161,7 +161,7 @@ class PNBuffer(object):
         self.inicialized_: bool = False
 
         tmd = self.cursor_.metadata()
-        if not tmd:
+        if tmd is None:
             logger.warning("Metadata not found for specified cursor %s", self.cursor_.curName())
             return
 
