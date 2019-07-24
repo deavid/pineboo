@@ -331,7 +331,7 @@ def get_expected_args_num(inspected_function: Callable) -> int:
 
 
 def get_expected_kwargs(inspected_function: Callable) -> bool:
-    expected_kwargs = inspect.getargspec(inspected_function)[2]
+    expected_kwargs = inspect.getfullargspec(inspected_function)[2]
     return True if expected_kwargs else False
 
 

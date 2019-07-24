@@ -43,7 +43,7 @@ class FLFieldDB(QtWidgets.QWidget):
     editor_: Any  # Editor para el contenido del campo que representa el componente
     fieldName_: str  # Nombre del campo de la tabla al que esta asociado este componente
     tableName_: Optional[str]  # Nombre de la tabla fóranea
-    actionName_: str  # Nombre de la accion
+    actionName_: Optional[str]  # Nombre de la accion
     foreignField_: Optional[str]  # Nombre del campo foráneo
     fieldRelation_: Optional[str]  # Nombre del campo de la relación
     filter_: Optional[str]  # Nombre del campo de la relación
@@ -99,7 +99,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
     def __init__(self, parent: "QtWidgets.QtWidget", *args) -> None:
         super(FLFieldDB, self).__init__(parent)
-
+        self._loaded = False
         self.DEBUG = False  # FIXME: debe recoger DEBUG de pineboolib.project
         self.editor_ = None
         self.cursor_ = None
@@ -109,6 +109,12 @@ class FLFieldDB(QtWidgets.QWidget):
         self.showAlias_ = True
         self.showEditor_ = True
         self.autoCompMode_ = "OnDemandF4"
+        self.name = "FLFieldDB"
+        self.showed = False
+        self._refreshLaterEditor = None
+        self.keepDisabled_ = False
+        self.initNotNullColor_ = False
+        self.actionName_ = None
 
         self.maxPixImages_ = config.value("ebcomportamiento/maxPixImages", None)
         self.autoCompMode_ = config.value("ebcomportamiento/autoComp", "OnDemandF4")
@@ -203,9 +209,6 @@ class FLFieldDB(QtWidgets.QWidget):
             else:
                 self.logger.warning("*** FLFieldDB::loaded: SIN cursor ??")
 
-        if not self.name:
-            self.setName("FLFieldDB")
-
         self.cursorBackup_ = False
         self._partDecimal = 0
         self.initCursor()
@@ -255,9 +258,8 @@ class FLFieldDB(QtWidgets.QWidget):
     """
 
     def setFilter(self, f: str) -> None:
-        if not self.filter_ == f:
-            self.filter_ = f
-            self.setMapValue()
+        self.filter_ = f
+        self.setMapValue()
 
     """
     Para obtener el filtro del cursor.

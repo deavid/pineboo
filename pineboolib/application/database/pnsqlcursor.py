@@ -2375,27 +2375,27 @@ class PNSqlCursor(QtCore.QObject):
 
     @pyqtSlot()
     def select(self, _filter: Optional[str] = None, sort: Optional[str] = None) -> bool:  # sort = QtCore.QSqlIndex()
-        _filter = _filter if _filter is not None else self.filter()
+        # _filter = _filter if _filter is not None else self.filter()
         if not self.d.metadata_:
             return False
 
-        bFilter = self.baseFilter()
-        finalFilter = bFilter
-        if _filter:
-            if bFilter:
-                if _filter not in bFilter:
-                    finalFilter = "%s AND %s" % (bFilter, _filter)
-                else:
-                    finalFilter = bFilter
-
-            else:
-                finalFilter = _filter
+        finalFilter = _filter or ""
+        # bFilter = self.baseFilter()
+        # finalFilter = bFilter
+        # if _filter:
+        #    if bFilter:
+        #        if _filter not in bFilter:
+        #            finalFilter = "%s AND %s" % (bFilter, _filter)
+        #        else:
+        #            finalFilter = bFilter
+        #
+        #    else:
+        #        finalFilter = _filter
 
         if self.d.cursorRelation_ and self.d.cursorRelation_.modeAccess() == self.Insert and not self.curFilter():
             finalFilter = "1 = 0"
 
-        if finalFilter:
-            self.setFilter(finalFilter)
+        self.setFilter(finalFilter)
 
         if sort:
             self.d._model.setSortOrder(sort)
@@ -2504,8 +2504,8 @@ class PNSqlCursor(QtCore.QObject):
         finalFilter = _filter
 
         bFilter = self.baseFilter()
-        if bFilter:
-            if not finalFilter:
+        if bFilter not in [None, ""]:
+            if finalFilter in [None, ""]:
                 finalFilter = bFilter
             elif finalFilter in bFilter:
                 finalFilter = bFilter
@@ -3452,8 +3452,8 @@ class PNCursorPrivate(QtCore.QObject):
 
     """
     Cursor relacionado con este.
-    cursorRelation_: Optional[PNSqlCursor]
     """
+    cursorRelation_: Optional["PNSqlCursor"]
 
     """
     Relación que determina como se relaciona con el cursor relacionado.
@@ -3555,8 +3555,8 @@ class PNCursorPrivate(QtCore.QObject):
 
     """
     Cursor propietario
-    cursor_: "PNSqlCursor"
     """
+    cursor_: Optional["PNSqlCursor"]
 
     """
     Nombre del cursor
@@ -3626,13 +3626,13 @@ class PNCursorPrivate(QtCore.QObject):
         self.aclDone_ = False
         self.edition_ = True
         self.browse_ = True
-        self.cursor_: Optional["PNSqlCursor"] = None
-        self.cursorRelation_: Optional["PNSqlCursor"] = None
+        self.cursor_ = None
+        self.cursorRelation_ = None
+        self.relation_ = None
         self.acTable_ = None
         self.timer_ = None
         self.ctxt_ = None
         self.rawValues_ = False
-        self.relation_ = None
         self.persistentFilter_ = None
 
     def __del__(self) -> None:
@@ -3642,12 +3642,15 @@ class PNCursorPrivate(QtCore.QObject):
 
         if self.bufferCopy_:
             del self.bufferCopy_
+            self.bufferCopy_ = None
 
         if self.relation_:
             del self.relation_
+            self.relation_ = None
 
         if self.acTable_:
             del self.acTable_
+            self.acTable_ = None
 
         if self.edition_states_:
             del self.edition_states_
@@ -3660,6 +3663,7 @@ class PNCursorPrivate(QtCore.QObject):
             # logger.trace("AQBoolFlagState count %s", self.count_)
         if self.transactionsOpened_:
             del self.transactionsOpened_
+            self.transactionsOpened_ = []
 
     def doAcl(self) -> None:
         if not self.acTable_:
