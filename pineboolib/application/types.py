@@ -1,7 +1,7 @@
 import os
 import os.path
 import collections
-from typing import Any, Optional, Dict
+from typing import Any, Optional, Dict, Union
 
 from PyQt5 import QtCore  # type: ignore
 
@@ -28,7 +28,7 @@ class QString(str):
     Clase QString para simular la original que no existe en PyQt5
     """
 
-    def mid(self, start, length=None):
+    def mid(self, start: int, length: Optional[int] = None) -> str:
         """
         Recoje una sub cadena a partir de una cadena
         @param start. Posición inicial
@@ -103,7 +103,7 @@ def Object(x: Optional[Dict[str, Any]] = None) -> StructMyDict:
     return StructMyDict(x)
 
 
-def String(value):
+def String(value: str) -> str:
     """
     Devuelve una cadena de texto
     @param value. Valor a convertir
@@ -143,14 +143,14 @@ class Array(object):
             for f in args:
                 self.__setitem__(f, f)
 
-    def __iter__(self):
+    def __iter__(self) -> Array:
         """
         iterable
         """
         self.pos_iter = 0
         return self
 
-    def __next__(self):
+    def __next__(self) -> Any:
         """
         iterable
         """
@@ -171,7 +171,7 @@ class Array(object):
 
         return ret_
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:
         """
         Especificamos una nueva entrada
         @param key. Nombre del registro
@@ -182,7 +182,7 @@ class Array(object):
         #    field_key = "%s_bis" % field_key
         self.dict_[key] = value
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: Union[str, int, slice]) -> Any:
         """
         Recogemos el valor de un registro
         @param key. Valor que idenfica el registro a recoger
@@ -202,13 +202,13 @@ class Array(object):
 
         return None
 
-    def __getattr__(self, k):
+    def __getattr__(self, k: str) -> Any:
         if k == "length":
             return len(self.dict_)
         else:
             return self.dict_[k]
 
-    def splice(self, *args):
+    def splice(self, *args) -> None:
         if len(args) == 2:  # Delete
             pos_ini = args[0]
             length_ = args[1]
@@ -252,13 +252,13 @@ class Array(object):
 
             self.dict_ = new
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.dict_)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return " ".join(self.dict_.keys())
 
-    def append(self, val):
+    def append(self, val: Any) -> None:
         k = repr(val)
         while True:
             if hasattr(self.dict_, k):
@@ -309,22 +309,23 @@ class Date(object):
             self.date_ = QtCore.QDate(args[0], args[1], args[2])
             self.time_ = QtCore.QTime(0, 0)
 
-    def toString(self, pattern=None) -> str:
+    def toString(self, pattern: Optional[str] = None) -> str:
         """
         Retorna una cadena de texto con los datos de fecha y hora.
         @return cadena de texto con los datos de fecha y hora
         """
         if pattern:
             texto = self.date_.toString(pattern)
+        else:
+            texto = "%s-%s-%sT%s:%s:%s" % (
+                self.date_.toString("yyyy"),
+                self.date_.toString("MM"),
+                self.date_.toString("dd"),
+                self.time_.toString("hh"),
+                self.time_.toString("mm"),
+                self.time_.toString("ss"),
+            )
 
-        texto = "%s-%s-%sT%s:%s:%s" % (
-            self.date_.toString("yyyy"),
-            self.date_.toString("MM"),
-            self.date_.toString("dd"),
-            self.time_.toString("hh"),
-            self.time_.toString("mm"),
-            self.time_.toString("ss"),
-        )
         return texto
 
     def getTime(self) -> int:
@@ -345,7 +346,7 @@ class Date(object):
         """
         return self.date_.year()
 
-    def setYear(self, yyyy) -> "Date":
+    def setYear(self, yyyy: str) -> "Date":
         """
         Setea un año dado
         @param yyyy. Año a setear
@@ -362,7 +363,7 @@ class Date(object):
         """
         return self.date_.month()
 
-    def setMonth(self, mm) -> "Date":
+    def setMonth(self, mm: str) -> "Date":
         """
         Setea un mes dado
         @param mm. Mes a setear
@@ -382,7 +383,7 @@ class Date(object):
         """
         return self.date_.day()
 
-    def setDay(self, dd) -> "Date":
+    def setDay(self, dd: str) -> "Date":
         """
         Setea un dia dado
         @param dd. Dia a setear
@@ -426,7 +427,7 @@ class Date(object):
     getDate = getDay
     # setDate = setDay
 
-    def setDate(self, date) -> "Date":
+    def setDate(self, date: Any) -> "Date":
         """
         Se especifica fecha
         @param date. Fecha a setear
@@ -442,7 +443,7 @@ class Date(object):
 
         return self
 
-    def addDays(self, d) -> "Date":
+    def addDays(self, d: int) -> "Date":
         """
         Se añaden dias a una fecha dada
         @param d. Dias a sumar (o restar) a la fecha dada
@@ -450,7 +451,7 @@ class Date(object):
         """
         return Date(self.date_.addDays(d).toString("yyyy-MM-dd"))
 
-    def addMonths(self, m) -> "Date":
+    def addMonths(self, m: int) -> "Date":
         """
         Se añaden meses a una fecha dada
         @param m. Meses a sumar (o restar) a la fecha dada
@@ -458,7 +459,7 @@ class Date(object):
         """
         return Date(self.date_.addMonths(m).toString("yyyy-MM-dd"))
 
-    def addYears(self, y) -> "Date":
+    def addYears(self, y: int) -> "Date":
         """
         Se añaden años a una fecha dada
         @param y. Años a sumar (o restar) a la fecha dada
@@ -470,28 +471,25 @@ class Date(object):
     def parse(cls, value: str) -> "Date":
         return Date(value, "yyyy-MM-dd")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.toString()
 
-    def __lt__(self, other) -> bool:
+    def __lt__(self, other: Union[str, "Date"]) -> bool:
         return str(self) < str(other)
 
-    def __le__(self, other) -> bool:
+    def __le__(self, other: Union[str, "Date"]) -> bool:
         return str(self) <= str(other)
 
-    def __ge__(self, other) -> bool:
+    def __ge__(self, other: Union[str, "Date"]) -> bool:
         return str(self) >= str(other)
 
-    def __gt__(self, other) -> bool:
+    def __gt__(self, other: Union[str, "Date"]) -> bool:
         return str(self) > str(other)
 
-    def __eq__(self, other):
-        if str(other) == str(self):
-            return True
-        else:
-            return False
+    def __eq__(self, other: Any) -> bool:
+        return str(other) == str(self)
 
-    def __ne__(self, other):
+    def __ne__(self, other: Any) -> bool:
         return not self.__eq__(other)
 
 
