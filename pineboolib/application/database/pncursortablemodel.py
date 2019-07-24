@@ -45,7 +45,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     _driver_sql = None
     _size = None
     sql_str = ""
-    _initialized: bool = False
+    _initialized: Optional[
+        bool
+    ] = None  # Usa 3 estado None, True y False para hacer un primer refresh retardado si pertenece a un fldatatable
 
     def __init__(self, conn: "IConnection", parent: "PNSqlCursor") -> None:
         """
@@ -605,8 +607,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def refresh(self) -> None:
-
-        if not self._initialized and self.parent_view:  # Si es el primer refresh y estoy conectado a un FLDatatable()
+        if self._initialized is None and self.parent_view:  # Si es el primer refresh y estoy conectado a un FLDatatable()
             self._initialized = True
             timer = QtCore.QTimer()
             timer.singleShot(5, self.refresh)
@@ -905,7 +906,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     def Insert(self, fl_cursor) -> bool:
         # Metemos lineas en la tabla de la bd
-        pKValue = None
+        # pKValue = None
         buffer = fl_cursor.buffer()
         campos = ""
         valores = ""
@@ -917,8 +918,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 value = buffer.value(b.name)
 
             if value is not None:  # si el campo se rellena o hay valor default
-                if b.name == fl_cursor.metadata().primaryKey():
-                    pKValue = value
+                # if b.name == fl_cursor.metadata().primaryKey():
+                #    pKValue = value
                 if b.type_ in ("string", "stringlist") and isinstance(value, str):
                     value = self.db().normalizeValue(value)
                 value = self.db().manager().formatValue(b.type_, value, False)
@@ -935,8 +936,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 # print(sql)
                 self.db().execute_query(sql)
                 # self.refresh()
-                if pKValue is not None:
-                    fl_cursor.move(self.findPKRow((pKValue,)))
+                # if pKValue is not None:
+                #    fl_cursor.move(self.findPKRow((pKValue,)))
 
                 self.need_update = True
             except Exception:
