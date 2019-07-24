@@ -934,7 +934,7 @@ class FLMYSQL_MYISAM(object):
             # logger.warning(in_sql)
             # ok = q.exec_(in_sql)
             if not ok:
-                self.db_.dbAux().rollback()
+                self.db_.dbAux().rollbackTransaction()
                 if oldMTD and oldMTD != newMTD:
                     del oldMTD
                 if newMTD:

@@ -4,6 +4,7 @@ from PyQt5.QtXml import QDomDocument  # type: ignore
 
 
 from pineboolib.core import decorators
+from pineboolib.core.settings import config
 from pineboolib.core.utils.utils_base import filedir, auto_qt_translate_text
 from pineboolib.application.utils.xpm import cacheXPM
 
@@ -178,7 +179,8 @@ class FLManager(QtCore.QObject, IManager):
             raise Exception("metadata. self.db_ is empty!")
 
         if quick is None:
-            quick = bool(util.readSettingEntry("application/dbadmin_enabled", False))
+            dbadmin = config.value("application/dbadmin_enabled", False)
+            quick = not bool(dbadmin)
 
         if isinstance(n, str):
             if not n:

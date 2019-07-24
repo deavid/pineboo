@@ -4,10 +4,7 @@ from pineboolib import logging
 from pineboolib.core import decorators
 
 from PyQt5 import QtCore, Qt  # type: ignore
-from typing import Any, Union, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from pineboolib.fllegacy.fltranslator import FLTranslator
+from typing import Any, Union
 
 
 """
@@ -30,13 +27,13 @@ class FLTranslations(object):
 
     """
     Si no existe el .qm convierte el .ts que le damos a .qm
-    @param tor. Objeto clase metatranslator.
+    @param tor. Objeto clase metatranslator. type: "FLTranslator"
     @param tsFileName. Nombre del fichero .ts a convertir
     @param verbose. Muestra verbose (True, False)
     @return Boolean. Proceso realizado correctamente
     """
 
-    def loadTsFile(self, tor: "FLTranslator", ts_file_name: Union[bytes, int, str], verbose) -> Any:
+    def loadTsFile(self, tor: Any, ts_file_name: Union[bytes, int, str], verbose) -> bool:
         # qm_file_name = "%s.qm" % ts_file_name[:-3]
         ok = False
         if os.path.exists(ts_file_name):

@@ -794,7 +794,7 @@ class FLQPSQL(object):
         constraintName = "%s_key" % oldMTD.name()
 
         if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
-            self.db_.dbAux().rollback()
+            self.db_.dbAux().rollbackTransaction()
             return False
 
         for oldField in fieldList:
@@ -805,15 +805,15 @@ class FLQPSQL(object):
                 if self.constraintExists(constraintName) and not q.exec_(
                     "ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)
                 ):
-                    self.db_.dbAux().rollback()
+                    self.db_.dbAux().rollbackTransaction()
                     return False
 
         if not q.exec_("ALTER TABLE %s RENAME TO %s" % (oldMTD.name(), renameOld)):
-            self.db_.dbAux().rollback()
+            self.db_.dbAux().rollbackTransaction()
             return False
 
         if not self.db_.manager().createTable(newMTD):
-            self.db_.dbAux().rollback()
+            self.db_.dbAux().rollbackTransaction()
             return False
 
         oldCursor = PNSqlCursor(renameOld, True, self.db_.dbAux())
@@ -823,7 +823,7 @@ class FLQPSQL(object):
         fieldList = newMTD.fieldList()
 
         if not fieldList:
-            self.db_.dbAux().rollback()
+            self.db_.dbAux().rollbackTransaction()
             return False
 
         oldCursor.select()
@@ -923,7 +923,7 @@ class FLQPSQL(object):
         if ok:
             self.db_.dbAux().commit()
         else:
-            self.db_.dbAux().rollback()
+            self.db_.dbAux().rollbackTransaction()
             return False
 
         force = False  # FIXME
@@ -1074,7 +1074,7 @@ class FLQPSQL(object):
                             "application", "En método alterTable, no se ha podido borrar el índice %1_%2_key de la tabla antigua."
                         ).arg(oldMTD.name(), oldField)
                     )
-                    self.db_.dbAux().rollback()
+                    self.db_.dbAux().rollbackTransaction()
                     if oldMTD and not oldMTD == newMTD:
                         del oldMTD
                     if newMTD:
@@ -1085,7 +1085,7 @@ class FLQPSQL(object):
         if not q.exec_("ALTER TABLE %s RENAME TO %s" % (oldMTD.name(), renameOld)):
             logger.warning("FLManager::alterTable : " + util.translate("application", "No se ha podido renombrar la tabla antigua."))
 
-            self.db_.dbAux().rollback()
+            self.db_.dbAux().rollbackTransaction()
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -1094,7 +1094,7 @@ class FLQPSQL(object):
             return False
 
         if not self.db_.manager().createTable(newMTD):
-            self.db_.dbAux().rollback()
+            self.db_.dbAux().rollbackTransaction()
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -1106,7 +1106,7 @@ class FLQPSQL(object):
         ok = False
 
         if not force and not fieldNamesOld:
-            self.db_.dbAux().rollback()
+            self.db_.dbAux().rollbackTransaction()
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:

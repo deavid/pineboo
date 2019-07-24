@@ -403,6 +403,10 @@ class PNSqlCursor(QtCore.QObject):
         #    f = "1 = 1"
 
         # logger.trace("--------------------->Añadiendo filtro",  f)
+        none_f: Optional[str] = f
+        if none_f is None:
+            logger.debug("setMainFilter: f does not accept 'None'. Use empty string instead.")
+            f = ""
         if self.d._model and getattr(self.d._model, "where_filters", None):
             self.d._model.where_filters["main-filter"] = f
             if doRefresh:

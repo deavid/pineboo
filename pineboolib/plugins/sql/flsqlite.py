@@ -799,7 +799,7 @@ class FLSQLITE(object):
     #     ):
     #         self.logger.warning("FLManager::alterTable : " + util.tr("No se ha podido renombrar la tabla antigua."))
     #
-    #         self.db_.dbAux().rollback()
+    #         self.db_.dbAux().rollbackTransaction()
     #         if oldMTD and not oldMTD == newMTD:
     #             del oldMTD
     #         if newMTD:
@@ -808,7 +808,7 @@ class FLSQLITE(object):
     #         return False
     #
     #     if not self.db_.manager().createTable(newMTD):
-    #         self.db_.dbAux().rollback()
+    #         self.db_.dbAux().rollbackTransaction()
     #         if oldMTD and not oldMTD == newMTD:
     #             del oldMTD
     #         if newMTD:
@@ -834,7 +834,7 @@ class FLSQLITE(object):
     #     # FIXME: newField is never assigned
     #     if not fieldList:
     #         self.logger.warning("FLManager::alterTable : " + util.tr("Los nuevos metadatos no tienen campos."))
-    #         self.db_.dbAux().rollback()
+    #         self.db_.dbAux().rollbackTransaction()
     #         if oldMTD and not oldMTD == newMTD:
     #             del oldMTD
     #         if newMTD:
@@ -898,7 +898,7 @@ class FLSQLITE(object):
     #     if ok:
     #         self.db_.dbAux().commit()
     #     else:
-    #         self.db_.dbAux().rollback()
+    #         self.db_.dbAux().rollbackTransaction()
     #         return False
     #
     #     return True
