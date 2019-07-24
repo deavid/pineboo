@@ -125,10 +125,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self.threadFetcher = threading.Thread(target=self.threadFetch)
             self.threadFetcherStop = threading.Event()
 
-        elif self.USE_TIMER:
-            self.timer = QtCore.QTimer()
-            self.timer.timeout.connect(self.updateRows)
-            self.timer.start(1000)
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.updateRows)
+        self.timer.start(1000)
 
         self.canFetchMoreRows = True
         self._disable_refresh = False
@@ -453,7 +452,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         fromrow = self.rowsLoaded
         torow = self.fetchedRows - ROW_BATCH_COUNT - 1
         if torow - fromrow < 5:
-            if self.canFetchMoreRows and self.USE_TIMER:
+            if self.canFetchMoreRows:
                 self.logger.trace("Updaterows %s (updated:%d)", self.metadata().name(), self.fetchedRows)
                 self.fetchMore(parent, self.metadata().name(), self.where_filter)
             return
@@ -518,9 +517,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             self.pendingRows = 0
             self.indexUpdateRowRange((from_rows, self.rows))
-            if self.USE_THREADS is True:
-                self.threadFetcher = threading.Thread(target=self.threadFetch)
-                self.threadFetcher.start()
+            # if self.USE_THREADS is True:
+            #     self.threadFetcher = threading.Thread(target=self.threadFetch)
+            #     self.threadFetcher.start()
 
         if torow > self.rows - 1:
             torow = self.rows - 1
@@ -549,10 +548,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.dataChanged.emit(topLeft, bottomRight)
         tiempo_final = time.time()
         self.lastFetch = tiempo_final
-        # if self.USE_THREADS == True and not self.threadFetcher.is_alive() and self.pendingRows > 0:
-        #    self.threadFetcher = threading.Thread(target=self.threadFetch)
-        #    self.threadFetcherStop = threading.Event()
-        #    self.threadFetcher.start()
+        if self.USE_THREADS and not self.threadFetcher.is_alive() and self.canFetchMoreRows:
+            self.threadFetcher = threading.Thread(target=self.threadFetch)
+            self.threadFetcherStop = threading.Event()
+            self.threadFetcher.start()
 
         if tiempo_final - tiempo_inicial > 0.2:
             self.logger.info(
