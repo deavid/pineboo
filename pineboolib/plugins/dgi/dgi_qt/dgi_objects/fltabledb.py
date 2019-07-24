@@ -90,7 +90,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Componente para visualizar los registros
     """
-    tableRecords_: Optional[Any] = None
+    tableRecords_: Optional[FLDataTable] = None
 
     """
     Nombre de la tabla a la que esta asociado este componente.
@@ -131,7 +131,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Mantiene el filtro de la tabla
     """
-    filter_: Optional[str] = ""
+    filter_: str = ""
 
     """
     Almacena si el componente está en modo sólo lectura
@@ -355,7 +355,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.checkColumnVisible_ = False
         self.checkColumnEnabled_ = False
         self.tdbFilterLastWhere_: Optional[str] = None
-        self.filter_ = None
+        self.filter_ = ""
         from pineboolib.application import project
 
         if project._DGI is not None:
@@ -803,7 +803,7 @@ class FLTableDB(QtWidgets.QWidget):
     @return Filtro
     """
 
-    def filter(self) -> Optional[str]:
+    def filter(self) -> str:
         return self.filter_
 
     """
@@ -2264,7 +2264,7 @@ class FLTableDB(QtWidgets.QWidget):
             return
 
         t.selectRow(r)
-        t.scrollTo(t.cursor().model().index(r, 0))
+        t.scrollTo(t.cur.model().index(r, 0))
 
     """
     @return Ancho de la columna
@@ -2476,7 +2476,7 @@ class FLTableDB(QtWidgets.QWidget):
     def filterRecords(self, p: str) -> None:
         if not self.cursor().model():
             return
-        bFilter = None
+        bFilter: Optional[str] = None
         if not self.tableRecords_:
             raise Exception("tableRecords_ is not defined!")
 
@@ -2519,7 +2519,10 @@ class FLTableDB(QtWidgets.QWidget):
                         bFilter = None
 
         self.refreshDelayed(msec_refresh, refreshData)
-        self.filter_ = bFilter
+        if bFilter:
+            self.filter_ = bFilter
+        else:
+            self.filter_ = ""
 
     def setSortOrder(self, ascending: bool = True, col_order: Optional[int] = None) -> None:
 

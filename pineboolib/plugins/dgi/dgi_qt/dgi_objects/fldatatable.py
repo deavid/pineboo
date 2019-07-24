@@ -6,9 +6,7 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.core.settings import config
 from PyQt5.QtWidgets import QCheckBox  # type: ignore
 from pineboolib import logging
-from typing import Any, Optional, TypeVar, List, Dict
-
-_T1 = TypeVar("_T1")
+from typing import Any, Optional, List, Dict, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -205,6 +203,9 @@ class FLDataTable(QtWidgets.QTableView):
                 # self.ensureRowSelectedVisible()
 
     def setPersistentFilter(self, pFilter: str) -> None:
+        pFilter_none: Optional[str] = pFilter
+        if pFilter_none is None:
+            raise Exception("Invalid use of setPersistentFilter with None")
         self.persistentFilter_ = pFilter
 
     def setFilter(self, f) -> None:
@@ -328,11 +329,11 @@ class FLDataTable(QtWidgets.QTableView):
     Ver FLDataTable::function_get_color
     """
 
-    def setFunctionGetColor(self, f: str, iface=None) -> None:
+    def setFunctionGetColor(self, f: Optional[str], iface=None) -> None:
         self.fltable_iface = iface
         self.function_get_color = f
 
-    def functionGetColor(self) -> Any:
+    def functionGetColor(self) -> Tuple[Optional[str], Any]:
         return (self.function_get_color, self.fltable_iface)
 
     """
@@ -674,7 +675,7 @@ class FLDataTable(QtWidgets.QTableView):
             self.hide()
             filter: str = self.persistentFilter_
             if self.filter_:
-                if not self.persistentFilter_ or self.filter_ not in self.persistentFilter_:
+                if self.filter_ not in self.persistentFilter_:
                     if self.persistentFilter_:
                         filter = "%s AND %s" % (filter, self.filter_)
                     else:
