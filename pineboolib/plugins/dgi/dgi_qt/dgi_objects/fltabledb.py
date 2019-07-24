@@ -210,7 +210,7 @@ class FLTableDB(QtWidgets.QWidget):
 
     @author Silix
     """
-    sortColumn3_: Optional[int]
+    sortColumn3_: int
 
     """
     Indica el sentido ascendente o descendente del la ordenacion actual de los registros
