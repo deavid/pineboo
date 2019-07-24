@@ -2782,12 +2782,12 @@ class PNSqlCursor(QtCore.QObject):
                     self.setValueBuffer(self.d.relation_.field(), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
                     self.d.cursorRelation_.setAskForCancelChanges(True)
 
-            self.d._model.Insert(self)
-            self.d._model.refresh()
             pk_name = self.d.buffer_.pK()
             if pk_name is None:
                 raise ValueError("primery key is not defined!")
 
+            self.d._model.Insert(self)
+            self.d._model.refresh()
             pk_row = self.d._model.findPKRow((self.d.buffer_.value(pk_name),))
             if pk_row is None:
                 raise Exception("pk_row not found after insert!")
@@ -3724,13 +3724,11 @@ class PNCursorPrivate(QtCore.QObject):
             self.acTable_.processObject(self.metadata_)
 
     def needUpdate(self) -> bool:
-        return False
-        #
-        # if self.isQuery_:
-        #     return False
-        #
-        # need = self._model.need_update
-        # return need
+        if self.isQuery_:
+            return False
+
+        need = self._model.need_update
+        return need
 
     def msgBoxWarning(self, msg: str, throwException: bool = False) -> None:
         logger.warning(msg)
