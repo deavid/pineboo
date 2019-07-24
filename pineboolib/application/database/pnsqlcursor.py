@@ -2497,7 +2497,7 @@ class PNSqlCursor(QtCore.QObject):
     def setFilter(self, _filter: str) -> None:
         _filter_none: Optional[str] = _filter
         if _filter_none is None:
-            logger.warning("setFilter: None is not allowed, use empty string")
+            logger.warning("setFilter: None is not allowed, use empty string", stack_info=True)
             _filter = ""
         # self.d.filter_ = None
 

@@ -43,7 +43,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Cursor, con los registros
     """
-    cursor_ = None
+    cursor_: Optional[FLSqlCursor] = None
 
     """
     Almacena la tabla está en modo sólo lectura
@@ -79,7 +79,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Filtro persistente para el cursor
     """
-    persistentFilter_ = None
+    persistentFilter_ = ""
 
     """
     Indicador para evitar refrescos anidados
@@ -163,7 +163,7 @@ class FLDataTable(QtWidgets.QTableView):
     Establece el cursor
     """
 
-    def setFLSqlCursor(self, c) -> None:
+    def setFLSqlCursor(self, c: FLSqlCursor) -> None:
         if c and c.metadata():
             cur_chg = False
             if self.cursor_ and not self.cursor_ == c:
@@ -201,38 +201,43 @@ class FLDataTable(QtWidgets.QTableView):
         if id_pk is not None:
             pos = self.model().findPKRow((id_pk,))
             if pos is not None:
-                self.cursor().move(pos)
+                self.cur.move(pos)
                 # self.ensureRowSelectedVisible()
 
-    def setPersistentFilter(self, pFilter) -> None:
+    def setPersistentFilter(self, pFilter: str) -> None:
         self.persistentFilter_ = pFilter
 
     def setFilter(self, f) -> None:
         self.filter_ = f
 
-    """
-    retorna el número de columnas
-    """
-
     def numCols(self) -> Any:
+        """
+        retorna el número de columnas
+        """
 
         return self.horizontalHeader().count()
 
     def setSort(self, s) -> None:
         self.sort_ = s
 
-    """
-    Devuelve el cursor
-    """
-
-    def cursor(self) -> Any:
+    def cursor(self) -> Optional[FLSqlCursor]:
+        """
+        Devuelve el cursor
+        """
         return self.cursor_
 
-    """
-    Establece la tabla a sólo lectura o no
-    """
+    @property
+    def cur(self) -> FLSqlCursor:
+        if self.cursor_ is None:
+            raise Exception("Cursor not set yet")
+        if self.cursor_.aqWasDeleted():
+            raise Exception("Cursor was deleted")
+        return self.cursor_
 
     def setFLReadOnly(self, mode) -> None:
+        """
+        Establece la tabla a sólo lectura o no
+        """
 
         if not self.cursor_ or self.cursor_.aqWasDeleted():
             return
@@ -285,14 +290,16 @@ class FLDataTable(QtWidgets.QTableView):
 
     def clearChecked(self) -> None:
         self.primarysKeysChecked_.clear()
-        for r in self.cursor().model()._checkColumn.keys():
-            self.cursor().model()._checkColumn[r].setChecked(False)
+        model = self.cur.model()
+        for r in model._checkColumn.keys():
+            model._checkColumn[r].setChecked(False)
 
     """
     Establece el estado seleccionado por chequeo para un regsitro, indicando el valor de su clave primaria
     """
 
-    def setPrimaryKeyChecked(self, primaryKeyValue: object, on) -> None:
+    def setPrimaryKeyChecked(self, primaryKeyValue: str, on: bool) -> None:
+        model = self.cur.model()
         if on:
             if primaryKeyValue not in self.primarysKeysChecked_:
                 self.primarysKeysChecked_.append(primaryKeyValue)
@@ -302,10 +309,10 @@ class FLDataTable(QtWidgets.QTableView):
                 self.primarysKeysChecked_.remove(primaryKeyValue)
                 self.primaryKeyToggled.emit(primaryKeyValue, False)
 
-        if primaryKeyValue not in self.cursor().model()._checkColumn.keys():
-            self.cursor().model()._checkColumn[primaryKeyValue] = QCheckBox()
+        if primaryKeyValue not in model._checkColumn.keys():
+            model._checkColumn[primaryKeyValue] = QCheckBox()
 
-        self.cursor().model()._checkColumn[primaryKeyValue].setChecked(on)
+        model._checkColumn[primaryKeyValue].setChecked(on)
 
     """
     Ver FLDataTable::showAllPixmaps_
@@ -347,29 +354,23 @@ class FLDataTable(QtWidgets.QTableView):
     Redefinida por conveniencia
     """
 
-    def indexOf(self, i) -> Any:
+    def indexOf(self, i) -> str:
         return self.header().visualIndex(i)
 
-    """
-    @return El nombre del campo en la tabla de una columna dada
-    """
-
-    def fieldName(self, col) -> Any:
-
-        if not self.cursor_ or self.cursor_.aqWasDeleted():
-            return None
-
-        field = self.cursor_.field(self.indexOf(col))
+    def fieldName(self, col) -> str:
+        """
+        @return El nombre del campo en la tabla de una columna dada
+        """
+        field = self.cur.field(self.indexOf(col))
         if field is None:
-            return None
-
-        return field.name()
+            raise Exception("Field not found")
+        return field.name
 
     """
     Filtrado de eventos
     """
 
-    def eventFilter(self, o, e) -> Any:
+    def eventFilter(self, o, e) -> bool:
         r = self.currentRow()
         c = self.currentColumn()
         nr = self.numRows()
@@ -550,20 +551,17 @@ class FLDataTable(QtWidgets.QTableView):
     """
 
     def setChecked(self, index) -> None:
-        if not self.cursor_:
-            return
-
         row = index.row()
         col = index.column()
-        field = self.cursor_.metadata().indexFieldObject(col)
+        field = self.cur.metadata().indexFieldObject(col)
         _type = field.type()
 
         if _type != "check":
             return
-
-        pK = str(self.cursor().model().value(row, self.cursor().metadata().primaryKey()))
-        self.cursor().model()._checkColumn[pK].setChecked(not self.cursor().model()._checkColumn[pK].isChecked())
-        self.setPrimaryKeyChecked(str(pK), self.cursor().model()._checkColumn[pK].isChecked())
+        model = self.cur.model()
+        pK = str(model.value(row, self.cur.metadata().primaryKey()))
+        model._checkColumn[pK].setChecked(not model._checkColumn[pK].isChecked())
+        self.setPrimaryKeyChecked(str(pK), model._checkColumn[pK].isChecked())
         # print("FIXME: falta un repaint para ver el color!!")
 
     """
@@ -668,13 +666,13 @@ class FLDataTable(QtWidgets.QTableView):
         # if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
         if not self.refreshing_:
 
-            # if self.function_get_color and self.cursor().model():
-            #    if self.cursor().model().color_function_ != self.function_get_color:
-            #        self.cursor().model().setColorFunction(self.function_get_color)
+            # if self.function_get_color and self.cur.model():
+            #    if self.cur.model().color_function_ != self.function_get_color:
+            #        self.cur.model().setColorFunction(self.function_get_color)
 
             self.refreshing_ = True
             self.hide()
-            filter = self.persistentFilter_
+            filter: str = self.persistentFilter_
             if self.filter_:
                 if not self.persistentFilter_ or self.filter_ not in self.persistentFilter_:
                     if self.persistentFilter_:
@@ -682,20 +680,21 @@ class FLDataTable(QtWidgets.QTableView):
                     else:
                         filter = self.filter_
 
-            self.cursor().setFilter(filter)
+            self.cur.setFilter(filter)
             if self.sort_:
-                self.cursor().setSort(self.sort_)
+                self.cur.setSort(self.sort_)
 
             last_pk = None
-            if self.cursor().buffer():
-                pk_name = self.cursor().buffer().pK()
+            buffer = self.cur.buffer()
+            if buffer:
+                pk_name = buffer.pK()
                 if pk_name is not None:
-                    last_pk = self.cursor().buffer().value(pk_name)
+                    last_pk = buffer.value(pk_name)
 
-            self.cursor().refresh()
+            self.cur.refresh()
 
             self.marcaRow(last_pk)
-            self.cursor().refreshBuffer()
+            self.cur.refreshBuffer()
             self.show()
             self.refreshing_ = False
 
@@ -708,11 +707,11 @@ class FLDataTable(QtWidgets.QTableView):
     def ensureRowSelectedVisible(self, position=None):
         if position is None:
             if self.cursor():
-                position = self.cursor().at()
+                position = self.cur.at()
             else:
                 return
 
-        # index = self.cursor().model().index(position, 0)
+        # index = self.cur.model().index(position, 0)
         # if index is not None:
         #    self.scrollTo(index)
 
