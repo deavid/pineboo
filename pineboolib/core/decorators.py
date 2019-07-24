@@ -200,6 +200,6 @@ def Deprecated(fn: T_FN) -> T_FN:
 
 def pyqtSlot(*args) -> Callable[[T_FN], T_FN]:
     def _pyqtSlot(fn: T_FN) -> T_FN:
-        return QtCore.pyqtSlot(*args)(fn)
+        return cast(T_FN, QtCore.pyqtSlot(*args)(fn))
 
     return _pyqtSlot
