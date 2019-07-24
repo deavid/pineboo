@@ -76,6 +76,7 @@ class PNSqlQueryPrivate(object):
         self.groupDict_ = {}
         self.fieldMetaDataList_ = {}
         self.orderBy_ = None
+        self.where_ = ""
 
 
 class PNSqlQuery(object):
