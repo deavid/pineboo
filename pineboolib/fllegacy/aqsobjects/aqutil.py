@@ -19,3 +19,5 @@ class AQUtil(object):
         result = getattr(self.util, name, None)
         if result is None:
             raise Exception('AQUtil can\'t load "%s" attribute fom FLUtil!' % name)
+
+        return result
