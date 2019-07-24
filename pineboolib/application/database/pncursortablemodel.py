@@ -15,6 +15,8 @@ from pineboolib.application.utils.date_conversion import date_amd_to_dma
 from typing import Any, Iterable, Optional, Union, List, Dict, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from pineboolib.application.metadata.pntablemetadata import PNTableMetaData  # noqa: F401
+    from pineboolib.application.database.pnsqlcursor import PNSqlCursor  # noqa: F401
     from pineboolib.interfaces.iconnection import IConnection
     from pineboolib.interfaces.iapicursor import IApiCursor
 
@@ -45,7 +47,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     sql_str = ""
     _initialized: bool = False
 
-    def __init__(self, conn: "IConnection", parent) -> None:
+    def __init__(self, conn: "IConnection", parent: "PNSqlCursor") -> None:
         """
         Constructor
         @param conn. Objeto PNConnection
@@ -55,7 +57,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         if parent is None:
             raise ValueError("Parent is mandatory")
         self._cursorConn = conn
-        self._parent: Any = parent
+        self._parent: "PNSqlCursor" = parent
         self.parent_view: Any = None
 
         # self._metadata = self._parent.metadata()
@@ -1136,7 +1138,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return Objeto FLTableMetaData
     """
 
-    def metadata(self) -> Any:
+    def metadata(self) -> "PNTableMetaData":
         return self._parent.metadata()
 
     def driver_sql(self) -> Any:

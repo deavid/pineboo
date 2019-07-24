@@ -681,7 +681,10 @@ class PNTableMetaData(ITableMetaData):
 
         self.d = copy.copy(other.d)
 
-    def indexFieldObject(self, position, show_exception=True) -> Any:
+    def indexFieldObject(self, position: int) -> "PNFieldMetaData":
+        return self.d.fieldList_[position]
+
+    def _indexFieldObject(self, position: int, show_exception: bool = True) -> Optional["PNFieldMetaData"]:
         i = 0
         ret = None
         for field in self.d.fieldList_:

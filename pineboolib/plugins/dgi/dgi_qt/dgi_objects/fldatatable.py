@@ -10,6 +10,7 @@ from typing import Any, Optional, List, Dict, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.application.database.pncursortablemodel import PNCursorTableModel  # noqa: F401
+    from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
@@ -113,14 +114,15 @@ class FLDataTable(QtWidgets.QTableView):
     """
     onlyTable_ = False
 
-    def __init__(self, parent: Optional[Any] = None, name: str = None, popup: bool = False):
+    def __init__(self, parent: Optional[Any] = None, name: Optional[str] = None, popup: bool = False):
         super(FLDataTable, self).__init__(parent)
 
         if parent:
             self._parent = parent
 
-        if not name:
-            self.setName("FLDataTable")
+        if name is None:
+            name = "FLDataTable"
+        self.setObjectName(name)
 
         self.readonly_ = False
         self.editonly_ = False
@@ -871,7 +873,7 @@ class FLDataTable(QtWidgets.QTableView):
         """
         return self.header().visualIndex(c)
 
-    def visual_index_to_field(self, pos_: int) -> Optional[str]:
+    def visual_index_to_field(self, pos_: int) -> Optional["PNFieldMetaData"]:
         # if pos_ is None:
         #     logger.warning("visual_index_to_field: pos is None")
         #     return None
@@ -885,13 +887,12 @@ class FLDataTable(QtWidgets.QTableView):
         #     logger.warning("visual_index_to_field: logIdx is None")
         #     return None
         model: "PNCursorTableModel" = self.model()
-        mtd = model.metadata().indexFieldObject(logIdx)
-        if mtd is None:
-            return None
-        if not mtd.visibleGrid():
-            raise ValueError("Se ha devuelto el field %s.%s que no es visible en el grid" % (mtd.metadata().name(), mtd.name()))
+        mtd = model.metadata()
+        mtdfield = mtd.indexFieldObject(logIdx)
+        if not mtdfield.visibleGrid():
+            raise ValueError("Se ha devuelto el field %s.%s que no es visible en el grid" % (mtd.name(), mtdfield.name()))
 
-        return mtd
+        return mtdfield
 
     def currentRow(self) -> int:
         """

@@ -32,7 +32,7 @@ class ITableMetaData:
     def inCache(self) -> bool:
         return False
 
-    def indexFieldObject(self, position: int, show_exception: bool):
+    def indexFieldObject(self, position: int):
         return
 
     def indexPos(self, field_name: Optional[str]) -> int:

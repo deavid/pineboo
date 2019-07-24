@@ -1846,7 +1846,7 @@ class FLTableDB(QtWidgets.QWidget):
                     if isinstance(ret, list):
                         s = ret
 
-                self.tableRecords_.setSort(s)
+                self.tableRecords_.setSort(", ".join(s))
 
             if model:
                 if self.comboBoxFieldToSearch is None:
@@ -2248,9 +2248,8 @@ class FLTableDB(QtWidgets.QWidget):
 
     def setColumnWidth(self, field: str, w: int) -> None:
         if self.tableRecords_:
-            col = self.tableRecords_.column_name_to_column_index(field) if isinstance(field, str) else field
-
-            self.tableRecords_.setColumnWidth(col, w)
+            # col = self.tableRecords_.column_name_to_column_index(field) if isinstance(field, str) else field
+            self.tableRecords_.setColumnWidth(field, w)
 
     """
     Selecciona la fila indicada
@@ -2488,8 +2487,10 @@ class FLTableDB(QtWidgets.QWidget):
 
         msec_refresh = 400
         column = self.tableRecords_.header().logicalIndex(self.sortColumn_)
-
-        field = self.cursor().model().metadata().indexFieldObject(self.tableRecords_.visual_index_to_column_index(column))
+        colidx = self.tableRecords_.visual_index_to_column_index(column)
+        if colidx is None:
+            raise Exception("Unexpected: Column not found")
+        field = self.cursor().model().metadata().indexFieldObject(colidx)
         bFilter = self.cursor().db().manager().formatAssignValueLike(field, p, True)
 
         idMod = self.cursor().db().managerModules().idModuleOfFile(self.cursor().metadata().name() + ".mtd")

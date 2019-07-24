@@ -221,7 +221,7 @@ class PNFieldMetaData(IFieldMetaData):
     """
 
     def visibleGrid(self) -> bool:
-        return self.d.visibleGrid_ if self.d.visibleGrid_ is not None else False
+        return self.d.visibleGrid_
 
     """
     @return TRUE si el campo es generado, es decir, se incluye en las consultas
@@ -869,7 +869,7 @@ class PNFieldMetaDataPrivate(object):
     """
     Indica si el campo debe ser visible en la rejilla de la tabla.
     """
-    visibleGrid_ = None
+    visibleGrid_ = True
 
     """
     Indica si el campo es generado, es decir, se incluye en las consultas
