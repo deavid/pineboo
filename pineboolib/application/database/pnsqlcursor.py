@@ -2785,10 +2785,11 @@ class PNSqlCursor(QtCore.QObject):
             pk_name = self.d.buffer_.pK()
             if pk_name is None:
                 raise ValueError("primery key is not defined!")
+            pk_value = self.d.buffer_.value(pk_name)
 
             self.d._model.Insert(self)
             self.d._model.refresh()
-            pk_row = self.d._model.findPKRow((self.d.buffer_.value(pk_name),))
+            pk_row = self.d._model.findPKRow((pk_value,))
             if pk_row is None:
                 raise Exception("pk_row not found after insert!")
             self.move(pk_row)
