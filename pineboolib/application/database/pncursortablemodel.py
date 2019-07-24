@@ -68,8 +68,15 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return
 
         self._driver_sql = self.db().driver()
-        # self.USE_THREADS = self.driver_sql().useThreads()
-        # self.USE_TIMER = self.driver_sql().useTimer()
+        self.USE_THREADS = self.driver_sql().useThreads()
+        self.USE_TIMER = self.driver_sql().useTimer()
+        if self.USE_THREADS and self.USE_TIMER:
+            self.USE_TIMER = False
+            self.logger.warning("SQL Driver supports Threads and Timer, defaulting to Threads")
+
+        if not self.USE_THREADS and not self.USE_TIMER:
+            self.USE_TIMER = True
+            self.logger.warning("SQL Driver supports neither Threads nor Timer, defaulting to Timer")
 
         self.rowsLoaded = 0
         self.sql_fields: List[str] = []
