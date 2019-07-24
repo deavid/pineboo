@@ -143,7 +143,7 @@ class Array(object):
             for f in args:
                 self.__setitem__(f, f)
 
-    def __iter__(self) -> Array:
+    def __iter__(self) -> "Array":
         """
         iterable
         """
