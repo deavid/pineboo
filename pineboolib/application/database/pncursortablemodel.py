@@ -45,6 +45,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     _driver_sql = None
     _size = None
     sql_str = ""
+    canFetchMoreRows: bool
     _initialized: Optional[
         bool
     ] = None  # Usa 3 estado None, True y False para hacer un primer refresh retardado si pertenece a un fldatatable
@@ -122,7 +123,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self.timer.timeout.connect(self.updateRows)
             self.timer.start(1000)
 
-        self.canFetchMore = True
+        self.canFetchMoreRows = True
         self._disable_refresh = False
 
         self._cursor_db: IApiCursor = self.db().cursor()
@@ -463,13 +464,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param where_filter. Filtro usado para recoger datos.
     """
 
-    def fetchMore(self, index, tablename=None, where_filter=None) -> None:
+    def fetchMore(self, index, tablename=None, where_filter=None, size_hint=1000) -> None:
         if not self.sql_str:
             return
 
         tiempo_inicial = time.time()
         # ROW_BATCH_COUNT = min(200 + self.rowsLoaded // 10, 1000)
-        ROW_BATCH_COUNT = 1000
+        ROW_BATCH_COUNT = size_hint
 
         parent = index
         fromrow = self.rowsLoaded
@@ -477,20 +478,18 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         torow = self.rowsLoaded + ROW_BATCH_COUNT
         if self.fetchedRows - ROW_BATCH_COUNT - 1 > torow:
             torow = self.fetchedRows - ROW_BATCH_COUNT - 1
+        if tablename is None:
+            tablename = self.metadata().name()
 
-        # print("refrescando modelo tabla %r , query %r, rows: %d %r"
-        #    % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
+        self.logger.debug("refrescando modelo tabla %r, rows: %d %r" % (tablename, self.rows, (fromrow, torow)))
         if torow < fromrow:
             return
 
         # print("QUERY:", sql)
-        if self.fetchedRows <= torow and self.canFetchMore:
+        if self.fetchedRows <= torow and self.canFetchMoreRows:
 
             if self.USE_THREADS and self.threadFetcher.is_alive():
                 self.threadFetcher.join()
-
-            if tablename is None:
-                tablename = self.metadata().name()
 
             if where_filter is None:
                 where_filter = self.where_filter
@@ -501,7 +500,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self._vdata += [None] * newrows
             self.fetchedRows += newrows
             self.rows += newrows
-            self.canFetchMore = newrows > 0
+            self.canFetchMoreRows = bool(newrows > 0)
 
             self.pendingRows = 0
             self.indexUpdateRowRange((from_rows, self.rows))
@@ -691,12 +690,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         else:
             self.sql_str = ", ".join(self.sql_fields)
 
+        SZ_FETCH = max(1000, oldrows - 1)
         self.driver_sql().refreshQuery(self._curname, self.sql_str, from_, self.where_filter, self.cursorDB(), self.db().db())
 
-        self.refreshFetch(1000)
+        self.refreshFetch(SZ_FETCH)
         self.need_update = False
         self.rows = 0
-        self.canFetchMore = True
+        self.canFetchMoreRows = True
         # print("rows:", self.rows)
         self.pendingRows = 0
 
@@ -705,7 +705,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         # self.threadFetcherStop = threading.Event()
         # self.threadFetcher.start()
         # self.color_dict_.clear()  # Limpiamos diccionario de colores
-        self.fetchMore(parent, self.metadata().name(), self.where_filter)
+        self.fetchMore(parent, self.metadata().name(), self.where_filter, size_hint=SZ_FETCH)
         # print("%s:: rows: %s" % (self._curname, self.rows))
 
     """
@@ -987,9 +987,20 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self.indexes_valid = True
 
         pklist = tuple(pklist)
+        if pklist[0] is None:
+            raise ValueError("Primary Key can't be null")
+        parent = QtCore.QModelIndex()
+        while self.canFetchMoreRows and pklist not in self.pkidx:
+            self.fetchMore(parent, self.metadata().name(), self.where_filter)
+            if not self.indexes_valid:
+                for n in range(self.rows):
+                    self.indexUpdateRow(n)
+                self.indexes_valid = True
 
         if pklist not in self.pkidx:
-            self.logger.info("CursorTableModel.%s.findPKRow:: PK not found: %r", self.metadata().name(), pklist)
+            self.logger.info(
+                "CursorTableModel.%s.findPKRow:: PK not found: %r (from: %r)", self.metadata().name(), pklist, list(self.pkidx.keys())[:8]
+            )
             return None
         return self.pkidx[pklist]
 
