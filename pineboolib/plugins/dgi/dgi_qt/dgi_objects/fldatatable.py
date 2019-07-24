@@ -675,14 +675,16 @@ class FLDataTable(QtWidgets.QTableView):
             self.refreshing_ = True
             self.hide()
             filter = self.persistentFilter_
-            if self.filter_:
+            if self.filter_ is not None:
                 if not self.persistentFilter_ or self.filter_ not in self.persistentFilter_:
                     if self.persistentFilter_:
                         filter = "%s AND %s" % (filter, self.filter_)
                     else:
                         filter = self.filter_
 
-            self.cursor().setFilter(filter)
+            if filter is not None:
+                self.cursor().setFilter(filter)
+
             if self.sort_:
                 self.cursor().setSort(self.sort_)
 
