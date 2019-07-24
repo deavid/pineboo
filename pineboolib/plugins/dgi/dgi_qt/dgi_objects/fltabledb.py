@@ -6,7 +6,6 @@ from PyQt5.QtGui import QPixmap  # type: ignore
 
 from pineboolib import logging
 from pineboolib.core import decorators
-from pineboolib.core.decorators import pyqtSlot
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldatatable import FLDataTable
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformsearchdb import FLFormSearchDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
@@ -1774,7 +1773,7 @@ class FLTableDB(QtWidgets.QWidget):
                     else:
                         fieldCheck = tMD.field(self.fieldNameCheckColumn_)
 
-                self.tableRecords().cursor().model().updateColumnsCount()
+                self.tableRecords().cur.model().updateColumnsCount()
                 self.tableRecords().header().reset()
                 self.tableRecords().header().swapSections(
                     self.tableRecords().column_name_to_column_index(fieldCheck.name()), self.sortColumn_
