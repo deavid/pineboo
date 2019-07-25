@@ -3,10 +3,10 @@ from pineboolib.application.utils.check_dependencies import check_dependencies
 from sqlalchemy import create_engine  # type: ignore
 
 from PyQt5.Qt import qWarning  # type: ignore
-from PyQt5.QtWidgets import QMessageBox  # type: ignore
+from PyQt5.QtWidgets import QMessageBox, QWidget  # type: ignore
 
 from pineboolib.plugins.sql.flqpsql import FLQPSQL
-from typing import Any, SupportsInt, Union
+from typing import Any, SupportsInt, Union, cast
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,10 @@ class FLQPSQL2(FLQPSQL):
                 project._splash.hide()
             if repr(traceback.format_exc()).find("does not exist") > -1:
                 ret = QMessageBox.warning(
-                    None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No
+                    QWidget(),
+                    "Pineboo",
+                    "La base de datos %s no existe.\n¿Desea crearla?" % db_name,
+                    cast(QMessageBox, QMessageBox.Ok | QMessageBox.No),
                 )
                 if ret == QMessageBox.No:
                     return False
@@ -77,12 +80,12 @@ class FLQPSQL2(FLQPSQL):
                     except Exception:
                         qWarning(traceback.format_exc())
                         QMessageBox.information(
-                            None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok
+                            QWidget(), "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok
                         )
                         print("ERROR: No se ha podido crear la Base de Datos %s" % db_name)
                         return False
             else:
-                QMessageBox.information(None, "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok)
+                QMessageBox.information(QWidget(), "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok)
                 return False
 
         # self.conn_.autocommit = True #Posiblemente tengamos que ponerlo a

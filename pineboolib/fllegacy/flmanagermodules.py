@@ -54,17 +54,17 @@ class FLManagerModules(object):
     Mantiene el identificador del area a la que pertenece el módulo activo.
     """
 
-    activeIdArea_ = None
+    activeIdArea_: Optional[str]
 
     """
     Mantiene el identificador del módulo activo.
     """
-    activeIdModule_ = None
+    activeIdModule_: Optional[str]
 
     """
     Mantiene la clave sha correspondiente a la version de los módulos cargados localmente
     """
-    shaLocal_ = None
+    shaLocal_: Optional[str]
 
     """
     Diccionario de claves de ficheros, para optimizar lecturas
@@ -740,6 +740,15 @@ class FLManagerModules(object):
             idDB = "%s%s%s%s%s" % (db_aux.database(), db_aux.host(), db_aux.user(), db_aux.driverName(), db_aux.port())
 
         from pineboolib.core.settings import settings
+
+        if self.activeIdArea_ is None:
+            raise ValueError("activeIdArea_ is empty!")
+
+        if self.activeIdModule_ is None:
+            raise ValueError("activeIdModule_ is empty!")
+
+        if self.shaLocal_ is None:
+            raise ValueError("shaLocal_ is empty!")
 
         settings.setValue("Modules/activeIdModule/%s" % idDB, self.activeIdModule_)
         settings.setValue("Modules/activeIdArea/%s" % idDB, self.activeIdArea_)

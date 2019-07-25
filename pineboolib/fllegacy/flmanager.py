@@ -394,6 +394,9 @@ class FLManager(QtCore.QObject, IManager):
                         if not fieldsEmpty and (field.lower() in fields):
                             continue
 
+                        if table is None:
+                            raise ValueError("table is empty!")
+
                         mtdAux = self.metadata(table, True)
                         if mtdAux is not None:
                             fmtdAux = mtdAux.field(field)
@@ -1014,7 +1017,7 @@ class FLManager(QtCore.QObject, IManager):
         util = FLUtil()
 
         ck = False
-        n: bool
+        n: str
         a: str
         ol: Optional[str] = None
         rX = None
@@ -1362,7 +1365,7 @@ class FLManager(QtCore.QObject, IManager):
                 _in = QtCore.QTextStream(_file)
                 _data = _in.readAll()
                 if not util.domDocumentSetContent(doc, _data):
-                    logger.warning("FLManager::createSystemTable: %s", util.tr("Error al cargar los metadatos para la tabla %1").arg(n))
+                    logger.warning("FLManager::createSystemTable: %s", self.tr("Error al cargar los metadatos para la tabla %s" % n))
                     return False
                 else:
                     docElem = doc.documentElement()
