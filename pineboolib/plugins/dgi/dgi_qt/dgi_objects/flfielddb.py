@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
-from PyQt5.QtCore import Qt, QDateTime  # type: ignore
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt, QDateTime
 
 from pineboolib.core import decorators
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
@@ -23,10 +23,10 @@ from pineboolib import logging
 from pineboolib import pncontrolsfactory
 from pineboolib.application import project
 
-from typing import Any, Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
-    from PyQt5.Qt import QPixmap  # type: ignore
+    from PyQt5.Qt import QPixmap
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +97,7 @@ class FLFieldDB(QtWidgets.QWidget):
     """
     iconSize: Optional[QtCore.QSize] = None
 
-    def __init__(self, parent: "QtWidgets.QtWidget", *args) -> None:
+    def __init__(self, parent: "QtWidgets.QWidget", *args) -> None:
         super(FLFieldDB, self).__init__(parent)
         self._loaded = False
         self.DEBUG = False  # FIXME: debe recoger DEBUG de pineboolib.project
@@ -357,13 +357,13 @@ class FLFieldDB(QtWidgets.QWidget):
     @param f Formato del campo
     """
 
-    def setTextFormat(self, f: str) -> None:
+    def setTextFormat(self, f: Qt.TextFormat) -> None:
         self.textFormat_ = f
         ted = self.editor_
         if isinstance(ted, pncontrolsfactory.QTextEdit):
             ted.setTextFormat(self.textFormat_)
 
-    def textFormat(self) -> str:
+    def textFormat(self) -> Qt.TextFormat:
         """@return El formato del texto."""
         ted = self.editor_
         if isinstance(ted, pncontrolsfactory.QTextEdit):
@@ -410,30 +410,27 @@ class FLFieldDB(QtWidgets.QWidget):
 
             if not self.timerAutoComp_:
                 self.timerAutoComp_ = QtCore.QTimer(self)
-                # self.timerAutoComp_.timeout.connect(self.toggleAutoCompletion)
+                self.timerAutoComp_.timeout.connect(self.toggleAutoCompletion)
             else:
                 self.timerAutoComp_.stop()
 
             if not event.key() in (Qt.Key_Enter, Qt.Key_Return):
-                # timerActive = True
-                # self.timerAutoComp_.start(500)
-                self.timerAutoComp_.singleShot(500, self.toggleAutoCompletion)
+                timerActive = True
+                self.timerAutoComp_.start(500)
             else:
-                # timer = QtCore.QTimer(self)
                 self.timerAutoComp_.singleShot(0, self.autoCompletionUpdateValue)
                 return True
         if not timerActive and self.autoCompMode_ == "AlwaysAuto" and (not self.autoComFrame_ or not self.autoComFrame_.isVisible()):
             if event.key() in (Qt.Key_Backspace, Qt.Key_Delete, Qt.Key_Space, Qt.Key_ydiaeresis):
                 if not self.timerAutoComp_:
                     self.timerAutoComp_ = QtCore.QTimer(self)
-                    # self.timerAutoComp_.timeout.connect(self.toggleAutoCompletion)
+                    self.timerAutoComp_.timeout.connect(self.toggleAutoCompletion)
                 else:
                     self.timerAutoComp_.stop()
 
                 if not event.key() in (Qt.Key_Enter, Qt.Key_Return):
-                    # timerActive = True
-                    # self.timerAutoComp_.start(500)
-                    self.timerAutoComp_.singleShot(500, self.toggleAutoCompletion)
+                    timerActive = True
+                    self.timerAutoComp_.start(500)
                 else:
                     self.timerAutoComp_.singleShot(0, self.autoCompletionUpdateValue)
                     return True
@@ -857,7 +854,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         field = tMD.field(self.fieldName_)
         if field is None:
-            self.logger.warning(FLUtil.tr("FLFieldDB::value() : No existe el campo %s"), self.fieldName_)
+            self.logger.warning(self.tr("FLFieldDB::value() : No existe el campo %s" % self.fieldName_))
             return None
 
         v: Any = None
@@ -978,7 +975,10 @@ class FLFieldDB(QtWidgets.QWidget):
         if not self.showAlias_ == value:
             self.showAlias_ = value
             if self.textLabelDB:
-                self.textLabelDB.show() if self.showAlias_ else self.textLabelDB.hide()
+                if self.showAlias_:
+                    self.textLabelDB.show()
+                else:
+                    self.textLabelDB.hide()
 
     """
     Inserta como acelerador de teclado una combinación de teclas, devolviendo su identificador
@@ -1817,6 +1817,9 @@ class FLFieldDB(QtWidgets.QWidget):
         hasPushButtonDB = False
         self.fieldAlias_ = field.alias()
 
+        if not self.fieldAlias_:
+            raise Exception("fieldAlias_ is not defined!")
+
         if self.textLabelDB:
             self.textLabelDB.setFont(self.font())
             if not type_ == "pixmap" and not type_ == "bool":
@@ -1956,6 +1959,9 @@ class FLFieldDB(QtWidgets.QWidget):
 
                     self.keyF2Pressed.connect(self.pushButtonDB.animateClick)  # FIXME
                     self.labelClicked.connect(self.openFormRecordRelation)
+                    if not self.textLabelDB:
+                        raise ValueError("textLabelDB is not defined!")
+
                     self.textLabelDB.installEventFilter(self)
                     tlf = self.textLabelDB.font()
                     tlf.setUnderline(True)
@@ -2010,7 +2016,9 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.editorImg_.setAutoScaled(True)
                     self.FLWidgetFieldDBLayout.removeWidget(self.pushButtonDB)
                     self.FLWidgetFieldDBLayout.addWidget(self.editorImg_)
-                self.textLabelDB.hide()
+
+                if self.textLabelDB:
+                    self.textLabelDB.hide()
 
                 sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
                 # sizePolicy.setHeightForWidth(True)
@@ -2304,6 +2312,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @param fmt Indica el formato con el que guardar la imagen
     """
 
+    @decorators.pyqtSlot(QtWidgets.QAction)
     def savePixmap(self, f: "QPixmap") -> None:
         if self.editorImg_:
             ext = f.text().lower()
@@ -2610,9 +2619,9 @@ class FLFieldDB(QtWidgets.QWidget):
             #        return
             #    a.setTable(field.relationM1().foreignField())
 
-            f = FLFormSearchDB(c2, self.topWidget_)
+            form_search = FLFormSearchDB(c2, self.topWidget_)
 
-            f.setFilter(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
+            form_search.setFilter(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
         else:
             mng = self.cursor_.db().manager()
             if not self.actionName_:
@@ -2626,12 +2635,12 @@ class FLFieldDB(QtWidgets.QWidget):
                 a.setTable(field.relationM1().foreignTable())
             c = FLSqlCursor(a.table(), True, self.cursor_.db().connectionName())
             # f = FLFormSearchDB(c, a.name(), self.topWidget_)
-            f = FLFormSearchDB(c, self.topWidget_)
+            form_search = FLFormSearchDB(c, self.topWidget_)
 
-        f.setMainWidget()
+        form_search.setMainWidget()
         from pineboolib import pncontrolsfactory
 
-        list_objs = f.findChildren(pncontrolsfactory.FLTableDB)
+        list_objs = form_search.findChildren(pncontrolsfactory.FLTableDB)
         obj_tdb = None
 
         if list_objs:
@@ -2644,8 +2653,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 obj_tdb.setReadOnly(True)
 
         if self.filter_:
-            f.setFilter(self.filter_)
-        if f.mainWidget():
+            form_search.setFilter(self.filter_)
+        if form_search.mainWidget():
             if obj_tdb:
                 cur_value = self.value()
                 if field.type() == "string" and cur_value:
@@ -2674,8 +2683,8 @@ class FLFieldDB(QtWidgets.QWidget):
                     objTdb.putFisrtCol(field.relationM1().foreignField())
                 QtCore.QTimer.singleShot(0,objTdb.lineEditSearch, self.setFocus)
         """
-        v = f.exec_(field.relationM1().foreignField())
-        f.close()
+        v = form_search.exec_(field.relationM1().foreignField())
+        form_search.close()
         if c:
             del c
         if v:
@@ -2705,7 +2714,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
         util = FLUtil()
         if field.type() == "pixmap":
-            fd = QtWidgets.QFileDialog(self, util.translate("pineboo", "Elegir archivo"), None, "*")
+            fd = QtWidgets.QFileDialog(self.parentWidget(), util.translate("pineboo", "Elegir archivo"), "", "*")
             fd.setViewMode(QtWidgets.QFileDialog.Detail)
             filename = None
             if fd.exec_() == QtWidgets.QDialog.Accepted:
@@ -2872,7 +2881,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
     @decorators.NotImplementedWarn
     def pixmap(self) -> "QPixmap":
-        pix = QtGui.QPixmap
+        pix = QtGui.QPixmap()
         pix.loadFromData(self.value().toCString())
         return pix
 
@@ -3207,7 +3216,7 @@ class FLFieldDB(QtWidgets.QWidget):
             hasPushButtonDB = False
 
         if not self.fieldName_:
-            self.fieldAlias_ = FLUtil.tr("Error: fieldName vacio")
+            self.fieldAlias_ = self.tr("Error: fieldName vacio")
         else:
             self.fieldAlias_ = self.fieldName_
 
@@ -3233,7 +3242,10 @@ class FLFieldDB(QtWidgets.QWidget):
 
         if self.textLabelDB:
             self.textLabelDB.setText(self.fieldAlias_)
-            self.textLabelDB.show() if self.showAlias_ else self.textLabelDB.hide()
+            if self.showAlias_:
+                self.textLabelDB.show()
+            else:
+                self.textLabelDB.hide()
 
         if hasPushButtonDB:
             if self.pushButtonDB:
