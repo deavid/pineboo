@@ -8,6 +8,7 @@ from PyQt5.Qt import QKeySequence  # type: ignore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.core.settings import config
+from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.flapplication import aqApp
 from typing import Any
@@ -220,14 +221,12 @@ class FLFormSearchDB(FLFormDB):
 
         if self.iface:
             try:
-                timer1 = QtCore.QTimer(self)
-                timer1.singleShot(50, self.iface.init)
+                QtCore.QTimer.singleShot(50, self.iface.init)
             except Exception:
                 pass
 
         if not self.isClosing_:
-            timer2 = QtCore.QTimer(self)
-            timer2.singleShot(0, self.emitFormReady)
+            QtCore.QTimer.singleShot(0, self.emitFormReady)
 
         self.loop = True
         if self.eventloop:
