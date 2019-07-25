@@ -214,7 +214,7 @@ class PNTableMetaData(ITableMetaData):
     @param fN Nombre del campo
     """
 
-    def fieldNameToAlias(self, fN: str) -> Optional[str]:
+    def fieldNameToAlias(self, fN: str) -> str:
 
         if not fN:
             return fN
@@ -223,7 +223,7 @@ class PNTableMetaData(ITableMetaData):
             if key.name().lower() == fN.lower():
                 return key.alias()
 
-        return None
+        return fN
 
     """
     Obtiene el nombre de un campo a partir de su alias.
@@ -468,13 +468,13 @@ class PNTableMetaData(ITableMetaData):
 
     def fieldLength(self, fN: str) -> Optional[int]:
         if not fN:
-            return
+            return None
 
         for f in self.fieldList():
             if f.name() == fN.lower():
                 return f.length()
 
-        return
+        return None
 
     """
     Obtiene el número de dígitos de la parte entera de un campo a partir de su nombre.
@@ -484,13 +484,13 @@ class PNTableMetaData(ITableMetaData):
 
     def fieldPartInteger(self, fN: str) -> Optional[int]:
         if not fN:
-            return
+            return None
 
         for f in self.fieldList():
             if f.name() == fN.lower():
                 return f.partInteger()
 
-        return
+        return None
 
     """
     Obtiene el número de dígitos de la parte decimal de un campo a partir de su nombre.
@@ -500,13 +500,13 @@ class PNTableMetaData(ITableMetaData):
 
     def fieldPartDecimal(self, fN: str) -> Optional[int]:
         if not fN:
-            return
+            return None
 
         for f in self.fieldList():
             if f.name() == fN.lower():
                 return f.partDecimal()
 
-        return
+        return None
 
     """
     Obtiene si un campo es calculado.
@@ -516,13 +516,13 @@ class PNTableMetaData(ITableMetaData):
 
     def fieldCalculated(self, fN: str) -> Optional[int]:
         if not fN:
-            return
+            return None
 
         for f in self.fieldList():
             if f.name() == fN.lower():
                 return f.calculated()
 
-        return
+        return None
 
     """
     Obtiene si un campo es visible.
@@ -549,7 +549,7 @@ class PNTableMetaData(ITableMetaData):
 
     def field(self, fN: str) -> Optional["PNFieldMetaData"]:
         if not fN:
-            return
+            return None
 
         for f in self.d.fieldList_:
             if f.name() == fN.lower():
