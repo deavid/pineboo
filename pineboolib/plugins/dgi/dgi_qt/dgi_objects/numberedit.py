@@ -26,14 +26,14 @@ class NumberEdit(QWidget):
         self.validator = QDoubleValidator()
         self.line_edit.setValidator(self.validator)
 
-    def getValue(self) -> Any:
+    def getValue(self) -> str:
         """
         Recoge el valor
         @return valor actual
         """
-        return self.line_edit.text
+        return self.line_edit.getText()
 
-    def setValue(self, value) -> None:
+    def setValue(self, value: Any) -> None:
         """
         Setea el valor dado como valor actual
         @param value. Nuevo valor actual
@@ -43,7 +43,7 @@ class NumberEdit(QWidget):
 
         self.line_edit.setText(value)
 
-    def getDecimals(self) -> Any:
+    def getDecimals(self) -> int:
         """
         Recoge decimales
         @return decimales del valor actual
@@ -67,14 +67,14 @@ class NumberEdit(QWidget):
 
         self.line_edit.validator().setBottom(float(min))
 
-    def getMinimum(self) -> Any:
+    def getMinimum(self) -> Union[int, float]:
         """
         Recoge el valor mínimo seteable
         @return valor mínimo seteable
         """
         return self.line_edit.validator().bottom()
 
-    def getMaximum(self) -> Any:
+    def getMaximum(self) -> Union[int, float]:
         """
         Recoge el valor máximo seteable
         @return Valor máximo posible
@@ -91,12 +91,12 @@ class NumberEdit(QWidget):
 
         return self.line_edit.validator().setTop(float(max))
 
-    def getLabel(self) -> None:
+    def getLabel(self) -> str:
         """
         Recoge la etiqueta del diálogo
         @return texto de la etiqueta del diálogo
         """
-        self.label_line_edit.text()
+        return self.label_line_edit.get_text()
 
     def setLabel(self, label: str) -> None:
         """

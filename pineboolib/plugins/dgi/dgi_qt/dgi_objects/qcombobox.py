@@ -2,7 +2,7 @@
 from PyQt5 import QtWidgets  # type: ignore
 
 
-from typing import Optional, Union, Any, Sized, TYPE_CHECKING
+from typing import Optional, Union, Any, Sized, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qframe import QFrame  # noqa: F401
@@ -13,7 +13,7 @@ class QComboBox(QtWidgets.QComboBox):
     def __init__(self, parent: Optional[Union["QFrame", "QGroupBox"]] = None) -> None:
         super().__init__(parent)
 
-    def insertStringList(self, strl: Sized) -> None:
+    def insertStringList(self, strl: List[str]) -> None:
         self.insertItems(len(strl), strl)
 
     def setReadOnly(self, b: bool) -> None:
@@ -22,8 +22,8 @@ class QComboBox(QtWidgets.QComboBox):
     def getCurrentItem(self) -> Any:
         return super().currentIndex
 
-    def setCurrentItem(self, i) -> Any:
-        pos = None
+    def setCurrentItem(self, i: Union[str, int]) -> Any:
+        pos = -1
         if isinstance(i, str):
             pos = 0
             size_ = self.model().rowCount()
@@ -38,10 +38,10 @@ class QComboBox(QtWidgets.QComboBox):
 
         return super().setCurrentIndex(pos)
 
-    def getCurrentText(self):
+    def getCurrentText(self) -> str:
         return super().currentText()
 
-    def setCurrentText(self, value):
+    def setCurrentText(self, value: str) -> None:
         super().setCurrentText(value)
 
     currentItem = property(getCurrentItem, setCurrentItem, None, "get/set current item index")
