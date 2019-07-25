@@ -154,14 +154,14 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Almacena los metadatos del campo por el que está actualmente ordenada la tabla
     """
-    sortField_: Optional[str]
+    sortField_: Optional[PNFieldMetaData]
 
     """
     Almacena los metadatos del campo por el que está actualmente ordenada la tabla en segunda instancia
 
     @author Silix - dpinelo
     """
-    sortField2_: Optional[str]
+    sortField2_: Optional[PNFieldMetaData]
 
     """
     Crónometro interno
@@ -1381,7 +1381,10 @@ class FLTableDB(QtWidgets.QWidget):
 
             while i < hCount:
                 _label = self.cursor().model().headerData(i + self.sortColumn_, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)
-                field = tMD.field(tMD.fieldAliasToName(_label))
+                _alias = tMD.fieldAliasToName(_label)
+                if _alias is None:
+                    raise Exception("alias could not be solved")
+                field = tMD.field(_alias)
 
                 if field is None:
                     i = i + 1
@@ -1554,9 +1557,9 @@ class FLTableDB(QtWidgets.QWidget):
         fieldName = None
         condValue: str = ""
         where: str = ""
-        fieldArg = None
-        arg2 = None
-        arg4 = None
+        fieldArg = ""
+        arg2 = ""
+        arg4 = ""
 
         ol = None
 
@@ -1564,6 +1567,9 @@ class FLTableDB(QtWidgets.QWidget):
             if self.tdbFilter is None:
                 break
             fieldName = tMD.fieldAliasToName(self.tdbFilter.text(i, 0))
+            if fieldName is None:
+                raise Exception("fieldName could not be resolved!")
+
             field = tMD.field(fieldName)
             if field is None:
                 continue
@@ -1592,7 +1598,7 @@ class FLTableDB(QtWidgets.QWidget):
             else:
                 fieldName = tMD.name() + "." + fieldName
 
-            fieldArg = fieldName
+            fieldArg = fieldName or ""
             arg2 = ""
             arg4 = ""
             type = field.type()
@@ -1682,7 +1688,7 @@ class FLTableDB(QtWidgets.QWidget):
             elif condType == self.Less:
                 condValue += " < " + str(arg2)
             elif condType == self.FromTo:
-                condValue += " >= " + str(arg2) + " AND " + fieldArg + " <= " + (arg4)
+                condValue += " >= " + str(arg2) + " AND " + fieldArg + " <= " + str(arg4)
             elif condType == self.Null:
                 condValue += " IS NULL "
             elif condType == self.notNull:
@@ -1779,6 +1785,9 @@ class FLTableDB(QtWidgets.QWidget):
                         tMD.addFieldMD(fieldCheck)
                     else:
                         fieldCheck = tMD.field(self.fieldNameCheckColumn_)
+
+                if fieldCheck is None:
+                    raise Exception("fieldCheck is empty!")
 
                 self.tableRecords().cur.model().updateColumnsCount()
                 self.tableRecords().header().reset()

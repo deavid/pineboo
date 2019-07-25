@@ -1116,8 +1116,15 @@ class FLFieldDB(QtWidgets.QWidget):
                     return
 
                 field = tMD.field(self.fieldRelation_)
-                tmd = FLSqlCursor(field.relationM1().foreignTable()).metadata()
-                if not tmd:
+                if field is None:
+                    return
+
+                relation_m1 = field.relationM1()
+                if relation_m1 is None:
+                    return
+
+                tmd = FLSqlCursor(relation_m1.foreignTable()).metadata()
+                if tmd is None:
                     return
 
                 # if self.topWidget_ and not self.topWidget_.isShown() and not self.cursor_.modeAccess() == FLSqlCursor.Insert:
@@ -1133,10 +1140,14 @@ class FLFieldDB(QtWidgets.QWidget):
                 v = self.cursor_.valueBuffer(self.fieldRelation_)
                 q = FLSqlQuery()
                 q.setForwardOnly(True)
-                q.setTablesList(field.relationM1().foreignTable())
-                q.setSelect("%s,%s" % (self.foreignField(), field.relationM1().foreignField()))
-                q.setFrom(field.relationM1().foreignTable())
-                where = field.formatAssignValue(field.relationM1().foreignField(), v, True)
+                relation_m1 = field.relationM1()
+                if relation_m1 is None:
+                    raise ValueError("relationM1 does not exist!")
+
+                q.setTablesList(relation_m1.foreignTable())
+                q.setSelect("%s,%s" % (self.foreignField(), relation_m1.foreignField()))
+                q.setFrom(relation_m1.foreignTable())
+                where = field.formatAssignValue(relation_m1.foreignField(), v, True)
                 filterAc = self.cursor_.filterAssoc(self.fieldRelation_, tmd)
                 if filterAc:
                     if not where:
@@ -1349,8 +1360,8 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "date":
             if self.cursor_.modeAccess() == FLSqlCursor.Insert and nulo and not field.allowNull():
                 defVal = field.defaultValue()
-                if defVal:
-                    defVal = defVal.toDate()
+                if defVal is not None:
+                    defVal = QtCore.QDate.fromString(str(defVal))
                 else:
                     defVal = QtCore.QDate.currentDate()
 
@@ -1375,8 +1386,8 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "time":
             if self.cursor_.modeAccess() == FLSqlCursor.Insert and nulo and not field.allowNull():
                 defVal = field.defaultValue()
-                if defVal:
-                    defVal = defVal.toTime()
+                if defVal is not None:
+                    defVal = QtCore.QTime.fromString(str(defVal))
                 else:
                     defVal = QtCore.QTime.currentTime()
 
