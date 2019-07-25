@@ -1,7 +1,7 @@
 import os
 import os.path
 import collections
-from typing import Any, Optional, Dict, Union
+from typing import Any, Optional, Dict, Union, List
 
 from PyQt5 import QtCore  # type: ignore
 
@@ -12,7 +12,7 @@ from pineboolib.application.utils.date_conversion import date_dma_to_amd
 logger = logging.getLogger(__name__)
 
 
-def Boolean(x=False) -> bool:
+def Boolean(x: Union[bool, int, str, float] = False) -> bool:
     """
     Retorna Booelan de una cadena de texto
     """
@@ -41,7 +41,7 @@ class QString(str):
             return self[start : start + length]
 
 
-def Function(*args):
+def Function(*args: str) -> Any:
 
     import importlib
     import sys as python_sys
@@ -119,7 +119,7 @@ class Array(object):
 
     dict_: Dict[Any, Any]
 
-    def __init__(self, *args) -> None:
+    def __init__(self, *args: Any) -> None:
         self.pos_iter = 0
         self.dict_ = collections.OrderedDict()
 
@@ -208,7 +208,7 @@ class Array(object):
         else:
             return self.dict_[k]
 
-    def splice(self, *args) -> None:
+    def splice(self, *args: Any) -> None:
         if len(args) == 2:  # Delete
             pos_ini = args[0]
             length_ = args[1]
@@ -277,7 +277,7 @@ class Date(object):
     date_: QtCore.QDate
     time_: QtCore.QTime
 
-    def __init__(self, *args) -> None:
+    def __init__(self, *args: Union["Date", QtCore.QDate, str, QtCore.QTime, int]) -> None:
         super(Date, self).__init__()
         if not args:
             self.date_ = QtCore.QDate.currentDate()
@@ -285,12 +285,17 @@ class Date(object):
         elif len(args) <= 2:
             date_ = args[0]
             format_ = args[1] if len(args) == 2 else "yyyy-MM-dd"
+            if not isinstance(format_, str):
+                raise ValueError("format must be string")
             self.time_ = QtCore.QTime(0, 0)
             if isinstance(date_, str):
                 if len(date_) == 10:
                     tmp = date_.split("-")
                     if len(tmp[2]) == 4:
-                        date_ = date_dma_to_amd(date_)
+                        date_amd = date_dma_to_amd(date_)
+                        if date_amd is None:
+                            raise ValueError("Date %s is invalid" % date_)
+                        date_ = date_amd
 
                     self.date_ = QtCore.QDate.fromString(date_, format_)
                 else:
@@ -306,7 +311,10 @@ class Date(object):
             if not self.time_:
                 self.time_ = QtCore.QTime(0, 0)
         else:
-            self.date_ = QtCore.QDate(args[0], args[1], args[2])
+            y, m, d = args[0], args[1], args[2]
+            if not isinstance(y, int) or not isinstance(m, int) or not isinstance(d, int):
+                raise ValueError("Expected year, month, day as integers")
+            self.date_ = QtCore.QDate(y, m, d)
             self.time_ = QtCore.QTime(0, 0)
 
     def toString(self, pattern: Optional[str] = None) -> str:
