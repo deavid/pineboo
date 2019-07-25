@@ -1236,6 +1236,9 @@ class PNSqlCursor(QtCore.QObject):
                     pK = self.d.metadata_.primaryKey()
                     if not self.d.buffer_.isNull(pK) and s is not None:
                         pKV = self.d.buffer_.value(pK)
+                        field_mtd = self.d.metadata_.field(pK)
+                        if field_mtd is None:
+                            raise Exception("pk field is not found!")
                         q = PNSqlQuery(None, self.db().connectionName())
                         q.setTablesList(self.d.metadata_.name())
                         q.setSelect(fiName)
@@ -1245,7 +1248,7 @@ class PNSqlCursor(QtCore.QObject):
                             % (
                                 self.db().manager().formatAssignValue(field, s, True),
                                 self.d.metadata_.primaryKey(self.d.isQuery_),
-                                self.db().manager().formatValue(self.d.metadata_.field(pK).type(), pKV),
+                                self.db().manager().formatValue(field_mtd.type(), pKV),
                             )
                         )
                         q.setForwardOnly(True)
@@ -1472,7 +1475,12 @@ class PNSqlCursor(QtCore.QObject):
 
         if not self.d.metadata_ or not self.modeAccess() == self.Browse:
             return
-        if not self.d.metadata_.field(fN).type() == "unlock":
+
+        field_mtd = self.d.metadata_.field(fN)
+        if field_mtd is None:
+            raise Exception("Field %s is empty!" % fN)
+
+        if not field_mtd.type() == "unlock":
             logger.warning("setUnLock sólo permite modificar campos del tipo Unlock")
             return
 
@@ -1827,7 +1835,10 @@ class PNSqlCursor(QtCore.QObject):
 
         if not tableMD:
             # ownTMD = True
-            tableMD = self.db().manager().metadata(field.relationM1().foreignTable())
+            rel_m1 = field.relationM1()
+            if rel_m1 is None:
+                raise Exception("relation is empty!")
+            tableMD = self.db().manager().metadata(rel_m1.foreignTable())
 
         if not tableMD:
             return None
@@ -1903,7 +1914,11 @@ class PNSqlCursor(QtCore.QObject):
         if not self.d.buffer_:
             raise Exception("Buffer not set")
         while i <= self.d._model.rowCount():
-            if self.d._model.value(i, self.d.buffer_.pK()) == value:
+            pk_value = self.d.buffer_.pK()
+            if pk_value is None:
+                raise ValueError("pk_value is empty!")
+
+            if self.d._model.value(i, pk_value) == value:
                 return self.move(i)
 
             i = i + 1
@@ -1953,7 +1968,7 @@ class PNSqlCursor(QtCore.QObject):
             return
 
         if self.d.cursorRelation_ is not None and self.d.relation_ is not None:
-            self.d.persistentFilter_ = None
+            self.clearPersistentFilter()
             if not self.d.cursorRelation_.metadata():
                 return
             if self.d.cursorRelation_.metadata().primaryKey() == fN and self.d.cursorRelation_.modeAccess() == self.Insert:
@@ -2366,7 +2381,7 @@ class PNSqlCursor(QtCore.QObject):
                 "se han guardado.\nSqlCursor::~SqlCursor: %s\n" % t
             )
             self.rollbackOpened(-1, msg)
-        self.destroyed.emit()
+        # self.destroyed.emit()
         # self.d.countRefCursor = self.d.countRefCursor - 1     FIXME
 
     """
@@ -2867,7 +2882,10 @@ class PNSqlCursor(QtCore.QObject):
                         f = c.d.metadata_.field(r.foreignField())
                         if f is None:
                             continue
-                        if f.relationM1() and f.relationM1().deleteCascade():
+
+                        relation_m1 = f.relationM1()
+
+                        if relation_m1 and relation_m1.deleteCascade():
                             c.setForwardOnly(True)
                             c.select(self.conn().manager().formatAssignValue(r.foreignField(), f, s, True))
                             while c.next():
@@ -3416,11 +3434,13 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     """ Uso interno """
-    clearPersistentFilter = QtCore.pyqtSignal()
+    # clearPersistentFilter = QtCore.pyqtSignal()
 
-    destroyed = QtCore.pyqtSignal()
-    # def clearPersistentFilter(self):
-    #     self.d.persistentFilter_ = None
+    # destroyed = QtCore.pyqtSignal()
+
+    @pyqtSlot()
+    def clearPersistentFilter(self):
+        self.d.persistentFilter_ = None
 
 
 class PNCursorPrivate(QtCore.QObject):
