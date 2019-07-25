@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QMessageBox, QApplication  # type: ignore
 from pineboolib.core.utils import logging
-from typing import Any
+from typing import Any, cast
 
 logger = logging.getLogger("messageBox")
 
@@ -47,7 +48,7 @@ class MessageBox(QMessageBox):
         # text = unicode(text,"UTF-8")
         msg = QMessageBox(icon, title, text)
         msg.setParent(QApplication.activeModalWidget())
-        msg.setWindowModality(1)
+        msg.setWindowModality(QtCore.Qt.ApplicationModal)
         msg.setEnabled(True)
         if button0:
             msg.addButton(button0)
