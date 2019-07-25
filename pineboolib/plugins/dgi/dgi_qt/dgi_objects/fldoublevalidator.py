@@ -31,7 +31,6 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
         # 0 Invalid
         # 1 Intermediate
         # 2 Acceptable
-        ret_0 = None
         ret_2 = state[2]
 
         if state[0] in (self.Invalid, self.Intermediate) and len(value_in) > 0:
@@ -49,7 +48,7 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
             ret_1 = ret_1[0 : len(ret_1) - 1] + ","
 
         if len(ret_1) == 1 and ret_1 not in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "."):
-            ret_0 = 0
+            ret_0 = self.Invalid
             ret_1 = ""
             ret_2 = 0
 
