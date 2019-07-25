@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui  # type: ignore
 from PyQt5.QtWidgets import QLabel  # type: ignore
-from typing import Any
+from typing import Any, cast
 
 
 class FLPixmapView(QtWidgets.QScrollArea):
@@ -23,12 +23,12 @@ class FLPixmapView(QtWidgets.QScrollArea):
         self.pixmap_ = QtGui.QPixmap()
         self.pixmapView_ = QLabel(self)
         self.lay_.addWidget(self.pixmapView_)
-        self.pixmapView_.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignCenter)
+        self.pixmapView_.setAlignment(cast(QtCore.Qt.AlignmentFlag, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignCenter))
         self.pixmapView_.installEventFilter(self)
         self.setStyleSheet("QScrollArea { border: 1px solid darkgray; border-radius: 3px; }")
         self._parent = parent
 
-    def setPixmap(self, pix) -> None:
+    def setPixmap(self, pix: QtGui.QPixmap) -> None:
         # if not project.DGI.localDesktop():
         #    project.DGI._par.addQueque("%s_setPixmap" % self._parent.objectName(
         #    ), self._parent.cursor_.valueBuffer(self._parent.fieldName_))
@@ -51,7 +51,7 @@ class FLPixmapView(QtWidgets.QScrollArea):
 
     def resizeContents(self) -> None:
 
-        if self.pixmap_ is not None and self.pixmap_.isNull():
+        if self.pixmap_ is None or self.pixmap_.isNull():
             return
 
         new_pix = self.pixmap_

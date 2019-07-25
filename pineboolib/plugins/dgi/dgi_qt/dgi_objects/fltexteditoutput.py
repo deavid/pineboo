@@ -22,9 +22,9 @@ class FLTextEditOutput(QtWidgets.QPlainTextEdit):
             self.oldStdout.write(txt)
         self.appendPlainText(txt)
 
-    def close(self) -> None:
+    def close(self) -> bool:
         if self.oldStdout:
             sys.stdout = self.oldStdout
         if self.oldStderr:
             sys.stderr = self.oldStderr
-        super().close()
+        return super().close()

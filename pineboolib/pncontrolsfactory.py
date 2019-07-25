@@ -447,8 +447,8 @@ def solve_connection(sender: Any, signal: str, receiver: Any, slot: str) -> Opti
             signal = signal.replace("valueChanged", "dateChanged")
 
     if isinstance(sender, QTable):
-        if "currentChanged" in signal:
-            signal = signal.replace("currentChanged", "CurrentChanged")
+        if "CurrentChanged" in signal:
+            signal = signal.replace("CurrentChanged", "currentChanged")
 
     # if receiver.__class__.__name__ == "FormInternalObj" and slot == "accept":
     #    receiver = receiver.parent()

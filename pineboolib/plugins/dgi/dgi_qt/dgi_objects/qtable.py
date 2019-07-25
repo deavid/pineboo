@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
-
+from typing import Optional, Any, List, Union, cast
 from PyQt5 import QtWidgets, QtCore, Qt  # type: ignore
+from PyQt5.QtCore import pyqtSignal  # type: ignore
+from PyQt5.QtWidgets import QAbstractItemView  # type: ignore
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import format_double
-
-
-from PyQt5.QtWidgets import QAbstractItemView  # type: ignore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
-from typing import Optional, Any, List, Union
 
 
 class QTable(QtWidgets.QTableWidget):
 
     lineaActual = None
-    CurrentChanged = QtCore.pyqtSignal(int, int)
+    # currentChanged = QtCore.pyqtSignal(int, int) # defined in base class
     doubleClicked = QtCore.pyqtSignal(int, int)
-    clicked = QtCore.pyqtSignal(int, int)
+    # clicked = QtCore.pyqtSignal(int, int)  # defined in base class
     valueChanged = QtCore.pyqtSignal(int, int)
     read_only_cols: List[str]
     read_only_rows: List[str]
@@ -38,10 +36,10 @@ class QTable(QtWidgets.QTableWidget):
 
         self.cols_list = []
         self.lineaActual = -1
-        self.currentCellChanged.connect(self.currentChanged_)
-        self.cellDoubleClicked.connect(self.doubleClicked_)
-        self.cellClicked.connect(self.simpleClicked_)
-        self.itemChanged.connect(self.valueChanged_)
+        cast(pyqtSignal, self.currentCellChanged).connect(self.currentChanged_)
+        cast(pyqtSignal, self.cellDoubleClicked).connect(self.doubleClicked_)
+        cast(pyqtSignal, self.cellClicked).connect(self.simpleClicked_)
+        cast(pyqtSignal, self.itemChanged).connect(self.valueChanged_)
         self.read_only_cols = []
         self.read_only_rows = []
         self.resize_policy = 0  # Default
@@ -49,8 +47,7 @@ class QTable(QtWidgets.QTableWidget):
 
     def currentChanged_(self, current_row, current_column, previous_row, previous_column) -> None:
         if current_row > -1 and current_column > -1:
-            self.CurrentChanged.emit(current_row, current_column)
-            pass
+            cast(pyqtSignal, self.currentChanged).emit(current_row, current_column)
 
     def doubleClicked_(self, f, c) -> None:
         self.doubleClicked.emit(f, c)
@@ -175,9 +172,9 @@ class QTable(QtWidgets.QTableWidget):
 
         if new_item is not None:
             if row in self.read_only_rows or col in self.read_only_cols:
-                new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                new_item.setFlags(cast(Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled))
             else:
-                new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+                new_item.setFlags(cast(Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable))
 
     def setCellWidget(self, row, col, obj) -> None:
         super().setCellWidget(row, col, obj)
@@ -205,9 +202,10 @@ class QTable(QtWidgets.QTableWidget):
         for col in range(self.columnCount()):
             item = self.item(row, col)
             if item:
-                item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled) if b else item.setFlags(
-                    QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
-                )
+                if b:
+                    item.setFlags(cast(Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled))
+                else:
+                    item.setFlags(cast(Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable))
 
     def setColumnReadOnly(self, col, b) -> None:
         if b:
@@ -224,9 +222,10 @@ class QTable(QtWidgets.QTableWidget):
         for row in range(self.rowCount()):
             item = self.item(row, col)
             if item:
-                item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled) if b else item.setFlags(
-                    QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
-                )
+                if b:
+                    item.setFlags(cast(Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled))
+                else:
+                    item.setFlags(cast(Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable))
 
     @decorators.NotImplementedWarn
     def setLeftMargin(self, n):
