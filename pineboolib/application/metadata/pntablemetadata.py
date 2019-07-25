@@ -196,9 +196,9 @@ class PNTableMetaData(ITableMetaData):
     @param prefixTable Si es TRUE se añade un prefijo con el nombre de la tabla; nombretabla.nombrecampo
     """
 
-    def primaryKey(self, prefixTable=False) -> Any:
+    def primaryKey(self, prefixTable=False) -> str:
         if not self.d.primaryKey_:
-            return None
+            raise Exception("No primaryKey")
 
         if "." in self.d.primaryKey_:
             return self.d.primaryKey_
@@ -214,7 +214,7 @@ class PNTableMetaData(ITableMetaData):
     @param fN Nombre del campo
     """
 
-    def fieldNameToAlias(self, fN: str) -> Any:
+    def fieldNameToAlias(self, fN: str) -> Optional[str]:
 
         if not fN:
             return fN
@@ -231,7 +231,7 @@ class PNTableMetaData(ITableMetaData):
     @param aN Nombre del alias del campo
     """
 
-    def fieldAliasToName(self, aN: str) -> Any:
+    def fieldAliasToName(self, aN: str) -> Optional[str]:
 
         if not aN:
             return aN
@@ -292,7 +292,7 @@ class PNTableMetaData(ITableMetaData):
     @param fN Nombre del campo
     """
 
-    def fieldIsPrimaryKey(self, fN) -> Any:
+    def fieldIsPrimaryKey(self, fN) -> Optional[bool]:
         if not fN:
             return None
         fN = str(fN)
@@ -308,7 +308,7 @@ class PNTableMetaData(ITableMetaData):
     @param fN Nombre del campo
     """
 
-    def fieldIsIndex(self, field_name=None) -> Any:
+    def fieldIsIndex(self, field_name=None) -> Optional[bool]:
 
         if field_name in self.fieldNames():
             return self.fieldNames().index(field_name)
@@ -323,7 +323,7 @@ class PNTableMetaData(ITableMetaData):
     @author Andrés Otón Urbano (baxas@eresmas.com)
     """
 
-    def fieldIsCounter(self, fN: str) -> Any:
+    def fieldIsCounter(self, fN: str) -> Optional[bool]:
         if not fN:
             return False
 
@@ -345,7 +345,7 @@ class PNTableMetaData(ITableMetaData):
     @param fN Nombre del campo
     """
 
-    def fieldAllowNull(self, fN: str) -> Any:
+    def fieldAllowNull(self, fN: str) -> Optional[bool]:
         if not fN:
             return False
 
@@ -361,7 +361,7 @@ class PNTableMetaData(ITableMetaData):
     @param fN Nombre del campo
     """
 
-    def fieldIsUnique(self, fN: str) -> Any:
+    def fieldIsUnique(self, fN: str) -> Optional[bool]:
         if not fN:
             return False
 
@@ -466,7 +466,7 @@ class PNTableMetaData(ITableMetaData):
     @param fN Nombre del campo
     """
 
-    def fieldLength(self, fN: str) -> Any:
+    def fieldLength(self, fN: str) -> Optional[int]:
         if not fN:
             return
 
@@ -482,7 +482,7 @@ class PNTableMetaData(ITableMetaData):
     @param fN Nombre del campo
     """
 
-    def fieldPartInteger(self, fN: str) -> Any:
+    def fieldPartInteger(self, fN: str) -> Optional[int]:
         if not fN:
             return
 
@@ -498,7 +498,7 @@ class PNTableMetaData(ITableMetaData):
     @param fN Nombre del campo
     """
 
-    def fieldPartDecimal(self, fN: str) -> Any:
+    def fieldPartDecimal(self, fN: str) -> Optional[int]:
         if not fN:
             return
 
@@ -514,7 +514,7 @@ class PNTableMetaData(ITableMetaData):
     @param fN Nombre del campo
     """
 
-    def fieldCalculated(self, fN: str) -> Any:
+    def fieldCalculated(self, fN: str) -> Optional[int]:
         if not fN:
             return
 
@@ -547,7 +547,7 @@ class PNTableMetaData(ITableMetaData):
     @return Un objeto FLFieldMetaData con lainformación o metadatos de un campo dado
     """
 
-    def field(self, fN: str) -> Any:
+    def field(self, fN: str) -> Optional["PNFieldMetaData"]:
         if not fN:
             return
 

@@ -1,11 +1,11 @@
-from typing import Any, Callable, Dict, Optional  # , TYPE_CHECKING
+from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
 
-# if TYPE_CHECKING:
+if TYPE_CHECKING:
+    from pineboolib.application.database import pnsqlquery  # noqa: F401
 #     import pineboolib.application.database.pnconnection
 #     import pineboolib.application.metadata.pnfieldmetadata
 #     import pineboolib.application.metadata.pntablemetadata
 #     import pineboolib.application.metadata.pnrelationmetadata
-#     import pineboolib.application.database.pnsqlquery
 #     import pineboolib.fllegacy.flaction
 
 
@@ -87,7 +87,7 @@ class IManager(object):
     def metadataRelation(self, relation) -> Any:  # "PNRelationMetaData"
         raise Exception("must be implemented")
 
-    def query(self, n, parent=...) -> Optional[Any]:  # "PNSqlQuery"
+    def query(self, n, parent=...) -> Optional["pnsqlquery.PNSqlQuery"]:  # "PNSqlQuery"
         return None
 
     def storeLargeValue(self, mtd, largeValue: str) -> Optional[str]:
