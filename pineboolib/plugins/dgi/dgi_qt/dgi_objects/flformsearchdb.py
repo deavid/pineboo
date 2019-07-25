@@ -109,7 +109,7 @@ class FLFormSearchDB(FLFormDB):
         self.bottomToolbar.widget_hlayout.setSpacing(0)
         self.bottomToolbar.widget_hlayout.addStretch()
         self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.layout.addWidget(self.bottomToolbar)
+        self.layout_.addWidget(self.bottomToolbar)
 
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
         sizePolicy.setHeightForWidth(True)

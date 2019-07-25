@@ -51,7 +51,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     """
     Capa principal del formulario
     """
-    layout = None
+    layout_ = None
 
     """
     Widget principal del formulario
@@ -191,12 +191,12 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         self.loop = False
         self.eventloop = QtCore.QEventLoop()
 
-        self.layout = QtWidgets.QVBoxLayout()
-        self.layout.setContentsMargins(1, 1, 1, 1)
-        self.layout.setSpacing(1)
-        self.layout.setContentsMargins(1, 1, 1, 1)
-        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
-        self.setLayout(self.layout)
+        self.layout_ = QtWidgets.QVBoxLayout()
+        self.layout_.setContentsMargins(1, 1, 1, 1)
+        self.layout_.setSpacing(1)
+        self.layout_.setContentsMargins(1, 1, 1, 1)
+        self.layout_.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        self.setLayout(self.layout_)
         if not self._uiName:
             self._uiName = self._action.form()
 
@@ -227,13 +227,13 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
             return
 
         # self.resize(550,350)
-        if self.layout is None:
+        if self.layout_ is None:
             return
 
-        self.layout.insertWidget(0, self.widget)
-        self.layout.setSpacing(1)
-        self.layout.setContentsMargins(1, 1, 1, 1)
-        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        self.layout_.insertWidget(0, self.widget)
+        self.layout_.setSpacing(1)
+        self.layout_.setContentsMargins(1, 1, 1, 1)
+        self.layout_.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
         if self._uiName:
             from pineboolib.application import project
@@ -468,7 +468,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
             self.snapShot().save(fi, "PNG")
 
-    def saveGeometry(self) -> None:
+    def saveGeometry(self) -> QtCore.QByteArray:
         # pW = self.parentWidget()
         # if not pW:
         geo = QtCore.QSize(self.width(), self.height())
@@ -480,6 +480,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         #    geo = QtCore.QSize(pW.width(), pW.height())
 
         saveGeometryForm(self.geoName(), geo)
+        return super().saveGeometry()
 
     """
     Establece el título de la ventana.
@@ -592,7 +593,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     """
 
     @decorators.pyqtSlot()
-    def script(self):
+    def get_script(self):
         ifc = self.iface
         if ifc:
             return str(ifc)
@@ -607,7 +608,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
             return
 
         if not self.isClosing_:
-            QtCore.QTimer(self).singleShot(0, self.emitFormReady)
+            QtCore.QTimer.singleShot(0, self.emitFormReady)
 
     def emitFormReady(self) -> None:
         from pineboolib import pncontrolsfactory
@@ -687,16 +688,17 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         if self.bottomToolbar and self.toolButtonClose:
             self.toolButtonClose.hide()
         self.bottomToolbar = QtWidgets.QFrame()
-        self.bottomToolbar.setMinimumSize(self.iconSize)
+        if self.iconSize is not None:
+            self.bottomToolbar.setMinimumSize(self.iconSize)
 
-        self.bottomToolbar.layout = QtWidgets.QHBoxLayout()
-        self.bottomToolbar.setLayout(self.bottomToolbar.layout)
-        self.bottomToolbar.layout.setContentsMargins(0, 0, 0, 0)
-        self.bottomToolbar.layout.setSpacing(0)
-        self.bottomToolbar.layout.addStretch()
+        self.bottomToolbar.setLayout(QtWidgets.QHBoxLayout())
+        self.bottomToolbar.setLayout(self.bottomToolbar.layout())
+        self.bottomToolbar.layout().setContentsMargins(0, 0, 0, 0)
+        self.bottomToolbar.layout().setSpacing(0)
+        self.bottomToolbar.layout().addStretch()
         self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
-        if self.layout is not None:
-            self.layout.addWidget(self.bottomToolbar)
+        if self.layout_ is not None:
+            self.layout_.addWidget(self.bottomToolbar)
         # if self.layout:
         #    self.layout = None
         # Limpiamos la toolbar
@@ -718,7 +720,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
             pushButtonExport.setWhatsThis("Exportar a XML(F3)")
             pushButtonExport.setToolTip("Exportar a XML(F3)")
             pushButtonExport.setFocusPolicy(QtCore.Qt.NoFocus)
-            self.bottomToolbar.layout.addWidget(pushButtonExport)
+            self.bottomToolbar.layout().addWidget(pushButtonExport)
             pushButtonExport.clicked.connect(self.exportToXml)
 
             if config.value("ebcomportamiento/show_snaptshop_button", False):
@@ -732,11 +734,11 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
                 push_button_snapshot.setWhatsThis("Capturar pantalla(F8)")
                 push_button_snapshot.setToolTip("Capturar pantalla(F8)")
                 push_button_snapshot.setFocusPolicy(QtCore.Qt.NoFocus)
-                self.bottomToolbar.layout.addWidget(push_button_snapshot)
+                self.bottomToolbar.layout().addWidget(push_button_snapshot)
                 push_button_snapshot.clicked.connect(self.saveSnapShot)
 
             spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-            self.bottomToolbar.layout.addItem(spacer)
+            self.bottomToolbar.layout().addItem(spacer)
 
         if not self.pushButtonCancel:
             self.pushButtonCancel = QtWidgets.QToolButton()
@@ -752,7 +754,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         self.pushButtonCancel.setShortcut(QKeySequence(self.tr("Esc")))
         self.pushButtonCancel.setWhatsThis("Cerrar formulario (Esc)")
         self.pushButtonCancel.setToolTip("Cerrar formulario (Esc)")
-        self.bottomToolbar.layout.addWidget(self.pushButtonCancel)
+        self.bottomToolbar.layout().addWidget(self.pushButtonCancel)
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
     """

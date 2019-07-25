@@ -1,4 +1,7 @@
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from PyQt5 import QtCore
 
 
 class IFormDB(object):
@@ -117,7 +120,7 @@ class IFormDB(object):
     def name(self) -> str:
         return ""
 
-    def saveGeometry(self) -> None:
+    def saveGeometry(self) -> "QtCore.QByteArray":
         return
 
     def saveSnapShot(self, path_file=...) -> None:
