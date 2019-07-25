@@ -59,7 +59,6 @@ class FLCodBar(object):
         self.barcode = {}
         self.barcode["value"] = ""
 
-        self.p: QPixmap = None
         if value in [None, 0]:
             self.readingStdout = False
             self.writingStdout = False
@@ -316,7 +315,7 @@ class FLCodBar(object):
             logger.warning("width or height missing")
             svg_w = 0.0
             svg_h = 0.0
-        self.p = QPixmap(svg_w, svg_h)
+        self.p = QPixmap(int(svg_w), int(svg_h))
         render = QSvgRenderer(svg)
         self.p.fill(QtCore.Qt.transparent)
         painter = Qt.QPainter(self.p)
