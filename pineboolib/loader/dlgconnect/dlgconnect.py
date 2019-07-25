@@ -11,7 +11,7 @@ from PyQt5.QtCore import QSize  # type: ignore
 from pineboolib.core.utils.utils_base import filedir, indent
 from pineboolib.core.settings import config, settings
 from pineboolib.core.decorators import pyqtSlot
-from typing import Optional
+from typing import Optional, cast
 
 
 class DlgConnect(QtWidgets.QWidget):
@@ -281,7 +281,7 @@ class DlgConnect(QtWidgets.QWidget):
                 self.ui,
                 "Pineboo",
                 "¿Desea borrar el perfil %s?" % self.ui.cbProfiles.currentText(),
-                QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No,
+                cast(QtWidgets.QMessageBox, QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No),
                 QtWidgets.QMessageBox.No,
             )
             if res == QtWidgets.QMessageBox.No:
