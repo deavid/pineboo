@@ -207,14 +207,14 @@ class FLManager(QtCore.QObject, IManager):
 
                 if not stream:
                     if n.find("alteredtable") == -1:
-                        logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                        logger.info("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
                     self.metadataCachedFails.append(n)
                     return None
 
                 doc = QDomDocument(n)
 
                 if not util.domDocumentSetContent(doc, stream):
-                    logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                    logger.info("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
                     self.metadataCachedFails.append(n)
                     return None
 

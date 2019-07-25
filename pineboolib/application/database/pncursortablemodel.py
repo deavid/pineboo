@@ -32,7 +32,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     rows = 15
     cols = 5
     USE_THREADS = False
-    USE_TIMER = False
+    USE_TIMER = True
     CURSOR_COUNT = itertools.count()
     rowsLoaded = 0
     where_filter: str
@@ -70,6 +70,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self._driver_sql = self.db().driver()
         self.USE_THREADS = self.driver_sql().useThreads()
         self.USE_TIMER = self.driver_sql().useTimer()
+        if self.USE_THREADS and self.USE_TIMER:
+            self.USE_TIMER = False
+            self.logger.warning("SQL Driver supports Threads and Timer, defaulting to Threads")
+
+        if not self.USE_THREADS and not self.USE_TIMER:
+            self.USE_TIMER = True
+            self.logger.warning("SQL Driver supports neither Threads nor Timer, defaulting to Timer")
 
         self.rowsLoaded = 0
         self.sql_fields: List[str] = []
@@ -118,10 +125,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self.threadFetcher = threading.Thread(target=self.threadFetch)
             self.threadFetcherStop = threading.Event()
 
-        elif self.USE_TIMER:
-            self.timer = QtCore.QTimer()
-            self.timer.timeout.connect(self.updateRows)
-            self.timer.start(1000)
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.updateRows)
+        self.timer.start(1000)
 
         self.canFetchMoreRows = True
         self._disable_refresh = False
@@ -445,10 +451,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         parent = QtCore.QModelIndex()
         fromrow = self.rowsLoaded
         torow = self.fetchedRows - ROW_BATCH_COUNT - 1
-        if torow - fromrow < 10:
+        if torow - fromrow < 5:
+            if self.canFetchMoreRows:
+                self.logger.trace("Updaterows %s (updated:%d)", self.metadata().name(), self.fetchedRows)
+                self.fetchMore(parent, self.metadata().name(), self.where_filter)
             return
-        if DEBUG:
-            self.logger.info("Updaterows %s (UPDATE:%d)", self.metadata().name(), torow - fromrow + 1)
+
+        self.logger.trace("Updaterows %s (UPDATE:%d)", self.metadata().name(), torow - fromrow + 1)
 
         self.beginInsertRows(parent, fromrow, torow)
         self.rowsLoaded = torow + 1
@@ -481,7 +490,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         if tablename is None:
             tablename = self.metadata().name()
 
-        self.logger.debug("refrescando modelo tabla %r, rows: %d %r" % (tablename, self.rows, (fromrow, torow)))
+        self.logger.trace("refrescando modelo tabla %r, rows: %d %r" % (tablename, self.rows, (fromrow, torow)))
         if torow < fromrow:
             return
 
@@ -493,6 +502,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             if where_filter is None:
                 where_filter = self.where_filter
+
             c_all = self.driver_sql().fetchAll(self.cursorDB(), tablename, where_filter, self.sql_str, self._curname)
             newrows = len(c_all)  # self._cursor.rowcount
             from_rows = self.rows
@@ -501,12 +511,15 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self.fetchedRows += newrows
             self.rows += newrows
             self.canFetchMoreRows = bool(newrows > 0)
+            self.logger.trace("refrescando modelo tabla %r, new rows: %d  fetched: %d", tablename, newrows, self.fetchedRows)
+            if not self.USE_THREADS:
+                self.refreshFetch(ROW_BATCH_COUNT)
 
             self.pendingRows = 0
             self.indexUpdateRowRange((from_rows, self.rows))
-            if self.USE_THREADS is True:
-                self.threadFetcher = threading.Thread(target=self.threadFetch)
-                self.threadFetcher.start()
+            # if self.USE_THREADS is True:
+            #     self.threadFetcher = threading.Thread(target=self.threadFetch)
+            #     self.threadFetcher.start()
 
         if torow > self.rows - 1:
             torow = self.rows - 1
@@ -535,10 +548,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.dataChanged.emit(topLeft, bottomRight)
         tiempo_final = time.time()
         self.lastFetch = tiempo_final
-        # if self.USE_THREADS == True and not self.threadFetcher.is_alive() and self.pendingRows > 0:
-        #    self.threadFetcher = threading.Thread(target=self.threadFetch)
-        #    self.threadFetcherStop = threading.Event()
-        #    self.threadFetcher.start()
+        if self.USE_THREADS and not self.threadFetcher.is_alive() and self.canFetchMoreRows:
+            self.threadFetcher = threading.Thread(target=self.threadFetch)
+            self.threadFetcherStop = threading.Event()
+            self.threadFetcher.start()
 
         if tiempo_final - tiempo_inicial > 0.2:
             self.logger.info(
@@ -609,7 +622,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         if self._initialized is None and self.parent_view:  # Si es el primer refresh y estoy conectado a un FLDatatable()
             self._initialized = True
             timer = QtCore.QTimer()
-            timer.singleShot(1, self.refresh)
+            timer.singleShot(1, lambda: self.refresh())
             return
 
         if self._initialized:  # Si estoy inicializando y no me ha enviado un sender, cancelo el refesh
@@ -690,7 +703,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         else:
             self.sql_str = ", ".join(self.sql_fields)
 
-        SZ_FETCH = max(1000, oldrows - 1)
+        SZ_FETCH = max(1000, oldrows)
         self.driver_sql().refreshQuery(self._curname, self.sql_str, from_, self.where_filter, self.cursorDB(), self.db().db())
 
         self.refreshFetch(SZ_FETCH)
