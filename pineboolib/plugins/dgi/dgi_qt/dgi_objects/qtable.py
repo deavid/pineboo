@@ -172,9 +172,9 @@ class QTable(QtWidgets.QTableWidget):
 
         if new_item is not None:
             if row in self.read_only_rows or col in self.read_only_cols:
-                new_item.setFlags(cast(Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled))
+                new_item.setFlags(cast(QtCore.Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled))
             else:
-                new_item.setFlags(cast(Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable))
+                new_item.setFlags(cast(QtCore.Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable))
 
     def setCellWidget(self, row, col, obj) -> None:
         super().setCellWidget(row, col, obj)
