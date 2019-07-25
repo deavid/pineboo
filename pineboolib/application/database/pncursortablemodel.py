@@ -575,7 +575,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param qry. Query con los campos a usar
     """
 
-    def _refresh_field_info(self, qry: "PNSqlQuery") -> None:
+    def _refresh_field_info(self, qry: Optional["PNSqlQuery"] = None) -> None:
         is_query = self.metadata().isQuery()
         qry_tables = []
         if is_query:
@@ -704,9 +704,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         if qry is not None:
             self._refresh_field_info(qry)
+        else:
+            self._refresh_field_info()
 
         self._curname = "cur_%s_%08d" % (self.metadata().name(), next(self.CURSOR_COUNT))
-
         if self.sql_fields_without_check:
             self.sql_str = ", ".join(self.sql_fields_without_check)
         else:
@@ -1099,8 +1100,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def columnCount(self, *args: List[Any]) -> int:
-        if args:
-            self.logger.warning("columnCount%r: wrong arg count", args)
+        # if args:
+        #    self.logger.warning("columnCount%r: wrong arg count", args, stack_info=True)
         return self.cols
 
     """
