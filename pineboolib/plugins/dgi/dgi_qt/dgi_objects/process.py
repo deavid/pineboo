@@ -83,7 +83,7 @@ class Process(QtCore.QProcess):
         Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
         Process.stderr = pro.readAllStandardError().data().decode(encoding)
 
-    def execute(comando: str) -> None:  #  FIXME: aquí hay otro problema parecido a File, que se llama inicializado y sin inicializar
+    def execute(comando: str) -> None:  # FIXME: aquí hay otro problema parecido a File, que se llama inicializado y sin inicializar
         import sys
 
         encoding = sys.getfilesystemencoding()
@@ -110,4 +110,4 @@ class Process(QtCore.QProcess):
         Process.stderr = pro.readAllStandardError().data().decode(encoding)
 
     running = property(getIsRunning)
-    workingDirectory = property(getWorkingDirectory, setWorkingDirectory)
+    workingDirectory = property(getWorkingDirectory, setWorkingDirectory)  # type: ignore

@@ -35,7 +35,7 @@ class QLineEdit(QtWidgets.QLineEdit):
         # if not project.DGI.localDesktop():
         #    project.DGI._par.addQueque("%s_setText" % self._parent.objectName(), v)
 
-    text = property(getText, setText)
+    text = property(getText, setText)  # type: ignore
 
     @decorators.NotImplementedWarn
     def setBackgroundOrigin(self, bgo):

@@ -69,7 +69,7 @@ class QPushButton(QtWidgets.QPushButton):
 
     toggleButton = property(getToggleButton, setToggleButton)
     on = property(getOn, setOn)
-    text = property(getText, setText)
+    text = property(getText, setText)  # type: ignore
 
     @decorators.NotImplementedWarn
     def __getattr__(self, name):

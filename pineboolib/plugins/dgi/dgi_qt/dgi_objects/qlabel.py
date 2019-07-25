@@ -37,6 +37,6 @@ class QLabel(QtWidgets.QLabel):
         pal.setColor(pal.WindowText, color)
         self.setPalette(pal)
 
-    alignment = property(getAlign, setAlign)
-    text = property(get_text, setText)
+    alignment = property(getAlign, setAlign)  # type: ignore
+    text = property(get_text, setText)  # type: ignore
     paletteForegroundColor = property(get_palette_fore_ground, set_palette_fore_ground)

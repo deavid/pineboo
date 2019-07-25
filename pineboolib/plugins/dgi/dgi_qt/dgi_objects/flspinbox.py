@@ -17,5 +17,5 @@ class FLSpinBox(QtWidgets.QSpinBox):
     def setValue(self, val) -> None:
         super().setValue(val)
 
-    value = property(getValue, setValue)
-    text = value
+    value: Any = property(getValue, setValue)  # type: ignore
+    text: Any = value

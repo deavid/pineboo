@@ -35,4 +35,4 @@ class FLDateEdit(QDateEdit):
         super().setDate(date)
         self.setStyleSheet("color: black")
 
-    date = property(getDate, setDate)
+    date = property(getDate, setDate)  # type: ignore
