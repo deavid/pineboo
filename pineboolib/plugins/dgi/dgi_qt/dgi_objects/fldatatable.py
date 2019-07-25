@@ -513,7 +513,7 @@ class FLDataTable(QtWidgets.QTableView):
         for rel in rel_list:
             cur = FLSqlCursor(rel.foreignTable(), True, db.connectionName(), None, None, popup)
 
-            if cur.metadata():
+            if cur.d.metadata_:
                 mtd = cur.metadata()
                 field = mtd.field(rel.foreignField())
                 if field is None:
