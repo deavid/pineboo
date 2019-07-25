@@ -465,7 +465,7 @@ class FLApplication(QtCore.QObject):
             return
 
         if self.toogle_bars_:
-            tool_bar = self.main_widget_.findChild(pncontrolsfactory.QToolBar)
+            tool_bar = mw.findChild(pncontrolsfactory.QToolBar)
             for ac in self.toogle_bars_.actions():
                 if ac.objectName() == "Herramientas":
                     a = ac
@@ -799,7 +799,7 @@ class FLApplication(QtCore.QObject):
         from pineboolib.core.settings import config
 
         self.style_mapper = QtCore.QSignalMapper()
-        self.style_mapper.mapped[str].connect(self.setStyle)
+        self.style_mapper.mapped.connect(self.setStyle)  # FIXME: was mapped[str].connect
         style_read = config.value("application/style", None)
         if not style_read:
             style_read = "Fusion"
@@ -1001,8 +1001,7 @@ class FLApplication(QtCore.QObject):
 
         self.p_work_space_ = None
 
-        time = QtCore.QTimer()
-        time.singleShot(0, self.reinitP)
+        QtCore.QTimer.singleShot(0, self.reinitP)
         from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import empty_base
 
         empty_base()
@@ -1154,7 +1153,7 @@ class FLApplication(QtCore.QObject):
 
         if not mw.isHidden():
             wi.showText(self.mainWidget().mapToGlobal(QtCore.QPoint(mw.width() * 2, 0)), msg_warn, mw)
-            QtCore.QTimer().singleShot(4000, wi.hideText)
+            QtCore.QTimer.singleShot(4000, wi.hideText)
             self.processEvents()
 
     @decorators.NotImplementedWarn
@@ -1343,7 +1342,7 @@ class FLApplication(QtCore.QObject):
             if self.db().driverName():
                 self.db().managerModules().finish()
                 self.db().manager().finish()
-                QtCore.QTimer().singleShot(0, self.quit)
+                QtCore.QTimer.singleShot(0, self.quit)
 
             for mw in self.dict_main_widgets_.values():
                 mw.close()
@@ -1560,10 +1559,10 @@ class FLApplication(QtCore.QObject):
     def helpIndex(self) -> None:
         self.call("sys.openUrl", ["http://manuales-eneboo-pineboo.org/"])
 
-    def tr(self, text) -> Any:
+    def tr(self, sourceText: str, disambiguation: Optional[str] = None, n: int = 0) -> Any:
         from pineboolib import pncontrolsfactory
 
-        return pncontrolsfactory.QApplication.translate("system", text)
+        return pncontrolsfactory.QApplication.translate("system", sourceText)
 
     def loadTranslations(self) -> None:
         """

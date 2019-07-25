@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore  # type: ignore
+from PyQt5 import QtWidgets  # type: ignore
 
 from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
 from pineboolib.fllegacy.flaccesscontrol import FLAccessControl
@@ -32,24 +32,19 @@ class FLAccessControlMainWindow(FLAccessControl):
         if not mw or not self.acosPerms_:
             return
 
+        a: QtWidgets.QAction
+        list1 = mw.queryList("QAction")
+        actions_idx = {a.name(): a for a in list1}
         if not self.perm_:
-            list1 = QtCore.QObjectList(mw.queryList("QAction"))
-            ito = QtCore.QObjectListIt(list1)
-            a = QtCore.QAction
-
-            while not ito.current() == 0:
-                a = ito.current()
-                ++ito
+            for a in list1:
                 if self.acosPerms_[a.name()]:
                     continue
                 if self.perm_ == "-w" or self.perm_ == "--":
                     a.setVisible(False)
 
-        it = QtCore.QDictIterator(self.acosPerms_)
-        for i in range(len(it.current())):
-            a = mw.child(it.currentKey(), "QAction")
-            if a:
-                perm = it
+        for a_name, perm in self.acosPerms_.items():
+            if a_name in actions_idx:
+                a = actions_idx[a_name]
                 if perm in ("-w", "--"):
                     a.setVisible(False)
 

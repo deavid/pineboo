@@ -139,17 +139,23 @@ class FLPicture(QObject):
 
         elif len(args) and isinstance(args[0], QtGui.QPicture):
             if len(args) >= 3:
-                super(FLPicture, self).__init__(args[1], args[2])
+                # FIXME: We need to find the actual call or what it was meant to do to fix this
+                raise ValueError("Unsupported construct")
+                # super(FLPicture, self).__init__(args[1], args[2])
             else:
                 super(FLPicture, self).__init__()
             self.setPicture(args[0])
 
         elif len(args) > 1 and isinstance(args[1], QtGui.QPainter):
+            # FIXME: We need to find the actual call or what it was meant to do to fix this
             self.d_.setPainter(args[1])
-            super(FLPicture, self).__init__(args[2], args[3])
+            raise ValueError("Unsupported construct")
+            # super(FLPicture, self).__init__(args[2], args[3])
 
         else:
-            super(FLPicture, self).__init__(args[0], args[1])
+            # FIXME: We need to find the actual call or what it was meant to do to fix this
+            raise ValueError("Unsupported construct")
+            # super(FLPicture, self).__init__(args[0], args[1])
 
     @decorators.BetaImplementation
     def PIC_NEW_D(self):
@@ -525,7 +531,7 @@ class FLPicture(QObject):
             return 0
         self.end()
         cpyPic = QtGui.QPicture()
-        cpyPic.setData(self.d_.pic_.data(), self.d_.pic_.size())
+        cpyPic.setData(self.d_.pic_.data())
         pa = QtGui.QPainter(pix)
         pa.setClipRect(0, 0, pix.width(), pix.height())
         cpyPic.play(pa)
@@ -541,7 +547,7 @@ class FLPicture(QObject):
         if pic and pic.picture():
             self.end()
             cpyPic = QtGui.QPicture()
-            cpyPic.setData(self.d_.pic_.data(), self.d_.pic_.size())
+            cpyPic.setData(self.d_.pic_.data())
             pa = QtGui.QPainter(pic.picture())
             cpyPic.play(pa)
             pa.end()

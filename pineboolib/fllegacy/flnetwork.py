@@ -1,6 +1,7 @@
 # # -*- coding: utf-8 -*-
-from typing import Optional
+from typing import Optional, cast
 from PyQt5 import QtCore  # type: ignore
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager, QNetworkReply  # type: ignore
 from pineboolib.core import decorators
 
@@ -26,7 +27,9 @@ class FLNetwork(QtCore.QObject):
 
         self.manager = QNetworkAccessManager()
         # self.manager.readyRead.connect(self._slotNetworkStart)
-        self.manager.finished["QNetworkReply*"].connect(self._slotNetworkFinished)
+        finished_signal = cast(pyqtSignal, self.manager.finished)
+        finished_signal.connect(self._slotNetworkFinished)
+        # finished_signal["QNetworkReply*"].connect(self._slotNetworkFinished) # FIXME: What does this code?
         # self.data.connect(self._slotNetWorkData)
         # self.dataTransferProgress.connect(self._slotNetworkProgress)
 

@@ -49,17 +49,18 @@ class AQS(object):
     """
 
     def ColorDialog_getColor(
-        self, color: Optional[Union[str, QColor]] = None, parent: Optional["QWidget"] = None, name: Optional[str] = None
+        self, color: Optional[Union[int, str, QColor]] = None, parent: Optional["QWidget"] = None, name: Optional[str] = None
     ) -> Any:
         from PyQt5.QtWidgets import QColorDialog  # type: ignore
 
         if color is None:
-            color = QColor.black()
+            qcolor = QColor("black")
+        elif not isinstance(color, QColor):
+            qcolor = QColor(color)
+        else:
+            qcolor = color
 
-        if isinstance(color, str):
-            color = QColor()
-
-        cL = QColorDialog(color, parent)
+        cL = QColorDialog(qcolor, parent)
         return cL.getColor()
 
     """
