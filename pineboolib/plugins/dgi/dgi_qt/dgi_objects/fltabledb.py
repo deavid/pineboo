@@ -181,7 +181,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Indica el texto de la etiqueta de encabezado para la columna de selección
     """
-    aliasCheckColumn_: Optional[str]
+    aliasCheckColumn_: str
 
     """
     Indica el nombre para crear un pseudocampo en el cursor para la columna de selección
@@ -363,6 +363,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.tabControlLayout = QtWidgets.QHBoxLayout()
         self.tabFilter = QtWidgets.QFrame()  # contiene filtros
+        self.tabData = QtWidgets.QFrame()  # contiene data
         self.functionGetColor_ = None
 
         from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
@@ -1112,17 +1113,17 @@ class FLTableDB(QtWidgets.QWidget):
         self.dataLayout = QtWidgets.QHBoxLayout()  # Contiene tabData y tabFilters
         # self.dataLayout.setContentsMargins(0, 0, 0, 0)
         # self.dataLayout.setSizeConstraint(0)
-        self.tabData = QtWidgets.QFrame()  # contiene data
-        self.tabDataLayout = QtWidgets.QVBoxLayout()
 
-        if self.tabData is not None:
+        self.tabDataLayout = QtWidgets.QVBoxLayout()
+        filterL = QtWidgets.QVBoxLayout()
+
+        if self.tabData:
             self.tabData.setSizePolicy(sizePolicyGB)
             self.tabData.setLayout(self.tabDataLayout)
 
-        if self.tabFilter is not None:
+        if self.tabFilter:
             self.tabFilter.setSizePolicy(sizePolicyGB)
-
-        filterL = QtWidgets.QVBoxLayout()
+            self.tabFilter.setLayout(filterL)
 
         # Fix para acercar el lineEdit con el fltable
         # self.tabData.setContentsMargins(0, 0, 0, 0)
@@ -1130,26 +1131,27 @@ class FLTableDB(QtWidgets.QWidget):
         # self.tabDataLayout.setContentsMargins(0, 0, 0, 0)
         # filterL.setContentsMargins(0, 0, 0, 0)
 
-        self.tabFilter.setLayout(filterL)
-
         # Contiene botones lateral (datos, filtros, odf)
         self.buttonsLayout = QtWidgets.QVBoxLayout()
         self.masterLayout = QtWidgets.QVBoxLayout()  # Contiene todos los layouts
 
-        self.pbData = QtWidgets.QPushButton(self)
-        self.pbData.setSizePolicy(sizePolicy)
-        self.pbData.setMinimumSize(self.iconSize)
-        self.pbData.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.pbData.setIcon(QtGui.QIcon(filedir("../share/icons", "fltable-data.png")))
-        self.pbData.setText("")
-        self.pbData.setToolTip("Mostrar registros")
-        self.pbData.setWhatsThis("Mostrar registros")
-        self.buttonsLayout.addWidget(self.pbData)
-        self.pbData.clicked.connect(self.activeTabData)
+        if self.pbData is None:
+            self.pbData = QtWidgets.QPushButton(self)
+            self.pbData.setSizePolicy(sizePolicy)
+            if self.iconSize is not None:
+                self.pbData.setMinimumSize(self.iconSize)
+            self.pbData.setFocusPolicy(QtCore.Qt.NoFocus)
+            self.pbData.setIcon(QtGui.QIcon(filedir("../share/icons", "fltable-data.png")))
+            self.pbData.setText("")
+            self.pbData.setToolTip("Mostrar registros")
+            self.pbData.setWhatsThis("Mostrar registros")
+            self.buttonsLayout.addWidget(self.pbData)
+            self.pbData.clicked.connect(self.activeTabData)
 
         self.pbFilter = QtWidgets.QPushButton(self)
         self.pbFilter.setSizePolicy(sizePolicy)
-        self.pbFilter.setMinimumSize(self.iconSize)
+        if self.iconSize is not None:
+            self.pbFilter.setMinimumSize(self.iconSize)
         self.pbFilter.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pbFilter.setIcon(QtGui.QIcon(filedir("../share/icons", "fltable-filter.png")))
         self.pbFilter.setText("")
@@ -1160,7 +1162,8 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.pbOdf = QtWidgets.QPushButton(self)
         self.pbOdf.setSizePolicy(sizePolicy)
-        self.pbOdf.setMinimumSize(self.iconSize)
+        if self.iconSize is not None:
+            self.pbOdf.setMinimumSize(self.iconSize)
         self.pbOdf.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pbOdf.setIcon(QtGui.QIcon(filedir("../share/icons", "fltable-odf.png")))
         self.pbOdf.setText("")
@@ -1173,7 +1176,8 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.pbClean = QtWidgets.QPushButton(self)
         self.pbClean.setSizePolicy(sizePolicyClean)
-        self.pbClean.setMinimumSize(self.iconSize)
+        if self.iconSize is not None:
+            self.pbClean.setMinimumSize(self.iconSize)
         self.pbClean.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pbClean.setIcon(QtGui.QIcon(filedir("../share/icons", "fltable-clean.png")))
         self.pbClean.setText("")
@@ -1211,9 +1215,12 @@ class FLTableDB(QtWidgets.QWidget):
         self.setLayout(self.masterLayout)
 
         # Se añade data, filtros y botonera
-        self.dataLayout.addWidget(self.tabData)
-        self.dataLayout.addWidget(self.tabFilter)
-        self.tabFilter.hide()
+        if self.tabData is not None:
+            self.dataLayout.addWidget(self.tabData)
+        if self.tabFilter is not None:
+            self.dataLayout.addWidget(self.tabFilter)
+            self.tabFilter.hide()
+
         self.dataLayout.addLayout(self.buttonsLayout)
         self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
         self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
@@ -1699,7 +1706,7 @@ class FLTableDB(QtWidgets.QWidget):
         if not self.fakeEditor_:
             self.fakeEditor_ = QtWidgets.QTextEdit(self.tabData)
 
-            sizePolicy = QtWidgets.QSizePolicy(7, QtWidgets.QSizePolicy.Expanding)
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
             sizePolicy.setHeightForWidth(True)
 
             self.fakeEditor_.setSizePolicy(sizePolicy)
@@ -1979,13 +1986,18 @@ class FLTableDB(QtWidgets.QWidget):
     @decorators.pyqtSlot(bool)
     def editRecord(self, wait: bool = True) -> None:
         w = self.sender()
-        if isinstance(w, FLDataTable):
-            w = None
-
         cur_relation = self.cursor().cursorRelation()
 
-        if w and (
-            not self.cursor() or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (cur_relation and cur_relation.isLocked())
+        if (
+            w
+            and not isinstance(w, FLDataTable)
+            and (
+                not self.cursor()
+                or self.reqReadOnly_
+                or self.reqEditOnly_
+                or self.reqOnlyTable_
+                or (cur_relation and cur_relation.isLocked())
+            )
         ):
             w.setDisabled(True)
             return
@@ -2001,9 +2013,8 @@ class FLTableDB(QtWidgets.QWidget):
     def browseRecord(self, wait: bool = True) -> None:
 
         w = self.sender()
-        if isinstance(w, FLDataTable):
-            w = None
-        if w and (not self.cursor() or self.reqOnlyTable_):
+
+        if w and not isinstance(w, FLDataTable) and (not self.cursor() or self.reqOnlyTable_):
             w.setDisabled(True)
             return
 
@@ -2017,18 +2028,20 @@ class FLTableDB(QtWidgets.QWidget):
     @decorators.pyqtSlot(bool)
     def deleteRecord(self, wait: bool = True) -> None:
         w = self.sender()
-        if isinstance(w, FLDataTable):
-            w = None
 
         cur_relation = self.cursor().cursorRelation()
 
-        if w and (
-            not self.cursor()
-            or self.reqReadOnly_
-            or self.reqInsertOnly_
-            or self.reqEditOnly_
-            or self.reqOnlyTable_
-            or (cur_relation and cur_relation.isLocked())
+        if (
+            w
+            and not isinstance(w, FLDataTable)
+            and (
+                not self.cursor()
+                or self.reqReadOnly_
+                or self.reqInsertOnly_
+                or self.reqEditOnly_
+                or self.reqOnlyTable_
+                or (cur_relation and cur_relation.isLocked())
+            )
         ):
             w.setDisabled(True)
             return
@@ -2043,13 +2056,19 @@ class FLTableDB(QtWidgets.QWidget):
     @decorators.pyqtSlot()
     def copyRecord(self):
         w = self.sender()
-        if isinstance(w, FLDataTable):
-            w = None
 
         cur_relation = self.cursor().cursorRelation()
 
-        if w and (
-            not self.cursor() or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (cur_relation and cur_relation.isLocked())
+        if (
+            w
+            and not isinstance(w, FLDataTable)
+            and (
+                not self.cursor()
+                or self.reqReadOnly_
+                or self.reqEditOnly_
+                or self.reqOnlyTable_
+                or (cur_relation and cur_relation.isLocked())
+            )
         ):
             w.setDisabled(True)
             return
