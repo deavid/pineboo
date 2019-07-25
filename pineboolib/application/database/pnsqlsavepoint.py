@@ -61,7 +61,7 @@ class opInfo:
     def __del__(self) -> None:
         pass
 
-    # @QtCore.pyqtSlot()
+    # @decorators.pyqtSlot()
     # def cursorDestroyed(self):
     #    self.cursor = None
 

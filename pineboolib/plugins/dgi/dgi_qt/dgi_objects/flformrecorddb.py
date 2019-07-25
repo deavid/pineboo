@@ -613,7 +613,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Se activa al pulsar el boton aceptar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def accept(self):
         if self.accepting:
             return
@@ -650,7 +650,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Se activa al pulsar el boton aceptar y continuar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def acceptContinue(self):
         if self.accepting:
             return
@@ -691,7 +691,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Se activa al pulsar el botón cancelar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def reject(self):
         self.accepted_ = False
         self.canceledForm()
@@ -701,7 +701,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Devuelve el script asociado al formulario
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     @decorators.NotImplementedWarn
     def script(self):
         pass
@@ -710,7 +710,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Ir al primer anterior
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def firstRecord(self):
         if self.cursor_ and not self.cursor_.at() == 0:
             if not self.validateForm():
@@ -733,7 +733,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Ir al registro anterior
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def previousRecord(self):
         if self.cursor_ and self.cursor_.isValid():
             if self.cursor_.at() == 0:
@@ -760,7 +760,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Ir al registro siguiente
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def nextRecord(self):
         if self.cursor_ and self.cursor_.isValid():
             if self.cursor_.at() == (self.cursor_.size() - 1):
@@ -787,7 +787,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Ir al ultimo registro
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def lastRecord(self):
         if self.cursor_ and not self.cursor_.at() == (self.cursor_.size() - 1):
             if not self.validateForm():
@@ -810,7 +810,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Desactiva el botón cancelar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def disablePushButtonCancel(self):
         if self.pushButtonCancel:
             self.pushButtonCancel.setDisabled(True)

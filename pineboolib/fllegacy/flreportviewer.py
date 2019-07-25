@@ -342,7 +342,7 @@ class FLReportViewer(QtWidgets.QWidget):
             )
 
     @decorators.BetaImplementation
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def exportToPDF(self):
         if self.slotsExportedDisabled_:
             return
@@ -376,7 +376,7 @@ class FLReportViewer(QtWidgets.QWidget):
         self.slotPrintReportToPdf(fileName)
 
     @decorators.BetaImplementation
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def sendEMailPDF(self):
         t = self.ui_["leDocumento"].text()
         util = FLUtil()

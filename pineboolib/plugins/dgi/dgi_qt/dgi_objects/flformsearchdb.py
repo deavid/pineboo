@@ -102,11 +102,11 @@ class FLFormSearchDB(FLFormDB):
         self.bottomToolbar = QtWidgets.QFrame()
         self.bottomToolbar.setMaximumHeight(64)
         self.bottomToolbar.setMinimumHeight(16)
-        self.bottomToolbar.layout = QtWidgets.QHBoxLayout()
-        self.bottomToolbar.setLayout(self.bottomToolbar.layout)
-        self.bottomToolbar.layout.setContentsMargins(0, 0, 0, 0)
-        self.bottomToolbar.layout.setSpacing(0)
-        self.bottomToolbar.layout.addStretch()
+        self.bottomToolbar.widget_hlayout = QtWidgets.QHBoxLayout()
+        self.bottomToolbar.setLayout(self.bottomToolbar.widget_hlayout)
+        self.bottomToolbar.widget_hlayout.setContentsMargins(0, 0, 0, 0)
+        self.bottomToolbar.widget_hlayout.setSpacing(0)
+        self.bottomToolbar.widget_hlayout.addStretch()
         self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
         self.layout.addWidget(self.bottomToolbar)
 
@@ -126,7 +126,7 @@ class FLFormSearchDB(FLFormDB):
             pushButtonExport.setWhatsThis("Exportar a XML(F3)")
             pushButtonExport.setToolTip("Exportar a XML(F3)")
             pushButtonExport.setFocusPolicy(QtCore.Qt.NoFocus)
-            self.bottomToolbar.layout.addWidget(pushButtonExport)
+            self.bottomToolbar.widget_hlayout.addWidget(pushButtonExport)
             pushButtonExport.clicked.connect(self.exportToXml)
 
             if config.value("ebcomportamiento/show_snaptshop_button", False):
@@ -140,11 +140,11 @@ class FLFormSearchDB(FLFormDB):
                 push_button_snapshot.setWhatsThis("Capturar pantalla(F8)")
                 push_button_snapshot.setToolTip("Capturar pantalla(F8)")
                 push_button_snapshot.setFocusPolicy(QtCore.Qt.NoFocus)
-                self.bottomToolbar.layout.addWidget(push_button_snapshot)
+                self.bottomToolbar.widget_hlayout.addWidget(push_button_snapshot)
                 push_button_snapshot.clicked.connect(self.saveSnapShot)
 
             spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-            self.bottomToolbar.layout.addItem(spacer)
+            self.bottomToolbar.widget_hlayout.addItem(spacer)
 
         if not self.pushButtonAccept:
             self.pushButtonAccept = pncontrolsfactory.QToolButton(self)
@@ -160,7 +160,7 @@ class FLFormSearchDB(FLFormDB):
         self.pushButtonAccept.setWhatsThis("Seleccionar registro actual y cerrar formulario (F10)")
         self.pushButtonAccept.setToolTip("Seleccionar registro actual y cerrar formulario (F10)")
         self.pushButtonAccept.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.bottomToolbar.layout.addWidget(self.pushButtonAccept)
+        self.bottomToolbar.widget_hlayout.addWidget(self.pushButtonAccept)
         self.pushButtonAccept.show()
 
         if not self.pushButtonCancel:
@@ -176,7 +176,7 @@ class FLFormSearchDB(FLFormDB):
         # pushButtonCancel->setAccel(Esc); FIXME
         self.pushButtonCancel.setWhatsThis("Cerrar formulario sin seleccionar registro (Esc)")
         self.pushButtonCancel.setToolTip("Cerrar formulario sin seleccionar registro (Esc)")
-        self.bottomToolbar.layout.addWidget(self.pushButtonCancel)
+        self.bottomToolbar.widget_hlayout.addWidget(self.pushButtonCancel)
         self.pushButtonCancel.show()
 
         self.cursor_.setEdition(False)
@@ -309,7 +309,7 @@ class FLFormSearchDB(FLFormDB):
     Invoca a la función "init" del script "masterprocess" asociado al formulario
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def callInitScript(self):
         pass
 
@@ -317,7 +317,7 @@ class FLFormSearchDB(FLFormDB):
     Redefinida por conveniencia
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def hide(self):
         if self.loop:
             self.loop = False
@@ -332,7 +332,7 @@ class FLFormSearchDB(FLFormDB):
     Se activa al pulsar el boton aceptar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def accept(self):
         if self.acceptingRejecting_:
             return
@@ -356,7 +356,7 @@ class FLFormSearchDB(FLFormDB):
     Se activa al pulsar el botón cancelar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def reject(self):
         if self.acceptingRejecting_:
             return
@@ -373,7 +373,7 @@ class FLFormSearchDB(FLFormDB):
     Redefinida por conveniencia
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def show(self):
         self.exec_()
 

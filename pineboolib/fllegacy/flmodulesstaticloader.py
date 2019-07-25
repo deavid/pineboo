@@ -166,7 +166,7 @@ class FLStaticLoader(QtCore.QObject):
         self.pbDelDir.clicked.connect(self.delDir)
         self.chkEnabled.toggled.connect(self.setEnabled)
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def load(self):
         self.b_.readSettings()
         self.lblBdTop.setText(self.b_.db_)
@@ -221,7 +221,7 @@ class FLStaticLoader(QtCore.QObject):
 
             self.b_.dirs_.append(AQStaticDirInfo(True, dir))
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def modDir(self):
 
         cur_row = self.tblDirs.currentRow()
@@ -239,7 +239,7 @@ class FLStaticLoader(QtCore.QObject):
 
             self.tblDirs.setText(cur_row, 0, dir)
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def delDir(self):
 
         cur_row = self.tblDirs.currentRow()
