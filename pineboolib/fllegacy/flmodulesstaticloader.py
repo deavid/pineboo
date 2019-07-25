@@ -10,7 +10,10 @@ from pineboolib import pncontrolsfactory
 from pineboolib.core.settings import config
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flapplication import aqApp
-from typing import Any, List, Optional, cast
+from typing import Any, List, Optional, cast, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.application.database.pnconnection import PNConnection
 
 logger = logging.getLogger(__name__)
 
@@ -36,13 +39,13 @@ class AQStaticBdInfo(object):
     dirs_: List[AQStaticDirInfo]
     key_ = None
 
-    def __init__(self, database) -> None:
+    def __init__(self, database: "PNConnection") -> None:
         self.db_ = database.DBName()
 
         self.key_ = "StaticLoader/%s/" % self.db_
         self.enabled_ = config.value("%senabled" % self.key_, False)
 
-    def findPath(self, p) -> Optional[AQStaticDirInfo]:
+    def findPath(self, p: str) -> Optional[AQStaticDirInfo]:
 
         for info in self.dirs_:
             if info.path_ == p:
@@ -104,7 +107,7 @@ class FLStaticLoaderWarning(QtCore.QObject):
         aqApp.popupWarn(msg)
 
     @decorators.NotImplementedWarn
-    def scriptBaseFileName(self, name):
+    def scriptBaseFileName(self, name: str):
 
         scripts = aqApp.project().scripts()
         for it in scripts:
@@ -168,7 +171,7 @@ class FLStaticLoader(QtCore.QObject):
         self.chkEnabled.toggled.connect(self.setEnabled)
 
     @decorators.pyqtSlot()
-    def load(self):
+    def load(self) -> None:
         self.b_.readSettings()
         self.lblBdTop.setText(self.b_.db_)
         self.chkEnabled.setChecked(self.b_.enabled_)
@@ -198,7 +201,7 @@ class FLStaticLoader(QtCore.QObject):
             self.tblDirs.setCurrentCell(n_rows, 0)
 
     @QtCore.pyqtSlot(bool)
-    def addDir(self):
+    def addDir(self) -> None:
 
         cur_row = self.tblDirs.currentRow()
         dir_init = self.tblDirs.text(cur_row, 0) if cur_row > -1 else ""
@@ -221,7 +224,7 @@ class FLStaticLoader(QtCore.QObject):
             self.b_.dirs_.append(AQStaticDirInfo(True, dir))
 
     @decorators.pyqtSlot()
-    def modDir(self):
+    def modDir(self) -> None:
 
         cur_row = self.tblDirs.currentRow()
         if cur_row == -1:
@@ -239,7 +242,7 @@ class FLStaticLoader(QtCore.QObject):
             self.tblDirs.setText(cur_row, 0, dir)
 
     @decorators.pyqtSlot()
-    def delDir(self):
+    def delDir(self) -> None:
 
         cur_row = self.tblDirs.currentRow()
         if cur_row == -1:
@@ -260,11 +263,11 @@ class FLStaticLoader(QtCore.QObject):
         self.tblDirs.removeRow(cur_row)
 
     @QtCore.pyqtSlot(bool)
-    def setEnabled(self, on):
+    def setEnabled(self, on: bool) -> None:
         self.b_.enabled_ = on
 
     @QtCore.pyqtSlot(bool)
-    def setChecked(self, on):
+    def setChecked(self, on: bool) -> None:
 
         chk = self.sender()
         if not chk:
@@ -281,13 +284,13 @@ class FLStaticLoader(QtCore.QObject):
             info.active_ = on
 
     @staticmethod
-    def setup(b, ui) -> None:
+    def setup(b, ui: Any) -> None:
         diag_setup = FLStaticLoader(b, ui)
         if QtWidgets.QDialog.Accepted == diag_setup.ui_.exec_():
             b.writeSettings()
 
     @staticmethod
-    def content(n, b, only_path=False) -> Any:
+    def content(n, b: Any, only_path=False) -> Any:
         global warn_
         b.readSettings()
         util = FLUtil()
