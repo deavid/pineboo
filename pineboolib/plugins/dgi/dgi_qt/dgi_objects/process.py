@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore  # type: ignore
+from PyQt5.QtCore import pyqtSignal
 import sys
-from typing import Any, List
+from typing import Any, List, cast, Optional, Iterable
 from pineboolib.core import decorators
 
 
@@ -13,8 +14,8 @@ class Process(QtCore.QProcess):
 
     def __init__(self, *args) -> None:
         super(Process, self).__init__()
-        super().readyReadStandardOutput.connect(self.stdoutReady)
-        super().readyReadStandardError.connect(self.stderrReady)
+        cast(pyqtSignal, self.readyReadStandardOutput).connect(self.stdoutReady)
+        cast(pyqtSignal, self.readyReadStandardError).connect(self.stderrReady)
         self.stderr = None
         self.normalExit = self.NormalExit
         self.crashExit = self.CrashExit
@@ -24,7 +25,7 @@ class Process(QtCore.QProcess):
             argumentos = args[1:]
             self.setArguments(argumentos)
 
-    def start(self) -> None:
+    def start(self, *args: Any) -> None:
         super(Process, self).start()
 
     def stop(self) -> None:
@@ -62,9 +63,10 @@ class Process(QtCore.QProcess):
     def exitcode(self) -> Any:
         return self.exitCode()
 
+    @staticmethod
     def executeNoSplit(
         comando: list, stdin_buffer
-    ) -> None:  #  FIXME: aquí hay otro problema parecido a File, que se llama inicializado y sin inicializar
+    ) -> None:  # FIXME: aquí hay otro problema parecido a File, que se llama inicializado y sin inicializar
 
         list_ = []
         for c in comando:
@@ -83,7 +85,10 @@ class Process(QtCore.QProcess):
         Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
         Process.stderr = pro.readAllStandardError().data().decode(encoding)
 
-    def execute(comando: str) -> None:  # FIXME: aquí hay otro problema parecido a File, que se llama inicializado y sin inicializar
+    @staticmethod
+    def execute(
+        comando: str, arguments: Optional[Iterable[str]] = None
+    ) -> int:  # FIXME: aquí hay otro problema parecido a File, que se llama inicializado y sin inicializar
         import sys
 
         encoding = sys.getfilesystemencoding()
@@ -108,6 +113,7 @@ class Process(QtCore.QProcess):
         pro.waitForFinished(30000)
         Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
         Process.stderr = pro.readAllStandardError().data().decode(encoding)
+        return 0  # FIXME: Probably we need to return the exit code
 
     running = property(getIsRunning)
     workingDirectory = property(getWorkingDirectory, setWorkingDirectory)  # type: ignore

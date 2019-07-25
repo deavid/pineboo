@@ -379,7 +379,7 @@ class FLFormSearchDB(FLFormDB):
     def child(self, childName) -> Any:
         return self.findChild(QtWidgets.QWidget, childName, QtCore.Qt.FindChildrenRecursively)
 
-    def accepted(self) -> bool:
+    def accepted(self) -> bool:  # type: ignore   # FIXME: QDialog has a signal called "accepted"
         return self.accepted_
 
     def setMainWidget(self, w=None):

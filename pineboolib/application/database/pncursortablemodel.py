@@ -578,6 +578,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     def _refresh_field_info(self, qry: Optional["PNSqlQuery"] = None) -> None:
         is_query = self.metadata().isQuery()
         qry_tables = []
+        if qry is None:
+            return
         if is_query:
             qry_select = [x.strip() for x in (qry.select()).split(",")]
             qry_fields: Dict[str, str] = {fieldname.split(".")[-1]: fieldname for fieldname in qry_select}

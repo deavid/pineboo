@@ -53,6 +53,6 @@ class Dialog(QDialog):
 
     def __getattr__(self, name: str) -> Any:
         if name == "caption":
-            name = self.setWindowTitle
+            name = "setWindowTitle"
 
         return getattr(super(Dialog, self), name)

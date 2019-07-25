@@ -34,7 +34,7 @@ componentes serán plugins, como FLFieldDB o FLTableDB.
 """
 
 
-class FLFormDB(QtWidgets.QDialog, IFormDB):
+class FLFormDB(IFormDB):
 
     """
     Cursor, con los registros, utilizado por el formulario
@@ -811,7 +811,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         # self.closed.emit()
         self.hide()
         self.emitFormClosed()
-        super(FLFormDB, self).closeEvent(e)
+        super().closeEvent(e)
         # self._action.mainform_widget = None
         self.deleteLater()
         self._loaded = False
@@ -914,7 +914,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     """
 
     def focusInEvent(self, f) -> None:
-        super(FLFormDB, self).focusInEvent(f)
+        super().focusInEvent(f)
         if not self.isIfaceBind():
             self.bindIface()
 
@@ -949,7 +949,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
         # if not self.tiempo_ini:
         #    self.tiempo_ini = time.time()
-        super(FLFormDB, self).show()
+        super().show()
         # tiempo_fin = time.time()
 
         if self.parent().parent() is None:

@@ -1,10 +1,9 @@
-from typing import Any, Callable, Optional, TYPE_CHECKING
+from typing import Any, Callable, Optional
+from PyQt5.QtWidgets import QDialog
+from PyQt5 import QtCore
 
-if TYPE_CHECKING:
-    from PyQt5 import QtCore
 
-
-class IFormDB(object):
+class IFormDB(QDialog):
     _action: Any
     accept: Any
     actionName_: str
@@ -44,7 +43,6 @@ class IFormDB(object):
     showed: Optional[bool]
     toolButtonClose: None
     widget: Any
-    show: Callable
     main: Callable  # Just for QSA to add here the main() method for execDefaultScript
 
     __init__: Callable
@@ -61,7 +59,7 @@ class IFormDB(object):
         return
 
     def closeEvent(self, e) -> None:
-        return
+        return super().closeEvent(e)
 
     def cursor(self) -> Any:
         return
@@ -78,9 +76,6 @@ class IFormDB(object):
     def exec_(self) -> bool:
         return False
 
-    def focusInEvent(self, f) -> None:
-        return
-
     def formClassName(self) -> str:
         return ""
 
@@ -89,9 +84,6 @@ class IFormDB(object):
 
     def geoName(self) -> str:
         return ""
-
-    def hide(self) -> None:
-        return
 
     def idMDI(self) -> Optional[str]:
         return ""
@@ -120,8 +112,8 @@ class IFormDB(object):
     def name(self) -> str:
         return ""
 
-    def saveGeometry(self) -> bytes:
-        return b""
+    def saveGeometry(self) -> QtCore.QByteArray:
+        return super().saveGeometry()
 
     def saveSnapShot(self, path_file=...) -> None:
         return
