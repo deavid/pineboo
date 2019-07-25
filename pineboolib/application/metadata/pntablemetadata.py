@@ -308,13 +308,13 @@ class PNTableMetaData(ITableMetaData):
     @param fN Nombre del campo
     """
 
-    def fieldIsIndex(self, field_name=None) -> Optional[bool]:
+    def fieldIsIndex(self, field_name=None) -> int:
 
         if field_name in self.fieldNames():
             return self.fieldNames().index(field_name)
 
         self.logger.warning("FLTableMetaData.fieldIsIndex(%s) No encontrado", field_name)
-        return None
+        return -1
 
     """
     Obtiene si un campo es contador.
