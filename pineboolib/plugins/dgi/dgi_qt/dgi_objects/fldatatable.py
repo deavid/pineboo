@@ -152,8 +152,8 @@ class FLDataTable(QtWidgets.QTableView):
     """
 
     def __del__(self) -> None:
-        if self.timerViewRepaint_:
-            self.timerViewRepaint_.stop()
+        # if self.timerViewRepaint_:
+        #    self.timerViewRepaint_.stop()
 
         if self.cursor_:
             self.cursor_.restoreEditionFlag(self)
@@ -228,11 +228,11 @@ class FLDataTable(QtWidgets.QTableView):
     def setSort(self, s: str) -> None:
         self.sort_ = s
 
-    def cursor(self) -> Optional[FLSqlCursor]:
-        """
-        Devuelve el cursor
-        """
-        return self.cursor_
+    # def cursor(self) -> Optional[FLSqlCursor]:
+    #    """
+    #    Devuelve el cursor
+    #    """
+    #    return self.cursor_
 
     @property
     def cur(self) -> FLSqlCursor:
@@ -738,7 +738,7 @@ class FLDataTable(QtWidgets.QTableView):
     @param  w     Ancho de la columna
     """
 
-    def setColumnWidth(self, field: str, w: int) -> None:
+    def setColWidth(self, field: str, w: int) -> None:
         self.widthCols_[field] = w
 
     def resize_column(self, col: int, str_text: Optional[str]) -> None:
@@ -768,22 +768,22 @@ class FLDataTable(QtWidgets.QTableView):
                         self.resize(wC, pw.height())
                         pw.resize(wC, pw.height())
 
-    def delayedViewportRepaint(self) -> None:
-        if not self.timerViewRepaint_:
-            self.timerViewRepaint_ = QtCore.QTimer(self)
-            self.timerViewRepaint_.timeout.connect(self.repaintViewportSlot)
+    # def delayedViewportRepaint(self) -> None:
+    #    if not self.timerViewRepaint_:
+    #        self.timerViewRepaint_ = QtCore.QTimer(self)
+    #        self.timerViewRepaint_.timeout.connect(self.repaintViewportSlot)
 
-        if not self.timerViewRepaint_.isActive():
-            self.setUpdatesEnabled(False)
-            self.timerViewRepaint_.start(50)
+    #    if not self.timerViewRepaint_.isActive():
+    #        self.setUpdatesEnabled(False)
+    #        self.timerViewRepaint_.start(50)
 
-    @decorators.pyqtSlot()
-    def repaintViewportSlot(self) -> None:
+    # @decorators.pyqtSlot()
+    # def repaintViewportSlot(self) -> None:
 
-        vw = self.viewport()
-        self.setUpdatesEnabled(True)
-        if vw:
-            vw.repaint(False)
+    #    vw = self.viewport()
+    #    self.setUpdatesEnabled(True)
+    #    if vw:
+    #        vw.repaint(False)
 
     def cursorDestroyed(self, obj: Optional[Any] = None) -> None:
 

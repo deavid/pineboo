@@ -229,11 +229,12 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
         self.bottomToolbar = QtWidgets.QFrame()
         self.bottomToolbar.setMinimumSize(self.iconSize)
         self.bottomToolbar.setLayout(QtWidgets.QHBoxLayout())
+
         self.bottomToolbar.layout().setContentsMargins(0, 0, 0, 0)
         self.bottomToolbar.layout().setSpacing(0)
         self.bottomToolbar.layout().addStretch()
         self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.layout().addWidget(self.bottomToolbar)
+        self.layout.addWidget(self.bottomToolbar)
         # if self.layout:
         #    self.layout = None
         # Limpiamos la toolbar

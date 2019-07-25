@@ -1250,7 +1250,7 @@ class FLTableDB(QtWidgets.QWidget):
                 if self.autoSortColumn_:
                     self.tableRecords_.header().sectionClicked.connect(self.switchSortOrder)
 
-        t_cursor = self.tableRecords_.cursor()
+        t_cursor = self.tableRecords_.cursor_
         if (
             self.cursor()
             and self.cursor() is not t_cursor
@@ -1288,7 +1288,7 @@ class FLTableDB(QtWidgets.QWidget):
                 logger.exception("setTableRecordsCursor: Error disconnecting setChecked signal")
             self.tableRecords_.clicked.connect(self.tableRecords_.setChecked)
 
-        t_cursor = self.tableRecords_.cursor()
+        t_cursor = self.tableRecords_.cursor_
         if t_cursor is not self.cursor():
             self.tableRecords_.setFLSqlCursor(self.cursor())
             if t_cursor:
@@ -2265,7 +2265,7 @@ class FLTableDB(QtWidgets.QWidget):
     def setColumnWidth(self, field: str, w: int) -> None:
         if self.tableRecords_:
             # col = self.tableRecords_.column_name_to_column_index(field) if isinstance(field, str) else field
-            self.tableRecords_.setColumnWidth(field, w)
+            self.tableRecords_.setColWidth(field, w)
 
     """
     Selecciona la fila indicada

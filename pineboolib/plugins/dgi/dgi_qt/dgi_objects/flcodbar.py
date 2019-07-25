@@ -8,7 +8,7 @@ from PyQt5.QtSvg import QSvgRenderer  # type: ignore
 from pineboolib import logging
 
 import barcode  # type: ignore # pip3 install python-barcode
-from typing import Dict, Any, Union, cast, List
+from typing import Dict, Any, Union, cast, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ BARCODE_GTIN = 17
 class FLCodBar(object):
 
     barcode: Dict[str, Any]
-    p: QPixmap
+    p: Optional[QPixmap]
     pError: QPixmap
 
     def __init__(
@@ -58,6 +58,7 @@ class FLCodBar(object):
         self.pError = QPixmap()
         self.barcode = {}
         self.barcode["value"] = ""
+        self.p = None
 
         if value in [None, 0]:
             self.readingStdout = False
@@ -88,10 +89,11 @@ class FLCodBar(object):
 
         if not self.p:
             self.barcode["valid"] = False
+            return self.pixmapError()
 
         return self.p
 
-    def pixmapError(self) -> Any:
+    def pixmapError(self) -> QPixmap:
         return self.pError
 
     def value(self) -> Any:
@@ -181,7 +183,8 @@ class FLCodBar(object):
         data["res"] = 72
 
     def cleanUp(self) -> None:
-        self.p.resize(0, 0)
+        if self.p:
+            self.p.resize(0, 0)
         self.pError.resize(0, 0)
 
     def nameToType(self, name: str) -> int:
