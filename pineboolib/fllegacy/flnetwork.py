@@ -59,11 +59,11 @@ class FLNetwork(QtCore.QObject):
         data = self.manager.get(self.request)
         self.put(data.readAll(), toLocation)
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def _slotNetworkStart(self):
         self.start.emit()
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def _slotNetworkFinished(self, reply=None):
         self.finished.emit()
 

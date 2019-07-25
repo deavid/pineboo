@@ -23,10 +23,10 @@ from pineboolib import logging
 from pineboolib import pncontrolsfactory
 from pineboolib.application import project
 
-from typing import Any, Optional, TYPE_CHECKING, Union
+from typing import Any, Optional, TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
-    from PyQt5.Qt import QPixmap
+    from PyQt5.QtGui import QPixmap
 
 logger = logging.getLogger(__name__)
 
@@ -159,7 +159,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         self.textLabelDB = QtWidgets.QLabel()
         self.textLabelDB.setMinimumHeight(16)  # No inicia originalmente aqui
-        self.textLabelDB.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft)
+        self.textLabelDB.setAlignment(cast(QtCore.Qt.AlignmentFlag, QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft))
         # self.textLabelDB.setFrameShape(QtGui.QFrame.WinPanel)
         self.textLabelDB.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textLabelDB.setLineWidth(0)
@@ -418,7 +418,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 timerActive = True
                 self.timerAutoComp_.start(500)
             else:
-                self.timerAutoComp_.singleShot(0, self.autoCompletionUpdateValue)
+                QtCore.QTimer.singleShot(0, self.autoCompletionUpdateValue)
                 return True
         if not timerActive and self.autoCompMode_ == "AlwaysAuto" and (not self.autoComFrame_ or not self.autoComFrame_.isVisible()):
             if event.key() in (Qt.Key_Backspace, Qt.Key_Delete, Qt.Key_Space, Qt.Key_ydiaeresis):
@@ -432,7 +432,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     timerActive = True
                     self.timerAutoComp_.start(500)
                 else:
-                    self.timerAutoComp_.singleShot(0, self.autoCompletionUpdateValue)
+                    QtCore.QTimer.singleShot(0, self.autoCompletionUpdateValue)
                     return True
         return False
 
@@ -2593,7 +2593,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         fMD = field.associatedField()
-
+        form_search: FLFormSearchDB
         if fMD:
             if not fMD.relationM1():
                 self.logger.info("FLFieldDB : El campo asociado debe tener una relación M1")
@@ -2661,7 +2661,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     obj_tdb.setInitSearch(cur_value)
                     obj_tdb.putFisrtCol(field.relationM1().foreignField())
 
-                QtCore.QTimer().singleShot(0, obj_tdb.lineEditSearch, self.setFocus)
+                QtCore.QTimer.singleShot(0, obj_tdb.lineEditSearch, self.setFocus)
         """
         lObjs = f.queryList("FLTableDB")
         obj = lObjs.first()

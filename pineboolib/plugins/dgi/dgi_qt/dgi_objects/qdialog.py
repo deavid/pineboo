@@ -29,15 +29,15 @@ class QDialog(QtWidgets.QDialog):
     def setEnable_(self, enable_) -> None:
         self.setEnabled(enable_)
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def accept(self):
         super().accept()
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def reject(self):
         super().reject()
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def close(self):
         super().close()
 

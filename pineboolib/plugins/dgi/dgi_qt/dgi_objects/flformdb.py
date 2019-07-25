@@ -252,7 +252,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Invoca a la función "init" del script "masterprocess" asociado al formulario
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def initScript(self):
         if self._loaded:
             if not getattr(self.widget, "iface", None):
@@ -525,7 +525,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Cierra el formulario
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def close(self):
         if self.isClosing_:
             return True
@@ -538,7 +538,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Se activa al pulsar el boton aceptar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def accept(self):
         pass
 
@@ -546,14 +546,14 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Se activa al pulsar el botón cancelar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def reject(self):
         pass
 
     """
     Redefinida por conveniencia
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     @decorators.NotImplementedWarn
     def show(self):
         return True
@@ -563,7 +563,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Utilizado en documentación para evitar conflictos al capturar los formularios
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def showForDocument(self):
         self.showed = True
         self.mainWidget_.show()
@@ -573,7 +573,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     # """
     # Maximiza el formulario
     # """
-    # @QtCore.pyqtSlot()
+    # @decorators.pyqtSlot()
     # @decorators.NotImplementedWarn
     # def setMaximized(self):
     #    return True
@@ -582,7 +582,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Muestra el script asociado al formulario en el Workbench para depurar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     @decorators.NotImplementedWarn
     def debugScript(self):
         return True
@@ -591,7 +591,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Devuelve el script asociado al formulario
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def script(self):
         ifc = self.iface
         if ifc:
@@ -600,7 +600,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
     # private slots:
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def callInitScript(self):
 
         if not self.initScript():
