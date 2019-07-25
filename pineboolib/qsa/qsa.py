@@ -6,6 +6,7 @@ import math
 from pineboolib import logging
 
 from PyQt5 import QtCore  # type: ignore
+from PyQt5.Qt import QIODevice  # type: ignore
 
 # FLObjects
 from pineboolib.core import decorators
@@ -16,7 +17,7 @@ from pineboolib.core.utils.utils_base import ustr, filedir
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.pncontrolsfactory import qsa_sys
 
-from typing import Any, Optional, Union, Match, List, Pattern, Generator
+from typing import Any, Optional, Union, Match, List, Pattern, Generator, Callable
 
 
 logger = logging.getLogger(__name__)
@@ -334,22 +335,22 @@ class Dir(object):
             os.mkdir(name)
 
 
-class File(QtCore.QFile):
+class File(object):
     """
     Para gestionar un fichero
     """
+
+    ReadOnly = QIODevice.ReadOnly
+    WriteOnly = QIODevice.WriteOnly
+    ReadWrite = QIODevice.ReadWrite
 
     fichero: str
     mode = None
     path = None
 
-    from PyQt5.Qt import QIODevice  # type: ignore
-
-    ReadOnly = QIODevice.ReadOnly
-    WriteOnly = QIODevice.WriteOnly
-    ReadWrite = QIODevice.ReadWrite
     encode_: str
     last_seek = None
+    qfile: QtCore.QFile
 
     def __init__(self, rutaFichero: Optional[str] = None, encode: Optional[str] = None):
         self.encode_ = "iso-8859-15"
@@ -357,10 +358,11 @@ class File(QtCore.QFile):
             # if isinstance(rutaFichero, tuple):
             #     rutaFichero = rutaFichero[0]
             self.fichero = str(rutaFichero)
-            super().__init__(rutaFichero)
+            self.qfile = QtCore.QFile(rutaFichero)
+
             self.path = os.path.dirname(os.path.abspath(self.fichero))
         else:
-            super().__init__()
+            self.qfile = QtCore.QFile()
 
         if encode is not None:
             self.encode_ = encode
@@ -436,14 +438,16 @@ class File(QtCore.QFile):
 
         file.close()
 
+    @staticmethod
     def exists(name: str) -> bool:
         """
         Comprueba si un fichero exite
         @param name. Nombre del fichero.
         @return boolean informando si existe o no el fichero.
         """
-        return QtCore.QFile.exists(name)
+        return os.path.exists(name)
 
+    @staticmethod
     def isDir(dir_name: str) -> bool:
         """
         Indica si la ruta data es un directorio
@@ -452,6 +456,7 @@ class File(QtCore.QFile):
         """
         return os.path.isdir(dir_name)
 
+    @staticmethod
     def isFile(file_name: str) -> bool:
         """
         Indica si la ruta data es un fichero
@@ -551,7 +556,7 @@ class File(QtCore.QFile):
             file = File(self)
             return file.remove()
         else:
-            return super().remove()
+            return self.qfile.remove()
 
     name = property(getName)
 

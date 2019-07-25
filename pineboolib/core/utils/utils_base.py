@@ -3,21 +3,16 @@ import os
 import re
 import sys
 import io
-from PyQt5 import QtCore  # type: ignore
+import os.path
 from PyQt5.QtGui import QPixmap  # type: ignore
-from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir  # type: ignore
+from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir, pyqtSignal  # type: ignore
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest  # type: ignore
-
-from typing import Optional, Union, Any, List
+from pineboolib.core import decorators
+from typing import Optional, Union, Any, List, cast
 from xml.etree.ElementTree import ElementTree, Element
 from . import logging
 
-from typing import Callable, TypeVar
-
-_T0 = TypeVar("_T0")
-_T1 = TypeVar("_T1")
-_T2 = TypeVar("_T2")
-_T3 = TypeVar("_T3")
+from typing import Callable
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +133,7 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
         super(downloadManager, self).__init__()
         self.manager = QNetworkAccessManager()
         self.currentDownload = []
-        self.manager.finished.connect(self.downloadFinished)
+        cast(pyqtSignal, self.manager.finished).connect(self.downloadFinished)
 
     def setLE(self, filename: str, dir_: str, urllineedit: Any) -> None:
         self.filename = filename
@@ -160,10 +155,10 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
         if not basename:
             basename = "download"
 
-        if QFile.exists(basename):
+        if os.path.exists(basename):
             i = 0
             basename = basename + "."
-            while QFile.exists("%s%s" % (basename, i)):
+            while os.path.exists("%s%s" % (basename, i)):
                 i = i + 1
 
             basename = "%s%s" % (basename, i)
@@ -189,7 +184,7 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
         statusCode = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
         return statusCode in [301, 302, 303, 305, 307, 308]
 
-    @QtCore.pyqtSlot(QNetworkReply)
+    @decorators.pyqtSlot(QNetworkReply)
     def downloadFinished(self, reply):
         url = reply.url()
         if not reply.error():
@@ -230,7 +225,7 @@ def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False) -> bool:
         if not QFile.copy(from_, to_):
             return False
 
-    for dir_ in dir.entryList(QDir.Dirs | QDir.NoDotAndDotDot):
+    for dir_ in dir.entryList(cast(QDir.Filter, QDir.Dirs | QDir.NoDotAndDotDot)):
         from_ = from_dir + dir_
         to_ = to_dir + dir_
 

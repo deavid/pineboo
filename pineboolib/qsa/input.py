@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QInputDialog, QLineEdit  # type: ignore
+from PyQt5.QtWidgets import QInputDialog, QLineEdit, QWidget  # type: ignore
 from typing import Any, Optional, Union, List
 
 
@@ -16,14 +16,16 @@ class Input(object):
         @param title. Título del diálogo
         @return cadena de texto recogida
         """
-        text, ok = QInputDialog.getText(None, title, question, QLineEdit.Normal, prevtxt)
+        parent = QWidget()  # FIXME: Should be the mainWindow or similar
+        text, ok = QInputDialog.getText(parent, title, question, QLineEdit.Normal, prevtxt)
         if not ok:
             return None
         return text
 
     @classmethod
     def getNumber(cls, question: str, value: Union[str, float], part_decimal: int, title: str = "Pineboo") -> Optional[float]:
-        text, ok = QInputDialog.getText(None, title, question, QLineEdit.Normal, str(round(float(value), part_decimal)))
+        parent = QWidget()  # FIXME: Should be the mainWindow or similar
+        text, ok = QInputDialog.getText(parent, title, question, QLineEdit.Normal, str(round(float(value), part_decimal)))
         if not ok:
             return None
         return float(text)
@@ -38,7 +40,8 @@ class Input(object):
         @return item, Item seleccionado.
         """
 
-        text, ok = QInputDialog.getItem(None, title, question, items_list, 0, editable)
+        parent = QWidget()  # FIXME: Should be the mainWindow or similar
+        text, ok = QInputDialog.getItem(parent, title, question, items_list, 0, editable)
         if not ok:
             return None
         return text
