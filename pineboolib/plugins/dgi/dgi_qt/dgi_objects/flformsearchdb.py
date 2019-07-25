@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from pineboolib import logging
+from pineboolib.core import decorators
 
 from PyQt5 import QtCore, QtWidgets  # type: ignore
 from PyQt5.QtWidgets import QToolButton  # type: ignore

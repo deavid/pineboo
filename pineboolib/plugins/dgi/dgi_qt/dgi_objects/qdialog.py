@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtWidgets, QtCore  # type: ignore
+from PyQt5 import QtWidgets  # type: ignore
 from typing import Any
+from pineboolib.core import decorators
 
 
 class QDialog(QtWidgets.QDialog):

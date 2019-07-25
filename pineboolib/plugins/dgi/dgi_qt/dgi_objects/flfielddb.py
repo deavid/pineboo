@@ -2,7 +2,7 @@
 import datetime
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt, QDateTime
+from PyQt5.QtCore import Qt, QDateTime, pyqtSignal
 
 from pineboolib.core import decorators
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
@@ -2115,7 +2115,8 @@ class FLFieldDB(QtWidgets.QWidget):
                         #        savepixmap_.triggered.disconnect(self.savePixmap)
                         #    except Exception:
                         #        self.logger.exception("Error al desconectar señal")
-                        savepixmap_.triggered.connect(self.savePixmap)
+                        triggered = cast(pyqtSignal, savepixmap_.triggered)
+                        triggered.connect(self.savePixmap)
 
                     if self.pushButtonDB:
                         self.pushButtonDB.installEventFilter(self) if hasPushButtonDB else self.pushButtonDB.setDisabled(True)
