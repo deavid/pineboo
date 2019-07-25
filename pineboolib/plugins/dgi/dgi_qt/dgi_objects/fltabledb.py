@@ -2093,7 +2093,7 @@ class FLTableDB(QtWidgets.QWidget):
 
     @decorators.pyqtSlot(int)
     @decorators.pyqtSlot(str)
-    def putFirstCol(self, col: Union[int, str]) -> bool:
+    def putFirstCol(self, col: Union[int, str]) -> None:
         if not self.tableRecords_:
             raise Exception("tableRecords_ is not defined!")
 
@@ -2104,11 +2104,9 @@ class FLTableDB(QtWidgets.QWidget):
         )
 
         if _index is None or _index < 0:
-            return False
+            return
         self.moveCol(_index, self.sortColumn_)
         self.tableRecords_.sortByColumn(self.sortColumn_, QtCore.Qt.AscendingOrder if self.orderAsc_ else QtCore.Qt.DescendingOrder)
-
-        return True
 
     """
     Coloca la columna como segunda pasando el nombre del campo.
@@ -2118,7 +2116,7 @@ class FLTableDB(QtWidgets.QWidget):
 
     @decorators.pyqtSlot(int)
     @decorators.pyqtSlot(str)
-    def putSecondCol(self, col: Union[int, str]) -> bool:
+    def putSecondCol(self, col: Union[int, str]) -> None:
         if not self.tableRecords_:
             raise Exception("tableRecords_ is not defined!")
         _index = (
@@ -2128,10 +2126,9 @@ class FLTableDB(QtWidgets.QWidget):
         )
 
         if _index is None or _index < 0:
-            return False
+            return
 
         self.moveCol(_index, self.sortColumn2_)
-        return True
 
     """
     Mueve una columna de un campo origen a la columna de otro campo destino
