@@ -274,8 +274,8 @@ class Date(object):
     Case que gestiona un objeto tipo Date
     """
 
-    date_: QtCore.QDate = None
-    time_: QtCore.QTime = None
+    date_: QtCore.QDate
+    time_: QtCore.QTime
 
     def __init__(self, *args) -> None:
         super(Date, self).__init__()
@@ -285,7 +285,7 @@ class Date(object):
         elif len(args) <= 2:
             date_ = args[0]
             format_ = args[1] if len(args) == 2 else "yyyy-MM-dd"
-            self.time_ = None
+            self.time_ = QtCore.QTime(0, 0)
             if isinstance(date_, str):
                 if len(date_) == 10:
                     tmp = date_.split("-")

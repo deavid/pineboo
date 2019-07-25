@@ -7,12 +7,13 @@ import locale
 from datetime import date
 
 from PyQt5 import QtCore, QtGui, Qt  # type: ignore
+from PyQt5.QtCore import pyqtSignal  # type: ignore
 from PyQt5 import QtWidgets  # type: ignore  # FIXME: Not allowed here! this is for QCheckBox but it's not needed
 
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils import logging
 from pineboolib.application.utils.date_conversion import date_amd_to_dma
-from typing import Any, Iterable, Optional, Union, List, Dict, Tuple, TYPE_CHECKING
+from typing import Any, Iterable, Optional, Union, List, Dict, Tuple, cast, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.application.metadata.pntablemetadata import PNTableMetaData  # noqa: F401
@@ -143,12 +144,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         """
         self._disable_refresh = disable
 
-    def sort(self, col, order) -> None:
+    def sort(self, column: int, order: QtCore.Qt.SortOrder = QtCore.Qt.AscendingOrder) -> None:
         """
         Indica el tipo de orden a usar y sobre que columna
         @param col. Columna usada
         @param order. 0 ASC, 1 DESC
         """
+        col = column
         # order 0 ascendente , 1 descendente
         ord = "ASC"
         if order == 1:
@@ -163,12 +165,12 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         order_list: List[str] = []
         found_ = False
         if self._sortOrder:
-            for column in self._sortOrder.split(","):
-                if col_name in column and ord in column:
+            for column_name in self._sortOrder.split(","):
+                if col_name in column_name and ord in column_name:
                     found_ = True
                     order_list.append("%s %s" % (col_name, ord))
                 else:
-                    order_list.append(column)
+                    order_list.append(column_name)
 
             if not found_:
                 self.logger.debug(
@@ -206,7 +208,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     # def dict_color_function(self):
     #    return self.color_function_
 
-    def data(self, index, role) -> Any:
+    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.DisplayRole) -> Any:
         """ (overload of QAbstractTableModel)
         Retorna información de un registro. Puede ser desde Alineación, color de fondo, valor ... dependiendo del rol
         @param index. Posición del registro
@@ -621,8 +623,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     def refresh(self) -> None:
         if self._initialized is None and self.parent_view:  # Si es el primer refresh y estoy conectado a un FLDatatable()
             self._initialized = True
-            timer = QtCore.QTimer()
-            timer.singleShot(1, lambda: self.refresh())
+            timer = QtCore.QTimer.singleShot(1, self.refresh)
             return
 
         if self._initialized:  # Si estoy inicializando y no me ha enviado un sender, cancelo el refesh
@@ -683,7 +684,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self._data = []
         self.endRemoveRows()
         if oldrows > 0:
-            self.rowsRemoved.emit(parent, 0, oldrows - 1)
+            cast(pyqtSignal, self.rowsRemoved).emit(parent, 0, oldrows - 1)
 
         if self.metadata().isQuery():
             qry = self.db().manager().query(self.metadata().query())
@@ -1132,7 +1133,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return info segun sección, orientación y rol.
     """
 
-    def headerData(self, section, orientation, role) -> Any:
+    def headerData(self, section: int, orientation: QtCore.Qt.Orientation, role: int = QtCore.Qt.DisplayRole) -> Any:
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
                 if not self.col_aliases:
@@ -1164,6 +1165,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def metadata(self) -> "PNTableMetaData":
+        if self._parent.d.metadata_ is None:
+            raise Exception("Metadata not set")
         return self._parent.d.metadata_
 
     def driver_sql(self) -> Any:

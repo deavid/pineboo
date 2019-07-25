@@ -23,11 +23,11 @@ class AQUnpacker(QtCore.QObject):
     def getText(self) -> Any:
         ba = QtCore.QByteArray(self.stream_.readBytes())
         uncompress_ = QtCore.qUncompress(ba)
-        data_ = uncompress_.data()
+        data_bytes = uncompress_.data()
         try:
-            data_ = data_.decode("utf-8")
+            data_ = data_bytes.decode("utf-8")
         except UnicodeDecodeError:
-            data_ = data_.decode("iso-8859-15")
+            data_ = data_bytes.decode("iso-8859-15")
 
         return data_
 
