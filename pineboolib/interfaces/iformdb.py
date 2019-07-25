@@ -120,8 +120,8 @@ class IFormDB(object):
     def name(self) -> str:
         return ""
 
-    def saveGeometry(self) -> "QtCore.QByteArray":
-        return
+    def saveGeometry(self) -> bytes:
+        return b""
 
     def saveSnapShot(self, path_file=...) -> None:
         return
