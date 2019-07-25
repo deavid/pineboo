@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QTime, QDate, QDateTime, Qt  # type: ignore
 from PyQt5.Qt import qWarning, QDomDocument, QRegExp  # type: ignore
-from PyQt5.QtWidgets import QMessageBox, QProgressDialog  # type: ignore
+from PyQt5.QtWidgets import QMessageBox, QProgressDialog, QWidget  # type: ignore
 
 from pineboolib.core.utils.utils_base import text2bool, auto_qt_translate_text
 from pineboolib.application.utils.check_dependencies import check_dependencies
@@ -18,7 +18,7 @@ from pineboolib.application import project
 from pineboolib import logging
 
 
-from typing import Iterable, Optional, Union, List, Dict, Any
+from typing import Iterable, Optional, Union, List, Dict, Any, cast
 
 
 logger = logging.getLogger(__name__)
@@ -112,7 +112,10 @@ class FLQPSQL(object):
 
             if "does not exist" in str(e) or "no existe" in str(e):
                 ret = QMessageBox.warning(
-                    None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No
+                    QWidget(),
+                    "Pineboo",
+                    "La base de datos %s no existe.\n¿Desea crearla?" % db_name,
+                    cast(QMessageBox, QMessageBox.Ok | QMessageBox.No),
                 )
                 if ret == QMessageBox.No:
                     return False
@@ -141,12 +144,12 @@ class FLQPSQL(object):
                     except Exception:
                         qWarning(traceback.format_exc())
                         QMessageBox.information(
-                            None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok
+                            QWidget(), "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok
                         )
                         print("ERROR: No se ha podido crear la Base de Datos %s" % db_name)
                         return False
             else:
-                QMessageBox.information(None, "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok)
+                QMessageBox.information(QWidget(), "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok)
                 return False
 
         # self.conn_.autocommit = True #Posiblemente tengamos que ponerlo a

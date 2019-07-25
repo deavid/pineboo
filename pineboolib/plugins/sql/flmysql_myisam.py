@@ -3,7 +3,7 @@ import traceback
 from PyQt5.Qt import qWarning, QApplication, QRegExp  # type: ignore
 from PyQt5.QtCore import QTime, QDate, QDateTime, Qt  # type: ignore
 from PyQt5.QtXml import QDomDocument  # type: ignore
-from PyQt5.QtWidgets import QMessageBox  # type: ignore
+from PyQt5.QtWidgets import QMessageBox, QWidget  # type: ignore
 
 from pineboolib.core.utils.utils_base import auto_qt_translate_text
 from pineboolib.core.utils.utils_base import text2bool
@@ -16,7 +16,7 @@ from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.application import project
 from pineboolib import logging
 
-from typing import Any, Iterable, Optional, Union, List, Dict
+from typing import Any, Iterable, Optional, Union, List, Dict, cast
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +93,10 @@ class FLMYSQL_MYISAM(object):
                 project._splash.hide()
             if "Unknown database" in str(e):
                 ret = QMessageBox.warning(
-                    None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No
+                    QWidget(),
+                    "Pineboo",
+                    "La base de datos %s no existe.\n¿Desea crearla?" % db_name,
+                    cast(QMessageBox, QMessageBox.Ok | QMessageBox.No),
                 )
                 if ret == QMessageBox.No:
                     return False
@@ -112,13 +115,13 @@ class FLMYSQL_MYISAM(object):
                         return self.connect(db_name, db_host, db_port, db_userName, db_password)
                     except Exception:
                         QMessageBox.information(
-                            None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok
+                            QWidget(), "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok
                         )
                         print("ERROR: No se ha podido crear la Base de Datos %s" % db_name)
                         return False
 
             else:
-                QMessageBox.information(None, "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok)
+                QMessageBox.information(QWidget(), "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok)
                 return False
 
         if self.conn_:
