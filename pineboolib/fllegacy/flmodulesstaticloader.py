@@ -5,11 +5,12 @@ from PyQt5 import QtWidgets, Qt, QtCore  # type: ignore
 
 from pineboolib import logging
 from pineboolib.core import decorators
+from pineboolib import pncontrolsfactory
 
 from pineboolib.core.settings import config
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flapplication import aqApp
-from typing import Any, List, Optional
+from typing import Any, List, Optional, cast
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +185,6 @@ class FLStaticLoader(QtCore.QObject):
             n_rows = len(self.b_.dirs_)
             self.tblDirs.setNumRows(n_rows)
             row = 0
-            from pineboolib import pncontrolsfactory
 
             for info in self.b_.dirs_:
                 self.tblDirs.setText(row, 0, info.path_)
@@ -206,7 +206,6 @@ class FLStaticLoader(QtCore.QObject):
         dir = Qt.QFileDialog.getExistingDirectory(None, self.tr("Selecciones el directorio a insertar"), dir_init)
 
         if dir:
-            from pineboolib import pncontrolsfactory
 
             n_rows = self.tblDirs.numRows()
             self.tblDirs.setNumRows(n_rows + 1)
@@ -247,10 +246,10 @@ class FLStaticLoader(QtCore.QObject):
             return
 
         if QtWidgets.QMessageBox.No == QtWidgets.QMessageBox.warning(
-            None,
+            QtWidgets.QWidget(),
             self.tr("Borrar registro"),
             self.tr("El registro activo será borrado. ¿ Está seguro ?"),
-            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No,
+            cast(QtWidgets.QMessageBox, QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No),
         ):
             return
 
@@ -299,7 +298,7 @@ class FLStaticLoader(QtCore.QObject):
                 if not warn_:
                     warn_ = FLStaticLoaderWarning()
 
-                timer = QtCore.QTimer()
+                timer = QtCore.QTimer
                 if not warn_.warns_ and config.value("ebcomportamiento/SLInterface", True):
                     timer.singleShot(500, warn_.popupWarnings)
 
