@@ -9,7 +9,6 @@ from PyQt5.Qt import QKeySequence  # type: ignore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.core.settings import config
-from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.flapplication import aqApp
 from typing import Any
