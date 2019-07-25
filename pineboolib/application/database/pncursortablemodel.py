@@ -81,7 +81,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         if not self.USE_THREADS and not self.USE_TIMER:
             self.USE_TIMER = True
             self.logger.warning("SQL Driver supports neither Threads nor Timer, defaulting to Timer")
-
+        self.USE_THREADS = False
+        self.USE_TIMER = True
         self.rowsLoaded = 0
         self.sql_fields: List[str] = []
         self.sql_fields_omited: List[str] = []
@@ -631,7 +632,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     def refresh(self) -> None:
         if self._initialized is None and self.parent_view:  # Si es el primer refresh y estoy conectado a un FLDatatable()
             self._initialized = True
-            timer = QtCore.QTimer.singleShot(1, self.refresh)
+            QtCore.QTimer.singleShot(1, self.refresh)
             return
 
         if self._initialized:  # Si estoy inicializando y no me ha enviado un sender, cancelo el refesh
@@ -1150,7 +1151,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             if self.where_filter.find("ORDER BY") > -1:
                 where_ = self.where_filter[: self.where_filter.find("ORDER BY")]
 
-            from pineboolib.application.database.pnsqlquery import PNSqlQuery
+            from pineboolib.application.database.pnsqlquery import PNSqlQuery  # noqa: F811
 
             q = PNSqlQuery(None, self.db().name)
             q.exec_("SELECT COUNT(*) FROM %s WHERE %s" % (from_, where_))

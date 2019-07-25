@@ -1833,7 +1833,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         if self.textLabelDB:
             self.textLabelDB.setFont(self.font())
-            if not type_ in ["pixmap", "bool"]:
+            if type_ not in ["pixmap", "bool"]:
                 if not field.allowNull() and field.editable():
                     self.textLabelDB.setText("%s*" % self.fieldAlias_)
                 else:

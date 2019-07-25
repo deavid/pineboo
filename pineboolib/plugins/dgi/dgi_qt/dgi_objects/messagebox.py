@@ -2,7 +2,7 @@
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QMessageBox, QApplication  # type: ignore
 from pineboolib.core.utils import logging
-from typing import Any, cast
+from typing import Any
 
 logger = logging.getLogger("messageBox")
 

@@ -8,7 +8,7 @@ from PyQt5.QtSvg import QSvgRenderer  # type: ignore
 from pineboolib import logging
 
 import barcode  # type: ignore # pip3 install python-barcode
-from typing import Dict, Any, Union, cast, List, Optional
+from typing import Dict, Any, Union, cast, Optional
 
 logger = logging.getLogger(__name__)
 

@@ -2,7 +2,7 @@
 from PyQt5 import QtWidgets  # type: ignore
 
 
-from typing import Optional, Union, Any, Sized, List, TYPE_CHECKING
+from typing import Optional, Union, Any, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qframe import QFrame  # noqa: F401

@@ -1,7 +1,7 @@
 import os
 import os.path
 import collections
-from typing import Any, Optional, Dict, Union, List
+from typing import Any, Optional, Dict, Union
 
 from PyQt5 import QtCore  # type: ignore
 

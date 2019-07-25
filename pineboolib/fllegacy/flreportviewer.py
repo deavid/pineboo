@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtCore, QtXml
-from PyQt5.QtCore import Qt, QObject
+from PyQt5.QtCore import Qt
 
 from pineboolib.core import decorators
 

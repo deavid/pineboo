@@ -445,8 +445,6 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def setAtomicValueBuffer(self, fN: str, functionName: str) -> None:
-        from pineboolib import pncontrolsfactory
-
         if not self.d.buffer_ or not fN or not self.d.metadata_:
             return
 
