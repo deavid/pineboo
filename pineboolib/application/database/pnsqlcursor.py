@@ -2862,9 +2862,9 @@ class PNSqlCursor(QtCore.QObject):
                 else:
                     for r in relationList:
                         c = PNSqlCursor(r.foreignTable())
-                        if not c.metadata():
+                        if not c.d.metadata_:
                             continue
-                        f = c.metadata().field(r.foreignField())
+                        f = c.d.metadata_.field(r.foreignField())
                         if f is None:
                             continue
                         if f.relationM1() and f.relationM1().deleteCascade():

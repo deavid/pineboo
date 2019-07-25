@@ -1164,7 +1164,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def metadata(self) -> "PNTableMetaData":
-        return self._parent.metadata()
+        return self._parent.d.metadata_
 
     def driver_sql(self) -> Any:
         return self._driver_sql
