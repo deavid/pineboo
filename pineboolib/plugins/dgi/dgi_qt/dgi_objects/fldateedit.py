@@ -20,11 +20,11 @@ class FLDateEdit(QDateEdit):
         self.setMaximumWidth(90)
         self._parent = parent
 
-    def setOrder(self, order) -> None:
+    def setOrder(self, order: str) -> None:
         self.setDisplayFormat(order)
 
-    def getDate(self):
-        return super(FLDateEdit, self).date
+    def getDate(self) -> str:
+        return super().getDate()
 
     def setDate(self, d: Union[str, datetime.date, Date] = None) -> None:  # type: ignore
         if d in (None, "NAN", ""):
@@ -33,9 +33,6 @@ class FLDateEdit(QDateEdit):
             date = convert_to_qdate(d)
 
         super().setDate(date)
-        # if not project.DGI.localDesktop():
-        #    project.DGI._par.addQueque("%s_setDate" % self._parent.objectName(), date.toString())
-        # else:
         self.setStyleSheet("color: black")
 
     date = property(getDate, setDate)
