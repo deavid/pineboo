@@ -3,6 +3,7 @@
 from PyQt5 import QtCore  # type: ignore
 import sys
 from typing import Any, List
+from pineboolib.core import decorators
 
 
 class Process(QtCore.QProcess):
@@ -12,8 +13,8 @@ class Process(QtCore.QProcess):
 
     def __init__(self, *args) -> None:
         super(Process, self).__init__()
-        self.readyReadStandardOutput.connect(self.stdoutReady)
-        self.readyReadStandardError.connect(self.stderrReady)
+        super().readyReadStandardOutput.connect(self.stdoutReady)
+        super().readyReadStandardError.connect(self.stderrReady)
         self.stderr = None
         self.normalExit = self.NormalExit
         self.crashExit = self.CrashExit
@@ -35,9 +36,11 @@ class Process(QtCore.QProcess):
         self.writeData(stdin_as_bytes)
         # self.closeWriteChannel()
 
+    @decorators.pyqtSlot()
     def stdoutReady(self) -> None:
         self.stdout = str(self.readAllStandardOutput())
 
+    @decorators.pyqtSlot()
     def stderrReady(self) -> None:
         self.stderr = str(self.readAllStandardError())
 
@@ -59,7 +62,9 @@ class Process(QtCore.QProcess):
     def exitcode(self) -> Any:
         return self.exitCode()
 
-    def executeNoSplit(comando: list, stdin_buffer) -> None:
+    def executeNoSplit(
+        comando: list, stdin_buffer
+    ) -> None:  #  FIXME: aquí hay otro problema parecido a File, que se llama inicializado y sin inicializar
 
         list_ = []
         for c in comando:
@@ -78,7 +83,7 @@ class Process(QtCore.QProcess):
         Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
         Process.stderr = pro.readAllStandardError().data().decode(encoding)
 
-    def execute(comando: str) -> None:
+    def execute(comando: str) -> None:  #  FIXME: aquí hay otro problema parecido a File, que se llama inicializado y sin inicializar
         import sys
 
         encoding = sys.getfilesystemencoding()
