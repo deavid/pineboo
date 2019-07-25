@@ -13,7 +13,7 @@ class Struct(object):
     pk: List[str]
     fields_idx: Dict[str, int]
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -46,7 +46,7 @@ class XMLStruct(Struct):
                 except Exception:
                     print("utils.XMLStruct: Omitiendo", self.__name__, key, text)
 
-    def __str__(self):
+    def __str__(self) -> str:
         attrs = ["%s=%s" % (k, repr(getattr(self, k))) for k in self._attrs]
         txtattrs = " ".join(attrs)
         return "<%s.%s %s>" % (self.__class__.__name__, self.__name__, txtattrs)

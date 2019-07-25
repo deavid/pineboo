@@ -4,11 +4,13 @@ import re
 import sys
 import io
 import os.path
+import shutil
 from PyQt5.QtGui import QPixmap  # type: ignore
 from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir, pyqtSignal  # type: ignore
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest  # type: ignore
 from pineboolib.core import decorators
 from typing import Optional, Union, Any, List, cast
+from types import FrameType
 from xml.etree.ElementTree import ElementTree, Element
 from . import logging
 
@@ -36,7 +38,7 @@ def auto_qt_translate_text(text: Optional[str]) -> str:
 aqtt = auto_qt_translate_text
 
 
-def one(x: List[Any], default=None):
+def one(x: List[Any], default: Any = None) -> Any:
     """ Se le pasa una lista de elementos (normalmente de un xml) y devuelve el primero o None;
     sirve para ahorrar try/excepts y limpiar código"""
     try:
@@ -68,7 +70,7 @@ class DefFun:
         logger.debug("WARN: %r: Propiedad no implementada %r", self.parent.__class__.__name__, self.funname)
         return 0
 
-    def __call__(self, *args) -> Any:
+    def __call__(self, *args: Any) -> Any:
         if self.realfun:
             logger.debug("%r: Redirigiendo Llamada a función %s %s", self.parent.__class__.__name__, self.funname, args)
             return self.realfun(*args)
@@ -77,7 +79,7 @@ class DefFun:
         return None
 
 
-def traceit(frame, event, arg) -> Callable[[Any, Any, Any], Any]:
+def traceit(frame: FrameType, event: str, arg: Any) -> Callable[[FrameType, str, Any], Any]:
     """Print a trace line for each Python line executed or call.
 
     This function is intended to be the callback of sys.settrace.
@@ -103,16 +105,16 @@ def traceit(frame, event, arg) -> Callable[[Any, Any, Any], Any]:
 
 
 class TraceBlock:
-    def __enter__(self) -> Callable[[Any, Any, Any], Any]:
+    def __enter__(self) -> Callable[[FrameType, str, Any], Any]:
         sys.settrace(traceit)
         return traceit
 
-    def __exit__(self, type, value, traceback) -> None:
+    def __exit__(self, type: Any, value: Any, traceback: Any) -> None:
         sys.settrace(None)
 
 
 def trace_function(f: Callable) -> Callable:
-    def wrapper(*args):
+    def wrapper(*args: Any) -> Any:
         with TraceBlock():
             return f(*args)
 
@@ -148,8 +150,9 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
         # self.reply.sslErrors.connect(self.sslErrors)
         self.currentDownload.append(self.reply)
 
-    def saveFileName(self, url) -> Any:
-        path = url.path()
+    def saveFileName(self, url: str) -> Any:
+        # path = url.path()
+        path = url
         basename = QFileInfo(path).fileName()
 
         if not basename:
@@ -165,7 +168,7 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
 
         return basename
 
-    def saveToDisk(self, filename, data) -> bool:
+    def saveToDisk(self, filename: str, data: Any) -> bool:
         if self.dir_ is None:
             raise ValueError("setLE was not called first")
         fi = "%s/%s" % (self.dir_, filename)
@@ -180,12 +183,12 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
 
         return True
 
-    def isHttpRedirect(self, reply) -> bool:
+    def isHttpRedirect(self, reply: Any) -> bool:
         statusCode = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
         return statusCode in [301, 302, 303, 305, 307, 308]
 
     @decorators.pyqtSlot(QNetworkReply)
-    def downloadFinished(self, reply):
+    def downloadFinished(self, reply: Any) -> None:
         url = reply.url()
         if not reply.error():
             if not self.isHttpRedirect(reply):
@@ -199,7 +202,7 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
             self.result = reply.errorString()
 
 
-def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False) -> bool:
+def copy_dir_recursive(from_dir: str, to_dir: str, replace_on_conflict: bool = False) -> bool:
     dir = QDir()
     dir.setPath(from_dir)
 
@@ -217,12 +220,11 @@ def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False) -> bool:
 
         if os.path.exists(to_):
             if replace_on_conflict:
-                if not QFile.remove(to_):
-                    return False
+                os.remove(to_)
             else:
                 continue
 
-        if not QFile.copy(from_, to_):
+        if not shutil.copy(from_, to_):
             return False
 
     for dir_ in dir.entryList(cast(QDir.Filter, QDir.Dirs | QDir.NoDotAndDotDot)):
@@ -265,7 +267,7 @@ def text2bool(text: str) -> bool:
     raise ValueError("Valor booleano no comprendido '%s'" % text)
 
 
-def ustr(*t1) -> str:
+def ustr(*t1: Union[bytes, str, int, None]) -> str:
     def ustr1(t: Union[bytes, str, int, None]) -> str:
 
         if isinstance(t, str):
@@ -293,23 +295,23 @@ def ustr(*t1) -> str:
 
 
 class StructMyDict(dict):
-    def __getattr__(self, name) -> Any:
+    def __getattr__(self, name: str) -> Any:
         try:
             return self[name]
         except KeyError as e:
             raise AttributeError(e)
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: Any) -> None:
         self[name] = value
 
 
-def version_check(mod_name, mod_ver, min_ver) -> None:
+def version_check(mod_name: str, mod_ver: str, min_ver: str) -> None:
     """Compare two version numbers and raise a warning if "minver" is not met."""
     if version_normalize(mod_ver) < version_normalize(min_ver):
         logger.warning("La version de <%s> es %s. La mínima recomendada es %s.", mod_name, mod_ver, min_ver)
 
 
-def version_normalize(v) -> List[int]:
+def version_normalize(v: str) -> List[int]:
     """Normalize version string numbers like 3.10.1 so they can be compared."""
     return [int(x) for x in re.sub(r"(\.0+)*$", "", v).split(".")]
 
@@ -429,7 +431,7 @@ def parse_for_duplicates(text: str) -> str:
     return ret_
 
 
-def indent(elem: Element, level=0) -> None:
+def indent(elem: Element, level: int = 0) -> None:
     """
     copy and paste from http://effbot.org/zone/element-lib.htm#prettyprint
     it basically walks your tree and adds spaces and newlines so the tree is
@@ -482,7 +484,7 @@ def format_double(d: Union[int, str, float], part_integer: int, part_decimal: in
     return ret_
 
 
-def format_int(value: Union[str, int, float, None], part_intenger=None) -> str:
+def format_int(value: Union[str, int, float, None], part_intenger: int = None) -> str:
     if value is None:
         return ""
     str_integer = "{:,d}".format(int(value))
@@ -495,7 +497,7 @@ def format_int(value: Union[str, int, float, None], part_intenger=None) -> str:
     return str_integer
 
 
-def unformat_number(new_str: str, old_str: Optional[str], type_) -> Any:
+def unformat_number(new_str: str, old_str: Optional[str], type_: str) -> str:
     ret_ = new_str
     if old_str is not None:
 
@@ -555,7 +557,7 @@ def get_base_dir() -> str:
     return os.path.realpath(base_dir)
 
 
-def filedir(*path) -> str:
+def filedir(*path: str) -> str:
     """
     filedir(path1[, path2, path3 , ...])
     @param array de carpetas de la ruta
@@ -576,7 +578,7 @@ def download_files() -> None:
         os.mkdir(filedir("../tempdata"))
 
 
-def pixmap_fromMimeSource(name) -> Any:
+def pixmap_fromMimeSource(name: str) -> Any:
 
     file_name = filedir("../share/icons", name)
     return QPixmap(file_name) if os.path.exists(file_name) else None

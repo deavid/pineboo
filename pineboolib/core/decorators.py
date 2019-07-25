@@ -29,7 +29,7 @@ Aviso no implementado
 
 def NotImplementedWarn(fn: T_FN) -> T_FN:
     @functools.wraps(fn)
-    def newfn(*args, **kwargs):
+    def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
         x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
@@ -52,7 +52,7 @@ Aviso no implementado. Igual que la anterior, pero solo informa en caso de debug
 
 def NotImplementedDebug(fn: T_FN) -> T_FN:
     @functools.wraps(fn)
-    def newfn(*args, **kwargs):
+    def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
         x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
@@ -74,7 +74,7 @@ Avisa que hay otro desarollador trabajando en una función
 
 def WorkingOnThis(fn: T_FN) -> T_FN:
     @functools.wraps(fn)
-    def newfn(*args, **kwargs):
+    def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
         x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
@@ -96,7 +96,7 @@ Aviso de implementación de una función en pruebas
 
 def BetaImplementation(fn: T_FN) -> T_FN:
     @functools.wraps(fn)
-    def newfn(*args, **kwargs):
+    def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
         x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
@@ -118,7 +118,7 @@ Similar a NotImplemented, pero sin traceback. Para funciones que de momento no n
 
 def Empty(fn: T_FN) -> T_FN:
     @functools.wraps(fn)
-    def newfn(*args, **kwargs):
+    def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
         x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
@@ -140,7 +140,7 @@ Avisa de que la funcionalidad está incompleta de desarrollo
 
 def Incomplete(fn: T_FN) -> T_FN:
     @functools.wraps(fn)
-    def newfn(*args, **kwargs):
+    def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
         x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
@@ -161,7 +161,7 @@ Avisa de que la funcionalidad tiene que ser revisada
 
 
 def needRevision(fn: T_FN) -> T_FN:
-    def newfn(*args, **kwargs):
+    def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
         x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
@@ -183,7 +183,7 @@ Avisa de que la funcionalidad está dejando de ser usada, en pro de otra
 
 def Deprecated(fn: T_FN) -> T_FN:
     @functools.wraps(fn)
-    def newfn(*args, **kwargs):
+    def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
         x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
@@ -198,7 +198,7 @@ def Deprecated(fn: T_FN) -> T_FN:
     return mock_fn
 
 
-def pyqtSlot(*args) -> Callable[[T_FN], T_FN]:
+def pyqtSlot(*args: Any) -> Callable[[T_FN], T_FN]:
     def _pyqtSlot(fn: T_FN) -> T_FN:
         return cast(T_FN, QtCore.pyqtSlot(*args)(fn))
 

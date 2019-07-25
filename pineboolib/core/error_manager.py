@@ -5,7 +5,7 @@ from .utils import logging
 logger = logging.getLogger(__name__)
 
 
-def translate(mod, txt: str) -> str:
+def translate(mod: str, txt: str) -> str:
     # FIXME: qsa_sys is not something we should import here
     return txt
 

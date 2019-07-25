@@ -132,11 +132,11 @@ def exec_main(options: Values) -> int:
     if options.enable_gui:
         from PyQt5 import QtWidgets  # type: ignore
 
-        project.app = QtWidgets.QApplication(sys.argv)
+        project.set_app(QtWidgets.QApplication(sys.argv))
         project.app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
         setup_gui(project.app, options)
     else:
-        project.app = QtCore.QCoreApplication(sys.argv)
+        project.set_app(QtCore.QCoreApplication(sys.argv))
 
     if options.trace_debug:
         from pineboolib.core.utils.utils_base import traceit

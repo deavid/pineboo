@@ -29,7 +29,7 @@ class Project(object):
     """
 
     logger = logging.getLogger("main.Project")
-    app: QtCore.QCoreApplication = None
+    _app: Optional[QtCore.QCoreApplication] = None
     _conn: Optional["IConnection"] = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
     options: Values
@@ -67,6 +67,15 @@ class Project(object):
         self.tables: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.files: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.options = Values()
+
+    @property
+    def app(self) -> QtCore.QCoreApplication:
+        if self._app is None:
+            raise Exception("No application set")
+        return self._app
+
+    def set_app(self, app: QtCore.QCoreApplication):
+        self._app = app
 
     @property
     def conn(self) -> "IConnection":

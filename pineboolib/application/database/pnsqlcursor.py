@@ -510,7 +510,7 @@ class PNSqlCursor(QtCore.QObject):
 
             self.bufferChanged.emit(fN)
 
-            pncontrolsfactory.SysType.processEvents(self)
+            project.app.processEvents()
 
     """
     Establece el valor de un campo del buffer con un valor.
@@ -520,7 +520,6 @@ class PNSqlCursor(QtCore.QObject):
     """
 
     def setValueBuffer(self, fN: str, v: Any) -> None:
-        from pineboolib import pncontrolsfactory
 
         if not self.buffer():
             return
@@ -608,7 +607,7 @@ class PNSqlCursor(QtCore.QObject):
                         bChCursor(fN, self)
 
             self.bufferChanged.emit(fN)
-        pncontrolsfactory.SysType.processEvents(self)
+        project.app.processEvents()
 
     """
     Devuelve el valor de un campo del self.d.buffer_.

@@ -4,6 +4,7 @@ It allows MyPy/PyType to properly keep track of the new message types
 """
 import logging as python_logging
 from logging import basicConfig  # noqa: F401
+from typing import Any
 
 CRITICAL = 50
 FATAL = CRITICAL
@@ -20,23 +21,23 @@ NOTSET = 0
 
 
 class Logger(python_logging.Logger):
-    def message(self, message, *args, **kwargs):
+    def message(self, message: str, *args: Any, **kwargs: Any) -> None:
         self.log(MESSAGE, message, *args, **kwargs)
 
-    def hint(self, message, *args, **kwargs):
+    def hint(self, message: str, *args: Any, **kwargs: Any) -> None:
         self.log(HINT, message, *args, **kwargs)
 
-    def notice(self, message, *args, **kwargs):
+    def notice(self, message: str, *args: Any, **kwargs: Any) -> None:
         self.log(NOTICE, message, *args, **kwargs)
 
-    def trace(self, message, *args, **kwargs):
+    def trace(self, message: str, *args: Any, **kwargs: Any) -> None:
         self.log(TRACE, message, *args, **kwargs)
 
 
 python_logging.Logger.manager.loggerClass = Logger  # type: ignore
 
 
-def getLogger(name=None) -> Logger:
+def getLogger(name: str = None) -> Logger:
     """
     Return a logger with the specified name, creating it if necessary.
     If no name is specified, return the root logger.
@@ -53,7 +54,7 @@ def addLoggingLevel(levelName: str, levelNum: int) -> None:
     # This method was inspired by the answers to Stack Overflow post
     # http://stackoverflow.com/q/2183233/2988730, especially
     # http://stackoverflow.com/a/13638084/2988730
-    def logForLevel(self, message, *args, **kwargs):
+    def logForLevel(self: Any, message: str, *args: Any, **kwargs: Any) -> None:
         if self.isEnabledFor(levelNum):
             self._log(levelNum, message, args, **kwargs)
 

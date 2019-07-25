@@ -17,7 +17,7 @@ from pineboolib.core.utils.utils_base import ustr, filedir
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.pncontrolsfactory import qsa_sys
 
-from typing import Any, Optional, Union, Match, List, Pattern, Generator, Callable
+from typing import Any, Optional, Union, Match, List, Pattern, Generator
 
 
 logger = logging.getLogger(__name__)
