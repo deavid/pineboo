@@ -11,7 +11,7 @@ from pineboolib.core.settings import config
 
 from pineboolib import pncontrolsfactory
 
-from typing import Optional, Tuple, Callable, List, Dict, Any
+from typing import Optional, Tuple, Callable, List, Dict, Any, cast
 
 ICONS: Dict[str, Any] = {}
 root = None
@@ -495,7 +495,7 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
                 hPolicy = QtWidgets.QSizePolicy.Fixed
                 vPolicy = QtWidgets.QSizePolicy.Fixed
                 orient_ = None
-                policy_ = None
+                policy_ = QtWidgets.QSizePolicy.Expanding
                 rowSpan = c.get("rowspan") or 1
                 colSpan = c.get("colspan") or 1
                 # policy_name = None
@@ -513,7 +513,7 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
                         if config.value("ebcomportamiento/spacerLegacy", False) or orient_ == 1:
                             policy_ = QtWidgets.QSizePolicy.Policy(value)
                         else:
-                            policy_ = 7  # Siempre Expanding
+                            policy_ = QtWidgets.QSizePolicy.Expanding  # Siempre Expanding
 
                     elif pname == "name":
                         spacer_name = value  # noqa: F841
@@ -777,7 +777,7 @@ def u(x: Any) -> str:
     return str(x)
 
 
-def b(x: str) -> Optional[bool]:
+def b(x: str) -> bool:
     x = x.lower()
     if x[0] == "t":
         return True
@@ -792,7 +792,7 @@ def b(x: str) -> Optional[bool]:
     if x == "off":
         return False
     logger.warning("Bool?:", repr(x))
-    return None
+    return False
 
 
 def _loadVariant(variant, widget=None) -> Any:
@@ -821,59 +821,59 @@ def _loadVariant(variant, widget=None) -> Any:
 
         p = QtWidgets.QSizePolicy()
         for c in variant:
-            ivalue = int(c.text.strip())
+            ivalue_policy = cast(QtWidgets.QSizePolicy.Policy, int(c.text.strip()))
             if c.tag == "hsizetype":
-                p.setHorizontalPolicy(ivalue)
+                p.setHorizontalPolicy(ivalue_policy)
             if c.tag == "vsizetype":
-                p.setVerticalPolicy(ivalue)
+                p.setVerticalPolicy(ivalue_policy)
             if c.tag == "horstretch":
-                p.setHorizontalStretch(ivalue)
+                p.setHorizontalStretch(ivalue_policy)
             if c.tag == "verstretch":
-                p.setVerticalStretch(ivalue)
+                p.setVerticalStretch(ivalue_policy)
         return p
     if variant.tag == "size":
-        p = QtCore.QSize()
+        p_sz = QtCore.QSize()
         for c in variant:
             ivalue = int(c.text.strip())
             if c.tag == "width":
-                p.setWidth(ivalue)
+                p_sz.setWidth(ivalue)
             if c.tag == "height":
-                p.setHeight(ivalue)
-        return p
+                p_sz.setHeight(ivalue)
+        return p_sz
     if variant.tag == "font":
-        p = QtGui.QFont()
+        p_font = QtGui.QFont()
         for c in variant:
             value = c.text.strip()
-            bv: Optional[bool] = False
+            bv: bool = False
             if c.tag not in ("family", "pointsize"):
                 bv = b(value)
             try:
                 if c.tag == "bold":
-                    p.setBold(bv)
+                    p_font.setBold(bv)
                 elif c.tag == "italic":
-                    p.setItalic(bv)
+                    p_font.setItalic(bv)
                 elif c.tag == "family":
-                    p.setFamily(value)
+                    p_font.setFamily(value)
                 elif c.tag == "pointsize":
-                    p.setPointSize(int(value))
+                    p_font.setPointSize(int(value))
                 else:
                     logger.warning("unknown font style type %s", repr(c.tag))
             except Exception as e:
                 logger.warning(e)
-        return p
+        return p_font
 
     if variant.tag == "set":
         v = None
         final = 0
         text = variant.text
-        libs = [QtCore.Qt]
+        libs_1: List[Any] = [QtCore.Qt]
 
         if text.find("WordBreak|") > -1:
             if widget is not None:
                 widget.setWordWrap(True)
             text = text.replace("WordBreak|", "")
 
-        for lib in libs:
+        for lib in libs_1:
             for t in text.split("|"):
                 v = getattr(lib, t, None)
                 if v is not None:
@@ -885,8 +885,8 @@ def _loadVariant(variant, widget=None) -> Any:
 
     if variant.tag == "enum":
         v = None
-        libs = [QtCore.Qt, QtWidgets.QFrame, QtWidgets.QSizePolicy, QtWidgets.QTabWidget]
-        for lib in libs:
+        libs_2: List[Any] = [QtCore.Qt, QtWidgets.QFrame, QtWidgets.QSizePolicy, QtWidgets.QTabWidget]
+        for lib in libs_2:
             v = getattr(lib, text, None)
             if v is not None:
                 return v
@@ -955,9 +955,9 @@ def _loadVariant(variant, widget=None) -> Any:
 
     if variant.tag == "date":
 
-        y_ = None
-        m_ = None
-        d_ = None
+        y_ = 2000
+        m_ = 1
+        d_ = 1
         for v in variant:
             if v.tag == "year":
                 y_ = int(v.text)
