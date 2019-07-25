@@ -1828,12 +1828,12 @@ class FLFieldDB(QtWidgets.QWidget):
         hasPushButtonDB = False
         self.fieldAlias_ = field.alias()
 
-        if not self.fieldAlias_:
-            raise Exception("fieldAlias_ is not defined!")
+        if self.fieldAlias_ is None:
+            raise Exception("alias from %s.%s is not defined!" % (field.metadata().name(), field.name()))
 
         if self.textLabelDB:
             self.textLabelDB.setFont(self.font())
-            if not type_ == "pixmap" and not type_ == "bool":
+            if not type_ in ["pixmap", "bool"]:
                 if not field.allowNull() and field.editable():
                     self.textLabelDB.setText("%s*" % self.fieldAlias_)
                 else:
