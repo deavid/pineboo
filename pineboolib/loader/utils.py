@@ -16,7 +16,7 @@ def monkey_patch_connect() -> None:
     logger.warning("... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa.")
 
     class BoundSignal:
-        _CONNECT = QtCore.pyqtBoundSignal.connect
+        _CONNECT = QtCore.pyqtBoundSignal.connect  # type: ignore
         _EMIT = QtCore.pyqtBoundSignal.emit
         _LAST_EMITTED_SIGNAL: Dict[str, Any] = {}
 
@@ -72,5 +72,5 @@ def monkey_patch_connect() -> None:
             BoundSignal._LAST_EMITTED_SIGNAL[repr(self)] = stack
             return BoundSignal._EMIT(self, *args)
 
-    QtCore.pyqtBoundSignal.connect = BoundSignal.connect
-    QtCore.pyqtBoundSignal.emit = BoundSignal.emit
+    QtCore.pyqtBoundSignal.connect = BoundSignal.connect  # type: ignore
+    QtCore.pyqtBoundSignal.emit = BoundSignal.emit  # type: ignore
