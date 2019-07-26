@@ -2485,7 +2485,7 @@ class FLTableDB(QtWidgets.QWidget):
 
                 self.orderAsc_ = not self.orderAsc_
 
-            self.setSortOrder(self.orderAsc_, col)
+            self.setSortOrder(self.orderAsc_, self.sortColumn_)
 
     """
     Filtra los registros de la tabla utilizando el primer campo, según el patrón dado.
