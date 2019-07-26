@@ -97,8 +97,8 @@ class FLReportViewer(QtWidgets.QWidget):
         self.Append = 1
         self.PageBreak = 1
         self.stylepainter: FLStylePainter = FLStylePainter()
-        from pineboolib.plugins.dgi.dgi_qt.dgi_qt3ui import loadUi
-        from pineboolib.core.utils.utils_base import filedir
+        # from pineboolib.plugins.dgi.dgi_qt.dgi_qt3ui import loadUi
+        # from pineboolib.core.utils.utils_base import filedir
 
         # loadUi(filedir("forms/FLWidgetReportViewer.ui"), self)
         # self.ui_["FLWidgetReportViewer"] = self.child("FLWidgetReportViewer")

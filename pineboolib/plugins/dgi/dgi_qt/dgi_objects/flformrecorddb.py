@@ -8,7 +8,6 @@ from pineboolib import logging
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.settings import config
-from pineboolib.interfaces import IFormRecordDB
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
@@ -37,7 +36,7 @@ edición de registros definidos en los metadatos
 """
 
 
-class FLFormRecordDB(FLFormDB, IFormRecordDB):
+class FLFormRecordDB(FLFormDB):
 
     logger = logging.getLogger("dgi_qt.FLFormRecordDB")
     """

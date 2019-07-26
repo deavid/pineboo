@@ -7,7 +7,8 @@ from .utils.path import _path, coalesce_path
 from typing import Optional, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib.interfaces import IFormDB, IFormRecordDB
+    from pineboolib.interfaces import IFormDB
+    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformrecorddb import FLFormRecordDB
 
     # from .moduleactions import ModuleActions  # noqa: F401
 
@@ -69,7 +70,7 @@ class XMLAction(XMLStruct):
         self.formrecord = self._v("formrecord")
         self.scriptformrecord = self._v("scriptformrecord")
         self.mainform_widget: Optional[IFormDB] = None
-        self.formrecord_widget: Optional[IFormRecordDB] = None
+        self.formrecord_widget: Optional[FLFormRecordDB] = None
         self._loaded = False
 
     """
@@ -78,7 +79,7 @@ class XMLAction(XMLStruct):
     @return widget con form inicializado
     """
 
-    def loadRecord(self, cursor: Optional[Any]) -> "IFormRecordDB":
+    def loadRecord(self, cursor: Optional[Any]) -> "FLFormRecordDB":
         self._loaded = getattr(self.formrecord_widget, "_loaded", False)
         if not self._loaded:
             if self.formrecord_widget and getattr(self.formrecord_widget, "widget", None):
@@ -159,7 +160,7 @@ class XMLAction(XMLStruct):
     @return wigdet del formRecord.
     """
 
-    def formRecordWidget(self) -> "IFormRecordDB":
+    def formRecordWidget(self) -> "FLFormRecordDB":
         if not getattr(self.formrecord_widget, "_loaded", None):
             self.loadRecord(None)
 
