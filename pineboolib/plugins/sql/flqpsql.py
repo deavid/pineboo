@@ -611,6 +611,10 @@ class FLQPSQL(object):
             allowNull = row[2]
             defVal = row[5]
 
+            if isinstance(defVal, str) and defVal is not None:
+                if defVal.find("::character varying") > -1:
+                    defVal = defVal[0 : defVal.find("::character varying")]
+
             if len_ == -1 and precision and precision > -1:
                 len_ = precision - 4
                 precision = -1
