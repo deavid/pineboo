@@ -335,7 +335,7 @@ class Dir(object):
             os.mkdir(name)
 
 
-class File(object):
+class File(object):  # FIXME : Rehacer!!
     """
     Para gestionar un fichero
     """
@@ -345,7 +345,7 @@ class File(object):
     ReadWrite = QIODevice.ReadWrite
 
     fichero: str
-    mode = None
+    mode_: QIODevice
     path = None
 
     encode_: str
@@ -366,6 +366,14 @@ class File(object):
 
         if encode is not None:
             self.encode_ = encode
+
+        self.mode_ = self.ReadWrite
+
+    def open(self, m: QIODevice) -> None:
+        self.mode_ = m
+
+    def close(self) -> None:
+        pass
 
     def read(self: Union["File", str], bytes: bool = False) -> Union[str, bytes]:
         """
