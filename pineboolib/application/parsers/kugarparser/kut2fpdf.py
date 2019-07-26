@@ -574,8 +574,9 @@ class Kut2FPDF(object):
             if res_ == ["0"]:
                 return
 
-        if text is not None and text.startswith(filedir("../tempdata")):
-            is_image = True
+        if text is not None:
+            if text.startswith(filedir("../tempdata")):
+                is_image = True
 
         # negValueColor = xml.get("NegValueColor")
         # Currency = xml.get("Currency")

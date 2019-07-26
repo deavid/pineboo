@@ -579,10 +579,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     def _refresh_field_info(self) -> None:
         is_query = self.metadata().isQuery()
         qry_tables = []
+        qry = None
         # if qry is None:
         #    return
         if is_query:
             qry = self.db().manager().query(self.metadata().query())
+            if qry is None:
+                raise Exception(" The query %s return empty value" % self.metadata().query())
             qry_select = [x.strip() for x in (qry.select()).split(",")]
             qry_fields: Dict[str, str] = {fieldname.split(".")[-1]: fieldname for fieldname in qry_select}
 
@@ -611,6 +614,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                             break
                     # Omito los campos que aparentemente no existen
                     if not found and not field.name() in self.sql_fields_omited:
+
+                        if qry is None:
+                            raise Exception("The qry is empty!")
+
                         # NOTE: Esto podría ser por ejemplo porque no entendemos los campos computados.
                         self.logger.error(
                             "CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s ",
@@ -697,7 +704,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             cast(pyqtSignal, self.rowsRemoved).emit(parent, 0, oldrows - 1)
 
         if self.metadata().isQuery():
-            from_ = self.db().manager().query(self.metadata().query()).from_()
+            query = self.db().manager().query(self.metadata().query())
+            if query is None:
+                raise Exception("query is empty!")
+            from_ = query.from_()
         else:
             from_ = self.metadata().name()
 
@@ -1108,11 +1118,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.cols = len(self.metadata().fieldList())
         self.loadColAliases()
         if self.metadata().isQuery():
-            qry = self.db().manager().query(self.metadata().query())
-        else:
-            qry = None
-        if qry is not None:
-            self._refresh_field_info(qry)
+            self._refresh_field_info()
 
     """
     Devuelve el número de lineas
