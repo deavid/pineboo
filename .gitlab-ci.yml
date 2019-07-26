@@ -16,7 +16,7 @@ image: deavidsedice/pineboo-build:latest-devel
 #     - venv/
 
 before_script:
-  - python -V  # Print out python version for debugging
+  - python3 -V  # Print out python version for debugging
   # - pip install virtualenv
   # - virtualenv venv
   # - source venv/bin/activate
