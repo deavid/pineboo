@@ -305,7 +305,7 @@ class Kut2FPDF(object):
             if draw_if:
                 show = data.get(draw_if)
 
-            if dF.get("Level") == str(data_level) and show not in ("None", "False"):
+            if dF.get("Level") == str(data_level) and show not in ("", "False", "None"):
 
                 if section_name in ("DetailHeader", "Detail"):
                     heightCalculated = self._parser_tools.getHeight(dF) + self.topSection() + self.increase_section_size
@@ -574,7 +574,7 @@ class Kut2FPDF(object):
             if res_ == ["0"]:
                 return
 
-        if text.startswith(filedir("../tempdata")):
+        if text is not None and text.startswith(filedir("../tempdata")):
             is_image = True
 
         # negValueColor = xml.get("NegValueColor")
