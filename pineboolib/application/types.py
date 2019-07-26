@@ -171,7 +171,7 @@ class Array(object):
 
         return ret_
 
-    def __setitem__(self, key: str, value: Any) -> None:
+    def __setitem__(self, key: Union[str, int], value: Any) -> None:
         """
         Especificamos una nueva entrada
         @param key. Nombre del registro
@@ -202,11 +202,11 @@ class Array(object):
 
         return None
 
-    def __getattr__(self, k: str) -> Any:
-        if k == "length":
-            return len(self.dict_)
-        else:
-            return self.dict_[k]
+    def length(self) -> int:
+        return len(self.dict_)
+
+    def __getattr__(self, k: Union[str, int]) -> Any:
+        return self.dict_[k]
 
     def splice(self, *args: Any) -> None:
         if len(args) == 2:  # Delete

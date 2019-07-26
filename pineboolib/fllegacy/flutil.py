@@ -760,7 +760,7 @@ class FLUtil(QtCore.QObject):
         cursor.close()
         return True
 
-    def roundFieldValue(self, value: Union[int, float], table_name: str, field_name: str) -> float:
+    def roundFieldValue(self, value: float, table_name: str, field_name: str) -> str:
         """
         Redondea un valor en función de la precisión especificada para un campo tipo double de la base de datos
 
@@ -775,9 +775,9 @@ class FLUtil(QtCore.QObject):
 
         tmd = aqApp.db().manager().metadata(table_name)
         if tmd is None:
-            return 0
+            return ""
         fmd = tmd.field(field_name)
-        return float(self.buildNumber(value, "float", fmd.partDecimal())) if fmd is not None else 0
+        return self.buildNumber(value, "float", fmd.partDecimal()) if fmd is not None else ""
 
     def sqlSelect(self, f: str, s: str, w: str, tL: Optional[Union[str, List]] = None, size: int = 0, connName: str = "default") -> Any:
         from pineboolib.application.database.utils import sqlSelect
