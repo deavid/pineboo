@@ -4,42 +4,14 @@ import os.path
 from pineboolib.core.utils.struct import XMLStruct
 from .utils.path import _path, coalesce_path
 
-from typing import Optional, Any, TYPE_CHECKING
+from typing import Optional, Any, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from pineboolib.fllegacy.flaction import FLAction  # noqa: F401
     from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
     from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformrecorddb import FLFormRecordDB
-
-    # from .moduleactions import ModuleActions  # noqa: F401
-
-
-class XMLMainFormAction(XMLStruct):
-    """
-    Contiene Información de cada action del mainForm
-    """
-
-    name = "unnamed"
-    text = ""
-    mainform = None
-    mod: Any = None
-    prj = None
-    slot: Optional[str] = None
-    logger = logging.getLogger("main.XMLMainFormAction")
-
-    def run(self) -> None:
-        """
-        Lanza la action
-        """
-        if self.mod is None:
-            raise Exception("No module set")
-        if self.slot is None:
-            raise Exception("No slot set")
-        self.logger.debug("Running: %s %s %s", self.name, self.text, self.slot)
-        try:
-            action = self.mod.actions[self.name]
-            getattr(action, self.slot, "unknownSlot")()
-        finally:
-            self.logger.debug("END of Running: %s %s %s", self.name, self.text, self.slot)
+    from .moduleactions import ModuleActions  # noqa: F401
+    from .database.pnsqlcursor import PNSqlCursor  # noqa: F401
 
 
 class XMLAction(XMLStruct):
@@ -48,7 +20,7 @@ class XMLAction(XMLStruct):
     """
 
     logger = logging.getLogger("main.XMLAction")
-    mod: Optional[Any]  # Optional["ModuleActions"]
+    mod: Optional["ModuleActions"]
     alias: str
 
     def __init__(self, *args, project, name=None, **kwargs) -> None:
@@ -79,7 +51,7 @@ class XMLAction(XMLStruct):
     @return widget con form inicializado
     """
 
-    def loadRecord(self, cursor: Optional[Any]) -> "FLFormRecordDB":
+    def loadRecord(self, cursor: Optional["PNSqlCursor"]) -> "FLFormRecordDB":
         self._loaded = getattr(self.formrecord_widget, "_loaded", False)
         if not self._loaded:
             if self.formrecord_widget and getattr(self.formrecord_widget, "widget", None):
@@ -173,7 +145,7 @@ class XMLAction(XMLStruct):
     @param cursor. Cursor a usar por el FLFormRecordDB
     """
     # FIXME: cursor is FLSqlCursor but should be something core, not "FL". Also, an interface
-    def openDefaultFormRecord(self, cursor: Any, wait: bool = True) -> None:
+    def openDefaultFormRecord(self, cursor: "PNSqlCursor", wait: bool = True) -> None:
         self.logger.info("Opening default formRecord for Action %s", self.name)
         w = self.loadRecord(cursor)
         # w.init()
@@ -226,7 +198,7 @@ class XMLAction(XMLStruct):
             self.logger.info("No script to load on %s for action %s", parent, self.name)
 
         parent_object = parent
-        action_: Any  # XMLAction / FLAction
+        action_: Union[XMLAction, "FLAction"]  # XMLAction / FLAction
         if parent is None:
             action_ = self
         else:
