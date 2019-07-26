@@ -1,0 +1,8 @@
+version: '3'
+services:
+  pineboo-build:
+    build: ./docker/pineboo-build
+    image: pineboo/build
+    volumes:
+     - ./:/usr/src/pineboo
+    command: bash -c 'cd /usr/src/pineboo; flake8 pineboolib/; mypy -p pineboolib'
