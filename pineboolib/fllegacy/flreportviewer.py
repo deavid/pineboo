@@ -100,10 +100,10 @@ class FLReportViewer(QtWidgets.QWidget):
         from pineboolib.plugins.dgi.dgi_qt.dgi_qt3ui import loadUi
         from pineboolib.core.utils.utils_base import filedir
 
-        loadUi(filedir("forms/FLWidgetReportViewer.ui"), self)
-        self.ui_["FLWidgetReportViewer"] = self.child("FLWidgetReportViewer")
-        self.ui_["frEMail"] = self.child("frEMail")
-        self.ui_["ledStyle"] = self.child("ledStyle")
+        # loadUi(filedir("forms/FLWidgetReportViewer.ui"), self)
+        # self.ui_["FLWidgetReportViewer"] = self.child("FLWidgetReportViewer")
+        # self.ui_["frEMail"] = self.child("frEMail")
+        # self.ui_["ledStyle"] = self.child("ledStyle")
 
         # if not name:
         #    self.setName("FLReportViewer")
