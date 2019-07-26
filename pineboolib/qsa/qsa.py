@@ -3,6 +3,7 @@ import traceback
 import os
 import re
 import math
+from os.path import expanduser
 from pineboolib import logging
 
 from PyQt5 import QtCore  # type: ignore
@@ -255,16 +256,22 @@ class Dir(object):
     Gestiona un directorio
     """
 
-    Files: str = "*.*"
+    # Filters :
+    Files = QtCore.QDir.Files
+    Dirs = QtCore.QDir.Dirs
+    NoFilter = QtCore.QDir.NoFilter
 
-    from os.path import expanduser
+    # Sort Flags:
+    Name = QtCore.QDir.Name
+    NoSort = QtCore.QDir.NoSort
 
+    # other:
     home = expanduser("~")
 
     def __init__(self, path: Optional[str] = None):
         self.path_: Optional[str] = path
 
-    def entryList(self, patron: str, type_: Optional[str] = None) -> list:
+    def entryList(self, patron: str, type_: int = NoFilter, sort: int = NoSort) -> list:
         """
         Lista de ficheros que coinciden con un patron dado
         @param patron. Patron a usa para identificar los ficheros
@@ -343,6 +350,7 @@ class File(object):  # FIXME : Rehacer!!
     ReadOnly = QIODevice.ReadOnly
     WriteOnly = QIODevice.WriteOnly
     ReadWrite = QIODevice.ReadWrite
+    Append = QIODevice.Append
 
     fichero: str
     mode_: QIODevice
@@ -351,6 +359,7 @@ class File(object):  # FIXME : Rehacer!!
     encode_: str
     last_seek = None
     qfile: QtCore.QFile
+    eof = False
 
     def __init__(self, rutaFichero: Optional[str] = None, encode: Optional[str] = None):
         self.encode_ = "iso-8859-15"
@@ -371,6 +380,7 @@ class File(object):  # FIXME : Rehacer!!
 
     def open(self, m: QIODevice) -> None:
         self.mode_ = m
+        self.eof = False
 
     def close(self) -> None:
         pass
@@ -404,6 +414,8 @@ class File(object):  # FIXME : Rehacer!!
             ret = ret + l
 
         f.close()
+        if isinstance(self, File):
+            self.eof = True
         return ret
 
     def write(self: Union["File", str], data: Union[str, bytes], length: int = -1) -> None:
@@ -431,8 +443,11 @@ class File(object):  # FIXME : Rehacer!!
             bytes_ = data.encode(encode)
         else:
             bytes_ = data
-
-        with open(file_, "wb") as file:
+        mode = "wb"
+        if isinstance(self, File):
+            if self.mode_ == self.Append:
+                mode = "ab"
+        with open(file_, mode) as file:
             file.write(bytes_)
 
         file.close()

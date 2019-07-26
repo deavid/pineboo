@@ -208,6 +208,9 @@ class Array(object):
     def __getattr__(self, k: Union[str, int]) -> Any:
         return self.dict_[k]
 
+    def __setattr__(self, k: Union[str, int], val: Any) -> None:
+        self.dict_[k] = val
+
     def splice(self, *args: Any) -> None:
         if len(args) == 2:  # Delete
             pos_ini = args[0]
