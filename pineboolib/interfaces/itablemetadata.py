@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Any
 
 
 class ITableMetaData:
@@ -8,13 +8,13 @@ class ITableMetaData:
     def addFieldMD(self, f) -> None:
         return
 
-    def field(self, fN: Optional[str]):
+    def field(self, fN: str) -> Any:
         return
 
     def fieldIsIndex(self, field_name: Optional[str]) -> int:
         return -1
 
-    def fieldList(self, prefix_table: bool):
+    def fieldList(self):
         return
 
     def fieldListOfCompoundKey(self, fN: str) -> None:
@@ -32,7 +32,7 @@ class ITableMetaData:
     def inCache(self) -> bool:
         return False
 
-    def indexFieldObject(self, position: int, show_exception: bool):
+    def indexFieldObject(self, position: int):
         return
 
     def indexPos(self, field_name: Optional[str]) -> int:

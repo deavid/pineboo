@@ -2,12 +2,12 @@
 
 import os
 from pineboolib.core.utils.utils_base import filedir
-from pineboolib.fllegacy.fltranslations import FLTranslations
-from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.core.settings import config
 from pineboolib.application import project
 
 from PyQt5.Qt import QTranslator  # type: ignore
 from pineboolib import logging
+from typing import Any, Dict
 
 
 class FLTranslator(QTranslator):
@@ -19,18 +19,19 @@ class FLTranslator(QTranslator):
     idM_ = None
     lang_ = None
     translation_from_ = None
-    ts_translation_contexts = {}
+    ts_translation_contexts: Dict[str, Dict[str, str]] = {}
 
-    def __init__(self, parent=None, name=None, multiLang=False, sysTrans=False):
+    def __init__(self, parent=None, name: str = None, multiLang=False, sysTrans=False) -> None:
         super(FLTranslator, self).__init__()
         self.logger = logging.getLogger("FLTranslator")
         self._prj = parent
+        if not name:
+            raise Exception("Name is mandatory")
         self.idM_ = name[: name.rfind("_")]
         self.lang_ = name[name.rfind("_") + 1 :]
         self.mulTiLang_ = multiLang
         self.sysTrans_ = sysTrans
-        settings = FLSettings()
-        self.translation_from_qm = settings.readBoolEntry("ebcomportamiento/translations_from_qm", False)
+        self.translation_from_qm = config.value("ebcomportamiento/translations_from_qm", False)
 
     """
     Carga en el traductor el contenido de un fichero de traducciones existente en la caché de disco
@@ -42,7 +43,9 @@ class FLTranslator(QTranslator):
     @return  TRUE si la operación tuvo éxito
     """
 
-    def loadTsContent(self, key):
+    def loadTsContent(self, key) -> Any:
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         if self.idM_ == "sys":
             ts_file = filedir("../share/pineboo/translations/%s.%s" % (self.idM_, self.lang_))
         else:
@@ -64,6 +67,7 @@ class FLTranslator(QTranslator):
                     return False
 
             else:
+                from pineboolib.fllegacy.fltranslations import FLTranslations
 
                 trans = FLTranslations()
                 trans.lrelease("%s.ts" % ts_file, qm_file, not self.mulTiLang_)
@@ -74,7 +78,7 @@ class FLTranslator(QTranslator):
 
         return ret_
 
-    def translate(self, *args):
+    def translate(self, *args) -> Any:
         context = args[0]
         if context.endswith("PlatformTheme"):
             context = "QMessageBox"
@@ -91,7 +95,7 @@ class FLTranslator(QTranslator):
 
         return ret_
 
-    def load_ts(self, file_name):
+    def load_ts(self, file_name: str) -> bool:
         try:
             from pineboolib.core.utils.utils_base import load2xml
 
@@ -102,6 +106,8 @@ class FLTranslator(QTranslator):
                     self.logger.warning("load_ts: <name> not found, skipping")
                     continue
                 context_dict_key = name_elem.text
+                if not context_dict_key:
+                    continue
                 if context_dict_key not in self.ts_translation_contexts.keys():
                     self.ts_translation_contexts[context_dict_key] = {}
                 for message in context.findall("message"):

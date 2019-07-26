@@ -1,11 +1,12 @@
-from pineboolib.core.utils.logging import logging
-from .pnsqlquery import PNSqlQuery
+from pineboolib.core.utils import logging
+
+from typing import Any, Union, List, Optional
 
 
 logger = logging.getLogger("database.utils")
 
 
-def nextCounter(*args):
+def nextCounter(*args) -> Any:
     """
     Este metodo devuelve el siguiente valor de un campo tipo contador de una tabla.
 
@@ -45,6 +46,8 @@ def nextCounter(*args):
     @return Qvariant con el numero siguiente.
     @author Andrés Otón Urbano.
     """
+    from .pnsqlquery import PNSqlQuery
+
     if len(args) == 2:
         name = args[0]
         cursor_ = args[1]
@@ -167,7 +170,7 @@ def nextCounter(*args):
         return None
 
 
-def sqlSelect(f, s, w, tL=None, size=0, connName="default"):
+def sqlSelect(f: str, s: str, w, tL: Optional[Union[str, List]] = None, size: int = 0, connName: str = "default") -> Any:
     """
     Ejecuta una query de tipo select, devolviendo los resultados del primer registro encontrado
 
@@ -181,6 +184,8 @@ def sqlSelect(f, s, w, tL=None, size=0, connName="default"):
     """
     if w is None or w == "":
         return False
+
+    from .pnsqlquery import PNSqlQuery
 
     q = PNSqlQuery(None, connName)
     if tL:
@@ -204,11 +209,13 @@ def sqlSelect(f, s, w, tL=None, size=0, connName="default"):
     return False
 
 
-def quickSqlSelect(f, s, w, connName="default"):
+def quickSqlSelect(f: str, s: str, w: str, connName: str = "default") -> Any:
     """
     Versión rápida de sqlSelect. Ejecuta directamente la consulta sin realizar comprobaciones.
     Usar con precaución.
     """
+    from .pnsqlquery import PNSqlQuery
+
     if not w:
         sql = "select " + s + " from " + f
     else:
@@ -221,7 +228,7 @@ def quickSqlSelect(f, s, w, connName="default"):
     return q.value(0) if q.first() else False
 
 
-def sqlInsert(t, fL, vL, connName="default"):
+def sqlInsert(t, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connName: str = "default") -> Any:
     """
     Realiza la inserción de un registro en una tabla mediante un objeto FLSqlCursor
 
@@ -232,8 +239,8 @@ def sqlInsert(t, fL, vL, connName="default"):
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
 
-    fL = fL.split(",") if isinstance(fL, str) else fL
-    vL = vL.split(",") if isinstance(vL, str) else vL
+    fL: List[str] = fL_.split(",") if isinstance(fL_, str) else fL_
+    vL: List[str] = vL_.split(",") if isinstance(vL_, str) else vL_
 
     if not len(fL) == len(vL):
         return False
@@ -256,7 +263,7 @@ def sqlInsert(t, fL, vL, connName="default"):
     return c.commitBuffer()
 
 
-def sqlUpdate(t, fL, vL, w, connName="default"):
+def sqlUpdate(t, fL: Union[str, List[str]], vL: Union[str, List[str]], w, connName: str = "default") -> bool:
     """
     Realiza la modificación de uno o más registros en una tabla mediante un objeto FLSqlCursor
 
@@ -291,7 +298,7 @@ def sqlUpdate(t, fL, vL, w, connName="default"):
     return True
 
 
-def sqlDelete(t, w, connName="default"):
+def sqlDelete(t: str, w: str, connName: str = "default") -> bool:
     """
     Borra uno o más registros en una tabla mediante un objeto FLSqlCursor
 
@@ -318,7 +325,7 @@ def sqlDelete(t, w, connName="default"):
     return True
 
 
-def quickSqlDelete(t, w, connName="default"):
+def quickSqlDelete(t: str, w: str, connName: str = "default") -> None:
     """
     Versión rápida de sqlDelete. Ejecuta directamente la consulta sin realizar comprobaciones y sin disparar señales de commits.
     Usar con precaución.
@@ -326,11 +333,14 @@ def quickSqlDelete(t, w, connName="default"):
     execSql("DELETE FROM %s WHERE %s" % (t, w))
 
 
-def execSql(sql, connName="default"):
+def execSql(sql: str, connName: str = "default") -> bool:
     """
     Uso interno
     """
     from pineboolib.application import project
+
+    if project.conn is None:
+        raise Exception("Project is not connected yet")
 
     conn_ = project.conn.useConn(connName)
     cur = conn_.cursor()

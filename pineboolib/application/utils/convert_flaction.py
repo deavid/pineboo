@@ -1,6 +1,6 @@
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 
-from typing import TYPE_CHECKING
+from typing import Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.application.xmlaction import XMLAction
@@ -17,16 +17,18 @@ def convertFLAction(action: "FLAction") -> "XMLAction":
     return project.actions[action.name()]
 
 
-def convert2FLAction(action: "XMLAction") -> "FLAction":
-    name = None
+def convert2FLAction(action: Union[str, "XMLAction"]) -> "FLAction":
     if isinstance(action, str):
-        name = str
+        name = action
     else:
         name = action.name
 
     from pineboolib.application import project
 
+    if project.conn is None:
+        raise Exception("Project is not connected yet")
+
     logger.trace("convert2FLAction: Load action from db manager")
-    action = project.conn.manager().action(name)
+    flaction = project.conn.manager().action(name)
     logger.trace("convert2FLAction: done")
-    return action
+    return flaction

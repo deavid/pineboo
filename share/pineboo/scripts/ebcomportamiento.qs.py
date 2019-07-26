@@ -49,8 +49,6 @@ class FormInternalObj(FormDBWidget):
         w.child(u"cbDeleteCache").checked = self.leerValorLocal("deleteCache")
         w.child(u"cbParseProject").checked = self.leerValorLocal("parseProject")
         w.child(u"cbActionsMenuRed").checked = self.leerValorLocal("ActionsMenuRed")
-        w.child(u"cbKugarParser").addItems(project.kugarPlugin.listAvalibles())
-        w.child(u"cbKugarParser").setCurrentText(self.leerValorLocal("kugarParser") if not "" else project.kugarPlugin.defaultParser())
         w.child(u"cbSpacerLegacy").checked = self.leerValorLocal("spacerLegacy")
         w.child(u"cbParseModulesOnLoad").checked = self.leerValorLocal("parseModulesOnLoad")
         w.child(u"cb_traducciones").checked = self.leerValorLocal("translations_from_qm")
@@ -62,6 +60,8 @@ class FormInternalObj(FormDBWidget):
         w.child("cb_imagenes").checked = self.leerValorLocal("no_img_cached")
         w.child("cb_dbadmin").checked = self.leerValorLocal("dbadmin_enabled")
         w.child("cb_std_query").checked = self.leerValorLocal("std_query")
+        w.child("cb_disable_mtdparser").checked = self.leerValorLocal("orm_parser_disabled")
+        w.child("cb_disable_orm_load").checked = self.leerValorLocal("orm_load_disabled")
         autoComp = self.leerValorLocal("autoComp")
         if not autoComp or autoComp == "OnDemandF4":
             autoComp = "Bajo Demanda (F4)"
@@ -69,7 +69,7 @@ class FormInternalObj(FormDBWidget):
             autoComp = "Nunca"
         else:
             autoComp = "Siempre"
-        w.child(u"cbAutoComp").setCurrentText(autoComp)
+        w.child(u"cbAutoComp").setCurrentText = autoComp
 
         w.child(u"leCO").hide()
         self.colorActual_ = self.leerValorLocal("colorObligatorio")
@@ -171,7 +171,6 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("deleteCache", w.child(u"cbDeleteCache").checked)
         self.grabarValorLocal("parseProject", w.child(u"cbParseProject").checked)
         self.grabarValorLocal("mobileMode", w.child(u"cbMobile").checked)
-        self.grabarValorLocal("kugarParser", w.child(u"cbKugarParser").currentText())
         self.grabarValorLocal("spacerLegacy", w.child(u"cbSpacerLegacy").checked)
         self.grabarValorLocal("parseModulesOnLoad", w.child(u"cbParseModulesOnLoad").checked)
         self.grabarValorLocal("translations_from_qm", w.child(u"cb_traducciones").checked)
@@ -185,7 +184,10 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("no_img_cached", w.child("cb_imagenes").checked)
         self.grabarValorLocal("dbadmin_enabled", w.child("cb_dbadmin").checked)
         self.grabarValorLocal("std_query", w.child("cb_std_query").checked)
-        autoComp = w.child(u"cbAutoComp").currentText()
+        self.grabarValorLocal("orm_parser_disabled", w.child("cb_disable_mtdparser").checked)
+        self.grabarValorLocal("orm_load_disabled", w.child("cb_disable_orm_load").checked)
+
+        autoComp = w.child(u"cbAutoComp").currentText
         if autoComp == "Nunca":
             autoComp = "NeverAuto"
         elif autoComp == "Bajo Demanda (F4)":

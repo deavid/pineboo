@@ -1,5 +1,8 @@
 # # -*- coding: utf-8 -*-
+from typing import Optional, cast
 from PyQt5 import QtCore  # type: ignore
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager, QNetworkReply  # type: ignore
 from pineboolib.core import decorators
 
 
@@ -9,23 +12,24 @@ class FLNetwork(QtCore.QObject):
     request = None
     manager = None
 
-    reply = None
+    reply: Optional[QNetworkReply] = None
 
     finished = QtCore.pyqtSignal()
     start = QtCore.pyqtSignal()
     data = QtCore.pyqtSignal(str)
     dataTransferProgress = QtCore.pyqtSignal(int, int)
 
-    def __init__(self, url):
+    def __init__(self, url) -> None:
         super(FLNetwork, self).__init__()
         self.url = url
-        from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager  # type: ignore
 
         self.request = QNetworkRequest()
 
         self.manager = QNetworkAccessManager()
         # self.manager.readyRead.connect(self._slotNetworkStart)
-        self.manager.finished["QNetworkReply*"].connect(self._slotNetworkFinished)
+        finished_signal = cast(pyqtSignal, self.manager.finished)
+        finished_signal.connect(self._slotNetworkFinished)
+        # finished_signal["QNetworkReply*"].connect(self._slotNetworkFinished) # FIXME: What does this code?
         # self.data.connect(self._slotNetWorkData)
         # self.dataTransferProgress.connect(self._slotNetworkProgress)
 
@@ -58,11 +62,11 @@ class FLNetwork(QtCore.QObject):
         data = self.manager.get(self.request)
         self.put(data.readAll(), toLocation)
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def _slotNetworkStart(self):
         self.start.emit()
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def _slotNetworkFinished(self, reply=None):
         self.finished.emit()
 
@@ -71,7 +75,9 @@ class FLNetwork(QtCore.QObject):
     #    buffer = b
     #    self.data.emit(b)
 
-    def _slotNetworkProgress(self, bDone, bTotal):
+    def _slotNetworkProgress(self, bDone, bTotal) -> None:
+        if self.reply is None:
+            raise Exception("No reply in progress")
         self.dataTransferProgress.emit(bDone, bTotal)
         data_ = None
         reply_ = self.reply.readAll().data()

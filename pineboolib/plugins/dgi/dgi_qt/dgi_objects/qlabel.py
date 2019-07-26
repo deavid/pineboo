@@ -1,21 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtWidgets, QtCore, QtGui  # type: ignore
-from typing import Any
+from typing import Any, Union
 
 
 class QLabel(QtWidgets.QLabel):
-    @QtCore.pyqtProperty(str)
-    def text(self):
+    def get_text(self):
         return super().text()
 
-    @text.setter
-    def text(self, v):
-        if not isinstance(v, str):
-            v = str(v)
-        self.setText(v)
-
-    def setText(self, text: str) -> None:
+    def setText(self, text: Union[str, int]) -> None:
         if not isinstance(text, str):
             text = str(text)
         super().setText(text)
@@ -44,5 +37,6 @@ class QLabel(QtWidgets.QLabel):
         pal.setColor(pal.WindowText, color)
         self.setPalette(pal)
 
-    alignment = property(getAlign, setAlign)
+    alignment = property(getAlign, setAlign)  # type: ignore
+    text = property(get_text, setText)  # type: ignore
     paletteForegroundColor = property(get_palette_fore_ground, set_palette_fore_ground)

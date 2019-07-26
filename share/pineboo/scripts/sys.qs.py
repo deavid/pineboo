@@ -18,7 +18,7 @@ from pineboolib.qsa import AQSqlCursor, RegExp, QCheckBox, QString, String, Grou
 from pineboolib.qsa import util, decorators, Process, filedir
 from pineboolib.application import project
 from pineboolib import logging, qsa
-from pineboolib.error_manager import error_manager
+from pineboolib.core.error_manager import error_manager
 from pineboolib.pncontrolsfactory import SysType
 
 qsa_sys = SysType()
@@ -1935,32 +1935,19 @@ def dumpDatabase():
 
 def setObjText(container=None, component=None, value=None):
     c = testObj(container, component)
-    if not c:
+    if c is None:
         return False
     clase = u"FLFieldDB" if hasattr(c, "editor_") else c.__class__.__name__
-    s03_when = clase
-    s03_do_work, s03_work_done = False, False
-    if s03_when == u"QPushButton":
-        s03_do_work, s03_work_done = True, True
-    if s03_do_work:
+
+    if clase == u"QPushButton":
         pass
-    if s03_when == u"QToolButton":
-        s03_do_work, s03_work_done = True, True
-    if s03_do_work:
+    elif clase == u"QToolButton":
         pass
-    if s03_when == u"QLabel":
-        s03_do_work, s03_work_done = True, True
-    if s03_do_work:
+    elif clase == u"QLabel":
         runObjMethod(container, component, u"text", value)
-        s03_do_work = False  # BREAK
-    if s03_when == u"FLFieldDB":
-        s03_do_work, s03_work_done = True, True
-    if s03_do_work:
+    elif clase == u"FLFieldDB":
         runObjMethod(container, component, u"setValue", value)
-        s03_do_work = False  # BREAK
-    if not s03_work_done:
-        s03_do_work, s03_work_done = True, True
-    if s03_do_work:
+    else:
         return False
     return True
 
@@ -1970,7 +1957,7 @@ def disableObj(container=None, component=None):
     if not c:
         return False
     clase = (
-        "FLFieldDB" if isinstance(c, project._DGI.FLFieldDB) else "FLTableDB" if isinstance(c, project._DGI.FLTableDB) else c.className()
+        "FLFieldDB" if isinstance(c, project.DGI.FLFieldDB) else "FLTableDB" if isinstance(c, project.DGI.FLTableDB) else c.className()
     )
     if clase in ["QToolButton", "QPushButton"]:
         runObjMethod(container, component, u"setEnabled", False)
@@ -1987,25 +1974,13 @@ def enableObj(container=None, component=None):
     if not c:
         return False
     clase = u"FLFieldDB" if (u"editor" in c) else ((u"FLTableDB" if (u"tableName" in c) else c.className()))
-    s05_when = clase
-    s05_do_work, s05_work_done = False, False
-    if s05_when == u"QPushButton":
-        s05_do_work, s05_work_done = True, True
-    if s05_do_work:
+    if clase == u"QPushButton":
         pass
-    if s05_when == u"QToolButton":
-        s05_do_work, s05_work_done = True, True
-    if s05_do_work:
+    elif clase == u"QToolButton":
         runObjMethod(container, component, u"setEnabled", True)
-        s05_do_work = False  # BREAK
-    if s05_when == u"FLFieldDB":
-        s05_do_work, s05_work_done = True, True
-    if s05_do_work:
+    elif clase == u"FLFieldDB":
         runObjMethod(container, component, u"setDisabled", False)
-        s05_do_work = False  # BREAK
-    if not s05_work_done:
-        s05_do_work, s05_work_done = True, True
-    if s05_do_work:
+    else:
         return False
     return True
 
@@ -2015,20 +1990,11 @@ def filterObj(container=None, component=None, filter=None):
     if not c:
         return False
     clase = u"FLFieldDB" if (u"editor" in c) else ((u"FLTableDB" if (u"tableName" in c) else c.className()))
-    s06_when = clase
-    s06_do_work, s06_work_done = False, False
-    if s06_when == u"FLTableDB":
-        s06_do_work, s06_work_done = True, True
-    if s06_do_work:
+    if clase == u"FLTableDB":
         pass
-    if s06_when == u"FLFieldDB":
-        s06_do_work, s06_work_done = True, True
-    if s06_do_work:
+    elif clase == u"FLFieldDB":
         runObjMethod(container, component, u"setFilter", filter)
-        s06_do_work = False  # BREAK
-    if not s06_work_done:
-        s06_do_work, s06_work_done = True, True
-    if s06_do_work:
+    else:
         return False
     return True
 
@@ -2058,7 +2024,7 @@ def runObjMethod(container=None, component=None, method=None, param=None):
     c = container.child(component)
     m = getattr(c, method, None)
     if m is not None:
-        setattr(c, method, param)
+        m(param)
     else:
         debug(ustr(method, u" no existe"))
 

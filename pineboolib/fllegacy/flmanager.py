@@ -4,17 +4,16 @@ from PyQt5.QtXml import QDomDocument  # type: ignore
 
 
 from pineboolib.core import decorators
+from pineboolib.core.settings import config
 from pineboolib.core.utils.utils_base import filedir, auto_qt_translate_text
 from pineboolib.application.utils.xpm import cacheXPM
 
 
-from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
-from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
-from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
-from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
-from pineboolib.application.database.pnsqlquery import PNSqlQuery, PNGroupByQuery
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-from pineboolib.fllegacy.flaction import FLAction
+from pineboolib.application.metadata.pncompoundkeymetadata import PNCompoundKeyMetaData
+from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
+from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData
+from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
+
 from pineboolib.fllegacy.flutil import FLUtil
 
 from xml import etree  # type: ignore
@@ -22,8 +21,17 @@ from pineboolib import logging
 from pineboolib.interfaces import IManager
 
 from PyQt5.QtXml import QDomElement  # type: ignore
-from pineboolib.interfaces.iconnection import IConnection
-from typing import Optional, Union
+
+
+from pineboolib.application.database.pnsqlquery import PNSqlQuery
+from pineboolib.application.database.pngroupbyquery import PNGroupByQuery
+from pineboolib.application.database.pnsqlcursor import PNSqlCursor
+
+from typing import Optional, Union, Any, List, Dict, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.interfaces.iconnection import IConnection
+    import pineboolib.fllegacy.flaction
 
 logger = logging.getLogger(__name__)
 
@@ -38,23 +46,23 @@ class FLManager(QtCore.QObject, IManager):
     Encargada de abrir los formularios u obtener sus definiciones (ficheros .ui).
     Tambien mantiene los metadatos de todas la tablas de la base de
     datos, ofreciendo la posibilidad de recuperar los metadatos
-    mediante objetos FLTableMetaData de una tabla dada.
+    mediante objetos PNTableMetaData de una tabla dada.
 
     @author InfoSiAL S.L.
     """
 
-    listTables_ = []  # Lista de las tablas de la base de datos, para optimizar lecturas
-    dictKeyMetaData_ = None  # Diccionario de claves de metadatos, para optimizar lecturas
-    cacheMetaData_ = None  # Caché de metadatos, para optimizar lecturas
-    cacheAction_ = None  # Caché de definiciones de acciones, para optimizar lecturas
+    listTables_: List[str] = []  # Lista de las tablas de la base de datos, para optimizar lecturas
+    dictKeyMetaData_: Dict[str, str]  # Diccionario de claves de metadatos, para optimizar lecturas
+    cacheMetaData_: Dict[str, PNTableMetaData]  # Caché de metadatos, para optimizar lecturas
+    cacheAction_: Dict[str, "pineboolib.fllegacy.flaction.FLAction"]  # Caché de definiciones de acciones, para optimizar lecturas
     # Caché de metadatos de talblas del sistema para optimizar lecturas
-    cacheMetaDataSys_ = None
+    cacheMetaDataSys_: Dict[str, PNTableMetaData]
     db_ = None  # Base de datos a utilizar por el manejador
     initCount_ = 0  # Indica el número de veces que se ha llamado a FLManager::init()
     buffer_ = None
-    metadataCachedFails = []
+    metadataCachedFails: List[str]
 
-    def __init__(self, db: IConnection) -> None:
+    def __init__(self, db: "IConnection") -> None:
         """
         constructor
         """
@@ -76,6 +84,9 @@ class FLManager(QtCore.QObject, IManager):
         self.initCount_ = self.initCount_ + 1
         self.createSystemTable("flmetadata")
         self.createSystemTable("flseqs")
+
+        if not self.db_:
+            raise Exception("FLManagar.__init__. self.db_ is empty!")
 
         if not self.db_.dbAux():
             return
@@ -130,7 +141,7 @@ class FLManager(QtCore.QObject, IManager):
         if not self.cacheMetaDataSys_:
             self.cacheMetaDataSys_ = {}
 
-    def finish(self):
+    def finish(self) -> None:
         self.dictKeyMetaData_ = {}
         self.listTables_ = []
         self.cacheMetaData_ = {}
@@ -138,13 +149,13 @@ class FLManager(QtCore.QObject, IManager):
 
         del self
 
-    def metadata(self, n: Union[str, QDomElement], quick: Optional[bool] = None) -> Optional[FLTableMetaData]:
+    def metadata(self, n: Union[str, QDomElement], quick: Optional[bool] = None) -> Optional["PNTableMetaData"]:
         """
         Para obtener definicion de una tabla de la base de datos, a partir de un fichero XML.
 
         El nombre de la tabla corresponde con el nombre del fichero mas la extensión ".mtd"
         que contiene en XML la descripción de la tablas. Este método escanea el fichero
-        y construye/devuelve el objeto FLTableMetaData correspondiente, además
+        y construye/devuelve el objeto PNTableMetaData correspondiente, además
         realiza una copia de estos metadatos en una tabla de la misma base de datos
         para poder determinar cuando ha sido modificados y así, si es necesario, reconstruir
         la tabla para que se adapte a la nuevos metadatos. NO SE HACEN
@@ -156,7 +167,7 @@ class FLManager(QtCore.QObject, IManager):
 
         @param n Nombre de la tabla de la base de datos de la que obtener los metadatos
         @param quick Si TRUE no realiza chequeos, usar con cuidado
-        @return Un objeto FLTableMetaData con los metadatos de la tabla solicitada
+        @return Un objeto PNTableMetaData con los metadatos de la tabla solicitada
         """
 
         util = FLUtil()
@@ -164,15 +175,19 @@ class FLManager(QtCore.QObject, IManager):
         if not n:
             return None
 
+        if not self.db_:
+            raise Exception("metadata. self.db_ is empty!")
+
         if quick is None:
-            quick = False if util.readSettingEntry("application/dbadmin_enabled", False) else True
+            dbadmin = config.value("application/dbadmin_enabled", False)
+            quick = not bool(dbadmin)
 
         if isinstance(n, str):
             if not n:
                 return None
 
-            ret = False
-            acl = False
+            ret: Any = False
+            acl: Any = False
             key = n.strip()
             stream = None
             isSysTable = n[0:3] == "sys" or self.isSystemTable(n)
@@ -192,14 +207,14 @@ class FLManager(QtCore.QObject, IManager):
 
                 if not stream:
                     if n.find("alteredtable") == -1:
-                        logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                        logger.info("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
                     self.metadataCachedFails.append(n)
                     return None
 
                 doc = QDomDocument(n)
 
                 if not util.domDocumentSetContent(doc, stream):
-                    logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                    logger.info("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
                     self.metadataCachedFails.append(n)
                     return None
 
@@ -215,9 +230,9 @@ class FLManager(QtCore.QObject, IManager):
                 acl = None  # FIXME: Add ACL later
 
                 # if ret.fieldNamesUnlock():
-                #    ret = FLTableMetaData(ret)
+                #    ret = PNTableMetaData(ret)
 
-                if acl:
+                if acl is not None:
                     acl.process(ret)
 
                 if not isSysTable:
@@ -302,7 +317,7 @@ class FLManager(QtCore.QObject, IManager):
                         continue
 
                 no = no.nextSibling()
-            tmd = FLTableMetaData(name, a, q)
+            tmd = PNTableMetaData(name, a, q)
             cK = None
             assocs = []
             tmd.setFTSFunction(ftsfun)
@@ -316,11 +331,11 @@ class FLManager(QtCore.QObject, IManager):
                     if e.tagName() == "field":
                         f = self.metadataField(e, v, ed)
                         if not tmd:
-                            tmd = FLTableMetaData(name, a, q)
+                            tmd = PNTableMetaData(name, a, q)
                         tmd.addFieldMD(f)
                         if f.isCompoundKey():
                             if not cK:
-                                cK = FLCompoundKey()
+                                cK = PNCompoundKeyMetaData()
                             cK.addFieldMD(f)
 
                         if f.associatedFieldName():
@@ -364,13 +379,13 @@ class FLManager(QtCore.QObject, IManager):
                     # .split(",")
                     fieldsEmpty = not fields
 
-                    for it in fL:
-                        pos = it.find(".")
+                    for it2 in fL:
+                        pos = it2.find(".")
                         if pos > -1:
-                            table = it[:pos]
-                            field = it[pos + 1 :]
+                            table = it2[:pos]
+                            field = it2[pos + 1 :]
                         else:
-                            field = it
+                            field = it2
 
                         # if not (not fieldsEmpty and table == name and fields.find(field.lower())) != fields.end():
                         # print("Tabla %s nombre %s campo %s buscando en %s" % (table, name, field, fields))
@@ -379,13 +394,16 @@ class FLManager(QtCore.QObject, IManager):
                         if not fieldsEmpty and (field.lower() in fields):
                             continue
 
+                        if table is None:
+                            raise ValueError("table is empty!")
+
                         mtdAux = self.metadata(table, True)
                         if mtdAux is not None:
                             fmtdAux = mtdAux.field(field)
                             if fmtdAux is not None:
                                 isForeignKey = False
                                 if fmtdAux.isPrimaryKey() and not table == name:
-                                    fmtdAux = FLFieldMetaData(fmtdAux)
+                                    fmtdAux = PNFieldMetaData(fmtdAux)
                                     fmtdAux.setIsPrimaryKey(False)
                                     fmtdAux.setEditable(False)
 
@@ -396,7 +414,7 @@ class FLManager(QtCore.QObject, IManager):
                                     fieldsAux = tmd.fieldNames()
                                     if fmtdAuxName not in fieldsAux:
                                         if not isForeignKey:
-                                            fmtdAux = FLFieldMetaData(fmtdAux)
+                                            fmtdAux = PNFieldMetaData(fmtdAux)
 
                                         fmtdAux.setName("%s.%s" % (table, field))
                                         # newRef = False
@@ -420,7 +438,7 @@ class FLManager(QtCore.QObject, IManager):
     def metadataDev(self, n, quick=None):
         return True
 
-    def query(self, n, parent=None):
+    def query(self, n, parent=None) -> Optional["PNSqlQuery"]:
         """
         Para obtener una consulta de la base de datos, a partir de un fichero XML.
 
@@ -432,6 +450,9 @@ class FLManager(QtCore.QObject, IManager):
         @param n Nombre de la consulta de la base de datos que se quiere obtener
         @return Un objeto FLSqlQuery que representa a la consulta que se quiere obtener
         """
+        if self.db_ is None:
+            raise Exception("query. self.db_ is empty!")
+
         qryName = "%s.qry" % n
         qry_ = self.db_.managerModules().contentCached(qryName)
 
@@ -443,6 +464,7 @@ class FLManager(QtCore.QObject, IManager):
         #    encoding="UTF-8",
         #    remove_blank_text=True,
         # )
+        from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
         q = PNSqlQuery(parent, self.db_.connectionName())
 
@@ -451,41 +473,47 @@ class FLManager(QtCore.QObject, IManager):
         elem_from = root_.find("from")
 
         if elem_select is not None:
-            q.setSelect(elem_select.text.replace(" ", "").replace("\n", "").replace("\t", "").replace("\r", ""))
+            if elem_select.text is not None:
+                q.setSelect(elem_select.text.replace(" ", "").replace("\n", "").replace("\t", "").replace("\r", ""))
         if elem_from is not None:
-            q.setFrom(elem_from.text.strip(" \t\n\r"))
+            if elem_from.text is not None:
+                q.setFrom(elem_from.text.strip(" \t\n\r"))
 
         for where in root_.iter("where"):
-            q.setWhere(where.text.strip(" \t\n\r"))
+            if where.text is not None:
+                q.setWhere(where.text.strip(" \t\n\r"))
 
         elem_tables = root_.find("tables")
         if elem_tables is not None:
-            q.setTablesList(elem_tables.text.strip(" \t\n\r"))
+            if elem_tables.text is not None:
+                q.setTablesList(elem_tables.text.strip(" \t\n\r"))
 
         elem_order = root_.find("order")
         if elem_order is not None:
-            orderBy_ = elem_order.text.strip(" \t\n\r")
-            q.setOrderBy(orderBy_)
+            if elem_order.text is not None:
+                orderBy_ = elem_order.text.strip(" \t\n\r")
+                q.setOrderBy(orderBy_)
 
         groupXml_ = root_.findall("group")
 
         if not groupXml_:
             groupXml_ = []
         # group_ = []
-        i = 0
-        while i < len(groupXml_):
-            gr = groupXml_[i]
-            elem_level = gr.find("level")
-            elem_field = gr.find("field")
-            if elem_field is not None and elem_level is not None and float(elem_level.text.strip(" \t\n\r")) == i:
-                # print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
-                q.addGroup(PNGroupByQuery(i, elem_field.text.strip(" \t\n\r")))
 
-            i = i + 1
+        for i in range(len(groupXml_)):
+            gr = groupXml_[i]
+            if gr is not None:
+                elem_level = gr.find("level")
+                elem_field = gr.find("field")
+                if elem_field is not None and elem_level is not None:
+                    if elem_level.text is not None and elem_field.text is not None:
+                        if float(elem_level.text.strip(" \t\n\r")) == i:
+                            # print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
+                            q.addGroup(PNGroupByQuery(i, elem_field.text.strip(" \t\n\r")))
 
         return q
 
-    def action(self, n: str) -> FLAction:
+    def action(self, n: str) -> "pineboolib.fllegacy.flaction.FLAction":
         """
         Obtiene la definición de una acción a partir de su nombre.
 
@@ -495,15 +523,22 @@ class FLManager(QtCore.QObject, IManager):
 
         @param n Nombre de la accion
         @return Un objeto FLAction con la descripcion de la accion
+
         """
+        if not self.db_:
+            raise Exception("action. self.db_ is empty!")
+
         # FIXME: This function is really inefficient. Pineboo already parses the actions much before.
-        if n in self.cacheAction_.keys():
+        if self.cacheAction_ and n in self.cacheAction_.keys():
             return self.cacheAction_[n]
+
+        from pineboolib.fllegacy.flaction import FLAction
+
         a = FLAction()
         util = FLUtil()
         doc = QDomDocument(n)
         list_modules = self.db_.managerModules().listAllIdModules()
-        content_actions = None
+        content_actions = ""
 
         for it in list_modules:
 
@@ -639,7 +674,7 @@ class FLManager(QtCore.QObject, IManager):
         else:
             return self.db_.existsTable(n)
 
-    def checkMetaData(self, mtd1, mtd2):
+    def checkMetaData(self, mtd1, mtd2) -> Any:
         """
         Compara los metadatos de dos tablas,  la definición en XML de esas dos tablas se
         pasan como dos cadenas de caracteres.
@@ -709,7 +744,7 @@ class FLManager(QtCore.QObject, IManager):
 
             return True
 
-    def alterTable(self, mtd1=None, mtd2=None, key=None, force=False):
+    def alterTable(self, mtd1=None, mtd2=None, key=None, force=False) -> bool:
         """
         Modifica la estructura o metadatos de una tabla, preservando los posibles datos
         que pueda contener.
@@ -724,16 +759,21 @@ class FLManager(QtCore.QObject, IManager):
         @param key Clave sha1 de la vieja estructura
         @return TRUE si la modificación tuvo éxito
         """
+        if not self.db_:
+            raise Exception("alterTable. self.db_ is empty!")
+
         return self.db_.dbAux().alterTable(mtd1, mtd2, key, force)
 
-    def createTable(self, n_or_tmd):
+    def createTable(self, n_or_tmd) -> Any:
         """
         Crea una tabla en la base de datos.
 
         @param n_tmd Nombre o metadatos de la tabla que se quiere crear
-        @return Un objeto FLTableMetaData con los metadatos de la tabla que se ha creado, o
+        @return Un objeto PNTableMetaData con los metadatos de la tabla que se ha creado, o
           0 si no se pudo crear la tabla o ya existía
         """
+        if not self.db_:
+            raise Exception("createTable. self.db_ is empty!")
 
         util = FLUtil()
         if n_or_tmd is None:
@@ -762,49 +802,52 @@ class FLManager(QtCore.QObject, IManager):
 
             return n_or_tmd
 
-    def formatValueLike(self, *args, **kwargs):
+    def formatValueLike(self, *args, **kwargs) -> str:
         """
         Devuelve el contenido del valor de de un campo formateado para ser reconocido
         por la base de datos actual en condiciones LIKE, dentro de la clausura WHERE de SQL.
 
         Este método toma como parametros los metadatos del campo definidos con
-        FLFieldMetaData. Además de TRUE y FALSE como posibles valores de un campo
+        PNFieldMetaData. Además de TRUE y FALSE como posibles valores de un campo
         lógico también acepta los valores Sí y No (o su traducción al idioma correspondiente).
         Las fechas son adaptadas al forma AAAA-MM-DD, que es el formato reconocido por PostgreSQL .
 
-        @param fMD Objeto FLFieldMetaData que describre los metadatos para el campo
+        @param fMD Objeto PNFieldMetaData que describre los metadatos para el campo
         @param v Valor que se quiere formatear para el campo indicado
         @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
         """
+        if not self.db_:
+            raise Exception("formatValueLike. self.db_ is empty!")
+
         if not isinstance(args[0], str):
             if args[0] is None:
                 return ""
 
-            self.formatValueLike(args[0].type(), args[1], args[2])
+            return self.formatValueLike(args[0].type(), args[1], args[2])
         else:
             return self.db_.formatValueLike(args[0], args[1], args[2])
 
-    def formatAssignValueLike(self, *args, **kwargs):
+    def formatAssignValueLike(self, *args, **kwargs) -> str:
         """
         Devuelve el contenido del valor de de un campo formateado para ser reconocido
         por la base de datos actual, dentro de la clausura WHERE de SQL.
 
         Este método toma como parametros los metadatos del campo definidos con
-        FLFieldMetaData. Además de TRUE y FALSE como posibles valores de un campo
+        PNFieldMetaData. Además de TRUE y FALSE como posibles valores de un campo
         lógico también acepta los valores Sí y No (o su traducción al idioma correspondiente).
         Las fechas son adaptadas al forma AAAA-MM-DD, que es el formato reconocido por PostgreSQL .
 
-        @param fMD Objeto FLFieldMetaData que describre los metadatos para el campo
+        @param fMD Objeto PNFieldMetaData que describre los metadatos para el campo
         @param v Valor que se quiere formatear para el campo indicado
         @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
         """
-        if isinstance(args[0], FLFieldMetaData):
+        if isinstance(args[0], PNFieldMetaData):
             # Tipo 1
             if args[0] is None:
                 return "1 = 1"
 
             mtd = args[0].metadata()
-            prefixTable = mtd.name()
+
             if not mtd:
                 return self.formatAssignValueLike(args[0].name(), args[0].type(), args[1], args[2])
 
@@ -828,10 +871,10 @@ class FLManager(QtCore.QObject, IManager):
                         break
                 # FIXME: deleteLater() is a C++ internal to clear the memory later. Not used in Python
                 # qry.deleteLater()
-
+            prefixTable = mtd.name()
             return self.formatAssignValueLike("%s.%s" % (prefixTable, fieldName), args[0].type(), args[1], args[2])
 
-        elif isinstance(args[1], FLFieldMetaData):
+        elif isinstance(args[1], PNFieldMetaData):
             # tipo 2
             if args[1] is None:
                 return "1 = 1"
@@ -861,8 +904,10 @@ class FLManager(QtCore.QObject, IManager):
 
             return "%s%s" % (field_name, format_value)
 
-    def formatValue(self, fMD_or_type: str, v: Optional[Union[str, int]], upper: bool = False) -> str:
+    def formatValue(self, fMD_or_type: str, v: Any, upper: bool = False) -> str:
         # FIXME: This function sometimes returns integers!
+        if not self.db_:
+            raise Exception("formatValue. self.db_ is empty!")
 
         if not fMD_or_type:
             raise ValueError("fMD_or_type is required")
@@ -881,7 +926,7 @@ class FLManager(QtCore.QObject, IManager):
         # print("tipo 1", type(args[1]))
         # print("tipo 2", type(args[2]))]
 
-        if isinstance(args[0], FLFieldMetaData) and len(args) == 3:
+        if isinstance(args[0], PNFieldMetaData) and len(args) == 3:
             fMD = args[0]
             mtd = fMD.metadata()
             if not mtd:
@@ -921,10 +966,10 @@ class FLManager(QtCore.QObject, IManager):
 
             return self.formatAssignValue(fieldName, args[0].type(), args[1], args[2])
 
-        elif isinstance(args[1], FLFieldMetaData) and isinstance(args[0], str):
+        elif isinstance(args[1], PNFieldMetaData) and isinstance(args[0], str):
             return self.formatAssignValue(args[0], args[1].type(), args[2], args[3])
 
-        elif isinstance(args[0], FLFieldMetaData) and len(args) == 2:
+        elif isinstance(args[0], PNFieldMetaData) and len(args) == 2:
             return self.formatAssignValue(args[0].name(), args[0], args[1], False)
         else:
             if args[1] is None:
@@ -950,13 +995,13 @@ class FLManager(QtCore.QObject, IManager):
 
             return retorno
 
-    def metadataField(self, field: QDomElement, v: bool = True, ed: bool = True) -> FLFieldMetaData:
+    def metadataField(self, field: QDomElement, v: bool = True, ed: bool = True) -> "PNFieldMetaData":
         """
-        Crea un objeto FLFieldMetaData a partir de un elemento XML.
+        Crea un objeto PNFieldMetaData a partir de un elemento XML.
 
         Dado un elemento XML, que contiene la descripción de un
         campo de una tabla construye y agrega a una lista de descripciones
-        de campos el objeto FLFieldMetaData correspondiente, que contiene
+        de campos el objeto PNFieldMetaData correspondiente, que contiene
         dicha definición del campo. Tambien lo agrega a una lista de claves
         compuesta, si el campo construido pertenece a una clave compuesta.
         NO SE HACEN CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
@@ -964,7 +1009,7 @@ class FLManager(QtCore.QObject, IManager):
         @param field Elemento XML con la descripción del campo
         @param v Valor utilizado por defecto para la propiedad visible
         @param ed Valor utilizado por defecto para la propiedad editable
-        @return Objeto FLFieldMetaData que contiene la descripción del campo
+        @return Objeto PNFieldMetaData que contiene la descripción del campo
         """
         if not field:
             raise ValueError("field is required")
@@ -972,9 +1017,9 @@ class FLManager(QtCore.QObject, IManager):
         util = FLUtil()
 
         ck = False
-        n = None
-        a = None
-        ol = False
+        n: str
+        a: str
+        ol: Optional[str] = None
         rX = None
         assocBy = None
         assocWith = None
@@ -991,7 +1036,7 @@ class FLManager(QtCore.QObject, IManager):
         fullCalc = False
         trimm = False
 
-        t: str = None
+        t: Optional[str] = None
         length = 0
         pI = 4
         pD = 0
@@ -1151,13 +1196,13 @@ class FLManager(QtCore.QObject, IManager):
 
             no = no.nextSibling()
 
-        f = FLFieldMetaData(
+        f = PNFieldMetaData(
             n, util.translate("Metadata", a), aN, iPK, t, length, c, v, ed, pI, pD, iNX, uNI, coun, dV, oT, rX, vG, True, ck
         )
         f.setFullyCalculated(fullCalc)
         f.setTrimed(trimm)
 
-        if ol:
+        if ol is not None:
             f.setOptionsList(ol)
         if so is not None:
             f.setSearchOptions(so)
@@ -1199,7 +1244,7 @@ class FLManager(QtCore.QObject, IManager):
 
         return f
 
-    def metadataRelation(self, relation: QDomElement) -> FLRelationMetaData:
+    def metadataRelation(self, relation: QDomElement) -> "PNRelationMetaData":
         """
         Crea un objeto FLRelationMetaData a partir de un elemento XML.
 
@@ -1216,7 +1261,7 @@ class FLManager(QtCore.QObject, IManager):
 
         fT = ""
         fF = ""
-        rC = FLRelationMetaData.RELATION_M1
+        rC = PNRelationMetaData.RELATION_M1
         dC = False
         uC = False
         cI = True
@@ -1239,7 +1284,7 @@ class FLManager(QtCore.QObject, IManager):
 
                 elif e.tagName() == "card":
                     if e.text() == "1M":
-                        rC = FLRelationMetaData.RELATION_1M
+                        rC = PNRelationMetaData.RELATION_1M
 
                     no = no.nextSibling()
                     continue
@@ -1261,7 +1306,7 @@ class FLManager(QtCore.QObject, IManager):
 
             no = no.nextSibling()
 
-        return FLRelationMetaData(fT, fF, rC, dC, uC, cI)
+        return PNRelationMetaData(fT, fF, rC, dC, uC, cI)
 
     @decorators.NotImplementedWarn
     def queryParameter(self, parameter):
@@ -1301,7 +1346,7 @@ class FLManager(QtCore.QObject, IManager):
         el sistema con tablas iniciales.
 
         @param n Nombre de la tabla.
-        @return Un objeto FLTableMetaData con los metadatos de la tabla que se ha creado, o
+        @return Un objeto PNTableMetaData con los metadatos de la tabla que se ha creado, o
           False si no se pudo crear la tabla o ya existía
         """
         util = FLUtil()
@@ -1320,7 +1365,7 @@ class FLManager(QtCore.QObject, IManager):
                 _in = QtCore.QTextStream(_file)
                 _data = _in.readAll()
                 if not util.domDocumentSetContent(doc, _data):
-                    logger.warning("FLManager::createSystemTable: %s", util.tr("Error al cargar los metadatos para la tabla %1").arg(n))
+                    logger.warning("FLManager::createSystemTable: %s", self.tr("Error al cargar los metadatos para la tabla %s" % n))
                     return False
                 else:
                     docElem = doc.documentElement()
@@ -1336,10 +1381,13 @@ class FLManager(QtCore.QObject, IManager):
 
         return False
 
-    def loadTables(self):
+    def loadTables(self) -> None:
         """
         Carga en la lista de tablas los nombres de las tablas de la base de datos
         """
+        if not self.db_:
+            raise Exception("loadTables. self.db_ is empty!")
+
         if not self.listTables_:
             self.listTables_ = []
         else:
@@ -1347,11 +1395,14 @@ class FLManager(QtCore.QObject, IManager):
 
         self.listTables_ = self.db_.dbAux().tables()
 
-    def cleanupMetaData(self):
+    def cleanupMetaData(self) -> None:
         """
         Limpieza la tabla flmetadata, actualiza el cotenido xml con el de los fichero .mtd
         actualmente cargados
         """
+        if not self.db_:
+            raise Exception("cleanupMetaData. self.db_ is empty!")
+
         # util = FLUtil()
         if not self.existsTable("flfiles") or not self.existsTable("flmetadata"):
             return
@@ -1372,14 +1423,14 @@ class FLManager(QtCore.QObject, IManager):
         self.db_.managerModules().loadAllIdModules()
         self.db_.managerModules().loadIdAreas()
 
-        q = PNSqlQuery(None, self.db_.dbAux())
+        q = PNSqlQuery(None, "dbAux")
         q.exec_("SELECT tabla,xml FROM flmetadata")
         while q.next():
             self.dictKeyMetaData_[str(q.value(0))] = str(q.value(1))
 
-        c = FLSqlCursor("flmetadata", True, self.db_.dbAux())
+        c = PNSqlCursor("flmetadata", True, "dbAux")
 
-        q2 = PNSqlQuery(None, self.db_.dbAux())
+        q2 = PNSqlQuery(None, "dbAux")
         q2.exec_("SELECT nombre,sha FROM flfiles WHERE nombre LIKE '%.mtd' and nombre not like '%%alteredtable%'")
         while q2.next():
             table = str(q2.value(0))
@@ -1409,7 +1460,7 @@ class FLManager(QtCore.QObject, IManager):
         """
         from pineboolib.application import project
 
-        if n in project._DGI.sys_mtds():
+        if project._DGI and n in project.DGI.sys_mtds():
             return True
 
         if n[0:2] != "fl":
@@ -1423,7 +1474,7 @@ class FLManager(QtCore.QObject, IManager):
 
         return False
 
-    def storeLargeValue(self, mtd, largeValue):
+    def storeLargeValue(self, mtd, largeValue: str) -> Optional[str]:
         """
         Utilizado para almacenar valores grandes de campos en tablas separadas indexadas
         por claves SHA del contenido del valor.
@@ -1441,6 +1492,9 @@ class FLManager(QtCore.QObject, IManager):
         @param largeValue Valor de gran tamaño del campo
         @return Clave de referencia al valor
         """
+        if not self.db_:
+            raise Exception("storeLareValue. self.db_ is empty!")
+
         if largeValue[0:3] == "RK@" or not mtd:
             return None
 
@@ -1449,19 +1503,19 @@ class FLManager(QtCore.QObject, IManager):
         #    return None
 
         tableLarge = None
-        from pineboolib.fllegacy.flapplication import aqApp
+        from pineboolib import pncontrolsfactory
 
-        if aqApp.singleFLLarge():
+        if pncontrolsfactory.aqApp.singleFLLarge():
             tableLarge = "fllarge"
         else:
             tableLarge = "fllarge_%s" % tableName
             if not self.existsTable(tableLarge):
-                mtdLarge = FLTableMetaData(tableLarge, tableLarge)
-                fieldLarge = FLFieldMetaData("refkey", "refkey", False, True, "string", 100)
+                mtdLarge = PNTableMetaData(tableLarge, tableLarge)
+                fieldLarge = PNFieldMetaData("refkey", "refkey", False, True, "string", 100)
                 mtdLarge.addFieldMD(fieldLarge)
-                fieldLarge2 = FLFieldMetaData("sha", "sha", True, False, "string", 50)
+                fieldLarge2 = PNFieldMetaData("sha", "sha", True, False, "string", 50)
                 mtdLarge.addFieldMD(fieldLarge2)
-                fieldLarge3 = FLFieldMetaData("contenido", "contenido", True, False, "stringlist")
+                fieldLarge3 = PNFieldMetaData("contenido", "contenido", True, False, "stringlist")
                 mtdLarge.addFieldMD(fieldLarge3)
                 mtdAux = self.createTable(mtdLarge)
                 mtd.insertChild(mtdLarge)
@@ -1472,7 +1526,7 @@ class FLManager(QtCore.QObject, IManager):
         sha = str(util.sha1(largeValue))
         # print("-->", tableName, sha)
         refKey = "RK@%s@%s" % (tableName, sha)
-        q = PNSqlQuery(None, self.db_.dbAux())
+        q = PNSqlQuery(None, "dbAux")
         q.setSelect("refkey")
         q.setFrom("fllarge")
         q.setWhere(" refkey = '%s'" % refKey)
@@ -1484,13 +1538,13 @@ class FLManager(QtCore.QObject, IManager):
                     return None
         else:
             sql = "INSERT INTO %s (contenido,refkey) VALUES ('%s','%s')" % (tableLarge, largeValue, refKey)
-            if not util.execSql(sql):
+            if not util.execSql(sql, "Aux"):
                 logger.warning("FLManager::ERROR:StoreLargeValue.Insert %s.%s", tableLarge, refKey)
                 return None
 
         return refKey
 
-    def fetchLargeValue(self, refKey):
+    def fetchLargeValue(self, refKey: str) -> Optional[str]:
         """
         Obtiene el valor de gran tamaño segun su clave de referencia.
 
@@ -1502,14 +1556,14 @@ class FLManager(QtCore.QObject, IManager):
         if not refKey[0:3] == "RK@":
             return None
 
-        from pineboolib.fllegacy.flapplication import aqApp
+        from pineboolib import pncontrolsfactory
 
-        tableName = "fllarge" if aqApp.singleFLLarge() else "fllarge_" + refKey.split("@")[1]
+        tableName = "fllarge" if pncontrolsfactory.aqApp.singleFLLarge() else "fllarge_" + refKey.split("@")[1]
 
         if not self.existsTable(tableName):
             return None
 
-        q = PNSqlQuery()
+        q = PNSqlQuery(None, "Aux")
         q.setSelect("contenido")
         q.setFrom(tableName)
         q.setWhere(" refkey = '%s'" % refKey)
@@ -1522,7 +1576,9 @@ class FLManager(QtCore.QObject, IManager):
 
             return v
 
-    def initCount(self):
+        return None
+
+    def initCount(self) -> int:
         """
         Uso interno. Indica el número de veces que se ha llamado a FLManager::init().
         """

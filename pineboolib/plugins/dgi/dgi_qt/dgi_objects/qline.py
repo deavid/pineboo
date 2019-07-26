@@ -24,4 +24,4 @@ class QLine(QtWidgets.QFrame):
         return self.orientation_
 
     orientation = property(getOrientation, setOrientation)
-    objectName = property(getObjectName, setObjectName)
+    objectName = property(getObjectName, setObjectName)  # type: ignore

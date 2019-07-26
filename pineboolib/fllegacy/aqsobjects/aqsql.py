@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from pineboolib.application import project
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib import logging
-from typing import Union
+
+from typing import Union, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.fllegacy.flsqlcursor import FLSqlCursor  # noqa: F401
 
 logger = logging.getLogger(__name__)
 """
@@ -24,7 +27,10 @@ class AQSql(object):
     @return La base de datos correspondiente al nombre de conexion indicado
     """
 
-    def database(self, connection_name="default"):
+    @classmethod
+    def database(self, connection_name="default") -> Any:
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         return project.conn.useConn(connection_name)
 
     """
@@ -45,15 +51,18 @@ class AQSql(object):
     }
     """
 
-    def update(self, table_or_cursor: Union[str, FLSqlCursor], fields, values, where="", conn=None):
+    @classmethod
+    def update(self, table_or_cursor: Union[str, "FLSqlCursor"], fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
-            cur = FLSqlCursor(table_or_cursor, conn)
+            from pineboolib.application.database.pnsqlcursor import PNSqlCursor
+
+            cur = PNSqlCursor(table_or_cursor, conn)
         else:
             cur = table_or_cursor
 
-        if cur is None:
-            return False
+        # if cur is None:
+        #     return False
 
         if not cur.metadata():
             return False
@@ -76,7 +85,6 @@ class AQSql(object):
             if msgCheck != "":
                 ok = False
                 raise Exception(msgCheck)
-                break
 
             cur.setActivatedCheckIntegrity(False)
             ok = cur.commitBuffer()
@@ -101,15 +109,15 @@ class AQSql(object):
             }
     """
 
-    def insert(self, table_or_cursor: Union[str, FLSqlCursor], fields, values, where="", conn=None):
+    @classmethod
+    def insert(self, table_or_cursor: Union[str, "FLSqlCursor"], fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
-            cur = FLSqlCursor(table_or_cursor, conn)
+            from pineboolib.application.database.pnsqlcursor import PNSqlCursor
+
+            cur = PNSqlCursor(table_or_cursor, conn)
         else:
             cur = table_or_cursor
-
-        if cur is None:
-            return False
 
         if not cur.metadata():
             return False
@@ -150,7 +158,8 @@ class AQSql(object):
         }
     """
 
-    def del_(self, cur_or_table: Union[str, FLSqlCursor], where="", conn_name="default"):
+    @classmethod
+    def del_(self, cur_or_table: Union[str, "FLSqlCursor"], where="", conn_name="default"):
 
         if not isinstance(cur_or_table, str):
             cur = cur_or_table
@@ -175,7 +184,7 @@ class AQSql(object):
                     break
 
                 msg_check = cur.msgCheckIntegrity()
-                if msg_check is None:
+                if not msg_check:
                     ok = False
                     logger.warning(msg_check, cur.db())
                     break
@@ -186,9 +195,9 @@ class AQSql(object):
 
             return ok
         else:
-            from .aqsqlcursor import AQSqlCursor
+            from pineboolib.application.database.pnsqlcursor import PNSqlCursor
 
-            cur = AQSqlCursor(cur_or_table, True, conn_name)
+            cur = PNSqlCursor(cur_or_table, True, conn_name)
             cur.setForwardOnly(True)
             return cur.del_(where)
 

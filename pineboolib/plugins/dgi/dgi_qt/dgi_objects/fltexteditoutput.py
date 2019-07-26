@@ -18,10 +18,13 @@ class FLTextEditOutput(QtWidgets.QPlainTextEdit):
 
     def write(self, txt: Union[bytearray, bytes, str]) -> None:
         txt = str(txt)
-        self.oldStdout.write(txt)
+        if self.oldStdout:
+            self.oldStdout.write(txt)
         self.appendPlainText(txt)
 
-    def close(self) -> None:
-        sys.stdout = self.oldStdout
-        sys.stderr = self.oldStderr
-        super().close()
+    def close(self) -> bool:
+        if self.oldStdout:
+            sys.stdout = self.oldStdout
+        if self.oldStderr:
+            sys.stderr = self.oldStderr
+        return super().close()

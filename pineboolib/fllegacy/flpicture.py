@@ -11,7 +11,7 @@ from pineboolib.core import decorators
 class FLPicturePrivate(QtCore.QObject):
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(FLPicture.FLPicturePrivate, self).__init__()
+        super().__init__()
 
         self.pic_ = QtGui.QPicture()
         self.pte_ = QtGui.QPainter()
@@ -52,7 +52,7 @@ class FLPicturePrivate(QtCore.QObject):
 
 
 class FLPicture(QObject):
-    d_: FLPicturePrivate = None
+    d_: FLPicturePrivate
 
     class FLPenStyle(Enum):
         NoPen = 0
@@ -130,35 +130,43 @@ class FLPicture(QObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
+        self.d_ = FLPicturePrivate()
         if len(args) and isinstance(args[0], FLPicture):
             super(FLPicture, self).__init__()
             otherPic = args[0]
             if otherPic and otherPic != self and otherPic.d_ and otherPic.d_.pic_:
-                self.d_ = FLPicturePrivate()
                 self.d_.pic_ = otherPic.d_.pic_
 
         elif len(args) and isinstance(args[0], QtGui.QPicture):
             if len(args) >= 3:
-                super(FLPicture, self).__init__(args[1], args[2])
+                # FIXME: We need to find the actual call or what it was meant to do to fix this
+                raise ValueError("Unsupported construct")
+                # super(FLPicture, self).__init__(args[1], args[2])
             else:
                 super(FLPicture, self).__init__()
             self.setPicture(args[0])
 
         elif len(args) > 1 and isinstance(args[1], QtGui.QPainter):
+            # FIXME: We need to find the actual call or what it was meant to do to fix this
             self.d_.setPainter(args[1])
-            super(FLPicture, self).__init__(args[2], args[3])
+            raise ValueError("Unsupported construct")
+            # super(FLPicture, self).__init__(args[2], args[3])
 
         else:
-            super(FLPicture, self).__init__(args[0], args[1])
+            # FIXME: We need to find the actual call or what it was meant to do to fix this
+            raise ValueError("Unsupported construct")
+            # super(FLPicture, self).__init__(args[0], args[1])
 
     @decorators.BetaImplementation
     def PIC_NEW_D(self):
-        if not self.d_:
-            self.d_ = FLPicturePrivate()
+        pass
+        # NOTE: Not needed, it is always created at init.
+        # if not self.d_:
+        #     self.d_ = FLPicturePrivate()
 
     @decorators.BetaImplementation
     def PIC_CHK_D(self):
-        if not self.d_ or (self.d_ and not self.d_.pte_.isActive()):
+        if not self.d_.pte_.isActive():
             # print("FLPicture. Picture no está activado, para activarlo llama a la función begin()")
             return False
         return True
@@ -166,7 +174,7 @@ class FLPicture(QObject):
     @decorators.BetaImplementation
     def picture(self):
         if not self.d_:
-            return 0
+            return None
         return self.d_.pic_
 
     @decorators.BetaImplementation
@@ -174,13 +182,12 @@ class FLPicture(QObject):
         if pic:
             self.cleanup()
             self.PIC_NEW_D()
-            del self.d_.pic_
             self.d_.pic_ = pic
             self.d_.ownerPic_ = False
 
     @decorators.BetaImplementation
     def isNull(self):
-        return self.d_ and self.d_.pic_.isNull()
+        return self.d_.pic_.isNull()
 
     @decorators.BetaImplementation
     def load(self, fileName, fformat=0):
@@ -217,9 +224,12 @@ class FLPicture(QObject):
 
     @decorators.BetaImplementation
     def cleanup(self):
-        if hasattr(self, "d_") and self.d_:
-            del self.d_
-        self.d_ = 0
+        pass
+        # FIXME: Not needed, Python does cleanup. If this is used later for re-using the same
+        # ... instance, at least avoid saving zero (0) to the pointer.
+        # if hasattr(self, "d_") and self.d_:
+        #     del self.d_
+        # self.d_ = 0
 
     @decorators.BetaImplementation
     def isActive(self):
@@ -521,7 +531,7 @@ class FLPicture(QObject):
             return 0
         self.end()
         cpyPic = QtGui.QPicture()
-        cpyPic.setData(self.d_.pic_.data(), self.d_.pic_.size())
+        cpyPic.setData(self.d_.pic_.data())
         pa = QtGui.QPainter(pix)
         pa.setClipRect(0, 0, pix.width(), pix.height())
         cpyPic.play(pa)
@@ -537,7 +547,7 @@ class FLPicture(QObject):
         if pic and pic.picture():
             self.end()
             cpyPic = QtGui.QPicture()
-            cpyPic.setData(self.d_.pic_.data(), self.d_.pic_.size())
+            cpyPic.setData(self.d_.pic_.data())
             pa = QtGui.QPainter(pic.picture())
             cpyPic.play(pa)
             pa.end()

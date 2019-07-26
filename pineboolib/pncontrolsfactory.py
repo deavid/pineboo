@@ -5,13 +5,12 @@ import re
 import os
 import traceback
 
-from typing import Any, List, Tuple, Optional
-
 from PyQt5 import QtCore  # type: ignore
-from pineboolib.core.utils.utils_base import create_dict
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 from pineboolib.application import project
 from pineboolib.fllegacy.systype import SysType
+import types
+from typing import Callable, Any, List, Tuple, Optional, Dict
 
 
 logger = logging.getLogger("PNControlsFactory")
@@ -28,7 +27,123 @@ class ObjectNotFoundInCurrentDGI(object):
 
 
 class ObjectNotFoundDGINotLoaded(object):
-    pass
+    def __init__(self, *args: List[Any]):
+        pass
+
+
+aqApp: Any = ObjectNotFoundDGINotLoaded
+
+# --- create empty objects first:
+QComboBox: Any = ObjectNotFoundDGINotLoaded
+QTable: Any = ObjectNotFoundDGINotLoaded
+QLayoutWidget: Any = ObjectNotFoundDGINotLoaded
+QToolButton: Any = ObjectNotFoundDGINotLoaded
+QTabWidget: Any = ObjectNotFoundDGINotLoaded
+QLabel: Any = ObjectNotFoundDGINotLoaded
+QGroupBox: Any = ObjectNotFoundDGINotLoaded
+QListView: Any = ObjectNotFoundDGINotLoaded
+QPushButton: Any = ObjectNotFoundDGINotLoaded
+QTextEdit: Any = ObjectNotFoundDGINotLoaded
+QLineEdit: Any = ObjectNotFoundDGINotLoaded
+QDateEdit: Any = ObjectNotFoundDGINotLoaded
+QTimeEdit: Any = ObjectNotFoundDGINotLoaded
+QCheckBox: Any = ObjectNotFoundDGINotLoaded
+QWidget: Any = ObjectNotFoundDGINotLoaded
+QtWidgets: Any = ObjectNotFoundDGINotLoaded
+QColor: Any = ObjectNotFoundDGINotLoaded
+QMessageBox: Any = ObjectNotFoundDGINotLoaded
+QButtonGroup: Any = ObjectNotFoundDGINotLoaded
+QDialog: Any = ObjectNotFoundDGINotLoaded
+QVBoxLayout: Any = ObjectNotFoundDGINotLoaded
+QHBoxLayout: Any = ObjectNotFoundDGINotLoaded
+QFrame: Any = ObjectNotFoundDGINotLoaded
+QMainWindow: Any = ObjectNotFoundDGINotLoaded
+QSignalMapper: Any = ObjectNotFoundDGINotLoaded
+QDomDocument: Any = ObjectNotFoundDGINotLoaded
+QMenu: Any = ObjectNotFoundDGINotLoaded
+QToolBar: Any = ObjectNotFoundDGINotLoaded
+QListWidgetItem: Any = ObjectNotFoundDGINotLoaded
+QListViewWidget: Any = ObjectNotFoundDGINotLoaded
+QPixmap: Any = ObjectNotFoundDGINotLoaded
+QImage: Any = ObjectNotFoundDGINotLoaded
+QIcon: Any = ObjectNotFoundDGINotLoaded
+QAction: Any = ObjectNotFoundDGINotLoaded
+QActionGroup: Any = ObjectNotFoundDGINotLoaded
+QTreeWidget: Any = ObjectNotFoundDGINotLoaded
+QTreeWidgetItem: Any = ObjectNotFoundDGINotLoaded
+QTreeWidgetItemIterator: Any = ObjectNotFoundDGINotLoaded
+QDataView: Any = ObjectNotFoundDGINotLoaded
+QProcess: Any = ObjectNotFoundDGINotLoaded
+QByteArray: Any = ObjectNotFoundDGINotLoaded
+QRadioButton: Any = ObjectNotFoundDGINotLoaded
+QSpinBox: Any = ObjectNotFoundDGINotLoaded
+QInputDialog: Any = ObjectNotFoundDGINotLoaded
+QApplication: Any = ObjectNotFoundDGINotLoaded
+qApp: Any = ObjectNotFoundDGINotLoaded
+QStyleFactory: Any = ObjectNotFoundDGINotLoaded
+QFontDialog: Any = ObjectNotFoundDGINotLoaded
+QDockWidget: Any = ObjectNotFoundDGINotLoaded
+QMdiArea: Any = ObjectNotFoundDGINotLoaded
+QMdiSubWindow: Any = ObjectNotFoundDGINotLoaded
+QKeySequence: Any = ObjectNotFoundDGINotLoaded
+QSize: Any = ObjectNotFoundDGINotLoaded
+QSizePolicy: Any = ObjectNotFoundDGINotLoaded
+QToolBox: Any = ObjectNotFoundDGINotLoaded
+QPainter: Any = ObjectNotFoundDGINotLoaded
+QBrush: Any = ObjectNotFoundDGINotLoaded
+QProgressDialog: Any = ObjectNotFoundDGINotLoaded
+QFileDialog: Any = ObjectNotFoundDGINotLoaded
+
+# Clases FL
+FLLineEdit: Any = ObjectNotFoundDGINotLoaded
+FLTimeEdit: Any = ObjectNotFoundDGINotLoaded
+FLDateEdit: Any = ObjectNotFoundDGINotLoaded
+FLPixmapView: Any = ObjectNotFoundDGINotLoaded
+FLDomDocument: Any = ObjectNotFoundDGINotLoaded
+FLDomElement: Any = ObjectNotFoundDGINotLoaded
+FLDomNode: Any = ObjectNotFoundDGINotLoaded
+FLDomNodeList: Any = ObjectNotFoundDGINotLoaded
+FLListViewItem: Any = ObjectNotFoundDGINotLoaded
+FLTable: Any = ObjectNotFoundDGINotLoaded
+FLDataTable: Any = ObjectNotFoundDGINotLoaded
+FLCheckBox: Any = ObjectNotFoundDGINotLoaded
+FLTextEditOutput: Any = ObjectNotFoundDGINotLoaded
+FLSpinBox: Any = ObjectNotFoundDGINotLoaded
+FLTableDB: Any = ObjectNotFoundDGINotLoaded
+FLFieldDB: Any = ObjectNotFoundDGINotLoaded
+FLFormDB: Any = ObjectNotFoundDGINotLoaded
+FLFormRecordDB: Any = ObjectNotFoundDGINotLoaded
+FLFormSearchDB: Any = ObjectNotFoundDGINotLoaded
+FLDoubleValidator: Any = ObjectNotFoundDGINotLoaded
+FLIntValidator: Any = ObjectNotFoundDGINotLoaded
+FLUIntValidator: Any = ObjectNotFoundDGINotLoaded
+FLCodBar: Any = ObjectNotFoundDGINotLoaded
+FLWidget: Any = ObjectNotFoundDGINotLoaded
+FLWorkSpace: Any = ObjectNotFoundDGINotLoaded
+
+FormDBWidget: Any = ObjectNotFoundDGINotLoaded
+
+# Clases QSA
+CheckBox: Any = ObjectNotFoundDGINotLoaded
+ComboBox: Any = ObjectNotFoundDGINotLoaded
+TextEdit: Any = ObjectNotFoundDGINotLoaded
+LineEdit: Any = ObjectNotFoundDGINotLoaded
+FileDialog: Any = ObjectNotFoundDGINotLoaded
+MessageBox: Any = ObjectNotFoundDGINotLoaded
+RadioButton: Any = ObjectNotFoundDGINotLoaded
+Color = QColor
+Dialog: Any = ObjectNotFoundDGINotLoaded
+Label: Any = ObjectNotFoundDGINotLoaded
+GroupBox: Any = ObjectNotFoundDGINotLoaded
+Process: Any = ObjectNotFoundDGINotLoaded
+SpinBox: Any = ObjectNotFoundDGINotLoaded
+Line: Any = ObjectNotFoundDGINotLoaded
+NumberEdit: Any = ObjectNotFoundDGINotLoaded
+DateEdit: Any = ObjectNotFoundDGINotLoaded
+TimeEdit: Any = ObjectNotFoundDGINotLoaded
+
+# Clases AQNext
+auth: Any = ObjectNotFoundDGINotLoaded
 
 
 def resolveObject(name: str) -> Any:
@@ -38,11 +153,11 @@ def resolveObject(name: str) -> Any:
     if obj_:
         return obj_
 
-    logger.warning("resolveObject: class <%s> not found in dgi <%s>", name, project._DGI.alias().lower())
+    logger.warning("resolveObject: class <%s> not found in dgi <%s>", name, project.DGI.alias().lower())
     return ObjectNotFoundInCurrentDGI
 
 
-def reload_from_DGI():
+def reload_from_DGI() -> None:
     # Clases Qt
     global QComboBox, QTable, QLayoutWidget, QToolButton, QTabWidget, QLabel, QGroupBox, QListView, QPushButton, QTextEdit
     global QLineEdit, QDateEdit, QTimeEdit, QCheckBox, QWidget, QtWidgets, QColor, QMessageBox, QButtonGroup, QDialog
@@ -176,10 +291,10 @@ def reload_from_DGI():
 
 
 class System_class(object):
-    def setenv(self, name, val):
+    def setenv(self, name: str, val: str) -> None:
         os.environ[name] = val
 
-    def getenv(self, name):
+    def getenv(self, name: str) -> str:
         ret_ = ""
         if name in os.environ.keys():
             ret_ = os.environ[name]
@@ -191,9 +306,9 @@ System = System_class()
 
 
 class ProxySlot:
-    PROXY_FUNCTIONS = {}
+    PROXY_FUNCTIONS: Dict[str, Callable] = {}
 
-    def __init__(self, remote_fn, receiver, slot):
+    def __init__(self, remote_fn: types.MethodType, receiver: Any, slot: Any) -> None:
         self.key = "%r.%r->%r" % (remote_fn, receiver, slot)
         if self.key not in self.PROXY_FUNCTIONS:
             weak_fn = weakref.WeakMethod(remote_fn)
@@ -201,11 +316,11 @@ class ProxySlot:
             self.PROXY_FUNCTIONS[self.key] = proxy_fn(weak_fn, weak_receiver, slot)
         self.proxy_function = self.PROXY_FUNCTIONS[self.key]
 
-    def getProxyFn(self):
+    def getProxyFn(self) -> Callable:
         return self.proxy_function
 
 
-def get_expected_args_num(inspected_function):
+def get_expected_args_num(inspected_function: Callable) -> int:
     expected_args = inspect.getargspec(inspected_function)[0]
     args_num = len(expected_args)
 
@@ -215,13 +330,13 @@ def get_expected_args_num(inspected_function):
     return args_num
 
 
-def get_expected_kwargs(inspected_function):
-    expected_kwargs = inspect.getargspec(inspected_function)[2]
+def get_expected_kwargs(inspected_function: Callable) -> bool:
+    expected_kwargs = inspect.getfullargspec(inspected_function)[2]
     return True if expected_kwargs else False
 
 
-def proxy_fn(wf, wr, slot):
-    def fn(*args, **kwargs):
+def proxy_fn(wf: weakref.WeakMethod, wr: weakref.ref, slot: Any) -> Callable:
+    def fn(*args: List[Any], **kwargs: Dict[str, Any]) -> Optional[Any]:
         f = wf()
         if not f:
             return None
@@ -239,8 +354,8 @@ def proxy_fn(wf, wr, slot):
     return fn
 
 
-def slot_done(fn, signal, sender, caller):
-    def new_fn(*args, **kwargs):
+def slot_done(fn: Callable, signal: Any, sender: Any, caller: Any) -> Callable:
+    def new_fn(*args: List[Any], **kwargs: Dict[str, Any]) -> Any:
 
         res = False
 
@@ -248,13 +363,15 @@ def slot_done(fn, signal, sender, caller):
         # En Eneboo se esperaba que signal no contenga argumentos
         if signal.signal == "2clicked(bool)":
             args = tuple()
-
-        args_num = get_expected_args_num(fn)
+        # args_num = get_expected_args_num(fn)
         try:
             if get_expected_kwargs(fn):
-                res = fn(*args[0:args_num], **kwargs)
+                # res = fn(*args[0:args_num], **kwargs)
+                res = fn(*args, **kwargs)
             else:
-                res = fn(*args[0:args_num])
+                # res = fn(*args[0:args_num])
+                res = fn(*args)
+
         except Exception:
             logger.exception("Error trying to create a connection")
 
@@ -272,11 +389,11 @@ def slot_done(fn, signal, sender, caller):
     return new_fn
 
 
-def connect(sender, signal, receiver, slot, caller=None) -> Optional[Tuple[Any, Any]]:
+def connect(sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = None) -> Optional[Tuple[Any, Any]]:
     if caller is not None:
-        logger.debug("* * * Connect:: %s %s %s %s %s", caller, sender, signal, receiver, slot)
+        logger.trace("* * * Connect:: %s %s %s %s %s", caller, sender, signal, receiver, slot)
     else:
-        logger.debug("? ? ? Connect:: %s %s %s %s", sender, signal, receiver, slot)
+        logger.trace("? ? ? Connect:: %s %s %s %s", sender, signal, receiver, slot)
     signal_slot = solve_connection(sender, signal, receiver, slot)
 
     if not signal_slot:
@@ -303,7 +420,7 @@ def connect(sender, signal, receiver, slot, caller=None) -> Optional[Tuple[Any, 
     return signal_slot
 
 
-def disconnect(sender, signal, receiver, slot, caller=None) -> Optional[Tuple[Any, Any]]:
+def disconnect(sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = None) -> Optional[Tuple[Any, Any]]:
     signal_slot = solve_connection(sender, signal, receiver, slot)
     if not signal_slot:
         return None
@@ -316,10 +433,10 @@ def disconnect(sender, signal, receiver, slot, caller=None) -> Optional[Tuple[An
     return signal_slot
 
 
-def solve_connection(sender, signal, receiver, slot):
+def solve_connection(sender: Any, signal: str, receiver: Any, slot: str) -> Optional[Tuple[Any, Any]]:
     if sender is None:
         logger.error("Connect Error:: %s %s %s %s", sender, signal, receiver, slot)
-        return False
+        return None
 
     m = re.search(r"^(\w+)\.(\w+)(\(.*\))?", slot)
     if slot.endswith("()"):
@@ -330,22 +447,31 @@ def solve_connection(sender, signal, receiver, slot):
             signal = signal.replace("valueChanged", "dateChanged")
 
     if isinstance(sender, QTable):
-        if "currentChanged" in signal:
-            signal = signal.replace("currentChanged", "CurrentChanged")
+        if "CurrentChanged" in signal:
+            signal = signal.replace("CurrentChanged", "currentChanged")
 
     # if receiver.__class__.__name__ == "FormInternalObj" and slot == "accept":
     #    receiver = receiver.parent()
+    remote_fn = None
+    if slot.find(".") > -1:
+        slot_list = slot.split(".")
+        remote_fn = receiver
+        for slot_ in slot_list:
+            remote_fn = getattr(remote_fn, slot_, None)
 
-    remote_fn = getattr(receiver, slot, None)
+            if remote_fn is None:
+                break
+
+    else:
+        remote_fn = getattr(receiver, slot, None)
 
     sg_name = re.sub(r" *\(.*\)", "", signal)
     oSignal = getattr(sender, sg_name, None)
     # if not oSignal and sender.__class__.__name__ == "FormInternalObj":
     #    oSignal = getattr(sender.parent(), sg_name, None)
-
     if not oSignal:
         logger.error("ERROR: No existe la señal %s para la clase %s", signal, sender.__class__.__name__)
-        return
+        return None
 
     if remote_fn:
         # if receiver.__class__.__name__ in ("FLFormSearchDB", "QDialog") and slot in ("accept", "reject"):
@@ -367,29 +493,34 @@ def solve_connection(sender, signal, receiver, slot):
         if isinstance(slot, str):
             oSlot = getattr(receiver, slot, None)
             if not oSlot:
-                return False
-        return oSignal, oSlot
+                if hasattr(receiver, "iface"):
+                    oSlot = getattr(receiver.iface, slot, None)
+            if not oSlot:
+                logger.error("Al realizar connect %s:%s -> %s:%s ; " "el es QObject pero no tiene slot", sender, signal, receiver, slot)
+                return None
+            return oSignal, oSlot
     else:
         logger.error(
             "Al realizar connect %s:%s -> %s:%s ; " "el slot no se reconoce y el receptor no es QObject.", sender, signal, receiver, slot
         )
-    return False
+    return None
 
 
-def GET(function_name, arguments=[], conn=None):
-    if conn is None:
-        conn = project.conn
-    if hasattr(conn.driver(), "send_to_server"):
-        return conn.driver().send_to_server(create_dict("call_function", function_name, conn.driver().id_, arguments))
-    else:
-        return "Funcionalidad no soportada"
+# FIXME: Belongs to RPC drivers
+# def GET(function_name, arguments=[], conn=None) -> Any:
+#     if conn is None:
+#         conn = project.conn
+#     if hasattr(conn.driver(), "send_to_server"):
+#         return conn.driver().send_to_server(create_dict("call_function", function_name, conn.driver().id_, arguments))
+#     else:
+#         return "Funcionalidad no soportada"
 
 
-def check_gc_referrers(typename, w_obj, name):
+def check_gc_referrers(typename: Any, w_obj: Callable, name: str) -> None:
     import threading
     import time
 
-    def checkfn():
+    def checkfn() -> None:
         import gc
 
         time.sleep(2)
@@ -419,135 +550,22 @@ def check_gc_referrers(typename, w_obj, name):
 
 
 class QEventLoop(QtCore.QEventLoop):
-    def exitLoop(self):
+    def exitLoop(self) -> None:
         super().exit()
 
-    def enterLoop(self):
+    def enterLoop(self) -> None:
         super().exec_()
 
 
-def print_stack(maxsize=1):
+def print_stack(maxsize: int = 1) -> None:
     for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
         print(tb.rstrip())
 
 
 # Usadas solo por import *
 # FIXME: No se debe usar import * !!!
-from pineboolib.packager.aqunpacker import AQUnpacker  # noqa:
-from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData  # noqa:
+from pineboolib.application.packager.aqunpacker import AQUnpacker  # noqa:
+
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
 
 # aqApp -- imported from loader.main after reload_from_DGI() call, as it is a cyclic dependency
-
-# --- create empty objects first:
-
-QComboBox = ObjectNotFoundDGINotLoaded
-QTable = ObjectNotFoundDGINotLoaded
-QLayoutWidget = ObjectNotFoundDGINotLoaded
-QToolButton = ObjectNotFoundDGINotLoaded
-QTabWidget = ObjectNotFoundDGINotLoaded
-QLabel = ObjectNotFoundDGINotLoaded
-QGroupBox = ObjectNotFoundDGINotLoaded
-QListView = ObjectNotFoundDGINotLoaded
-QPushButton = ObjectNotFoundDGINotLoaded
-QTextEdit = ObjectNotFoundDGINotLoaded
-QLineEdit = ObjectNotFoundDGINotLoaded
-QDateEdit = ObjectNotFoundDGINotLoaded
-QTimeEdit = ObjectNotFoundDGINotLoaded
-QCheckBox = ObjectNotFoundDGINotLoaded
-QWidget = ObjectNotFoundDGINotLoaded
-QtWidgets = ObjectNotFoundDGINotLoaded
-QColor = ObjectNotFoundDGINotLoaded
-QMessageBox = ObjectNotFoundDGINotLoaded
-QButtonGroup = ObjectNotFoundDGINotLoaded
-QDialog = ObjectNotFoundDGINotLoaded
-QVBoxLayout = ObjectNotFoundDGINotLoaded
-QHBoxLayout = ObjectNotFoundDGINotLoaded
-QFrame = ObjectNotFoundDGINotLoaded
-QMainWindow = ObjectNotFoundDGINotLoaded
-QSignalMapper = ObjectNotFoundDGINotLoaded
-QDomDocument = ObjectNotFoundDGINotLoaded
-QMenu = ObjectNotFoundDGINotLoaded
-QToolBar = ObjectNotFoundDGINotLoaded
-QListWidgetItem = ObjectNotFoundDGINotLoaded
-QListViewWidget = ObjectNotFoundDGINotLoaded
-QPixmap = ObjectNotFoundDGINotLoaded
-QImage = ObjectNotFoundDGINotLoaded
-QIcon = ObjectNotFoundDGINotLoaded
-QAction = ObjectNotFoundDGINotLoaded
-QActionGroup = ObjectNotFoundDGINotLoaded
-QTreeWidget = ObjectNotFoundDGINotLoaded
-QTreeWidgetItem = ObjectNotFoundDGINotLoaded
-QTreeWidgetItemIterator = ObjectNotFoundDGINotLoaded
-QDataView = ObjectNotFoundDGINotLoaded
-QProcess = ObjectNotFoundDGINotLoaded
-QByteArray = ObjectNotFoundDGINotLoaded
-QRadioButton = ObjectNotFoundDGINotLoaded
-QSpinBox = ObjectNotFoundDGINotLoaded
-QInputDialog = ObjectNotFoundDGINotLoaded
-QApplication = ObjectNotFoundDGINotLoaded
-qApp = ObjectNotFoundDGINotLoaded
-QStyleFactory = ObjectNotFoundDGINotLoaded
-QFontDialog = ObjectNotFoundDGINotLoaded
-QDockWidget = ObjectNotFoundDGINotLoaded
-QMdiArea = ObjectNotFoundDGINotLoaded
-QMdiSubWindow = ObjectNotFoundDGINotLoaded
-QKeySequence = ObjectNotFoundDGINotLoaded
-QSize = ObjectNotFoundDGINotLoaded
-QSizePolicy = ObjectNotFoundDGINotLoaded
-QToolBox = ObjectNotFoundDGINotLoaded
-QPainter = ObjectNotFoundDGINotLoaded
-QBrush = ObjectNotFoundDGINotLoaded
-QProgressDialog = ObjectNotFoundDGINotLoaded
-QFileDialog = ObjectNotFoundDGINotLoaded
-
-# Clases FL
-FLLineEdit = ObjectNotFoundDGINotLoaded
-FLTimeEdit = ObjectNotFoundDGINotLoaded
-FLDateEdit = ObjectNotFoundDGINotLoaded
-FLPixmapView = ObjectNotFoundDGINotLoaded
-FLDomDocument = ObjectNotFoundDGINotLoaded
-FLDomElement = ObjectNotFoundDGINotLoaded
-FLDomNode = ObjectNotFoundDGINotLoaded
-FLDomNodeList = ObjectNotFoundDGINotLoaded
-FLListViewItem = ObjectNotFoundDGINotLoaded
-FLTable = ObjectNotFoundDGINotLoaded
-FLDataTable = ObjectNotFoundDGINotLoaded
-FLCheckBox = ObjectNotFoundDGINotLoaded
-FLTextEditOutput = ObjectNotFoundDGINotLoaded
-FLSpinBox = ObjectNotFoundDGINotLoaded
-FLTableDB = ObjectNotFoundDGINotLoaded
-FLFieldDB = ObjectNotFoundDGINotLoaded
-FLFormDB = ObjectNotFoundDGINotLoaded
-FLFormRecordDB = ObjectNotFoundDGINotLoaded
-FLFormSearchDB = ObjectNotFoundDGINotLoaded
-FLDoubleValidator = ObjectNotFoundDGINotLoaded
-FLIntValidator = ObjectNotFoundDGINotLoaded
-FLUIntValidator = ObjectNotFoundDGINotLoaded
-FLCodBar = ObjectNotFoundDGINotLoaded
-FLWidget = ObjectNotFoundDGINotLoaded
-FLWorkSpace = ObjectNotFoundDGINotLoaded
-
-FormDBWidget = ObjectNotFoundDGINotLoaded
-
-# Clases QSA
-CheckBox = ObjectNotFoundDGINotLoaded
-ComboBox = ObjectNotFoundDGINotLoaded
-TextEdit = ObjectNotFoundDGINotLoaded
-LineEdit = ObjectNotFoundDGINotLoaded
-FileDialog = ObjectNotFoundDGINotLoaded
-MessageBox = ObjectNotFoundDGINotLoaded
-RadioButton = ObjectNotFoundDGINotLoaded
-Color = QColor
-Dialog = ObjectNotFoundDGINotLoaded
-Label = ObjectNotFoundDGINotLoaded
-GroupBox = ObjectNotFoundDGINotLoaded
-Process = ObjectNotFoundDGINotLoaded
-SpinBox = ObjectNotFoundDGINotLoaded
-Line = ObjectNotFoundDGINotLoaded
-NumberEdit = ObjectNotFoundDGINotLoaded
-DateEdit = ObjectNotFoundDGINotLoaded
-TimeEdit = ObjectNotFoundDGINotLoaded
-
-# Clases AQNext
-auth = ObjectNotFoundDGINotLoaded

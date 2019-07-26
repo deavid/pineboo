@@ -2,16 +2,16 @@
 import traceback
 from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
 from PyQt5.Qt import QKeySequence  # type: ignore
+from PyQt5.QtWidgets import QDialog  # type: ignore
 
 from pineboolib import logging
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
-from pineboolib.interfaces import IFormDB
 from pineboolib.application.utils.geometry import loadGeometryForm, saveGeometryForm
 from pineboolib.fllegacy.flaction import FLAction
-from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.core.settings import config
 from pineboolib.fllegacy.flapplication import aqApp
-
+from typing import Any, Union, Dict, Optional, Tuple, Type
 
 """
 Representa un formulario que enlaza con una tabla.
@@ -34,7 +34,7 @@ componentes serán plugins, como FLFieldDB o FLTableDB.
 """
 
 
-class FLFormDB(QtWidgets.QDialog, IFormDB):
+class FLFormDB(QDialog):
 
     """
     Cursor, con los registros, utilizado por el formulario
@@ -51,7 +51,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     """
     Capa principal del formulario
     """
-    layout = None
+    layout_ = None
 
     """
     Widget principal del formulario
@@ -62,7 +62,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
     Generalmente es el nombre de la acción que abre el formulario
     """
-    idMDI_ = None
+    idMDI_: Optional[str] = None
 
     """
     Capa para botones
@@ -107,12 +107,12 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     """
     Almacena que se aceptado, es decir NO se ha pulsado, botón cancelar
     """
-    accepted_ = None
+    accepted_: bool = False
 
     """
     Nombre del formulario relativo a la acción (form / formRecrd + nombre de la acción)
     """
-    actionName_ = None
+    actionName_: str = ""
 
     """
     Interface para scripts
@@ -144,49 +144,59 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     formReady = QtCore.pyqtSignal()
     formClosed = QtCore.pyqtSignal()
 
-    known_instances = {}
+    known_instances: Dict[Tuple[Type["FLFormDB"], str], "FLFormDB"] = {}
     cursor_ = None
     bottomToolbar = None
     pushButtonCancel = None
     toolButtonClose = None
 
     _uiName = None
-    _scriptForm = None
+    _scriptForm: Union[Any, str] = None
+
+    loop: bool
 
     init_thread_script = None
+    logger = logging.getLogger("FLFormDB")
 
     def __init__(self, parent, action: FLAction, load=False):
 
-        self.logger = logging.getLogger("FLFormDB")
         # self.tiempo_ini = time.time()
         from pineboolib.application import project
 
         if not parent:
             parent = aqApp.mainWidget()
-
-        # if project._DGI.localDesktop():  # Si es local Inicializa
-        #    super(QtWidgets.QWidget, self).__init__(parent)
-        super(QtWidgets.QWidget, self).__init__(parent)
+        # if project.DGI.localDesktop():  # Si es local Inicializa
+        QtWidgets.QWidget.__init__(self, parent)  # FIXME: Porqué pide dos argumentos extra??
+        # super(QtWidgets.QWidget, self).__init__(parent)
 
         self._loaded = False
         self.known_instances[(self.__class__, action.name())] = self
 
-        self._action = action
+        self._action: "FLAction" = action
         if type(self).__name__ == "FLFormRecordDB":
             self.actionName_ = "formRecord" + self._action.name()
             script_name = self._action.scriptFormRecord()
         else:
-            self.actionName_ = "form" + self._action.name()
-            script_name = self._action.scriptForm()
+            if self._action.table():
+                self.actionName_ = "form" + self._action.name()
+                script_name = self._action.scriptForm()
+            else:
+                # Load of the main script (flfactppal/flfacturac)
+                # Currently detected by having no table
+                # FIXME: A better detection method should be placed.
+                self.actionName_ = self._action.name()
+                script_name = self._action.name()
 
         # self.mod = self._action.mod
+        self.loop = False
+        self.eventloop = QtCore.QEventLoop()
 
-        self.layout = QtWidgets.QVBoxLayout()
-        self.layout.setContentsMargins(1, 1, 1, 1)
-        self.layout.setSpacing(1)
-        self.layout.setContentsMargins(1, 1, 1, 1)
-        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
-        self.setLayout(self.layout)
+        self.layout_ = QtWidgets.QVBoxLayout()
+        self.layout_.setContentsMargins(1, 1, 1, 1)
+        self.layout_.setSpacing(1)
+        self.layout_.setContentsMargins(1, 1, 1, 1)
+        self.layout_.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        self.setLayout(self.layout_)
         if not self._uiName:
             self._uiName = self._action.form()
 
@@ -195,49 +205,54 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
         # if not getattr(self._action, "alias", None):
         #    qWarning("FLFormDB::Cargando un action XML")
-        # elif project._DGI.localDesktop():
+        # elif project.DGI.localDesktop():
         # self.setWindowTitle(self._action.alias)
 
         self.idMDI_ = self._action.name()
 
-        if script_name is None:
-            script_name = self._action.scriptForm() if self._action.table() else self._action.name()
-
+        self.logger.info("init: Action: %s", self._action)
         self.script = project.actions[self._action.name()].load_script(script_name, self)
         self.widget = self.script.form
         self.iface = self.widget.iface
 
-        self.iconSize = project._DGI.iconSize()
+        if project._DGI is not None:
+            self.iconSize = project.DGI.iconSize()
         self.init_thread_script = None
         if load:
             self.load()
             self.initForm()
 
-    def load(self):
+    def load(self) -> None:
         if self._loaded:
             return
 
         # self.resize(550,350)
-        self.layout.insertWidget(0, self.widget)
-        self.layout.setSpacing(1)
-        self.layout.setContentsMargins(1, 1, 1, 1)
-        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        if self.layout_ is None:
+            return
+
+        self.layout_.insertWidget(0, self.widget)
+        self.layout_.setSpacing(1)
+        self.layout_.setContentsMargins(1, 1, 1, 1)
+        self.layout_.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
         if self._uiName:
             from pineboolib.application import project
+
+            if project.conn is None:
+                raise Exception("Project is not connected yet")
 
             project.conn.managerModules().createUI(self._uiName, None, self)
 
         self._loaded = True
 
-    def loaded(self):
+    def loaded(self) -> bool:
         return self._loaded
 
     """
     Invoca a la función "init" del script "masterprocess" asociado al formulario
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def initScript(self):
         if self._loaded:
             if not getattr(self.widget, "iface", None):
@@ -251,7 +266,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
                     self.iface.init()
                 except Exception:
                     # script_name = self.iface.__module__
-                    from pineboolib.error_manager import error_manager
+                    from pineboolib.core.error_manager import error_manager
                     from pineboolib.application import project
 
                     aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
@@ -286,7 +301,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     destructor
     """
 
-    def __del__(self):
+    def __del__(self) -> None:
         # TODO: Esto hay que moverlo al closeEvent o al close()
         # ..... los métodos __del__ de python son muy poco fiables.
         # ..... Se lanzan o muy tarde, o nunca.
@@ -294,7 +309,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
         self.unbindIface()
 
-    def setCursor(self, cursor=None):
+    def setCursor(self, cursor=None) -> None:
         if cursor is not self.cursor_ and self.cursor_ and self.oldCursorCtxt:
             self.cursor_.setContext(self.oldCursorCtxt)
 
@@ -327,7 +342,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
       en el formulario
     """
 
-    def cursor(self):
+    def cursor(self) -> Any:
         return self.cursor_
 
     """
@@ -336,21 +351,21 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     return Objeto QWidget que corresponde con el widget principal del formulario
     """
 
-    def mainWidget(self):
+    def mainWidget(self) -> Any:
         return self.mainWidget_
 
     """
     Establece el identificador MDI
     """
 
-    def setIdMDI(self, id_):
+    def setIdMDI(self, id_) -> None:
         self.idMDI_ = id_
 
     """
     Obtiene el identificador MDI
     """
 
-    def idMDI(self):
+    def idMDI(self) -> Optional[str]:
         return self.idMDI_
 
     """
@@ -366,7 +381,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     @param w Widget principal para el formulario
     """
 
-    def setMainWidget(self, w=None):
+    def setMainWidget(self, w=None) -> None:
         """
         if not w:
             if not self.cursor_:
@@ -426,7 +441,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Obtiene la imagen o captura de pantalla del formulario.
     """
 
-    def snapShot(self):
+    def snapShot(self) -> Any:
         pix = self.grab()
         return pix.toImage()
 
@@ -436,7 +451,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     @param pathFile Ruta y nombre del fichero donde guardar la imagen
     """
 
-    def saveSnapShot(self, path_file=None):
+    def saveSnapShot(self, path_file=None) -> None:
         if not path_file:
             from pineboolib import pncontrolsfactory
 
@@ -453,7 +468,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
             self.snapShot().save(fi, "PNG")
 
-    def saveGeometry(self):
+    def saveGeometry(self) -> QtCore.QByteArray:
         # pW = self.parentWidget()
         # if not pW:
         geo = QtCore.QSize(self.width(), self.height())
@@ -465,6 +480,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         #    geo = QtCore.QSize(pW.width(), pW.height())
 
         saveGeometryForm(self.geoName(), geo)
+        return super().saveGeometry()
 
     """
     Establece el título de la ventana.
@@ -473,7 +489,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     @author Silix
     """
 
-    def setCaptionWidget(self, text):
+    def setCaptionWidget(self, text) -> None:
         if not text:
             return
 
@@ -483,23 +499,26 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Devuelve si se ha aceptado el formulario
     """
 
-    def accepted(self):
+    def accepted(self) -> Any:
         return self.accepted_
 
     """
     Devuelve el nombre de la clase del formulario en tiempo de ejecución
     """
 
-    def formClassName(self):
+    def formClassName(self) -> str:
         return "FormDB"
 
     """
     Sólo para compatibilizar con FLFormSearchDB. Por defecto sólo llama QWidget::show
     """
 
-    def exec_(self):
-        self.show()
+    def exec_(self) -> bool:
+        super().show()
         return True
+
+    def hide(self) -> None:
+        super().hide()
 
     # public slots:
 
@@ -507,7 +526,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Cierra el formulario
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def close(self):
         if self.isClosing_:
             return True
@@ -520,7 +539,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Se activa al pulsar el boton aceptar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def accept(self):
         pass
 
@@ -528,14 +547,14 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Se activa al pulsar el botón cancelar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def reject(self):
         pass
 
     """
     Redefinida por conveniencia
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     @decorators.NotImplementedWarn
     def show(self):
         return True
@@ -545,7 +564,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Utilizado en documentación para evitar conflictos al capturar los formularios
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def showForDocument(self):
         self.showed = True
         self.mainWidget_.show()
@@ -555,7 +574,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     # """
     # Maximiza el formulario
     # """
-    # @QtCore.pyqtSlot()
+    # @decorators.pyqtSlot()
     # @decorators.NotImplementedWarn
     # def setMaximized(self):
     #    return True
@@ -564,7 +583,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Muestra el script asociado al formulario en el Workbench para depurar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     @decorators.NotImplementedWarn
     def debugScript(self):
         return True
@@ -573,8 +592,8 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Devuelve el script asociado al formulario
     """
 
-    @QtCore.pyqtSlot()
-    def script(self):
+    @decorators.pyqtSlot()
+    def get_script(self):
         ifc = self.iface
         if ifc:
             return str(ifc)
@@ -582,16 +601,16 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
     # private slots:
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def callInitScript(self):
 
         if not self.initScript():
             return
 
         if not self.isClosing_:
-            QtCore.QTimer(self).singleShot(0, self.emitFormReady)
+            QtCore.QTimer.singleShot(0, self.emitFormReady)
 
-    def emitFormReady(self):
+    def emitFormReady(self) -> None:
         from pineboolib import pncontrolsfactory
 
         qsa_sys = pncontrolsfactory.SysType()
@@ -602,24 +621,27 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
     # protected_:
 
-    def emitFormClosed(self):
+    def emitFormClosed(self) -> None:
         from pineboolib.application import project
 
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
+
         if "fltesttest" in project.conn.managerModules().listAllIdModules():
-            project.call("fltesttest.iface.recibeEvento", ("formClosed", self.actionName_), None)
+            project.call("fltesttest.iface.recibeEvento", ["formClosed", self.actionName_], None)
 
         self.formClosed.emit()
         if self.widget:
             self.widget.closed.emit()
 
-    def action(self):
+    def action(self) -> FLAction:
         return self._action
 
     """
     Inicialización
     """
 
-    def initForm(self):
+    def initForm(self) -> None:
         # acl = project.acl()
         acl = None  # FIXME: Add ACL later
         if acl:
@@ -636,10 +658,12 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
             v = None
 
-            if getattr(self.iface, "preloadMainFilter", None):
-                v = self.iface.preloadMainFilter()
+            preload_main_filter = getattr(self.iface, "preloadMainFilter", None)
 
-            if v:
+            if preload_main_filter:
+                v = preload_main_filter()
+
+            if v is not None and self.cursor_:
                 self.cursor_.setMainFilter(v, False)
 
             # if self._loaded and not self.__class__.__name__ == "FLFormRecordDB":
@@ -657,22 +681,24 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
                 caption = "No hay metadatos"
             self.setCaptionWidget(caption)
 
-    def loadControls(self):
+    def loadControls(self) -> None:
         if self.pushButtonCancel:
             self.pushButtonCancel.hide()
 
         if self.bottomToolbar and self.toolButtonClose:
             self.toolButtonClose.hide()
         self.bottomToolbar = QtWidgets.QFrame()
-        self.bottomToolbar.setMinimumSize(self.iconSize)
+        if self.iconSize is not None:
+            self.bottomToolbar.setMinimumSize(self.iconSize)
 
-        self.bottomToolbar.layout = QtWidgets.QHBoxLayout()
-        self.bottomToolbar.setLayout(self.bottomToolbar.layout)
-        self.bottomToolbar.layout.setContentsMargins(0, 0, 0, 0)
-        self.bottomToolbar.layout.setSpacing(0)
-        self.bottomToolbar.layout.addStretch()
+        self.bottomToolbar.setLayout(QtWidgets.QHBoxLayout())
+        self.bottomToolbar.setLayout(self.bottomToolbar.layout())
+        self.bottomToolbar.layout().setContentsMargins(0, 0, 0, 0)
+        self.bottomToolbar.layout().setSpacing(0)
+        self.bottomToolbar.layout().addStretch()
         self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.layout.addWidget(self.bottomToolbar)
+        if self.layout_ is not None:
+            self.layout_.addWidget(self.bottomToolbar)
         # if self.layout:
         #    self.layout = None
         # Limpiamos la toolbar
@@ -681,8 +707,8 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         sizePolicy.setHeightForWidth(True)
 
         pbSize = self.iconSize
-        settings = FLSettings()
-        if settings.readBoolEntry("application/isDebuggerMode", False):
+
+        if config.value("application/isDebuggerMode", False):
 
             pushButtonExport = QtWidgets.QToolButton()
             pushButtonExport.setObjectName("pushButtonExport")
@@ -694,10 +720,10 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
             pushButtonExport.setWhatsThis("Exportar a XML(F3)")
             pushButtonExport.setToolTip("Exportar a XML(F3)")
             pushButtonExport.setFocusPolicy(QtCore.Qt.NoFocus)
-            self.bottomToolbar.layout.addWidget(pushButtonExport)
+            self.bottomToolbar.layout().addWidget(pushButtonExport)
             pushButtonExport.clicked.connect(self.exportToXml)
 
-            if settings.readBoolEntry("ebcomportamiento/show_snaptshop_button", False):
+            if config.value("ebcomportamiento/show_snaptshop_button", False):
                 push_button_snapshot = QtWidgets.QToolButton()
                 push_button_snapshot.setObjectName("pushButtonSnapshot")
                 push_button_snapshot.setSizePolicy(sizePolicy)
@@ -708,11 +734,11 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
                 push_button_snapshot.setWhatsThis("Capturar pantalla(F8)")
                 push_button_snapshot.setToolTip("Capturar pantalla(F8)")
                 push_button_snapshot.setFocusPolicy(QtCore.Qt.NoFocus)
-                self.bottomToolbar.layout.addWidget(push_button_snapshot)
+                self.bottomToolbar.layout().addWidget(push_button_snapshot)
                 push_button_snapshot.clicked.connect(self.saveSnapShot)
 
             spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-            self.bottomToolbar.layout.addItem(spacer)
+            self.bottomToolbar.layout().addItem(spacer)
 
         if not self.pushButtonCancel:
             self.pushButtonCancel = QtWidgets.QToolButton()
@@ -728,27 +754,27 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         self.pushButtonCancel.setShortcut(QKeySequence(self.tr("Esc")))
         self.pushButtonCancel.setWhatsThis("Cerrar formulario (Esc)")
         self.pushButtonCancel.setToolTip("Cerrar formulario (Esc)")
-        self.bottomToolbar.layout.addWidget(self.pushButtonCancel)
+        self.bottomToolbar.layout().addWidget(self.pushButtonCancel)
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
     """
     Nombre interno del formulario
     """
 
-    def formName(self):
+    def formName(self) -> str:
         return "form%s" % self.idMDI_
 
-    def name(self):
+    def name(self) -> str:
         return self.formName()
 
-    def geoName(self):
+    def geoName(self) -> str:
         return self.formName()
 
     """
     Une la interfaz de script al objeto del formulario
     """
 
-    def bindIface(self):
+    def bindIface(self) -> None:
 
         if self.iface:
             self.oldFormObj = self.iface
@@ -757,7 +783,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Desune la interfaz de script al objeto del formulario
     """
 
-    def unbindIface(self):
+    def unbindIface(self) -> None:
         if not self.iface:
             return
 
@@ -767,7 +793,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Indica si la interfaz de script está unida al objeto formulario
     """
 
-    def isIfaceBind(self):
+    def isIfaceBind(self) -> bool:
         if self.iface:
             return True
         else:
@@ -777,7 +803,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Captura evento cerrar
     """
 
-    def closeEvent(self, e):
+    def closeEvent(self, e) -> None:
         self.frameGeometry()
 
         self.saveGeometry()
@@ -785,8 +811,8 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         # self.closed.emit()
         self.hide()
         self.emitFormClosed()
-        super(FLFormDB, self).closeEvent(e)
-        self._action.mainform_widget = None
+        super().closeEvent(e)
+        # self._action.mainform_widget = None
         self.deleteLater()
         self._loaded = False
         from pineboolib import pncontrolsfactory
@@ -798,8 +824,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
             # if hasattr(self.script, "form"):
             #    print("Borrando self.script.form", self.script.form)
             #    self.script.form = None
-
-            if self.widget is not None:
+            if self.widget is not None and type(self).__name__ != "FLFormSearchDB":
                 self.widget.close()
                 self.widget = None
                 # del self.widget
@@ -828,7 +853,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Captura evento mostrar
     """
 
-    def showEvent(self, e):
+    def showEvent(self, e) -> None:
         # --> Para mostrar form sin negro previo
         from pineboolib import pncontrolsfactory
 
@@ -858,7 +883,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
                 self.parent().resize(size)
                 self.parent().repaint()
 
-    def cursorDestroyed(self, obj_=None):
+    def cursorDestroyed(self, obj_=None) -> None:
         if not obj_:
             obj_ = self.sender()
 
@@ -888,8 +913,8 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
     Captura evento de entrar foco
     """
 
-    def focusInEvent(self, f):
-        super(FLFormDB, self).focusInEvent(f)
+    def focusInEvent(self, f) -> None:
+        super().focusInEvent(f)
         if not self.isIfaceBind():
             self.bindIface()
 
@@ -924,9 +949,8 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
 
         # if not self.tiempo_ini:
         #    self.tiempo_ini = time.time()
-        super(FLFormDB, self).show()
+        super().show()
         # tiempo_fin = time.time()
-        # settings = FLSettings()
 
         if self.parent().parent() is None:
             from PyQt5.QtWidgets import QDesktopWidget  # type: ignore # Centrado
@@ -940,7 +964,7 @@ class FLFormDB(QtWidgets.QDialog, IFormDB):
         #                     (self.actionName_, tiempo_fin - self.tiempo_ini, self, self.iface))
         # self.tiempo_ini = None
 
-    def initMainWidget(self, w=None):
+    def initMainWidget(self, w=None) -> None:
         if not self.showed:
             self.show()
 

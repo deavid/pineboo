@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets  # type: ignore
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget import QWidget
+from typing import Any
 
 
 class LineEdit(QWidget):
-    _label = None
-    _line = None
+    _label: QtWidgets.QLabel
+    _line: QtWidgets.QLineEdit
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(LineEdit, self).__init__()
 
         self._label = QtWidgets.QLabel(self)
@@ -17,7 +18,7 @@ class LineEdit(QWidget):
         _lay.addWidget(self._line)
         self.setLayout(_lay)
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name, value) -> None:
         if name == "label":
             self._label.setText(str(value))
         elif name == "text":
@@ -25,7 +26,7 @@ class LineEdit(QWidget):
         else:
             super(LineEdit, self).__setattr__(name, value)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> Any:
         if name == "text":
             return self._line.text()
         else:

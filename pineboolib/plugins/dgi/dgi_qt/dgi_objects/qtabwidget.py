@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets  # type: ignore
 from pineboolib import logging
-from typing import Any, Optional, TypeVar, Union
-
-_T0 = TypeVar("_T0")
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +31,7 @@ class QTabWidget(QtWidgets.QTabWidget):
 
         return QtWidgets.QTabWidget.setCurrentIndex(self, idx)
 
-    def indexByName(self, tab: _T0) -> Optional[Union[int, _T0]]:
+    def indexByName(self, tab: Any) -> Optional[int]:
 
         idx = None
         if isinstance(tab, int):

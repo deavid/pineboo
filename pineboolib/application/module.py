@@ -1,13 +1,14 @@
 import os.path
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 
 from pineboolib.core.parsetable import parseTable
 from .utils.path import _path
 
-# For types only:
-from .file import File
-from typing import Dict
-from pineboolib.core.utils.struct import TableStruct
+from typing import Dict, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .file import File
+    from pineboolib.core.utils.struct import TableStruct
 
 
 class Module(object):
@@ -28,11 +29,11 @@ class Module(object):
         self.name = name
         self.description = description  # En python2 era .decode(UTF-8)
         self.icon = icon
-        self.files: Dict[str, File] = {}
+        self.files: Dict[str, "File"] = {}
         self.tables: Dict[str, TableStruct] = {}
         self.loaded = False
 
-    def add_project_file(self, fileobj: File) -> None:
+    def add_project_file(self, fileobj: "File") -> None:
         """Añade ficheros al array que controla que ficehros tengo.
         @param fileobj. Objeto File con información del fichero
         """
@@ -67,8 +68,11 @@ class Module(object):
             if not tablefile.endswith(".mtd") or tablefile.find("alteredtable") > -1:
                 continue
             name, ext = os.path.splitext(tablefile)
+            path = _path(tablefile)
+            if path is None:
+                raise Exception("Cannot find %s" % tablefile)
             try:
-                contenido = str(open(_path(tablefile), "rb").read(), "ISO-8859-15")
+                contenido = str(open(path, "rb").read(), "ISO-8859-15")
             except UnicodeDecodeError as e:
                 self.logger.error("Error al leer el fichero %s %s", tablefile, e)
                 continue

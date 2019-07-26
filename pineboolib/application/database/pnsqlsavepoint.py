@@ -2,6 +2,7 @@
 
 # Completada Si
 from pineboolib.core import decorators
+from typing import Any, List
 
 
 """
@@ -31,7 +32,7 @@ class opInfo:
     cursor = None
     autoDelete_ = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         if len(args) > 0:
 
             self.opInfo2(*args)
@@ -42,10 +43,10 @@ class opInfo:
 
         self.setAutoDelete(False)
 
-    def opInfo1(self):
+    def opInfo1(self) -> None:
         return
 
-    def opInfo2(self, pK, o, b, a, s, f, n, c):  # * c:
+    def opInfo2(self, pK, o, b, a, s, f, n, c) -> None:  # * c:
         self.primaryKey = pK
         self.op = o
         self.buffer = b
@@ -57,14 +58,14 @@ class opInfo:
 
         # c.destroyed.connect(self.cursorDestroyed())
 
-    def __del__(self):
+    def __del__(self) -> None:
         pass
 
-    # @QtCore.pyqtSlot()
+    # @decorators.pyqtSlot()
     # def cursorDestroyed(self):
     #    self.cursor = None
 
-    def setAutoDelete(self, b):
+    def setAutoDelete(self, b) -> None:
         self.autoDelete_ = b
 
     """
@@ -117,7 +118,7 @@ class PNSqlSavePoint:
     Pila para almacenar informacion de las operaciones.
     """
 
-    opInfos = []
+    opInfos: List[opInfo] = []
 
     """
     Identificador del punto de salvaguarda
@@ -132,7 +133,7 @@ class PNSqlSavePoint:
     @param id Identificador para el punto de salvaguarda.
     """
 
-    def __init__(self, _id=None):
+    def __init__(self, _id=None) -> None:
 
         self.opInfos.append(opInfo())
         self.opInfos[0].setAutoDelete(True)
@@ -148,7 +149,7 @@ class PNSqlSavePoint:
     destructor.
     """
 
-    def __del__(self):
+    def __del__(self) -> None:
         if self.opInfos:
             self.opInfos = []
 
@@ -158,14 +159,14 @@ class PNSqlSavePoint:
     Establece el identificador del punto de salvaguarda.
     """
 
-    def setId(self, id_):
+    def setId(self, id_) -> None:
         self.id_ = id_
 
     """
     Obtiene el identificador del punto de salvaguarda.
     """
 
-    def id(self):
+    def id(self) -> Any:
         return self.id_
 
     """
@@ -175,7 +176,7 @@ class PNSqlSavePoint:
     invocar a este método ya no se podrán deshacer.
     """
 
-    def clear(self):
+    def clear(self) -> None:
         self.opInfos.clear()
 
     """
@@ -218,7 +219,7 @@ class PNSqlSavePoint:
     @param cursor Cursor asociado.
     """
 
-    def saveEdit(self, primaryKey, buffer, cursor):
+    def saveEdit(self, primaryKey, buffer, cursor) -> None:
         if not cursor or not buffer:
             return
 

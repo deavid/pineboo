@@ -1,24 +1,24 @@
-from pineboolib.core.utils.logging import logging
-from typing import Any
+from pineboolib.core.utils import logging
+import datetime
+from typing import Dict, Iterable, Tuple, Union, Any, List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.interfaces.ifieldmetadata import IFieldMetaData  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
 
 class sql_inspector(object):
 
-    _table_names = None
-    _field_names = None
-    _mtd_fields = None
     _sql_list = None
-    _invalid_tables = None
-    _invalid_fields = None
-    _posible_float = None
     _sql = None
-    _alias = None
 
-    def __init__(self, sql_text):
-
-        self._mtd_fields = {}
+    def __init__(self, sql_text: str) -> None:
+        self._invalid_tables: List[str] = []  # FIXME: Maybe a set() is better
+        self._mtd_fields: Dict[int, "IFieldMetaData"] = {}
+        self._field_names: Dict[str, int] = {}
+        self._table_names: List[str] = []
+        self._alias: Dict[str, str] = {}
         self._posible_float = False
         sql_text = sql_text.replace("\n", " ")
         sql_text = sql_text.replace("\t", " ")
@@ -32,19 +32,16 @@ class sql_inspector(object):
             # self.table_names()
             # self.field_names()
 
-    def mtd_fields(self):
+    def mtd_fields(self) -> Dict[int, Any]:
         return self._mtd_fields
 
-    def table_names(self):
+    def table_names(self) -> List[str]:
         return self._table_names
 
-    def field_names(self):
-        ret = []
-        if self._field_names:
-            ret = list(self._field_names.keys())
-        return ret
+    def field_names(self) -> List[str]:  # FIXME: This does NOT preserve order!
+        return list(self._field_names.keys())
 
-    def fieldNameToPos(self, name):
+    def fieldNameToPos(self, name: str) -> Any:
 
         if name in self._field_names.keys():
             return self._field_names[name]
@@ -56,9 +53,9 @@ class sql_inspector(object):
                     table_name = self._alias[table_name]
                     return self.fieldNameToPos("%s.%s" % (table_name, field_name))
 
-        raise Exception("No se encuentra el campo %s el la query (%s)" % (name, self._sql))
+        raise Exception("No se encuentra el campo %s el la query:\n%s" % (name, self._sql))
 
-    def posToFieldName(self, pos):
+    def posToFieldName(self, pos) -> Any:
 
         for k, v in self._field_names:
             if v == pos:
@@ -66,7 +63,7 @@ class sql_inspector(object):
 
         return False
 
-    def _resolve_fields(self, sql):
+    def _resolve_fields(self, sql) -> None:
         list_sql = sql.split(" ")
 
         if list_sql[0] == "select":
@@ -74,7 +71,7 @@ class sql_inspector(object):
                 return  # Se entiende que es una consulta especial
 
             index_from = list_sql.index("from")
-            fl = []
+            fl: List[str] = []
             fields_list = list_sql[1:index_from]
             for field in fields_list:
                 field = field.replace(" ", "")
@@ -147,7 +144,7 @@ class sql_inspector(object):
                         last_was_table = True
                     prev_ = t
 
-            temp_tl = []
+            temp_tl: List[str] = []
             for t in tablas:
                 temp_tl = temp_tl + t.split(",")
 
@@ -171,7 +168,7 @@ class sql_inspector(object):
 
             self._create_mtd_fields(fl_finish, tablas)
 
-    def resolve_empty_value(self, pos):
+    def resolve_empty_value(self, pos) -> Any:
         if not self.mtd_fields():
             return None
 
@@ -203,9 +200,11 @@ class sql_inspector(object):
 
         return ret_
 
-    def resolve_value(self, pos, value, raw=False):
+    def resolve_value(self, pos, value: Union[bytes, float, str, datetime.time], raw=False) -> Any:
 
         if not self.mtd_fields():
+            if isinstance(value, datetime.time):
+                value = str(value)[0:8]
             return value
 
         type_ = "double"
@@ -219,7 +218,7 @@ class sql_inspector(object):
             if mtd is not None:
                 type_ = mtd.type()
 
-        ret_ = value
+        ret_: Any = value
         if type_ in ("string", "stringlist"):
             pass
         elif type_ == "double":
@@ -229,14 +228,25 @@ class sql_inspector(object):
         elif type_ == "pixmap":
             from pineboolib.application import project
 
-            if raw or not project.conn.manager().isSystemTable(mtd.metadata().name()):
+            if project.conn is None:
+                raise Exception("Project is not connected yet")
+
+            metadata = mtd.metadata()
+            if metadata is None:
+                raise Exception("Metadata not found")
+            if raw or not project.conn.manager().isSystemTable(metadata.name()):
                 ret_ = project.conn.manager().fetchLargeValue(ret_)
         elif type_ == "date":
             from pineboolib.application import types
 
             ret_ = types.Date(str(ret_))
         elif type_ == "time":
-            ret_ = str(ret_)[:8]
+            ret_ = str(ret_)
+            if ret_.find(".") > -1:
+                ret_ = ret_[0 : ret_.find(".")]
+            elif ret_.find("+") > -1:
+                ret_ = ret_[0 : ret_.find("+")]
+
         elif type_ in ("unlock", "bool"):
             pass
         elif type_ == "bytearray":
@@ -247,8 +257,11 @@ class sql_inspector(object):
 
         return ret_
 
-    def _create_mtd_fields(self, fields_list, tables_list):
+    def _create_mtd_fields(self, fields_list: Iterable, tables_list: Iterable) -> None:
         from pineboolib.application import project
+
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
 
         _filter = ["sum(", "max(", "distint("]
 
@@ -283,17 +296,20 @@ class sql_inspector(object):
                     # tables_list.remove(table_name)
 
 
-def resolve_query(table_name, params):
+def resolve_query(table_name, params: Dict[str, str]) -> Tuple[str, str]:
     or_where = ""
     and_where = ""
     where = ""
     order_by = ""
     from pineboolib.application import project
 
+    if project.conn is None:
+        raise Exception("Project is not connected yet")
+
     mtd = project.conn.manager().metadata(table_name)
 
     if hasattr(params, "_iterlists"):
-        q = params
+        q: Any = params
         params = {k: q.getlist(k) if len(q.getlist(k)) > 1 else v for k, v in q.items()}
 
     for p in params:
@@ -318,7 +334,7 @@ def resolve_query(table_name, params):
     return where, order_by
 
 
-def resolve_order_params(key, valor):
+def resolve_order_params(key, valor: str) -> Any:
     if valor.startswith("-"):
         valor = valor[1:] + " DESC, "
     else:
@@ -327,7 +343,7 @@ def resolve_order_params(key, valor):
     return valor
 
 
-def resolve_where_params(key, valor, mtd_table):
+def resolve_where_params(key: str, valor: Optional[str], mtd_table) -> str:
     list_params = key.split("__")
     campo = "_".join(list_params[0].split("_")[1:])
     tipo = list_params[1]
@@ -384,30 +400,29 @@ def resolve_where_params(key, valor, mtd_table):
     return where
 
 
-def resolve_pagination(query):
+def resolve_pagination(query: Dict[str, Any]) -> Tuple[str, str]:
     init = 0
     limit = 0
-    for k in query.keys():
+    for k, v in query.items():
         if k.startswith("p_"):
             if k.endswith("l"):
-                limit = query[k]
+                limit = v
             elif k.endswith("o"):
-                init = query[k]
+                init = v
 
                 # if query[k] == "true":
                 #    page = 0
                 # else:
-                #    page = int(query[k])
+                #    page = int(v)
 
-    ret = (None, "50")
     if limit != 0:
         # init = page * limit
-        ret = (init, limit)
+        return (str(init), str(limit))
+    else:
+        return ("0", "50")
 
-    return ret
 
-
-def get_tipo_aqnext(tipo):
+def get_tipo_aqnext(tipo) -> int:
     tipo_ = 3
     # subtipo_ = None
 

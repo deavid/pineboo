@@ -9,6 +9,7 @@ from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.core.utils.utils_base import filedir, load2xml
 from pineboolib.application.utils.path import _path
 
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ class dgi_qt(dgi_schema):
         parent = qApp.focusWidget().parent() if hasattr(qApp.focusWidget(), "parent") else qApp.focusWidget()
         self.MessageBox.warning(t, self.MessageBox.Ok, self.MessageBox.NoButton, self.MessageBox.NoButton, "Pineboo", parent)
 
-    def createUI(self, n, connector=None, parent=None, name=None):
+    def createUI(self, n, connector=None, parent=None, name=None) -> Any:
         import pineboolib.pncontrolsfactory
 
         if ".ui" not in n:
@@ -68,8 +69,8 @@ class dgi_qt(dgi_schema):
 
         if form_path is None:
             # raise AttributeError("File %r not found in project" % n)
-            # logger.warning("%s.createUI : No se encuentra el fichero %s", self.__name__, n)
-            return
+            logger.debug("createUI: No se encuentra el fichero %s", n)
+            return None
 
         tree = load2xml(form_path)
 
@@ -79,11 +80,16 @@ class dgi_qt(dgi_schema):
         root_ = tree.getroot()
 
         UIVersion = root_.get("version")
+        if UIVersion is None:
+            UIVersion = "1.0"
         if parent is None:
             wid = root_.find("widget")
             if wid is None:
                 raise Exception("No parent provided and also no <widget> found")
-            parent = getattr(pineboolib.pncontrolsfactory, wid.get("class"))()
+            xclass = wid.get("class")
+            if xclass is None:
+                raise Exception("class was expected")
+            parent = getattr(pineboolib.pncontrolsfactory, xclass)()
 
         if hasattr(parent, "widget"):
             w_ = parent.widget
@@ -92,7 +98,8 @@ class dgi_qt(dgi_schema):
 
         logger.info("Procesando %s (v%s)", n, UIVersion)
         if UIVersion < "4.0":
-            self.pnqt3ui.loadUi(form_path, w_)
+            if self.pnqt3ui:
+                self.pnqt3ui.loadUi(form_path, w_)
         else:
             from PyQt5 import uic  # type: ignore
 
@@ -103,3 +110,9 @@ class dgi_qt(dgi_schema):
             uic.loadUi(form_path, w_)
 
         return w_
+
+    def about_pineboo(self):
+        from .dgi_objects.dlg_about.about_pineboo import AboutPineboo
+
+        about_ = AboutPineboo()
+        about_.show()

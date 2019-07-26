@@ -21,7 +21,7 @@ class FormDBWidget(QtWidgets.QWidget):
             super().__init__(parent)
 
             self._module = sys.modules[self.__module__]
-            self._module.connect = self._connect
+            self._module.connect = self._connect  # FIXME: Please don't write to the module. Fails flake8/mypy.
             self._module.disconnect = self._disconnect
             self._action = action
             self.cursor_ = None
@@ -110,6 +110,10 @@ class FormDBWidget(QtWidgets.QWidget):
             ret = self.findChild(QtWidgets.QWidget, child_name, QtCore.Qt.FindChildrenRecursively)
             if ret is None and self.parent():
                 ret = getattr(self.parent(), child_name, None)
+
+            if ret is None:
+                if child_name == super().objectName() and self.form is not None:
+                    ret = self.form
 
             if ret is not None:
                 from pineboolib import pncontrolsfactory

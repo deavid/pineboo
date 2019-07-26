@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-
-
-from typing import Optional
+from pineboolib.application.xmlaction import XMLAction
+from typing import Union
 
 
 class FLAction(object):
@@ -18,59 +17,77 @@ class FLAction(object):
     """
     Nombre de la accion
     """
-    name_ = None
+    name_: str = ""
 
     """
     Nombre del script asociado al formulario de edición de registros
     """
-    scriptFormRecord_ = None
+    scriptFormRecord_: str = ""
 
     """
     Nombre del script asociado al formulario maestro
     """
-    scriptForm_ = None
+    scriptForm_: str = ""
 
     """
     Nombre de la tabla origen para el formulario maestro
     """
-    table_ = None
+    table_: str = ""
 
     """
     Nombre del formulario maestro
     """
-    form_ = None
+    form_: str = ""
 
     """
     Nombre del formulario de edición de registros
     """
-    formRecord_ = None
+    formRecord_: str = ""
 
     """
     Texto para la barra de título del formulario maestro
     """
-    caption_ = None
+    caption_: str = ""
 
     """
     Descripción
     """
-    description_ = None
+    description_: str = ""
 
     """
     constructor.
     """
 
-    def __init__(self, action: None = None) -> None:
+    def __init__(self, action: Union[str, XMLAction] = None) -> None:
         super(FLAction, self).__init__()
-        if action:
-            if isinstance(action, str):
-                self.setName(action)
-            else:
-                self.setName(action.name)
+        if action is None:
+            return
+        if isinstance(action, str):
+            self.setName(action)
+        elif isinstance(action, XMLAction):
+            self.setName(action.name)
+            if action.mainscript is not None:
                 self.setScriptForm(action.mainscript)
-                self.setScriptFormRecord(action.script)
+            if action.scriptformrecord is not None:
+                self.setScriptFormRecord(action.scriptformrecord)
+            if action.mainform is not None:
                 self.setForm(action.mainform)
+            if action.form is not None:
                 self.setFormRecord(action.form)
+            if action.alias is not None:
                 self.setCaption(action.alias)
+        else:
+            raise Exception("Unsupported action %r" % action)
+
+    def __repr__(self):
+        return "<FLAction name=%r scriptForm=%r scriptFormRecord=%r form=%r formRecord=%r caption=%r>" % (
+            self.name_,
+            self.scriptForm_,
+            self.scriptFormRecord_,
+            self.form_,
+            self.formRecord_,
+            self.caption_,
+        )
 
     """
     Establece el nombre de la accion
@@ -146,35 +163,35 @@ class FLAction(object):
     Obtiene el nombre del script asociado al formulario maestro
     """
 
-    def scriptForm(self) -> Optional[str]:
+    def scriptForm(self) -> str:
         return self.scriptForm_
 
     """
     Obtiene  la tabla asociada a la accion
     """
 
-    def table(self) -> Optional[str]:
+    def table(self) -> str:
         return self.table_
 
     """
     Obtiene el texto de la barra de título del formulario
     """
 
-    def caption(self) -> Optional[str]:
+    def caption(self) -> str:
         return self.caption_
 
     """
     Obtiene la descripcion
     """
 
-    def description(self) -> None:
+    def description(self) -> str:
         return self.description_
 
     """
     Obtiene el nombre del formulario mestro
     """
 
-    def form(self) -> Optional[str]:
+    def form(self) -> str:
         return self.form_
 
     """

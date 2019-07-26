@@ -1,24 +1,26 @@
 import os
 import time
-from typing import List, Optional, Union, Any, Dict
+from typing import List, Optional, Any, Dict, TYPE_CHECKING
 from optparse import Values
 
 # from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists # FIXME: Not allowed yet
 from PyQt5 import QtCore  # type: ignore
 
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils.struct import AreaStruct
 from pineboolib.core.exceptions import CodeDoesNotBelongHereException, NotConnectedError
-from pineboolib.core.settings import config, settings
-from pineboolib.interfaces.dgi_schema import dgi_schema
-from pineboolib.interfaces.iconnection import IConnection
+from pineboolib.core.settings import config
 
 from pineboolib.application.module import Module
-from pineboolib.application.file import File
-from pineboolib.application.xmlaction import XMLAction
-from pineboolib.application.utils.xpm import cacheXPM
+
+
 from pineboolib.application.utils.path import _dir
+
+if TYPE_CHECKING:
+    from pineboolib.interfaces.dgi_schema import dgi_schema
+    from pineboolib.interfaces.iconnection import IConnection
+    from pineboolib.application.xmlaction import XMLAction
 
 
 class Project(object):
@@ -27,20 +29,19 @@ class Project(object):
     """
 
     logger = logging.getLogger("main.Project")
-    app: QtCore.QCoreApplication = None
-    conn: IConnection = None  # Almacena la conexión principal a la base de datos
+    _app: Optional[QtCore.QCoreApplication] = None
+    _conn: Optional["IConnection"] = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
-    options: Values = None
-    modules: Dict[str, Module]
+    options: Values
+    modules: Dict[str, "Module"]
 
     # _initModules = None
     main_form: Any = None  # FIXME: How is this used? Which type?
-    main_window = None
+    main_window: Any = None
     acl_ = None
-    _DGI = None
+    _DGI: Optional["dgi_schema"] = None
     deleteCache = None
     path = None
-    kugarPluging = None
     _splash = None
     sql_drivers_manager = None
     timer_ = None
@@ -51,11 +52,11 @@ class Project(object):
         """
         Constructor
         """
-        self.conn = None
+        self._conn = None
         self._DGI = None
         self.tree = None
         self.root = None
-        self.apppath = None
+        self.apppath = ""
         self.tmpdir = filedir("../tempdata")
         self.parser = None
         self.main_form_name: Optional[str] = None
@@ -65,24 +66,40 @@ class Project(object):
         self.actions: Dict[Any, XMLAction] = {}  # FIXME: Add proper type
         self.tables: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.files: Dict[Any, Any] = {}  # FIXME: Add proper type
-        self.apppath = None
-        self.kugarPlugin = None
-        self.deleteCache = None
-        self.parseProject = None
+        self.options = Values()
 
-    def init_conn(self, connection: IConnection) -> None:
-        self.conn = connection
+    @property
+    def app(self) -> QtCore.QCoreApplication:
+        if self._app is None:
+            raise Exception("No application set")
+        return self._app
+
+    def set_app(self, app: QtCore.QCoreApplication):
+        self._app = app
+
+    @property
+    def conn(self) -> "IConnection":
+        if self._conn is None:
+            raise Exception("Project is not initialized")
+        return self._conn
+
+    @property
+    def DGI(self) -> "dgi_schema":
+        if self._DGI is None:
+            raise Exception("Project is not initialized")
+        return self._DGI
+
+    def init_conn(self, connection: "IConnection") -> None:
+        self._conn = connection
         self.apppath = filedir("..")
         self.tmpdir = config.value("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))
         if not os.path.exists(self.tmpdir):
             os.mkdir(self.tmpdir)
-        from pineboolib.plugins.kugar.pnkugarplugins import PNKugarPlugins
 
-        self.kugarPlugin = PNKugarPlugins()
         self.deleteCache = config.value("ebcomportamiento/deleteCache", False)
         self.parseProject = config.value("ebcomportamiento/parseProject", False)
 
-    def init_dgi(self, DGI: dgi_schema) -> None:
+    def init_dgi(self, DGI: "dgi_schema") -> None:
         """Load and associate the defined DGI onto this project"""
         # FIXME: Actually, DGI should be loaded here, or kind of.
         from pineboolib.core.message_manager import Manager
@@ -95,12 +112,7 @@ class Project(object):
         if config.value("ebcomportamiento/mdi_mode"):
             self.main_form_name = "eneboo_mdi"  # FIXME: Belongs to loader.main .. or dgi-qt5
 
-        if self._DGI.mobilePlatform():
-            self.main_form_name = "mobile"  # FIXME: Belongs to loader.main .. or dgi-qt5
-
-        if not self._DGI.localDesktop():
-            # FIXME: Maybe it is a good idea to call this regardless of localDesktop
-            self._DGI.extraProjectInit()
+        self._DGI.extraProjectInit()
 
     def load_modules(self) -> None:
         for module_name, mod_obj in self.modules.items():
@@ -138,10 +150,13 @@ class Project(object):
         self.actions = {}
         self.tables = {}
 
+        if self._DGI is None:
+            raise Exception("DGI not loaded")
+
         if not self.conn or not self.conn.conn:
             raise NotConnectedError("Cannot execute Pineboo Project without a connection in place")
 
-        from pineboolib.pnobjectsfactory import load_models
+        from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import load_models
 
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
@@ -190,7 +205,9 @@ class Project(object):
             % self.conn.driver().formatValue("bool", "True", False)
         )
 
-        self.modules: Dict[str, Module] = {}
+        self.modules: Dict[str, "Module"] = {}
+        from pineboolib.application.utils.xpm import cacheXPM
+
         for idarea, idmodulo, descripcion, icono in cursor_:
             icono = cacheXPM(icono)
             self.modules[idmodulo] = Module(idarea, idmodulo, descripcion, icono)
@@ -213,7 +230,8 @@ class Project(object):
         if not os.path.exists(_dir("cache")):
             raise AssertionError
         p = 0
-        pos_qs = 1
+        from pineboolib.application.file import File
+
         for idmodulo, nombre, sha in cursor_:
             if not self._DGI.accept_file(nombre):
                 continue
@@ -239,8 +257,9 @@ class Project(object):
                         continue
 
                 elif file_name.endswith(".mtd"):
-                    if os.path.exists("%s_model.py" % _dir("cache", fileobj.filekey[:-4])):
-                        continue
+                    if not config.value("ebcomportamiento/orm_parser_disabled", False):
+                        if os.path.exists("%s_model.py" % _dir("cache", fileobj.filekey[:-4])):
+                            continue
                 else:
                     continue
 
@@ -251,7 +270,6 @@ class Project(object):
                 self.conn.driver().formatValue("string", sha, False),
             )
             cur2.execute(sql)
-            # qs_count = 0
             for (contenido,) in cur2:
 
                 encode_ = "ISO-8859-15"
@@ -272,19 +290,11 @@ class Project(object):
                     f2.write(txt)
                     f2.close()
 
-            if nombre.endswith(".mtd"):
-                pass
-                # FIXME:
-                # from pineboolib.mtdparser.pnmtdparser import mtd_parse
-                # mtd_parse(fileobj)
-
-            if self.parseProject and nombre.endswith(".qs") and settings.value("application/isDebuggerMode", False):
-                self.message_manager().send("splash", "showMessage", ["Convirtiendo %s ( %d/ ??) ..." % (nombre, pos_qs)])
+            if self.parseProject and nombre.endswith(".qs") and config.value("application/isDebuggerMode", False):
+                self.message_manager().send("splash", "showMessage", ["Convirtiendo %s ( %d/ %d) ..." % (nombre, p, size_)])
                 if os.path.exists(file_name):
 
                     self.parseScript(file_name, "(%d de %d)" % (p, size_))
-
-                pos_qs += 1
 
         tiempo_fin = time.time()
         self.logger.info("Descarga del proyecto completo a disco duro: %.3fs", (tiempo_fin - tiempo_ini))
@@ -300,15 +310,11 @@ class Project(object):
                     if self.parseProject and nombre.endswith(".qs"):
                         self.parseScript(_dir(root, nombre))
 
-        self.message_manager().send("splash", "showMessage", ["Cargando objetos ..."])
-
-        load_models()
+        if not config.value("ebcomportamiento/orm_load_disabled", False):
+            self.message_manager().send("splash", "showMessage", ["Cargando objetos ..."])
+            load_models()
 
         self.message_manager().send("splash", "showMessage", ["Cargando traducciones ..."])
-        # FIXME: Can we call this outside of this class?
-        # from pineboolib import pncontrolsfactory
-        #
-        # aqApp.loadTranslations()
 
         # FIXME: ACLs needed at this level?
         # self.acl_ = FLAccessControlLists()
@@ -316,9 +322,7 @@ class Project(object):
 
         return True
 
-    def call(
-        self, function: str, aList: List[Union[List[str], str, bool]], object_context: None = None, showException: bool = True
-    ) -> Optional[bool]:
+    def call(self, function: str, aList: List[Any], object_context: Any = None, showException: bool = True) -> Optional[Any]:
         """
         LLama a una función del projecto.
         @param function. Nombre de la función a llamar.
@@ -331,14 +335,11 @@ class Project(object):
         # de hacer esto.
         self.logger.trace("JS.CALL: fn:%s args:%s ctx:%s", function, aList, object_context, stack_info=True)
 
-        if function is not None:
-            # Tipicamente flfactalma.iface.beforeCommit_articulos()
-            if function[-2:] == "()":
-                function = function[:-2]
+        # Tipicamente flfactalma.iface.beforeCommit_articulos()
+        if function[-2:] == "()":
+            function = function[:-2]
 
-            aFunction = function.split(".")
-        else:
-            aFunction = []
+        aFunction = function.split(".")
 
         if not object_context:
             if not aFunction[0] in self.actions:
@@ -348,7 +349,7 @@ class Project(object):
                 else:
                     if showException:
                         self.logger.error("No existe la acción %s", aFunction[0])
-                return False
+                return None
 
             funAction = self.actions[aFunction[0]]
             if aFunction[1] == "iface" or len(aFunction) == 2:
@@ -375,7 +376,7 @@ class Project(object):
             if not object_context:
                 if showException:
                     self.logger.error("No existe el script para la acción %s en el módulo %s", aFunction[0], aFunction[0])
-                return False
+                return None
 
         fn = None
         if len(aFunction) == 1:  # Si no hay puntos en la llamada a functión
@@ -415,8 +416,8 @@ class Project(object):
             raise IOError
         python_script_path = (scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or self.no_python_cache:
-            file_name = scriptname.split(os.sep)  # FIXME: is a bad idea to split by os.sep
-            file_name = file_name[len(file_name) - 2]
+            file_name_l = scriptname.split(os.sep)  # FIXME: is a bad idea to split by os.sep
+            file_name = file_name_l[len(file_name_l) - 2]
 
             msg = "Convirtiendo a Python . . . %s.qs %s" % (file_name, txt_)
             self.logger.info(msg)
@@ -432,7 +433,7 @@ class Project(object):
 
             # clean_no_python = self._DGI.clean_no_python() # FIXME: No longer needed. Applied on the go.
 
-            from pineboolib.flparser import postparse
+            from pineboolib.application.parsers.qsaparser import postparse
 
             try:
                 postparse.pythonify([scriptname])
@@ -465,7 +466,7 @@ class Project(object):
                 maxValue = t.maxValue()
                 value = t.run()
             except Exception:
-                result = False
+                self.logger.exception("While running tests")
         else:
 
             for test in testDict.keys():
@@ -476,8 +477,7 @@ class Project(object):
                 print("result", test, v, "/", t.maxValue)
                 value = value + v
 
-        if result is None and maxValue > 0:
-            resultValue = value
+        resultValue = value
 
         self.logger.warning("%s/%s", resultValue, maxValue)
 
@@ -493,7 +493,7 @@ class Project(object):
         # return self.tmpdir
 
     def load_version(self):
-        self.version = "0.9"
+        self.version = "0.12"
         if config.value("application/dbadmin_enabled", False):
             self.version = "DBAdmin v%s" % self.version
         else:

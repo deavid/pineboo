@@ -5,9 +5,10 @@ from pineboolib import logging
 
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils.struct import AreaStruct
-from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.core.settings import config
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.application import project
+from pineboolib.core.settings import settings
 
 from PyQt5.QtWidgets import (  # type: ignore
     QToolButton,
@@ -24,6 +25,7 @@ from PyQt5.QtWidgets import (  # type: ignore
 )
 from PyQt5 import QtCore, QtGui  # type: ignore
 from PyQt5.QtCore import Qt  # type: ignore
+from typing import Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -40,15 +42,15 @@ class MainForm(QMainWindow):
     favoritosW = None
     wid = None  # widget principal
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super(MainForm, self).__init__(parent)
         self.ui_ = None
 
     @classmethod
-    def setDebugLevel(self, q):
+    def setDebugLevel(self, q) -> None:
         MainForm.debugLevel = q
 
-    def load(self):
+    def load(self) -> None:
         from pineboolib.application import project
 
         self.ui_ = project.conn.managerModules().createUI(filedir("plugins/mainform/pineboo/mainform.ui"), None, self)
@@ -137,8 +139,7 @@ class MainForm(QMainWindow):
             self.loadModule(module)
 
         # Cargando Area desarrollo si procede ...
-        sett_ = FLSettings()
-        if sett_.readBoolEntry("application/isDebuggerMode", False):
+        if config.value("application/isDebuggerMode", False):
             areaDevelop = AreaStruct(idarea="dvl", descripcion="Desarrollo")
             self.loadArea(areaDevelop)
 
@@ -165,7 +166,7 @@ class MainForm(QMainWindow):
 
         self.statusBar().showMessage(statusText)
 
-    def closeFormTab(self, numero):
+    def closeFormTab(self, numero) -> None:
         if isinstance(numero, str):
             i = 0
             name = numero
@@ -187,7 +188,7 @@ class MainForm(QMainWindow):
                     break
                 i = i + 1
 
-    def addFormTab(self, action):
+    def addFormTab(self, action) -> None:
         widget = action.mainform_widget
         if action.name in self.openTabs:
             self.closeFormTab(action.name)
@@ -203,7 +204,7 @@ class MainForm(QMainWindow):
         self.formTab.setCurrentWidget(widget)
         self.openTabs.append(action.name)
 
-    def loadArea(self, area):
+    def loadArea(self, area) -> None:
         assert area.idarea not in self.areas
         vl = QWidget()
         vl.layout = QVBoxLayout()  # layout de la pestaña
@@ -220,7 +221,7 @@ class MainForm(QMainWindow):
         vl.layout.addWidget(moduleToolBox)
         self.areasTab.addItem(vl, area.descripcion)
 
-    def loadModule(self, module):
+    def loadModule(self, module) -> None:
         logger.debug("loadModule: Procesando %s ", module.name)
         # Creamos pestañas de areas y un vBLayout por cada módulo. Despues ahí metemos los actions de cada módulo
         if module.areaid not in self.areas:
@@ -247,7 +248,7 @@ class MainForm(QMainWindow):
         except Exception:
             logger.exception("ERROR al procesar modulo %s", module.name)
 
-    def moduleLoad(self, vBLayout, module):
+    def moduleLoad(self, vBLayout, module) -> Optional[bool]:
         if not module.loaded:
             module.load()
         if not module.loaded:
@@ -272,7 +273,7 @@ class MainForm(QMainWindow):
             self.addToMenuPineboo(action, module)
         vBLayout.addStretch()
 
-    def closeEvent(self, evnt):
+    def closeEvent(self, evnt) -> None:
 
         res = QMessageBox.information(QApplication.activeWindow(), "Salir de Pineboo", "¿ Desea salir ?", QMessageBox.Yes, QMessageBox.No)
 
@@ -281,17 +282,16 @@ class MainForm(QMainWindow):
 
         self.saveState()
 
-    def saveState(self):
+    def saveState(self) -> None:
         if self:
-            sett_ = FLSettings()
-            sett_.writeEntryList("application/mainForm/tabsOpened", self.openTabs)
-            sett_.writeEntry("application/mainForm/viewFavorites", self.dockFavoritos.isVisible())
-            sett_.writeEntry("application/mainForm/FavoritesSize", self.dockFavoritos.size())
-            sett_.writeEntry("application/mainForm/viewAreas", self.dockAreasTab.isVisible())
-            sett_.writeEntry("application/mainForm/AreasSize", self.dockFavoritos.size())
-            sett_.writeEntry("application/mainForm/mainFormSize", self.size())
+            settings.set_value("mainForm/tabsOpened", self.openTabs)
+            settings.set_value("mainForm/viewFavorites", self.dockFavoritos.isVisible())
+            settings.set_value("mainForm/FavoritesSize", self.dockFavoritos.size())
+            settings.set_value("mainForm/viewAreas", self.dockAreasTab.isVisible())
+            settings.set_value("mainForm/AreasSize", self.dockFavoritos.size())
+            settings.set_value("mainForm/mainFormSize", self.size())
 
-    def addToMenuPineboo(self, ac, mod):
+    def addToMenuPineboo(self, ac, mod) -> None:
         # print(mod.name, ac.name, project.areas[mod.areaid].descripcion)
         # Comprueba si el area ya se ha creado
         if mod.areaid not in self.mPAreas.keys():
@@ -317,10 +317,9 @@ class MainForm(QMainWindow):
         action_ = moduloM.addAction(ac.icon, ac.text)
         action_.triggered.connect(ac.run)
 
-    def restoreOpenedTabs(self):
+    def restoreOpenedTabs(self) -> None:
         # Cargamos pestañas abiertas
-        sett_ = FLSettings()
-        tabsOpened_ = sett_.readListEntry("application/mainForm/tabsOpened")
+        tabsOpened_ = settings.value("mainForm/tabsOpened")
         if tabsOpened_:
             for t in tabsOpened_:
                 for k, module in sorted(project.modules.items()):
@@ -329,13 +328,12 @@ class MainForm(QMainWindow):
                             module.mainform.actions[t].run()
                             break
 
-    def loadState(self):
-        sett_ = FLSettings()
+    def loadState(self) -> None:
         # viewFavorites_ = sett_.readBoolEntry("application/mainForm/viewFavorites", True)
         # viewAreas_ = sett_.readBoolEntry("application/mainForm/viewAreas", True)
-        sizeF_ = sett_.readEntry("application/mainForm/FavoritesSize", None)
-        sizeA_ = sett_.readEntry("application/mainForm/AreasSize", None)
-        sizeMF_ = sett_.readEntry("application/mainForm/mainFormSize", None)
+        sizeF_ = settings.value("mainForm/FavoritesSize", None)
+        sizeA_ = settings.value("mainForm/AreasSize", None)
+        sizeMF_ = settings.value("mainForm/mainFormSize", None)
         if sizeF_ is not None:
             self.dockFavoritos.resize(sizeF_)
 
@@ -354,38 +352,36 @@ class MainForm(QMainWindow):
         self.actionModulos.setChecked(viewAreas_)
         """
 
-    def changeStateDockFavoritos(self):
+    def changeStateDockFavoritos(self) -> None:
         visible_ = self.actionFavoritos.isChecked()
         if visible_:
-            sett_ = FLSettings()
-            sizeF_ = sett_.readEntry("application/mainForm/FavoritesSize", None)
+            sizeF_ = settings.value("mainForm/FavoritesSize", None)
             if sizeF_ is not None:
                 self.dockFavoritos.resize(sizeF_)
 
         self.dockFavoritos.setVisible(visible_)
 
-    def changeStateActionFavoritos(self):
+    def changeStateActionFavoritos(self) -> None:
         if self.dockFavoritos.isVisible():
             self.actionFavoritos.setChecked(True)
         else:
             self.actionFavoritos.setChecked(False)
 
-    def changeStateDockAreas(self):
+    def changeStateDockAreas(self) -> None:
         visible_ = self.actionModulos.isChecked()
         if visible_:
-            sett_ = FLSettings()
-            sizeA_ = sett_.readEntry("application/mainForm/AreasSize", None)
+            sizeA_ = settings.value("mainForm/AreasSize", None)
             if sizeA_ is not None:
                 self.dockAreasTab.resize(sizeA_)
         self.dockAreasTab.setVisible(visible_)
 
-    def changeStateActionAreas(self):
+    def changeStateActionAreas(self) -> None:
         if self.dockAreasTab.isVisible():
             self.actionModulos.setChecked(True)
         else:
             self.actionModulos.setChecked(False)
 
-    def loadDevelop(self):
+    def loadDevelop(self) -> None:
         moduleToolBox = self.toolBoxs[self.areas.index("dvl")]
         vBLayout = QWidget()
         vBLayout.layout = QVBoxLayout()  # layout de cada módulo.
@@ -407,7 +403,7 @@ class MainForm(QMainWindow):
 
         # self.addToMenuPineboo(action, module)
 
-    def showConsole(self):
+    def showConsole(self) -> None:
         if not self.dockConsole:
             self.dockConsole = QDockWidget()
             self.dockConsole.setWindowTitle("Consola")
@@ -422,7 +418,7 @@ class OutputWindow(QPlainTextEdit):
     oldStdout = None
     oldStderr = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(OutputWindow, self).__init__()
 
         self.oldStdout = sys.stdout
@@ -430,7 +426,7 @@ class OutputWindow(QPlainTextEdit):
         sys.stdout = self
         sys.stderr = self
 
-    def write(self, txt):
+    def write(self, txt: Union[bytearray, bytes, str]) -> None:
         self.oldStdout.write(txt)
         self.appendPlainText(str(txt))
 

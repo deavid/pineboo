@@ -9,11 +9,16 @@ from pineboolib.core import decorators
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldatatable import FLDataTable
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformsearchdb import FLFormSearchDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
-from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
+
+from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData
+from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
+
 from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.core.settings import config
 from pineboolib.fllegacy.flapplication import aqApp
+
+
+from typing import Any, Optional, List, Union
 
 
 logger = logging.getLogger(__name__)
@@ -50,22 +55,19 @@ class FLTableDB(QtWidgets.QWidget):
     Null = 9
     NotNull = 10
 
-    mapCondType = None
-
     _parent = None
-    _name = None
+    _name: str
     loadLater_ = None
 
-    tdbFilter = None
+    tdbFilter: Optional[Any] = None
 
     pbData = None
     pbFilter = None
     pbOdf = None
 
-    comboBoxFieldToSearch = None
-    comboBoxFieldToSearch2 = None
-    tableRecords_ = None
-    lineEditSearch = None
+    comboBoxFieldToSearch: QtWidgets.QComboBox
+    comboBoxFieldToSearch2: QtWidgets.QComboBox
+    lineEditSearch: QtWidgets.QLineEdit
 
     tabDataLayout = None
     tabControlLayout = None
@@ -75,49 +77,293 @@ class FLTableDB(QtWidgets.QWidget):
     tabFilter = None
     buttonsLayout = None
     masterLayout = None
-    tabFilterLoaded = False
+    tabFilterLoaded: bool
 
     _controlsInit = None
 
-    tdbFilterBuildWhere_ = None
-    filterHidden_ = False
-    findHidden_ = False
-    _loaded = False
+    _loaded: bool
     """
     Tamaño de icono por defecto
     """
-    iconSize = None
+    iconSize: Optional[Any] = None
+
+    """
+    Componente para visualizar los registros
+    """
+    tableRecords_: Optional[FLDataTable] = None
+
+    """
+    Nombre de la tabla a la que esta asociado este componente.
+    """
+    tableName_: Optional[str] = None
+
+    """
+    Nombre del campo foráneo
+    """
+    foreignField_: Optional[str] = None
+
+    """
+    Nombre del campo de la relación
+    """
+    fieldRelation_: Optional[str] = None
+
+    """
+    Cursor con los datos de origen para el componente
+    """
+    cursor_: Any = None
+
+    """
+    Cursor auxiliar de uso interno para almacenar los registros de la tabla
+    relacionada con la de origen
+    """
+    cursorAux: Any = None
+
+    """
+    Matiene la ventana padre
+    """
+    topWidget: Any = None
+
+    """
+    Indica que la ventana ya ha sido mostrada una vez
+    """
+    showed = False
+
+    """
+    Mantiene el filtro de la tabla
+    """
+    filter_: str = ""
+
+    """
+    Almacena si el componente está en modo sólo lectura
+    """
+    readonly_: bool
+    reqReadOnly_: bool
+
+    """
+    Almacena si el componente está en modo sólo edición
+    """
+    editonly_: bool
+    reqEditOnly_: bool
+
+    """
+    Indica si el componente está en modo sólo permitir añadir registros
+    """
+    insertonly_: bool
+    reqInsertOnly_: bool
+
+    """
+    Almacena los metadatos del campo por el que está actualmente ordenada la tabla
+    """
+    sortField_: Optional[PNFieldMetaData]
+
+    """
+    Almacena los metadatos del campo por el que está actualmente ordenada la tabla en segunda instancia
+
+    @author Silix - dpinelo
+    """
+    sortField2_: Optional[PNFieldMetaData]
+
+    """
+    Crónometro interno
+    """
+    timer: Optional[QtCore.QTimer]
+
+    """
+    Filtro inicial de búsqueda
+    """
+    initSearch_: Optional[str]
+
+    """
+    Indica que la columna de seleción está activada
+    """
+    checkColumnEnabled_: bool
+
+    """
+    Indica el texto de la etiqueta de encabezado para la columna de selección
+    """
+    aliasCheckColumn_: str
+
+    """
+    Indica el nombre para crear un pseudocampo en el cursor para la columna de selección
+    """
+    fieldNameCheckColumn_: str
+
+    """
+    Indica que la columna de selección está visible
+    """
+    checkColumnVisible_: bool
+
+    """
+    Indica el número de columna por la que ordenar los registros
+    """
+    sortColumn_: int = 0
+
+    """
+    Indica el número de columna por la que ordenar los registros
+
+    @author Silix - dpinelo
+    """
+    sortColumn2_: int
+
+    """
+    Indica el número de columna por la que ordenar los registros
+
+    @author Silix
+    """
+    sortColumn3_: int
+
+    """
+    Indica el sentido ascendente o descendente del la ordenacion actual de los registros
+    """
+    orderAsc_: bool
+
+    """
+    Indica el sentido ascendente o descendente del la ordenacion actual de los registros
+
+    @author Silix - dpinelo
+    """
+    orderAsc2_: bool
+
+    """
+    Indica el sentido ascendente o descendente del la ordenacion actual de los registros
+
+    @author Silix
+    """
+    orderAsc3_: bool
+
+    """
+    Indica si se debe establecer automáticamente la primera columna como de ordenación
+    """
+    autoSortColumn_: bool
+
+    """
+    Almacena la última claúsula de filtro aplicada en el refresco
+    """
+    tdbFilterLastWhere_: Optional[str] = None
+
+    """
+    Diccionario que relaciona literales descriptivos de una condición de filtro
+    con su enumeración
+    """
+    mapCondType: List[str]
+
+    """
+    Indica si el marco de búsqueda está oculto
+    """
+    findHidden_: bool
+
+    """
+    Indica si el marco para conmutar entre datos y filtro está oculto
+    """
+    filterHidden_: bool
+
+    """
+    Indica si se deben mostrar los campos tipo pixmap en todas las filas
+    """
+    showAllPixmaps_: bool
+
+    """
+    Nombre de la función de script a invocar para obtener el color y estilo de las filas y celdas
+
+    El nombre de la función debe tener la forma 'objeto.nombre_funcion' o 'nombre_funcion',
+    en el segundo caso donde no se especifica 'objeto' automáticamente se añadirá como
+    prefijo el nombre del formulario donde se inicializa el componente FLTableDB seguido de un punto.
+    De esta forma si utilizamos un mismo formulario para varias acciones, p.e. master.ui, podemos controlar
+    si usamos distintas funciones de obtener color para cada acción (distintos nombres de formularios) o
+    una única función común para todas las acciones.
+
+    Ej. Estableciendo 'tdbGetColor' si el componente se inicializa en el formulario maestro de clientes,
+    se utilizará 'formclientes.tdbGetColor', si se inicializa en el fomulario maestro de proveedores, se
+    utilizará 'formproveedores.tdbGetColor', etc... Si establecemos 'flfactppal.tdbGetColor' siempre se llama a
+    esa función independientemente del formulario en el que se inicialize el componente.
+
+    Cuando se está pintando una celda se llamará a esa función pasándole cinco parámentros:
+    - Nombre del campo correspondiente a la celda
+    - Valor del campo de la celda
+    - Cursor de la tabla posicionado en el registro correspondiente a la fila que
+      está pintando. AVISO: En este punto los valores del buffer son indefinidos, no se hace refreshBuffer
+      por motivos de eficiencia
+    - Tipo del campo, ver FLUtilInterface::Type en FLObjectFactory.h
+    - Seleccionado. Si es TRUE indica que la celda a pintar está en la fila resaltada/seleccionada.
+      Generalmente las celdas en la fila seleccionada se colorean de forma distinta al resto.
+
+    La función debe devolver una array con cuatro cadenas de caracteres;
+
+    [ "color_de_fondo", "color_lapiz", "estilo_fondo", "estilo_lapiz" ]
+
+    En los dos primeros, el color, se puede utilizar cualquier valor aceptado por QColor::setNamedColor, ejemplos;
+
+    "green"
+    "#44ADDB"
+
+    En los dos últimos, el estilo, se pueden utilizar los valores aceptados por QBrush::setStyle y QPen::setStyle,
+    ver en FLDataTable.cpp las funciones nametoBrushStyle y nametoPenStyle, ejemplos;
+
+    "SolidPattern"
+    "DiagCrossPattern"
+    "DotLine"
+    "SolidLine"
+
+    Si alguno de los valores del array es vacio "", entonces se utilizarán los colores o estilos establecidos por defecto.
+    """
+    functionGetColor_: Optional[str]
+
+    """
+    Indica que no se realicen operaciones con la base de datos (abrir formularios). Modo "sólo tabla".
+    """
+    onlyTable_: bool
+    reqOnlyTable_: bool
+
+    """
+    Editor falso
+    """
+    fakeEditor_: Optional[Any] = None
+
+    tableDB_filterRecords_functionName_: Optional[str]
 
     """
     constructor
     """
 
-    def __init__(self, parent=None, name=None):
+    def __init__(self, parent: Optional["QtWidgets.QWidget"] = None, name: Optional[str] = None) -> None:
         if parent is None:
             return
         super(FLTableDB, self).__init__(parent)
         self.topWidget = parent
         self.showAllPixmaps_ = True
-        self.tdbFilterBuildWhere_ = None
         self.sortColumn_ = 0
         self.sortColumn2_ = 1
         self.sortColumn3_ = 2
+        self.sortField_ = None
+        self.initSearch_ = None
         self.autoSortColumn_ = True
         self.orderAsc_ = True
         self.orderAsc2_ = True
         self.orderAsc3_ = True
+        self.readonly_ = False
+        self.editonly_ = False
+        self.onlyTable_ = False
+        self.insertonly_ = False
+        self.reqReadOnly_ = False
+        self.reqEditOnly_ = False
+        self.reqInsertOnly_ = False
+        self.reqOnlyTable_ = False
         self.tabFilterLoaded = False
         self.timer_1 = QtCore.QTimer(self)
         if name:
             self.setObjectName(name)
         self.checkColumnVisible_ = False
-        self.tdbFilterLastWhere_ = None
-        self.filter_ = None
+        self.checkColumnEnabled_ = False
+        self.tdbFilterLastWhere_: Optional[str] = None
+        self.filter_ = ""
         from pineboolib.application import project
 
-        self.iconSize = project._DGI.iconSize()
+        if project._DGI is not None:
+            self.iconSize = project.DGI.iconSize()
+
         self.tabControlLayout = QtWidgets.QHBoxLayout()
         self.tabFilter = QtWidgets.QFrame()  # contiene filtros
+        self.tabData = QtWidgets.QFrame()  # contiene data
         self.functionGetColor_ = None
 
         from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
@@ -133,7 +379,7 @@ class FLTableDB(QtWidgets.QWidget):
     # def __getattr__(self, name):
     #    return DefFun(self, name)
 
-    def load(self):
+    def load(self) -> None:
 
         # Es necesario pasar a modo interactivo lo antes posible
         # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
@@ -141,11 +387,13 @@ class FLTableDB(QtWidgets.QWidget):
         if self.loaded():
             return
 
-        if not self.topWidget.cursor():
-            print("FLTableDB : Uno de los padres o antecesores de FLTableDB deber ser de la clase FLFormDB o heredar de ella")
-            return
+        if self.topWidget is not None:
+            if not self.topWidget.cursor():
+                logger.warning("FLTableDB : Uno de los padres o antecesores de FLTableDB deber ser de la clase FLFormDB o heredar de ella")
+                return
 
-        self.cursor_ = self.topWidget.cursor()
+            self.cursor_ = self.topWidget.cursor()
+
         self.initCursor()
         # self.setFont(QtWidgets.QApplication.font())
 
@@ -165,9 +413,9 @@ class FLTableDB(QtWidgets.QWidget):
         self.showWidget()
 
         if DEBUG:
-            print("**FLTableDB::name: %r cursor: %r" % (self.objectName(), self.cursor().d.nameCursor_))
+            logger.warning("**FLTableDB::name: %r cursor: %r", self.objectName(), self.cursor().d.nameCursor_)
 
-    def loaded(self):
+    def loaded(self) -> bool:
         return self._loaded
 
     """
@@ -175,7 +423,7 @@ class FLTableDB(QtWidgets.QWidget):
     una tabla relacionada
     """
 
-    def initCursor(self):
+    def initCursor(self) -> None:
         if not self.topWidget or not self.cursor():
             return
 
@@ -184,7 +432,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         tMD = self.cursor().metadata()
         if self.sortField_ is None:
-            if tMD:
+            if tMD is not None:
                 self.sortField_ = tMD.field(tMD.primaryKey())
 
         ownTMD = None
@@ -197,10 +445,12 @@ class FLTableDB(QtWidgets.QWidget):
                 tMD = self.cursor().db().manager().createTable(self.tableName_)
             else:
                 ownTMD = True
-                tMD = self.cursor().db().manager().metadata(self.tableName_)
+                manager_tmd = self.cursor().db().manager().metadata(self.tableName_)
 
-            if not tMD or isinstance(tMD, bool):
-                return
+                if not manager_tmd or isinstance(manager_tmd, bool):
+                    return
+
+                tMD = manager_tmd
 
             if not self.foreignField_ or not self.fieldRelation_:
                 if not self.cursor().metadata():
@@ -239,7 +489,7 @@ class FLTableDB(QtWidgets.QWidget):
         checkIntegrity = False
         if not rMD:
             if testM1:
-                if testM1.cardinality() == FLRelationMetaData.RELATION_M1:
+                if testM1.cardinality() == PNRelationMetaData.RELATION_M1:
                     checkIntegrity = True
             fMD = self.cursor().metadata().field(self.foreignField_)
             if fMD is not None:
@@ -249,7 +499,7 @@ class FLTableDB(QtWidgets.QWidget):
                 if tmdAux and not tmdAux.inCache():
                     del tmdAux
 
-                rMD = FLRelationMetaData(self.tableName_, self.fieldRelation_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
+                rMD = PNRelationMetaData(self.tableName_, self.fieldRelation_, PNRelationMetaData.RELATION_1M, False, False, checkIntegrity)
                 fMD.addRelationMD(rMD)
                 logger.warning(
                     "FLTableDB : La relación entre la tabla del formulario %s y esta tabla %s de este campo no existe, "
@@ -278,7 +528,7 @@ class FLTableDB(QtWidgets.QWidget):
         if not rMD:
             fMD = tMD.field(self.fieldRelation_)
             if fMD is not None:
-                rMD = FLRelationMetaData(curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, False)
+                rMD = PNRelationMetaData(curName, self.foreignField_, PNRelationMetaData.RELATION_1M, False, False, False)
                 fMD.addRelationMD(rMD)
                 if DEBUG:
                     logger.trace(
@@ -326,7 +576,7 @@ class FLTableDB(QtWidgets.QWidget):
     return Objeto FLSqlCursor con el cursor que contiene los registros para ser utilizados en el formulario
     """
 
-    def cursor(self):
+    def cursor(self) -> FLSqlCursor:
         # if not self.cursor().buffer():
         #    self.cursor().refreshBuffer()
         return self.cursor_
@@ -337,7 +587,9 @@ class FLTableDB(QtWidgets.QWidget):
     @return Nombre de la tabla asociado
     """
 
-    def tableName(self):
+    def tableName(self) -> str:
+        if not self.tableName_:
+            raise Exception("tableName_ is empty!")
         return self.tableName_
 
     """
@@ -346,7 +598,7 @@ class FLTableDB(QtWidgets.QWidget):
     @param fT Nombre de la tabla asociada
     """
 
-    def setTableName(self, fT):
+    def setTableName(self, fT: str) -> None:
         self.tableName_ = fT
         if self.topWidget:
             self.initCursor()
@@ -359,7 +611,7 @@ class FLTableDB(QtWidgets.QWidget):
     @return Nombre del campo
     """
 
-    def foreignField(self):
+    def foreignField(self) -> Optional[str]:
         return self.foreignField_
 
     """
@@ -368,7 +620,7 @@ class FLTableDB(QtWidgets.QWidget):
     @param fN Nombre del campo
     """
 
-    def setForeignField(self, fN):
+    def setForeignField(self, fN: str) -> None:
         self.foreignField_ = fN
         if self.topWidget:
             self.initCursor()
@@ -381,7 +633,7 @@ class FLTableDB(QtWidgets.QWidget):
     @return Nombre del campo
     """
 
-    def fieldRelation(self):
+    def fieldRelation(self) -> Optional[str]:
         return self.fieldRelation_
 
     """
@@ -390,7 +642,7 @@ class FLTableDB(QtWidgets.QWidget):
     @param fN Nombre del campo
     """
 
-    def setFieldRelation(self, fN):
+    def setFieldRelation(self, fN: str) -> None:
         self.fieldRelation_ = fN
         if self.topWidget:
             self.initCursor()
@@ -401,7 +653,7 @@ class FLTableDB(QtWidgets.QWidget):
     Establece si el componente esta en modo solo lectura o no.
     """
 
-    def setReadOnly(self, mode):
+    def setReadOnly(self, mode: bool) -> None:
 
         if self.tableRecords_:
             self.readonly_ = mode
@@ -410,14 +662,14 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.reqReadOnly_ = mode
 
-    def readOnly(self):
+    def readOnly(self) -> bool:
         return self.reqReadOnly_
 
     """
     Establece si el componente esta en modo solo edición o no.
     """
 
-    def setEditOnly(self, mode):
+    def setEditOnly(self, mode: bool) -> None:
         if self.tableRecords_:
             self.editonly_ = mode
             self.tableRecords_.setEditOnly(mode)
@@ -425,14 +677,14 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.reqEditOnly_ = mode
 
-    def editOnly(self):
+    def editOnly(self) -> bool:
         return self.reqEditOnly_
 
     """
     Establece el componente a sólo inserción o no.
     """
 
-    def setInsertOnly(self, mode):
+    def setInsertOnly(self, mode: bool) -> None:
         if self.tableRecords_:
             self.insertonly_ = mode
             self.tableRecords_.setInsertOnly(mode)
@@ -440,14 +692,14 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.reqInsertOnly_ = mode
 
-    def insertOnly(self):
+    def insertOnly(self) -> bool:
         return self.reqInsertOnly_
 
     """
     Establece el filtro inicial de búsqueda
     """
 
-    def setInitSearch(self, iS):
+    def setInitSearch(self, iS: str) -> None:
         self.initSearch_ = iS
 
     """
@@ -457,8 +709,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @decorators.BetaImplementation
-    def setOrderCols(self, fields):
-        if not self.cursor():
+    def setOrderCols(self, fields: List[str]):
+        if not self.cursor() or not self.tableRecords_:
             return
         tMD = self.cursor().metadata()
         if not tMD:
@@ -486,6 +738,9 @@ class FLTableDB(QtWidgets.QWidget):
             self.moveCol(_index, i)
             i = i + 1
 
+        if not self.lineEditSearch:
+            raise Exception("lineEditSearch is not defined!")
+
         self.setSortOrder(True)
         textSearch = self.lineEditSearch.text()
         self.refresh(True)
@@ -510,8 +765,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @decorators.BetaImplementation
-    def orderCols(self):
-        list_ = []
+    def orderCols(self) -> List[str]:
+        list_: List[str] = []
 
         if not self.cursor():
             return list_
@@ -526,8 +781,11 @@ class FLTableDB(QtWidgets.QWidget):
         model = self.cursor().model()
 
         if model:
+            if not self.tableRecords_:
+                raise Exception("tableRecords_ is not defined!")
+
             for column in range(model.columnCount()):
-                list_.append(self.tableRecords._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+                list_.append(self.tableRecords_._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
 
         return list_
 
@@ -537,7 +795,7 @@ class FLTableDB(QtWidgets.QWidget):
     @param f Sentencia Where que establece el filtro
     """
 
-    def setFilter(self, f):
+    def setFilter(self, f: str) -> None:
         self.filter_ = f
 
     """
@@ -546,7 +804,7 @@ class FLTableDB(QtWidgets.QWidget):
     @return Filtro
     """
 
-    def filter(self):
+    def filter(self) -> str:
         return self.filter_
 
     """
@@ -555,14 +813,14 @@ class FLTableDB(QtWidgets.QWidget):
     @return Filtro
     """
 
-    def findFilter(self):
+    def findFilter(self) -> Optional[str]:
         return self.tdbFilterLastWhere_
 
     """
     Obtiene si la columna de selección está activada
     """
 
-    def checkColumnEnabled(self):
+    def checkColumnEnabled(self) -> bool:
         return self.checkColumnEnabled_
 
     """
@@ -571,7 +829,7 @@ class FLTableDB(QtWidgets.QWidget):
     El cambio de estado no será efectivo hasta el siguiente refresh.
     """
 
-    def setCheckColumnEnabled(self, b):
+    def setCheckColumnEnabled(self, b: bool) -> None:
         self.checkColumnEnabled_ = b
 
     """
@@ -579,8 +837,11 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @decorators.BetaImplementation
-    def aliasCheckColumn(self):
-        return self.tableRecords._model.headerData(
+    def aliasCheckColumn(self) -> Optional[str]:
+        if not self.tableRecords_:
+            raise Exception("tableRecords_ is not defined!")
+
+        return self.tableRecords_._model.headerData(
             self.tableRecords_.selectionModel().selectedColumns(), QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole
         )
 
@@ -590,14 +851,14 @@ class FLTableDB(QtWidgets.QWidget):
     El cambio del texto de la etiqueta no será efectivo hasta el próximo refresh
     """
 
-    def setAliasCheckColumn(self, t):
+    def setAliasCheckColumn(self, t: str) -> None:
         self.aliasCheckColumn_ = t
 
     """
     Obtiene si el marco de búsqueda está oculto
     """
 
-    def findHidden(self):
+    def findHidden(self) -> bool:
         return self.findHidden_
 
     """
@@ -607,7 +868,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @decorators.Deprecated
-    def setFindHidden(self, h):
+    def setFindHidden(self, h: bool) -> None:
         # if self.findHidden_ is not h:
         #    self.findHidden_ = h
         #    if h:
@@ -620,7 +881,7 @@ class FLTableDB(QtWidgets.QWidget):
     Obtiene si el marco para conmutar entre datos y filtro está oculto
     """
 
-    def filterHidden(self):
+    def filterHidden(self) -> bool:
         return self.filterHidden_
 
     """
@@ -630,7 +891,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @decorators.Deprecated
-    def setFilterHidden(self, h):
+    def setFilterHidden(self, h: bool) -> None:
         # if self.filterHidden_ is not h:
         #    self.filterHidden_ = h
         #    if h:
@@ -643,28 +904,28 @@ class FLTableDB(QtWidgets.QWidget):
     Ver FLTableDB::showAllPixmaps_
     """
 
-    def showAllPixmaps(self):
+    def showAllPixmaps(self) -> bool:
         return self.showAllPixmaps_
 
     """
     Ver FLTableDB::showAllPixmaps_
     """
 
-    def setShowAllPixmaps(self, s):
+    def setShowAllPixmaps(self, s: bool) -> None:
         self.showAllPixmaps_ = s
 
     """
     Ver FLTableDB::functionGetColor_
     """
 
-    def functionGetColor(self):
+    def functionGetColor(self) -> Optional[str]:
         return self.functionGetColor_
 
     """
     Ver FLTableDB::functionGetColor_
     """
 
-    def setFunctionGetColor(self, f):
+    def setFunctionGetColor(self, f: str) -> None:
         self.functionGetColor_ = f
 
         # if self.tableRecords_ is not None:
@@ -674,21 +935,21 @@ class FLTableDB(QtWidgets.QWidget):
     Asigna el nombre de función a llamar cuando cambia el filtro.
     """
 
-    def setFilterRecordsFunction(self, fn):
+    def setFilterRecordsFunction(self, fn: str) -> None:
         self.tableDB_filterRecords_functionName_ = fn
 
     """
     Ver FLTableDB::onlyTable_
     """
 
-    def setOnlyTable(self, on=True):
+    def setOnlyTable(self, on: bool = True) -> None:
         if self.tableRecords_:
             self.onlyTable_ = on
             self.tableRecords_.setOnlyTable(on)
 
         self.reqOnlyTable_ = on
 
-    def onlyTable(self):
+    def onlyTable(self) -> bool:
         return self.reqOnlyTable_
 
     """
@@ -696,17 +957,17 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @decorators.NotImplementedWarn
-    def setAutoSortColumn(self, on=True):
+    def setAutoSortColumn(self, on: bool = True):
         self.autoSortColumn_ = on
 
-    def autoSortColumn(self):
+    def autoSortColumn(self) -> bool:
         return self.autoSortColumn_
 
     """
     Filtro de eventos
     """
 
-    def eventFilter(self, obj, ev):
+    def eventFilter(self, obj: Any, ev: Any) -> Any:
         if (
             not self.tableRecords_
             or not self.lineEditSearch
@@ -725,7 +986,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         if ev.type() == QtCore.QEvent.WindowUnblocked and isinstance(obj, FLDataTable):
             row = self.currentRow()
-            self.refresh(True, True)
+            self.tableRecords_.refresh()
             if row > -1:
                 self.setCurrentRow(row)
             return True
@@ -761,7 +1022,7 @@ class FLTableDB(QtWidgets.QWidget):
     Captura evento mostrar
     """
 
-    def showEvent(self, e):
+    def showEvent(self, e: Any) -> None:
         super(FLTableDB, self).showEvent(e)
         self.load()
         if not self.loaded():
@@ -771,7 +1032,7 @@ class FLTableDB(QtWidgets.QWidget):
     Redefinida por conveniencia
     """
 
-    def showWidget(self):
+    def showWidget(self) -> None:
         if self.showed:
             return
 
@@ -802,16 +1063,17 @@ class FLTableDB(QtWidgets.QWidget):
         if not self.cursorAux:
             if not self.initSearch_:
                 self.refresh(True, True)
-                QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
+                if self.tableRecords_:
+                    QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
             else:
                 self.refresh(True)
-                if self.tableRecords_.numRows() <= 0:
+                if self.tableRecords_ and self.tableRecords_.numRows() <= 0:
 
                     self.refresh(False, True)
                 else:
                     self.refreshDelayed()
 
-            if not isinstance(self.topWidget, FLFormRecordDB):
+            if not isinstance(self.topWidget, FLFormRecordDB) and self.lineEditSearch is not None:
                 self.lineEditSearch.setFocus()
 
         if self.cursorAux:
@@ -821,10 +1083,11 @@ class FLTableDB(QtWidgets.QWidget):
 
             if self.initSearch_:
                 self.refresh(True, True)
-                QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
+                if self.tableRecords_:
+                    QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
             else:
                 self.refresh(True)
-                if self.tableRecords_.numRows() <= 0:
+                if self.tableRecords_ and self.tableRecords_.numRows() <= 0:
                     self.refresh(False, True)
                 else:
                     self.refreshDelayed()
@@ -836,7 +1099,7 @@ class FLTableDB(QtWidgets.QWidget):
         # if own_tmd and tmd and not tmd.inCache():
         #    del tmd
 
-    def createFLTableDBWidget(self):
+    def createFLTableDBWidget(self) -> None:
         from pineboolib.core.utils.utils_base import filedir
 
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
@@ -850,15 +1113,17 @@ class FLTableDB(QtWidgets.QWidget):
         self.dataLayout = QtWidgets.QHBoxLayout()  # Contiene tabData y tabFilters
         # self.dataLayout.setContentsMargins(0, 0, 0, 0)
         # self.dataLayout.setSizeConstraint(0)
-        self.tabData = QtWidgets.QFrame()  # contiene data
-        self.tabData.setSizePolicy(sizePolicyGB)
-
-        self.tabFilter.setSizePolicy(sizePolicyGB)
 
         self.tabDataLayout = QtWidgets.QVBoxLayout()
-
         filterL = QtWidgets.QVBoxLayout()
-        self.tabData.setLayout(self.tabDataLayout)
+
+        if self.tabData:
+            self.tabData.setSizePolicy(sizePolicyGB)
+            self.tabData.setLayout(self.tabDataLayout)
+
+        if self.tabFilter:
+            self.tabFilter.setSizePolicy(sizePolicyGB)
+            self.tabFilter.setLayout(filterL)
 
         # Fix para acercar el lineEdit con el fltable
         # self.tabData.setContentsMargins(0, 0, 0, 0)
@@ -866,26 +1131,27 @@ class FLTableDB(QtWidgets.QWidget):
         # self.tabDataLayout.setContentsMargins(0, 0, 0, 0)
         # filterL.setContentsMargins(0, 0, 0, 0)
 
-        self.tabFilter.setLayout(filterL)
-
         # Contiene botones lateral (datos, filtros, odf)
         self.buttonsLayout = QtWidgets.QVBoxLayout()
         self.masterLayout = QtWidgets.QVBoxLayout()  # Contiene todos los layouts
 
-        self.pbData = QtWidgets.QPushButton(self)
-        self.pbData.setSizePolicy(sizePolicy)
-        self.pbData.setMinimumSize(self.iconSize)
-        self.pbData.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.pbData.setIcon(QtGui.QIcon(filedir("../share/icons", "fltable-data.png")))
-        self.pbData.setText("")
-        self.pbData.setToolTip("Mostrar registros")
-        self.pbData.setWhatsThis("Mostrar registros")
-        self.buttonsLayout.addWidget(self.pbData)
-        self.pbData.clicked.connect(self.activeTabData)
+        if self.pbData is None:
+            self.pbData = QtWidgets.QPushButton(self)
+            self.pbData.setSizePolicy(sizePolicy)
+            if self.iconSize is not None:
+                self.pbData.setMinimumSize(self.iconSize)
+            self.pbData.setFocusPolicy(QtCore.Qt.NoFocus)
+            self.pbData.setIcon(QtGui.QIcon(filedir("../share/icons", "fltable-data.png")))
+            self.pbData.setText("")
+            self.pbData.setToolTip("Mostrar registros")
+            self.pbData.setWhatsThis("Mostrar registros")
+            self.buttonsLayout.addWidget(self.pbData)
+            self.pbData.clicked.connect(self.activeTabData)
 
         self.pbFilter = QtWidgets.QPushButton(self)
         self.pbFilter.setSizePolicy(sizePolicy)
-        self.pbFilter.setMinimumSize(self.iconSize)
+        if self.iconSize is not None:
+            self.pbFilter.setMinimumSize(self.iconSize)
         self.pbFilter.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pbFilter.setIcon(QtGui.QIcon(filedir("../share/icons", "fltable-filter.png")))
         self.pbFilter.setText("")
@@ -896,7 +1162,8 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.pbOdf = QtWidgets.QPushButton(self)
         self.pbOdf.setSizePolicy(sizePolicy)
-        self.pbOdf.setMinimumSize(self.iconSize)
+        if self.iconSize is not None:
+            self.pbOdf.setMinimumSize(self.iconSize)
         self.pbOdf.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pbOdf.setIcon(QtGui.QIcon(filedir("../share/icons", "fltable-odf.png")))
         self.pbOdf.setText("")
@@ -904,12 +1171,13 @@ class FLTableDB(QtWidgets.QWidget):
         self.pbOdf.setWhatsThis("Exportar a hoja de cálculo")
         self.buttonsLayout.addWidget(self.pbOdf)
         self.pbOdf.clicked.connect(self.exportToOds)
-        if FLSettings().readEntry("ebcomportamiento/FLTableExport2Calc", "false") == "true":
+        if config.value("ebcomportamiento/FLTableExport2Calc", "false") == "true":
             self.pbOdf.setDisabled(True)
 
         self.pbClean = QtWidgets.QPushButton(self)
         self.pbClean.setSizePolicy(sizePolicyClean)
-        self.pbClean.setMinimumSize(self.iconSize)
+        if self.iconSize is not None:
+            self.pbClean.setMinimumSize(self.iconSize)
         self.pbClean.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pbClean.setIcon(QtGui.QIcon(filedir("../share/icons", "fltable-clean.png")))
         self.pbClean.setText("")
@@ -935,20 +1203,24 @@ class FLTableDB(QtWidgets.QWidget):
         label1.setText("Buscar")
         label2.setText("en")
 
-        self.tabControlLayout.addWidget(label1)
-        self.tabControlLayout.addWidget(self.lineEditSearch)
-        self.tabControlLayout.addWidget(label2)
-        self.tabControlLayout.addWidget(self.comboBoxFieldToSearch)
-        self.tabControlLayout.addWidget(self.comboBoxFieldToSearch2)
+        if self.tabControlLayout is not None:
+            self.tabControlLayout.addWidget(label1)
+            self.tabControlLayout.addWidget(self.lineEditSearch)
+            self.tabControlLayout.addWidget(label2)
+            self.tabControlLayout.addWidget(self.comboBoxFieldToSearch)
+            self.tabControlLayout.addWidget(self.comboBoxFieldToSearch2)
 
-        self.masterLayout.addLayout(self.tabControlLayout)
+            self.masterLayout.addLayout(self.tabControlLayout)
         self.masterLayout.addLayout(self.dataLayout)
         self.setLayout(self.masterLayout)
 
         # Se añade data, filtros y botonera
-        self.dataLayout.addWidget(self.tabData)
-        self.dataLayout.addWidget(self.tabFilter)
-        self.tabFilter.hide()
+        if self.tabData is not None:
+            self.dataLayout.addWidget(self.tabData)
+        if self.tabFilter is not None:
+            self.dataLayout.addWidget(self.tabFilter)
+            self.tabFilter.hide()
+
         self.dataLayout.addLayout(self.buttonsLayout)
         self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
         self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
@@ -960,21 +1232,25 @@ class FLTableDB(QtWidgets.QWidget):
     Obtiene el componente tabla de registros
     """
 
-    def tableRecords(self):
-        if not self.tableRecords_:
+    def tableRecords(self) -> "FLDataTable":
+        if self.tableRecords_ is None:
             self.tableRecords_ = FLDataTable(self.tabData, "tableRecords")
-            self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)
-            self.setFocusProxy(self.tableRecords_)
-            self.tabDataLayout.addWidget(self.tableRecords_)
-            self.setTabOrder(self.tableRecords_, self.lineEditSearch)
-            self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
-            self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
-            self.lineEditSearch.installEventFilter(self)
-            self.tableRecords_.installEventFilter(self)
-            if self.autoSortColumn_:
-                self.tableRecords_.header().sectionClicked.connect(self.switchSortOrder)
+            if self.tableRecords_ is not None:
+                self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)
+                self.setFocusProxy(self.tableRecords_)
+                if self.tabDataLayout is not None:
+                    self.tabDataLayout.addWidget(self.tableRecords_)
+                self.setTabOrder(self.tableRecords_, self.lineEditSearch)
+                self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
+                self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
+                if self.lineEditSearch is not None:
+                    self.lineEditSearch.installEventFilter(self)
+                self.tableRecords_.installEventFilter(self)
 
-        t_cursor = self.tableRecords_.cursor()
+                if self.autoSortColumn_:
+                    self.tableRecords_.header().sectionClicked.connect(self.switchSortOrder)
+
+        t_cursor = self.tableRecords_.cursor_
         if (
             self.cursor()
             and self.cursor() is not t_cursor
@@ -989,18 +1265,21 @@ class FLTableDB(QtWidgets.QWidget):
     Asigna el cursor actual del componente a la tabla de registros
     """
 
-    def setTableRecordsCursor(self):
-
-        if not self.tableRecords_:
+    def setTableRecordsCursor(self) -> None:
+        if self.tableRecords_ is None:
             self.tableRecords_ = FLDataTable(self.tabData, "tableRecords")
-            self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)
-            self.setFocusProxy(self.tableRecords_)
-            self.tabDataLayout.addWidget(self.tableRecords_)
-            self.setTabOrder(self.tableRecords_, self.lineEditSearch)
-            self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
-            self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
-            self.lineEditSearch.installEventFilter(self)
-            self.tableRecords_.installEventFilter(self)
+            if self.tableRecords_ is not None:
+                self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)
+                self.setFocusProxy(self.tableRecords_)
+                if self.tabDataLayout is not None:
+                    self.tabDataLayout.addWidget(self.tableRecords_)
+                self.setTabOrder(self.tableRecords_, self.lineEditSearch)
+                self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
+                self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
+                self.tableRecords_.installEventFilter(self)
+
+                if self.lineEditSearch is not None:
+                    self.lineEditSearch.installEventFilter(self)
 
         if self.checkColumnEnabled_:
             try:
@@ -1009,7 +1288,7 @@ class FLTableDB(QtWidgets.QWidget):
                 logger.exception("setTableRecordsCursor: Error disconnecting setChecked signal")
             self.tableRecords_.clicked.connect(self.tableRecords_.setChecked)
 
-        t_cursor = self.tableRecords_.cursor()
+        t_cursor = self.tableRecords_.cursor_
         if t_cursor is not self.cursor():
             self.tableRecords_.setFLSqlCursor(self.cursor())
             if t_cursor:
@@ -1019,26 +1298,26 @@ class FLTableDB(QtWidgets.QWidget):
             self.tableRecords_.recordChoosed.connect(self.recordChoosedSlot)
             self.cursor().newBuffer.connect(self.currentChangedSlot)
 
-    @QtCore.pyqtSlot()
-    def recordChoosedSlot(self):
+    @decorators.pyqtSlot()
+    def recordChoosedSlot(self) -> None:
         if isinstance(self.topWidget, FLFormSearchDB) and self.topWidget.inExec_:
             self.topWidget.accept()
         else:
             self.cursor().chooseRecord()
 
-    @QtCore.pyqtSlot()
-    def currentChangedSlot(self):
+    @decorators.pyqtSlot()
+    def currentChangedSlot(self) -> None:
         self.currentChanged.emit()
 
-    def currentRow(self):
+    def currentRow(self) -> int:
         return self.cursor().at()
 
     """
     Refresca la pestaña datos aplicando el filtro
     """
 
-    def refreshTabData(self):
-        tdbWhere = self.tdbFilterBuildWhere()
+    def refreshTabData(self) -> None:
+        tdbWhere: Optional[str] = self.tdbFilterBuildWhere()
         if not tdbWhere == self.tdbFilterLastWhere_:
             self.tdbFilterLastWhere_ = tdbWhere
 
@@ -1048,7 +1327,7 @@ class FLTableDB(QtWidgets.QWidget):
     Refresca la pestaña del filtro
     """
 
-    def refreshTabFilter(self):
+    def refreshTabFilter(self) -> None:
         if self.tabFilterLoaded:
             return
 
@@ -1057,7 +1336,7 @@ class FLTableDB(QtWidgets.QWidget):
             return
 
         hCount = horizHeader.count() - self.sortColumn_
-        if self.tdbFilter.numRows() < hCount and self.cursor():
+        if self.tdbFilter and self.tdbFilter.numRows() < hCount and self.cursor():
             tMD = self.cursor().metadata()
             if not tMD:
                 return
@@ -1102,7 +1381,10 @@ class FLTableDB(QtWidgets.QWidget):
 
             while i < hCount:
                 _label = self.cursor().model().headerData(i + self.sortColumn_, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)
-                field = tMD.field(tMD.fieldAliasToName(_label))
+                _alias = tMD.fieldAliasToName(_label)
+                if _alias is None:
+                    raise Exception("alias could not be solved")
+                field = tMD.field(_alias)
 
                 if field is None:
                     i = i + 1
@@ -1212,7 +1494,7 @@ class FLTableDB(QtWidgets.QWidget):
                         timeNow = QtCore.QTime.currentTime()
                         editor_.setTime(timeNow)
 
-                    if type_ in (FLFieldMetaData.Unlock, "bool"):
+                    if type_ in (PNFieldMetaData.Unlock, "bool"):
                         editor_ = pncontrolsfactory.FLCheckBox(self)
 
                     if editor_:
@@ -1226,7 +1508,8 @@ class FLTableDB(QtWidgets.QWidget):
         k = 0
 
         while k < 5:
-            self.tdbFilter.adjustColumn(k)
+            if self.tdbFilter:
+                self.tdbFilter.adjustColumn(k)
             k += 1
 
         self.tabFilterLoaded = True  # Con esto no volvemos a cargar y reescribir el filtro
@@ -1236,7 +1519,7 @@ class FLTableDB(QtWidgets.QWidget):
     su literal
     """
 
-    def decodeCondType(self, strCondType):
+    def decodeCondType(self, strCondType: str) -> int:
         i = 0
         while i < len(self.mapCondType):
             if strCondType == self.mapCondType[i]:
@@ -1251,8 +1534,11 @@ class FLTableDB(QtWidgets.QWidget):
     definidos en la pestaña de filtro
     """
 
-    def tdbFilterBuildWhere(self):
+    def tdbFilterBuildWhere(self) -> Optional[str]:
         if not self.topWidget:
+            return None
+
+        if self.tdbFilter is None:
             return None
 
         rCount = self.tdbFilter.numRows()
@@ -1269,16 +1555,21 @@ class FLTableDB(QtWidgets.QWidget):
         type = None
         condType = None
         fieldName = None
-        condValue = None
-        where = ""
-        fieldArg = None
-        arg2 = None
-        arg4 = None
+        condValue: str = ""
+        where: str = ""
+        fieldArg = ""
+        arg2 = ""
+        arg4 = ""
 
         ol = None
 
         for i in range(rCount):
+            if self.tdbFilter is None:
+                break
             fieldName = tMD.fieldAliasToName(self.tdbFilter.text(i, 0))
+            if fieldName is None:
+                raise Exception("fieldName could not be resolved!")
+
             field = tMD.field(fieldName)
             if field is None:
                 continue
@@ -1288,7 +1579,7 @@ class FLTableDB(QtWidgets.QWidget):
             if not cond:
                 continue
 
-            condType = self.decodeCondType(cond.currentText())
+            condType = self.decodeCondType(cond.currentText)
             if condType == self.All:
                 continue
 
@@ -1307,7 +1598,7 @@ class FLTableDB(QtWidgets.QWidget):
             else:
                 fieldName = tMD.name() + "." + fieldName
 
-            fieldArg = fieldName
+            fieldArg = fieldName or ""
             arg2 = ""
             arg4 = ""
             type = field.type()
@@ -1321,11 +1612,11 @@ class FLTableDB(QtWidgets.QWidget):
                     if condType == self.FromTo:
                         editorOp1 = self.tdbFilter.cellWidget(i, 3)
                         editorOp2 = self.tdbFilter.cellWidget(i, 4)
-                        arg2 = self.cursor().db().manager().formatValue(type, editorOp1.currentText(), True)
-                        arg4 = self.cursor().db().manager().formatValue(type, editorOp2.currentText(), True)
+                        arg2 = self.cursor().db().manager().formatValue(type, editorOp1.currentText, True)
+                        arg4 = self.cursor().db().manager().formatValue(type, editorOp2.currentText, True)
                     else:
                         editorOp1 = self.tdbFilter.cellWidget(i, 2)
-                        arg2 = self.cursor().db().manager().formatValue(type, editorOp1.currentText(), True)
+                        arg2 = self.cursor().db().manager().formatValue(type, editorOp1.currentText, True)
                 else:
                     if condType == self.FromTo:
                         editorOp1 = self.tdbFilter.cellWidget(i, 3)
@@ -1380,6 +1671,8 @@ class FLTableDB(QtWidgets.QWidget):
                 where += " AND"
 
             condValue = " " + fieldArg
+            if arg2 is None:
+                arg2 = ""
             if condType == self.Contains:
                 condValue += " LIKE '%" + arg2.replace("'", "") + "%'"
             elif condType == self.Starts:
@@ -1395,7 +1688,7 @@ class FLTableDB(QtWidgets.QWidget):
             elif condType == self.Less:
                 condValue += " < " + str(arg2)
             elif condType == self.FromTo:
-                condValue += " >= " + str(arg2) + " AND " + fieldArg + " <= " + (arg4)
+                condValue += " >= " + str(arg2) + " AND " + fieldArg + " <= " + str(arg4)
             elif condType == self.Null:
                 condValue += " IS NULL "
             elif condType == self.notNull:
@@ -1415,17 +1708,19 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @decorators.BetaImplementation
-    def initFakeEditor(self):
+    def initFakeEditor(self) -> None:
         if not self.fakeEditor_:
             self.fakeEditor_ = QtWidgets.QTextEdit(self.tabData)
 
-            sizePolicy = QtWidgets.QSizePolicy(7, QtWidgets.QSizePolicy.Expanding)
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
             sizePolicy.setHeightForWidth(True)
 
             self.fakeEditor_.setSizePolicy(sizePolicy)
             self.fakeEditor_.setTabChangesFocus(True)
             self.fakeEditor_.setFocusPolicy(QtCore.Qt.StrongFocus)
             self.setFocusProxy(self.fakeEditor_)
+            if not self.tabDataLayout:
+                raise Exception("self.tabDataLayout is not defined!")
             self.tabDataLayout.addWidget(self.fakeEditor_)
             self.setTabOrder(self.fakeEditor_, self.lineEditSearch)
             self.setTabOrder(self.fakeEditor_, self.comboBoxFieldToSearch)
@@ -1442,247 +1737,13 @@ class FLTableDB(QtWidgets.QWidget):
             self.fakeEditor_.setText(prty)
 
     """
-    Componente para visualizar los registros
-    """
-    tableRecords_ = None
-
-    """
-    Nombre de la tabla a la que esta asociado este componente.
-    """
-    tableName_ = None
-
-    """
-    Nombre del campo foráneo
-    """
-    foreignField_ = None
-
-    """
-    Nombre del campo de la relación
-    """
-    fieldRelation_ = None
-
-    """
-    Cursor con los datos de origen para el componente
-    """
-    cursor_ = None
-
-    """
-    Cursor auxiliar de uso interno para almacenar los registros de la tabla
-    relacionada con la de origen
-    """
-    cursorAux = None
-
-    """
-    Matiene la ventana padre
-    """
-    topWidget = None
-
-    """
-    Indica que la ventana ya ha sido mostrada una vez
-    """
-    showed = None
-
-    """
-    Mantiene el filtro de la tabla
-    """
-    filter_ = ""
-
-    """
-    Almacena si el componente está en modo sólo lectura
-    """
-    readonly_ = False
-    reqReadOnly_ = False
-
-    """
-    Almacena si el componente está en modo sólo edición
-    """
-    editonly_ = False
-    reqEditOnly_ = False
-
-    """
-    Indica si el componente está en modo sólo permitir añadir registros
-    """
-    insertonly_ = False
-    reqInsertOnly_ = False
-
-    """
-    Almacena los metadatos del campo por el que está actualmente ordenada la tabla
-    """
-    sortField_ = None
-
-    """
-    Almacena los metadatos del campo por el que está actualmente ordenada la tabla en segunda instancia
-
-    @author Silix - dpinelo
-    """
-    sortField2_ = None
-
-    """
-    Crónometro interno
-    """
-    timer = None
-
-    """
-    Filtro inicial de búsqueda
-    """
-    initSearch_ = None
-
-    """
-    Indica que la columna de seleción está activada
-    """
-    checkColumnEnabled_ = None
-
-    """
-    Indica el texto de la etiqueta de encabezado para la columna de selección
-    """
-    aliasCheckColumn_ = None
-
-    """
-    Indica el nombre para crear un pseudocampo en el cursor para la columna de selección
-    """
-    fieldNameCheckColumn_ = None
-
-    """
-    Indica que la columna de selección está visible
-    """
-    checkColumnVisible_ = None
-
-    """
-    Indica el número de columna por la que ordenar los registros
-    """
-    sortColumn_ = 0
-
-    """
-    Indica el número de columna por la que ordenar los registros
-
-    @author Silix - dpinelo
-    """
-    sortColumn2_ = None
-
-    """
-    Indica el número de columna por la que ordenar los registros
-
-    @author Silix
-    """
-    sortColumn3_ = None
-
-    """
-    Indica el sentido ascendente o descendente del la ordenacion actual de los registros
-    """
-    orderAsc_ = None
-
-    """
-    Indica el sentido ascendente o descendente del la ordenacion actual de los registros
-
-    @author Silix - dpinelo
-    """
-    orderAsc2_ = None
-
-    """
-    Indica el sentido ascendente o descendente del la ordenacion actual de los registros
-
-    @author Silix
-    """
-    orderAsc3_ = None
-
-    """
-    Indica si se debe establecer automáticamente la primera columna como de ordenación
-    """
-    autoSortColumn_ = True
-
-    """
-    Almacena la última claúsula de filtro aplicada en el refresco
-    """
-    tdbFilterLastWhere_ = ""
-
-    """
-    Diccionario que relaciona literales descriptivos de una condición de filtro
-    con su enumeración
-    """
-    mapCondType = []
-
-    """
-    Indica si el marco de búsqueda está oculto
-    """
-    findHidden_ = None
-
-    """
-    Indica si el marco para conmutar entre datos y filtro está oculto
-    """
-    filterHidden_ = None
-
-    """
-    Indica si se deben mostrar los campos tipo pixmap en todas las filas
-    """
-    showAllPixmaps_ = None
-
-    """
-    Nombre de la función de script a invocar para obtener el color y estilo de las filas y celdas
-
-    El nombre de la función debe tener la forma 'objeto.nombre_funcion' o 'nombre_funcion',
-    en el segundo caso donde no se especifica 'objeto' automáticamente se añadirá como
-    prefijo el nombre del formulario donde se inicializa el componente FLTableDB seguido de un punto.
-    De esta forma si utilizamos un mismo formulario para varias acciones, p.e. master.ui, podemos controlar
-    si usamos distintas funciones de obtener color para cada acción (distintos nombres de formularios) o
-    una única función común para todas las acciones.
-
-    Ej. Estableciendo 'tdbGetColor' si el componente se inicializa en el formulario maestro de clientes,
-    se utilizará 'formclientes.tdbGetColor', si se inicializa en el fomulario maestro de proveedores, se
-    utilizará 'formproveedores.tdbGetColor', etc... Si establecemos 'flfactppal.tdbGetColor' siempre se llama a
-    esa función independientemente del formulario en el que se inicialize el componente.
-
-    Cuando se está pintando una celda se llamará a esa función pasándole cinco parámentros:
-    - Nombre del campo correspondiente a la celda
-    - Valor del campo de la celda
-    - Cursor de la tabla posicionado en el registro correspondiente a la fila que
-      está pintando. AVISO: En este punto los valores del buffer son indefinidos, no se hace refreshBuffer
-      por motivos de eficiencia
-    - Tipo del campo, ver FLUtilInterface::Type en FLObjectFactory.h
-    - Seleccionado. Si es TRUE indica que la celda a pintar está en la fila resaltada/seleccionada.
-      Generalmente las celdas en la fila seleccionada se colorean de forma distinta al resto.
-
-    La función debe devolver una array con cuatro cadenas de caracteres;
-
-    [ "color_de_fondo", "color_lapiz", "estilo_fondo", "estilo_lapiz" ]
-
-    En los dos primeros, el color, se puede utilizar cualquier valor aceptado por QColor::setNamedColor, ejemplos;
-
-    "green"
-    "#44ADDB"
-
-    En los dos últimos, el estilo, se pueden utilizar los valores aceptados por QBrush::setStyle y QPen::setStyle,
-    ver en FLDataTable.cpp las funciones nametoBrushStyle y nametoPenStyle, ejemplos;
-
-    "SolidPattern"
-    "DiagCrossPattern"
-    "DotLine"
-    "SolidLine"
-
-    Si alguno de los valores del array es vacio "", entonces se utilizarán los colores o estilos establecidos por defecto.
-    """
-    functionGetColor_ = None
-
-    """
-    Indica que no se realicen operaciones con la base de datos (abrir formularios). Modo "sólo tabla".
-    """
-    onlyTable_ = False
-    reqOnlyTable_ = False
-
-    """
-    Editor falso
-    """
-    fakeEditor_ = None
-
-    tableDB_filterRecords_functionName_ = None
-
-    """
     Actualiza el conjunto de registros.
     """
 
-    @QtCore.pyqtSlot()
-    @QtCore.pyqtSlot(bool)
-    @QtCore.pyqtSlot(bool, bool)
-    def refresh(self, refreshHead=False, refreshData=True):
+    @decorators.pyqtSlot()
+    @decorators.pyqtSlot(bool)
+    @decorators.pyqtSlot(bool, bool)
+    def refresh(self, refreshHead: bool = False, refreshData: bool = True) -> None:
         if not self.cursor() or not self.tableRecords_:
             return
 
@@ -1699,12 +1760,12 @@ class FLTableDB(QtWidgets.QWidget):
                     self.fieldNameCheckColumn_ = "%s_check_column" % tMD.name()
 
                     if self.fieldNameCheckColumn_ not in tMD.fieldNames():
-                        fieldCheck = FLFieldMetaData(
+                        fieldCheck = PNFieldMetaData(
                             self.fieldNameCheckColumn_,
                             self.tr(self.aliasCheckColumn_),
                             True,
                             False,
-                            FLFieldMetaData.Check,
+                            PNFieldMetaData.Check,
                             0,
                             False,
                             True,
@@ -1725,7 +1786,10 @@ class FLTableDB(QtWidgets.QWidget):
                     else:
                         fieldCheck = tMD.field(self.fieldNameCheckColumn_)
 
-                self.tableRecords().cursor().model().updateColumnsCount()
+                if fieldCheck is None:
+                    raise Exception("fieldCheck is empty!")
+
+                self.tableRecords().cur.model().updateColumnsCount()
                 self.tableRecords().header().reset()
                 self.tableRecords().header().swapSections(
                     self.tableRecords().column_name_to_column_index(fieldCheck.name()), self.sortColumn_
@@ -1746,7 +1810,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.sortColumn3_ = 2
             self.checkColumnVisible_ = False
 
-        self.tableRecords_.setFunctionGetColor(self.functionGetColor())
+        self.tableRecords_.setFunctionGetColor(self.functionGetColor(), getattr(self.topWidget, "iface", None))
 
         if refreshHead:
             if not self.tableRecords().header().isHidden():
@@ -1776,7 +1840,7 @@ class FLTableDB(QtWidgets.QWidget):
                 id_mod = self.cursor().db().managerModules().idModuleOfFile("%s.mtd" % self.cursor().metadata().name())
                 function_qsa = "%s.tableDB_setSort_%s" % (id_mod, self.cursor().metadata().name())
 
-                vars = []
+                vars: List[Any] = []
                 vars.append(s)
                 if field_1:
                     vars.append(field_1.name())
@@ -1798,9 +1862,15 @@ class FLTableDB(QtWidgets.QWidget):
                     if isinstance(ret, list):
                         s = ret
 
-                self.tableRecords_.setSort(s)
+                self.tableRecords_.setSort(", ".join(s))
 
             if model:
+                if self.comboBoxFieldToSearch is None:
+                    raise Exception("comboBoxFieldSearch is not defined!")
+
+                if self.comboBoxFieldToSearch2 is None:
+                    raise Exception("comboBoxFieldSearch2 is not defined!")
+
                 try:
                     self.comboBoxFieldToSearch.currentIndexChanged.disconnect(self.putFirstCol)
                     self.comboBoxFieldToSearch2.currentIndexChanged.disconnect(self.putSecondCol)
@@ -1886,54 +1956,57 @@ class FLTableDB(QtWidgets.QWidget):
     @param msec Cantidad de tiempo del lapsus, en milisegundos.
     """
 
-    def refreshDelayed(self, msec=50, refreshData=True):
+    def refreshDelayed(self, msec: int = 50, refreshData: bool = True) -> None:
 
         self._refreshData = True if refreshData else False
         QtCore.QTimer.singleShot(msec, self.refreshDelayed2)
         self.seekCursor()
 
-    def refreshDelayed2(self):
+    def refreshDelayed2(self) -> None:
         self.refresh(False, self._refreshData)
-        self._refreshData = None
+        self._refreshData = False
 
     """
     Invoca al método FLSqlCursor::insertRecord()
     """
 
-    @QtCore.pyqtSlot(bool)
-    def insertRecord(self, unknown=None):
+    @decorators.pyqtSlot(bool)
+    def insertRecord(self, wait: bool = True) -> None:
 
         w = self.sender()
         # if (w and (not self.cursor() or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor().cursorRelation()
         #      and self.cursor().cursorRelation().isLocked()))):
         relationLock = False
-
-        if isinstance(self.cursor().cursorRelation(), FLSqlCursor):
-            relationLock = self.cursor().cursorRelation().isLocked()
+        cur_relation = self.cursor().cursorRelation()
+        if cur_relation is not None:
+            relationLock = cur_relation.isLocked()
 
         if w and (not self.cursor() or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or relationLock):
             w.setDisabled(True)
             return
 
         if self.cursor():
-            self.cursor().insertRecord()
+            self.cursor().insertRecord(wait)
 
     """
     Invoca al método FLSqlCursor::editRecord()
     """
 
-    @QtCore.pyqtSlot(bool)
-    def editRecord(self, unknown=None):
+    @decorators.pyqtSlot(bool)
+    def editRecord(self, wait: bool = True) -> None:
         w = self.sender()
-        if isinstance(w, FLDataTable):
-            w = None
+        cur_relation = self.cursor().cursorRelation()
 
-        if w and (
-            not self.cursor()
-            or self.reqReadOnly_
-            or self.reqEditOnly_
-            or self.reqOnlyTable_
-            or (self.cursor().cursorRelation() and self.cursor().cursorRelation().isLocked())
+        if (
+            w
+            and not isinstance(w, FLDataTable)
+            and (
+                not self.cursor()
+                or self.reqReadOnly_
+                or self.reqEditOnly_
+                or self.reqOnlyTable_
+                or (cur_relation and cur_relation.isLocked())
+            )
         ):
             w.setDisabled(True)
             return
@@ -1945,57 +2018,66 @@ class FLTableDB(QtWidgets.QWidget):
     Invoca al método FLSqlCursor::browseRecord()
     """
 
-    @QtCore.pyqtSlot(bool)
-    def browseRecord(self, unknown):
+    @decorators.pyqtSlot(bool)
+    def browseRecord(self, wait: bool = True) -> None:
 
         w = self.sender()
-        if isinstance(w, FLDataTable):
-            w = None
-        if w and (not self.cursor() or self.reqOnlyTable_):
+
+        if w and not isinstance(w, FLDataTable) and (not self.cursor() or self.reqOnlyTable_):
             w.setDisabled(True)
             return
 
         if self.cursor():
-            self.cursor().browseRecord()
+            self.cursor().browseRecord(wait)
 
     """
     Invoca al método FLSqlCursor::deleteRecord()
     """
 
-    @QtCore.pyqtSlot(bool)
-    def deleteRecord(self, unknown=None):
+    @decorators.pyqtSlot(bool)
+    def deleteRecord(self, wait: bool = True) -> None:
         w = self.sender()
-        if isinstance(w, FLDataTable):
-            w = None
-        if w and (
-            not self.cursor()
-            or self.reqReadOnly_
-            or self.reqInsertOnly_
-            or self.reqEditOnly_
-            or self.reqOnlyTable_
-            or (self.cursor().cursorRelation() and self.cursor().cursorRelation().isLocked())
+
+        cur_relation = self.cursor().cursorRelation()
+
+        if (
+            w
+            and not isinstance(w, FLDataTable)
+            and (
+                not self.cursor()
+                or self.reqReadOnly_
+                or self.reqInsertOnly_
+                or self.reqEditOnly_
+                or self.reqOnlyTable_
+                or (cur_relation and cur_relation.isLocked())
+            )
         ):
             w.setDisabled(True)
             return
 
         if self.cursor():
-            self.cursor().deleteRecord()
+            self.cursor().deleteRecord(wait)
 
     """
     Invoca al método FLSqlCursor::copyRecord()
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def copyRecord(self):
         w = self.sender()
-        if isinstance(w, FLDataTable):
-            w = None
-        if w and (
-            not self.cursor()
-            or self.reqReadOnly_
-            or self.reqEditOnly_
-            or self.reqOnlyTable_
-            or (self.cursor().cursorRelation() and self.cursor().cursorRelation().isLocked())
+
+        cur_relation = self.cursor().cursorRelation()
+
+        if (
+            w
+            and not isinstance(w, FLDataTable)
+            and (
+                not self.cursor()
+                or self.reqReadOnly_
+                or self.reqEditOnly_
+                or self.reqOnlyTable_
+                or (cur_relation and cur_relation.isLocked())
+            )
         ):
             w.setDisabled(True)
             return
@@ -2018,9 +2100,12 @@ class FLTableDB(QtWidgets.QWidget):
     @author InfoSiAL, S.L.
     """
 
-    @QtCore.pyqtSlot(int)
-    @QtCore.pyqtSlot(str)
-    def putFirstCol(self, col):
+    @decorators.pyqtSlot(int)
+    @decorators.pyqtSlot(str)
+    def putFirstCol(self, col: Union[int, str]) -> None:
+        if not self.tableRecords_:
+            raise Exception("tableRecords_ is not defined!")
+
         _index = (
             self.tableRecords_.column_name_to_column_index(col)
             if isinstance(col, str)
@@ -2028,11 +2113,9 @@ class FLTableDB(QtWidgets.QWidget):
         )
 
         if _index is None or _index < 0:
-            return False
+            return
         self.moveCol(_index, self.sortColumn_)
         self.tableRecords_.sortByColumn(self.sortColumn_, QtCore.Qt.AscendingOrder if self.orderAsc_ else QtCore.Qt.DescendingOrder)
-
-        return True
 
     """
     Coloca la columna como segunda pasando el nombre del campo.
@@ -2040,9 +2123,11 @@ class FLTableDB(QtWidgets.QWidget):
     @author Silix - dpinelo
     """
 
-    @QtCore.pyqtSlot(int)
-    @QtCore.pyqtSlot(str)
-    def putSecondCol(self, col):
+    @decorators.pyqtSlot(int)
+    @decorators.pyqtSlot(str)
+    def putSecondCol(self, col: Union[int, str]) -> None:
+        if not self.tableRecords_:
+            raise Exception("tableRecords_ is not defined!")
         _index = (
             self.tableRecords_.column_name_to_column_index(col)
             if isinstance(col, str)
@@ -2050,10 +2135,9 @@ class FLTableDB(QtWidgets.QWidget):
         )
 
         if _index is None or _index < 0:
-            return False
+            return
 
         self.moveCol(_index, self.sortColumn2_)
-        return True
 
     """
     Mueve una columna de un campo origen a la columna de otro campo destino
@@ -2065,13 +2149,16 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @decorators.BetaImplementation
-    def moveCol(self, from_, to, firstSearch=True):
+    def moveCol(self, from_: int, to: int, firstSearch: bool = True) -> None:
         if from_ < 0 or to < 0:
             return
 
         tMD = self.cursor().metadata()
         if not tMD:
             return
+
+        if not self.tableRecords_:
+            raise Exception("tableRecords_ is not defined!")
 
         self.tableRecords_.hide()
 
@@ -2144,37 +2231,37 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @decorators.BetaImplementation
-    def seekCursor(self):
+    def seekCursor(self) -> None:
         return
-        textSearch = self.lineEditSearch.text()
-        if not textSearch:
-            return
-
-        if not self.cursor():
-            return
-
-        # fN = self.sortField_.name()
-        textSearch.replace("%", "")
+        # textSearch = self.lineEditSearch.text()
+        # if not textSearch:
+        #     return
+        #
+        # if not self.cursor():
+        #     return
+        #
+        # # fN = self.sortField_.name()
+        # textSearch.replace("%", "")
 
         # if "'" not in textSearch and "\\" not in textSearch:
         #     sql = self.cursor().executedQuery() + " LIMIT 1"
-        """
-            #QSqlQuery qry(sql, cursor_->db()->db()); #FIXME
-            if (qry.first()) {
-      QString v(qry.value(0).toString());
-      int pos = -1;
-      if (!v.upper().startsWith(textSearch.upper()))
-        pos = cursor_->atFromBinarySearch(fN, textSearch, orderAsc_);
-      if (pos == -1)
-        pos = cursor_->atFromBinarySearch(fN, v, orderAsc_);
-      cursor_->seek(pos, false, true);
-      """
+        #   """
+        #       #QSqlQuery qry(sql, cursor_->db()->db()); #FIXME
+        #       if (qry.first()) {
+        # QString v(qry.value(0).toString());
+        # int pos = -1;
+        # if (!v.upper().startsWith(textSearch.upper()))
+        #   pos = cursor_->atFromBinarySearch(fN, textSearch, orderAsc_);
+        # if (pos == -1)
+        #   pos = cursor_->atFromBinarySearch(fN, v, orderAsc_);
+        # cursor_->seek(pos, false, true);
+        # """
 
     """
     Redefinida por conveniencia
     """
 
-    def setEnabled(self, b):
+    def setEnabled(self, b: bool) -> None:
         self.setReadOnly(not b)
 
     """
@@ -2184,11 +2271,10 @@ class FLTableDB(QtWidgets.QWidget):
     @param  w     Ancho de la columna
     """
 
-    def setColumnWidth(self, field, w):
+    def setColumnWidth(self, field: str, w: int) -> None:
         if self.tableRecords_:
-            col = self.tableRecords_.column_name_to_column_index(field) if isinstance(field, str) else field
-
-            self.tableRecords_.setColumnWidth(col, w)
+            # col = self.tableRecords_.column_name_to_column_index(field) if isinstance(field, str) else field
+            self.tableRecords_.setColWidth(field, w)
 
     """
     Selecciona la fila indicada
@@ -2196,20 +2282,20 @@ class FLTableDB(QtWidgets.QWidget):
     @param  r   Índice de la fila a seleccionar
     """
 
-    def setCurrentRow(self, r):
+    def setCurrentRow(self, r: int) -> None:
         t = self.tableRecords_
         if not t:
             return
 
         t.selectRow(r)
-        t.scrollTo(t.cursor().model().index(r, 0))
+        t.scrollTo(t.cur.model().index(r, 0))
 
     """
     @return Ancho de la columna
     """
 
     @decorators.NotImplementedWarn
-    def columnWidth(self, c):
+    def columnWidth(self, c: int) -> None:
         pass
 
     """
@@ -2220,7 +2306,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @decorators.NotImplementedWarn
-    def setRowHeight(self, row, h):
+    def setRowHeight(self, row: int, h: int) -> None:
         pass
 
     """
@@ -2228,14 +2314,14 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     @decorators.NotImplementedWarn
-    def rowHeight(self, row):
+    def rowHeight(self, row: int) -> None:
         pass
 
     """
     Exporta a una hoja de cálculo ODS y la visualiza
     """
 
-    def exportToOds(self):
+    def exportToOds(self) -> None:
         if not self.cursor():
             return
 
@@ -2248,8 +2334,7 @@ class FLTableDB(QtWidgets.QWidget):
         cursor.select(filter_)
         from pineboolib import pncontrolsfactory
 
-        settings = FLSettings()
-        if settings.readBoolEntry("ebcomportamiento/FLTableExport2Calc", False):
+        if config.value("ebcomportamiento/FLTableExport2Calc", False):
             pncontrolsfactory.QMessageBox.information(
                 self.topWidget,
                 self.tr("Opción deshabilitada"),
@@ -2354,7 +2439,6 @@ class FLTableDB(QtWidgets.QWidget):
                                     row.coveredCell()
 
                             else:
-                                print("Pixmap inválido", val)
                                 row.coveredCell()
                         else:
                             row.coveredCell()
@@ -2393,14 +2477,15 @@ class FLTableDB(QtWidgets.QWidget):
     Si la propiedad autoSortColumn es TRUE.
     """
 
-    def switchSortOrder(self, col=0):
+    def switchSortOrder(self, col: int = 0) -> None:
         if not self.autoSortColumn_:
             return
-        if self.tableRecords_.logical_index_to_visual_index(col) == self.tableRecords_.visual_index_to_column_index(self.sortColumn_):
+        if self.tableRecords_:
+            if self.tableRecords_.logical_index_to_visual_index(col) == self.tableRecords_.visual_index_to_column_index(self.sortColumn_):
 
-            self.orderAsc_ = not self.orderAsc_
+                self.orderAsc_ = not self.orderAsc_
 
-        self.setSortOrder(self.orderAsc_, col)
+            self.setSortOrder(self.orderAsc_, self.sortColumn_)
 
     """
     Filtra los registros de la tabla utilizando el primer campo, según el patrón dado.
@@ -2411,11 +2496,13 @@ class FLTableDB(QtWidgets.QWidget):
     @param p Cadena de caracteres con el patrón de filtrado
     """
 
-    @QtCore.pyqtSlot(str)
-    def filterRecords(self, p):
+    @decorators.pyqtSlot(str)
+    def filterRecords(self, p: str) -> None:
         if not self.cursor().model():
             return
-        bFilter = None
+        bFilter: Optional[str] = None
+        if not self.tableRecords_:
+            raise Exception("tableRecords_ is not defined!")
 
         # if p:
         #    p = "%s%%" % p
@@ -2425,8 +2512,10 @@ class FLTableDB(QtWidgets.QWidget):
 
         msec_refresh = 400
         column = self.tableRecords_.header().logicalIndex(self.sortColumn_)
-
-        field = self.cursor().model().metadata().indexFieldObject(self.tableRecords_.visual_index_to_column_index(column))
+        colidx = self.tableRecords_.visual_index_to_column_index(column)
+        if colidx is None:
+            raise Exception("Unexpected: Column not found")
+        field = self.cursor().model().metadata().indexFieldObject(colidx)
         bFilter = self.cursor().db().manager().formatAssignValueLike(field, p, True)
 
         idMod = self.cursor().db().managerModules().idModuleOfFile(self.cursor().metadata().name() + ".mtd")
@@ -2456,29 +2545,38 @@ class FLTableDB(QtWidgets.QWidget):
                         bFilter = None
 
         self.refreshDelayed(msec_refresh, refreshData)
-        self.filter_ = bFilter
+        if bFilter:
+            self.filter_ = bFilter
+        else:
+            self.filter_ = ""
 
-    def setSortOrder(self, ascending=True, col_order=None):
+    def setSortOrder(self, ascending: bool = True, col_order: Optional[int] = None) -> None:
+
         order = Qt.AscendingOrder if ascending else Qt.DescendingOrder
-        col = self.sortColumn_
-        while True:
-            column = self.tableRecords_.header().logicalIndex(col)
-            if not self.tableRecords_.isColumnHidden(column):
-                break
-            col += 1
-        self.tableRecords_.sortByColumn(column, order)
 
-    def isSortOrderAscending(self):
+        col = col_order if col_order is not None else self.sortColumn_
+        if self.tableRecords_:
+            while True:
+
+                column = self.tableRecords_.header().logicalIndex(col)
+                if not self.tableRecords_.isColumnHidden(column):
+                    break
+                col += 1
+            self.tableRecords_.sortByColumn(column, order)
+
+    def isSortOrderAscending(self) -> bool:
         return self.orderAsc_
 
     """
     Activa la tabla de datos
     """
 
-    def activeTabData(self, b):
+    def activeTabData(self, b: bool) -> None:
         # if (self.topWidget and not self.tabTable.visibleWidget() == self.tabData):
-        self.tabFilter.hide()
-        self.tabData.show()
+        if self.tabFilter is not None:
+            self.tabFilter.hide()
+        if self.tabData is not None:
+            self.tabData.show()
         self.refreshTabData()
         # self.tabTable.raiseWidget(self.tabData)
 
@@ -2486,10 +2584,12 @@ class FLTableDB(QtWidgets.QWidget):
     Activa la tabla de filtro
     """
 
-    def activeTabFilter(self, b):
+    def activeTabFilter(self, b: bool) -> None:
         # if (self.topWidget and not self.tabTable.visibleWidget() == self.tabFilter):
-        self.tabData.hide()
-        self.tabFilter.show()
+        if self.tabData is not None:
+            self.tabData.hide()
+        if self.tabFilter is not None:
+            self.tabFilter.show()
         self.refreshTabFilter()
         # self.tabTable.raiseWidget(self.tabFilter)
 
@@ -2497,7 +2597,7 @@ class FLTableDB(QtWidgets.QWidget):
     Limpia e inicializa el filtro
     """
 
-    def tdbFilterClear(self):
+    def tdbFilterClear(self) -> None:
         if not self.topWidget:
             return
 
@@ -2529,12 +2629,11 @@ class FLTableDB(QtWidgets.QWidget):
     """
     currentChanged = QtCore.pyqtSignal()
 
-    def primarysKeysChecked(self):
+    def primarysKeysChecked(self) -> List[Any]:
         return self.tableRecords().primarysKeysChecked()
 
-    def clearChecked(self):
+    def clearChecked(self) -> None:
         self.tableRecords().clearChecked()
 
-    def setPrimaryKeyChecked(self, name, b):
-        name = str(name)
+    def setPrimaryKeyChecked(self, name: str, b: bool) -> None:
         self.tableRecords().setPrimaryKeyChecked(name, b)

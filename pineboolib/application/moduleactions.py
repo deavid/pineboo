@@ -1,11 +1,11 @@
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 
 from pineboolib.core.exceptions import ForbiddenError
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.xmlaction import XMLAction
 from .proxy import DelayedObjectProxyLoader
 
-from typing import Any, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING, NoReturn
 
 
 class ModuleActions(object):
@@ -14,7 +14,7 @@ class ModuleActions(object):
     @return el objecto del XMLAction afectado
     """
 
-    logger = logging.getLogger("main.ModuleActions")
+    logger = logging.getLogger("application.ModuleActions")
 
     def __init__(self, module: Any, path: str, modulename: str) -> None:
         """Constructor
@@ -47,9 +47,11 @@ class ModuleActions(object):
         self.tree = load2xml(self.path)
         self.root = self.tree.getroot()
 
-        action = XMLAction(project=self.project)
+        action = XMLAction(project=self.project, name=self.mod.name)
+        if action is None:
+            raise Exception("action is empty!")
+
         action.mod = self
-        action.name = self.mod.name
         action.alias = self.mod.name
         # action.form = self.mod.name
         action.form = None
@@ -68,7 +70,7 @@ class ModuleActions(object):
             name = action_xml.name
             if name != "unnamed":
                 if hasattr(qsa_dict_modules, "form%s" % name):
-                    self.logger.warning(
+                    self.logger.debug(
                         "No se sobreescribe variable de entorno %s. Hay una definición previa en %s",
                         "%s.form%s" % (self.module_name, name),
                         self.module_name,
@@ -87,12 +89,12 @@ class ModuleActions(object):
 
                     setattr(qsa_dict_modules, "formRecord" + name, delayed_action)
 
-    def __contains__(self, k):
+    def __contains__(self, k) -> bool:
         """Busca si es propietario de una action
         """
         return k in self.project.actions  # FIXME: Actions should be loaded to their parent, not the singleton
 
-    def __getitem__(self, name):
+    def __getitem__(self, name) -> Any:
         """Recoge una action determinada
         @param name. Nombre de la action
         @return Retorna el XMLAction de la action dada
@@ -105,6 +107,6 @@ class ModuleActions(object):
     @param action_. Action a añadir a la propiedad del módulo
     """
 
-    def __setitem__(self, name, action_):
+    def __setitem__(self, name, action_) -> NoReturn:
         raise ForbiddenError("Actions are not writable!")
         # self.project.actions[name] = action_

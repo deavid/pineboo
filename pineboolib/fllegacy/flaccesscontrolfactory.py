@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore  # type: ignore
+from PyQt5 import QtWidgets  # type: ignore
 
-from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
+from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
 from pineboolib.fllegacy.flaccesscontrol import FLAccessControl
 
 from pineboolib.application import project
+from typing import Dict
 
 
 class FLAccessControlMainWindow(FLAccessControl):
@@ -24,42 +25,37 @@ class FLAccessControlMainWindow(FLAccessControl):
     def type(self):
         return "mainwindow"
 
-    def processObject(self, obj):
+    def processObject(self, obj) -> None:
         from pineboolib import pncontrolsfactory
 
         mw = pncontrolsfactory.QMainWindow(obj)
         if not mw or not self.acosPerms_:
             return
 
+        a: QtWidgets.QAction
+        list1 = mw.queryList("QAction")
+        actions_idx = {a.name(): a for a in list1}
         if not self.perm_:
-            list1 = QtCore.QObjectList(mw.queryList("QAction"))
-            ito = QtCore.QObjectListIt(list1)
-            a = QtCore.QAction
-
-            while not ito.current() == 0:
-                a = ito.current()
-                ++ito
+            for a in list1:
                 if self.acosPerms_[a.name()]:
                     continue
                 if self.perm_ == "-w" or self.perm_ == "--":
                     a.setVisible(False)
 
-        it = QtCore.QDictIterator(self.acosPerms_)
-        for i in range(len(it.current())):
-            a = mw.child(it.currentKey(), "QAction")
-            if a:
-                perm = it
+        for a_name, perm in self.acosPerms_.items():
+            if a_name in actions_idx:
+                a = actions_idx[a_name]
                 if perm in ("-w", "--"):
                     a.setVisible(False)
 
-    def setFromObject(self, object):
+    def setFromObject(self, object) -> None:
         print("FLAccessControlMainWindow::setFromObject %s" % "No implementado todavía.")
 
 
 class FLAccessControlForm(FLAccessControl):
     def __init__(self):
         super().__init__()
-        if project._DGI.localDesktop():
+        if project.DGI.localDesktop():
             from PyQt5.Qt import qApp  # type: ignore
             from PyQt5 import QtGui  # type: ignore
 
@@ -95,7 +91,7 @@ class FLAccessControlForm(FLAccessControl):
   FLFormRecordDB y FLFormSearchDB) se pueda hacer no visible o no editable a conveniencia.
     """
 
-    def processObject(self, obj):
+    def processObject(self, obj) -> None:
         fm = obj
         if not fm or not self.acosPerms_:
             return
@@ -123,7 +119,7 @@ class FLAccessControlForm(FLAccessControl):
             if w:
                 perm = self.acosPerms_[it]
                 if perm in ("-w", "--"):
-                    if project._DGI.localDesktop():
+                    if project.DGI.localDesktop():
                         w.setPalette(self.pal)
                     w.setDisabled(True)
                     w.hide()
@@ -135,18 +131,19 @@ class FLAccessControlForm(FLAccessControl):
             else:
                 print("WARN: FLAccessControlFactory: No se encuentra el control %s para procesar ACLS." % it)
 
-    def setFromObject(self, object):
+    def setFromObject(self, object) -> None:
         print("FLAccessControlform::setFromObject: No implementado todavía.")
 
 
 class FLAccessControlTable(FLAccessControl):
     def __init__(self) -> None:
         super().__init__()
+        self.acosPerms_: Dict[str, str] = {}
 
     def type(self):
         return "table"
 
-    def processObject(self, obj: FLTableMetaData) -> None:
+    def processObject(self, obj: "PNTableMetaData") -> None:
         if not obj:
             return
 
@@ -197,7 +194,7 @@ class FLAccessControlTable(FLAccessControl):
                 field.setVisible(True)
                 field.setEditable(True)
 
-    def setFromObject(self, obj: FLTableMetaData) -> None:
+    def setFromObject(self, obj: "PNTableMetaData") -> None:
         tm = obj
         if not tm:
             return
@@ -226,7 +223,7 @@ class FLAccessControlTable(FLAccessControl):
 
 
 class FLAccessControlFactory(object):
-    def create(self, type_: str) -> FLAccessControl:
+    def create(self, type_: str) -> "FLAccessControl":
         if type_ is None:
             raise ValueError("type_ must be set")
 
@@ -239,7 +236,7 @@ class FLAccessControlFactory(object):
 
         raise ValueError("type_ %r unknown" % type_)
 
-    def type(self, obj):
+    def type(self, obj) -> str:
         if obj is None:
             print("NO OBJ")
 
@@ -248,7 +245,7 @@ class FLAccessControlFactory(object):
 
         if isinstance(obj, pncontrolsfactory.QMainWindow):
             ret_ = "mainwindow"
-        elif isinstance(obj, FLTableMetaData):
+        elif isinstance(obj, PNTableMetaData):
             ret_ = "table"
         elif isinstance(obj, pncontrolsfactory.FLFormDB):
             ret_ = "form"

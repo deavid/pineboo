@@ -2,21 +2,25 @@
 import traceback
 import sys
 import re
-from typing import Any
 from json import dumps
 from xml import etree
 from xml.etree.ElementTree import fromstring
 
-from xmljson import yahoo as xml2json
+from xmljson import yahoo as xml2json  # type: ignore
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 
-from jsonrpc import JSONRPCResponseManager, dispatcher
+from jsonrpc import JSONRPCResponseManager, dispatcher  # type: ignore
 
 from pineboolib import logging
 from pineboolib.core import decorators
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
+
+from typing import Dict, List, Mapping, Optional, Sized, TypeVar, Union, Any
+import xml
+
+_T0 = TypeVar("_T0")
 
 
 logger = logging.getLogger(__name__)
@@ -24,12 +28,12 @@ logger = logging.getLogger(__name__)
 
 class parser(object):
     _mainForm = None
-    _queqe = {}
+    _queqe: Dict[str, str] = {}
 
-    def __init__(self, mainForm):
+    def __init__(self, mainForm) -> None:
         self._mainForm = mainForm
 
-    def addQueque(self, name, value):
+    def addQueque(self, name, value) -> None:
         self._queqe[name] = value
 
     @Request.application
@@ -46,7 +50,7 @@ class parser(object):
     def mainWindow(*args):
         from pineboolib.application import project
 
-        if project._DGI._par._queqe:
+        if project.DGI._par._queqe:
             return "queqePending"
         if not args:
             return "needArguments"
@@ -61,12 +65,12 @@ class parser(object):
     def mainForm(*args):
         from pineboolib.application import project
 
-        if project._DGI._par._queqe:
+        if project.DGI._par._queqe:
             return "queqePending"
         if not args:
             return "needArguments"
         try:
-            obj_ = project._DGI.mainForm()
+            obj_ = project.DGI.mainForm()
             return obj_.json_process(args)
         except Exception:
             print(traceback.format_exc())
@@ -76,16 +80,16 @@ class parser(object):
     def callFunction(*args):
         from pineboolib.application import project
 
-        if project._DGI._par._queqe:
+        if project.DGI._par._queqe:
             return "queqePending"
 
         fun_ = args[0]
-        param_ = None
+        param_: List[str] = []
         # fn = None
         if len(args) > 1:
-            param_ = ",".join(args[1:])
+            param_ = [",".join(args[1:])]
         else:
-            param_ = args[0]
+            param_ = []
 
         try:
             project.call(fun_, param_)
@@ -103,19 +107,19 @@ class parser(object):
         ret: Any
         if len(args) == 1:
             if args[0] == "clean":
-                project._DGI._par._queqe = {}
+                project.DGI._par._queqe = {}
                 return True
-            elif args[0] in project._DGI._par._queqe.keys():
+            elif args[0] in project.DGI._par._queqe.keys():
                 ret = []
-                for q in project._DGI._par._queqe.keys():
+                for q in project.DGI._par._queqe.keys():
                     if q.find(args[0]) > -1:
-                        ret.append((q, project._DGI._par._queqe[q]))
-                        del project._DGI._par._queqe[q]
+                        ret.append((q, project.DGI._par._queqe[q]))
+                        del project.DGI._par._queqe[q]
             else:
                 ret = "Not Found"
         else:
-            ret = project._DGI._par._queqe
-            project._DGI._par._queqe = {}
+            ret = project.DGI._par._queqe
+            project.DGI._par._queqe = {}
 
         return ret
 
@@ -124,14 +128,14 @@ class parser(object):
         from pineboolib.application import project
         from pineboolib import pncontrolsfactory
 
-        if project._DGI._par._queqe:
+        if project.DGI._par._queqe:
             return "queqePending"
         arguments = args
         actionName = arguments[0]
         control = arguments[1]
         emite = arguments[2]
-        if actionName in project._DGI._WJS.keys():
-            ac = project._DGI._W[actionName]
+        if actionName in project.DGI._WJS.keys():
+            ac = project.DGI._W[actionName]
 
             cr = ac.child(control)
             if cr:
@@ -159,10 +163,11 @@ class parser(object):
 
 class dgi_jsonrpc(dgi_schema):
     _par = None
-    _W = {}
-    _WJS = {}
+    _W: Dict[str, Any] = {}
+    _WJS: Dict[str, Any] = {}
+    _mainForm: Optional[object] = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         # desktopEnabled y mlDefault a True
         super().__init__()
         self._name = "jsonrpc"
@@ -174,23 +179,24 @@ class dgi_jsonrpc(dgi_schema):
         self._mainForm = None
         self.parserDGI = parserJson()
 
-    def extraProjectInit(self):
+    def extraProjectInit(self) -> None:
         pass
 
-    def setParameter(self, param):
+    def setParameter(self, param) -> None:
         self._listenSocket = param
 
-    def mainForm(self):
+    def mainForm(self) -> Any:
         if not self._mainForm:
-            self._mainForm = mainForm()
+            self._mainForm = MainForm()
         return self._mainForm
 
-    def exec_(self):
+    def exec_(self) -> None:
         self._par = parser(self._mainForm)
         self.launchServer()
 
-    def launchServer(self):
-        run_simple("localhost", 4000, self._par.receive)
+    def launchServer(self) -> None:
+        if self._par:
+            run_simple("localhost", 4000, self._par.receive)
         # print("JSON-RPC:INFO: Listening socket", self._listenSocket)
         # WSGIServer(self._par.query, bindAddress=self._listenSocket).run()
 
@@ -199,10 +205,11 @@ class dgi_jsonrpc(dgi_schema):
         self._WJS[widget.__class__.__module__] = self.parserDGI.parse(path)
         self._W[widget.__class__.__module__] = widget
 
-    def showWidget(self, widget):
-        self._par.addQueque("%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
+    def showWidget(self, widget) -> None:
+        if self._par:
+            self._par.addQueque("%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> Any:
         return super().resolveObject(self._name, name)
 
 
@@ -212,7 +219,7 @@ Exportador UI a JSON
 
 
 class parserJson:
-    def __init__(self):
+    def __init__(self) -> None:
         # TODO: se puede ampliar con propiedades y objetos de qt4
         self.aPropsForbidden = [
             "images",
@@ -246,7 +253,7 @@ class parserJson:
             "verstretch",
         ]
 
-    def isInDgi(self, property, type):
+    def isInDgi(self, property, type) -> bool:
         if type == "prop":
             if property in self.aPropsForbidden:
                 return False
@@ -256,7 +263,7 @@ class parserJson:
 
         return True
 
-    def manageProperties(self, obj):
+    def manageProperties(self, obj: _T0) -> Optional[_T0]:
         if isinstance(obj, dict):
             for property in list(obj):
                 if self.isInDgi(property, "prop"):
@@ -282,7 +289,7 @@ class parserJson:
                     del obj[ind]
         return obj
 
-    def parse(self, name):
+    def parse(self, name) -> Optional[str]:
         inputFile = name
         outputFile = re.search(r"\w+.ui", inputFile)
 
@@ -325,7 +332,7 @@ FIXME: Estas clases de abajo ,deberian de ser tipo object para poder levantar la
 """
 
 
-class mainForm(object):
+class MainForm(object):
     mainWindow = None
     MainForm = None
 
@@ -333,7 +340,7 @@ class mainForm(object):
         self.mainWindow = json_mainWindow()
         self.MainForm = json_MainForm()
 
-    def json_process(self, args):
+    def json_process(self, args: Mapping[int, Any]) -> Optional[bool]:
         try:
             _action = args[0]
 
@@ -341,25 +348,28 @@ class mainForm(object):
                 return self.runAction(args[1])
         except Exception:
             print(traceback.format_exc())
-            return False
 
-    def runAction(self, name):
+        return False
+
+    def runAction(self, name) -> bool:
         try:
-            self.mainWindow._actionsConnects[name].run()
-            return True
+            if self.mainWindow is not None:
+                self.mainWindow._actionsConnects[name].run()
+                return True
         except Exception:
             print(traceback.format_exc())
-            return False
+
+        return False
 
 
 class json_mainWindow(object):
-    areas_ = {}
-    modules_ = {}
-    _actionsConnects = {}
-    _actions = {}
-    _toolBarActions = []
-    _images = {}
-    initialized_mods_ = []
+    areas_: Dict[str, str] = {}
+    modules_: Dict[str, Any] = {}
+    _actionsConnects: Dict[str, Any] = {}
+    _actions: Dict[str, Any] = {}
+    _toolBarActions: List[str] = []
+    _images: Dict[str, Any] = {}
+    initialized_mods_: List[str] = []
     w_ = None
 
     def __init__(self):
@@ -410,27 +420,27 @@ class json_mainWindow(object):
             self._actionsConnects[action.name] = action
     """
 
-    def show(self):
+    def show(self) -> None:
         pass
 
-    def loadAction(self, action):
+    def loadAction(self, action) -> None:
         self._actions[action.name] = action
 
-    def loadConnection(self, action):
+    def loadConnection(self, action) -> None:
         self._actions[action.name] = action
 
-    def loadToolBarsAction(self, name):
+    def loadToolBarsAction(self, name) -> None:
         self._toolBarActions.append(name)
 
-    def addToJson(self, xml):
+    def addToJson(self, xml: xml.etree.ElementTree.Element) -> str:
         _json = xml2json.data(fromstring(etree.ElementTree.tostring(xml)))
         _jsonStr = dumps(_json, sort_keys=True, indent=2)
         return _jsonStr
 
-    def json_areas(self, *args):
+    def json_areas(self, *args) -> Dict[Any, Any]:
         return self.areas_
 
-    def json_modules(self, args):
+    def json_modules(self, *args: Union[Sized, Mapping[int, Any]]) -> List[Any]:
         _area = None
         if len(args) > 1:
             _area = args[1]
@@ -449,7 +459,7 @@ class json_mainWindow(object):
 
         return modulesS
 
-    def json_actions(self, args):
+    def json_actions(self, *args: Union[Sized, Mapping[int, Any]]) -> List[Any]:
         _module = None
         _ret = []
         if len(args) > 1:
@@ -471,26 +481,28 @@ class json_mainWindow(object):
 
         return _ret
 
-    def json_image(self, name):
+    def json_image(self, name: Mapping[int, Any]) -> Union[bool, str]:
         for _ac in self._actions.keys():
             if name[1] == self._actions[_ac].iconSet:
                 return str(self._actions[_ac].icon)
         return False
 
-    def initScript(self):
+    def initScript(self) -> None:
         self.initModule("sys")
 
-    def initModule(self, module):
+    def initModule(self, module) -> None:
         if module not in self.initialized_mods_:
             self.initialized_mods_.append(module)
             from pineboolib.application import project
 
             project.call("%s.iface.init" % module, [], None, False)
 
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
         mng = project.conn.managerModules()
         mng.setActiveIdModule(module)
 
 
 class json_MainForm(object):
-    def setDebugLevel(self, number):
+    def setDebugLevel(self, number) -> None:
         pass

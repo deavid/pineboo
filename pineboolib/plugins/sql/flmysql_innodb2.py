@@ -3,12 +3,8 @@ from pineboolib.plugins.sql.flmysql_myisam2 import FLMYSQL_MYISAM2
 
 class FLMYSQL_INNODB2(FLMYSQL_MYISAM2):
 
-    version_ = None
     conn_ = None
-    name_ = None
-    alias_ = None
     errorList = None
-    lastError_ = None
 
     def __init__(self):
         super(FLMYSQL_INNODB2, self).__init__()

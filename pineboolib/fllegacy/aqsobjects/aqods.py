@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from typing import Union, List, Any
+from typing import Union, List, Any, Tuple, Optional
 
-import odf
-from odf import table, style
+import odf  # type: ignore
+from odf import table, style  # type: ignore
 
 from pineboolib import logging
 
@@ -16,7 +16,7 @@ Generador de ficheros ODS
 
 class AQOdsGenerator_class(object):
 
-    doc_ = None
+    doc_: Any = None
     """
     Constructor
     """
@@ -31,7 +31,9 @@ class AQOdsGenerator_class(object):
     @param file_name. Nombre del fichero a generar
     """
 
-    def generateOds(self, file_name):
+    def generateOds(self, file_name: str) -> None:
+        if self.doc_ is None:
+            raise Exception("Document not set, cannot generate")
         file_name = file_name.replace(".ods", "")
         self.doc_.save(file_name, True)
 
@@ -40,7 +42,7 @@ class AQOdsGenerator_class(object):
     @param document. Datos a añadir al fichero
     """
 
-    def set_doc_(self, document):
+    def set_doc_(self, document) -> None:
         self.doc_ = document
 
 
@@ -57,8 +59,8 @@ class AQOdsSpreadSheet(object):
     @param generator. Generador de ficheros
     """
 
-    def __init__(self, generator):
-        from odf.opendocument import OpenDocumentSpreadsheet
+    def __init__(self, generator) -> None:
+        from odf.opendocument import OpenDocumentSpreadsheet  # type: ignore
 
         self.generator_ = generator
         self.spread_sheet = OpenDocumentSpreadsheet()
@@ -68,7 +70,7 @@ class AQOdsSpreadSheet(object):
     Cierra el documento
     """
 
-    def close(self):
+    def close(self) -> None:
         pass
 
 
@@ -80,7 +82,7 @@ class AQOdsImage(object):
     y_ = None
     link_ = None
 
-    def __init__(self, name, width, height, x, y, link):
+    def __init__(self, name, width, height, x, y, link) -> None:
         self.name_ = name
         self.width_ = width
         self.height_ = height
@@ -95,9 +97,7 @@ Hoja dentro del documento
 
 
 class AQOdsSheet(object):
-    sheet_ = None
-    spread_sheet_parent = None
-    num_rows_ = None
+    num_rows_: int
 
     """
     Constructor
@@ -105,10 +105,10 @@ class AQOdsSheet(object):
     @param sheet_name. Nombre de la hoja
     """
 
-    def __init__(self, spread_sheet, sheet_name):
+    def __init__(self, spread_sheet, sheet_name) -> None:
         self.spread_sheet_parent_ = spread_sheet.spread_sheet
         self.num_rows_ = 0
-        from odf.table import Table
+        from odf.table import Table  # type: ignore
 
         self.sheet_ = Table(name=sheet_name)
 
@@ -116,14 +116,14 @@ class AQOdsSheet(object):
     Numero de lineas
     """
 
-    def rowsCount(self):
+    def rowsCount(self) -> int:
         return self.num_rows_
 
     """
     Cierra la hoja
     """
 
-    def close(self):
+    def close(self) -> None:
         self.spread_sheet_parent_.spreadsheet.addElement(self.sheet_)
 
 
@@ -134,10 +134,10 @@ Linea dentro de una hoja
 
 class AQOdsRow(object):
     sheet_: Any
-    row_ = None
+    row_: table.TableRow
     cells_list_: List[Any]
-    style_cell_text_ = None
-    fix_precision_ = None
+    style_cell_text_: Optional[str] = None
+    fix_precision_: Optional[int] = None
     row_color_ = None
     property_cell_: List[Any]
 
@@ -146,7 +146,7 @@ class AQOdsRow(object):
     @param sheet. Hoja del documento
     """
 
-    def __init__(self, sheet):
+    def __init__(self, sheet) -> None:
 
         self.sheet_ = sheet
 
@@ -161,7 +161,7 @@ class AQOdsRow(object):
     @param color. Se especifica en formato hex(color)[2:]
     """
 
-    def addBgColor(self, color):
+    def addBgColor(self, color) -> None:
         self.row_color_ = color
 
     """
@@ -169,9 +169,9 @@ class AQOdsRow(object):
     @param opt. Opciones de linea, cada celda acaba con la asignación del valor
     """
 
-    def opIn(self, opt: Union[float, str, odf.element.Element, List, AQOdsImage]):
-        from odf.text import P, Span
-        from odf.draw import Frame, Image
+    def opIn(self, opt: Union[float, str, "odf.element.Element", List, "AQOdsImage"]):
+        from odf.text import P, Span  # type: ignore
+        from odf.draw import Frame, Image  # type: ignore
 
         if isinstance(opt, float):
             if self.fix_precision_ is not None:
@@ -229,7 +229,7 @@ class AQOdsRow(object):
     Nueva celda. Esta se crea al asignar el valor a la anterior
     """
 
-    def __newCell__(self):
+    def __newCell__(self) -> Tuple[Any, Any]:
 
         style_cell = style.Style(name="stylecell_%s_%s" % (len(self.cells_list_), self.sheet_.rowsCount()), family="table-cell")
         if self.row_color_:  # Guardo color si hay
@@ -245,7 +245,7 @@ class AQOdsRow(object):
     Cierra la linea
     """
 
-    def close(self):
+    def close(self) -> None:
         for cell in self.cells_list_:  # Meto las celdas en la linea
             self.row_.addElement(cell)
 
@@ -256,14 +256,14 @@ class AQOdsRow(object):
     El campo se rellena con datos vacíos
     """
 
-    def coveredCell(self):
+    def coveredCell(self) -> None:
         self.opIn(" ")
 
     """
     Especifica la precisión de los decimales del numero
     """
 
-    def setFixedPrecision(self, n):
+    def setFixedPrecision(self, n) -> None:
         self.fix_precision_ = n
 
 
@@ -273,7 +273,7 @@ Especifica un color
 """
 
 
-def AQOdsColor(color):
+def AQOdsColor(color: int) -> str:
     return hex(color)[2:]
 
 
@@ -288,8 +288,8 @@ class AQOdsStyle_class(object):
     Alinea al centro  una celda
     """
 
-    def alignCenter(self):
-        from odf import style
+    def alignCenter(self) -> Any:
+        from odf import style  # type: ignore
 
         return style.ParagraphProperties(textalign="center")
 
@@ -297,8 +297,8 @@ class AQOdsStyle_class(object):
     Alinea a la derecha una celda
     """
 
-    def alignRight(self):
-        from odf import style
+    def alignRight(self) -> Any:
+        from odf import style  # type: ignore
 
         return style.ParagraphProperties(textalign="right")
 
@@ -306,8 +306,8 @@ class AQOdsStyle_class(object):
     Alinea a la izquierda una celda
     """
 
-    def alignLeft(self):
-        from odf import style
+    def alignLeft(self) -> Any:
+        from odf import style  # type: ignore
 
         return style.ParagraphProperties(textalign="left")
 
@@ -315,8 +315,8 @@ class AQOdsStyle_class(object):
     Texto negrita
     """
 
-    def textBold(self):
-        from odf.style import Style, TextProperties
+    def textBold(self) -> Any:
+        from odf.style import Style, TextProperties  # type: ignore
 
         bold_style = Style(name="Bold", family="text")
         bold_style.addElement(TextProperties(fontweight="bold"))
@@ -326,8 +326,8 @@ class AQOdsStyle_class(object):
     Texto cursiva
     """
 
-    def textItalic(self):
-        from odf.style import Style, TextProperties
+    def textItalic(self) -> Any:
+        from odf.style import Style, TextProperties  # type: ignore
 
         italic_style = Style(name="Italic", family="text")
         italic_style.addElement(TextProperties(fontstyle="italic"))
@@ -337,8 +337,8 @@ class AQOdsStyle_class(object):
     Borde inferior de una celda
     """
 
-    def borderBottom(self):
-        from odf import style
+    def borderBottom(self) -> Any:
+        from odf import style  # type: ignore
 
         return style.TableCellProperties(borderbottom="1pt solid #000000")
 
@@ -346,8 +346,8 @@ class AQOdsStyle_class(object):
     Borde izquierdo de una celda
     """
 
-    def borderLeft(self):
-        from odf import style
+    def borderLeft(self) -> Any:
+        from odf import style  # type: ignore
 
         return style.TableCellProperties(borderleft="1pt solid #000000")
 
@@ -355,8 +355,8 @@ class AQOdsStyle_class(object):
     Borde derecho de una celda
     """
 
-    def borderRight(self):
-        from odf import style
+    def borderRight(self) -> Any:
+        from odf import style  # type: ignore
 
         return style.TableCellProperties(borderright="1pt solid #000000")
 
@@ -364,8 +364,8 @@ class AQOdsStyle_class(object):
     Borde superior de una celda
     """
 
-    def borderTop(self):
-        from odf import style
+    def borderTop(self) -> Any:
+        from odf import style  # type: ignore
 
         return style.TableCellProperties(bordertop="1pt solid #000000")
 

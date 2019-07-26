@@ -5,7 +5,7 @@ from pineboolib.core.utils.utils_base import filedir
 class splashscreen(object):
     """Show a splashscreen to inform keep the user busy while Pineboo is warming up."""
 
-    _splash = None
+    _splash: QtWidgets.QSplashScreen
 
     def __init__(self):
 
@@ -21,11 +21,11 @@ class splashscreen(object):
         frameGm.moveCenter(centerPoint)
         self._splash.move(frameGm.topLeft())
 
-    def showMessage(self, text):
+    def showMessage(self, text) -> None:
         self._splash.showMessage(text, QtCore.Qt.AlignLeft, QtCore.Qt.white)
 
-    def hide(self):
+    def hide(self) -> None:
         QtCore.QTimer.singleShot(1000, self._splash.hide)
 
-    def show(self):
+    def show(self) -> None:
         self._splash.show()

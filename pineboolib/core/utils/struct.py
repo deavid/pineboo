@@ -13,7 +13,7 @@ class Struct(object):
     pk: List[str]
     fields_idx: Dict[str, int]
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -46,13 +46,19 @@ class XMLStruct(Struct):
                 except Exception:
                     print("utils.XMLStruct: Omitiendo", self.__name__, key, text)
 
-    def __str__(self):
+    def __str__(self) -> str:
         attrs = ["%s=%s" % (k, repr(getattr(self, k))) for k in self._attrs]
         txtattrs = " ".join(attrs)
         return "<%s.%s %s>" % (self.__class__.__name__, self.__name__, txtattrs)
 
     def _v(self, k: str, default: None = None) -> Optional[str]:
         return getattr(self, k, default)
+
+    def _rv(self, k: str) -> str:
+        ret = getattr(self, k, None)
+        if not isinstance(ret, str):
+            raise ValueError("Retrieving value for %s, found %r which is not a string" % (k, ret))
+        return ret
 
 
 class AreaStruct(Struct):
@@ -65,7 +71,7 @@ class TableStruct(Struct):
     xmlroot: Any
     tablename: str
     name: str
-    query_table: str
+    query_table: Optional[str]
     fields: List[str]
     pk: List[str]
     fields_idx: Dict[str, int]

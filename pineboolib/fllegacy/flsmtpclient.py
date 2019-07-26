@@ -4,12 +4,14 @@ from os.path import basename
 from pineboolib import logging
 
 import smtplib
+import socket
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from email.mime.image import MIMEImage
 
+from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -67,14 +69,14 @@ class FLSmtpClient(QtCore.QObject):
     subject_ = None
     body_ = None
 
-    attachments_ = []
+    attachments_: List[str] = []  # List with file paths
 
     mail_server_ = None
     mime_type_ = None
     port_ = None
 
-    text_parts_ = []
-    map_attach_cid_ = {}
+    text_parts_: List[str] = []
+    map_attach_cid_: dict = {}  # FIXME: unused
 
     status_msg_ = None
     state_code_ = None
@@ -164,10 +166,10 @@ class FLSmtpClient(QtCore.QObject):
             logger.warning(err_msg_)
             self.changeStatus(err_msg_, State.AttachError)
 
-    def addTextPart(self, text, mine_type="text/plain"):
+    def addTextPart(self, text: str, mime_type="text/plain"):
         if text:
             self.text_parts_.append(text)
-            self.text_parts_.append(mine_type)
+            self.text_parts_.append(mime_type)
 
     def setMailServer(self, mail_server):
         self.mail_server_ = mail_server
@@ -219,7 +221,7 @@ class FLSmtpClient(QtCore.QObject):
 
     def startSend(self):
         from pineboolib.core.utils.utils_base import pixmap_fromMimeSource
-        from pineboolib.fllegacy.flsettings import FLSettings
+        from pineboolib.core.settings import settings
         from pineboolib.application import project
 
         self.sendStarted.emit()
@@ -249,8 +251,8 @@ class FLSmtpClient(QtCore.QObject):
         step += 1
         self.sendStepNumber.emit(step)
         # Adjuntar logo
-        if FLSettings().readBoolEntry("email/sendMailLogo", True):
-            logo = FLSettings().readEntry("email/mailLogo", "%s/logo_mail.png" % project.tmpdir)
+        if settings.value("email/sendMailLogo", True):
+            logo = settings.value("email/mailLogo", "%s/logo_mail.png" % project.tmpdir)
             if not QtCore.QFile.exists(logo):
                 logo = "%s/logo.png" % project.tmpdir
                 Qt.QPixmap(pixmap_fromMimeSource("pineboo-logo.png")).save(logo, "PNG")
@@ -306,10 +308,10 @@ class FLSmtpClient(QtCore.QObject):
             status_msg = "El servidor no ha respondido correctamente al saludo."
             self.changeStatus(status_msg, State.ClientError)
             return False
-        except smtplib.SMTPNotSupportedError:
-            status_msg = "El tipo de autenticación no está soportada por el servidor."
-            self.changeStatus(status_msg, State.ClientError)
-            return False
+        # except smtplib.SMTPNotSupportedError:
+        #     status_msg = "El tipo de autenticación no está soportada por el servidor."
+        #     self.changeStatus(status_msg, State.ClientError)
+        #     return False
         except smtplib.SMTPConnectError:
             status_msg = "No se puede conectar al servidor SMTP."
             self.changeStatus(status_msg, State.ServerError)
@@ -334,7 +336,7 @@ class FLSmtpClient(QtCore.QObject):
             status_msg = "Error desconocido"
             self.changeStatus(status_msg, State.ClientError)
             return False
-        except smtplib.socket.gaierror:
+        except socket.gaierror:
             status_msg = "Servidor SMTP no encontrado.Verifique el nombre de host de su servidor SMTP."
             self.changeStatus(status_msg, State.SmtpError)
             return False

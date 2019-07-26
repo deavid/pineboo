@@ -7,8 +7,8 @@ from PyQt5.QtSvg import QSvgRenderer  # type: ignore
 
 from pineboolib import logging
 
-import barcode  # pip3 install python-barcode
-from typing import Dict, Any
+import barcode  # type: ignore # pip3 install python-barcode
+from typing import Dict, Any, Union, cast, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -34,32 +34,32 @@ BARCODE_GTIN = 17
 
 class FLCodBar(object):
 
-    barcode = {}
-    p: QPixmap = None
-    pError: QPixmap = None
+    barcode: Dict[str, Any]
+    p: Optional[QPixmap]
+    pError: QPixmap
 
     def __init__(
         self,
-        value=None,
+        value: Union[None, int, str, Dict[str, Any]] = None,
         type_=BARCODE_128,
         margin=10,
         scale=1.0,
         cut=1.0,
         rotation=0,
         text_flag=False,
-        fg=QtCore.Qt.black,
-        bg=QtCore.Qt.white,
+        fg: QColor = cast(QColor, QtCore.Qt.black),
+        bg: QColor = cast(QColor, QtCore.Qt.white),
         res=72,
-    ):
+    ) -> None:
         dict_ = {"barcode": "python-barcode"}
         from pineboolib.application.utils.check_dependencies import check_dependencies
 
         check_dependencies(dict_)
         self.pError = QPixmap()
-
+        self.barcode = {}
         self.barcode["value"] = ""
+        self.p = None
 
-        self.p: QPixmap = None
         if value in [None, 0]:
             self.readingStdout = False
             self.writingStdout = False
@@ -79,8 +79,9 @@ class FLCodBar(object):
                 self.barcode["bg"] = bg
                 self.barcode["valid"] = False
                 self.barcode["res"] = res
-
-            else:
+            elif isinstance(value, int):
+                raise ValueError("Not supported")
+            elif isinstance(value, dict):
                 self._copyBarCode(value, self.barcode)
 
     def pixmap(self) -> QPixmap:
@@ -88,85 +89,86 @@ class FLCodBar(object):
 
         if not self.p:
             self.barcode["valid"] = False
+            return self.pixmapError()
 
         return self.p
 
-    def pixmapError(self):
+    def pixmapError(self) -> QPixmap:
         return self.pError
 
-    def value(self):
+    def value(self) -> Any:
         return self.barcode["value"]
 
-    def type_(self):
+    def type_(self) -> Any:
         return self.barcode["type"]
 
-    def margin(self):
+    def margin(self) -> Any:
         return self.barcode["margin"]
 
-    def scale(self):
+    def scale(self) -> Any:
         return self.barcode["scale"]
 
-    def cut(self):
+    def cut(self) -> Any:
         return self.barcode["cut"]
 
-    def text(self):
+    def text(self) -> Any:
         return self.barcode["text"]
 
-    def rotation(self):
+    def rotation(self) -> Any:
         return self.barcode["rotation"]
 
-    def fg(self):
+    def fg(self) -> Any:
         return self.barcode["fg"]
 
-    def bg(self):
+    def bg(self) -> Any:
         return self.barcode["bg"]
 
-    def setData(self, d):
+    def setData(self, d: Dict[str, Any]) -> None:
         self.barcode = d
 
-    def validBarcode(self):
+    def validBarcode(self) -> Any:
         return self.barcode["valid"]
 
-    def setCaption(self, caption):
+    def setCaption(self, caption) -> None:
         self.barcode["caption"] = caption
 
-    def caption(self):
+    def caption(self) -> Any:
         return self.barcode["caption"]
 
-    def setValue(self, value):
+    def setValue(self, value) -> None:
         self.barcode["value"] = value
 
-    def setType(self, type_):
+    def setType(self, type_) -> None:
         self.barcode["type"] = type_
 
-    def setMargin(self, margin):
+    def setMargin(self, margin) -> None:
         self.barcode["margin"] = margin
 
-    def setScale(self, scale):
+    def setScale(self, scale) -> None:
         self.barcode["scale"] = scale
 
-    def setCut(self, cut):
+    def setCut(self, cut) -> None:
         self.barcode["cut"] = cut
 
-    def setText(self, text):
+    def setText(self, text) -> None:
         self.barcode["text"] = text
 
-    def setRotation(self, rotation):
+    def setRotation(self, rotation) -> None:
         self.barcode["rotation"] = rotation
 
-    def setFg(self, fg):
+    def setFg(self, fg) -> None:
         self.barcode["fg"] = fg
 
-    def setBg(self, bg):
+    def setBg(self, bg) -> None:
         self.barcode["bg"] = bg
 
-    def setRes(self, res):
+    def setRes(self, res) -> None:
         self.barcode["res"] = res
 
-    def data(self):
+    def data(self) -> Dict[str, Any]:
         return self.barcode
 
-    def fillDefault(self, data):
+    def fillDefault(self, data) -> None:
         data["bg"] = "white"
         data["fg"] = "black"
         data["margin"] = 10
@@ -180,11 +182,12 @@ class FLCodBar(object):
         data["valid"] = False
         data["res"] = 72
 
-    def cleanUp(self):
-        self.p.resize(0, 0)
+    def cleanUp(self) -> None:
+        if self.p:
+            self.p.resize(0, 0)
         self.pError.resize(0, 0)
 
-    def nameToType(self, name):
+    def nameToType(self, name: str) -> int:
         n = name.lower()
         if n == "any":
             return BARCODE_ANY
@@ -226,7 +229,7 @@ class FLCodBar(object):
             logger.warning("Formato no soportado (%s)\nSoportados: %s." % (n, barcode.PROVIDED_BARCODES))
             return BARCODE_ANY
 
-    def typeToName(self, type_):
+    def typeToName(self, type_) -> str:
         if type_ == BARCODE_ANY:
             return "ANY"
         elif type_ == BARCODE_EAN:
@@ -266,7 +269,7 @@ class FLCodBar(object):
         else:
             return "ANY"
 
-    def _createBarcode(self):
+    def _createBarcode(self) -> None:
         if self.barcode["value"] == "":
             return
         if self.barcode["type"] == BARCODE_ANY:
@@ -307,9 +310,15 @@ class FLCodBar(object):
 
         svg = bar_.render(render_options)
         xml_svg = load2xml(svg.decode("utf-8")).getroot()
-        svg_w = 3.779 * float(xml_svg.get("width")[0:6])
-        svg_h = 3.779 * float(xml_svg.get("height")[0:6])
-        self.p = QPixmap(svg_w, svg_h)
+        xwidth, xheight = xml_svg.get("width"), xml_svg.get("height")
+        if xwidth and xheight:
+            svg_w = 3.779 * float(xwidth[0:6])
+            svg_h = 3.779 * float(xheight[0:6])
+        else:
+            logger.warning("width or height missing")
+            svg_w = 0.0
+            svg_h = 0.0
+        self.p = QPixmap(int(svg_w), int(svg_h))
         render = QSvgRenderer(svg)
         self.p.fill(QtCore.Qt.transparent)
         painter = Qt.QPainter(self.p)
@@ -329,7 +338,7 @@ class FLCodBar(object):
 
             self.barcode["valid"] = True
 
-    def _copyBarCode(self, source, dest):
+    def _copyBarCode(self, source: Dict[str, Any], dest) -> None:
         dest["value"] = source["value"]
         dest["type"] = source["type"]
         dest["margin"] = source["margin"]

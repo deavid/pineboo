@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtWidgets, QtCore  # type: ignore
+from PyQt5 import QtWidgets  # type: ignore
 from typing import Any
+from pineboolib.core import decorators
 
 
 class QDialog(QtWidgets.QDialog):
@@ -29,15 +30,15 @@ class QDialog(QtWidgets.QDialog):
     def setEnable_(self, enable_) -> None:
         self.setEnabled(enable_)
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def accept(self):
         super().accept()
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def reject(self):
         super().reject()
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def close(self):
         super().close()
 

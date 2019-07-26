@@ -1,5 +1,6 @@
 import traceback
 from pineboolib import logging
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 
@@ -15,9 +16,9 @@ def monkey_patch_connect() -> None:
     logger.warning("... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa.")
 
     class BoundSignal:
-        _CONNECT = QtCore.pyqtBoundSignal.connect
+        _CONNECT = QtCore.pyqtBoundSignal.connect  # type: ignore
         _EMIT = QtCore.pyqtBoundSignal.emit
-        _LAST_EMITTED_SIGNAL = {}
+        _LAST_EMITTED_SIGNAL: Dict[str, Any] = {}
 
         def slot_decorator(self, slot, connect_stack):
             selfid = repr(self)
@@ -25,7 +26,7 @@ def monkey_patch_connect() -> None:
             def decorated_slot(*args):
                 ret = None
                 if len(args) == 1 and args[0] is False:
-                    args = []
+                    args = tuple()
                 try:
                     # print("Calling slot: %r %r" % (slot, args))
                     ret = slot(*args)
@@ -71,5 +72,5 @@ def monkey_patch_connect() -> None:
             BoundSignal._LAST_EMITTED_SIGNAL[repr(self)] = stack
             return BoundSignal._EMIT(self, *args)
 
-    QtCore.pyqtBoundSignal.connect = BoundSignal.connect
-    QtCore.pyqtBoundSignal.emit = BoundSignal.emit
+    QtCore.pyqtBoundSignal.connect = BoundSignal.connect  # type: ignore
+    QtCore.pyqtBoundSignal.emit = BoundSignal.emit  # type: ignore

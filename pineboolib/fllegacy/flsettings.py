@@ -3,6 +3,7 @@ from pineboolib.core.settings import settings
 
 
 from typing import List, Optional, Union, Any
+from typing import SupportsFloat
 
 
 class FLSettings(object):
@@ -45,7 +46,7 @@ class FLSettings(object):
         else:
             return _def
 
-    def readDoubleEntry(self, key, _def=0):
+    def readDoubleEntry(self, key: str, _def: Union[bytes, str, SupportsFloat] = 0) -> float:
         ret = self.s.value(key)
         if ret is None:
             ret = _def

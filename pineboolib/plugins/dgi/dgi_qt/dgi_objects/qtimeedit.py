@@ -18,4 +18,4 @@ class QTimeEdit(QtWidgets.QTimeEdit):
     def getTime(self) -> Any:
         return super().time().toString("hh:mm:ss")
 
-    time = property(getTime, setTime)
+    time = property(getTime, setTime)  # type: ignore

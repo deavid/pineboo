@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
 from pineboolib import logging
+from pineboolib.core import decorators
 
 from PyQt5 import QtCore, Qt  # type: ignore
+from typing import Any, Union
 
 
 """
@@ -19,19 +21,19 @@ class FLTranslations(object):
     Constructor
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(FLTranslations, self).__init__()
         self.logger = logging.getLogger("FLTranslations")
 
     """
     Si no existe el .qm convierte el .ts que le damos a .qm
-    @param tor. Objeto clase metatranslator.
+    @param tor. Objeto clase metatranslator. type: "FLTranslator"
     @param tsFileName. Nombre del fichero .ts a convertir
     @param verbose. Muestra verbose (True, False)
     @return Boolean. Proceso realizado correctamente
     """
 
-    def loadTsFile(self, tor, ts_file_name, verbose):
+    def loadTsFile(self, tor: Any, ts_file_name: Union[bytes, int, str], verbose) -> bool:
         # qm_file_name = "%s.qm" % ts_file_name[:-3]
         ok = False
         if os.path.exists(ts_file_name):
@@ -42,39 +44,23 @@ class FLTranslations(object):
         return ok
 
     """
-    Comprueba si el .qm se ha creado
-    @param tor. Metatranslator
-    @param qmFileName. Nombre del fichero .qm a comprobar
-    @param verbose. Muestra verbose (True, False)
-    @param stripped. No usado
-    """
-
-    def releaseMetaTranslator(self, tor, qm_file_name, verbose, stripped):
-        from pineboolib.fllegacy.flsettings import FLSettings
-
-        if verbose:
-            self.logger.debug("Updating '%s'...", qm_file_name)
-
-        settings = FLSettings()
-        if settings.readBoolEntry("ebcomportamiento/translations_from_qm", False):
-            print("*** FAKE :: ", qm_file_name)
-            if not tor.release(qm_file_name, verbose, "Stripped" if stripped else "Everything"):
-                self.logger.warning("For some reason, i cannot save '%s'", qm_file_name)
-
-    """
     Libera el fichero .ts
     @param tsFileName. Nombre del fichero .ts
     @param verbose. Muestra verbose (True, False)
     @param stripped. no usado
     """
 
-    def releaseTsFile(self, ts_file_name, verbose, stripped):
-        tor = None
+    @decorators.Deprecated
+    def releaseTsFile(self, ts_file_name: str, verbose: bool, stripped: bool) -> None:
+        pass
+        # tor = None
 
-        if self.loadTsFile(tor, ts_file_name, verbose):
-            qm_file_name = "%s.qm" % ts_file_name[:-3]
-            if not os.path.exists(qm_file_name):
-                self.releaseMetaTranslator(tor, qm_file_name, verbose, stripped)
+        # if self.loadTsFile(tor, ts_file_name, verbose):
+        #    pass
+        # qm_file_name = "%s.qm" % ts_file_name[:-3]
+        # FIXME: self.releaseMetaTranslator - does not exist in this class
+        # if not os.path.exists(qm_file_name):
+        #     self.releaseMetaTranslator(tor, qm_file_name, verbose, stripped)
 
     """
     Convierte el fichero .ts en .qm
@@ -83,13 +69,11 @@ class FLTranslations(object):
     @param stripped. No usado
     """
 
-    def lrelease(self, ts_input_file, qm_output_file, stripped=True):
-        from pineboolib.translator.metatranslator import metaTranslator
+    def lrelease(self, ts_input_file: str, qm_output_file: str, stripped: bool = True) -> None:
         from pineboolib.application import project
 
         verbose = False
         metTranslations = False
-        tor = metaTranslator()
 
         f = Qt.QFile(ts_input_file)
         if not f.open(QtCore.QIODevice.ReadOnly):
@@ -101,13 +85,11 @@ class FLTranslations(object):
         f.close()
 
         if full_text.find("<!DOCTYPE TS>") >= 0:
-            if qm_output_file is None:
-                self.releaseTsFile(ts_input_file, verbose, stripped)
-            else:
-                if not self.loadTsFile(tor, ts_input_file, verbose):
-                    return
+            self.releaseTsFile(ts_input_file, verbose, stripped)
 
         else:
+            if project.conn is None:
+                raise Exception("Project has no connection yet")
             # modId = self.db_.managerModules().idModuleOfFile(tsInputFile)
             key = project.conn.managerModules().shaOfFile(ts_input_file)
             # dir = filedir("../tempdata/cache/%s/%s/file.ts/%s" %
@@ -124,9 +106,6 @@ class FLTranslations(object):
 
             if not metTranslations:
                 self.logger.warning("Met no 'TRANSLATIONS' entry in project file '%s'", ts_input_file)
-
-        if qm_output_file:
-            self.releaseMetaTranslator(tor, qm_output_file, verbose, stripped)
 
 
 """

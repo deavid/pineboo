@@ -20,9 +20,9 @@ def preload_actions(project, forceload: Container = None) -> None:
             project.actions[action].load()
         except Exception:
             logger.exception("Failure trying to load action %s", action)
-            project.conn.conn.rollback()  # FIXME: Proper transaction handling using with context
+            project.conn.conn.rollbackTransaction()  # FIXME: Proper transaction handling using with context
         try:
             project.actions[action].loadRecord(None)
         except Exception:
             logger.exception("Failure trying to loadRecord action %s", action)
-            project.conn.conn.rollback()  # FIXME: Proper transaction handling using with context
+            project.conn.conn.rollbackTransaction()  # FIXME: Proper transaction handling using with context

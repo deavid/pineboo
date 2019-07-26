@@ -1,10 +1,82 @@
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
 from pineboolib.core import decorators
 from pineboolib.core.settings import config
 from pineboolib.application.utils import sql_tools
 from pineboolib.application import project
+from pineboolib.interfaces.ifieldmetadata import IFieldMetaData
+from typing import Any, Union, List, Dict, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.interfaces.iconnection import IConnection  # noqa: F401
+    from pineboolib.interfaces.iapicursor import IApiCursor  # noqa: F401
+    from pineboolib.application.types import Array  # noqa: F401
+    from .pnparameterquery import PNParameterQuery  # noqa: F401
+    from .pngroupbyquery import PNGroupByQuery  # noqa: F401
 
 logger = logging.getLogger(__name__)
+
+
+class PNSqlQueryPrivate(object):
+    """
+    Nombre de la consulta
+    """
+
+    name_: str
+
+    """
+    Parte FROM de la consulta
+    """
+    from_: str
+
+    """
+    Parte WHERE de la consulta
+    """
+    where_: str
+
+    """
+    Parte ORDER BY de la consulta
+    """
+    orderBy_: Optional[str]
+
+    """
+    Base de datos sobre la que trabaja
+    """
+    db_: "IConnection"
+
+    """
+    Lista de parámetros
+    """
+    parameterDict_: Dict[str, Any] = {}
+
+    """
+    Lista de grupos
+    """
+    groupDict_: Dict[int, Any] = {}
+
+    """
+    Lista de nombres de los campos
+    """
+    fieldList_: List[str]
+
+    """
+    Lista de nombres de las tablas que entran a formar
+    parte en la consulta
+    """
+    tablesList_: List[str]
+
+    """
+    Lista de con los metadatos de los campos de la consulta
+    """
+    fieldMetaDataList_: Dict[str, IFieldMetaData]
+
+    def __init__(self, name: Optional[str] = None) -> None:
+        if name:
+            self.name_ = name
+        self.parameterDict_ = {}
+        self.groupDict_ = {}
+        self.fieldMetaDataList_ = {}
+        self.orderBy_ = None
+        self.where_ = ""
 
 
 class PNSqlQuery(object):
@@ -17,33 +89,35 @@ class PNSqlQuery(object):
     @author InfoSiAL S.L.
     """
 
-    countRefQuery = 0
-    invalidTables = False
-    fields_cache = None
-    _is_active = False
-    _fieldNameToPosDict = None
-    logger = None
-    value = None
-    _sql_inspector = None
+    countRefQuery: int = 0
+    invalidTablesList = False
+    _is_active: bool
+    _fieldNameToPosDict: Optional[Dict[str, int]]
+    _sql_inspector: Optional[sql_tools.sql_inspector]
+    _row: List[Any]
+    _datos: List[Any]
+    _posicion: int
+    _cursor: "IApiCursor"
 
-    def __init__(self, cx=None, connection_name="default"):
+    def __init__(self, cx=None, connection_name: Union[str, "IConnection"] = "default") -> None:
         # super(FLSqlQuery, self).__init__()
 
+        if project.conn is None:
+            raise Exception("Project is not connected yet")
+        self._sql_inspector = None
+        self._fieldNameToPosDict = None
         self.d = PNSqlQueryPrivate(cx)
-        self.d.db_ = project.conn.useConn(connection_name)
+        if isinstance(connection_name, str):
+            self.d.db_ = project.conn.useConn(connection_name)
+        else:
+            self.d.db_ = connection_name
 
         self.countRefQuery = self.countRefQuery + 1
-        self._row = None
-        self._posicion = None
-        self._datos = None
-        self._cursor = None
+        self._row = []
+        self._datos = []
         self.invalidTablesList = False
-        self.d.select_ = None
         self.d.fieldList_ = []
-        self.fields_cache = {}
         self._is_active = False
-        self._sql_inspector = None
-        # self.d.fieldMetaDataList_ = {}
 
         retornoQry = None
         if cx:
@@ -52,24 +126,20 @@ class PNSqlQuery(object):
         if retornoQry:
             self.d = retornoQry.d
 
-        self.value = self._value_quick
-
-        if config.value("ebcomportamiento/std_query", False):
-            self.value = self._value_std
-
-    def __del__(self):
+    def __del__(self) -> None:
         try:
             del self.d
             del self._datos
-            self._cursor.close()
-            del self._cursor
+            if self._cursor is not None:
+                self._cursor.close()
+                del self._cursor
         except Exception:
             pass
 
         self.countRefQuery = self.countRefQuery - 1
 
     @property
-    def sql_inspector(self):
+    def sql_inspector(self) -> sql_tools.sql_inspector:
         if self._sql_inspector is None:
             logger.warning("sql_inspector: Query has not executed yet", stack_info=True)
             sql = self.sql()
@@ -80,7 +150,7 @@ class PNSqlQuery(object):
     Ejecuta la consulta
     """
 
-    def exec_(self, sql=None):
+    def exec_(self, sql: Optional[str] = None) -> bool:
         if self.invalidTablesList:
             return False
 
@@ -96,6 +166,8 @@ class PNSqlQuery(object):
         try:
 
             self._cursor = self.db().cursor()
+            if self._cursor is None:
+                raise Exception("self._cursor is empty!")
             logger.trace("exec_: Ejecutando consulta: <%s> en <%s>", sql, self._cursor)
             self._cursor.execute(sql)
             self._datos = self._cursor.fetchall()
@@ -116,7 +188,7 @@ class PNSqlQuery(object):
     @param p Objeto FLParameterQuery con la descripción del parámetro a añadir
     """
 
-    def addParameter(self, p=None):
+    def addParameter(self, p: Optional["PNParameterQuery"]) -> None:
         if p:
             self.d.parameterDict_[p.name()] = p
 
@@ -126,7 +198,7 @@ class PNSqlQuery(object):
     @param g Objeto FLGroupByQuery con la descripción del grupo a añadir
     """
 
-    def addGroup(self, g=None):
+    def addGroup(self, g: Optional["PNGroupByQuery"]) -> None:
         if g:
             if not self.d.groupDict_:
                 self.d.groupDict_ = {}
@@ -134,57 +206,47 @@ class PNSqlQuery(object):
             self.d.groupDict_[g.level()] = g.field()
 
     """
-    Tipo de datos diccionario de parametros
-    """
-    FLParameterQueryDict = {}
-
-    """
-    Tipo de datos diccionaro de grupos
-    """
-    FLGroupByQueryDict = {}
-
-    """
     Para establecer el nombre de la consulta.
 
     @param n Nombre de la consulta
     """
 
-    def setName(self, n):
+    def setName(self, n: str) -> None:
         self.d.name_ = n
 
     """
     Para obtener el nombre de la consulta
     """
 
-    def name(self):
+    def name(self) -> str:
         return self.d.name_
 
     """
     Para obtener la parte SELECT de la sentencia SQL de la consulta
     """
 
-    def select(self):
-        return self.d.select_
+    def select(self) -> str:
+        return ",".join(self.d.fieldList_)
 
     """
     Para obtener la parte FROM de la sentencia SQL de la consulta
     """
 
-    def from_(self):
+    def from_(self) -> str:
         return self.d.from_
 
     """
     Para obtener la parte WHERE de la sentencia SQL de la consulta
     """
 
-    def where(self):
+    def where(self) -> str:
         return self.d.where_
 
     """
     Para obtener la parte ORDER BY de la sentencia SQL de la consulta
     """
 
-    def orderBy(self):
+    def orderBy(self) -> Optional[str]:
         return self.d.orderBy_
 
     """
@@ -199,44 +261,49 @@ class PNSqlQuery(object):
               se utiliza la coma.
     """
 
-    def setSelect(self, s, sep=","):
-        self.d.select_ = s
+    def setSelect(self, select: Union[str, List, "Array"], sep: str = ",") -> None:
+        list_fields = []
 
-        if isinstance(s, str) and sep in s:
-            # s = s.replace(" ", "")
-            list_fields = []
-            prev = ""
-            for f in s.split(sep):
+        if isinstance(select, str):
+            if sep in select:
+                # s = s.replace(" ", "")
 
-                field = prev + f
-                if field.count("(") == field.count(")"):
-                    list_fields.append(field)
-                    prev = ""
-                else:
-                    prev = "%s," % field
+                prev = ""
+                for f in select.split(sep):
 
-            s = list_fields
+                    field_ = prev + f
+                    if field_.count("(") == field_.count(")"):
+                        list_fields.append(field_)
+                        prev = ""
+                    else:
+                        prev = "%s," % field_
+
+        elif isinstance(select, list):
+            list_fields = list(select)
+        else:
+            for k, v in select:
+                list_fields.append(v)
 
             # s = s.split(sep)
 
         # self.d.select_ = s.strip_whitespace()
         # self.d.select_ = self.d.select_.simplifyWhiteSpace()
 
-        if not isinstance(s, list) and not "*" == s:
+        if not list_fields and isinstance(select, str) and not "*" == select:
             self.d.fieldList_.clear()
-            self.d.fieldList_.append(s)
-
+            self.d.fieldList_.append(select)
             return
 
         # fieldListAux = s.split(sep)
         # for f in s:
         #    f = str(f).strip()
 
-        table = None
-        field = None
+        table: Optional[str]
+        field: Optional[str]
         self.d.fieldList_.clear()
 
-        for f in s:
+        for f in list_fields:
+            table = field = None
             try:
                 if f.startswith(" "):
                     f = f[1:]
@@ -245,17 +312,17 @@ class PNSqlQuery(object):
             except Exception:
                 pass
 
-            if field == "*":
+            if field == "*" and not table:
                 mtd = self.db().manager().metadata(table, True)
-                if mtd:
-                    self.d.fieldList_ = mtd.fieldList(True)
+                if mtd is not None:
+                    self.d.fieldList_ = mtd.fieldNames()
                     if not mtd.inCache():
                         del mtd
 
             else:
                 self.d.fieldList_.append(f)
 
-            self.d.select_ = ",".join(self.d.fieldList_)
+            # self.d.select_ = ",".join(self.d.fieldList_)
 
     """
     Para establecer la parte FROM de la sentencia SQL de la consulta.
@@ -264,7 +331,7 @@ class PNSqlQuery(object):
            genera la consulta
     """
 
-    def setFrom(self, f):
+    def setFrom(self, f: str) -> None:
         self.d.from_ = f
         # self.d.from_ = f.strip_whitespace()
         # self.d.from_ = self.d.from_.simplifyWhiteSpace()
@@ -276,7 +343,7 @@ class PNSqlQuery(object):
         genera la consulta
     """
 
-    def setWhere(self, w):
+    def setWhere(self, w: str) -> None:
         self.d.where_ = w
         # self.d.where_ = w.strip_whitespace()
         # self.d.where_ = self.d.where_.simplifyWhiteSpace()
@@ -288,7 +355,7 @@ class PNSqlQuery(object):
            genera la consulta
     """
 
-    def setOrderBy(self, w):
+    def setOrderBy(self, w: str) -> None:
         self.d.orderBy_ = w
         # self.d.orderBy_ = w.strip_whitespace()
         # self.d.orderBy_ = self.d.orderBy_.simplifyWhiteSpace()
@@ -303,29 +370,32 @@ class PNSqlQuery(object):
     @return Cadena de texto con la sentencia completa SQL que genera la consulta
     """
 
-    def sql(self):
+    def sql(self) -> str:
         # for tableName in self.d.tablesList_:
         #    if not self.d.db_.manager().existsTable(tableName) and not self.d.db_.manager().createTable(tableName):
         #        return
 
         res = None
 
-        if not self.d.select_:
-            return False
+        if not self.d.fieldList_:
+            logger.warning("sql(): No select yet. Returning empty")
+            return ""
+
+        select = ",".join(self.d.fieldList_)
 
         if not self.d.from_:
-            res = "SELECT %s" % self.d.select_
+            res = "SELECT %s" % select
         elif not self.d.where_:
-            res = "SELECT %s FROM %s" % (self.d.select_, self.d.from_)
+            res = "SELECT %s FROM %s" % (select, self.d.from_)
         else:
-            res = "SELECT %s FROM %s WHERE %s" % (self.d.select_, self.d.from_, self.d.where_)
+            res = "SELECT %s FROM %s WHERE %s" % (select, self.d.from_, self.d.where_)
 
         if self.d.groupDict_ and not self.d.orderBy_:
             res = res + " ORDER BY "
-            initGD = None
+            initGD = False
             i = 0
             while i < len(self.d.groupDict_):
-                gD = self.d.groupDict_[i]
+                gD: str = self.d.groupDict_[i]
                 if not initGD:
                     res = res + gD
                     initGD = True
@@ -342,10 +412,14 @@ class PNSqlQuery(object):
                 v = self.d.parameterDict_[pD]
 
                 if not v:
-                    dialog = project._DGI.QInputDialog
+                    if not project._DGI:
+                        raise Exception("project._DGI is empty!")
+                    dialog = project.DGI.QInputDialog
 
                     if dialog is not None:
-                        v = dialog.getText(project._DGI.QApplication, "Entrada de parámetros de la consulta", pD, None, None)
+                        v = dialog.getText(None, "Entrada de parámetros de la consulta", pD)
+                        if v:
+                            v = v[0]
 
                 res = res.replace("[%s]" % pD, "'%s'" % v)
 
@@ -357,7 +431,7 @@ class PNSqlQuery(object):
     @return Diccionario de parámetros
     """
 
-    def parameterDict(self):
+    def parameterDict(self) -> Dict[str, Any]:
         return self.d.parameterDict_
 
     """
@@ -366,7 +440,7 @@ class PNSqlQuery(object):
     @return Diccionario de niveles de agrupamiento
     """
 
-    def groupDict(self):
+    def groupDict(self) -> Dict[int, Any]:
         return self.d.groupDict_
 
     """
@@ -376,7 +450,7 @@ class PNSqlQuery(object):
           consulta
     """
 
-    def fieldList(self):
+    def fieldList(self) -> List[str]:
         if self.d.fieldList_:
             return self.d.fieldList_
         else:
@@ -395,11 +469,10 @@ class PNSqlQuery(object):
     @param gd Diccionario de parámetros
     """
 
-    def setGroupDict(self, gd):
+    def setGroupDict(self, gd: Dict[int, Any]) -> None:
         if not gd:
             return
 
-        self.d.groupDict_ = []
         self.d.groupDict_ = gd
 
     """
@@ -415,11 +488,10 @@ class PNSqlQuery(object):
     @param pd Diccionario de parámetros
     """
 
-    def setParameterDict(self, pd):
+    def setParameterDict(self, pd: Dict[str, Any]) -> None:
         if not pd:
             return
 
-        self.d.parameterDict_ = []
         self.d.parameterDict_ = pd
 
     """
@@ -428,14 +500,14 @@ class PNSqlQuery(object):
     Está pensado sólo para tareas de depuración
     """
 
-    def showDebug(self):
+    def showDebug(self) -> None:
         if not self.isActive():
             logger.warning("DEBUG : La consulta no está activa : No se ha ejecutado exec() o la sentencia SQL no es válida")
 
         logger.warning("DEBUG : Nombre de la consulta : %s", self.d.name_)
         logger.warning("DEBUG : Niveles de agrupamiento :")
         if self.d.groupDict_:
-            for lev in self.d.groupDict_:
+            for lev in self.d.groupDict_.values():
                 logger.warning("**Nivel : %s", lev.level())
                 logger.warning("**Campo : %s", lev.field())
         else:
@@ -483,10 +555,10 @@ class PNSqlQuery(object):
              en vez de contenido al que apunta esa referencia
     """
 
-    def _value_quick(self, n, raw=False):
+    def _value_quick(self, n: Union[str, int], raw: bool = False) -> Any:
         # Fast version of self.value
         if self._fieldNameToPosDict is None:
-            self._fieldNameToPosDict = dict(enumerate(self.d.fieldList_))
+            self._fieldNameToPosDict = {v: n for n, v in enumerate(self.d.fieldList_)}
         try:
             if isinstance(n, int):
                 ret = self._row[n]
@@ -497,14 +569,15 @@ class PNSqlQuery(object):
             ret = self._value_std(n, raw)
         return ret
 
-    def _value_std(self, n, raw=False):
+    def _value_std(self, n: Union[str, int, None], raw: bool = False) -> Any:
         if n is None:
-            self.logger.trace("value::invalid use with n=None.", stack_info=True)
+            logger.trace("value::invalid use with n=None.", stack_info=True)
             return None
 
-        pos = n
         if isinstance(n, str):
-            pos = self.sql_inspector.fieldNameToPos(n.lower())
+            pos: int = self.sql_inspector.fieldNameToPos(n.lower())
+        if isinstance(n, int):
+            pos = n
 
         ret = self._row[pos]
 
@@ -517,6 +590,13 @@ class PNSqlQuery(object):
                 logger.exception("value::error retrieving row position %s", pos)
 
         return ret
+
+    def value(self, n: Union[str, int], raw: bool = False) -> Any:
+        _value = self._value_std
+
+        if config.value("ebcomportamiento/std_query", False):
+            _value = self._value_std
+        return _value(n, raw)
 
     """
     def _value_std(self, n, raw=False):
@@ -648,12 +728,13 @@ class PNSqlQuery(object):
     @param n Nombre del campo de la consulta
     """
 
-    def isNull(self, n):
-        i = n
+    def isNull(self, n: str) -> bool:
         if isinstance(n, str):
-            i = self.fieldNameToPos(n)
+            pos_ = self.fieldNameToPos(n)
 
-        return self._row[i] in (None, "None")
+            return self._row[pos_] in (None, "None")
+
+        raise Exception("isNull. field not found %s" % n)
 
     """
     Devuelve el nombre de campo, dada su posicion en la consulta.
@@ -664,7 +745,7 @@ class PNSqlQuery(object):
       QString::null
     """
 
-    def posToFieldName(self, p):
+    def posToFieldName(self, p: int) -> str:
         return self.sql_inspector.posToFieldName(p)
         # if p < 0 or p >= len(self.d.fieldList_):
         #    return None
@@ -683,7 +764,7 @@ class PNSqlQuery(object):
     @return Posicion del campo en la consulta. Si no existe el campo devuelve -1
     """
 
-    def fieldNameToPos(self, name):
+    def fieldNameToPos(self, name: str) -> int:
         return self.sql_inspector.fieldNameToPos(name.lower())
         # i = 0
         # for field in self.d.fieldList_:
@@ -702,7 +783,7 @@ class PNSqlQuery(object):
         consulta
     """
 
-    def tablesList(self):
+    def tablesList(self) -> List[str]:
         if self.d.tablesList_:
             return self.d.tablesList_
         else:
@@ -715,11 +796,16 @@ class PNSqlQuery(object):
         separados por comas, p.e. "tabla1,tabla2,tabla3"
     """
 
-    def setTablesList(self, tl):
+    def setTablesList(self, tl: Union[str, List]) -> None:
         self.d.tablesList_ = []
-        tl = tl.replace(" ", "")
-        for tabla in tl.split(","):
-            if not self.db().manager().existsTable(tabla) and len(tl.split(",")) >= 1:
+        if isinstance(tl, list):
+            table_list = ",".join(tl)
+        else:
+            table_list = tl
+
+        table_list = table_list.replace(" ", "")
+        for tabla in table_list.split(","):
+            if not self.db().manager().existsTable(tabla) and len(table_list.split(",")) >= 1:
                 self.invalidTablesList = True
 
             self.d.tablesList_.append(tabla)
@@ -731,7 +817,7 @@ class PNSqlQuery(object):
     @param v Valor para el parámetros
     """
 
-    def setValueParam(self, name, v):
+    def setValueParam(self, name: str, v: Any) -> None:
         self.d.parameterDict_[name] = v
 
     """
@@ -740,7 +826,7 @@ class PNSqlQuery(object):
     @param name Nombre del parámetro.
     """
 
-    def valueParam(self, name):
+    def valueParam(self, name: str) -> Any:
         if name in self.d.parameterDict_.keys():
             return self.d.parameterDict_[name]
         else:
@@ -750,7 +836,7 @@ class PNSqlQuery(object):
     Redefinicion del método size() de QSqlQuery
     """
 
-    def size(self):
+    def size(self) -> int:
         return len(self._datos)
 
     """
@@ -759,7 +845,7 @@ class PNSqlQuery(object):
     @return Objeto con la lista de deficiones de campos de la consulta
     """
 
-    def fieldMetaDataList(self):
+    def fieldMetaDataList(self) -> Any:
         if not self.d.fieldMetaDataList_:
             self.d.fieldMetaDataList_ = {}
         table = None
@@ -785,29 +871,22 @@ class PNSqlQuery(object):
     Para obtener la base de datos sobre la que trabaja
     """
 
-    def db(self):
+    def db(self) -> "IConnection":
         return self.d.db_
 
-    """
-    Privado
-    """
-    d = None
-
-    _posicion = None
-
-    def isValid(self):
+    def isValid(self) -> bool:
         return False if self.invalidTablesList else True
 
-    def isActive(self):
+    def isActive(self) -> bool:
         return self._is_active
 
-    def at(self):
+    def at(self) -> Any:
         return self._posicion
 
-    def lastQuery(self):
+    def lastQuery(self) -> Union[bool, str]:
         return self.sql()
 
-    def numRowsAffected(self):
+    def numRowsAffected(self) -> int:
         return len(self._datos)
 
     @decorators.NotImplementedWarn
@@ -834,7 +913,7 @@ class PNSqlQuery(object):
     def isForwardOnly(self):
         pass
 
-    def setForwardOnly(self, forward):
+    def setForwardOnly(self, forward) -> None:
         # No sirve para nada , por ahora
         pass
 
@@ -842,7 +921,7 @@ class PNSqlQuery(object):
     def QSqlQuery_value(self, i):
         pass
 
-    def seek(self, i, relative=False):
+    def seek(self, i: int, relative=False) -> bool:
         if not self._cursor:
             return False
 
@@ -858,7 +937,7 @@ class PNSqlQuery(object):
 
         return False
 
-    def next(self):
+    def next(self) -> bool:
         if not self._cursor:
             return False
 
@@ -870,7 +949,7 @@ class PNSqlQuery(object):
 
         return False
 
-    def prev(self):
+    def prev(self) -> bool:
         if not self._cursor:
             return False
 
@@ -882,7 +961,7 @@ class PNSqlQuery(object):
 
         return False
 
-    def first(self):
+    def first(self) -> bool:
         if not self._cursor:
             return False
 
@@ -893,7 +972,7 @@ class PNSqlQuery(object):
 
         return False
 
-    def last(self):
+    def last(self) -> bool:
         if not self._cursor:
             return False
 
@@ -927,100 +1006,3 @@ class PNSqlQuery(object):
     @decorators.NotImplementedWarn
     def executedQuery(self):
         pass
-
-
-class PNSqlQueryPrivate(object):
-    name_ = None
-    select_ = None
-    from_ = None
-    where_ = None
-    orderBy_ = None
-    groupDict_ = []
-
-    def __init__(self, name=None):
-        self.name_ = name
-        self.select_ = None
-        self.from_ = None
-        self.where_ = None
-        self.orderBy_ = None
-        self.parameterDict_ = {}
-        self.groupDict_ = []
-        self.fieldMetaDataList_ = {}
-        self.db_ = None
-
-    def __del__(self):
-        self.parameterDict_ = None
-        self.groupDict_ = None
-        self.fieldMetaDataList_ = None
-
-    """
-    Nombre de la consulta
-    """
-    name_ = None
-
-    """
-    Parte SELECT de la consulta
-    """
-    select_ = None
-
-    """
-    Parte FROM de la consulta
-    """
-    from_ = None
-
-    """
-    Parte WHERE de la consulta
-    """
-    where_ = None
-
-    """
-    Parte ORDER BY de la consulta
-    """
-    orderBy_ = None
-
-    """
-    Lista de nombres de los campos
-    """
-    fieldList_ = []
-
-    """
-    Lista de parámetros
-    """
-    parameterDict_ = {}
-
-    """
-    Lista de grupos
-    """
-    groupDict_ = {}
-
-    """
-    Lista de nombres de las tablas que entran a formar
-    parte en la consulta
-    """
-    tablesList_ = []
-
-    """
-    Lista de con los metadatos de los campos de la consulta
-    """
-    fieldMetaDataList_ = {}
-
-    """
-    Base de datos sobre la que trabaja
-    """
-    db_ = None
-
-
-class PNGroupByQuery(object):
-
-    level_ = None
-    field_ = None
-
-    def __init__(self, n, v):
-        self.level_ = n
-        self.field_ = v
-
-    def level(self):
-        return self.level_
-
-    def field(self):
-        return self.field_

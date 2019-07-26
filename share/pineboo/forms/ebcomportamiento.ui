@@ -9,7 +9,7 @@
             <x>0</x>
             <y>0</y>
             <width>615</width>
-            <height>632</height>
+            <height>622</height>
         </rect>
     </property>
     <property name="caption">
@@ -484,6 +484,35 @@
                                 </widget>
                                 <widget class="QGroupBox">
                                     <property name="name">
+                                        <cstring>groupBox16</cstring>
+                                    </property>
+                                    <property name="title">
+                                        <string>ORM sqlAlchemy</string>
+                                    </property>
+                                    <vbox>
+                                        <property name="name">
+                                            <cstring>unnamed</cstring>
+                                        </property>
+                                        <widget class="QCheckBox">
+                                            <property name="name">
+                                                <cstring>cb_disable_mtdparser</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Desactivar conversor de ficheros MTD a model ORM.</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QCheckBox">
+                                            <property name="name">
+                                                <cstring>cb_disable_orm_load</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Desacivar carga de models ORM en QSA.</string>
+                                            </property>
+                                        </widget>
+                                    </vbox>
+                                </widget>
+                                <widget class="QGroupBox">
+                                    <property name="name">
                                         <cstring>groupBox9</cstring>
                                     </property>
                                     <property name="title">
@@ -553,46 +582,6 @@
                                 <property name="name">
                                     <cstring>unnamed</cstring>
                                 </property>
-                                <widget class="QLayoutWidget">
-                                    <property name="name">
-                                        <cstring>layout8</cstring>
-                                    </property>
-                                    <hbox>
-                                        <property name="name">
-                                            <cstring>unnamed</cstring>
-                                        </property>
-                                        <widget class="QLabel">
-                                            <property name="name">
-                                                <cstring>textLabel1_2</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Conversor a usar:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QComboBox">
-                                            <property name="name">
-                                                <cstring>cbKugarParser</cstring>
-                                            </property>
-                                        </widget>
-                                        <spacer>
-                                            <property name="name">
-                                                <cstring>spacer12_2</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Expanding</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>131</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                    </hbox>
-                                </widget>
                                 <widget class="QCheckBox">
                                     <property name="name">
                                         <cstring>cb_kut_debug</cstring>

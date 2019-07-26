@@ -21,7 +21,7 @@ class QButtonGroup(QGroupBox):
     def setLineWidth(self, w):
         pass
 
-    def setSelectedId(self, id):
+    def setSelectedId(self, id) -> None:
         self.selectedId = id
 
     def __getattr__(self, name: str) -> Callable:

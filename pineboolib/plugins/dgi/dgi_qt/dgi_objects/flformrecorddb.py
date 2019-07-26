@@ -7,12 +7,12 @@ from PyQt5.Qt import QKeySequence  # type: ignore
 from pineboolib import logging
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
-from pineboolib.interfaces import IFormRecordDB
+from pineboolib.core.settings import config
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flapplication import aqApp
+from typing import Any, cast
 
 
 DEBUG = False
@@ -36,7 +36,7 @@ edición de registros definidos en los metadatos
 """
 
 
-class FLFormRecordDB(FLFormDB, IFormRecordDB):
+class FLFormRecordDB(FLFormDB):
 
     logger = logging.getLogger("dgi_qt.FLFormRecordDB")
     """
@@ -103,7 +103,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
                  QWidget *parent = 0, bool showAcceptContinue = true);
     """
 
-    def __init__(self, parent_or_cursor, action, load=False):
+    def __init__(self, parent_or_cursor, action, load=False) -> None:
         self.logger.trace("__init__: parent_or_cursor=%s, action=%s, load=%s", parent_or_cursor, action, load)
 
         if isinstance(action, str):
@@ -122,7 +122,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
         self._uiName = action.formRecord()
         self._scriptForm = action.scriptFormRecord() or "emptyscript"
 
-        if self.cursor():
+        if self.cursor_:
             self.initialModeAccess = self.cursor_.modeAccess()
             if DEBUG:
                 print("*** FLFormRecordDB::__init__: cursor: %r name: %r at:%r" % (self.cursor_, self.cursor_.curName(), self.cursor_.at()))
@@ -139,6 +139,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
         self.logger.trace("__init__: init form")
         self.initForm()
         self.logger.trace("__init__: done")
+        self.loop = False
 
     """
     Reimplementado, añade un widget como principal del formulario
@@ -155,18 +156,18 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     @author Silix
     """
 
-    def setCaptionWidget(self, text=None):
-        if not self.cursor():
+    def setCaptionWidget(self, text=None) -> None:
+        if not self.cursor_:
             return
 
         if not text:
             text = self.cursor_.metadata().alias()
 
-        if self.cursor().modeAccess() == self.cursor().Insert:
+        if self.cursor_.modeAccess() == self.cursor_.Insert:
             self.setWindowTitle("Insertar %s" % text)
-        elif self.cursor().modeAccess() == self.cursor().Edit:
+        elif self.cursor_.modeAccess() == self.cursor_.Edit:
             self.setWindowTitle("Editar %s" % text)
-        elif self.cursor().modeAccess() == self.cursor().Browse:
+        elif self.cursor_.modeAccess() == self.cursor_.Browse:
             self.setWindowTitle("Visualizar %s" % text)
 
     """
@@ -226,13 +227,13 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
 
         self.bottomToolbar = QtWidgets.QFrame()
         self.bottomToolbar.setMinimumSize(self.iconSize)
-        self.bottomToolbar.layout = QtWidgets.QHBoxLayout()
-        self.bottomToolbar.setLayout(self.bottomToolbar.layout)
-        self.bottomToolbar.layout.setContentsMargins(0, 0, 0, 0)
-        self.bottomToolbar.layout.setSpacing(0)
-        self.bottomToolbar.layout.addStretch()
+        self.bottomToolbar.setLayout(QtWidgets.QHBoxLayout())
+
+        self.bottomToolbar.layout().setContentsMargins(0, 0, 0, 0)
+        self.bottomToolbar.layout().setSpacing(0)
+        self.bottomToolbar.layout().addStretch()
         self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.layout.addWidget(self.bottomToolbar)
+        self.layout_.addWidget(self.bottomToolbar)
         # if self.layout:
         #    self.layout = None
         # Limpiamos la toolbar
@@ -242,9 +243,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
 
         pbSize = self.iconSize
 
-        settings = FLSettings()
-
-        if settings.readBoolEntry("application/isDebuggerMode", False):
+        if config.value("application/isDebuggerMode", False):
 
             pushButtonExport = QtWidgets.QToolButton()
             pushButtonExport.setObjectName("pushButtonExport")
@@ -256,10 +255,10 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
             pushButtonExport.setWhatsThis("Exportar a XML(F3)")
             pushButtonExport.setToolTip("Exportar a XML(F3)")
             pushButtonExport.setFocusPolicy(QtCore.Qt.NoFocus)
-            self.bottomToolbar.layout.addWidget(pushButtonExport)
+            self.bottomToolbar.layout().addWidget(pushButtonExport)
             pushButtonExport.clicked.connect(self.exportToXml)
 
-            if settings.readBoolEntry("ebcomportamiento/show_snaptshop_button", False):
+            if config.value("ebcomportamiento/show_snaptshop_button", False):
                 push_button_snapshot = QtWidgets.QToolButton()
                 push_button_snapshot.setObjectName("pushButtonSnapshot")
                 push_button_snapshot.setSizePolicy(sizePolicy)
@@ -270,11 +269,11 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
                 push_button_snapshot.setWhatsThis("Capturar pantalla(F8)")
                 push_button_snapshot.setToolTip("Capturar pantalla(F8)")
                 push_button_snapshot.setFocusPolicy(QtCore.Qt.NoFocus)
-                self.bottomToolbar.layout.addWidget(push_button_snapshot)
+                self.bottomToolbar.layout().addWidget(push_button_snapshot)
                 push_button_snapshot.clicked.connect(self.saveSnapShot)
 
             spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-            self.bottomToolbar.layout.addItem(spacer)
+            self.bottomToolbar.layout().addItem(spacer)
 
         if self.cursor().modeAccess() in (self.cursor().Edit, self.cursor().Browse):
             if not self.pushButtonFirst:
@@ -289,7 +288,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
                 self.pushButtonFirst.setWhatsThis("Aceptar los cambios e ir al primer registro (F5)")
                 self.pushButtonFirst.setToolTip("Aceptar los cambios e ir al primer registro (F5)")
                 self.pushButtonFirst.setFocusPolicy(QtCore.Qt.NoFocus)
-                self.bottomToolbar.layout.addWidget(self.pushButtonFirst)
+                self.bottomToolbar.layout().addWidget(self.pushButtonFirst)
                 # self.pushButtonFirst.show()
 
             if not self.pushButtonPrevious:
@@ -304,7 +303,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
                 self.pushButtonPrevious.setWhatsThis("Aceptar los cambios e ir al registro anterior (F6)")
                 self.pushButtonPrevious.setToolTip("Aceptar los cambios e ir al registro anterior (F6)")
                 self.pushButtonPrevious.setFocusPolicy(QtCore.Qt.NoFocus)
-                self.bottomToolbar.layout.addWidget(self.pushButtonPrevious)
+                self.bottomToolbar.layout().addWidget(self.pushButtonPrevious)
                 # self.pushButtonPrevious.show()
 
             if not self.pushButtonNext:
@@ -319,7 +318,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
                 self.pushButtonNext.setWhatsThis("Aceptar los cambios e ir al registro siguiente (F7)")
                 self.pushButtonNext.setToolTip("Aceptar los cambios e ir al registro siguiente (F7)")
                 self.pushButtonNext.setFocusPolicy(QtCore.Qt.NoFocus)
-                self.bottomToolbar.layout.addWidget(self.pushButtonNext)
+                self.bottomToolbar.layout().addWidget(self.pushButtonNext)
                 # self.pushButtonNext.show()
 
             if not self.pushButtonLast:
@@ -334,7 +333,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
                 self.pushButtonLast.setWhatsThis("Aceptar los cambios e ir al último registro (F8)")
                 self.pushButtonLast.setToolTip("Aceptar los cambios e ir al último registro (F8)")
                 self.pushButtonLast.setFocusPolicy(QtCore.Qt.NoFocus)
-                self.bottomToolbar.layout.addWidget(self.pushButtonLast)
+                self.bottomToolbar.layout().addWidget(self.pushButtonLast)
                 # self.pushButtonLast.show()
 
         if not self.cursor().modeAccess() == self.cursor().Browse:
@@ -349,7 +348,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
             self.pushButtonAcceptContinue.setWhatsThis("Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
             self.pushButtonAcceptContinue.setToolTip("Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
             self.pushButtonAcceptContinue.setFocusPolicy(QtCore.Qt.NoFocus)
-            self.bottomToolbar.layout.addWidget(self.pushButtonAcceptContinue)
+            self.bottomToolbar.layout().addWidget(self.pushButtonAcceptContinue)
             if not self.showAcceptContinue_:
                 self.pushButtonAcceptContinue.close()
                 # self.pushButtonAcceptContinue.show()
@@ -367,7 +366,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
             self.pushButtonAccept.setWhatsThis("Aceptar los cambios y cerrar formulario (F10)")
             self.pushButtonAccept.setToolTip("Aceptar los cambios y cerrar formulario (F10)")
             self.pushButtonAccept.setFocusPolicy(QtCore.Qt.NoFocus)
-            self.bottomToolbar.layout.addWidget(self.pushButtonAccept)
+            self.bottomToolbar.layout().addWidget(self.pushButtonAccept)
             # self.pushButtonAccept.show()
 
         if not self.pushButtonCancel:
@@ -397,8 +396,8 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
             self.pushButtonCancel.setToolTip("Aceptar y cerrar formulario (Esc)")
 
         # pushButtonCancel->setDefault(true);
-        self.bottomToolbar.layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed))
-        self.bottomToolbar.layout.addWidget(self.pushButtonCancel)
+        self.bottomToolbar.layout().addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed))
+        self.bottomToolbar.layout().addWidget(self.pushButtonCancel)
         # self.pushButtonAccept.show()
 
         self.setFocusPolicy(QtCore.Qt.NoFocus)
@@ -495,7 +494,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     @return TRUE si el formulario ha sido validado correctamente
     """
 
-    def validateForm(self):
+    def validateForm(self) -> Any:
         if not self.cursor_:
             return True
         mtd = self.cursor_.metadata()
@@ -527,9 +526,11 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
                             "Sí : Ignora el cambio del otro usuario y utiliza el valor que acaba de introducir\n"
                             "No : Respeta el cambio del otro usuario e ignora el valor que ha introducido\n"
                             "Cancelar : Cancela el guardado del registro y vuelve a la edición del registro\n\n",
-                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Default,
-                            QtWidgets.QMessageBox.No,
-                            QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.Escape,
+                            cast(QtWidgets.QMessageBox, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Default),
+                            cast(
+                                QtWidgets.QMessageBox,
+                                QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.Escape,
+                            ),
                         )
                         if res == QtWidgets.QMessageBox.Cancel:
                             return False
@@ -545,7 +546,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
                     ret_ = fun_()
                 except Exception:
                     # script_name = self.iface.__module__
-                    from pineboolib.error_manager import error_manager
+                    from pineboolib.core.error_manager import error_manager
                     from pineboolib.application import project
 
                     aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
@@ -560,7 +561,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     se acepta el formulario y justo antes de hace el commit del registro.
     """
 
-    def acceptedForm(self):
+    def acceptedForm(self) -> None:
         if self.iface:
             try:
                 self.iface.acceptedForm()
@@ -574,7 +575,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     justo después de hacer el commit del buffer del registro.
     """
 
-    def afterCommitBuffer(self):
+    def afterCommitBuffer(self) -> None:
         if self.iface:
             try:
                 self.iface.afterCommitBuffer()
@@ -588,7 +589,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     juesto despues de terminar la transacción en curso aceptando.
     """
 
-    def afterCommitTransaction(self):
+    def afterCommitTransaction(self) -> None:
         if self.iface:
             try:
                 self.iface.afterCommitTransaction()
@@ -602,7 +603,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     cancela el formulario.
     """
 
-    def canceledForm(self):
+    def canceledForm(self) -> None:
         if self.iface:
             try:
                 self.iface.canceledForm()
@@ -613,7 +614,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Se activa al pulsar el boton aceptar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def accept(self):
         if self.accepting:
             return
@@ -650,7 +651,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Se activa al pulsar el boton aceptar y continuar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def acceptContinue(self):
         if self.accepting:
             return
@@ -691,7 +692,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Se activa al pulsar el botón cancelar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def reject(self):
         self.accepted_ = False
         self.canceledForm()
@@ -701,7 +702,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Devuelve el script asociado al formulario
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     @decorators.NotImplementedWarn
     def script(self):
         pass
@@ -710,7 +711,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Ir al primer anterior
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def firstRecord(self):
         if self.cursor_ and not self.cursor_.at() == 0:
             if not self.validateForm():
@@ -733,7 +734,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Ir al registro anterior
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def previousRecord(self):
         if self.cursor_ and self.cursor_.isValid():
             if self.cursor_.at() == 0:
@@ -760,7 +761,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Ir al registro siguiente
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def nextRecord(self):
         if self.cursor_ and self.cursor_.isValid():
             if self.cursor_.at() == (self.cursor_.size() - 1):
@@ -787,7 +788,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Ir al ultimo registro
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def lastRecord(self):
         if self.cursor_ and not self.cursor_.at() == (self.cursor_.size() - 1):
             if not self.validateForm():
@@ -810,7 +811,7 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
     Desactiva el botón cancelar
     """
 
-    @QtCore.pyqtSlot()
+    @decorators.pyqtSlot()
     def disablePushButtonCancel(self):
         if self.pushButtonCancel:
             self.pushButtonCancel.setDisabled(True)
@@ -847,11 +848,26 @@ class FLFormRecordDB(FLFormDB, IFormRecordDB):
 
         super(FLFormRecordDB, self).show()
 
-    def inicializeControls(self):
+    def inicializeControls(self) -> None:
         from pineboolib import pncontrolsfactory
 
         for child_ in self.findChildren(QtWidgets.QWidget):
             if isinstance(child_, pncontrolsfactory.FLFieldDB):
                 loaded = getattr(child_, "_loaded", None)
                 if loaded is False:
-                    QtCore.QTimer().singleShot(0, child_.load)
+                    QtCore.QTimer.singleShot(0, child_.load)
+
+    def show_and_wait(self) -> None:
+        if self.loop:
+            raise Exception("show_and_wait(): Se ha detectado una llamada recursiva")
+
+        self.loop = True
+        self.show()
+        if self.eventloop:
+            self.eventloop.exec_()
+
+        self.loop = False
+
+    def hide(self) -> None:
+        if self.loop:
+            self.eventloop.exit()

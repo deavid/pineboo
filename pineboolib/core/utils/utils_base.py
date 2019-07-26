@@ -3,14 +3,21 @@ import os
 import re
 import sys
 import io
-from PyQt5 import QtCore  # type: ignore
+import os.path
+import shutil
 from PyQt5.QtGui import QPixmap  # type: ignore
-from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir  # type: ignore
+from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir, pyqtSignal  # type: ignore
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest  # type: ignore
-
-from typing import Optional, Union, Any, List
-from xml.etree.ElementTree import ElementTree
+from pineboolib.core import decorators
+from typing import Optional, Union, Any, List, cast
+from types import FrameType
+from xml.etree.ElementTree import ElementTree, Element
 from . import logging
+
+from typing import Callable, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.application.types import Date  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +41,7 @@ def auto_qt_translate_text(text: Optional[str]) -> str:
 aqtt = auto_qt_translate_text
 
 
-def one(x: List[Any], default=None):
+def one(x: List[Any], default: Any = None) -> Any:
     """ Se le pasa una lista de elementos (normalmente de un xml) y devuelve el primero o None;
     sirve para ahorrar try/excepts y limpiar código"""
     try:
@@ -49,14 +56,16 @@ class DefFun:
         Tiene una doble funcionalidad. Por un lado, permite convertir llamadas a propiedades en llamadas a la función de verdad.
         Por otro, su principal uso, es omitir las llamadas a funciones inexistentes, de forma que nos advierta en consola
         pero que el código se siga ejecutando. (ESTO ES PELIGROSO)
+
+        ** EN DESUSO **
     """
 
-    def __init__(self, parent: Any, funname: str, realfun: None = None) -> None:
+    def __init__(self, parent: Any, funname: str, realfun: Any = None) -> None:
         self.parent = parent
         self.funname = funname
-        self.realfun = None
+        self.realfun = realfun
 
-    def __str__(self):
+    def __str__(self) -> Any:
         if self.realfun:
             logger.debug("%r: Redirigiendo Propiedad a función %r", self.parent.__class__.__name__, self.funname)
             return self.realfun()
@@ -64,7 +73,7 @@ class DefFun:
         logger.debug("WARN: %r: Propiedad no implementada %r", self.parent.__class__.__name__, self.funname)
         return 0
 
-    def __call__(self, *args):
+    def __call__(self, *args: Any) -> Any:
         if self.realfun:
             logger.debug("%r: Redirigiendo Llamada a función %s %s", self.parent.__class__.__name__, self.funname, args)
             return self.realfun(*args)
@@ -73,7 +82,7 @@ class DefFun:
         return None
 
 
-def traceit(frame, event, arg):
+def traceit(frame: FrameType, event: str, arg: Any) -> Callable[[FrameType, str, Any], Any]:
     """Print a trace line for each Python line executed or call.
 
     This function is intended to be the callback of sys.settrace.
@@ -99,16 +108,16 @@ def traceit(frame, event, arg):
 
 
 class TraceBlock:
-    def __enter__(self):
+    def __enter__(self) -> Callable[[FrameType, str, Any], Any]:
         sys.settrace(traceit)
         return traceit
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, type: Any, value: Any, traceback: Any) -> None:
         sys.settrace(None)
 
 
-def trace_function(f):
-    def wrapper(*args):
+def trace_function(f: Callable) -> Callable:
+    def wrapper(*args: Any) -> Any:
         with TraceBlock():
             return f(*args)
 
@@ -116,8 +125,8 @@ def trace_function(f):
 
 
 class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
-    manager = None
-    currentDownload = None
+    manager: QNetworkAccessManager
+    currentDownload: List[Any]
     reply = None
     url = None
     result = None
@@ -125,41 +134,46 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
     dir_ = None
     url_ = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(downloadManager, self).__init__()
         self.manager = QNetworkAccessManager()
         self.currentDownload = []
-        self.manager.finished.connect(self.downloadFinished)
+        cast(pyqtSignal, self.manager.finished).connect(self.downloadFinished)
 
-    def setLE(self, filename, dir_, urllineedit):
+    def setLE(self, filename: str, dir_: str, urllineedit: Any) -> None:
         self.filename = filename
         self.dir_ = dir_
         self.url_ = urllineedit
 
-    def doDownload(self):
+    def doDownload(self) -> None:
+        if self.url_ is None or self.dir_ is None:
+            raise ValueError("setLE was not called first")
         request = QNetworkRequest(QUrl("%s/%s/%s" % (self.url_.text(), self.dir_, self.filename)))
         self.reply = self.manager.get(request)
         # self.reply.sslErrors.connect(self.sslErrors)
         self.currentDownload.append(self.reply)
 
-    def saveFileName(self, url):
-        path = url.path()
+    def saveFileName(self, url: str) -> Any:
+        # path = url.path()
+        path = url
         basename = QFileInfo(path).fileName()
 
         if not basename:
             basename = "download"
 
-        if QFile.exists(basename):
+        if os.path.exists(basename):
             i = 0
             basename = basename + "."
-            while QFile.exists("%s%s" % (basename, i)):
+            while os.path.exists("%s%s" % (basename, i)):
                 i = i + 1
 
             basename = "%s%s" % (basename, i)
 
         return basename
 
-    def saveToDisk(self, filename, data):
+    def saveToDisk(self, filename: str, data: Any) -> bool:
+        if self.dir_ is None:
+            raise ValueError("setLE was not called first")
         fi = "%s/%s" % (self.dir_, filename)
         if not os.path.exists(self.dir_):
             os.makedirs(self.dir_)
@@ -172,12 +186,12 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
 
         return True
 
-    def isHttpRedirect(self, reply):
+    def isHttpRedirect(self, reply: Any) -> bool:
         statusCode = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
         return statusCode in [301, 302, 303, 305, 307, 308]
 
-    @QtCore.pyqtSlot(QNetworkReply)
-    def downloadFinished(self, reply):
+    @decorators.pyqtSlot(QNetworkReply)
+    def downloadFinished(self, reply: Any) -> None:
         url = reply.url()
         if not reply.error():
             if not self.isHttpRedirect(reply):
@@ -191,7 +205,7 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
             self.result = reply.errorString()
 
 
-def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
+def copy_dir_recursive(from_dir: str, to_dir: str, replace_on_conflict: bool = False) -> bool:
     dir = QDir()
     dir.setPath(from_dir)
 
@@ -209,15 +223,14 @@ def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
 
         if os.path.exists(to_):
             if replace_on_conflict:
-                if not QFile.remove(to_):
-                    return False
+                os.remove(to_)
             else:
                 continue
 
-        if not QFile.copy(from_, to_):
+        if not shutil.copy(from_, to_):
             return False
 
-    for dir_ in dir.entryList(QDir.Dirs | QDir.NoDotAndDotDot):
+    for dir_ in dir.entryList(cast(QDir.Filter, QDir.Dirs | QDir.NoDotAndDotDot)):
         from_ = from_dir + dir_
         to_ = to_dir + dir_
 
@@ -257,53 +270,51 @@ def text2bool(text: str) -> bool:
     raise ValueError("Valor booleano no comprendido '%s'" % text)
 
 
-def ustr(*t1) -> str:
+def ustr(*t1: Union[bytes, str, int, "Date", None]) -> str:
+    def ustr1(t: Union[bytes, str, int, "Date", None]) -> str:
+
+        if isinstance(t, str):
+            return t
+
+        if isinstance(t, float):
+            try:
+                t = int(t)
+            except Exception:
+                pass
+
+        # if isinstance(t, QtCore.QString): return str(t)
+        if isinstance(t, bytes):
+            return str(t, "UTF-8")
+        try:
+            if t is None:
+                t = ""
+
+            return "%s" % t
+        except Exception:
+            logger.exception("ERROR Coercing to string: %s", repr(t))
+            return repr(t)
 
     return "".join([ustr1(t) for t in t1])
 
 
-def ustr1(t: Union[str, int]) -> str:
-
-    if isinstance(t, str):
-        return t
-
-    if isinstance(t, float):
-        try:
-            t = int(t)
-        except Exception:
-            pass
-
-    # if isinstance(t, QtCore.QString): return str(t)
-    if isinstance(t, str):
-        return str(t, "UTF-8")
-    try:
-        if t is None:
-            t = ""
-
-        return "%s" % t
-    except Exception:
-        logger.exception("ERROR Coercing to string: %s", repr(t))
-        return None
-
-
 class StructMyDict(dict):
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         try:
             return self[name]
         except KeyError as e:
             raise AttributeError(e)
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: Any) -> None:
         self[name] = value
 
 
-def version_check(mod_name, mod_ver, min_ver):
+def version_check(mod_name: str, mod_ver: str, min_ver: str) -> None:
     """Compare two version numbers and raise a warning if "minver" is not met."""
     if version_normalize(mod_ver) < version_normalize(min_ver):
         logger.warning("La version de <%s> es %s. La mínima recomendada es %s.", mod_name, mod_ver, min_ver)
 
 
-def version_normalize(v):
+def version_normalize(v: str) -> List[int]:
     """Normalize version string numbers like 3.10.1 so they can be compared."""
     return [int(x) for x in re.sub(r"(\.0+)*$", "", v).split(".")]
 
@@ -328,7 +339,7 @@ def load2xml(form_path_or_str: str) -> ElementTree:
             return super(xml_parser, self).close()
     """
 
-    file_ptr: io.StringIO = None
+    file_ptr: Optional[io.StringIO] = None
     if (
         form_path_or_str.find("KugarTemplate") > -1
         or form_path_or_str.find("DOCTYPE KugarData") > -1
@@ -351,7 +362,7 @@ def load2xml(form_path_or_str: str) -> ElementTree:
             raise
 
 
-def parse_for_duplicates(text):
+def parse_for_duplicates(text: str) -> str:
     ret_ = ""
     text = text.replace("+", "__PLUS__")
     text = text.replace("(", "__LPAREN__")
@@ -423,14 +434,12 @@ def parse_for_duplicates(text):
     return ret_
 
 
-"""
-copy and paste from http://effbot.org/zone/element-lib.htm#prettyprint
-it basically walks your tree and adds spaces and newlines so the tree is
-printed in a nice way
-"""
-
-
-def indent(elem, level=0):
+def indent(elem: Element, level: int = 0) -> None:
+    """
+    copy and paste from http://effbot.org/zone/element-lib.htm#prettyprint
+    it basically walks your tree and adds spaces and newlines so the tree is
+    printed in a nice way
+    """
     i = "\n" + level * "  "
     if len(elem):
         if not elem.text or not elem.text.strip():
@@ -446,8 +455,8 @@ def indent(elem, level=0):
             elem.tail = i
 
 
-def format_double(d, part_integer, part_decimal):
-    if d == "":
+def format_double(d: Union[int, str, float], part_integer: int, part_decimal: int) -> str:
+    if isinstance(d, str) and d == "":
         return d
     # import locale
     # p_int = field_meta.partInteger()
@@ -478,20 +487,20 @@ def format_double(d, part_integer, part_decimal):
     return ret_
 
 
-def format_int(value, part_intenger=None):
-    str_integer = value
-    if value is not None:
-        str_integer = "{:,d}".format(int(value))
+def format_int(value: Union[str, int, float, None], part_intenger: int = None) -> str:
+    if value is None:
+        return ""
+    str_integer = "{:,d}".format(int(value))
 
-        if decimal_separator == ",":
-            str_integer = str_integer.replace(",", ".")
-        else:
-            str_integer = str_integer.replace(".", ",")
+    if decimal_separator == ",":
+        str_integer = str_integer.replace(",", ".")
+    else:
+        str_integer = str_integer.replace(".", ",")
 
     return str_integer
 
 
-def unformat_number(new_str, old_str, type_):
+def unformat_number(new_str: str, old_str: Optional[str], type_: str) -> str:
     ret_ = new_str
     if old_str is not None:
 
@@ -529,9 +538,10 @@ def unformat_number(new_str, old_str, type_):
     return ret_
 
 
-def create_dict(method, fun, id, arguments=[]):
-    data = [{"function": fun, "arguments": arguments, "id": id}]
-    return {"method": method, "params": data, "jsonrpc": "2.0", "id": id}
+# FIXME: Belongs to RPC drivers
+# def create_dict(method: str, fun: str, id: int, arguments: List[Any] = []) -> Dict[str, Union[str, int, List[Any], Dict[str, Any]]]:
+#     data = [{"function": fun, "arguments": arguments, "id": id}]
+#     return {"method": method, "params": data, "jsonrpc": "2.0", "id": id}
 
 
 def is_deployed() -> bool:
@@ -550,7 +560,7 @@ def get_base_dir() -> str:
     return os.path.realpath(base_dir)
 
 
-def filedir(*path) -> str:
+def filedir(*path: str) -> str:
     """
     filedir(path1[, path2, path3 , ...])
     @param array de carpetas de la ruta
@@ -561,7 +571,7 @@ def filedir(*path) -> str:
     return ruta_
 
 
-def download_files():
+def download_files() -> None:
     if os.path.exists(filedir("forms")):
         return
 
@@ -571,7 +581,7 @@ def download_files():
         os.mkdir(filedir("../tempdata"))
 
 
-def pixmap_fromMimeSource(name):
+def pixmap_fromMimeSource(name: str) -> Any:
 
     file_name = filedir("../share/icons", name)
     return QPixmap(file_name) if os.path.exists(file_name) else None

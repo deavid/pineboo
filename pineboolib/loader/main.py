@@ -10,7 +10,6 @@ from .dgi import load_dgi
 from PyQt5 import QtCore  # type: ignore
 
 from optparse import Values
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -72,17 +71,13 @@ def setup_gui(app: QtCore.QCoreApplication, options: Values):
     for fontfile in noto_fonts:
         QtGui.QFontDatabase.addApplicationFont(filedir("../share/fonts/Noto_Sans", fontfile))
 
-    from pineboolib.fllegacy.flsettings import FLSettings
-
-    sett_ = FLSettings()
-
-    styleA = sett_.readEntry("application/style", None)
+    styleA = config.value("application/style", None)
     if styleA is None:
         styleA = "Fusion"
 
     app.setStyle(styleA)
 
-    fontA = sett_.readEntry("application/font", None)
+    fontA = config.value("application/font", None)
     if fontA is None:
         if is_mobile_mode():
             font = QtGui.QFont("Noto Sans", 14)
@@ -126,6 +121,9 @@ def exec_main(options: Values) -> int:
 
     # TODO: Refactorizar función en otras más pequeñas
     from pineboolib.application import project  # FIXME: next time, proper singleton
+    from pineboolib.application.parsers.qsaparser import pytnyzer
+
+    pytnyzer.STRICT_MODE = False
 
     project.load_version()
     project.setDebugLevel(options.debug_level)
@@ -134,11 +132,11 @@ def exec_main(options: Values) -> int:
     if options.enable_gui:
         from PyQt5 import QtWidgets  # type: ignore
 
-        project.app = QtWidgets.QApplication(sys.argv)
+        project.set_app(QtWidgets.QApplication(sys.argv))
         project.app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
         setup_gui(project.app, options)
     else:
-        project.app = QtCore.QCoreApplication(sys.argv)
+        project.set_app(QtCore.QCoreApplication(sys.argv))
 
     if options.trace_debug:
         from pineboolib.core.utils.utils_base import traceit
@@ -177,7 +175,7 @@ def exec_main(options: Values) -> int:
     from .connection import config_dbconn, connect_to_db, DEFAULT_SQLITE_CONN
 
     configdb = config_dbconn(options)
-
+    logger.debug(configdb)
     project.init_dgi(_DGI)
 
     from pineboolib import pncontrolsfactory
@@ -237,9 +235,18 @@ def exec_main(options: Values) -> int:
     # project._splash = splash
 
     project.run()
-    if project.conn.conn is False:
+
+    if not project.conn.conn:
         logger.warning("No connection was provided. Aborting Pineboo load.")
         return -99
+
+    if not config.value("ebcomportamiento/orm_parser_disabled", False):
+        from pineboolib.application.parsers.mtdparser.pnmtdparser import mtd_parse
+
+        for table in project.conn.tables("Tables"):
+            mtd_parse(table)
+
+    aqApp.loadTranslations()
 
     from .init_project import init_project
 

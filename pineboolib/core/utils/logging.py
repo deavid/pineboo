@@ -2,8 +2,9 @@
 
 It allows MyPy/PyType to properly keep track of the new message types
 """
-import logging
+import logging as python_logging
 from logging import basicConfig  # noqa: F401
+from typing import Any
 
 CRITICAL = 50
 FATAL = CRITICAL
@@ -19,30 +20,30 @@ TRACE = 5  # NEW
 NOTSET = 0
 
 
-class Logger(logging.Logger):
-    def message(self, message, *args, **kwargs):
-        self.log(MESSAGE, message, args, **kwargs)
+class Logger(python_logging.Logger):
+    def message(self, message: str, *args: Any, **kwargs: Any) -> None:
+        self.log(MESSAGE, message, *args, **kwargs)
 
-    def hint(self, message, *args, **kwargs):
-        self.log(HINT, message, args, **kwargs)
+    def hint(self, message: str, *args: Any, **kwargs: Any) -> None:
+        self.log(HINT, message, *args, **kwargs)
 
-    def notice(self, message, *args, **kwargs):
-        self.log(NOTICE, message, args, **kwargs)
+    def notice(self, message: str, *args: Any, **kwargs: Any) -> None:
+        self.log(NOTICE, message, *args, **kwargs)
 
-    def trace(self, message, *args, **kwargs):
-        self.log(TRACE, message, args, **kwargs)
-
-
-logging.Logger.manager.loggerClass = Logger  # type: ignore
+    def trace(self, message: str, *args: Any, **kwargs: Any) -> None:
+        self.log(TRACE, message, *args, **kwargs)
 
 
-def getLogger(name=None) -> Logger:
+python_logging.Logger.manager.loggerClass = Logger  # type: ignore
+
+
+def getLogger(name: str = None) -> Logger:
     """
     Return a logger with the specified name, creating it if necessary.
     If no name is specified, return the root logger.
     """
     if name:
-        return logging.Logger.manager.getLogger(name)  # type: ignore
+        return python_logging.Logger.manager.getLogger(name)  # type: ignore
     else:
         raise Exception("Pineboo getLogger does not allow for root logger")
 
@@ -53,14 +54,14 @@ def addLoggingLevel(levelName: str, levelNum: int) -> None:
     # This method was inspired by the answers to Stack Overflow post
     # http://stackoverflow.com/q/2183233/2988730, especially
     # http://stackoverflow.com/a/13638084/2988730
-    def logForLevel(self, message, *args, **kwargs):
+    def logForLevel(self: Any, message: str, *args: Any, **kwargs: Any) -> None:
         if self.isEnabledFor(levelNum):
             self._log(levelNum, message, args, **kwargs)
 
-    logging.addLevelName(levelNum, levelName)
-    setattr(logging, levelName, levelNum)
-    if not hasattr(logging.getLoggerClass(), methodName):
-        setattr(logging.getLoggerClass(), methodName, logForLevel)
+    python_logging.addLevelName(levelNum, levelName)
+    setattr(python_logging, levelName, levelNum)
+    if not hasattr(python_logging.getLoggerClass(), methodName):
+        setattr(python_logging.getLoggerClass(), methodName, logForLevel)
 
 
 addLoggingLevel("TRACE", TRACE)

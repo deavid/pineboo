@@ -66,15 +66,15 @@ class FLAccessControl(object):
     Almacena el nombre del objeto de alto nivel.
     """
 
-    name_ = None
+    name_: str
     """
     Almacena el nombre del usuario de la base de datos.
     """
-    user_ = None
+    user_: str
     """
     Almacena el permiso general de la regla de control de acceso.
     """
-    perm_ = None
+    perm_: str
 
     """
     Diccionario de permisos específicos de los ACOs (Access Control Objects)
@@ -82,7 +82,7 @@ class FLAccessControl(object):
     correspondencia entre el nombre del ACO (utilizado como clave de búsqueda)
     y el permiso a aplicar.
     """
-    acosPerms_: Dict[str, str] = None
+    acosPerms_: Dict[str, str]
 
     def __init__(self) -> None:
         self.name_ = ""
@@ -263,16 +263,8 @@ class FLAccessControl(object):
     """
 
     def setAcos(self, acos: List[str]) -> None:
-        if acos is None:
-            return
+        self.acosPerms_.clear()
 
-        if self.acosPerms_:
-            self.acosPerms_.clear()
-            del self.acosPerms_
-
-        self.acosPerms_ = {}
-
-        # nameAcos = None
         i = 0
         while i < len(acos):
             self.acosPerms_[acos[i]] = acos[i + 1]
@@ -298,10 +290,10 @@ class FLAccessControl(object):
 
         return acos
 
-    def processObject(self, o):
+    def processObject(self, o) -> None:
         raise ValueError("Cannot access base class")
 
-    def setFromObject(self, obj: object) -> None:
+    def setFromObject(self, obj: Any) -> None:
         raise ValueError("Cannot access base class")
 
 

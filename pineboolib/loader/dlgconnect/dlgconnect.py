@@ -4,14 +4,14 @@ import base64
 import hashlib
 from xml.etree import ElementTree as ET
 
-from PyQt5 import QtWidgets, QtCore  # type: ignore
+from PyQt5 import QtWidgets  # type: ignore
 from PyQt5.QtWidgets import QMessageBox  # type: ignore
 from PyQt5.QtCore import QSize  # type: ignore
 
 from pineboolib.core.utils.utils_base import filedir, indent
-from pineboolib.fllegacy.flsettings import FLSettings  # FIXME: Use pineboolib.core.settings
-
-from typing import Optional
+from pineboolib.core.settings import config, settings
+from pineboolib.core.decorators import pyqtSlot
+from typing import Optional, cast
 
 
 class DlgConnect(QtWidgets.QWidget):
@@ -22,8 +22,6 @@ class DlgConnect(QtWidgets.QWidget):
     optionsShowed = True
     minSize = None
     maxSize = None
-    profile_dir = None
-    pNSqlDrivers = None
     edit_mode = None
 
     def __init__(self) -> None:
@@ -34,7 +32,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.optionsShowed = True
         self.minSize = QSize(350, 140)
         self.maxSize = QSize(350, 495)
-        self.profile_dir = FLSettings().readEntry("ebcomportamiento/profiles_folder", filedir("../profiles"))
+        self.profile_dir: str = config.value("ebcomportamiento/profiles_folder", filedir("../profiles"))
         from pineboolib.application.database.pnsqldrivers import PNSqlDrivers
 
         self.pNSqlDrivers = PNSqlDrivers()
@@ -46,12 +44,11 @@ class DlgConnect(QtWidgets.QWidget):
         """
         from pineboolib.fllegacy.flmanagermodules import FLManagerModules
 
-        mM = FLManagerModules()
         dlg_ = filedir("loader/dlgconnect/dlgconnect.ui")
 
-        self.ui = mM.createUI(dlg_, None, self)
-        del mM
-
+        self.ui = FLManagerModules.createUI(dlg_, None, self)
+        if not self.ui:
+            raise Exception("Error creating dlgConnect")
         # Centrado en pantalla
         frameGm = self.frameGeometry()
         screen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
@@ -105,8 +102,7 @@ class DlgConnect(QtWidgets.QWidget):
             fileName = file.split(".")[0]
             self.ui.cbProfiles.addItem(fileName)
 
-        settings = FLSettings()
-        last_profile = settings.readEntry("DBA/last_profile", None)
+        last_profile = settings.value("DBA/last_profile", None)
         if last_profile:
             self.ui.cbProfiles.setCurrentText(last_profile)
 
@@ -114,7 +110,7 @@ class DlgConnect(QtWidgets.QWidget):
     SLOTS
     """
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def showOptions(self) -> None:
         """
         Muestra el frame opciones
@@ -136,7 +132,7 @@ class DlgConnect(QtWidgets.QWidget):
 
         self.optionsShowed = not self.optionsShowed
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def open(self) -> None:
         """
         Abre la conexión seleccionada
@@ -145,16 +141,15 @@ class DlgConnect(QtWidgets.QWidget):
         tree = ET.parse(fileName)
         root = tree.getroot()
 
-        version = root.get("Version")
-        if version is None:
+        _version = root.get("Version")
+        if _version is None:
             version = 1.0
         else:
-            version = float(version)
+            version = float(_version)
 
         last_profile = self.ui.cbProfiles.currentText()
         if last_profile not in (None, ""):
-            settings = FLSettings()
-            settings.writeEntry("DBA/last_profile", last_profile)
+            settings.set_value("DBA/last_profile", last_profile)
 
         for profile in root.findall("profile-data"):
             if getattr(profile.find("password"), "text", None):
@@ -200,8 +195,8 @@ class DlgConnect(QtWidgets.QWidget):
 
         self.close()
 
-    @QtCore.pyqtSlot()
-    def saveProfile(self):
+    @pyqtSlot()
+    def saveProfile(self) -> None:
         """
         Guarda la conexión
         """
@@ -235,11 +230,11 @@ class DlgConnect(QtWidgets.QWidget):
         nameDB = self.ui.leDBName.text()
 
         auto_login = self.ui.cbAutoLogin.isChecked()
-        pass_profile = ""
+        pass_profile_text = ""
         if not auto_login:
-            pass_profile = self.ui.leProfilePassword.text()
+            pass_profile_text = self.ui.leProfilePassword.text()
 
-        pass_profile = hashlib.sha256(pass_profile.encode())
+        pass_profile = hashlib.sha256(pass_profile_text.encode())
         profile_user = ET.SubElement(profile, "profile-data")
         profile_password = ET.SubElement(profile_user, "password")
         profile_password.text = pass_profile.hexdigest()
@@ -276,8 +271,8 @@ class DlgConnect(QtWidgets.QWidget):
         self.loadProfiles()
         self.ui.cbProfiles.setCurrentText(description)
 
-    @QtCore.pyqtSlot()
-    def deleteProfile(self):
+    @pyqtSlot()
+    def deleteProfile(self) -> None:
         """
         Borra la conexión seleccionada
         """
@@ -286,7 +281,7 @@ class DlgConnect(QtWidgets.QWidget):
                 self.ui,
                 "Pineboo",
                 "¿Desea borrar el perfil %s?" % self.ui.cbProfiles.currentText(),
-                QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No,
+                cast(QtWidgets.QMessageBox, QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No),
                 QtWidgets.QMessageBox.No,
             )
             if res == QtWidgets.QMessageBox.No:
@@ -296,8 +291,8 @@ class DlgConnect(QtWidgets.QWidget):
             os.remove(os.path.join(self.profile_dir, fileName))
             self.loadProfiles()
 
-    @QtCore.pyqtSlot()
-    def editProfile(self):
+    @pyqtSlot()
+    def editProfile(self) -> None:
         """
         Edita la conexión seleccionada
         """
@@ -306,11 +301,11 @@ class DlgConnect(QtWidgets.QWidget):
         tree = ET.parse(file_name)
         root = tree.getroot()
 
-        version = root.get("Version")
-        if version is None:
+        _version = root.get("Version")
+        if _version is None:
             version = 1.0
         else:
-            version = float(version)
+            version = float(_version)
 
         self.ui.leProfilePassword.setText("")
 
@@ -348,14 +343,14 @@ class DlgConnect(QtWidgets.QWidget):
 
         self.edit_mode = True
 
-    @QtCore.pyqtSlot(int)
+    @pyqtSlot(int)
     def updatePort(self) -> None:
         """
         Actualiza al puerto por defecto del driver
         """
         self.ui.lePort.setText(self.pNSqlDrivers.port(self.ui.cbDBType.currentText()))
 
-    @QtCore.pyqtSlot(int)
+    @pyqtSlot(int)
     def enablePassword(self, n: Optional[int] = None) -> None:
         """
         Comprueba si el perfil requiere password para login o no
@@ -373,11 +368,11 @@ class DlgConnect(QtWidgets.QWidget):
             )
             return
 
-        version = root.get("Version")
-        if version is None:
+        _version = root.get("Version")
+        if _version is None:
             version = 1.0
         else:
-            version = float(version)
+            version = float(_version)
 
         for profile in root.findall("profile-data"):
             password = profile.find("password")
@@ -387,14 +382,14 @@ class DlgConnect(QtWidgets.QWidget):
         else:
             self.ui.lePassword.setEnabled(True)
 
-    def updateDBName(self):
+    def updateDBName(self) -> None:
         """
         Actualiza el nombre de la BD con el nombre de la descripción
         """
         self.ui.leDBName.setText(self.ui.leDescription.text().replace(" ", "_"))
 
-    @QtCore.pyqtSlot(int)
-    def enableProfilePassword(self):
+    @pyqtSlot(int)
+    def enableProfilePassword(self) -> None:
         """
         Comprueba si el perfil requiere password
         """
@@ -404,13 +399,13 @@ class DlgConnect(QtWidgets.QWidget):
         else:
             self.ui.leProfilePassword.setEnabled(True)
 
-    def change_profile_dir(self):
+    def change_profile_dir(self) -> None:
 
         new_dir = QtWidgets.QFileDialog.getExistingDirectory(
             self.ui, self.tr("Carpeta profiles"), self.profile_dir, QtWidgets.QFileDialog.ShowDirsOnly
         )
 
         if new_dir and new_dir is not self.profile_dir:
-            FLSettings().writeEntry("ebcomportamiento/profiles_folder", new_dir)
+            config.set_value("ebcomportamiento/profiles_folder", new_dir)
             self.profile_dir = new_dir
             self.loadProfiles()

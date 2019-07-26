@@ -2,6 +2,7 @@
 from PyQt5 import QtWidgets, QtGui  # type: ignore
 from pineboolib.core import decorators
 from PyQt5.QtCore import pyqtSignal  # type: ignore
+from typing import Any, List
 
 
 class QListView(QtWidgets.QWidget):
@@ -11,17 +12,17 @@ class QListView(QtWidgets.QWidget):
     _root_is_decorated = None
     _default_rename_action = None
     _tree = None
-    _cols_labels = None
+    _cols_labels: List[str]
     _key = None
     _root_item = None
-    _current_row = None
+    _current_row: int
 
     doubleClicked = pyqtSignal(object)
     selectionChanged = pyqtSignal(object)
     expanded = pyqtSignal(object)
     collapsed = pyqtSignal(object)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent=None)
         lay = QtWidgets.QVBoxLayout(self)
         self._tree = QtWidgets.QTreeView(self)
@@ -36,7 +37,7 @@ class QListView(QtWidgets.QWidget):
         self._tree.clicked.connect(self.singleClickedEmit)
         self._tree.activated.connect(self.singleClickedEmit)
 
-    def singleClickedEmit(self, index):
+    def singleClickedEmit(self, index) -> None:
         if index.column() != 0:
             index = index.sibling(index.row(), 0)
         else:
@@ -45,32 +46,33 @@ class QListView(QtWidgets.QWidget):
 
         self.selectionChanged.emit(item)
 
-    def doubleClickedEmit(self, index):
+    def doubleClickedEmit(self, index) -> None:
         item = index.model().itemFromIndex(index)
         self.doubleClicked.emit(item)
 
-    def addItem(self, t):
+    def addItem(self, t) -> None:
         from pineboolib import pncontrolsfactory
 
         self._current_row = self._current_row + 1
         item = pncontrolsfactory.FLListViewItem()
         item.setEditable(False)
         item.setText(t)
-
-        self._tree.model().setItem(self._current_row, 0, item)
+        if self._tree is not None:
+            self._tree.model().setItem(self._current_row, 0, item)
 
     @decorators.NotImplementedWarn
     def setItemMargin(self, m):
         self.setContentsMargins(m, m, m, m)
 
-    def setHeaderLabel(self, labels):
+    def setHeaderLabel(self, labels) -> None:
         if isinstance(labels, str):
             labels = [labels]
 
-        self._tree.model().setHorizontalHeaderLabels(labels)
+        if self._tree is not None:
+            self._tree.model().setHorizontalHeaderLabels(labels)
         self._cols_labels = labels
 
-    def setColumnText(self, col, new_value):
+    def setColumnText(self, col, new_value) -> None:
         i = 0
         new_list = []
         for old_value in self._cols_labels:
@@ -79,7 +81,7 @@ class QListView(QtWidgets.QWidget):
 
         self._cols_labels = new_list
 
-    def addColumn(self, text):
+    def addColumn(self, text) -> None:
         self._cols_labels.append(text)
 
         self.setHeaderLabel(self._cols_labels)
@@ -96,7 +98,7 @@ class QListView(QtWidgets.QWidget):
     def resizeEvent(self, e):
         return super().resizeEvent(e) if self._resizeable else False
 
-    def clear(self):
+    def clear(self) -> None:
         self._cols_labels = []
 
     @decorators.NotImplementedWarn
@@ -107,5 +109,8 @@ class QListView(QtWidgets.QWidget):
     def setDefaultRenameAction(self, b):
         self._default_rename_action = b
 
-    def model(self):
-        return self._tree.model()
+    def model(self) -> Any:
+        if self._tree is not None:
+            return self._tree.model()
+        else:
+            raise Exception("No hay _tree")

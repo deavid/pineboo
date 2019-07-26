@@ -13,10 +13,12 @@ share/pineboo/scripts/*.py.src
 src/*
 builds/*
 sysroots/*
+deploy/*
 __pycache__
 test.qs.py
 test.qs.py.debug
 test.qs.xml
 monkeytype.sqlite3
 .pytype/*
-pineboolib/flparser/lextab.py
+pineboolib/application/parsers/qsaparser/lextab.py
+.mypy_cache

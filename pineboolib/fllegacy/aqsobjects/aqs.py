@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
-from typing import Type
+
 from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication  # type: ignore
 from PyQt5.QtXml import QDomDocument  # type: ignore
 from PyQt5 import QtCore  # type: ignore
 from PyQt5 import QtGui  # type: ignore
 
-from pineboolib.core.utils.logging import logging
+from pineboolib.core.utils import logging
+
+
+from typing import Type, Any, Optional, Union
+from PyQt5.Qt import QCursor  # type: ignore
+from PyQt5.QtWidgets import QWidget  # type : ignore
+from PyQt5.QtGui import QColor  # type: ignore
 
 logger = logging.getLogger("AQS")
 
@@ -19,22 +25,21 @@ class AQS(object):
     Box = None
     Plain = None
     translate = ["DockLeft", "ContextMenu"]
-    InDock = None
 
-    def __init__(self):
-        self.InDock = "InDock"
-        self.OutSideDock = "OutSideDock"
-        self.SmtpSslConnection = 1
-        self.SmtpTlsConnection = 2
-        self.SmtpAuthPlain = 1
-        self.SmtpAuthLogin = 2
-        self.SmtpSendOk = 11
-        self.SmtpError = 7
-        self.SmtpMxDnsError = 10
-        self.SmtpSocketError = 12
-        self.SmtpAttachError = 15
-        self.SmtpServerError = 16
-        self.SmtpClientError = 17
+    def __init__(self) -> None:
+        self.InDock: str = "InDock"
+        self.OutSideDock: str = "OutSideDock"
+        self.SmtpSslConnection: int = 1
+        self.SmtpTlsConnection: int = 2
+        self.SmtpAuthPlain: int = 1
+        self.SmtpAuthLogin: int = 2
+        self.SmtpSendOk: int = 11
+        self.SmtpError: int = 7
+        self.SmtpMxDnsError: int = 10
+        self.SmtpSocketError: int = 12
+        self.SmtpAttachError: int = 15
+        self.SmtpServerError: int = 16
+        self.SmtpClientError: int = 17
 
     """
     Muestra el dialog de selección de color
@@ -43,17 +48,19 @@ class AQS(object):
     @param name. deprecated. Paramametro usado para compatibilidad
     """
 
-    def ColorDialog_getColor(self, color=None, parent=None, name=None):
+    def ColorDialog_getColor(
+        self, color: Optional[Union[int, str, QColor]] = None, parent: Optional["QWidget"] = None, name: Optional[str] = None
+    ) -> Any:
         from PyQt5.QtWidgets import QColorDialog  # type: ignore
-        from PyQt5.QtGui import QColor  # type: ignore
 
         if color is None:
-            color = QColor.black()
+            qcolor = QColor("black")
+        elif not isinstance(color, QColor):
+            qcolor = QColor(color)
+        else:
+            qcolor = color
 
-        if isinstance(color, str):
-            color = QColor()
-
-        cL = QColorDialog(color, parent)
+        cL = QColorDialog(qcolor, parent)
         return cL.getColor()
 
     """
@@ -65,7 +72,7 @@ class AQS(object):
     """
 
     @classmethod
-    def toXml(cls: Type["AQS"], obj_, include_children=True, include_complex_types=False):
+    def toXml(cls: Type["AQS"], obj_: "QWidget", include_children: bool = True, include_complex_types: bool = False):
         xml_ = QDomDocument()
 
         if not obj_:
@@ -121,7 +128,7 @@ class AQS(object):
     """
 
     @staticmethod
-    def pixmap_fromMimeSource(name):
+    def pixmap_fromMimeSource(name: str) -> Any:
         from pineboolib.core.utils.utils_base import pixmap_fromMimeSource
 
         return pixmap_fromMimeSource(name)
@@ -129,21 +136,21 @@ class AQS(object):
     Pixmap_fromMineSource = pixmap_fromMimeSource
 
     @classmethod
-    def sha1(self, byte_array):
+    def sha1(self, byte_array: bytes) -> Any:
         from pineboolib.pncontrolsfactory import QByteArray
 
         ba = QByteArray(byte_array)
         return ba.sha1()
 
     @classmethod
-    def Application_setOverrideCursor(self, shape, replace=False):
+    def Application_setOverrideCursor(self, shape: "QCursor", replace: bool = False) -> None:
         QApplication.setOverrideCursor(shape)
 
     @classmethod
-    def Application_restoreOverrideCursor(self):
+    def Application_restoreOverrideCursor(self) -> None:
         QApplication.restoreOverrideCursor()
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         if name in self.translate:
             if name == "DockLeft":
                 name = "LeftDockWidgetArea"

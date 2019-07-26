@@ -1,8 +1,7 @@
 from pineboolib import logging
 import re
 
-
-from typing import Optional
+from typing import Any, Tuple, Optional
 
 
 class ProjectConfig:
@@ -30,6 +29,15 @@ class ProjectConfig:
         if load_xml:
             self.load_projectxml(load_xml)
 
+    def __repr__(self):
+        return "<ProjectConfig database=%s host:port=%s:%s type=%s user=%s>" % (
+            self.database,
+            self.host,
+            self.port,
+            self.type,
+            self.username,
+        )
+
     def load_projectxml(self, file_name: str) -> bool:
         import hashlib
         import os.path
@@ -41,11 +49,11 @@ class ProjectConfig:
         tree = ET.parse(file_name)
         root = tree.getroot()
 
-        version = root.get("Version")
-        if version is None:
+        version_ = root.get("Version")
+        if version_ is None:
             version = 1.0
         else:
-            version = float(version)  # FIXME: Esto es muy mala idea. Tratar versiones como float causará problemas al comparar.
+            version = float(version_)  # FIXME: Esto es muy mala idea. Tratar versiones como float causará problemas al comparar.
 
         for profile in root.findall("profile-data"):
             invalid_password = False
@@ -98,7 +106,7 @@ class ProjectConfig:
         return True
 
     @classmethod
-    def translate_connstring(cls, connstring):
+    def translate_connstring(cls, connstring: str) -> Tuple[Any, Any, Any, Any, Any, Any]:
         """Translate a DSN connection string into user, pass, etc.
 
         Acepta un parámetro "connstring" que tenga la forma user@host/dbname
@@ -106,7 +114,7 @@ class ProjectConfig:
         valores por defecto y las diferentes formas de abreviar que existen.
         """
         user = "postgres"
-        passwd = None
+        passwd = ""
         host = "127.0.0.1"
         port = "5432"
         dbname = ""
@@ -121,17 +129,18 @@ class ProjectConfig:
                 raise ValueError("base de datos no valida")
             return user, passwd, driver_alias, host, port, dbname
         dbname = connstring[connstring.rindex("/") + 1 :]
-        conn_list = [None, None] + uphpstring.split("@")
-        user_pass, host_port = conn_list[-2], conn_list[-1]
+        up, hp = uphpstring.split("@")
+        conn_list = [None, None, up, hp]
+        _user_pass, _host_port = conn_list[-2], conn_list[-1]
 
-        if user_pass:
-            user_pass = user_pass.split(":") + [None, None, None]
+        if _user_pass:
+            user_pass = _user_pass.split(":") + ["", "", ""]
             user, passwd, driver_alias = (user_pass[0], user_pass[1] or passwd, user_pass[2] or driver_alias)
             if user_pass[3]:
                 raise ValueError("La cadena de usuario debe tener el formato user:pass:driver.")
 
-        if host_port:
-            host_port = host_port.split(":") + [None]
+        if _host_port:
+            host_port = _host_port.split(":") + [""]
             host, port = host_port[0], host_port[1] or port
             if host_port[2]:
                 raise ValueError("La cadena de host debe ser host:port.")
