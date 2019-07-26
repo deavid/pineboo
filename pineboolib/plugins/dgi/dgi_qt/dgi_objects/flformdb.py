@@ -499,7 +499,7 @@ class FLFormDB(QDialog):
     Devuelve si se ha aceptado el formulario
     """
 
-    def accepted(self) -> Any:
+    def accepted(self) -> bool:  # type: ignore   # FIXME: QDialog.accepted() is a signal. We're shadowing it.
         return self.accepted_
 
     """
