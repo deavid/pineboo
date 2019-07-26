@@ -354,13 +354,12 @@ class Date(object):
         """
         return self.date_.year()
 
-    def setYear(self, yyyy: str) -> "Date":
+    def setYear(self, year: Union[str, int]) -> "Date":
         """
         Setea un año dado
         @param yyyy. Año a setear
         """
-        if yyyy is not None:
-            self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (yyyy, self.date_.toString("MM"), self.date_.toString("dd")), "yyyy-MM-dd")
+        self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (year, self.date_.toString("MM"), self.date_.toString("dd")), "yyyy-MM-dd")
 
         return self
 
@@ -371,16 +370,18 @@ class Date(object):
         """
         return self.date_.month()
 
-    def setMonth(self, mm: str) -> "Date":
+    def setMonth(self, mm: Union[str, int]) -> "Date":
         """
         Setea un mes dado
         @param mm. Mes a setear
         """
+        if isinstance(mm, int):
+            mm = str(mm)
 
-        if mm is not None:
-            if len(str(mm)) == 1:
-                mm = "0%s" % mm
-            self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (self.date_.toString("yyyy"), mm, self.date_.toString("dd")), "yyyy-MM-dd")
+        if len(mm) == 1:
+            mm = "0%s" % mm
+
+        self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (self.date_.toString("yyyy"), mm, self.date_.toString("dd")), "yyyy-MM-dd")
 
         return self
 
@@ -391,16 +392,18 @@ class Date(object):
         """
         return self.date_.day()
 
-    def setDay(self, dd: str) -> "Date":
+    def setDay(self, dd: Union[str, int]) -> "Date":
         """
         Setea un dia dado
         @param dd. Dia a setear
         """
-        if dd is not None:
-            if len(str(dd)) == 1:
-                dd = "0%s" % dd
+        if isinstance(dd, int):
+            dd = str(dd)
 
-            self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (self.date_.toString("yyyy"), self.date_.toString("mm"), dd), "yyyy-MM-dd")
+        if len(str(dd)) == 1:
+            dd = "0%s" % dd
+
+        self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (self.date_.toString("yyyy"), self.date_.toString("mm"), dd), "yyyy-MM-dd")
 
         return self
 
