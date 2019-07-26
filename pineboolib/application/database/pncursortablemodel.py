@@ -576,12 +576,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @param qry. Query con los campos a usar
     """
 
-    def _refresh_field_info(self, qry: Optional["PNSqlQuery"] = None) -> None:
+    def _refresh_field_info(self) -> None:
         is_query = self.metadata().isQuery()
         qry_tables = []
-        if qry is None:
-            return
+        # if qry is None:
+        #    return
         if is_query:
+            qry = self.db().manager().query(self.metadata().query())
             qry_select = [x.strip() for x in (qry.select()).split(",")]
             qry_fields: Dict[str, str] = {fieldname.split(".")[-1]: fieldname for fieldname in qry_select}
 
@@ -696,19 +697,11 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             cast(pyqtSignal, self.rowsRemoved).emit(parent, 0, oldrows - 1)
 
         if self.metadata().isQuery():
-            qry = self.db().manager().query(self.metadata().query())
-
-            if qry is None:
-                raise Exception("No query found")
-            from_ = qry.from_()
+            from_ = self.db().manager().query(self.metadata().query()).from_()
         else:
-            qry = None
             from_ = self.metadata().name()
 
-        if qry is not None:
-            self._refresh_field_info(qry)
-        else:
-            self._refresh_field_info()
+        self._refresh_field_info()
 
         self._curname = "cur_%s_%08d" % (self.metadata().name(), next(self.CURSOR_COUNT))
         if self.sql_fields_without_check:
