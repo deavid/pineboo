@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from .pncursortablemodel import PNCursorTableModel  # noqa: F401
     from pineboolib.application.metadata.pntablemetadata import PNTableMetaData  # noqa: F401
     from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData  # noqa: F401
-    from pineboolib.interfaces.iformdb import IFormDB  # noqa: F401
+    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB  # noqa: F401
     from pineboolib.interfaces.iconnection import IConnection  # noqa: F401
     from pineboolib.fllegacy.flaction import FLAction  # noqa: F401
     from pineboolib.application.database.pnbuffer import FieldStruct  # noqa: F401
@@ -2752,7 +2752,7 @@ class PNSqlCursor(QtCore.QObject):
 
         idMod = self.db().managerModules().idModuleOfFile("%s.mtd" % self.d.metadata_.name())
 
-        module_script: "IFormDB" = project.actions[idMod].load() if idMod in project.actions.keys() else project.actions["sys"].load()
+        module_script: "FLFormDB" = project.actions[idMod].load() if idMod in project.actions.keys() else project.actions["sys"].load()
 
         if project.DGI.use_model():
             model_name = "models.%s.%s_def" % (idMod, idMod)

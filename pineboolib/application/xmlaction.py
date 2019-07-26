@@ -7,7 +7,7 @@ from .utils.path import _path, coalesce_path
 from typing import Optional, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib.interfaces import IFormDB
+    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
     from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformrecorddb import FLFormRecordDB
 
     # from .moduleactions import ModuleActions  # noqa: F401
@@ -69,7 +69,7 @@ class XMLAction(XMLStruct):
         self.mainscript = self._v("mainscript")
         self.formrecord = self._v("formrecord")
         self.scriptformrecord = self._v("scriptformrecord")
-        self.mainform_widget: Optional[IFormDB] = None
+        self.mainform_widget: Optional[FLFormDB] = None
         self.formrecord_widget: Optional[FLFormRecordDB] = None
         self._loaded = False
 
@@ -115,7 +115,7 @@ class XMLAction(XMLStruct):
 
         return self.formrecord_widget
 
-    def load(self) -> "IFormDB":
+    def load(self) -> "FLFormDB":
         self._loaded = getattr(self.mainform_widget, "_loaded", False)
         if not self._loaded:
             if self.mainform_widget is not None and getattr(self.mainform_widget, "widget", None):
@@ -215,7 +215,7 @@ class XMLAction(XMLStruct):
     @param parent. Objecto al que carga el script, si no se especifica es a self.script
     """
 
-    def load_script(self, scriptname: Optional[str], parent: Optional["IFormDB"] = None) -> Any:  # returns loaded script
+    def load_script(self, scriptname: Optional[str], parent: Optional["FLFormDB"] = None) -> Any:  # returns loaded script
         # FIXME: Parent logic is broken. We're loading scripts to two completely different objects.
         from importlib import machinery
 

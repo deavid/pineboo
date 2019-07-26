@@ -2,11 +2,11 @@
 import traceback
 from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
 from PyQt5.Qt import QKeySequence  # type: ignore
+from PyQt5.QtWidgets import QDialog  # type: ignore
 
 from pineboolib import logging
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
-from pineboolib.interfaces import IFormDB
 from pineboolib.application.utils.geometry import loadGeometryForm, saveGeometryForm
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.core.settings import config
@@ -34,7 +34,7 @@ componentes serán plugins, como FLFieldDB o FLTableDB.
 """
 
 
-class FLFormDB(IFormDB):
+class FLFormDB(QDialog):
 
     """
     Cursor, con los registros, utilizado por el formulario
