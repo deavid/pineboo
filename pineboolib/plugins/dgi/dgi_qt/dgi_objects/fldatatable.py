@@ -415,9 +415,11 @@ class FLDataTable(QtWidgets.QTableView):
             if key_event.key() == QtCore.Qt.Key_Space:
                 from pineboolib import pncontrolsfactory
 
-                chk = pncontrolsfactory.FLCheckBox(self.cellWidget(r, c))
-                if chk:
-                    chk.animateClick()
+                self.setChecked(self.model().index(r, c))
+
+                # chk = pncontrolsfactory.FLCheckBox(self.cellWidget(r, c))
+                # if chk:
+                #    chk.animateClick()
 
             if not config.value("ebcomportamiento/FLTableShortCut", False):
                 if key_event.key() == QtCore.Qt.Key_A and not self.popup_:
