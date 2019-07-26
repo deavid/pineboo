@@ -760,7 +760,7 @@ class FLUtil(QtCore.QObject):
         cursor.close()
         return True
 
-    def roundFieldValue(self, value: float, table_name: str, field_name: str) -> str:
+    def roundFieldValue(self, value: Union[float, int], table_name: str, field_name: str) -> str:
         """
         Redondea un valor en función de la precisión especificada para un campo tipo double de la base de datos
 
