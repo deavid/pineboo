@@ -17,7 +17,7 @@ from . import logging
 from typing import Callable, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib.application.types import Date
+    from pineboolib.application.types import Date  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
@@ -271,7 +271,7 @@ def text2bool(text: str) -> bool:
 
 
 def ustr(*t1: Union[bytes, str, int, "Date", None]) -> str:
-    def ustr1(t: Union[bytes, str, int, None]) -> str:
+    def ustr1(t: Union[bytes, str, int, "Date", None]) -> str:
 
         if isinstance(t, str):
             return t
