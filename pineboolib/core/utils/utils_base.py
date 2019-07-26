@@ -14,7 +14,10 @@ from types import FrameType
 from xml.etree.ElementTree import ElementTree, Element
 from . import logging
 
-from typing import Callable
+from typing import Callable, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.application.types import Date
 
 logger = logging.getLogger(__name__)
 
@@ -267,7 +270,7 @@ def text2bool(text: str) -> bool:
     raise ValueError("Valor booleano no comprendido '%s'" % text)
 
 
-def ustr(*t1: Union[bytes, str, int, None]) -> str:
+def ustr(*t1: Union[bytes, str, int, "Date", None]) -> str:
     def ustr1(t: Union[bytes, str, int, None]) -> str:
 
         if isinstance(t, str):
