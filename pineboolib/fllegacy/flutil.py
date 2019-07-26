@@ -644,7 +644,7 @@ class FLUtil(QtCore.QObject):
         d2 = datetime.datetime.strptime(d2, "%Y-%m-%d").date()
         return (d2 - d1).days
 
-    def buildNumber(self, v: Union[int, float], tipo: str, partDecimal: int) -> str:
+    def buildNumber(self, v: Union[int, float, str], tipo: str, partDecimal: int) -> str:
         """
         Construye un string a partir de un número, especificando el formato y precisión
 
@@ -654,9 +654,6 @@ class FLUtil(QtCore.QObject):
 
         @return Cadena que contiene el número formateado
         """
-        if not v:
-            v = 0
-
         val_str: str = str(v)
         if val_str.endswith("5"):
             val_str += "1"
@@ -760,7 +757,7 @@ class FLUtil(QtCore.QObject):
         cursor.close()
         return True
 
-    def roundFieldValue(self, value: Union[float, int], table_name: str, field_name: str) -> str:
+    def roundFieldValue(self, value: Union[float, int, str], table_name: str, field_name: str) -> str:
         """
         Redondea un valor en función de la precisión especificada para un campo tipo double de la base de datos
 
