@@ -3,7 +3,7 @@ import json
 import time
 from .utils import logging
 
-from PyQt5.QtCore import QSettings, QSize  # type: ignore
+from PyQt5.QtCore import QSettings, QSize
 
 from typing import Dict, List, Any, Union, Tuple, Type
 
