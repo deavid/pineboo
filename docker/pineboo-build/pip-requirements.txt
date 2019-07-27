@@ -79,3 +79,5 @@ typed-ast
 typing-extensions
 xmljson
 xmltodict
+sphinx
+sphinx-autodoc-typehints
