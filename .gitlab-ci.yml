@@ -29,9 +29,9 @@ test:
 
 run:
   script:
-    - python setup.py bdist_wheel
+    - python3 setup.py bdist_wheel
     # an alternative approach is to install and run:
-    - pip install dist/*
+    - pip3 install dist/*
     # run the command here
     # pineboo --help
   artifacts:
