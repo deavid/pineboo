@@ -25,6 +25,7 @@ test:
   script:
     - flake8 pineboolib/
     - mypy -p pineboolib
+    - pytest pineboolib/
 
 # run:
 #   script:

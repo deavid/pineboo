@@ -2,7 +2,7 @@ import traceback
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
 
-class FLSqlCursor_test:
+class FLSqlCursorMock:
 
     maxValue = None
 
