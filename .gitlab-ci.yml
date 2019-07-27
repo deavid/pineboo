@@ -27,23 +27,24 @@ test:
     - mypy -p pineboolib
     - pytest pineboolib/
 
-# run:
-#   script:
-#     - python setup.py bdist_wheel
-#     # an alternative approach is to install and run:
-#     - pip install dist/*
-#     # run the command here
-#   artifacts:
-#     paths:
-#       - dist/*.whl
-#
-# pages:
-#   script:
-#     - pip install sphinx sphinx-rtd-theme
-#     - cd doc ; make html
-#     - mv build/html/ ../public/
-#   artifacts:
-#     paths:
-#       - public
-#   only:
-#     - master
+run:
+  script:
+    - python setup.py bdist_wheel
+    # an alternative approach is to install and run:
+    - pip install dist/*
+    # run the command here
+    # pineboo --help
+  artifacts:
+    paths:
+      - dist/*.whl
+
+pages:
+  script:
+    # - pip install sphinx sphinx-rtd-theme
+    - cd doc ; make html
+    - mv build/html/ ../public/
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
