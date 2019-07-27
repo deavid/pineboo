@@ -117,7 +117,9 @@ class Array(object):
     Objeto tipo Array
     """
 
-    dict_: Dict[Any, Any]
+    # NOTE: To avoid infinite recursion on getattr/setattr, all attributes MUST be defined at class-level.
+    dict_: Dict[Any, Any] = {}
+    pos_iter = 0
 
     def __init__(self, *args: Any) -> None:
         self.pos_iter = 0
