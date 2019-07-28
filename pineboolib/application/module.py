@@ -1,3 +1,12 @@
+"""Manage load and storage of Eneboo/Pineboo modules.
+
+What are modules?
+-------------------
+
+Modules are the declaration of Pineboo source packages where all related functionality
+is stored within. Its composed of a name and description; and they contain code, forms, etc.
+"""
+
 import os.path
 from pineboolib.core.utils import logging
 
