@@ -89,14 +89,19 @@ class PythonifyItem(object):
 
     src_path: str = ""
     dst_path: str = ""
+    n: int = 0
+    len: int = 1
 
-    def __init__(self, src: str, dst: str):
-        self.src_path: str = src
-        self.dst_path: str = dst
+    def __init__(self, src: str, dst: str, n: int, len: int):
+        """Create object just from args."""
+        self.src_path = src
+        self.dst_path = dst
+        self.n = n
+        self.len = len
 
 
 def pythonify_item(o: PythonifyItem) -> bool:
-    logger.info("Parsing QS %r", o.src_path)
+    logger.info("(%.2f%%) Parsing QS %r", 100 * o.n / o.len, o.src_path)
     try:
         pycode = postparse.pythonify2(o.src_path)
     except Exception:
@@ -181,7 +186,7 @@ def main() -> None:
     # Step 5 - Convert QS into Python
     logger.info("Converting %d QS files...", len(qs_files))
 
+    itemlist = [PythonifyItem(src=src, dst=dst, n=n, len=len(qs_files)) for n, (src, dst) in enumerate(qs_files)]
     with Pool(CPU_COUNT) as p:
         # TODO: Add proper signatures to Python files to avoid reparsing
-        itemlist = [PythonifyItem(src=src, dst=dst) for src, dst in qs_files]
-        pycode_list: List[bool] = p.map(pythonify_item, itemlist)
+        pycode_list: List[bool] = p.map(pythonify_item, itemlist, chunksize=1)
