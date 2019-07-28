@@ -1,6 +1,7 @@
 #!/usr/bin/python3 -u
-# -*# -*- coding: utf-8 -*-
-"""Start the application and give control to pineboolib.pnapplication().
+# -*- coding: utf-8 -*-
+"""
+Start the application and give control to pineboolib.pnapplication().
 
 Bootstrap. Se encarga de inicializar la aplicación y ceder el control a
 pineboolib.pnapplication(); para ello acepta los parámetros necesarios de consola

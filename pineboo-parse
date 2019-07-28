@@ -7,18 +7,18 @@
     Lo primero es crear un enlace simbólico de sistema para poder acceder
     a él bajo el nombre de flparser:
 
-    $ sudo ln -s $(pwd)/test_flparser /usr/local/bin/flparser
+    $ sudo ln -s $(pwd)/pineboo-parse /usr/local/bin/flparser
 
     Luego, para escanear un proyecto basta con usar:
 
-    $ flparser --exec-py --full   LISTA FICHEROS A CONVERTIR
+    $ pineboo-parse --exec-py --full   LISTA FICHEROS A CONVERTIR
 
     Esto generará un .qs.xml, un .py y un .py.debug , por cada fichero que se le pase.
 
     En el caso de un proyecto en Git, podemos hacer:
 
     $ cd ~/git/abanq.modules/miproyecto
-    $ flparser --cache --exec-py --full $(git ls-files -- "*qs")
+    $ pineboo-parse --cache --exec-py --full $(git ls-files -- "*qs")
 
     La opción cache evita volver a parsear ficheros que fueron generados. Que esté
     generado no implica que estén correctos, pero es un paso. Muy útil si queremos
@@ -56,28 +56,7 @@
             3.2. Importa el fichero en Python para ver si da el OK o explota
 
 """
-import traceback
-import sys
 
-try:
-    from lxml import etree  # noqa: F401
-except ImportError:
-    print(traceback.format_exc())
-    print()
-    print("HINT: Instale el paquete python3-lxml e intente de nuevo")
-    print()
-    sys.exit(32)
-try:
-    import psycopg2  # noqa: F401
-except ImportError:
-    print(traceback.format_exc())
-    print()
-    print("HINT: Instale el paquete python3-psycopg2 e intente de nuevo")
-    print()
-    sys.exit(32)
-
-
-# import pineboolib.qsa.emptyscript
 from pineboolib.application.parsers.qsaparser import postparse
 
 if __name__ == "__main__":

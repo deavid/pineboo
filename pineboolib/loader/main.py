@@ -1,3 +1,4 @@
+"""Main module for starting up Pineboo."""
 import gc
 import sys
 import traceback
@@ -14,7 +15,13 @@ from optparse import Values
 logger = logging.getLogger(__name__)
 
 
-def startup():
+def startup_no_X():
+    """Start Pineboo with no GUI."""
+    startup(enable_gui=False)
+
+
+def startup(enable_gui: bool = None) -> None:
+    """Start up pineboo."""
     # FIXME: No hemos cargado pineboo aún. No se pueden usar métodos internos.
     # from pineboolib.application.utils.check_dependencies import check_dependencies
     # check_dependencies({"ply": "python3-ply", "PyQt5.QtCore": "python3-pyqt5", "Python": "Python"})
@@ -26,6 +33,8 @@ def startup():
     from .options import parse_options
 
     options = parse_options()
+    if enable_gui is not None:
+        options.enable_gui = enable_gui
     if options.enable_profiler:
         ret = exec_main_with_profiler(options)
     else:
@@ -41,6 +50,7 @@ def startup():
 
 
 def exec_main_with_profiler(options) -> int:
+    """Enable profiler."""
     import cProfile
     import pstats
     import io
@@ -58,11 +68,12 @@ def exec_main_with_profiler(options) -> int:
     return ret
 
 
-def excepthook(type, value, tback):
+def _excepthook(type, value, tback):
     return traceback.print_exception(type, value, tback)
 
 
 def setup_gui(app: QtCore.QCoreApplication, options: Values):
+    """Initialize GUI app."""
     from pineboolib.core.utils.utils_base import filedir
     from pineboolib.application.utils.mobilemode import is_mobile_mode
     from PyQt5 import QtGui  # type: ignore
@@ -93,7 +104,8 @@ def setup_gui(app: QtCore.QCoreApplication, options: Values):
 
 
 def exec_main(options: Values) -> int:
-    """Exec main program.
+    """
+    Exec main program.
 
     Handles optionlist and help.
     Also initializes all the objects
@@ -104,7 +116,7 @@ def exec_main(options: Values) -> int:
     # es bastante incómodo y genera problemas graves para detectar el problema.
     # Agregamos sys.excepthook para controlar esto y hacer que PyQt5 no nos
     # dé un segfault, aunque el resultado no sea siempre correcto:
-    sys.excepthook = excepthook
+    sys.excepthook = _excepthook
     # -------------------
 
     # Corregir Control-C:
