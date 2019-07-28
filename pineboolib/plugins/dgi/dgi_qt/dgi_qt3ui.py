@@ -232,7 +232,7 @@ def loadMenuBar(xml: ET.Element, widget) -> None:
             elif name == "geometry":
                 geo_ = x.find("rect")
                 if geo_:
-                    ex, ey, ew, eh = geo_.find("x"), geo_.find("y"), geo_.find("width"), geo_.find("height")
+                    ex, ey, ew, eh = (geo_.find("x"), geo_.find("y"), geo_.find("width"), geo_.find("height"))
                     if ex is None or ey is None or ew is None or eh is None:
                         continue
                     x1 = ex.text

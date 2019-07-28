@@ -78,7 +78,7 @@ class ProjectConfig:
             raise ValueError("database-name not found")
         self.database = dbname_elem.text
         for db in root.findall("database-server"):
-            host_elem, port_elem, type_elem = db.find("host"), db.find("port"), db.find("type")
+            host_elem, port_elem, type_elem = (db.find("host"), db.find("port"), db.find("type"))
             if host_elem is None or port_elem is None or type_elem is None:
                 raise ValueError("host, port and type are required")
             self.host = host_elem.text
@@ -91,7 +91,7 @@ class ProjectConfig:
                 return False
 
         for credentials in root.findall("database-credentials"):
-            username_elem, password_elem = credentials.find("username"), credentials.find("password")
+            username_elem, password_elem = (credentials.find("username"), credentials.find("password"))
             if username_elem is None:
                 self.username = ""
             else:
