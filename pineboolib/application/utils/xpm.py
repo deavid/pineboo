@@ -23,7 +23,9 @@ def cacheXPM(value: str) -> str:
     else:
         file_name = "%s/%s.xpm" % (cache_dir, xpm_name)
 
-    if not os.path.exists(file_name) or config.value("ebcomportamiento/no_img_cached", False):
+    if not os.path.exists(file_name) or config.value(
+        "ebcomportamiento/no_img_cached", False
+    ):
         f = open(file_name, "w")
         f.write(value)
         f.close()

@@ -107,7 +107,10 @@ class FLStylePainter(object):
                 itNod = nl.item(i)
                 if not itNod.attribute.contains("id"):
                     e = itNod.toElement()
-                    e.setAttribute("id", node.attribute().namedItem("id").nodeValue() + "-" + str(i))
+                    e.setAttribute(
+                        "id",
+                        node.attribute().namedItem("id").nodeValue() + "-" + str(i),
+                    )
                 self.normalizeTranslates(itNod, False)
 
             elem = node.toElement()
@@ -160,7 +163,9 @@ class FLStylePainter(object):
                 errColumn = None
 
                 if self.styleName_.lower().startswith("abanq:"):
-                    content = project.conn.managerModules().contentCached(self.styleName_[6:])
+                    content = project.conn.managerModules().contentCached(
+                        self.styleName_[6:]
+                    )
                     if not self.doc_.setContent(content, errMsg, errLine, errColumn):
                         return
                 elif self.styleName_.lower().startswith("file:"):
@@ -315,7 +320,11 @@ class FLStylePainter(object):
                 elif val == "italic":
                     font.setItalic(True)
                 else:
-                    QtCore.qWarning("FLStylePainterPrivate.setStyleProperty: unhandled " "font-style: {}", val)
+                    QtCore.qWarning(
+                        "FLStylePainterPrivate.setStyleProperty: unhandled "
+                        "font-style: {}",
+                        val,
+                    )
             elif prop == "font-weight":
                 w = font.weight()
                 if val == "100" or val == "200":
@@ -344,7 +353,9 @@ class FLStylePainter(object):
                         clipRegion = self.clipPathTable_[clipName]
                         if not clipRegion.isEmpty():
                             cp = QtGui.QPainter.CoordPainter
-                            self.painter_.setClipRegion(self.painter_.clipRegion() & clipRegion, cp)
+                            self.painter_.setClipRegion(
+                                self.painter_.clipRegion() & clipRegion, cp
+                            )
             # return talign #FIXME?
 
         @decorators.BetaImplementation
@@ -353,7 +364,9 @@ class FLStylePainter(object):
             strreg += "(em|ex|px|%|pt|pc|cm|mm|in|)$"
             reg = QtCore.QRegExp(strreg)
             if reg.search(string) == -1:
-                QtCore.qWarning("FLStylePainterPrivate::parseLen: couldn't parse " + string)
+                QtCore.qWarning(
+                    "FLStylePainterPrivate::parseLen: couldn't parse " + string
+                )
                 if ok:
                     ok = False
                 return 0.0
@@ -479,7 +492,9 @@ class FLStylePainter(object):
                     node = self.objNodesMap_[objName]
                 if node.isNull():
                     self.errCode_ = FLStylePainter.ErrCode.IdNotFound
-                    QtCore.qWarning("FLStylePainter.play: Object id " + objName + " not found.")
+                    QtCore.qWarning(
+                        "FLStylePainter.play: Object id " + objName + " not found."
+                    )
                     return False
                 return self.play(node, elm)
 
@@ -578,18 +593,30 @@ class FLStylePainter(object):
                         else:
                             self.painter_.drawRoundRect(x1, y1, w, h, rx, ry)
                         if not isSectionDraw:
-                            self.lastLabelRect_ = self.painter_.xForm(QtCore.QRect(x1, y1, w, h))
+                            self.lastLabelRect_ = self.painter_.xForm(
+                                QtCore.QRect(x1, y1, w, h)
+                            )
             elif t == cire:
                 cx1 = self.lenToDouble(attr, "cx") + 0.5
                 cy1 = self.lenToDouble(attr, "cy") + 0.5
                 crx = self.lenToDouble(attr, "r")
-                QtCore.QwtPainter.drawEllipse(self.painter_, QtCore.QRect(int(cx1 - crx), int(cy1 - crx), int(2 * crx), int(2 * crx)))
+                QtCore.QwtPainter.drawEllipse(
+                    self.painter_,
+                    QtCore.QRect(
+                        int(cx1 - crx), int(cy1 - crx), int(2 * crx), int(2 * crx)
+                    ),
+                )
             elif t == elle:
                 cx1 = self.lenToDouble(attr, "cx") + 0.5
                 cy1 = self.lenToDouble(attr, "cy") + 0.5
                 crx = self.lenToDouble(attr, "rx")
                 cry = self.lenToDouble(attr, "ry")
-                QtCore.QwtPainter.drawEllipse(self.painter_, QtCore.QRect(int(cx1 - crx), int(cy1 - cry), int(2 * crx), int(2 * cry)))
+                QtCore.QwtPainter.drawEllipse(
+                    self.painter_,
+                    QtCore.QRect(
+                        int(cx1 - crx), int(cy1 - cry), int(2 * crx), int(2 * cry)
+                    ),
+                )
             elif t == le:
                 if elm == le or isSectionDraw:
                     x1 = self.lenToInt(attr, "x1")
@@ -598,7 +625,16 @@ class FLStylePainter(object):
                     y2 = self.lenToInt(attr, "y2")
                     p = self.painter_.pen()
                     w = p.width()
-                    p.setWidth(int(w * (math.fabs(self.painter_.worldMatrix().m11()) + math.fabs(self.painter_.worldMatrix().m22())) / 2))
+                    p.setWidth(
+                        int(
+                            w
+                            * (
+                                math.fabs(self.painter_.worldMatrix().m11())
+                                + math.fabs(self.painter_.worldMatrix().m22())
+                            )
+                            / 2
+                        )
+                    )
                     self.painter_.setPen(p)
                     QtCore.QwtPainter.drawLine(self.painter_, x1, y1, x2, y2)
                     p.setWidth(w)
@@ -649,7 +685,10 @@ class FLStylePainter(object):
                         pn.setColor(bcolor)
                         self.painter_.setPen(pn)
                         QtCore.QwtPainter.drawText(
-                            self.painter_, self.painter_.xFormDev(self.lastLabelRect_), self.curr_["textalign"] | self.tf_, self.text_
+                            self.painter_,
+                            self.painter_.xFormDev(self.lastLabelRect_),
+                            self.curr_["textalign"] | self.tf_,
+                            self.text_,
                         )
                         pn.setColor(pcolor)
                         self.painter_.setPen(pn)
@@ -680,7 +719,12 @@ class FLStylePainter(object):
                                     self.curr_["textx"] -= w / 2
                                 elif self.curr_["textalign"] == Qt.AlignRight:
                                     self.curr_["textx"] -= w
-                                QtCore.QwtPainter.drawText(self.painter_, self.curr_["textx"], self.curr_["texty"], text)
+                                QtCore.QwtPainter.drawText(
+                                    self.painter_,
+                                    self.curr_["textx"],
+                                    self.curr_["texty"],
+                                    text,
+                                )
                                 pn.setColor(pcolor)
                                 self.painter_.setPen(pn)
                                 self.curr_["textx"] += w
@@ -702,11 +746,18 @@ class FLStylePainter(object):
                         if href and href != "":
                             pix = QtGui.QPixmap()
                             if not pix.load(href):
-                                QtCore.qWarning("FLStylePainterPrivate::play:" " Couldn't load image " + href)
+                                QtCore.qWarning(
+                                    "FLStylePainterPrivate::play:"
+                                    " Couldn't load image " + href
+                                )
                             else:
-                                self.painter_.drawPixmap(QtCore.QRect(x1, y1, w, h), pix)
+                                self.painter_.drawPixmap(
+                                    QtCore.QRect(x1, y1, w, h), pix
+                                )
                     else:
-                        self.painter_.drawPixmap(x1, y1, self.pix_, self.sx_, self.sy_, self.sw_, self.sh_)
+                        self.painter_.drawPixmap(
+                            x1, y1, self.pix_, self.sx_, self.sy_, self.sw_, self.sh_
+                        )
             elif t == de or t == tite:
                 pass
             elif t == clie:
@@ -738,7 +789,10 @@ class FLStylePainter(object):
                 if idObj and idObj != "":
                     self.clipPathTable_[idObj] = region
             elif t == inve:
-                QtCore.qWarning("FLStylePainterPrivate::play:" " unknown element type " + node.nodeName())
+                QtCore.qWarning(
+                    "FLStylePainterPrivate::play:"
+                    " unknown element type " + node.nodeName()
+                )
 
             self.restoreAttributes()
             return True
@@ -755,7 +809,12 @@ class FLStylePainter(object):
             a11 = cosTh * ry
 
             thHalf = 0.5 * (th1 - th0)
-            t = (8.0 / 3.0) * math.sin(thHalf * 0.5) * math.sin(thHalf * 0.5) / math.sin(thHalf)
+            t = (
+                (8.0 / 3.0)
+                * math.sin(thHalf * 0.5)
+                * math.sin(thHalf * 0.5)
+                / math.sin(thHalf)
+            )
             x1 = xc + math.cos(th0) - t * math.sin(th0)
             y1 = yc + math.sin(th0) + t * math.cos(th0)
             x3 = xc + math.cos(th1)
@@ -778,7 +837,20 @@ class FLStylePainter(object):
             return pcount
 
         @decorators.BetaImplementation
-        def pathArc(self, path, pcount, rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y, curx, cury):
+        def pathArc(
+            self,
+            path,
+            pcount,
+            rx,
+            ry,
+            x_axis_rotation,
+            large_arc_flag,
+            sweep_flag,
+            x,
+            y,
+            curx,
+            cury,
+        ):
             rx = math.fabs(rx)
             ry = math.fabs(ry)
 
@@ -831,7 +903,15 @@ class FLStylePainter(object):
 
             for i in range(n_segs):
                 pcount = self.pathArcSegment(
-                    path, pcount, xc, yc, th0 + i * th_arc / n_segs, th0 + (i + 1) * th_arc / n_segs, rx, ry, x_axis_rotation
+                    path,
+                    pcount,
+                    xc,
+                    yc,
+                    th0 + i * th_arc / n_segs,
+                    th0 + (i + 1) * th_arc / n_segs,
+                    rx,
+                    ry,
+                    x_axis_rotation,
                 )
 
             return pcount
@@ -873,7 +953,9 @@ class FLStylePainter(object):
                         cmd = mode
                         idx -= 1
                     else:
-                        QtCore.qWarning("FLStylePainterPrivate::drawPath: Unknown command")
+                        QtCore.qWarning(
+                            "FLStylePainterPrivate::drawPath: Unknown command"
+                        )
                         return
 
                 arg: List[float] = []
@@ -881,7 +963,10 @@ class FLStylePainter(object):
                 for i in range(numArgs):
                     pos = reg.search(data, idx)
                     if pos == -1:
-                        QtCore.qWarning("FLStylePainterPrivate::drawPath:" " Error parsing arguments")
+                        QtCore.qWarning(
+                            "FLStylePainterPrivate::drawPath:"
+                            " Error parsing arguments"
+                        )
                         return
                     arg[i] = float(reg.cap(1))
                     idx = pos + reg.matchedLength()
@@ -961,7 +1046,19 @@ class FLStylePainter(object):
                     ey = arg[6] + offsetY
                     curx = x
                     cury = y
-                    pcount = self.pathArc(path, pcount, rx, ry, xAxisRotation, int(largeArcFlag), int(sweepFlag), ex, ey, curx, cury)
+                    pcount = self.pathArc(
+                        path,
+                        pcount,
+                        rx,
+                        ry,
+                        xAxisRotation,
+                        int(largeArcFlag),
+                        int(sweepFlag),
+                        ex,
+                        ey,
+                        curx,
+                        cury,
+                    )
                     pcount += 1
                     x = int(ex)
                     y = int(ey)
@@ -1137,7 +1234,9 @@ class FLStylePainter(object):
             fnt.setPointSizeFloat(fnt.pointSizeFloat() / self.d_.relDpi_)
             oldAscent = self.d_.painter_.fontMetrics().ascent()
             self.d_.painter_.setFont(fnt)
-            self.d_.painter_.translate(0, oldAscent - self.d_.painter_.fontMetrics().ascent())
+            self.d_.painter_.translate(
+                0, oldAscent - self.d_.painter_.fontMetrics().ascent()
+            )
 
         if not st or st == "":
             return False
@@ -1164,7 +1263,11 @@ class FLStylePainter(object):
         if st == "_simple" and obj.name().startswith("_##Line"):
             return True
 
-        return st != "_mark" and self.d_.doc_.hasChildNodes() and self.d_.play(obj.name(), self.ElementType.LineElement)
+        return (
+            st != "_mark"
+            and self.d_.doc_.hasChildNodes()
+            and self.d_.play(obj.name(), self.ElementType.LineElement)
+        )
 
     @decorators.BetaImplementation
     def drawRect(self, obj):
@@ -1177,7 +1280,11 @@ class FLStylePainter(object):
         if st == "_simple" and obj.name().startswith("_##Label"):
             return True
 
-        return st != "_mark" and self.d_.doc_.hasChildNodes() and self.d_.play(obj.name(), self.ElementType.RectElement)
+        return (
+            st != "_mark"
+            and self.d_.doc_.hasChildNodes()
+            and self.d_.play(obj.name(), self.ElementType.RectElement)
+        )
 
     @decorators.BetaImplementation
     def setStyle(self, obj):
@@ -1192,7 +1299,11 @@ class FLStylePainter(object):
         if st == "_simple" and (nla or nli):
             return True
 
-        return st != "_mark" and self.d_.doc_.hasChildNodes() and self.d_.play(obj.name(), self.ElementType.SetStyleElement)
+        return (
+            st != "_mark"
+            and self.d_.doc_.hasChildNodes()
+            and self.d_.play(obj.name(), self.ElementType.SetStyleElement)
+        )
 
     @decorators.BetaImplementation
     def applyTransforms(self):
@@ -1244,7 +1355,9 @@ class FLStylePainter(object):
         if not file.open(Qt.IO_WriteOnly):
             return
 
-        docElemRes.setAttributeNS("http://www.w3.org/2000/svg", "xmlns:xlink", "http://www.w3.org/1999/xlink")
+        docElemRes.setAttributeNS(
+            "http://www.w3.org/2000/svg", "xmlns:xlink", "http://www.w3.org/1999/xlink"
+        )
         docRes.appendChild(docElemRes)
         s = QtCore.QTextStream(file)
         s.setEncoding(QtCore.QTextStream.UnicodeUTF8)

@@ -34,7 +34,11 @@ class AboutPineboo(QWidget):
         from pineboolib.application.utils.check_dependencies import DEPENDENCIES_CHECKED
 
         components = "Versiones de componentes:\n\n"
-        components += "S.O.: %s %s %s\n" % (platform.system(), platform.release(), platform.version())
+        components += "S.O.: %s %s %s\n" % (
+            platform.system(),
+            platform.release(),
+            platform.version(),
+        )
         # py_ver = sys.version
         # if py_ver.find("(") > -1:
         #    py_ver = py_ver[:py_ver.find("(")]

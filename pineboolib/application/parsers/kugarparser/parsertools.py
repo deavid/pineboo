@@ -11,7 +11,16 @@ from pineboolib.application.utils.xpm import cacheXPM
 from pineboolib.application import project
 
 
-from typing import Any, Iterable, Optional, SupportsInt, TypeVar, Union, List, TYPE_CHECKING
+from typing import (
+    Any,
+    Iterable,
+    Optional,
+    SupportsInt,
+    TypeVar,
+    Union,
+    List,
+    TYPE_CHECKING,
+)
 
 _T2 = TypeVar("_T2")
 
@@ -119,7 +128,9 @@ class KParserTools(object):
     @return Valor calculado.
     """
 
-    def calculated(self, value: Any, data_type, p: Union[bytes, str, SupportsInt] = None, data=None) -> Any:
+    def calculated(
+        self, value: Any, data_type, p: Union[bytes, str, SupportsInt] = None, data=None
+    ) -> Any:
 
         p = 0 if p is None else int(p)
 
@@ -169,18 +180,24 @@ class KParserTools(object):
                 from pineboolib.application.database.pnsqlquery import PNSqlQuery
 
                 single_query = PNSqlQuery()
-                single_query.exec_("SELECT valor FROM flsettings WHERE flkey='FLLargeMode'")
+                single_query.exec_(
+                    "SELECT valor FROM flsettings WHERE flkey='FLLargeMode'"
+                )
                 single_fllarge = True
 
                 if single_query.next():
                     if single_query.value(0) == "True":
                         single_fllarge = False
 
-                if not single_fllarge:  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
+                if (
+                    not single_fllarge
+                ):  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
                     table_name += "_%s" % ref_key.split("@")[1]
 
                 q = PNSqlQuery()
-                q.exec_("SELECT contenido FROM %s WHERE refkey='%s'" % (table_name, ref_key))
+                q.exec_(
+                    "SELECT contenido FROM %s WHERE refkey='%s'" % (table_name, ref_key)
+                )
                 if q.next():
                     value = cacheXPM(q.value(0))
 
@@ -188,7 +205,10 @@ class KParserTools(object):
                     ret = img_file
                     pix = pncontrolsfactory.QPixmap(value)
                     if not pix.save(img_file):
-                        self.logger.warning("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
+                        self.logger.warning(
+                            "%s:refkey2cache No se ha podido guardar la imagen %s"
+                            % (__name__, img_file)
+                        )
                         ret = None
                     else:
                         ret = img_file
@@ -196,7 +216,10 @@ class KParserTools(object):
                 pix = pncontrolsfactory.QPixmap(ref_key)
                 img_file = ref_key.replace(".xpm", ".png")
                 if not pix.save(img_file):
-                    self.logger.warning("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
+                    self.logger.warning(
+                        "%s:refkey2cache No se ha podido guardar la imagen %s"
+                        % (__name__, img_file)
+                    )
                     ret = None
                 else:
                     ret = img_file
@@ -215,7 +238,9 @@ class KParserTools(object):
     @return Array con los valores del tamaño de la página.
     """
 
-    def converPageSize(self, size, orientation, Custom: Optional[List[int]] = None) -> List[int]:
+    def converPageSize(
+        self, size, orientation, Custom: Optional[List[int]] = None
+    ) -> List[int]:
         r = None
         if size == 0:
             r = [595, 842]  # "A4"
@@ -274,7 +299,9 @@ class KParserTools(object):
         elif size in (30, 31):
             r = Custom  # "CUSTOM"
         if r is None:
-            self.logger.warning("porcessXML:No se encuentra pagesize para %s. Usando A4" % size)
+            self.logger.warning(
+                "porcessXML:No se encuentra pagesize para %s. Usando A4" % size
+            )
             r = [595, 842]
 
         # if orientation != 0:
@@ -306,9 +333,15 @@ class KParserTools(object):
             for lin_dir in lindirs.split(":"):
                 fonts_folders.append(os.path.join(lin_dir, "fonts"))
         elif sys.platform.find("darwin") > -1:
-            fonts_folders = ["/Library/Fonts", "/System/Library/Fonts", "~/Library/Fonts"]
+            fonts_folders = [
+                "/Library/Fonts",
+                "/System/Library/Fonts",
+                "~/Library/Fonts",
+            ]
         else:
-            self.logger.warning("KUTPARSERTOOLS: Plataforma desconocida %s", sys.platform)
+            self.logger.warning(
+                "KUTPARSERTOOLS: Plataforma desconocida %s", sys.platform
+            )
             return False
 
         font_name = font_name.replace(" ", "_")
@@ -336,7 +369,9 @@ class KParserTools(object):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
-                for filename in fnmatch.filter(filenames, "%s%s.ttf" % (font_name[0].upper(), font_name[1:])):
+                for filename in fnmatch.filter(
+                    filenames, "%s%s.ttf" % (font_name[0].upper(), font_name[1:])
+                ):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
@@ -344,7 +379,9 @@ class KParserTools(object):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
-                for filename in fnmatch.filter(filenames, "%s%s.ttf" % (font_name2[0].upper(), font_name2[1:])):
+                for filename in fnmatch.filter(
+                    filenames, "%s%s.ttf" % (font_name2[0].upper(), font_name2[1:])
+                ):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
@@ -352,7 +389,9 @@ class KParserTools(object):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
-                for filename in fnmatch.filter(filenames, "%s%s.ttf" % (font_name3[0].upper(), font_name3[1:])):
+                for filename in fnmatch.filter(
+                    filenames, "%s%s.ttf" % (font_name3[0].upper(), font_name3[1:])
+                ):
                     ret_ = os.path.join(root, filename)
                     return ret_
 

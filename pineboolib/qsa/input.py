@@ -8,7 +8,9 @@ class Input(object):
     """
 
     @classmethod
-    def getText(cls, question: str, prevtxt: str = "", title: str = "Pineboo") -> Optional[str]:
+    def getText(
+        cls, question: str, prevtxt: str = "", title: str = "Pineboo"
+    ) -> Optional[str]:
         """
         Recoge texto
         @param question. Label del diálogo.
@@ -17,21 +19,41 @@ class Input(object):
         @return cadena de texto recogida
         """
         parent = QWidget()  # FIXME: Should be the mainWindow or similar
-        text, ok = QInputDialog.getText(parent, title, question, QLineEdit.Normal, prevtxt)
+        text, ok = QInputDialog.getText(
+            parent, title, question, QLineEdit.Normal, prevtxt
+        )
         if not ok:
             return None
         return text
 
     @classmethod
-    def getNumber(cls, question: str, value: Union[str, float], part_decimal: int, title: str = "Pineboo") -> Optional[float]:
+    def getNumber(
+        cls,
+        question: str,
+        value: Union[str, float],
+        part_decimal: int,
+        title: str = "Pineboo",
+    ) -> Optional[float]:
         parent = QWidget()  # FIXME: Should be the mainWindow or similar
-        text, ok = QInputDialog.getText(parent, title, question, QLineEdit.Normal, str(round(float(value), part_decimal)))
+        text, ok = QInputDialog.getText(
+            parent,
+            title,
+            question,
+            QLineEdit.Normal,
+            str(round(float(value), part_decimal)),
+        )
         if not ok:
             return None
         return float(text)
 
     @classmethod
-    def getItem(cls, question: str, items_list: List[str] = [], title: str = "Pineboo", editable: bool = True) -> Any:
+    def getItem(
+        cls,
+        question: str,
+        items_list: List[str] = [],
+        title: str = "Pineboo",
+        editable: bool = True,
+    ) -> Any:
         """
         Recoge Item
         @param question. Label del diálogo.
@@ -41,7 +63,9 @@ class Input(object):
         """
 
         parent = QWidget()  # FIXME: Should be the mainWindow or similar
-        text, ok = QInputDialog.getItem(parent, title, question, items_list, 0, editable)
+        text, ok = QInputDialog.getItem(
+            parent, title, question, items_list, 0, editable
+        )
         if not ok:
             return None
         return text

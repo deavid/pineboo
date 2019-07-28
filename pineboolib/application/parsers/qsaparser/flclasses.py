@@ -122,7 +122,10 @@ class cBaseList(cBase):
                 raise NameError("Declaration Class doesn't have `name` atribute.")
 
             if cname in self.byDefName:
-                print("#WARNING# Variable %s found, but previously defined in this block" % cname)
+                print(
+                    "#WARNING# Variable %s found, but previously defined in this block"
+                    % cname
+                )
                 # self.byDefName[cname]=None
             else:
                 self.byDefName[cname] = child
@@ -186,7 +189,12 @@ class cBaseList(cBase):
             for c in sslice:
                 t1, t2 = c.type
                 n += 1
-                txt += "%-17s:%d" % ("%-8s/%-8s" % (t1[:8], t2[:8]), n) + ">" + ". " * c.codedepth + str(c)
+                txt += (
+                    "%-17s:%d" % ("%-8s/%-8s" % (t1[:8], t2[:8]), n)
+                    + ">"
+                    + ". " * c.codedepth
+                    + str(c)
+                )
                 txt += "\t<%d:\n" % n
             return txt
 

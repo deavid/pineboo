@@ -104,12 +104,21 @@ class FLFormRecordDB(FLFormDB):
     """
 
     def __init__(self, parent_or_cursor, action, load=False) -> None:
-        self.logger.trace("__init__: parent_or_cursor=%s, action=%s, load=%s", parent_or_cursor, action, load)
+        self.logger.trace(
+            "__init__: parent_or_cursor=%s, action=%s, load=%s",
+            parent_or_cursor,
+            action,
+            load,
+        )
 
         if isinstance(action, str):
             aqApp.db().manager().action(action)
 
-        parent = aqApp.mainWidget() if isinstance(parent_or_cursor, FLSqlCursor) else parent_or_cursor
+        parent = (
+            aqApp.mainWidget()
+            if isinstance(parent_or_cursor, FLSqlCursor)
+            else parent_or_cursor
+        )
         cursor = parent_or_cursor if isinstance(parent_or_cursor, FLSqlCursor) else None
         # if not cursor:
         #    load = True
@@ -125,7 +134,10 @@ class FLFormRecordDB(FLFormDB):
         if self.cursor_:
             self.initialModeAccess = self.cursor_.modeAccess()
             if DEBUG:
-                print("*** FLFormRecordDB::__init__: cursor: %r name: %r at:%r" % (self.cursor_, self.cursor_.curName(), self.cursor_.at()))
+                print(
+                    "*** FLFormRecordDB::__init__: cursor: %r name: %r at:%r"
+                    % (self.cursor_, self.cursor_.curName(), self.cursor_.at())
+                )
                 cur_values = [f.value for f in self.cursor_.d.buffer_.fieldList_]
                 print("*** cursor Buffer: %r" % cur_values)
 
@@ -238,7 +250,9 @@ class FLFormRecordDB(FLFormDB):
         #    self.layout = None
         # Limpiamos la toolbar
 
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0)
+        )
         sizePolicy.setHeightForWidth(True)
 
         pbSize = self.iconSize
@@ -250,7 +264,9 @@ class FLFormRecordDB(FLFormDB):
             pushButtonExport.setSizePolicy(sizePolicy)
             pushButtonExport.setMinimumSize(pbSize)
             pushButtonExport.setMaximumSize(pbSize)
-            pushButtonExport.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-properties.png")))
+            pushButtonExport.setIcon(
+                QtGui.QIcon(filedir("../share/icons", "gtk-properties.png"))
+            )
             pushButtonExport.setShortcut(QKeySequence(self.tr("F3")))
             pushButtonExport.setWhatsThis("Exportar a XML(F3)")
             pushButtonExport.setToolTip("Exportar a XML(F3)")
@@ -264,7 +280,9 @@ class FLFormRecordDB(FLFormDB):
                 push_button_snapshot.setSizePolicy(sizePolicy)
                 push_button_snapshot.setMinimumSize(pbSize)
                 push_button_snapshot.setMaximumSize(pbSize)
-                push_button_snapshot.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-paste.png")))
+                push_button_snapshot.setIcon(
+                    QtGui.QIcon(filedir("../share/icons", "gtk-paste.png"))
+                )
                 push_button_snapshot.setShortcut(QKeySequence(self.tr("F8")))
                 push_button_snapshot.setWhatsThis("Capturar pantalla(F8)")
                 push_button_snapshot.setToolTip("Capturar pantalla(F8)")
@@ -272,21 +290,29 @@ class FLFormRecordDB(FLFormDB):
                 self.bottomToolbar.layout().addWidget(push_button_snapshot)
                 push_button_snapshot.clicked.connect(self.saveSnapShot)
 
-            spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+            spacer = QtWidgets.QSpacerItem(
+                20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            )
             self.bottomToolbar.layout().addItem(spacer)
 
         if self.cursor().modeAccess() in (self.cursor().Edit, self.cursor().Browse):
             if not self.pushButtonFirst:
                 self.pushButtonFirst = QtWidgets.QToolButton()
                 self.pushButtonFirst.setObjectName("pushButtonFirst")
-                self.pushButtonFirst.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-goto-first-ltr.png")))
+                self.pushButtonFirst.setIcon(
+                    QtGui.QIcon(filedir("../share/icons", "gtk-goto-first-ltr.png"))
+                )
                 self.pushButtonFirst.clicked.connect(self.firstRecord)
                 self.pushButtonFirst.setSizePolicy(sizePolicy)
                 self.pushButtonFirst.setMaximumSize(pbSize)
                 self.pushButtonFirst.setMinimumSize(pbSize)
                 self.pushButtonFirst.setShortcut(QKeySequence(self.tr("F5")))
-                self.pushButtonFirst.setWhatsThis("Aceptar los cambios e ir al primer registro (F5)")
-                self.pushButtonFirst.setToolTip("Aceptar los cambios e ir al primer registro (F5)")
+                self.pushButtonFirst.setWhatsThis(
+                    "Aceptar los cambios e ir al primer registro (F5)"
+                )
+                self.pushButtonFirst.setToolTip(
+                    "Aceptar los cambios e ir al primer registro (F5)"
+                )
                 self.pushButtonFirst.setFocusPolicy(QtCore.Qt.NoFocus)
                 self.bottomToolbar.layout().addWidget(self.pushButtonFirst)
                 # self.pushButtonFirst.show()
@@ -294,14 +320,20 @@ class FLFormRecordDB(FLFormDB):
             if not self.pushButtonPrevious:
                 self.pushButtonPrevious = QtWidgets.QToolButton()
                 self.pushButtonPrevious.setObjectName("pushButtonPrevious")
-                self.pushButtonPrevious.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-go-back-ltr.png")))
+                self.pushButtonPrevious.setIcon(
+                    QtGui.QIcon(filedir("../share/icons", "gtk-go-back-ltr.png"))
+                )
                 self.pushButtonPrevious.clicked.connect(self.previousRecord)
                 self.pushButtonPrevious.setSizePolicy(sizePolicy)
                 self.pushButtonPrevious.setMaximumSize(pbSize)
                 self.pushButtonPrevious.setMinimumSize(pbSize)
                 self.pushButtonPrevious.setShortcut(QKeySequence(self.tr("F6")))
-                self.pushButtonPrevious.setWhatsThis("Aceptar los cambios e ir al registro anterior (F6)")
-                self.pushButtonPrevious.setToolTip("Aceptar los cambios e ir al registro anterior (F6)")
+                self.pushButtonPrevious.setWhatsThis(
+                    "Aceptar los cambios e ir al registro anterior (F6)"
+                )
+                self.pushButtonPrevious.setToolTip(
+                    "Aceptar los cambios e ir al registro anterior (F6)"
+                )
                 self.pushButtonPrevious.setFocusPolicy(QtCore.Qt.NoFocus)
                 self.bottomToolbar.layout().addWidget(self.pushButtonPrevious)
                 # self.pushButtonPrevious.show()
@@ -309,14 +341,20 @@ class FLFormRecordDB(FLFormDB):
             if not self.pushButtonNext:
                 self.pushButtonNext = QtWidgets.QToolButton()
                 self.pushButtonNext.setObjectName("pushButtonNext")
-                self.pushButtonNext.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-go-back-rtl.png")))
+                self.pushButtonNext.setIcon(
+                    QtGui.QIcon(filedir("../share/icons", "gtk-go-back-rtl.png"))
+                )
                 self.pushButtonNext.clicked.connect(self.nextRecord)
                 self.pushButtonNext.setSizePolicy(sizePolicy)
                 self.pushButtonNext.setMaximumSize(pbSize)
                 self.pushButtonNext.setMinimumSize(pbSize)
                 self.pushButtonNext.setShortcut(QKeySequence(self.tr("F7")))
-                self.pushButtonNext.setWhatsThis("Aceptar los cambios e ir al registro siguiente (F7)")
-                self.pushButtonNext.setToolTip("Aceptar los cambios e ir al registro siguiente (F7)")
+                self.pushButtonNext.setWhatsThis(
+                    "Aceptar los cambios e ir al registro siguiente (F7)"
+                )
+                self.pushButtonNext.setToolTip(
+                    "Aceptar los cambios e ir al registro siguiente (F7)"
+                )
                 self.pushButtonNext.setFocusPolicy(QtCore.Qt.NoFocus)
                 self.bottomToolbar.layout().addWidget(self.pushButtonNext)
                 # self.pushButtonNext.show()
@@ -324,14 +362,20 @@ class FLFormRecordDB(FLFormDB):
             if not self.pushButtonLast:
                 self.pushButtonLast = QtWidgets.QToolButton()
                 self.pushButtonLast.setObjectName("pushButtonLast")
-                self.pushButtonLast.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-goto-last-ltr.png")))
+                self.pushButtonLast.setIcon(
+                    QtGui.QIcon(filedir("../share/icons", "gtk-goto-last-ltr.png"))
+                )
                 self.pushButtonLast.clicked.connect(self.lastRecord)
                 self.pushButtonLast.setSizePolicy(sizePolicy)
                 self.pushButtonLast.setMaximumSize(pbSize)
                 self.pushButtonLast.setMinimumSize(pbSize)
                 self.pushButtonLast.setShortcut(QKeySequence(self.tr("F8")))
-                self.pushButtonLast.setWhatsThis("Aceptar los cambios e ir al último registro (F8)")
-                self.pushButtonLast.setToolTip("Aceptar los cambios e ir al último registro (F8)")
+                self.pushButtonLast.setWhatsThis(
+                    "Aceptar los cambios e ir al último registro (F8)"
+                )
+                self.pushButtonLast.setToolTip(
+                    "Aceptar los cambios e ir al último registro (F8)"
+                )
                 self.pushButtonLast.setFocusPolicy(QtCore.Qt.NoFocus)
                 self.bottomToolbar.layout().addWidget(self.pushButtonLast)
                 # self.pushButtonLast.show()
@@ -343,10 +387,16 @@ class FLFormRecordDB(FLFormDB):
             self.pushButtonAcceptContinue.setSizePolicy(sizePolicy)
             self.pushButtonAcceptContinue.setMaximumSize(pbSize)
             self.pushButtonAcceptContinue.setMinimumSize(pbSize)
-            self.pushButtonAcceptContinue.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-refresh.png")))
+            self.pushButtonAcceptContinue.setIcon(
+                QtGui.QIcon(filedir("../share/icons", "gtk-refresh.png"))
+            )
             self.pushButtonAcceptContinue.setShortcut(QKeySequence(self.tr("F9")))
-            self.pushButtonAcceptContinue.setWhatsThis("Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
-            self.pushButtonAcceptContinue.setToolTip("Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
+            self.pushButtonAcceptContinue.setWhatsThis(
+                "Aceptar los cambios y continuar con la edición de un nuevo registro (F9)"
+            )
+            self.pushButtonAcceptContinue.setToolTip(
+                "Aceptar los cambios y continuar con la edición de un nuevo registro (F9)"
+            )
             self.pushButtonAcceptContinue.setFocusPolicy(QtCore.Qt.NoFocus)
             self.bottomToolbar.layout().addWidget(self.pushButtonAcceptContinue)
             if not self.showAcceptContinue_:
@@ -361,10 +411,16 @@ class FLFormRecordDB(FLFormDB):
             self.pushButtonAccept.setSizePolicy(sizePolicy)
             self.pushButtonAccept.setMaximumSize(pbSize)
             self.pushButtonAccept.setMinimumSize(pbSize)
-            self.pushButtonAccept.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-save.png")))
+            self.pushButtonAccept.setIcon(
+                QtGui.QIcon(filedir("../share/icons", "gtk-save.png"))
+            )
             self.pushButtonAccept.setShortcut(QKeySequence(self.tr("F10")))
-            self.pushButtonAccept.setWhatsThis("Aceptar los cambios y cerrar formulario (F10)")
-            self.pushButtonAccept.setToolTip("Aceptar los cambios y cerrar formulario (F10)")
+            self.pushButtonAccept.setWhatsThis(
+                "Aceptar los cambios y cerrar formulario (F10)"
+            )
+            self.pushButtonAccept.setToolTip(
+                "Aceptar los cambios y cerrar formulario (F10)"
+            )
             self.pushButtonAccept.setFocusPolicy(QtCore.Qt.NoFocus)
             self.bottomToolbar.layout().addWidget(self.pushButtonAccept)
             # self.pushButtonAccept.show()
@@ -383,11 +439,17 @@ class FLFormRecordDB(FLFormDB):
         self.pushButtonCancel.setMaximumSize(pbSize)
         self.pushButtonCancel.setMinimumSize(pbSize)
         self.pushButtonCancel.setShortcut(QKeySequence(self.tr("Esc")))
-        self.pushButtonCancel.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
+        self.pushButtonCancel.setIcon(
+            QtGui.QIcon(filedir("../share/icons", "gtk-stop.png"))
+        )
         if not self.cursor().modeAccess() == self.cursor().Browse:
             self.pushButtonCancel.setFocusPolicy(QtCore.Qt.NoFocus)
-            self.pushButtonCancel.setWhatsThis("Cancelar los cambios y cerrar formulario (Esc)")
-            self.pushButtonCancel.setToolTip("Cancelar los cambios y cerrar formulario (Esc)")
+            self.pushButtonCancel.setWhatsThis(
+                "Cancelar los cambios y cerrar formulario (Esc)"
+            )
+            self.pushButtonCancel.setToolTip(
+                "Cancelar los cambios y cerrar formulario (Esc)"
+            )
         else:
             self.pushButtonCancel.setFocusPolicy(QtCore.Qt.StrongFocus)
             self.pushButtonCancel.setFocus()
@@ -396,7 +458,11 @@ class FLFormRecordDB(FLFormDB):
             self.pushButtonCancel.setToolTip("Aceptar y cerrar formulario (Esc)")
 
         # pushButtonCancel->setDefault(true);
-        self.bottomToolbar.layout().addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed))
+        self.bottomToolbar.layout().addItem(
+            QtWidgets.QSpacerItem(
+                20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            )
+        )
         self.bottomToolbar.layout().addWidget(self.pushButtonCancel)
         # self.pushButtonAccept.show()
 
@@ -460,7 +526,9 @@ class FLFormRecordDB(FLFormDB):
                         "FLFormRecordDB::closeEvent: %s %s" % (levels, self.name()),
                     )
             except Exception:
-                print("ERROR: FLFormRecordDB @ closeEvent :: las transacciones aún no funcionan.")
+                print(
+                    "ERROR: FLFormRecordDB @ closeEvent :: las transacciones aún no funcionan."
+                )
 
             if self.accepted_:
                 if not self.cursor_.commit():
@@ -506,7 +574,11 @@ class FLFormRecordDB(FLFormDB):
 
             if colFields:
                 pKN = mtd.primaryKey()
-                pKWhere = self.cursor_.db().manager().formatAssignValue(mtd.field(pKN), self.cursor_.valueBuffer(pKN))
+                pKWhere = (
+                    self.cursor_.db()
+                    .manager()
+                    .formatAssignValue(mtd.field(pKN), self.cursor_.valueBuffer(pKN))
+                )
                 q = FLSqlQuery(None, self.cursor_.db().connectionName())
                 q.setTablesList(mtd.name())
                 q.setSelect(colFields)
@@ -526,10 +598,16 @@ class FLFormRecordDB(FLFormDB):
                             "Sí : Ignora el cambio del otro usuario y utiliza el valor que acaba de introducir\n"
                             "No : Respeta el cambio del otro usuario e ignora el valor que ha introducido\n"
                             "Cancelar : Cancela el guardado del registro y vuelve a la edición del registro\n\n",
-                            cast(QtWidgets.QMessageBox, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Default),
                             cast(
                                 QtWidgets.QMessageBox,
-                                QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.Escape,
+                                QtWidgets.QMessageBox.Yes
+                                | QtWidgets.QMessageBox.Default,
+                            ),
+                            cast(
+                                QtWidgets.QMessageBox,
+                                QtWidgets.QMessageBox.No
+                                | QtWidgets.QMessageBox.Cancel
+                                | QtWidgets.QMessageBox.Escape,
                             ),
                         )
                         if res == QtWidgets.QMessageBox.Cancel:
@@ -538,7 +616,11 @@ class FLFormRecordDB(FLFormDB):
                         if res == QtWidgets.QMessageBox.No:
                             self.cursor_.setValueBuffer(field, q.value(i))
 
-        if self.iface and self.cursor_.modeAccess() == FLSqlCursor.Insert or self.cursor_.modeAccess() == FLSqlCursor.Edit:
+        if (
+            self.iface
+            and self.cursor_.modeAccess() == FLSqlCursor.Insert
+            or self.cursor_.modeAccess() == FLSqlCursor.Edit
+        ):
             ret_ = True
             fun_ = getattr(self.iface, "validateForm", None)
             if fun_ is not None and fun_ != self.validateForm:
@@ -549,7 +631,10 @@ class FLFormRecordDB(FLFormDB):
                     from pineboolib.core.error_manager import error_manager
                     from pineboolib.application import project
 
-                    aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
+                    aqApp.msgBoxWarning(
+                        error_manager(traceback.format_exc(limit=-6, chain=False)),
+                        project._DGI,
+                    )
 
             return ret_ if isinstance(ret_, bool) else False
         return True
@@ -834,7 +919,11 @@ class FLFormRecordDB(FLFormDB):
             if not self.cursor().isValid():
                 self.cursor().model().refresh()
 
-            if self.cursor().modeAccess() in (self.cursor().Insert, self.cursor().Edit, self.cursor().Browse):
+            if self.cursor().modeAccess() in (
+                self.cursor().Insert,
+                self.cursor().Edit,
+                self.cursor().Browse,
+            ):
                 self.cursor().transaction()
                 self.initTransLevel = self.cursor().transactionLevel()
                 self.setCaptionWidget(caption)

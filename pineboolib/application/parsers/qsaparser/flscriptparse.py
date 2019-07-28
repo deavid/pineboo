@@ -35,7 +35,15 @@ tokelines: Dict[str, int] = {}
 last_lexspan = None
 
 precedence = (
-    ("nonassoc", "EQUALS", "TIMESEQUAL", "DIVEQUAL", "MODEQUAL", "PLUSEQUAL", "MINUSEQUAL"),
+    (
+        "nonassoc",
+        "EQUALS",
+        "TIMESEQUAL",
+        "DIVEQUAL",
+        "MODEQUAL",
+        "PLUSEQUAL",
+        "MINUSEQUAL",
+    ),
     ("nonassoc", "MATHEXPRESSION"),
     ("nonassoc", "TERNARY"),
     ("left", "LOR", "LAND"),
@@ -54,11 +62,18 @@ ok_count = 0
 
 
 def cleanNoPython(data):
-    return re.sub(r"\/\/___NOPYTHON\[\[.*?\/\/\]\]___NOPYTHON\s*", "", data, flags=re.DOTALL)
+    return re.sub(
+        r"\/\/___NOPYTHON\[\[.*?\/\/\]\]___NOPYTHON\s*", "", data, flags=re.DOTALL
+    )
 
 
 def cleanNoPythonNever(data):
-    return re.sub(r"\/\/___NOPYTHON_NEVER\[\[.*?\/\/\]\]___NOPYTHON_NEVER\s*", "", data, flags=re.DOTALL)
+    return re.sub(
+        r"\/\/___NOPYTHON_NEVER\[\[.*?\/\/\]\]___NOPYTHON_NEVER\s*",
+        "",
+        data,
+        flags=re.DOTALL,
+    )
 
 
 def cnvrt(val):
@@ -90,7 +105,9 @@ def p_parse(token):
     token[0] = {
         "00-toktype": str(token.slice[0]),
         "02-size": lexspan,
-        "50-contents": [{"01-type": s.type, "99-value": s.value} for s in token.slice[1:]],
+        "50-contents": [
+            {"01-type": s.type, "99-value": s.value} for s in token.slice[1:]
+        ],
     }
 
     for n in reversed(range(len(token[0]["50-contents"]))):
@@ -100,7 +117,9 @@ def p_parse(token):
             # Makes tree calculation faster and less recursive.
             token[0]["50-contents"][n : n + 1] = contents["99-value"]["50-contents"]
 
-    numelems = len([s for s in token.slice[1:] if s.type != "empty" and s.value is not None])
+    numelems = len(
+        [s for s in token.slice[1:] if s.type != "empty" and s.value is not None]
+    )
 
     rspan = lexspan[0]
     if str(token.slice[0]) == "empty" or numelems == 0:
@@ -126,7 +145,9 @@ def p_parse(token):
     #    print "      " + "\n      ".join([ "%s(%r): %r" % (s.type, token.lexspan(n+1), s.value) for n,s in enumerate(token.slice[1:]) ])
     global seen_tokens, last_ok_token
     last_ok_token = token
-    seen_tokens.append((str(token.slice[0]), token.lineno(0), input_data[lexspan[0] : lexspan[1] + 1]))
+    seen_tokens.append(
+        (str(token.slice[0]), token.lineno(0), input_data[lexspan[0] : lexspan[1] + 1])
+    )
     global ok_count
     ok_count += 1
     if lexspan[0] not in tokelines:
@@ -143,7 +164,9 @@ def p_error(t):
     debug = False  # Poner a True para toneladas de debug.
     # if error_count == 0: print
     if t is not None:
-        if last_error_token is None or t.lexpos != getattr(last_error_token, "lexpos", None):
+        if last_error_token is None or t.lexpos != getattr(
+            last_error_token, "lexpos", None
+        ):
             if abs(last_error_line - t.lineno) > 4 and ok_count > 1 and error_count < 4:
                 error_count += 1
                 try:
@@ -159,7 +182,12 @@ def p_error(t):
                     if last_ok_token:
                         print(repr(last_ok_token[0]))
                         for s in last_ok_token.slice[:]:
-                            print(">>>", s.lineno, repr(s), pprint.pformat(s.value, depth=3))
+                            print(
+                                ">>>",
+                                s.lineno,
+                                repr(s),
+                                pprint.pformat(s.value, depth=3),
+                            )
                 last_error_line = t.lineno
             elif abs(last_error_line - t.lineno) > 1 and ok_count > 1:
                 last_error_line = t.lineno
@@ -546,7 +574,14 @@ p_parse.__doc__ = """
 # Build the grammar
 
 
-parser = yacc.yacc(method="LALR", debug=0, optimize=1, write_tables=1, debugfile="%s/yaccdebug.txt" % tempDir, outputdir="%s/" % tempDir)
+parser = yacc.yacc(
+    method="LALR",
+    debug=0,
+    optimize=1,
+    write_tables=1,
+    debugfile="%s/yaccdebug.txt" % tempDir,
+    outputdir="%s/" % tempDir,
+)
 
 # parser = yacc.yacc(method='LALR', debug=1,
 #                   optimize=0, write_tables=0, debugfile='%s/yaccdebug.txt' % tempDir, outputdir='%s/' % tempDir)
@@ -654,12 +689,17 @@ def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
             # FIXME: Esto o no parsea todos los elementos o hace stackoverflow. problematico para programas largos
             if depth < 150:
                 try:
-                    tree_obj = calctree(value, depth + 1, num + [str(n)], ctype, alias_mode=alias_mode)
+                    tree_obj = calctree(
+                        value, depth + 1, num + [str(n)], ctype, alias_mode=alias_mode
+                    )
                 except Exception as e:
                     print("ERROR: trying to calculate member:", e)
                     tree_obj = None
             else:
-                print("PANIC: *** Stack overflow trying to calculate member %d on:" % n, ctype)
+                print(
+                    "PANIC: *** Stack overflow trying to calculate member %d on:" % n,
+                    ctype,
+                )
                 tree_obj = None
 
             if type(tree_obj) is dict:
@@ -745,7 +785,9 @@ def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):
                 txthash = hashlib.sha1(txtinline.encode("utf8")).hexdigest()[:16]
                 # hashes.append(("depth:",depth,"hash:",txthash,"element:",ctype+":"+tname))
                 hashes.append((txthash, ctype + ":" + tname + "(%d)" % len(txtinline)))
-                ranges.append([depth, txthash] + trange + [ctype + ":" + tname, len(txtinline)])
+                ranges.append(
+                    [depth, txthash] + trange + [ctype + ":" + tname, len(txtinline)]
+                )
                 # ,"start:",trange[0],"end:",trange[1]))
                 # attrs.append(("start",trange[0]))
                 # attrs.append(("end",trange[1]))
@@ -825,13 +867,41 @@ def main():
     parser = OptionParser()
     # parser.add_option("-f", "--file", dest="filename",
     #                  help="write report to FILE", metavar="FILE")
-    parser.add_option("-O", "--output", dest="output", default="none", help="Set output TYPE: xml|hash", metavar="TYPE")
-    parser.add_option("--start", dest="start", default=None, help="Set start block", metavar="STMT")
-    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
+    parser.add_option(
+        "-O",
+        "--output",
+        dest="output",
+        default="none",
+        help="Set output TYPE: xml|hash",
+        metavar="TYPE",
+    )
+    parser.add_option(
+        "--start", dest="start", default=None, help="Set start block", metavar="STMT"
+    )
+    parser.add_option(
+        "-q",
+        "--quiet",
+        action="store_false",
+        dest="verbose",
+        default=True,
+        help="don't print status messages to stdout",
+    )
 
-    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
+    parser.add_option(
+        "--optdebug",
+        action="store_true",
+        dest="optdebug",
+        default=False,
+        help="debug optparse module",
+    )
 
-    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
+    parser.add_option(
+        "--debug",
+        action="store_true",
+        dest="debug",
+        default=False,
+        help="prints lots of useless messages",
+    )
 
     (options, args) = parser.parse_args()
     if options.optdebug:

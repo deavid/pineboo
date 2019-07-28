@@ -11,7 +11,9 @@ class QMdiArea(QMA):
         super().__init__(*args)
         from pineboolib import pncontrolsfactory
 
-        self.setBackground(pncontrolsfactory.QBrush(pncontrolsfactory.QColor(255, 255, 255)))
+        self.setBackground(
+            pncontrolsfactory.QBrush(pncontrolsfactory.QColor(255, 255, 255))
+        )
         self.logo = pncontrolsfactory.AQS.pixmap_fromMineSource("pineboo-logo.png")
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)

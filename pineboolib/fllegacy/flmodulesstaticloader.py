@@ -157,7 +157,9 @@ class FLStaticLoader(QtCore.QObject):
         self.pixOn.setVisible(False)
         self.tblDirs.verticalHeader().setVisible(False)
         self.tblDirs.setLeftMargin(0)
-        self.tblDirs.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Fixed)
+        self.tblDirs.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.Fixed
+        )
         self.tblDirs.horizontalHeader().setSectionsClickable(False)
         self.tblDirs.setColumnStrechable(0, True)
         self.tblDirs.adjustColumn(1)
@@ -206,7 +208,9 @@ class FLStaticLoader(QtCore.QObject):
         cur_row = self.tblDirs.currentRow()
         dir_init = self.tblDirs.text(cur_row, 0) if cur_row > -1 else ""
 
-        dir = Qt.QFileDialog.getExistingDirectory(None, self.tr("Selecciones el directorio a insertar"), dir_init)
+        dir = Qt.QFileDialog.getExistingDirectory(
+            None, self.tr("Selecciones el directorio a insertar"), dir_init
+        )
 
         if dir:
 
@@ -232,7 +236,9 @@ class FLStaticLoader(QtCore.QObject):
 
         dir_init = self.tblDirs.text(cur_row, 0) if cur_row > -1 else ""
 
-        dir = Qt.QFileDialog.getExistingDirectory(None, self.tr("Selecciones el directorio a modificar"), dir_init)
+        dir = Qt.QFileDialog.getExistingDirectory(
+            None, self.tr("Selecciones el directorio a modificar"), dir_init
+        )
 
         if dir:
             info = self.b_.findPath(self.tblDirs.text(cur_row, 0))
@@ -252,7 +258,10 @@ class FLStaticLoader(QtCore.QObject):
             QtWidgets.QWidget(),
             self.tr("Borrar registro"),
             self.tr("El registro activo será borrado. ¿ Está seguro ?"),
-            cast(QtWidgets.QMessageBox, QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No),
+            cast(
+                QtWidgets.QMessageBox,
+                QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No,
+            ),
         ):
             return
 
@@ -302,7 +311,9 @@ class FLStaticLoader(QtCore.QObject):
                     warn_ = FLStaticLoaderWarning()
 
                 timer = QtCore.QTimer
-                if not warn_.warns_ and config.value("ebcomportamiento/SLInterface", True):
+                if not warn_.warns_ and config.value(
+                    "ebcomportamiento/SLInterface", True
+                ):
                     timer.singleShot(500, warn_.popupWarnings)
 
                 if not warn_.paths_:
@@ -314,7 +325,9 @@ class FLStaticLoader(QtCore.QObject):
                     warn_.warns_.append(msg)
                     warn_.paths_.append("%s:%s" % (n, info.path_))
                     if config.value("ebcomportamiento/SLConsola", False):
-                        logger.warning("CARGA ESTATICA ACTIVADA:%s -> %s", n, info.path_)
+                        logger.warning(
+                            "CARGA ESTATICA ACTIVADA:%s -> %s", n, info.path_
+                        )
 
                 if only_path:
                     return content_path
@@ -324,7 +337,9 @@ class FLStaticLoader(QtCore.QObject):
                     if project.conn is None:
                         raise Exception("Project is not connected yet")
 
-                    return project.conn.managerModules().contentFS(info.path_ + separator + n)
+                    return project.conn.managerModules().contentFS(
+                        info.path_ + separator + n
+                    )
 
         return None
 

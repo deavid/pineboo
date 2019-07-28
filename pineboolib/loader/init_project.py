@@ -55,7 +55,9 @@ def init_project(DGI, options, project, mainForm, app) -> Any:
         ret = 0
 
     if mainForm is not None:
-        project.message_manager().send("splash", "showMessage", ["Abriendo interfaz ..."])
+        project.message_manager().send(
+            "splash", "showMessage", ["Abriendo interfaz ..."]
+        )
 
         logger.info("Abriendo interfaz ...")
         main_window.show()

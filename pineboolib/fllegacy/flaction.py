@@ -80,13 +80,16 @@ class FLAction(object):
             raise Exception("Unsupported action %r" % action)
 
     def __repr__(self):
-        return "<FLAction name=%r scriptForm=%r scriptFormRecord=%r form=%r formRecord=%r caption=%r>" % (
-            self.name_,
-            self.scriptForm_,
-            self.scriptFormRecord_,
-            self.form_,
-            self.formRecord_,
-            self.caption_,
+        return (
+            "<FLAction name=%r scriptForm=%r scriptFormRecord=%r form=%r formRecord=%r caption=%r>"
+            % (
+                self.name_,
+                self.scriptForm_,
+                self.scriptFormRecord_,
+                self.form_,
+                self.formRecord_,
+                self.caption_,
+            )
         )
 
     """

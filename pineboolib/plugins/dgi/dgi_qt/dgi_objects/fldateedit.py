@@ -26,7 +26,9 @@ class FLDateEdit(QDateEdit):
     def getDate(self) -> str:
         return super().getDate()
 
-    def setDate(self, d: Union[str, datetime.date, Date] = None) -> None:  # type: ignore
+    def setDate(
+        self, d: Union[str, datetime.date, Date] = None
+    ) -> None:  # type: ignore
         if d in (None, "NAN", ""):
             date = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
         else:

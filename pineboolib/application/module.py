@@ -93,7 +93,12 @@ class Module(object):
             try:
                 tableObj = parseTable(name, contenido)
             except ValueError as e:
-                self.logger.warning("No se pudo procesar. Se ignora tabla %s/%s (%s) ", self.name, name, e)
+                self.logger.warning(
+                    "No se pudo procesar. Se ignora tabla %s/%s (%s) ",
+                    self.name,
+                    name,
+                    e,
+                )
             self.tables[name] = tableObj
 
         self.loaded = True

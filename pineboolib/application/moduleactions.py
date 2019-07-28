@@ -57,12 +57,22 @@ class ModuleActions(object):
         action.form = None
         action.table = None
         action.scriptform = self.mod.name
-        self.project.actions[action.name] = action  # FIXME: Actions should be loaded to their parent, not the singleton
+        self.project.actions[
+            action.name
+        ] = action  # FIXME: Actions should be loaded to their parent, not the singleton
         if hasattr(qsa_dict_modules, action.name):
             if action.name != "sys":
-                self.logger.warning("No se sobreescribe variable de entorno %s", action.name)
+                self.logger.warning(
+                    "No se sobreescribe variable de entorno %s", action.name
+                )
         else:  # Se crea la action del módulo
-            setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % action.name))
+            setattr(
+                qsa_dict_modules,
+                action.name,
+                DelayedObjectProxyLoader(
+                    action.load, name="QSA.Module.%s" % action.name
+                ),
+            )
 
         for xmlaction in self.root:
             action_xml = XMLAction(xmlaction, project=self.project)
@@ -76,15 +86,26 @@ class ModuleActions(object):
                         self.module_name,
                     )
                 else:  # Se crea la action del form
-                    self.project.actions[name] = action_xml  # FIXME: Actions should be loaded to their parent, not the singleton
-                    delayed_action = DelayedObjectProxyLoader(action_xml.load, name="QSA.Module.%s.Action.form%s" % (self.mod.name, name))
+                    self.project.actions[
+                        name
+                    ] = (
+                        action_xml
+                    )  # FIXME: Actions should be loaded to their parent, not the singleton
+                    delayed_action = DelayedObjectProxyLoader(
+                        action_xml.load,
+                        name="QSA.Module.%s.Action.form%s" % (self.mod.name, name),
+                    )
                     setattr(qsa_dict_modules, "form" + name, delayed_action)
 
                 if hasattr(qsa_dict_modules, "formRecord" + name):
-                    self.logger.debug("No se sobreescribe variable de entorno %s", "formRecord" + name)
+                    self.logger.debug(
+                        "No se sobreescribe variable de entorno %s", "formRecord" + name
+                    )
                 else:  # Se crea la action del formRecord
                     delayed_action = DelayedObjectProxyLoader(
-                        action_xml.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)
+                        action_xml.formRecordWidget,
+                        name="QSA.Module.%s.Action.formRecord%s"
+                        % (self.mod.name, name),
                     )
 
                     setattr(qsa_dict_modules, "formRecord" + name, delayed_action)
@@ -92,14 +113,18 @@ class ModuleActions(object):
     def __contains__(self, k) -> bool:
         """Busca si es propietario de una action
         """
-        return k in self.project.actions  # FIXME: Actions should be loaded to their parent, not the singleton
+        return (
+            k in self.project.actions
+        )  # FIXME: Actions should be loaded to their parent, not the singleton
 
     def __getitem__(self, name) -> Any:
         """Recoge una action determinada
         @param name. Nombre de la action
         @return Retorna el XMLAction de la action dada
         """
-        return self.project.actions[name]  # FIXME: Actions should be loaded to their parent, not the singleton
+        return self.project.actions[
+            name
+        ]  # FIXME: Actions should be loaded to their parent, not the singleton
 
     """
     Añade una action a propiedad del módulo

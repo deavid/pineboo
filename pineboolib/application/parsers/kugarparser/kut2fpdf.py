@@ -83,7 +83,9 @@ class Kut2FPDF(object):
     @return Ruta a fichero pdf.
     """
 
-    def parse(self, name, kut: str, data: str, report=None, flags: List[int] = []) -> Any:
+    def parse(
+        self, name, kut: str, data: str, report=None, flags: List[int] = []
+    ) -> Any:
         try:
             self._xml = self._parser_tools.loadKut(kut).getroot()
         except Exception:
@@ -95,8 +97,14 @@ class Kut2FPDF(object):
             self.logger.exception("KUT2FPDF: Problema al procesar xml_data")
             return False
 
-        project.message_manager().send("progress_dialog_manager", "create", ["Pineboo", len(self._xml_data), "kugar"])
-        project.message_manager().send("progress_dialog_manager", "setLabelText", ["Creando informe ...", "kugar"])
+        project.message_manager().send(
+            "progress_dialog_manager",
+            "create",
+            ["Pineboo", len(self._xml_data), "kugar"],
+        )
+        project.message_manager().send(
+            "progress_dialog_manager", "setLabelText", ["Creando informe ...", "kugar"]
+        )
 
         self.name_ = name
         self.setPageFormat(self._xml)
@@ -163,7 +171,10 @@ class Kut2FPDF(object):
         import os
 
         pdf_name = project.tmpdir
-        pdf_name += "/%s_%s.pdf" % (self.name_, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+        pdf_name += "/%s_%s.pdf" % (
+            self.name_,
+            datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+        )
         if os.path.exists(pdf_name):
             os.remove(pdf_name)
         if self._document is not None:
@@ -196,7 +207,9 @@ class Kut2FPDF(object):
     def newPage(self, data_level: int, add_on_header=True) -> None:
         self._document.add_page(self._page_orientation)
         self._page_top[str(self._document.page_no())] = self._top_margin
-        self._document.set_margins(self._left_margin, self._top_margin, self._right_margin)  # Lo dejo pero no se nota nada
+        self._document.set_margins(
+            self._left_margin, self._top_margin, self._right_margin
+        )  # Lo dejo pero no se nota nada
         self._no_print_footer = False
         if self.design_mode:
             self.draw_margins()
@@ -239,7 +252,11 @@ class Kut2FPDF(object):
 
         top_level = 0
         level = 0
-        first_page_created = keep_page if keep_page is not None and self._document.page_no() > 0 else False
+        first_page_created = (
+            keep_page
+            if keep_page is not None and self._document.page_no() > 0
+            else False
+        )
 
         rows_array = self._xml_data.findall("Row")
         i = 0
@@ -278,7 +295,9 @@ class Kut2FPDF(object):
 
             self.prev_level = level
 
-            project.message_manager().send("progress_dialog_manager", "setProgress", [i, "kugar"])
+            project.message_manager().send(
+                "progress_dialog_manager", "setProgress", [i, "kugar"]
+            )
             i += 1
 
         if not self._no_print_footer:
@@ -308,7 +327,11 @@ class Kut2FPDF(object):
             if dF.get("Level") == str(data_level) and show not in ("", "False", "None"):
 
                 if section_name in ("DetailHeader", "Detail"):
-                    heightCalculated = self._parser_tools.getHeight(dF) + self.topSection() + self.increase_section_size
+                    heightCalculated = (
+                        self._parser_tools.getHeight(dF)
+                        + self.topSection()
+                        + self.increase_section_size
+                    )
 
                     if section_name == "DetailHeader":
                         for detail in self._xml.findall("Detail"):
@@ -327,17 +350,26 @@ class Kut2FPDF(object):
 
                     pageFooter: Any = self._xml.get("PageFooter")
                     if pageFooter is not None and isinstance(pageFooter, Element):
-                        if self._document.page_no() == 1 or pageFooter.get("PrintFrecuency") == "1":
+                        if (
+                            self._document.page_no() == 1
+                            or pageFooter.get("PrintFrecuency") == "1"
+                        ):
                             heightCalculated += self._parser_tools.getHeight(pageFooter)
 
                     heightCalculated += self._bottom_margin
-                    if (heightCalculated + aof_size) > self._document.h:  # Si nos pasamos
+                    if (
+                        heightCalculated + aof_size
+                    ) > self._document.h:  # Si nos pasamos
                         self._no_print_footer = True
                         # Vemos el tope por abajo
                         limit_bottom = self._document.h - aof_size
-                        actual_size = self._parser_tools.getHeight(dF) + self.topSection()
+                        actual_size = (
+                            self._parser_tools.getHeight(dF) + self.topSection()
+                        )
 
-                        if (actual_size >= limit_bottom - 2) or self.last_detail:  # +2 se usa de margen extra
+                        if (
+                            actual_size >= limit_bottom - 2
+                        ) or self.last_detail:  # +2 se usa de margen extra
                             self.processSection("AddOnFooter", str(data_level))
 
                             self.newPage(data_level)
@@ -362,7 +394,11 @@ class Kut2FPDF(object):
                 sec_ = s
 
         if sec_ is not None:
-            if sec_.get("PrintFrequency") == "1" or self._document.page_no() == 1 or name in ("AddOnHeader", "AddOnFooter"):
+            if (
+                sec_.get("PrintFrequency") == "1"
+                or self._document.page_no() == 1
+                or name in ("AddOnHeader", "AddOnFooter")
+            ):
                 self.processXML(sec_)
 
     """
@@ -384,7 +420,9 @@ class Kut2FPDF(object):
         if xml.tag == "DetailFooter":
             if xml.get("PlaceAtBottom") == "true":
                 height = self._parser_tools.getHeight(xml)
-                self.setTopSection(self._document.h - height - self.increase_section_size)
+                self.setTopSection(
+                    self._document.h - height - self.increase_section_size
+                )
                 size_updated = True
 
         if xml.tag == "PageFooter":
@@ -412,7 +450,11 @@ class Kut2FPDF(object):
                 if df.get("Level") == detail_level:
                     for cf in df.iter("CalculatedField"):
                         if cf.get("DrawAtHeader") == "true":
-                            header_name = "%s_header_%s_%s" % (self.detailn[detail_level], detail_level, cf.get("Field"))
+                            header_name = "%s_header_%s_%s" % (
+                                self.detailn[detail_level],
+                                detail_level,
+                                cf.get("Field"),
+                            )
                             self.draws_at_header[header_name] = ""
                             self.processText(cf, data, fix_height, xml.tag)
 
@@ -505,7 +547,9 @@ class Kut2FPDF(object):
     @param fix_height. Ajusta la altura a los .kut originales, excepto el pageFooter.
     """
 
-    def processText(self, xml, data_row=None, fix_height=True, section_name=None) -> None:
+    def processText(
+        self, xml, data_row=None, fix_height=True, section_name=None
+    ) -> None:
         is_image = False
         is_barcode = False
         text: str = xml.get("Text")
@@ -519,9 +563,13 @@ class Kut2FPDF(object):
 
         x = int(xml.get("X"))
 
-        y = int(xml.get("Y")) + self.topSection()  # Añade la altura que hay ocupada por otras secciones
+        y = (
+            int(xml.get("Y")) + self.topSection()
+        )  # Añade la altura que hay ocupada por otras secciones
         if fix_height:
-            y = self._parser_tools.ratio_correction_h(y)  # Corrige la posición con respecto al kut original
+            y = self._parser_tools.ratio_correction_h(
+                y
+            )  # Corrige la posición con respecto al kut original
 
         data_type = xml.get("DataType")
 
@@ -549,10 +597,17 @@ class Kut2FPDF(object):
                         text = str(ret_)
 
                 except Exception:
-                    self.logger.exception("KUT2FPDF:: Error llamando a function %s", function_name)
+                    self.logger.exception(
+                        "KUT2FPDF:: Error llamando a function %s", function_name
+                    )
                     return
             elif calculation_type == "1":
-                text = self._parser_tools.calculate_sum(field_name, self.last_data_processed, self._xml_data, self.actual_data_level)
+                text = self._parser_tools.calculate_sum(
+                    field_name,
+                    self.last_data_processed,
+                    self._xml_data,
+                    self.actual_data_level,
+                )
 
             elif calculation_type in ("5"):
                 if data_row is None:
@@ -561,7 +616,9 @@ class Kut2FPDF(object):
                 text = data_row.get(field_name)
 
         if data_type is not None:
-            text = self._parser_tools.calculated(text, int(data_type), xml.get("Precision"), data_row)
+            text = self._parser_tools.calculated(
+                text, int(data_type), xml.get("Precision"), data_row
+            )
 
         if data_type == "5":
             is_image = True
@@ -654,7 +711,11 @@ class Kut2FPDF(object):
         # font_name, font_size, font_style
         font_style = ""
         font_size = int(xml.get("FontSize"))
-        font_name_orig = xml.get("FontFamily").lower() if xml.get("FontFamily") is not None else "helvetica"
+        font_name_orig = (
+            xml.get("FontFamily").lower()
+            if xml.get("FontFamily") is not None
+            else "helvetica"
+        )
         font_name = font_name_orig
 
         font_w = xml.get("FontWeight")
@@ -688,7 +749,12 @@ class Kut2FPDF(object):
                 font_found = self._parser_tools.find_font(font_full_name, font_style)
             if font_found:
                 if self.design_mode:
-                    self.logger.warning("KUT2FPDF::Añadiendo el tipo de letra %s %s (%s)", font_name, font_style, font_found)
+                    self.logger.warning(
+                        "KUT2FPDF::Añadiendo el tipo de letra %s %s (%s)",
+                        font_name,
+                        font_style,
+                        font_found,
+                    )
                 self._document.add_font(font_name, font_style, font_found, True)
                 self._avalible_fonts.append(font_full_name)
 
@@ -696,12 +762,16 @@ class Kut2FPDF(object):
                 if font_full_name not in self._unavalible_fonts:
                     if self.design_mode:
                         self.logger.warning(
-                            "KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica%s." % (font_full_name, font_style)
+                            "KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica%s."
+                            % (font_full_name, font_style)
                         )
                     self._unavalible_fonts.append(font_full_name)
                 font_name = "helvetica"
 
-        if font_name is not font_name_orig and font_name_orig.lower().find("narrow") > -1:
+        if (
+            font_name is not font_name_orig
+            and font_name_orig.lower().find("narrow") > -1
+        ):
             font_w = 85
 
         self._document.set_font(font_name, font_style, font_size)
@@ -761,7 +831,9 @@ class Kut2FPDF(object):
             elif HAlignment == "2":
 
                 # Derecha
-                x = x + W - self._document.get_string_width(actual_text) - 2  # -2 de margen
+                x = (
+                    x + W - self._document.get_string_width(actual_text) - 2
+                )  # -2 de margen
                 # x = x + W - str_width if not height_resized else W
             else:
                 # Izquierda
@@ -787,13 +859,19 @@ class Kut2FPDF(object):
 
             if self.design_mode:
                 self.write_debug(
-                    self.calculateLeftStart(orig_x), y, "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w), 6, "green"
+                    self.calculateLeftStart(orig_x),
+                    y,
+                    "Hal:%s, Val:%s, T:%s st:%s"
+                    % (HAlignment, VAlignment, txt, font_w),
+                    6,
+                    "green",
                 )
                 if xml.tag == "CalculatedField":
                     self.write_debug(
                         self.calculateLeftStart(orig_x),
                         y,
-                        "CalculatedField:%s, Field:%s" % (xml.get("FunctionName"), xml.get("Field")),
+                        "CalculatedField:%s, Field:%s"
+                        % (xml.get("FunctionName"), xml.get("Field")),
                         3,
                         "blue",
                     )
@@ -803,7 +881,9 @@ class Kut2FPDF(object):
 
         result_section_size = result_section_size - start_section_size
 
-        if self.increase_section_size < extra_size:  # Si algun incremento extra hay superior se respeta
+        if (
+            self.increase_section_size < extra_size
+        ):  # Si algun incremento extra hay superior se respeta
             self.increase_section_size = extra_size
 
     def split_text(self, texto, limit_w) -> List[str]:
@@ -868,14 +948,18 @@ class Kut2FPDF(object):
             if xml.get("BorderStyle") == "1":
 
                 border_color = self.get_color(xml.get("BorderColor"))
-                self._document.set_draw_color(border_color[0], border_color[1], border_color[2])
+                self._document.set_draw_color(
+                    border_color[0], border_color[1], border_color[2]
+                )
                 style_ += "D"
 
             bg_color = self.get_color(xml.get("BackgroundColor"))
             self._document.set_fill_color(bg_color[0], bg_color[1], bg_color[2])
             style_ = "F" + style_
 
-            border_width = int(xml.get("BorderWidth") if xml.get("BorderWidth") else 0.2)
+            border_width = int(
+                xml.get("BorderWidth") if xml.get("BorderWidth") else 0.2
+            )
         else:
             self.write_cords_debug(x, y, W, H, orig_x, orig_w)
             style_ = "D"
@@ -903,7 +987,15 @@ class Kut2FPDF(object):
         self.write_debug(
             x,
             y,
-            "X:%s Y:%s W:%s H:%s orig_x:%s, orig_W:%s" % (round(x, 2), round(y, 2), round(w, 2), round(h, 2), round(ox, 2), round(ow, 2)),
+            "X:%s Y:%s W:%s H:%s orig_x:%s, orig_W:%s"
+            % (
+                round(x, 2),
+                round(y, 2),
+                round(w, 2),
+                round(h, 2),
+                round(ox, 2),
+                round(ow, 2),
+            ),
             2,
             "red",
         )
@@ -934,7 +1026,9 @@ class Kut2FPDF(object):
         self._document.text(x, y + h, text)
         self._document.text_color = orig_color
         # self._document.set_xy(orig_x, orig_y)
-        self._document.set_font(current_font_family, current_font_style, current_font_size)
+        self._document.set_font(
+            current_font_family, current_font_style, current_font_size
+        )
 
     """
     Inserta una imagen en la página actual.
@@ -999,19 +1093,34 @@ class Kut2FPDF(object):
         page_orientation = xml.get("PageOrientation")
 
         if page_size in [30, 31]:
-            custom_size = [int(xml.get("CustomHeightMM")), int(xml.get("CustomWidthMM"))]
+            custom_size = [
+                int(xml.get("CustomHeightMM")),
+                int(xml.get("CustomWidthMM")),
+            ]
 
         self._page_orientation = "P" if page_orientation == "0" else "L"
-        self._page_size = self._parser_tools.converPageSize(page_size, int(page_orientation), custom_size)  # devuelve un array
+        self._page_size = self._parser_tools.converPageSize(
+            page_size, int(page_orientation), custom_size
+        )  # devuelve un array
 
     def draw_margins(self) -> None:
-        self.draw_debug_line(0 + self._left_margin, 0, 0 + self._left_margin, self._page_size[1])  # Vertical derecha
         self.draw_debug_line(
-            self._page_size[0] - self._right_margin, 0, self._page_size[0] - self._right_margin, self._page_size[1]
+            0 + self._left_margin, 0, 0 + self._left_margin, self._page_size[1]
+        )  # Vertical derecha
+        self.draw_debug_line(
+            self._page_size[0] - self._right_margin,
+            0,
+            self._page_size[0] - self._right_margin,
+            self._page_size[1],
         )  # Vertical izquierda
-        self.draw_debug_line(0, 0 + self._top_margin, self._page_size[0], 0 + self._top_margin)  # Horizontal superior
         self.draw_debug_line(
-            0, self._page_size[1] - self._bottom_margin, self._page_size[0], self._page_size[1] - self._bottom_margin
+            0, 0 + self._top_margin, self._page_size[0], 0 + self._top_margin
+        )  # Horizontal superior
+        self.draw_debug_line(
+            0,
+            self._page_size[1] - self._bottom_margin,
+            self._page_size[0],
+            self._page_size[1] - self._bottom_margin,
         )  # Horizontal inferior
 
     def draw_debug_line(self, X1, Y1, X2, Y2, title=None, color="GREY") -> None:

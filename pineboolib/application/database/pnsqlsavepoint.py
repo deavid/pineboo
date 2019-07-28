@@ -209,7 +209,18 @@ class PNSqlSavePoint:
     def saveInsert(self, primaryKey, buffer, cursor):
         if not cursor or not buffer:
             return
-        self.opInfos.append(opInfo(primaryKey, 0, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
+        self.opInfos.append(
+            opInfo(
+                primaryKey,
+                0,
+                buffer,
+                cursor.at(),
+                cursor.sort(),
+                cursor.filter(),
+                cursor.name,
+                cursor,
+            )
+        )
 
     """
     Guarda el buffer con el contenido del registro a editar.
@@ -223,7 +234,18 @@ class PNSqlSavePoint:
         if not cursor or not buffer:
             return
 
-        self.opInfos.append(opInfo(primaryKey, 1, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
+        self.opInfos.append(
+            opInfo(
+                primaryKey,
+                1,
+                buffer,
+                cursor.at(),
+                cursor.sort(),
+                cursor.filter(),
+                cursor.name,
+                cursor,
+            )
+        )
 
     """
     Guarda el buffer con el contenido del registro a borrar.
@@ -237,7 +259,18 @@ class PNSqlSavePoint:
     def saveDel(self, primaryKey, buffer, cursor):
         if not cursor or not buffer:
             return
-        self.opInfos.append(opInfo(primaryKey, 2, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
+        self.opInfos.append(
+            opInfo(
+                primaryKey,
+                2,
+                buffer,
+                cursor.at(),
+                cursor.sort(),
+                cursor.filter(),
+                cursor.name,
+                cursor,
+            )
+        )
 
     """
     Deshace una operacion de insertar.
@@ -260,8 +293,12 @@ class PNSqlSavePoint:
         if not cursor_:
             return
 
-        if opInf.buffer.contains(opInf.primaryKey) and not opInf.buffer.isNull(opInf.primaryKey):
-            valuePrimaryKey = str(opInf.buffer.value(opInf.primaryKey))  # FIXME: (deavid) plz add notes on what needs to be fixed here.
+        if opInf.buffer.contains(opInf.primaryKey) and not opInf.buffer.isNull(
+            opInf.primaryKey
+        ):
+            valuePrimaryKey = str(
+                opInf.buffer.value(opInf.primaryKey)
+            )  # FIXME: (deavid) plz add notes on what needs to be fixed here.
             ok = cursor_.select(opInf.primaryKey + "='" + valuePrimaryKey + "'")
             if ok and cursor_.next():
                 cursor_.primeDelete()

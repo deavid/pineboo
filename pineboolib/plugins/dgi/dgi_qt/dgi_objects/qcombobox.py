@@ -6,7 +6,9 @@ from typing import Optional, Union, Any, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qframe import QFrame  # noqa: F401
-    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox  # noqa: F401
+    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import (
+        QGroupBox,
+    )  # noqa: F401
 
 
 class QComboBox(QtWidgets.QComboBox):
@@ -44,5 +46,9 @@ class QComboBox(QtWidgets.QComboBox):
     def setCurrentText(self, value: str) -> None:
         super().setCurrentText(value)
 
-    currentItem = property(getCurrentItem, setCurrentItem, None, "get/set current item index")
-    currentText = property(getCurrentText, setCurrentText, None, "get/set current text")  # type: ignore
+    currentItem = property(
+        getCurrentItem, setCurrentItem, None, "get/set current item index"
+    )
+    currentText = property(
+        getCurrentText, setCurrentText, None, "get/set current text"
+    )  # type: ignore

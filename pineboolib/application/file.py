@@ -13,7 +13,12 @@ class File(object):
     logger = logging.getLogger("application.File")
 
     def __init__(
-        self, module: str, filename: str, sha: Optional[str] = None, basedir: Optional[str] = None, db_name: Optional[str] = None
+        self,
+        module: str,
+        filename: str,
+        sha: Optional[str] = None,
+        basedir: Optional[str] = None,
+        db_name: Optional[str] = None,
     ) -> None:
         """
         Constructor
@@ -32,7 +37,14 @@ class File(object):
             self.name, self.ext = os.path.splitext(filename)
 
         if self.sha:
-            self.filekey = "%s/%s/file%s/%s/%s%s" % (db_name, module, self.ext, self.name, sha, self.ext)
+            self.filekey = "%s/%s/file%s/%s/%s%s" % (
+                db_name,
+                module,
+                self.ext,
+                self.name,
+                sha,
+                self.ext,
+            )
         else:
             self.filekey = filename
         self.basedir = basedir

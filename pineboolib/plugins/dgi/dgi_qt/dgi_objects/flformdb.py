@@ -166,7 +166,9 @@ class FLFormDB(QDialog):
         if not parent:
             parent = aqApp.mainWidget()
         # if project.DGI.localDesktop():  # Si es local Inicializa
-        QtWidgets.QWidget.__init__(self, parent)  # FIXME: Porqué pide dos argumentos extra??
+        QtWidgets.QWidget.__init__(
+            self, parent
+        )  # FIXME: Porqué pide dos argumentos extra??
         # super(QtWidgets.QWidget, self).__init__(parent)
 
         self._loaded = False
@@ -211,7 +213,9 @@ class FLFormDB(QDialog):
         self.idMDI_ = self._action.name()
 
         self.logger.info("init: Action: %s", self._action)
-        self.script = project.actions[self._action.name()].load_script(script_name, self)
+        self.script = project.actions[self._action.name()].load_script(
+            script_name, self
+        )
         self.widget = self.script.form
         self.iface = self.widget.iface
 
@@ -256,7 +260,9 @@ class FLFormDB(QDialog):
     def initScript(self):
         if self._loaded:
             if not getattr(self.widget, "iface", None):
-                self.iface = self.widget  # Es posible que no tenga ifaceCtx, así hacemos que sea polivalente
+                self.iface = (
+                    self.widget
+                )  # Es posible que no tenga ifaceCtx, así hacemos que sea polivalente
 
             if self.widget:
                 self.widget.clear_connections()
@@ -269,7 +275,10 @@ class FLFormDB(QDialog):
                     from pineboolib.core.error_manager import error_manager
                     from pineboolib.application import project
 
-                    aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
+                    aqApp.msgBoxWarning(
+                        error_manager(traceback.format_exc(limit=-6, chain=False)),
+                        project._DGI,
+                    )
 
             return True
 
@@ -455,9 +464,14 @@ class FLFormDB(QDialog):
         if not path_file:
             from pineboolib import pncontrolsfactory
 
-            tmp_file = "%s/snap_shot_%s.png" % (aqApp.tmp_dir(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
+            tmp_file = "%s/snap_shot_%s.png" % (
+                aqApp.tmp_dir(),
+                QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"),
+            )
 
-            ret = pncontrolsfactory.QFileDialog.getSaveFileName(None, "Pineboo", tmp_file, "PNG(*.png)")
+            ret = pncontrolsfactory.QFileDialog.getSaveFileName(
+                None, "Pineboo", tmp_file, "PNG(*.png)"
+            )
             path_file = ret[0] if ret else None
 
         if path_file:
@@ -499,7 +513,9 @@ class FLFormDB(QDialog):
     Devuelve si se ha aceptado el formulario
     """
 
-    def accepted(self) -> bool:  # type: ignore   # FIXME: QDialog.accepted() is a signal. We're shadowing it.
+    def accepted(
+        self
+    ) -> bool:  # type: ignore   # FIXME: QDialog.accepted() is a signal. We're shadowing it.
         return self.accepted_
 
     """
@@ -616,7 +632,9 @@ class FLFormDB(QDialog):
         qsa_sys = pncontrolsfactory.SysType()
         if qsa_sys.isLoadedModule("fltesttest"):
 
-            aqApp.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)
+            aqApp.call(
+                "fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None
+            )
         self.formReady.emit()
 
     # protected_:
@@ -628,7 +646,9 @@ class FLFormDB(QDialog):
             raise Exception("Project is not connected yet")
 
         if "fltesttest" in project.conn.managerModules().listAllIdModules():
-            project.call("fltesttest.iface.recibeEvento", ["formClosed", self.actionName_], None)
+            project.call(
+                "fltesttest.iface.recibeEvento", ["formClosed", self.actionName_], None
+            )
 
         self.formClosed.emit()
         if self.widget:
@@ -650,7 +670,10 @@ class FLFormDB(QDialog):
         self.loadControls()
 
         if self._action.table():
-            if not self.cursor() or self.cursor()._action.table() is not self._action.table():
+            if (
+                not self.cursor()
+                or self.cursor()._action.table() is not self._action.table()
+            ):
                 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
                 cursor = FLSqlCursor(self._action.table())
@@ -703,7 +726,9 @@ class FLFormDB(QDialog):
         #    self.layout = None
         # Limpiamos la toolbar
 
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0)
+        )
         sizePolicy.setHeightForWidth(True)
 
         pbSize = self.iconSize
@@ -715,7 +740,9 @@ class FLFormDB(QDialog):
             pushButtonExport.setSizePolicy(sizePolicy)
             pushButtonExport.setMinimumSize(pbSize)
             pushButtonExport.setMaximumSize(pbSize)
-            pushButtonExport.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-properties.png")))
+            pushButtonExport.setIcon(
+                QtGui.QIcon(filedir("../share/icons", "gtk-properties.png"))
+            )
             pushButtonExport.setShortcut(QKeySequence(self.tr("F3")))
             pushButtonExport.setWhatsThis("Exportar a XML(F3)")
             pushButtonExport.setToolTip("Exportar a XML(F3)")
@@ -729,7 +756,9 @@ class FLFormDB(QDialog):
                 push_button_snapshot.setSizePolicy(sizePolicy)
                 push_button_snapshot.setMinimumSize(pbSize)
                 push_button_snapshot.setMaximumSize(pbSize)
-                push_button_snapshot.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-paste.png")))
+                push_button_snapshot.setIcon(
+                    QtGui.QIcon(filedir("../share/icons", "gtk-paste.png"))
+                )
                 push_button_snapshot.setShortcut(QKeySequence(self.tr("F8")))
                 push_button_snapshot.setWhatsThis("Capturar pantalla(F8)")
                 push_button_snapshot.setToolTip("Capturar pantalla(F8)")
@@ -737,7 +766,9 @@ class FLFormDB(QDialog):
                 self.bottomToolbar.layout().addWidget(push_button_snapshot)
                 push_button_snapshot.clicked.connect(self.saveSnapShot)
 
-            spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+            spacer = QtWidgets.QSpacerItem(
+                20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            )
             self.bottomToolbar.layout().addItem(spacer)
 
         if not self.pushButtonCancel:
@@ -748,7 +779,9 @@ class FLFormDB(QDialog):
         self.pushButtonCancel.setSizePolicy(sizePolicy)
         self.pushButtonCancel.setMaximumSize(pbSize)
         self.pushButtonCancel.setMinimumSize(pbSize)
-        self.pushButtonCancel.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
+        self.pushButtonCancel.setIcon(
+            QtGui.QIcon(filedir("../share/icons", "gtk-stop.png"))
+        )
         # self.pushButtonCancel.setFocusPolicy(QtCore.Qt.StrongFocus)
         # self.pushButtonCancel.setFocus()
         self.pushButtonCancel.setShortcut(QKeySequence(self.tr("Esc")))
@@ -844,7 +877,11 @@ class FLFormDB(QDialog):
             self.script = None
         except Exception:
 
-            self.logger.error("El FLFormDB %s no se cerró correctamente:\n%s", self.formName(), traceback.format_exc())
+            self.logger.error(
+                "El FLFormDB %s no se cerró correctamente:\n%s",
+                self.formName(),
+                traceback.format_exc(),
+            )
 
         if isinstance(self.parent(), pncontrolsfactory.QMdiSubWindow):
             self.parent().close()
@@ -879,7 +916,9 @@ class FLFormDB(QDialog):
         if size:
             self.resize(size)
 
-            if self.parent() and isinstance(self.parent(), pncontrolsfactory.QMdiSubWindow):
+            if self.parent() and isinstance(
+                self.parent(), pncontrolsfactory.QMdiSubWindow
+            ):
                 self.parent().resize(size)
                 self.parent().repaint()
 
@@ -929,14 +968,19 @@ class FLFormDB(QDialog):
         from pineboolib import pncontrolsfactory
         from pineboolib.application import project
 
-        module_name = getattr(project.actions[self._action.name()].mod, "module_name", None)
+        module_name = getattr(
+            project.actions[self._action.name()].mod, "module_name", None
+        )
         if module_name:
 
             if module_name in aqApp.dict_main_widgets_.keys():
                 module_window = aqApp.dict_main_widgets_[module_name]
                 mdi_area = module_window.centralWidget()
 
-                if isinstance(mdi_area, pncontrolsfactory.QMdiArea) and type(self).__name__ == "FLFormDB":
+                if (
+                    isinstance(mdi_area, pncontrolsfactory.QMdiArea)
+                    and type(self).__name__ == "FLFormDB"
+                ):
                     if not isinstance(self.parent(), pncontrolsfactory.QMdiSubWindow):
                         # size = self.size()
                         mdi_area.addSubWindow(self)

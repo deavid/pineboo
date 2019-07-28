@@ -68,7 +68,9 @@ class FLMYSQL_MYISAM(object):
         return self.pure_python_
 
     def safe_load(self) -> Any:
-        return check_dependencies({"MySQLdb": "mysqlclient", "sqlalchemy": "sqlAlchemy"}, False)
+        return check_dependencies(
+            {"MySQLdb": "mysqlclient", "sqlalchemy": "sqlAlchemy"}, False
+        )
 
     def mobile(self) -> bool:
         return self.mobile_
@@ -87,7 +89,10 @@ class FLMYSQL_MYISAM(object):
 
         try:
             self.conn_ = MySQLdb.connect(db_host, db_userName, db_password, db_name)
-            self.engine_ = create_engine("mysql+mysqldb://%s:%s@%s:%s/%s" % (db_userName, db_password, db_host, db_port, db_name))
+            self.engine_ = create_engine(
+                "mysql+mysqldb://%s:%s@%s:%s/%s"
+                % (db_userName, db_password, db_host, db_port, db_name)
+            )
         except MySQLdb.OperationalError as e:
             if project._splash:
                 project._splash.hide()
@@ -112,16 +117,29 @@ class FLMYSQL_MYISAM(object):
                             cursor.close()
                             return False
                         cursor.close()
-                        return self.connect(db_name, db_host, db_port, db_userName, db_password)
+                        return self.connect(
+                            db_name, db_host, db_port, db_userName, db_password
+                        )
                     except Exception:
                         QMessageBox.information(
-                            QWidget(), "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok
+                            QWidget(),
+                            "Pineboo",
+                            "ERROR: No se ha podido crear la Base de Datos %s"
+                            % db_name,
+                            QMessageBox.Ok,
                         )
-                        print("ERROR: No se ha podido crear la Base de Datos %s" % db_name)
+                        print(
+                            "ERROR: No se ha podido crear la Base de Datos %s" % db_name
+                        )
                         return False
 
             else:
-                QMessageBox.information(QWidget(), "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok)
+                QMessageBox.information(
+                    QWidget(),
+                    "Pineboo",
+                    "Error de conexión\n%s" % str(e),
+                    QMessageBox.Ok,
+                )
                 return False
 
         if self.conn_:
@@ -293,7 +311,9 @@ class FLMYSQL_MYISAM(object):
             raise Exception("Must be connected")
         cursor = self.conn_.cursor()
 
-        strQry: Optional[str] = "SELECT seq FROM flseqs WHERE tabla = '%s' AND campo ='%s'" % (table, field)
+        strQry: Optional[
+            str
+        ] = "SELECT seq FROM flseqs WHERE tabla = '%s' AND campo ='%s'" % (table, field)
         try:
             cur_max = 0
             cursor.execute(strQry)
@@ -301,7 +321,11 @@ class FLMYSQL_MYISAM(object):
             if line:
                 cur_max = line[0]
         except Exception:
-            logger.warning("%s:: La consulta a la base de datos ha fallado", self.name_, traceback.format_exc())
+            logger.warning(
+                "%s:: La consulta a la base de datos ha fallado",
+                self.name_,
+                traceback.format_exc(),
+            )
             self.rollbackTransaction()
             return
 
@@ -315,15 +339,26 @@ class FLMYSQL_MYISAM(object):
         strQry = None
         if updateQry:
             if ret > cur_max:
-                strQry = "UPDATE flseqs SET seq=%s WHERE tabla = '%s' AND campo = '%s'" % (ret, table, field)
+                strQry = (
+                    "UPDATE flseqs SET seq=%s WHERE tabla = '%s' AND campo = '%s'"
+                    % (ret, table, field)
+                )
         else:
-            strQry = "INSERT INTO flseqs (tabla,campo,seq) VALUES('%s','%s',%s)" % (table, field, ret)
+            strQry = "INSERT INTO flseqs (tabla,campo,seq) VALUES('%s','%s',%s)" % (
+                table,
+                field,
+                ret,
+            )
 
         if strQry is not None:
             try:
                 cursor.execute(strQry)
             except Exception:
-                logger.warning("%s:: La consulta a la base de datos ha fallado\n %s", self.name_, traceback.format_exc())
+                logger.warning(
+                    "%s:: La consulta a la base de datos ha fallado\n %s",
+                    self.name_,
+                    traceback.format_exc(),
+                )
                 self.rollbackTransaction()
 
                 return
@@ -350,8 +385,14 @@ class FLMYSQL_MYISAM(object):
         try:
             cursor.execute("SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError("No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
-            logger.warning("MySQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s \n %s ", n, traceback.format_exc())
+            self.setLastError(
+                "No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n
+            )
+            logger.warning(
+                "MySQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s \n %s ",
+                n,
+                traceback.format_exc(),
+            )
             return False
 
         return True
@@ -374,9 +415,15 @@ class FLMYSQL_MYISAM(object):
         try:
             cursor.execute("ROLLBACK TO SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
+            self.setLastError(
+                "No se pudo rollback a punto de salvaguarda",
+                "ROLLBACK TO SAVEPOINTt sv_%s" % n,
+            )
             logger.warning(
-                "%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s", self.name_, n, traceback.format_exc()
+                "%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s",
+                self.name_,
+                n,
+                traceback.format_exc(),
             )
             return False
 
@@ -397,7 +444,11 @@ class FLMYSQL_MYISAM(object):
             cursor.execute("COMMIT")
         except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
-            logger.warning("%s:: No se pudo aceptar la transacción COMMIT\n %s", self.name_, traceback.format_exc())
+            logger.warning(
+                "%s:: No se pudo aceptar la transacción COMMIT\n %s",
+                self.name_,
+                traceback.format_exc(),
+            )
             return False
 
         return True
@@ -411,7 +462,11 @@ class FLMYSQL_MYISAM(object):
             cursor.execute("ROLLBACK")
         except Exception:
             self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
-            logger.warning("%s:: No se pudo deshacer la transacción ROLLBACK\n %s", self.name_, traceback.format_exc())
+            logger.warning(
+                "%s:: No se pudo deshacer la transacción ROLLBACK\n %s",
+                self.name_,
+                traceback.format_exc(),
+            )
             return False
 
         return True
@@ -425,7 +480,11 @@ class FLMYSQL_MYISAM(object):
             cursor.execute("START TRANSACTION")
         except Exception:
             self.setLastError("No se pudo crear la transacción", "BEGIN WORK")
-            logger.warning("%s:: No se pudo crear la transacción BEGIN\n %s", self.name_, traceback.format_exc())
+            logger.warning(
+                "%s:: No se pudo crear la transacción BEGIN\n %s",
+                self.name_,
+                traceback.format_exc(),
+            )
             return False
 
         return True
@@ -442,8 +501,14 @@ class FLMYSQL_MYISAM(object):
         try:
             cursor.execute("RELEASE SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError("No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
-            qWarning("MySQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s\n %s" % (n, traceback.format_exc()))
+            self.setLastError(
+                "No se pudo release a punto de salvaguarda",
+                "RELEASE SAVEPOINT sv_%s" % n,
+            )
+            qWarning(
+                "MySQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s\n %s"
+                % (n, traceback.format_exc())
+            )
 
             return False
 
@@ -474,7 +539,9 @@ class FLMYSQL_MYISAM(object):
         # ret_ = ret_.replace(";", "")
         return ret_
 
-    def refreshFetch(self, number, curname, table, cursor, fields, where_filter) -> None:
+    def refreshFetch(
+        self, number, curname, table, cursor, fields, where_filter
+    ) -> None:
         try:
             self.cursorsArray_[curname].fetchmany(number)
         except Exception:
@@ -535,8 +602,13 @@ class FLMYSQL_MYISAM(object):
                 unlocks += 1
 
         if unlocks > 1:
-            qWarning(u"%s : No se ha podido crear la tabla %s" % (self.name_, tmd.name()))
-            qWarning(u"%s : Hay mas de un campo tipo unlock. Solo puede haber uno." % self.name_)
+            qWarning(
+                u"%s : No se ha podido crear la tabla %s" % (self.name_, tmd.name())
+            )
+            qWarning(
+                u"%s : Hay mas de un campo tipo unlock. Solo puede haber uno."
+                % self.name_
+            )
             return None
 
         i = 1
@@ -549,7 +621,10 @@ class FLMYSQL_MYISAM(object):
             elif field.type() in ("bool", "unlock"):
                 sql += " BOOL"
             elif field.type() == "double":
-                sql += " DECIMAL(%s,%s)" % (field.partInteger() + field.partDecimal() + 5, field.partDecimal() + 5)
+                sql += " DECIMAL(%s,%s)" % (
+                    field.partInteger() + field.partDecimal() + 5,
+                    field.partDecimal() + 5,
+                )
             elif field.type() == "time":
                 sql += " TIME"
             elif field.type() == "date":
@@ -578,7 +653,9 @@ class FLMYSQL_MYISAM(object):
                     qWarning(
                         QApplication.tr("FLManager : Tabla-> ")
                         + tmd.name()
-                        + QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ")
+                        + QApplication.tr(
+                            " . Se ha intentado poner una segunda clave primaria para el campo "
+                        )
                         + field.name()
                         + QApplication.tr(" , pero el campo ")
                         + primaryKey
@@ -635,7 +712,9 @@ class FLMYSQL_MYISAM(object):
             "'.*alteredtable[[:digit:]][[:digit:]][[:digit:]][[:digit:]].*' or (bloqueo=0 and nombre like '%.mtd')"
         )
 
-        util.createProgressDialog(util.tr("Borrando backups"), len(listOldBks) + qry.size() + 2)
+        util.createProgressDialog(
+            util.tr("Borrando backups"), len(listOldBks) + qry.size() + 2
+        )
 
         while qry.next():
             item = qry.value(0)
@@ -732,7 +811,9 @@ class FLMYSQL_MYISAM(object):
                 # sqlCursor.setName(item, True)
 
                 # self.db_.dbAux().driver().commit()
-                sql_query2.exec_("show table status where Engine='%s' and Name='%s'" % (engine, item))
+                sql_query2.exec_(
+                    "show table status where Engine='%s' and Name='%s'" % (engine, item)
+                )
                 if not sql_query2.next():
                     if do_ques:
                         res = QMessageBox.question(
@@ -783,7 +864,9 @@ class FLMYSQL_MYISAM(object):
         doc = QDomDocument("doc")
         docElem = None
         if not util.domDocumentSetContent(doc, mtd1):
-            print("FLManager::alterTable : " + util.tr("Error al cargar los metadatos."))
+            print(
+                "FLManager::alterTable : " + util.tr("Error al cargar los metadatos.")
+            )
         else:
             docElem = doc.documentElement()
             oldMTD = self.db_.manager().metadata(docElem, True)
@@ -795,7 +878,9 @@ class FLMYSQL_MYISAM(object):
             return False
 
         if not util.domDocumentSetContent(doc, mtd2):
-            print("FLManager::alterTable : " + util.tr("Error al cargar los metadatos."))
+            print(
+                "FLManager::alterTable : " + util.tr("Error al cargar los metadatos.")
+            )
             return False
         else:
             docElem = doc.documentElement()
@@ -805,7 +890,10 @@ class FLMYSQL_MYISAM(object):
             oldMTD = newMTD
 
         if not oldMTD.name() == newMTD.name():
-            print("FLManager::alterTable : " + util.tr("Los nombres de las tablas nueva y vieja difieren."))
+            print(
+                "FLManager::alterTable : "
+                + util.tr("Los nombres de las tablas nueva y vieja difieren.")
+            )
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -817,7 +905,10 @@ class FLMYSQL_MYISAM(object):
         newPK = newMTD.primaryKey()
 
         if not oldPK == newPK:
-            print("FLManager::alterTable : " + util.tr("Los nombres de las claves primarias difieren."))
+            print(
+                "FLManager::alterTable : "
+                + util.tr("Los nombres de las claves primarias difieren.")
+            )
             if oldMTD and oldMTD != newMTD:
                 del oldMTD
             if newMTD:
@@ -834,7 +925,12 @@ class FLMYSQL_MYISAM(object):
             return True
 
         if not self.db_.manager().existsTable(oldMTD.name()):
-            print("FLManager::alterTable : " + util.tr("La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
+            print(
+                "FLManager::alterTable : "
+                + util.tr(
+                    "La tabla %1 antigua de donde importar los registros no existe."
+                ).arg(oldMTD.name())
+            )
             if oldMTD and oldMTD != newMTD:
                 del oldMTD
             if newMTD:
@@ -846,7 +942,10 @@ class FLMYSQL_MYISAM(object):
         # oldField = None
 
         if not fieldList:
-            print("FLManager::alterTable : " + util.tr("Los antiguos metadatos no tienen campos."))
+            print(
+                "FLManager::alterTable : "
+                + util.tr("Los antiguos metadatos no tienen campos.")
+            )
             if oldMTD and oldMTD != newMTD:
                 del oldMTD
             if newMTD:
@@ -860,7 +959,10 @@ class FLMYSQL_MYISAM(object):
                 if newMTD.field(it.name()) is not None:
                     fieldNamesOld.append(it.name())
 
-        renameOld = "%salteredtable%s" % (oldMTD.name()[0:5], QDateTime().currentDateTime().toString("ddhhssz"))
+        renameOld = "%salteredtable%s" % (
+            oldMTD.name()[0:5],
+            QDateTime().currentDateTime().toString("ddhhssz"),
+        )
 
         if not self.db_.dbAux():
             if oldMTD and oldMTD != newMTD:
@@ -874,7 +976,10 @@ class FLMYSQL_MYISAM(object):
         fieldList = newMTD.fieldList()
 
         if not fieldList:
-            qWarning("FLManager::alterTable : " + util.tr("Los nuevos metadatos no tienen campos"))
+            qWarning(
+                "FLManager::alterTable : "
+                + util.tr("Los nuevos metadatos no tienen campos")
+            )
 
             if oldMTD and oldMTD != newMTD:
                 del oldMTD
@@ -887,7 +992,10 @@ class FLMYSQL_MYISAM(object):
         in_sql = "ALTER TABLE %s RENAME TO %s" % (oldMTD.name(), renameOld)
         logger.warning(in_sql)
         if not q.exec_(in_sql):
-            qWarning("FLManager::alterTable : " + util.tr("No se ha podido renombrar la tabla antigua."))
+            qWarning(
+                "FLManager::alterTable : "
+                + util.tr("No se ha podido renombrar la tabla antigua.")
+            )
 
             if oldMTD and oldMTD != newMTD:
                 del oldMTD
@@ -921,11 +1029,16 @@ class FLMYSQL_MYISAM(object):
                 # c.setValueBuffer("sha", key)
                 # c.commitBuffer()
 
-                in_sql = "INSERT INTO flfiles(nombre,contenido,idmodulo,sha) VALUES ('%s.mtd','%s','%s','%s')" % (
-                    renameOld,
-                    mtd1,
-                    self.db_.managerModules().idModuleOfFile("%s.mtd" % oldMTD.name()),
-                    key,
+                in_sql = (
+                    "INSERT INTO flfiles(nombre,contenido,idmodulo,sha) VALUES ('%s.mtd','%s','%s','%s')"
+                    % (
+                        renameOld,
+                        mtd1,
+                        self.db_.managerModules().idModuleOfFile(
+                            "%s.mtd" % oldMTD.name()
+                        ),
+                        key,
+                    )
                 )
                 logger.warning(in_sql)
                 q.exec_(in_sql)
@@ -958,7 +1071,10 @@ class FLMYSQL_MYISAM(object):
             # oldCursor.setForwardOnly(True)
             # oldCursor.select()
             # totalSteps = oldCursor.size()
-            util.createProgressDialog(util.tr("Reestructurando registros para %s...") % newMTD.alias(), totalSteps)
+            util.createProgressDialog(
+                util.tr("Reestructurando registros para %s...") % newMTD.alias(),
+                totalSteps,
+            )
             util.setLabelText(util.tr("Tabla modificada"))
 
             step = 0
@@ -972,7 +1088,11 @@ class FLMYSQL_MYISAM(object):
 
             for it2 in fieldList:
                 oldField = oldMTD.field(it2.name())
-                if oldField is None or not result_set or oldField.name() not in result_set[0].keys():
+                if (
+                    oldField is None
+                    or not result_set
+                    or oldField.name() not in result_set[0].keys()
+                ):
                     if oldField is None:
                         oldField = it2
                     if it2.type() != PNFieldMetaData.Serial:
@@ -1019,10 +1139,16 @@ class FLMYSQL_MYISAM(object):
                             if defVal is not None:
                                 v = defVal
 
-                    if v is not None and newField.type() == "string" and newField.length() > 0:
+                    if (
+                        v is not None
+                        and newField.type() == "string"
+                        and newField.length() > 0
+                    ):
                         v = v[: newField.length()]
 
-                    if (not oldField.allowNull() or not newField.allowNull()) and v is None:
+                    if (
+                        not oldField.allowNull() or not newField.allowNull()
+                    ) and v is None:
                         if oldField.type() == PNFieldMetaData.Serial:
                             v = int(self.nextSerialVal(newMTD.name(), newField.name()))
                         elif oldField.type() in ["int", "uint", "bool", "unlock"]:
@@ -1104,7 +1230,11 @@ class FLMYSQL_MYISAM(object):
                 value = self.formatValue(field.type(), value, False)
                 vList.append(value)
 
-        sql = """INSERT INTO %s(%s) values (%s)""" % (table_name, ", ".join(fList), ", ".join(map(str, vList)))
+        sql = """INSERT INTO %s(%s) values (%s)""" % (
+            table_name,
+            ", ".join(fList),
+            ", ".join(map(str, vList)),
+        )
 
         if not fList:
             return False
@@ -1131,7 +1261,10 @@ class FLMYSQL_MYISAM(object):
             try:
                 recMtd = self.recordInfo(tmd_or_table2)
                 if not recMtd:
-                    raise Exception("Unexpected error trying to get recordInfo for %r" % tmd_or_table2)
+                    raise Exception(
+                        "Unexpected error trying to get recordInfo for %r"
+                        % tmd_or_table2
+                    )
                 recBd = self.recordInfo2(table1)
                 # fieldBd = None
                 for fieldMtd in recMtd:
@@ -1212,7 +1345,17 @@ class FLMYSQL_MYISAM(object):
             # print("longitud:", len_)
             # print("Precision:", precision_)
             # print("Defecto:", default_value_)
-            info.append([col_name, tipo_, allow_null, len_n, precision_, default_value_, primary_key_])
+            info.append(
+                [
+                    col_name,
+                    tipo_,
+                    allow_null,
+                    len_n,
+                    precision_,
+                    default_value_,
+                    primary_key_,
+                ]
+            )
             # info.append(desc[0], desc[1], not desc[6], , part_decimal, default_value, is_primary_key)
 
         return info
@@ -1258,7 +1401,11 @@ class FLMYSQL_MYISAM(object):
             stream = self.db_.managerModules().contentCached("%s.mtd" % tablename)
             util = FLUtil()
             if not util.domDocumentSetContent(doc, stream):
-                print("FLManager : " + QApplication.tr("Error al cargar los metadatos para la tabla") + tablename)
+                print(
+                    "FLManager : "
+                    + QApplication.tr("Error al cargar los metadatos para la tabla")
+                    + tablename
+                )
 
                 return self.recordInfo2(tablename)
 
@@ -1298,7 +1445,10 @@ class FLMYSQL_MYISAM(object):
             if field1[1] == "stringlist" and not field2[1] in ("stringlist", "pixmap"):
                 ret = True
 
-            elif field1[1] == "string" and (not field2[1] in ("string", "time", "date") or not field1[3] == field2[3]):
+            elif field1[1] == "string" and (
+                not field2[1] in ("string", "time", "date")
+                or not field1[3] == field2[3]
+            ):
                 if field1[3] == 0 and field2[3] == 255:
                     pass
                 else:
@@ -1347,6 +1497,10 @@ class FLMYSQL_MYISAM(object):
             cursor.execute(q)
         except Exception:
             self.setLastError("No se puedo ejecutar la siguiente query %s" % q, q)
-            logger.warning("MySQLDriver:: No se puedo ejecutar la siguiente query %s\n %s", q, traceback.format_exc())
+            logger.warning(
+                "MySQLDriver:: No se puedo ejecutar la siguiente query %s\n %s",
+                q,
+                traceback.format_exc(),
+            )
 
         return cursor

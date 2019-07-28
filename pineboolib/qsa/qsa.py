@@ -418,7 +418,9 @@ class File(object):  # FIXME : Rehacer!!
             self.eof = True
         return ret
 
-    def write(self: Union["File", str], data: Union[str, bytes], length: int = -1) -> None:
+    def write(
+        self: Union["File", str], data: Union[str, bytes], length: int = -1
+    ) -> None:
         """
         Escribe datos en el fichero
         @param data. Valores a guardar en el fichero
@@ -653,6 +655,15 @@ from pineboolib.fllegacy.flapplication import FLApplication  # noqa: F401
 from pineboolib.fllegacy.flvar import FLVar  # noqa: F401
 
 # from pineboolib.core.utils.utils_base import ustr, filedir  # noqa: F401
-from pineboolib.application.types import Boolean, QString, String, Function, Object, Array, Date, AttributeDict  # noqa: F401
+from pineboolib.application.types import (
+    Boolean,
+    QString,
+    String,
+    Function,
+    Object,
+    Array,
+    Date,
+    AttributeDict,
+)  # noqa: F401
 from .input import Input  # noqa: F401
 from pineboolib.pncontrolsfactory import *  # noqa: F401

@@ -70,7 +70,10 @@ def check_dependencies(dict_: Dict[str, str], exit: bool = True) -> bool:
                     from pineboolib import pncontrolsfactory
 
                     pncontrolsfactory.QMessageBox.warning(
-                        None, "Pineboo - Dependencias Incumplidas -", msg, pncontrolsfactory.QMessageBox.Ok
+                        None,
+                        "Pineboo - Dependencias Incumplidas -",
+                        msg,
+                        pncontrolsfactory.QMessageBox.Ok,
                     )
 
                 if not is_deployed():

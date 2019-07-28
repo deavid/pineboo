@@ -63,7 +63,18 @@ class FLUtil(QtCore.QObject):
         "veintinueve",
     ]
 
-    vecDecenas: List[str] = ["", "", "", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"]
+    vecDecenas: List[str] = [
+        "",
+        "",
+        "",
+        "treinta",
+        "cuarenta",
+        "cincuenta",
+        "sesenta",
+        "setenta",
+        "ochenta",
+        "noventa",
+    ]
     vecCentenas: List[str] = [
         "",
         "ciento",
@@ -87,9 +98,19 @@ class FLUtil(QtCore.QObject):
                 if cursor.next():
                     cursor.setModeAccess(cursor.Del)
                     if not cursor.commitBuffer():
-                        raise Exception("No pudo eliminar " + str(field.model._meta.db_table) + " : " + str(o.pk))
+                        raise Exception(
+                            "No pudo eliminar "
+                            + str(field.model._meta.db_table)
+                            + " : "
+                            + str(o.pk)
+                        )
             except Exception:
-                raise Exception("No pudo eliminar " + str(field.model._meta.db_table) + " : " + str(o.pk))
+                raise Exception(
+                    "No pudo eliminar "
+                    + str(field.model._meta.db_table)
+                    + " : "
+                    + str(o.pk)
+                )
 
     def partInteger(self, n: float) -> int:
         """
@@ -599,7 +620,11 @@ class FLUtil(QtCore.QObject):
         if isinstance(fecha, str):
             fecha = Date(fecha)
         if not isinstance(fecha, Date):
-            logger.error("addYears: No reconozco el tipo de dato %s", type(fecha), stack_info=True)
+            logger.error(
+                "addYears: No reconozco el tipo de dato %s",
+                type(fecha),
+                stack_info=True,
+            )
             return None
         return fecha.addYears(offset)
 
@@ -644,7 +669,9 @@ class FLUtil(QtCore.QObject):
         d2 = datetime.datetime.strptime(d2, "%Y-%m-%d").date()
         return (d2 - d1).days
 
-    def buildNumber(self, v: Union[int, float, str], tipo: str, partDecimal: int) -> str:
+    def buildNumber(
+        self, v: Union[int, float, str], tipo: str, partDecimal: int
+    ) -> str:
         """
         Construye un string a partir de un número, especificando el formato y precisión
 
@@ -658,7 +685,11 @@ class FLUtil(QtCore.QObject):
         if val_str.endswith("5"):
             val_str += "1"
 
-        ret = round(float(val_str)) if partDecimal == 0 else round(float(val_str), partDecimal)
+        ret = (
+            round(float(val_str))
+            if partDecimal == 0
+            else round(float(val_str), partDecimal)
+        )
         """
         d = float(v) * 10**partDecimal
         d = round(d)
@@ -742,7 +773,10 @@ class FLUtil(QtCore.QObject):
         found = self.readDBSettingEntry(key)
         cursor = project.conn.cursor()
         if found is None:
-            sql = "INSERT INTO flsettings (flkey, valor) VALUES ('%s', '%s')" % (key, value)
+            sql = "INSERT INTO flsettings (flkey, valor) VALUES ('%s', '%s')" % (
+                key,
+                value,
+            )
         else:
             sql = "UPDATE flsettings SET valor = '%s' WHERE %s" % (value, where)
         try:
@@ -757,7 +791,9 @@ class FLUtil(QtCore.QObject):
         cursor.close()
         return True
 
-    def roundFieldValue(self, value: Union[float, int, str], table_name: str, field_name: str) -> str:
+    def roundFieldValue(
+        self, value: Union[float, int, str], table_name: str, field_name: str
+    ) -> str:
         """
         Redondea un valor en función de la precisión especificada para un campo tipo double de la base de datos
 
@@ -774,9 +810,21 @@ class FLUtil(QtCore.QObject):
         if tmd is None:
             return ""
         fmd = tmd.field(field_name)
-        return self.buildNumber(value, "float", fmd.partDecimal()) if fmd is not None else ""
+        return (
+            self.buildNumber(value, "float", fmd.partDecimal())
+            if fmd is not None
+            else ""
+        )
 
-    def sqlSelect(self, f: str, s: str, w: str, tL: Optional[Union[str, List]] = None, size: int = 0, connName: str = "default") -> Any:
+    def sqlSelect(
+        self,
+        f: str,
+        s: str,
+        w: str,
+        tL: Optional[Union[str, List]] = None,
+        size: int = 0,
+        connName: str = "default",
+    ) -> Any:
         from pineboolib.application.database.utils import sqlSelect
 
         return sqlSelect(f, s, w, tL, size, connName)
@@ -786,12 +834,25 @@ class FLUtil(QtCore.QObject):
 
         return quickSqlSelect(f, s, w, connName)
 
-    def sqlInsert(self, t: str, fL: Union[str, List], vL: Union[str, List], connName: str = "default") -> Any:
+    def sqlInsert(
+        self,
+        t: str,
+        fL: Union[str, List],
+        vL: Union[str, List],
+        connName: str = "default",
+    ) -> Any:
         from pineboolib.application.database.utils import sqlInsert
 
         return sqlInsert(t, fL, vL, connName)
 
-    def sqlUpdate(self, t: str, fL: Union[str, List], vL: Union[str, List], w: str, connName: str = "default") -> Any:
+    def sqlUpdate(
+        self,
+        t: str,
+        fL: Union[str, List],
+        vL: Union[str, List],
+        w: str,
+        connName: str = "default",
+    ) -> Any:
         from pineboolib.application.database.utils import sqlUpdate
 
         return sqlUpdate(t, fL, vL, w, connName)
@@ -820,7 +881,9 @@ class FLUtil(QtCore.QObject):
         """
         from pineboolib.application import project
 
-        return project.message_manager().send("progress_dialog_manager", "create", [title, steps, id_])
+        return project.message_manager().send(
+            "progress_dialog_manager", "create", [title, steps, id_]
+        )
 
     def destroyProgressDialog(self, id_: str = "default") -> None:
         """
@@ -840,7 +903,9 @@ class FLUtil(QtCore.QObject):
 
         from pineboolib.application import project
 
-        project.message_manager().send("progress_dialog_manager", "setProgress", [step_number, id_])
+        project.message_manager().send(
+            "progress_dialog_manager", "setProgress", [step_number, id_]
+        )
 
     def setLabelText(self, l: str, id_: str = "default") -> None:
         """
@@ -851,7 +916,9 @@ class FLUtil(QtCore.QObject):
 
         from pineboolib.application import project
 
-        project.message_manager().send("progress_dialog_manager", "setLabelText", [l, id_])
+        project.message_manager().send(
+            "progress_dialog_manager", "setLabelText", [l, id_]
+        )
 
     def setTotalSteps(self, tS: int, id_: str = "default") -> None:
         """
@@ -862,7 +929,9 @@ class FLUtil(QtCore.QObject):
 
         from pineboolib.application import project
 
-        project.message_manager().send("progress_dialog_manager", "setTotalSteps", [tS, id_])
+        project.message_manager().send(
+            "progress_dialog_manager", "setTotalSteps", [tS, id_]
+        )
 
     def domDocumentSetContent(self, doc: "QDomDocument", content: str) -> bool:
         """
@@ -876,7 +945,9 @@ class FLUtil(QtCore.QObject):
         @return FALSE si hubo fallo, TRUE en caso contrario
         """
         if not content:
-            logger.warning("Se ha intentado cargar un fichero XML vacío", stack_info=False)
+            logger.warning(
+                "Se ha intentado cargar un fichero XML vacío", stack_info=False
+            )
             return False
 
         ErrMsg = ""
@@ -885,7 +956,12 @@ class FLUtil(QtCore.QObject):
 
         # if not doc.setContent(content, ErrMsg, errLine, errColumn):
         if not doc.setContent(content):
-            logger.warning("Error en fichero XML.\nError : %s\nLinea : %s\nColumna : %s", ErrMsg, errLine, errColumn)
+            logger.warning(
+                "Error en fichero XML.\nError : %s\nLinea : %s\nColumna : %s",
+                ErrMsg,
+                errLine,
+                errColumn,
+            )
             return False
 
         return True
@@ -978,7 +1054,9 @@ class FLUtil(QtCore.QObject):
         return ""
 
     @decorators.NotImplementedWarn
-    def findFiles(self, paths: str, filter_: str = "*", break_on_first_match: bool = False) -> List[str]:
+    def findFiles(
+        self, paths: str, filter_: str = "*", break_on_first_match: bool = False
+    ) -> List[str]:
         """
         Busca ficheros recursivamente en las rutas indicadas y según el patrón indicado
         @param  paths   Rutas de búsqueda
@@ -1028,7 +1106,9 @@ class FLUtil(QtCore.QObject):
 
         return None if mtd is None else mtd.fieldType(fn)
 
-    def fieldLength(self, fn: str, tn: Optional[str], conn_name: str = "default") -> int:
+    def fieldLength(
+        self, fn: str, tn: Optional[str], conn_name: str = "default"
+    ) -> int:
         """
         Retorna la longitud de un campo
         @param fn. Nombre del campo
@@ -1046,7 +1126,9 @@ class FLUtil(QtCore.QObject):
 
         return 0 if mtd is None else mtd.fieldLength(fn)
 
-    def fieldNameToAlias(self, fn: str, tn: Optional[str], conn_name: str = "default") -> str:
+    def fieldNameToAlias(
+        self, fn: str, tn: Optional[str], conn_name: str = "default"
+    ) -> str:
         """
         Retorna el alias de un campo a partir de su nombre
         @param fn. Nombre del campo
@@ -1064,7 +1146,9 @@ class FLUtil(QtCore.QObject):
 
         return fn if mtd is None else mtd.fieldNameToAlias(fn)
 
-    def tableNameToAlias(self, tn: Optional[str], conn_name: str = "default") -> Optional[str]:
+    def tableNameToAlias(
+        self, tn: Optional[str], conn_name: str = "default"
+    ) -> Optional[str]:
         """
         Retorna el nombre de una tabla a partir de su alias
         @param tn. Nombre de la tabla
@@ -1082,7 +1166,9 @@ class FLUtil(QtCore.QObject):
 
         return None if mtd is None else mtd.alias()
 
-    def fieldAliasToName(self, an: str, tn: Optional[str], conn_name: str = "default") -> str:
+    def fieldAliasToName(
+        self, an: str, tn: Optional[str], conn_name: str = "default"
+    ) -> str:
 
         """
         Retorna el nombre de un campo a partir de su alias
@@ -1102,7 +1188,9 @@ class FLUtil(QtCore.QObject):
 
         return an if mtd is None else mtd.fieldAliasToName(an)
 
-    def fieldAllowNull(self, fn: str, tn: Optional[str], conn_name: str = "default") -> bool:
+    def fieldAllowNull(
+        self, fn: str, tn: Optional[str], conn_name: str = "default"
+    ) -> bool:
         """
         Retorna si el campo permite dejarse en blanco
         @param fn. Nombre del campo
@@ -1121,7 +1209,9 @@ class FLUtil(QtCore.QObject):
 
         return False if mtd is None else mtd.fieldAllowNull(fn)
 
-    def fieldIsPrimaryKey(self, fn: str, tn: Optional[str], conn_name: str = "default") -> bool:
+    def fieldIsPrimaryKey(
+        self, fn: str, tn: Optional[str], conn_name: str = "default"
+    ) -> bool:
         """
         Retorna si el campo es clave primaria de la tabla
         @param fn. Nombre del campo
@@ -1139,7 +1229,9 @@ class FLUtil(QtCore.QObject):
 
         return False if mtd is None else mtd.fieldIsPrimaryKey(fn)
 
-    def fieldIsCompoundKey(self, fn: str, tn: Optional[str], conn_name: str = "default") -> bool:
+    def fieldIsCompoundKey(
+        self, fn: str, tn: Optional[str], conn_name: str = "default"
+    ) -> bool:
         """
         Retorna si el campo es clave compuesta de la tabla
         @param fn. Nombre del campo
@@ -1161,7 +1253,9 @@ class FLUtil(QtCore.QObject):
         # field = None  # FIXME: field is not defined anywhere
         # return False if field is None else field.isCompoundKey()
 
-    def fieldDefaultValue(self, fn: str, tn: Optional[str], conn_name: str = "default") -> Any:
+    def fieldDefaultValue(
+        self, fn: str, tn: Optional[str], conn_name: str = "default"
+    ) -> Any:
         """
         Retorna el valor por defecto de un campo
         @param fn. Nombre del campo
@@ -1186,7 +1280,9 @@ class FLUtil(QtCore.QObject):
 
         return field.defaultValue()
 
-    def formatValue(self, t: str, v: Any, upper: bool, conn_name: str = "default") -> Any:
+    def formatValue(
+        self, t: str, v: Any, upper: bool, conn_name: str = "default"
+    ) -> Any:
         """
         Retorna valor formateado
         @param t. Tipo de campo

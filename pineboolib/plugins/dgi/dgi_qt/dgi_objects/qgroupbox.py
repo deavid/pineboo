@@ -23,7 +23,9 @@ class QGroupBox(QtWidgets.QGroupBox):
         # self._do_style()
         self.setFlat(True)
         if not config.value("ebcomportamiento/spacerLegacy", False):
-            self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+            self.setSizePolicy(
+                QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred
+            )
 
     def setLineWidth(self, width: int) -> None:
         self._line_width = width

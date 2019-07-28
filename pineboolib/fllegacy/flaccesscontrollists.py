@@ -83,7 +83,10 @@ class FLAccessControlLists(object):
             self.accessControlList_ = {}
 
         if aclXml and not util.domDocumentSetContent(doc, aclXml):
-            QtCore.qWarning("FLAccessControlList : " + FLUtil().tr("Lista de control de acceso errónea"))
+            QtCore.qWarning(
+                "FLAccessControlList : "
+                + FLUtil().tr("Lista de control de acceso errónea")
+            )
             return
 
         self.accessControlList_ = {}
@@ -103,7 +106,9 @@ class FLAccessControlLists(object):
                 ac = FLAccessControlFactory().create(e.tagName())
                 if ac:
                     ac.set(e)
-                    self.accessControlList_["%s::%s::%s" % (ac.type(), ac.name(), ac.user())] = ac
+                    self.accessControlList_[
+                        "%s::%s::%s" % (ac.type(), ac.name(), ac.user())
+                    ] = ac
                     no = no.nextSibling()
                     continue
 

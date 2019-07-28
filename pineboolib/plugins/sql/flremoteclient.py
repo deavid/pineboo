@@ -18,7 +18,9 @@ from typing import Any, Callable, Dict, List, Union, Optional
 logger = logging.getLogger(__name__)
 
 
-def base_create_dict(method: str, fun: str, id: int, arguments: List[Any] = []) -> Dict[str, Union[str, int, List[Any], Dict[str, Any]]]:
+def base_create_dict(
+    method: str, fun: str, id: int, arguments: List[Any] = []
+) -> Dict[str, Union[str, int, List[Any], Dict[str, Any]]]:
     data = [{"function": fun, "arguments": arguments, "id": id}]
     return {"method": method, "params": data, "jsonrpc": "2.0", "id": id}
 
@@ -137,11 +139,19 @@ class FLREMOTECLIENT(object):
         self.send_to_server(
             self.create_dict(
                 "refreshQuery",
-                {"cursor_id": cursor.id_, "curname": "%s_%s" % (self.id_, curname), "fields": fields, "table": table, "where": where},
+                {
+                    "cursor_id": cursor.id_,
+                    "curname": "%s_%s" % (self.id_, curname),
+                    "fields": fields,
+                    "table": table,
+                    "where": where,
+                },
             )
         )
 
-    def refreshFetch(self, number, curname, table, cursor, fields, where_filter) -> None:
+    def refreshFetch(
+        self, number, curname, table, cursor, fields, where_filter
+    ) -> None:
         self.send_to_server(
             self.create_dict(
                 "refreshFetch",
@@ -191,19 +201,27 @@ class cursor_class(object):
 
     def execute(self, sql) -> None:
         self.last_sql = sql
-        self.data_ = self.driver_.send_to_server(self.driver_.create_dict("execute", {"cursor_id": self.id_, "sql": sql}))
+        self.data_ = self.driver_.send_to_server(
+            self.driver_.create_dict("execute", {"cursor_id": self.id_, "sql": sql})
+        )
         self.current_ = 0
 
     def close(self) -> None:
-        self.driver_.send_to_server(self.driver_.create_dict("close", {"cursor_id": self.id_}))
+        self.driver_.send_to_server(
+            self.driver_.create_dict("close", {"cursor_id": self.id_})
+        )
 
     def fetchone(self) -> Any:
-        ret_ = self.driver_.send_to_server(self.driver_.create_dict("fetchone", {"cursor_id": self.id_}))
+        ret_ = self.driver_.send_to_server(
+            self.driver_.create_dict("fetchone", {"cursor_id": self.id_})
+        )
         # print(self.id_, "**", self.last_sql, ret_)
         return ret_
 
     def fetchall(self) -> Any:
-        ret_ = self.driver_.send_to_server(self.driver_.create_dict("fetchall", {"cursor_id": self.id_}))
+        ret_ = self.driver_.send_to_server(
+            self.driver_.create_dict("fetchall", {"cursor_id": self.id_})
+        )
         # print(self.id_, "**", self.last_sql, ret_)
         return ret_
 
@@ -211,7 +229,9 @@ class cursor_class(object):
         return self
 
     def __next__(self) -> Any:
-        ret = self.driver_.send_to_server(self.driver_.create_dict("fetchone", {"cursor_id": self.id_}))
+        ret = self.driver_.send_to_server(
+            self.driver_.create_dict("fetchone", {"cursor_id": self.id_})
+        )
         if ret is None:
             raise StopIteration
         return ret
@@ -229,7 +249,9 @@ class conn_class(object):
         self.list_cursor = []
 
     def is_valid(self) -> Any:
-        db_name_server = self.driver_.send_to_server(self.driver_.create_dict("db_name"))
+        db_name_server = self.driver_.send_to_server(
+            self.driver_.create_dict("db_name")
+        )
         return self.db_name_ == db_name_server
 
     def cursor(self) -> cursor_class:

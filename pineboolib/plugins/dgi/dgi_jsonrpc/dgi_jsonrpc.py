@@ -207,7 +207,10 @@ class dgi_jsonrpc(dgi_schema):
 
     def showWidget(self, widget) -> None:
         if self._par:
-            self._par.addQueque("%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
+            self._par.addQueque(
+                "%s_showWidget" % widget.__class__.__module__,
+                self._WJS[widget.__class__.__module__],
+            )
 
     def __getattr__(self, name) -> Any:
         return super().resolveObject(self._name, name)

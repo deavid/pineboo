@@ -53,7 +53,9 @@ class sql_inspector(object):
                     table_name = self._alias[table_name]
                     return self.fieldNameToPos("%s.%s" % (table_name, field_name))
 
-        raise Exception("No se encuentra el campo %s el la query:\n%s" % (name, self._sql))
+        raise Exception(
+            "No se encuentra el campo %s el la query:\n%s" % (name, self._sql)
+        )
 
     def posToFieldName(self, pos) -> Any:
 
@@ -175,7 +177,10 @@ class sql_inspector(object):
         type_ = "double"
         if pos not in self._mtd_fields.keys():
             if pos not in self._field_names.values():
-                logger.warning("SQL_TOOLS : resolve_empty_value : No se encuentra la posición %s", pos)
+                logger.warning(
+                    "SQL_TOOLS : resolve_empty_value : No se encuentra la posición %s",
+                    pos,
+                )
                 return None
         else:
             mtd = self._mtd_fields[pos]
@@ -200,7 +205,9 @@ class sql_inspector(object):
 
         return ret_
 
-    def resolve_value(self, pos, value: Union[bytes, float, str, datetime.time], raw=False) -> Any:
+    def resolve_value(
+        self, pos, value: Union[bytes, float, str, datetime.time], raw=False
+    ) -> Any:
 
         if not self.mtd_fields():
             if isinstance(value, datetime.time):
@@ -211,7 +218,9 @@ class sql_inspector(object):
         if pos not in self._mtd_fields.keys():
             if pos not in self._field_names.values():
                 print(pos, self._field_names)
-                logger.warning("SQL_TOOLS : resolve_value : No se encuentra la posición %s", pos)
+                logger.warning(
+                    "SQL_TOOLS : resolve_value : No se encuentra la posición %s", pos
+                )
                 return None
         else:
             mtd = self._mtd_fields[pos]
@@ -361,7 +370,11 @@ def resolve_where_params(key: str, valor: Optional[str], mtd_table) -> str:
     if field is not None:
         field_type = field.type()
     else:
-        logger.warning("pineboolib.utils.resolve_where_params No se encuentra el campo %s en la tabla %s.", campo, mtd_table.name())
+        logger.warning(
+            "pineboolib.utils.resolve_where_params No se encuentra el campo %s en la tabla %s.",
+            campo,
+            mtd_table.name(),
+        )
         return ""
     # valor = aqApp.db().manager().formatValue(field_type , valor, False)
 

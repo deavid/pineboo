@@ -195,7 +195,9 @@ class AQOdsRow(object):
             self.style_cell_text_ = None
 
         else:
-            if isinstance(opt, list):  # Si es lista , Insertamos todos los parámetros uno a uno
+            if isinstance(
+                opt, list
+            ):  # Si es lista , Insertamos todos los parámetros uno a uno
                 for l in opt:
                     self.opIn(l)
 
@@ -205,7 +207,12 @@ class AQOdsRow(object):
                 cell, style = self.__newCell__()
 
                 # p = P()
-                frame = Frame(width="%spt" % opt.width_, height="%spt" % opt.height_, x="%spt" % opt.x_, y="%spt" % opt.y_)
+                frame = Frame(
+                    width="%spt" % opt.width_,
+                    height="%spt" % opt.height_,
+                    x="%spt" % opt.x_,
+                    y="%spt" % opt.y_,
+                )
                 frame.addElement(Image(href=href))
                 # p.addElement(frame)
                 cell.addElement(frame)
@@ -214,7 +221,10 @@ class AQOdsRow(object):
                 # self.opIn(href)
                 # print("FIXME:: Vacio", href)
             elif isinstance(opt, odf.element.Element):
-                if opt.tagName in ("style:paragraph-properties", "style:table-cell-properties"):
+                if opt.tagName in (
+                    "style:paragraph-properties",
+                    "style:table-cell-properties",
+                ):
                     import copy
 
                     prop = copy.copy(opt)
@@ -231,9 +241,14 @@ class AQOdsRow(object):
 
     def __newCell__(self) -> Tuple[Any, Any]:
 
-        style_cell = style.Style(name="stylecell_%s_%s" % (len(self.cells_list_), self.sheet_.rowsCount()), family="table-cell")
+        style_cell = style.Style(
+            name="stylecell_%s_%s" % (len(self.cells_list_), self.sheet_.rowsCount()),
+            family="table-cell",
+        )
         if self.row_color_:  # Guardo color si hay
-            style_cell.addElement(style.TableCellProperties(backgroundcolor="#%s" % self.row_color_))
+            style_cell.addElement(
+                style.TableCellProperties(backgroundcolor="#%s" % self.row_color_)
+            )
 
         for prop in self.property_cell_:  # Guardo prop cell si hay
             style_cell.addElement(prop)

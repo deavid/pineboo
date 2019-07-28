@@ -60,7 +60,9 @@ def char_data(data: str) -> None:
 
 def unmap(lines: Iterable[str]) -> List[str]:
 
-    runmap = re.compile(r"^(?P<depth>/*)(?P<tagname>\w+)(?P<attrs>&[^\(]+)*(?P<txt>\(.+\))?$")
+    runmap = re.compile(
+        r"^(?P<depth>/*)(?P<tagname>\w+)(?P<attrs>&[^\(]+)*(?P<txt>\(.+\))?$"
+    )
     # depthlevel
     # tagname
     elementpool: List[str] = []
@@ -128,11 +130,30 @@ def main() -> None:
     parser = OptionParser()
     # parser.add_option("-f", "--file", dest="filename",
     #                  help="write report to FILE", metavar="FILE")
-    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
+    parser.add_option(
+        "-q",
+        "--quiet",
+        action="store_false",
+        dest="verbose",
+        default=True,
+        help="don't print status messages to stdout",
+    )
 
-    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
+    parser.add_option(
+        "--optdebug",
+        action="store_true",
+        dest="optdebug",
+        default=False,
+        help="debug optparse module",
+    )
 
-    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
+    parser.add_option(
+        "--debug",
+        action="store_true",
+        dest="debug",
+        default=False,
+        help="prints lots of useless messages",
+    )
 
     (options, args) = parser.parse_args()
     if options.optdebug:

@@ -11,7 +11,15 @@ class ISqlCursor(object):
     RegExp = 1
     Function = 2
 
-    def __init__(self, name: str = None, autopopulate: bool = True, connectionName_or_db: Any = None, cR=None, r=None, parent=None):
+    def __init__(
+        self,
+        name: str = None,
+        autopopulate: bool = True,
+        connectionName_or_db: Any = None,
+        cR=None,
+        r=None,
+        parent=None,
+    ):
         super().__init__()
 
     def init(self, name: str, autopopulate, cR, r) -> None:

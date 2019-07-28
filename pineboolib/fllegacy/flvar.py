@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
-from pineboolib.application.database.utils import sqlSelect, sqlDelete, sqlUpdate, sqlInsert
+from pineboolib.application.database.utils import (
+    sqlSelect,
+    sqlDelete,
+    sqlUpdate,
+    sqlInsert,
+)
 from pineboolib.fllegacy.flapplication import aqApp
 
 from PyQt5 import QtCore  # type: ignore

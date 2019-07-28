@@ -80,7 +80,9 @@ class FLSQLITE(object):
         return self.name_
 
     def safe_load(self) -> Any:
-        return check_dependencies({"sqlite3": "sqlite3", "sqlalchemy": "sqlAlchemy"}, False)
+        return check_dependencies(
+            {"sqlite3": "sqlite3", "sqlalchemy": "sqlAlchemy"}, False
+        )
 
     def isOpen(self) -> bool:
         return self.open_
@@ -118,7 +120,9 @@ class FLSQLITE(object):
 
         import sqlite3
 
-        if project.conn is not None and self.db_filename == getattr(project.conn, "db_name", None):
+        if project.conn is not None and self.db_filename == getattr(
+            project.conn, "db_name", None
+        ):
             self.conn_ = project.conn.conn
         else:
             self.conn_ = sqlite3.connect("%s" % self.db_filename)
@@ -267,8 +271,14 @@ class FLSQLITE(object):
             self.logger.debug("Creando savepoint sv_%s" % n)
             cursor.execute("SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError("No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
-            self.logger.error("%s:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s", __name__, n)
+            self.setLastError(
+                "No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n
+            )
+            self.logger.error(
+                "%s:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s",
+                __name__,
+                n,
+            )
             return False
 
         return True
@@ -291,8 +301,15 @@ class FLSQLITE(object):
         try:
             cursor.execute("ROLLBACK TRANSACTION TO SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
-            self.logger.error("%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s", __name__, n)
+            self.setLastError(
+                "No se pudo rollback a punto de salvaguarda",
+                "ROLLBACK TO SAVEPOINTt sv_%s" % n,
+            )
+            self.logger.error(
+                "%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s",
+                __name__,
+                n,
+            )
             return False
 
         return True
@@ -312,7 +329,11 @@ class FLSQLITE(object):
             cursor.execute("END TRANSACTION")
         except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
-            self.logger.error("%s:: No se pudo aceptar la transacción COMMIT. %s", __name__, traceback.format_exc())
+            self.logger.error(
+                "%s:: No se pudo aceptar la transacción COMMIT. %s",
+                __name__,
+                traceback.format_exc(),
+            )
             return False
 
         return True
@@ -336,7 +357,9 @@ class FLSQLITE(object):
             cursor.execute(q)
         except Exception:
             self.logger.error("SQL3Driver:: No se pudo ejecutar la query %s" % q, q)
-            self.setLastError("%s::No se pudo ejecutar la query.\n%s" % (__name__, q), q)
+            self.setLastError(
+                "%s::No se pudo ejecutar la query.\n%s" % (__name__, q), q
+            )
 
         return cursor
 
@@ -349,7 +372,9 @@ class FLSQLITE(object):
             cursor.execute("ROLLBACK TRANSACTION")
         except Exception:
             self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
-            self.logger.error("SQL3Driver:: No se pudo deshacer la transacción ROLLBACK")
+            self.logger.error(
+                "SQL3Driver:: No se pudo deshacer la transacción ROLLBACK"
+            )
             return False
 
         return True
@@ -378,8 +403,14 @@ class FLSQLITE(object):
         try:
             cursor.execute("RELEASE SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError("No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
-            self.logger.error("SQL3Driver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s", n)
+            self.setLastError(
+                "No se pudo release a punto de salvaguarda",
+                "RELEASE SAVEPOINT sv_%s" % n,
+            )
+            self.logger.error(
+                "SQL3Driver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s",
+                n,
+            )
             return False
 
         return True
@@ -431,7 +462,9 @@ class FLSQLITE(object):
 
         cursor = self.cursor()
 
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='%s'" % name)
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='%s'" % name
+        )
 
         result = cursor.fetchall()
 
@@ -452,8 +485,12 @@ class FLSQLITE(object):
                 unlocks = unlocks + 1
 
         if unlocks > 1:
-            self.logger.debug(u"FLManager : No se ha podido crear la tabla " + tmd.name())
-            self.logger.debug(u"FLManager : Hay mas de un campo tipo unlock. Solo puede haber uno.")
+            self.logger.debug(
+                u"FLManager : No se ha podido crear la tabla " + tmd.name()
+            )
+            self.logger.debug(
+                u"FLManager : Hay mas de un campo tipo unlock. Solo puede haber uno."
+            )
             return None
 
         i = 1
@@ -495,7 +532,9 @@ class FLSQLITE(object):
                     self.logger.debug(
                         QApplication.tr("FLManager : Tabla-> ")
                         + tmd.name()
-                        + QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ")
+                        + QApplication.tr(
+                            " . Se ha intentado poner una segunda clave primaria para el campo "
+                        )
                         + field.name()
                         + QApplication.tr(" , pero el campo ")
                         + primaryKey
@@ -520,7 +559,11 @@ class FLSQLITE(object):
         sql = sql + ");"
         create_index = ""
         if tmd.primaryKey():
-            create_index = "CREATE INDEX %s_pkey ON %s (%s)" % (tmd.name(), tmd.name(), tmd.primaryKey())
+            create_index = "CREATE INDEX %s_pkey ON %s (%s)" % (
+                tmd.name(),
+                tmd.name(),
+                tmd.primaryKey(),
+            )
 
         # q = PNSqlQuery()
         # q.setForwardOnly(True)
@@ -582,7 +625,10 @@ class FLSQLITE(object):
             if field1[1] == "stringlist" and not field2[1] in ("stringlist", "pixmap"):
                 ret = True
 
-            elif field1[1] == "string" and (not field2[1] in ("string", "time", "date") or not field1[3] == field2[3]):
+            elif field1[1] == "string" and (
+                not field2[1] in ("string", "time", "date")
+                or not field1[3] == field2[3]
+            ):
                 if field2[1] in ("time", "date") and field1[3] == 20:
                     ret = False
                 else:
@@ -628,7 +674,12 @@ class FLSQLITE(object):
             stream = self.db_.managerModules().contentCached("%s.mtd" % tablename)
             util = FLUtil()
             if not util.domDocumentSetContent(doc, stream):
-                self.logger.warning("FLManager : " + QApplication.tr("Error al cargar los metadatos para la tabla %1").arg(tablename))
+                self.logger.warning(
+                    "FLManager : "
+                    + QApplication.tr(
+                        "Error al cargar los metadatos para la tabla %1"
+                    ).arg(tablename)
+                )
 
                 return self.recordInfo2(tablename)
 
@@ -960,7 +1011,9 @@ class FLSQLITE(object):
                 listOldBks.append(l)
 
         qry.exec_("select nombre from flfiles")
-        util.createProgressDialog(util.tr("Borrando backups"), len(listOldBks) + qry.size() + 5)
+        util.createProgressDialog(
+            util.tr("Borrando backups"), len(listOldBks) + qry.size() + 5
+        )
         while qry.next():
             item = qry.value(0)
             if rx.indexIn(item) > -1 or rx2.indexIn(item) > -1:

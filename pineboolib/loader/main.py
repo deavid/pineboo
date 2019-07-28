@@ -67,9 +67,16 @@ def setup_gui(app: QtCore.QCoreApplication, options: Values):
     from pineboolib.application.utils.mobilemode import is_mobile_mode
     from PyQt5 import QtGui  # type: ignore
 
-    noto_fonts = ["NotoSans-BoldItalic.ttf", "NotoSans-Bold.ttf", "NotoSans-Italic.ttf", "NotoSans-Regular.ttf"]
+    noto_fonts = [
+        "NotoSans-BoldItalic.ttf",
+        "NotoSans-Bold.ttf",
+        "NotoSans-Italic.ttf",
+        "NotoSans-Regular.ttf",
+    ]
     for fontfile in noto_fonts:
-        QtGui.QFontDatabase.addApplicationFont(filedir("../share/fonts/Noto_Sans", fontfile))
+        QtGui.QFontDatabase.addApplicationFont(
+            filedir("../share/fonts/Noto_Sans", fontfile)
+        )
 
     styleA = config.value("application/style", None)
     if styleA is None:
@@ -162,10 +169,16 @@ def exec_main(options: Values) -> int:
     _DGI = load_dgi(options.dgi, options.dgi_parameter)
 
     if _DGI.useDesktop() and not options.enable_gui:
-        raise Exception("Selected DGI <%s> is not compatible with <pineboo-core>. Use <pineboo> instead" % options.dgi)
+        raise Exception(
+            "Selected DGI <%s> is not compatible with <pineboo-core>. Use <pineboo> instead"
+            % options.dgi
+        )
 
     if not _DGI.useDesktop() and options.enable_gui:
-        logger.info("Selected DGI <%s> does not need graphical interface. Use <pineboo-core> for better results" % options.dgi)
+        logger.info(
+            "Selected DGI <%s> does not need graphical interface. Use <pineboo-core> for better results"
+            % options.dgi
+        )
 
     if not _DGI.useMLDefault():
         # When a particular DGI doesn't want the standard init, we stop loading here
@@ -212,7 +225,10 @@ def exec_main(options: Values) -> int:
         import importlib  # FIXME: Delete dynamic import and move this code between Project and DGI plugins
 
         project.main_form = (
-            importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (project.main_form_name, project.main_form_name))
+            importlib.import_module(
+                "pineboolib.plugins.mainform.%s.%s"
+                % (project.main_form_name, project.main_form_name)
+            )
             if _DGI.localDesktop()
             else _DGI.mainForm()
         )
@@ -250,5 +266,11 @@ def exec_main(options: Values) -> int:
 
     from .init_project import init_project
 
-    ret = init_project(_DGI, options, project, project.main_form if _DGI.useDesktop() else None, project.app)
+    ret = init_project(
+        _DGI,
+        options,
+        project,
+        project.main_form if _DGI.useDesktop() else None,
+        project.app,
+    )
     return ret

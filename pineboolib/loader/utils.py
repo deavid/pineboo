@@ -12,8 +12,12 @@ def monkey_patch_connect() -> None:
     """
     from PyQt5 import QtCore  # type: ignore
 
-    logger.warning("--trace-signals es experimental. Tiene problemas de memoria y falla en llamadas con un argumento (False)")
-    logger.warning("... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa.")
+    logger.warning(
+        "--trace-signals es experimental. Tiene problemas de memoria y falla en llamadas con un argumento (False)"
+    )
+    logger.warning(
+        "... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa."
+    )
 
     class BoundSignal:
         _CONNECT = QtCore.pyqtBoundSignal.connect  # type: ignore
@@ -31,13 +35,17 @@ def monkey_patch_connect() -> None:
                     # print("Calling slot: %r %r" % (slot, args))
                     ret = slot(*args)
                 except Exception:
-                    logger.error("Unhandled exception in slot %r (%r): %r" % (slot, self, args))
+                    logger.error(
+                        "Unhandled exception in slot %r (%r): %r" % (slot, self, args)
+                    )
                     logger.error("-- Connection --")
                     logger.error(traceback.format_list(connect_stack)[-2].rstrip())
                     last_emit_stack = BoundSignal._LAST_EMITTED_SIGNAL.get(selfid, None)
                     if last_emit_stack:
                         logger.error("-- Last signal emmitted --")
-                        logger.error(traceback.format_list(last_emit_stack)[-2].rstrip())
+                        logger.error(
+                            traceback.format_list(last_emit_stack)[-2].rstrip()
+                        )
                     logger.error("-- Slot traceback --")
                     logger.error(traceback.format_exc())
                 return ret

@@ -33,7 +33,9 @@ class FLTranslations(object):
     @return Boolean. Proceso realizado correctamente
     """
 
-    def loadTsFile(self, tor: Any, ts_file_name: Union[bytes, int, str], verbose) -> bool:
+    def loadTsFile(
+        self, tor: Any, ts_file_name: Union[bytes, int, str], verbose
+    ) -> bool:
         # qm_file_name = "%s.qm" % ts_file_name[:-3]
         ok = False
         if os.path.exists(ts_file_name):
@@ -69,7 +71,9 @@ class FLTranslations(object):
     @param stripped. No usado
     """
 
-    def lrelease(self, ts_input_file: str, qm_output_file: str, stripped: bool = True) -> None:
+    def lrelease(
+        self, ts_input_file: str, qm_output_file: str, stripped: bool = True
+    ) -> None:
         from pineboolib.application import project
 
         verbose = False
@@ -105,7 +109,9 @@ class FLTranslations(object):
                         self.releaseTsFile(t, verbose, stripped)
 
             if not metTranslations:
-                self.logger.warning("Met no 'TRANSLATIONS' entry in project file '%s'", ts_input_file)
+                self.logger.warning(
+                    "Met no 'TRANSLATIONS' entry in project file '%s'", ts_input_file
+                )
 
 
 """

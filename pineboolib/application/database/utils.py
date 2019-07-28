@@ -134,7 +134,13 @@ def nextCounter(*args) -> Any:
         _len = field.length() - len(serie)
         cadena = None
 
-        where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (name, field.length(), name, len(serie), serie)
+        where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (
+            name,
+            field.length(),
+            name,
+            len(serie),
+            serie,
+        )
         select = "substring(%s FROM %d) as %s" % (name, len(serie) + 1, name)
         q = PNSqlQuery(None, cursor_.db().connectionName())
         q.setForwardOnly(True)
@@ -170,7 +176,14 @@ def nextCounter(*args) -> Any:
         return None
 
 
-def sqlSelect(f: str, s: str, w, tL: Optional[Union[str, List]] = None, size: int = 0, connName: str = "default") -> Any:
+def sqlSelect(
+    f: str,
+    s: str,
+    w,
+    tL: Optional[Union[str, List]] = None,
+    size: int = 0,
+    connName: str = "default",
+) -> Any:
     """
     Ejecuta una query de tipo select, devolviendo los resultados del primer registro encontrado
 
@@ -228,7 +241,9 @@ def quickSqlSelect(f: str, s: str, w: str, connName: str = "default") -> Any:
     return q.value(0) if q.first() else False
 
 
-def sqlInsert(t, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connName: str = "default") -> Any:
+def sqlInsert(
+    t, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connName: str = "default"
+) -> Any:
     """
     Realiza la inserción de un registro en una tabla mediante un objeto FLSqlCursor
 
@@ -263,7 +278,13 @@ def sqlInsert(t, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connNam
     return c.commitBuffer()
 
 
-def sqlUpdate(t, fL: Union[str, List[str]], vL: Union[str, List[str]], w, connName: str = "default") -> bool:
+def sqlUpdate(
+    t,
+    fL: Union[str, List[str]],
+    vL: Union[str, List[str]],
+    w,
+    connName: str = "default",
+) -> bool:
     """
     Realiza la modificación de uno o más registros en una tabla mediante un objeto FLSqlCursor
 

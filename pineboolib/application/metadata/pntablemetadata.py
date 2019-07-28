@@ -282,7 +282,9 @@ class PNTableMetaData(ITableMetaData):
                 ret_ = 300
             else:
                 # FIXME: Falta stringlist e int
-                self.logger.warning("FIXME:: No hay definido un valor numérico para el tipo %s", type_)
+                self.logger.warning(
+                    "FIXME:: No hay definido un valor numérico para el tipo %s", type_
+                )
 
         return ret_
 
@@ -313,7 +315,9 @@ class PNTableMetaData(ITableMetaData):
         if field_name in self.fieldNames():
             return self.fieldNames().index(field_name)
 
-        self.logger.warning("FLTableMetaData.fieldIsIndex(%s) No encontrado", field_name)
+        self.logger.warning(
+            "FLTableMetaData.fieldIsIndex(%s) No encontrado", field_name
+        )
         return -1
 
     """
@@ -455,7 +459,10 @@ class PNTableMetaData(ITableMetaData):
 
             if relationList:
                 for itR in relationList:
-                    if itR.foreignField() == str(fFN).lower() and itR.foreignTable() == str(fTN).lower():
+                    if (
+                        itR.foreignField() == str(fFN).lower()
+                        and itR.foreignTable() == str(fTN).lower()
+                    ):
                         return itR
 
             return False
@@ -684,7 +691,9 @@ class PNTableMetaData(ITableMetaData):
     def indexFieldObject(self, position: int) -> "PNFieldMetaData":
         return self.d.fieldList_[position]
 
-    def _indexFieldObject(self, position: int, show_exception: bool = True) -> Optional["PNFieldMetaData"]:
+    def _indexFieldObject(
+        self, position: int, show_exception: bool = True
+    ) -> Optional["PNFieldMetaData"]:
         i = 0
         ret = None
         for field in self.d.fieldList_:
@@ -695,7 +704,11 @@ class PNTableMetaData(ITableMetaData):
             i += 1
 
         if ret is None and show_exception:
-            self.logger.warning("FLTableMetadata(%s).indexFieldObject() Posicion %s no encontrado", self.name(), position)
+            self.logger.warning(
+                "FLTableMetadata(%s).indexFieldObject() Posicion %s no encontrado",
+                self.name(),
+                position,
+            )
         return ret
 
 

@@ -51,7 +51,9 @@ class ProcessFile(object):
 
 
 class LineNumber(object):
-    def __init__(self, letter: Union[Sized, Mapping[int, Any]], lines: Mapping[int, Mapping]) -> None:
+    def __init__(
+        self, letter: Union[Sized, Mapping[int, Any]], lines: Mapping[int, Mapping]
+    ) -> None:
         self.nl = 0
         if len(letter) > 1:
             self.diffFrom = letter[0]
@@ -92,7 +94,15 @@ class LineNumber(object):
 
 def appliedDiff(
     C, A, B, prefer: str = "C", debug=False, quiet=False, swap=False
-) -> List[Tuple[str, str, Tuple[int, int, int], Optional[str], Union[str, protocols.SupportsFind, Mapping[int, Any]]]]:
+) -> List[
+    Tuple[
+        str,
+        str,
+        Tuple[int, int, int],
+        Optional[str],
+        Union[str, protocols.SupportsFind, Mapping[int, Any]],
+    ]
+]:
     diffAB = list(difflib.ndiff(A.sortednames, B.sortednames))
     diffAC = list(difflib.ndiff(A.sortednames, C.sortednames))
 
@@ -164,11 +174,17 @@ def appliedDiff(
             if debug:
                 print("WARNING: Omitting previously added block <%s>" % linetext)
 
-            while patchedResult[-1][4][0] == "#" and patchedResult[-1][4].find("separator") >= 0:
+            while (
+                patchedResult[-1][4][0] == "#"
+                and patchedResult[-1][4].find("separator") >= 0
+            ):
                 # print "sep//",
                 patchedResult.pop()
 
-            while patchedResult[-1][4][0] == "#" and patchedResult[-1][4].find("separator") == -1:
+            while (
+                patchedResult[-1][4][0] == "#"
+                and patchedResult[-1][4].find("separator") == -1
+            ):
                 # print "comm//",
                 patchedResult.pop()
             # if patchedResult[-1][4][0]=="#": patchedResult.pop()
@@ -207,7 +223,9 @@ def appliedDiff(
                     # Removing twice!
                     nBase.error = "removing-twice"
                 else:
-                    print("??", nRemote.letter, nDiffRemote.symbol(), nDiffRemote.line())
+                    print(
+                        "??", nRemote.letter, nDiffRemote.symbol(), nDiffRemote.line()
+                    )
             else:
                 next(nRemote)
 
@@ -227,7 +245,12 @@ def appliedDiff(
                     next(nDiffRemote)
                 if nDiffRemote.symbol() == "+":
                     if not quiet:
-                        print("!~", nRemote.letter, nDiffRemote.symbol(), nDiffRemote.line())
+                        print(
+                            "!~",
+                            nRemote.letter,
+                            nDiffRemote.symbol(),
+                            nDiffRemote.line(),
+                        )
                     next(nDiffRemote)
                     next(nRemote)
 
@@ -432,8 +455,14 @@ def writeAlignedFile(C, A, B, prefer="C", debug=False, quiet=False, swap=False) 
                 if rs1:
                     if lastclass != rs1.group(2):
                         # print "INFO: Changing >> class", thisclass, "extends",rs1.group(2), "--> extends", lastclass
-                        text = re.sub(r"class (\w+) extends (\w+)", "class %s extends %s" % (thisclass, lastclass), text)
-                rs2 = re.search(r"function .*%s\(.*context.*\) { (\w+)" % thisclass, text)
+                        text = re.sub(
+                            r"class (\w+) extends (\w+)",
+                            "class %s extends %s" % (thisclass, lastclass),
+                            text,
+                        )
+                rs2 = re.search(
+                    r"function .*%s\(.*context.*\) { (\w+)" % thisclass, text
+                )
                 if rs2:
                     if lastclass != rs2.group(1):
                         badline = rs2.group(0)
@@ -458,11 +487,30 @@ def main() -> None:
     #                action="store_false", dest="verbose", default=True,
     #                help="don't print status messages to stdout")
 
-    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
+    parser.add_option(
+        "--optdebug",
+        action="store_true",
+        dest="optdebug",
+        default=False,
+        help="debug optparse module",
+    )
 
-    parser.add_option("-q", "--quiet", action="store_true", dest="quiet", default=False, help="don't print status messages to stdout")
+    parser.add_option(
+        "-q",
+        "--quiet",
+        action="store_true",
+        dest="quiet",
+        default=False,
+        help="don't print status messages to stdout",
+    )
 
-    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
+    parser.add_option(
+        "--debug",
+        action="store_true",
+        dest="debug",
+        default=False,
+        help="prints lots of useless messages",
+    )
 
     (options, args) = parser.parse_args()
     if options.optdebug:

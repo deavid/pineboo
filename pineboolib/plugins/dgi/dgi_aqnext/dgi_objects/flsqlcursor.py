@@ -59,12 +59,23 @@ class DelayedObjectProxyLoader(object):
                 # rel_mtd = aqApp.db().manager().metadata(relation_table_name)
 
                 relation_mtd = PNRelationMetaData(
-                    relation_table_name, field_relation.field(), PNRelationMetaData.RELATION_1M, False, False, True
+                    relation_table_name,
+                    field_relation.field(),
+                    PNRelationMetaData.RELATION_1M,
+                    False,
+                    False,
+                    True,
                 )
                 relation_mtd.setField(relation_field_name)
 
                 if relation_table_name and relation_field_name:
-                    self.cursor_tree_dict[key_] = FLSqlCursor(relation_table_name, True, self._obj.conn(), self._obj, relation_mtd)
+                    self.cursor_tree_dict[key_] = FLSqlCursor(
+                        relation_table_name,
+                        True,
+                        self._obj.conn(),
+                        self._obj,
+                        relation_mtd,
+                    )
 
             rel_cursor = self.cursor_tree_dict[key_]
 
@@ -297,13 +308,22 @@ class meta_model(object):
                     # rel_mtd = aqApp.db().manager().metadata(relation_table_name)
 
                     relation_mtd = PNRelationMetaData(
-                        relation_table_name, field_relation.field(), PNRelationMetaData.RELATION_1M, False, False, True
+                        relation_table_name,
+                        field_relation.field(),
+                        PNRelationMetaData.RELATION_1M,
+                        False,
+                        False,
+                        True,
                     )
                     relation_mtd.setField(relation_field_name)
 
                     if relation_table_name and relation_field_name:
                         self.cursor_tree_dict[key_] = FLSqlCursor(
-                            relation_table_name, True, self._cursor.conn(), self._cursor, relation_mtd
+                            relation_table_name,
+                            True,
+                            self._cursor.conn(),
+                            self._cursor,
+                            relation_mtd,
                         )
 
                 rel_cursor = self.cursor_tree_dict[key_]

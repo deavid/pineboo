@@ -76,7 +76,12 @@ def loadUi(form_path: str, widget, parent=None) -> None:
         receiv_elem = xmlconnection.find("receiver")
         slot_elem = xmlconnection.find("slot")
 
-        if sender_elem is None or signal_elem is None or receiv_elem is None or slot_elem is None:
+        if (
+            sender_elem is None
+            or signal_elem is None
+            or receiv_elem is None
+            or slot_elem is None
+        ):
             continue
 
         sender_name = sender_elem.text
@@ -101,7 +106,9 @@ def loadUi(form_path: str, widget, parent=None) -> None:
         if sender_name == formname:
             sender = widget
         else:
-            sender = widget.findChild(QObject, sender_name, QtCore.Qt.FindChildrenRecursively)
+            sender = widget.findChild(
+                QObject, sender_name, QtCore.Qt.FindChildrenRecursively
+            )
 
         # if not project.DGI.localDesktop():
         #    wui = hasattr(widget, "ui_") and sender_name in widget.ui_
@@ -128,7 +135,13 @@ def loadUi(form_path: str, widget, parent=None) -> None:
                 else None
             )
             fn_name = slot_name.rstrip("()")
-            logger.trace("Conectando de UI a QS: (%r.%r -> %r.%r)", sender_name, signal_name, receiv_name, fn_name)
+            logger.trace(
+                "Conectando de UI a QS: (%r.%r -> %r.%r)",
+                sender_name,
+                signal_name,
+                receiv_name,
+                fn_name,
+            )
 
             ifx = widget
             # if hasattr(widget, "iface"):
@@ -140,11 +153,20 @@ def loadUi(form_path: str, widget, parent=None) -> None:
                     #    getattr(ifx, fn_name))
                     pncontrolsfactory.connect(sender, signal_name, ifx, fn_name)
                 except Exception:
-                    logger.exception("Error connecting: %s %s %s %s %s", sender, signal_name, receiver, slot_name, getattr(ifx, fn_name))
+                    logger.exception(
+                        "Error connecting: %s %s %s %s %s",
+                        sender,
+                        signal_name,
+                        receiver,
+                        slot_name,
+                        getattr(ifx, fn_name),
+                    )
                 continue
 
         if receiver is None:
-            receiver = widget.findChild(QObject, receiv_name, QtCore.Qt.FindChildrenRecursively)
+            receiver = widget.findChild(
+                QObject, receiv_name, QtCore.Qt.FindChildrenRecursively
+            )
 
         if receiver is None:
             from pineboolib import qsa
@@ -156,7 +178,9 @@ def loadUi(form_path: str, widget, parent=None) -> None:
                 if sender_name in project.actions.keys():
                     receiver = project.actions[sender_name]
                 else:
-                    logger.warning("Sender action %s not found.Connection skiped", sender_name)
+                    logger.warning(
+                        "Sender action %s not found.Connection skiped", sender_name
+                    )
                     continue
 
         if receiver is None:
@@ -166,7 +190,13 @@ def loadUi(form_path: str, widget, parent=None) -> None:
         try:
             getattr(sender, sg_name).connect(getattr(receiver, sl_name))
         except Exception:
-            logger.exception("Error connecting: %s:%s %s:%s", sender, signal_name, receiver, slot_name)
+            logger.exception(
+                "Error connecting: %s:%s %s:%s",
+                sender,
+                signal_name,
+                receiver,
+                slot_name,
+            )
 
     # Cargamos menubar ...
     xmlmenubar = root.find("menubar")
@@ -232,7 +262,12 @@ def loadMenuBar(xml: ET.Element, widget) -> None:
             elif name == "geometry":
                 geo_ = x.find("rect")
                 if geo_:
-                    ex, ey, ew, eh = geo_.find("x"), geo_.find("y"), geo_.find("width"), geo_.find("height")
+                    ex, ey, ew, eh = (
+                        geo_.find("x"),
+                        geo_.find("y"),
+                        geo_.find("width"),
+                        geo_.find("height"),
+                    )
                     if ex is None or ey is None or ew is None or eh is None:
                         continue
                     x1 = ex.text
@@ -314,7 +349,9 @@ def loadAction(action, widget) -> None:
 
 def createWidget(classname: str, parent=None) -> Any:
 
-    cls = getattr(pncontrolsfactory, classname, None) or getattr(QtWidgets, classname, None)
+    cls = getattr(pncontrolsfactory, classname, None) or getattr(
+        QtWidgets, classname, None
+    )
 
     if cls is None:
         logger.warning("WARN: Class name not found in QtWidgets:", classname)
@@ -415,7 +452,9 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
             value1 = loadVariant(xmlprop, widget)
             # FIXME: Not sure if it should return anyway
             if isinstance(value1, str):
-                logger.warning("Icono %s.%s no encontrado." % (widget.objectName(), value1))
+                logger.warning(
+                    "Icono %s.%s no encontrado." % (widget.objectName(), value1)
+                )
                 return
             else:
                 value = value1
@@ -461,7 +500,10 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
             elif c.tag == "widget":
                 new_widget = createWidget(c.get("class"), parent=widget)
                 # FIXME: Should check interfaces.
-                from pineboolib.plugins.dgi.dgi_qt.dgi_objects import qbuttongroup, qtoolbutton
+                from pineboolib.plugins.dgi.dgi_qt.dgi_objects import (
+                    qbuttongroup,
+                    qtoolbutton,
+                )
 
                 if isinstance(widget, qbuttongroup.QButtonGroup):
                     if isinstance(new_widget, qtoolbutton.QToolButton):
@@ -478,15 +520,23 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
                     try:
                         widget.layout.addWidget(new_widget)
                     except Exception:
-                        logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget.layout)
+                        logger.warning(
+                            "qt3ui: No se ha podido añadir %s a %s",
+                            new_widget,
+                            widget.layout,
+                        )
 
                 elif mode == "grid":
                     rowSpan = c.get("rowspan") or 1
                     colSpan = c.get("colspan") or 1
                     try:
-                        widget.layout.addWidget(new_widget, row, col, int(rowSpan), int(colSpan))
+                        widget.layout.addWidget(
+                            new_widget, row, col, int(rowSpan), int(colSpan)
+                        )
                     except Exception:
-                        logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget)
+                        logger.warning(
+                            "qt3ui: No se ha podido añadir %s a %s", new_widget, widget
+                        )
                         logger.trace("Detalle:", stack_info=True)
 
             elif c.tag == "spacer":
@@ -510,10 +560,15 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
 
                     elif pname == "sizeType":
                         # print("Convirtiendo %s a %s" % (p.find("enum").text, value))
-                        if config.value("ebcomportamiento/spacerLegacy", False) or orient_ == 1:
+                        if (
+                            config.value("ebcomportamiento/spacerLegacy", False)
+                            or orient_ == 1
+                        ):
                             policy_ = QtWidgets.QSizePolicy.Policy(value)
                         else:
-                            policy_ = QtWidgets.QSizePolicy.Expanding  # Siempre Expanding
+                            policy_ = (
+                                QtWidgets.QSizePolicy.Expanding
+                            )  # Siempre Expanding
 
                     elif pname == "name":
                         spacer_name = value  # noqa: F841
@@ -527,7 +582,9 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
                 #                                                  1 else "Vertical", policy_name, width, height, hPolicy, vPolicy))
                 new_spacer = QtWidgets.QSpacerItem(width, height, hPolicy, vPolicy)
                 if mode == "grid":
-                    widget.layout.addItem(new_spacer, row, col, int(rowSpan), int(colSpan))
+                    widget.layout.addItem(
+                        new_spacer, row, col, int(rowSpan), int(colSpan)
+                    )
                 else:
                     widget.layout.addItem(new_spacer)
                 # print("Spacer %s.%s --> %s" % (spacer_name, new_spacer, widget.objectName()))
@@ -568,7 +625,9 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
             continue
 
         if c.tag in ("vbox", "hbox", "grid"):
-            if has_layout_defined:  # nos saltamos una nueva definición del layout ( mezclas de ui incorrectas)
+            if (
+                has_layout_defined
+            ):  # nos saltamos una nueva definición del layout ( mezclas de ui incorrectas)
                 # El primer layout que se define es el que se respeta
                 continue
 
@@ -614,7 +673,9 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
 
             widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
             widget.layout.setObjectName(lay_name)
-            widget.layout.setContentsMargins(lay_margin_h, lay_margin_v, lay_margin_h, lay_margin_v)
+            widget.layout.setContentsMargins(
+                lay_margin_h, lay_margin_v, lay_margin_h, lay_margin_v
+            )
             widget.layout.setSpacing(lay_spacing)
 
             lay_type = "grid" if c.tag == "grid" else "box"
@@ -641,7 +702,11 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
             if attrs is not None:
                 attrs[k] = v
             else:
-                logger.warning("qt3ui: [NOT ASSIGNED] attribute %r => %r" % (k, v), widget.__class__, repr(c.tag))
+                logger.warning(
+                    "qt3ui: [NOT ASSIGNED] attribute %r => %r" % (k, v),
+                    widget.__class__,
+                    repr(c.tag),
+                )
             continue
         if c.tag == "widget":
             # Si dentro del widget hay otro significa
@@ -682,7 +747,11 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
                     lay.addWidget(new_widget)
             else:
                 if Options.DEBUG_LEVEL > 50:
-                    logger.warning("qt3ui: Unknown container widget xml tag", widget.__class__, repr(c.tag))
+                    logger.warning(
+                        "qt3ui: Unknown container widget xml tag",
+                        widget.__class__,
+                        repr(c.tag),
+                    )
             unbold_fonts.append(new_widget)
             continue
 
@@ -716,7 +785,12 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
             continue
 
         if Options.DEBUG_LEVEL > 50:
-            logger.warning("%s: Unknown widget xml tag %s %s", __name__, widget.__class__, repr(c.tag))
+            logger.warning(
+                "%s: Unknown widget xml tag %s %s",
+                __name__,
+                widget.__class__,
+                repr(c.tag),
+            )
 
     for c in properties:
         process_property(c)
@@ -885,7 +959,12 @@ def _loadVariant(variant, widget=None) -> Any:
 
     if variant.tag == "enum":
         v = None
-        libs_2: List[Any] = [QtCore.Qt, QtWidgets.QFrame, QtWidgets.QSizePolicy, QtWidgets.QTabWidget]
+        libs_2: List[Any] = [
+            QtCore.Qt,
+            QtWidgets.QFrame,
+            QtWidgets.QSizePolicy,
+            QtWidgets.QTabWidget,
+        ]
         for lib in libs_2:
             v = getattr(lib, text, None)
             if v is not None:
@@ -970,4 +1049,6 @@ def _loadVariant(variant, widget=None) -> Any:
         return d
 
     if Options.DEBUG_LEVEL > 50:
-        logger.warning("qt3ui: Unknown variant: %s --> %s ", repr(widget), ET.tostring(variant))
+        logger.warning(
+            "qt3ui: Unknown variant: %s --> %s ", repr(widget), ET.tostring(variant)
+        )

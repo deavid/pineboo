@@ -12,8 +12,30 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-ACCEPTABLE_VALUES = (int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, decimal.Decimal, datetime.timedelta)
-T_VALUE2 = Union[int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, datetime.timedelta, None]
+ACCEPTABLE_VALUES = (
+    int,
+    float,
+    str,
+    datetime.time,
+    datetime.date,
+    bool,
+    types.Date,
+    bytearray,
+    decimal.Decimal,
+    datetime.timedelta,
+)
+T_VALUE2 = Union[
+    int,
+    float,
+    str,
+    datetime.time,
+    datetime.date,
+    bool,
+    types.Date,
+    bytearray,
+    datetime.timedelta,
+    None,
+]
 
 
 class FieldStruct(object):
@@ -138,7 +160,9 @@ class FieldStruct(object):
             try:
                 return float(self.value) != float(val)  # type: ignore
             except Exception:
-                logger.trace("has_changed: Error converting %s != %s to floats", self.value, val)
+                logger.trace(
+                    "has_changed: Error converting %s != %s to floats", self.value, val
+                )
                 return True
 
         return True
@@ -162,7 +186,9 @@ class PNBuffer(object):
 
         tmd = self.cursor_.metadata()
         if tmd is None:
-            logger.warning("Metadata not found for specified cursor %s", self.cursor_.curName())
+            logger.warning(
+                "Metadata not found for specified cursor %s", self.cursor_.curName()
+            )
             return
 
         campos = tmd.fieldList()
@@ -187,7 +213,10 @@ class PNBuffer(object):
         @param row = Linea del cursor
         """
         if self.inicialized_:
-            logger.debug("(%s)PNBuffer. Se inicializa nuevamente el cursor", self.cursor_.curName())
+            logger.debug(
+                "(%s)PNBuffer. Se inicializa nuevamente el cursor",
+                self.cursor_.curName(),
+            )
 
         self.primeUpdate(row)
         self.inicialized_ = True
@@ -262,7 +291,9 @@ class PNBuffer(object):
         """
         return self.fieldDict_[name].generated
 
-    def setGenerated(self, f: Union[int, str, "ifieldmetadata.IFieldMetaData"], value: bool) -> None:
+    def setGenerated(
+        self, f: Union[int, str, "ifieldmetadata.IFieldMetaData"], value: bool
+    ) -> None:
         """Setea que es generado un campo.
         @param f. FLFieldMetadata campo a marcar
         @param value. True o False si el campo es generado
@@ -353,7 +384,10 @@ class PNBuffer(object):
                     y si ha cambiado lo marca como modificado (Por defecto a True)
         """
         if value is not None and not isinstance(value, ACCEPTABLE_VALUES):
-            raise ValueError("No se admite el tipo %r , en setValue(%s,%r)" % (type(value), name, value))
+            raise ValueError(
+                "No se admite el tipo %r , en setValue(%s,%r)"
+                % (type(value), name, value)
+            )
 
         field = self.field(name)
 

@@ -117,7 +117,13 @@ class xmlElement(object):
                 else:
                     tdata = entity_rep(self.tdata)
 
-                output += u"%s<%s%s>%s</%s>\n" % (depthpad, self.tagname, txtattrs, tdata, self.tagname)
+                output += u"%s<%s%s>%s</%s>\n" % (
+                    depthpad,
+                    self.tagname,
+                    txtattrs,
+                    tdata,
+                    self.tagname,
+                )
 
         return output
 
@@ -147,7 +153,10 @@ class JSON_Reverter(JSON_Base):
             if self.encoding != "auto":
                 self.encoding = self.encoding.upper()
                 if val.upper() != self.encoding:
-                    print(" ignoring %s=%s , using specified value '%s' instead" % (key, val, self.encoding))
+                    print(
+                        " ignoring %s=%s , using specified value '%s' instead"
+                        % (key, val, self.encoding)
+                    )
                 return
             self.encoding = val.upper()
             return
@@ -475,8 +484,16 @@ class JSON_Converter(JSON_Base):
         printr("EndCdataSectionHandler:")
         # se descarta el cierre...
 
-    def StartDoctypeDeclHandler(self, doctypeName, systemId, publicId, has_internal_subset):
-        printr("StartDoctypeDeclHandler:", doctypeName, systemId, publicId, has_internal_subset)
+    def StartDoctypeDeclHandler(
+        self, doctypeName, systemId, publicId, has_internal_subset
+    ):
+        printr(
+            "StartDoctypeDeclHandler:",
+            doctypeName,
+            systemId,
+            publicId,
+            has_internal_subset,
+        )
         # tagname: !\w+ -> DoctypeTag
         attrs = {}
         if systemId:
@@ -501,8 +518,26 @@ class JSON_Converter(JSON_Base):
     def ProcessingInstructionHandler(self, target, data):
         printr("ProcessingInstructionHandler:", target, data)
 
-    def EntityDeclHandler(self, entityName, is_parameter_entity, value, base, systemId, publicId, notationName):
-        printr("EntityDeclHandler:", entityName, is_parameter_entity, value, base, systemId, publicId, notationName)
+    def EntityDeclHandler(
+        self,
+        entityName,
+        is_parameter_entity,
+        value,
+        base,
+        systemId,
+        publicId,
+        notationName,
+    ):
+        printr(
+            "EntityDeclHandler:",
+            entityName,
+            is_parameter_entity,
+            value,
+            base,
+            systemId,
+            publicId,
+            notationName,
+        )
 
     def NotationDeclHandler(self, notationName, base, systemId, publicId):
         printr("NotationDeclHandler:", notationName, base, systemId, publicId)
@@ -563,13 +598,39 @@ def main():
     parser = OptionParser()
     # parser.add_option("-f", "--file", dest="filename",
     #                  help="write report to FILE", metavar="FILE")
-    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
+    parser.add_option(
+        "-q",
+        "--quiet",
+        action="store_false",
+        dest="verbose",
+        default=True,
+        help="don't print status messages to stdout",
+    )
 
-    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
+    parser.add_option(
+        "--optdebug",
+        action="store_true",
+        dest="optdebug",
+        default=False,
+        help="debug optparse module",
+    )
 
-    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
+    parser.add_option(
+        "--debug",
+        action="store_true",
+        dest="debug",
+        default=False,
+        help="prints lots of useless messages",
+    )
 
-    parser.add_option("-E", "--encoding", dest="encoding", default="auto", help="Set encoding=ENC: auto,utf-8,iso-8859-15", metavar="ENC")
+    parser.add_option(
+        "-E",
+        "--encoding",
+        dest="encoding",
+        default="auto",
+        help="Set encoding=ENC: auto,utf-8,iso-8859-15",
+        metavar="ENC",
+    )
 
     (options, args) = parser.parse_args()
     if options.optdebug:

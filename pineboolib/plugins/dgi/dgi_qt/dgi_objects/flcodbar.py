@@ -226,7 +226,10 @@ class FLCodBar(object):
         elif n == "gtin":
             return BARCODE_GTIN
         else:
-            logger.warning("Formato no soportado (%s)\nSoportados: %s." % (n, barcode.PROVIDED_BARCODES))
+            logger.warning(
+                "Formato no soportado (%s)\nSoportados: %s."
+                % (n, barcode.PROVIDED_BARCODES)
+            )
             return BARCODE_ANY
 
     def typeToName(self, type_) -> str:

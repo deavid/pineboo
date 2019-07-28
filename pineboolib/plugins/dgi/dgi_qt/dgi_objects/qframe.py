@@ -3,7 +3,9 @@ from PyQt5 import QtWidgets  # type: ignore
 from typing import Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox  # noqa: F401
+    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import (
+        QGroupBox,
+    )  # noqa: F401
     from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget import QWidget  # noqa: F401
 
 

@@ -73,7 +73,9 @@ class parser(object):
         from pineboolib.application import project
 
         result = project.call(func_name, arguments)
-        print("Llamada remota: %s(%s) --> %s" % (func_name, ", ".join(arguments), result))
+        print(
+            "Llamada remota: %s(%s) --> %s" % (func_name, ", ".join(arguments), result)
+        )
         return result
 
     @dispatcher.add_method
@@ -99,8 +101,13 @@ class parser(object):
         # print("--->", dict_["function"], dict_["arguments"]["cursor_id"] if "cursor_id" in dict_["arguments"] else None)
 
         if "cursor_id" in dict_["arguments"]:
-            if not "%s_%s" % (id_conn, dict_["arguments"]["cursor_id"]) in cursor_dict.keys():
-                cursor_dict["%s_%s" % (id_conn, dict_["arguments"]["cursor_id"])] = conn.cursor()
+            if (
+                not "%s_%s" % (id_conn, dict_["arguments"]["cursor_id"])
+                in cursor_dict.keys()
+            ):
+                cursor_dict[
+                    "%s_%s" % (id_conn, dict_["arguments"]["cursor_id"])
+                ] = conn.cursor()
 
             cursor = cursor_dict["%s_%s" % (id_conn, dict_["arguments"]["cursor_id"])]
 
@@ -113,7 +120,15 @@ class parser(object):
             #        res.append(data)
 
             except Exception:
-                print("Error %s  %s %s" % (dict_["arguments"]["cursor_id"], dict_["arguments"]["sql"], fun_name), traceback.format_exc())
+                print(
+                    "Error %s  %s %s"
+                    % (
+                        dict_["arguments"]["cursor_id"],
+                        dict_["arguments"]["sql"],
+                        fun_name,
+                    ),
+                    traceback.format_exc(),
+                )
 
         elif fun_name == "fetchone":
             ret = None
