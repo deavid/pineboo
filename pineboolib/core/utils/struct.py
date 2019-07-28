@@ -103,7 +103,7 @@ class TableStruct(Struct):
 
 class ActionStruct(XMLStruct):
     """
-    Contiene información de las actions especificadas en el .xml del módulo
+    Struct version for Actions.
     """
 
     alias: str = ""
