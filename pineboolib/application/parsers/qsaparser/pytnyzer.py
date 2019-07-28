@@ -2210,6 +2210,20 @@ def pythonize(filename, destfilename, debugname=None) -> None:
         f1.close()
 
 
+def pythonize2(root_ast: ElementTree.Element) -> str:
+    from io import StringIO
+
+    ASTPython.debug_file = None
+
+    f1 = StringIO()
+    write_python_file(f1, root_ast)
+    if black:
+        new_code = black.format_file_contents(f1.getvalue(), fast=True, mode=BLACK_FILEMODE)
+    else:
+        new_code = f1.getvalue()
+    return new_code
+
+
 def main() -> None:
     parser = OptionParser()
     parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")

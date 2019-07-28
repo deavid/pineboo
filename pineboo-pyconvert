@@ -1,0 +1,6 @@
+#!/usr/bin/python3
+"""Convert QS projects into Python packages that can be parsed with MyPy."""
+from pineboolib.application.parsers.qsaparser import pyconvert
+
+if __name__ == "__main__":
+    pyconvert.main()

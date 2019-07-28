@@ -617,6 +617,22 @@ def pythonify(filelist):
     execute(options, filelist)
 
 
+def pythonify2(filename: str) -> str:
+    from .pytnyzer import pythonize2
+
+    filecontent = open(filename, "r", encoding="latin-1").read()
+    prog = flscriptparse.parse(filecontent)
+    if not prog:
+        raise Exception("Parse failed")
+    if prog["error_count"] > 0:
+        raise Exception("Found %d errors parsing %r" % (prog["error_count"], filename))
+
+    tree_data = flscriptparse.calctree(prog, alias_mode=0)
+    ast = post_parse(tree_data)
+
+    return pythonize2(ast)
+
+
 def execute(options, args):
     from pineboolib.application.parsers.qsaparser import pytnyzer
 

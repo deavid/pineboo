@@ -99,3 +99,20 @@ class TableStruct(Struct):
     fields: List[str]
     pk: List[str]
     fields_idx: Dict[str, int]
+
+
+class ActionStruct(XMLStruct):
+    """
+    Contiene información de las actions especificadas en el .xml del módulo
+    """
+
+    alias: str = ""
+    form: Optional[str] = None
+    name: str = ""
+    description: Optional[str] = None
+    scriptform: Optional[str] = None
+    table: Optional[str] = None
+    mainform: Optional[str] = None
+    mainscript: Optional[str] = None
+    formrecord: Optional[str] = None
+    scriptformrecord: Optional[str] = None
