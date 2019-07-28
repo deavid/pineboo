@@ -162,9 +162,7 @@ class FLSmtpClient(QtCore.QObject):
                 if cid:
                     self.map_attach_cid_[attach] = cid
         else:
-            err_msg_ = self.tr(
-                "El fichero %s no existe o no se puede leer\n\n" % attach
-            )
+            err_msg_ = self.tr("El fichero %s no existe o no se puede leer\n\n" % attach)
             logger.warning(err_msg_)
             self.changeStatus(err_msg_, State.AttachError)
 
@@ -271,9 +269,7 @@ class FLSmtpClient(QtCore.QObject):
             try:
                 with open(att, "rb") as fil:
                     part = MIMEApplication(fil.read(), Name=basename(att))
-                    part[
-                        "Content-Disposition"
-                    ] = 'attachment; filename="%s"' % basename(att)
+                    part["Content-Disposition"] = 'attachment; filename="%s"' % basename(att)
                     outer.attach(part)
             except IOError:
                 logger.warning("Error al adjuntar el fichero %s." % att)
@@ -300,10 +296,7 @@ class FLSmtpClient(QtCore.QObject):
                 s.login(self.user_, self.password_)
 
                 self.changeStatus(
-                    status_msg,
-                    State.WaitingForAuthLogin
-                    if self.auth_method_ == State.SendAuthLogin
-                    else State.WaitingForAuthPlain,
+                    status_msg, State.WaitingForAuthLogin if self.auth_method_ == State.SendAuthLogin else State.WaitingForAuthPlain
                 )
 
             s.sendmail(self.from_value_, self.to_, composed)

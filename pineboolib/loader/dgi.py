@@ -20,9 +20,7 @@ def load_dgi(name: str, param: Any) -> "dgi_schema":
     dgi_entrypoint = DGILoader.load_dgi(name)
 
     try:
-        dgi = (
-            dgi_entrypoint()
-        )  # FIXME: Necesitamos ejecutar código dinámico tan pronto?
+        dgi = dgi_entrypoint()  # FIXME: Necesitamos ejecutar código dinámico tan pronto?
     except Exception:
         logger.exception("Error inesperado al cargar el módulo DGI %s" % name)
         raise

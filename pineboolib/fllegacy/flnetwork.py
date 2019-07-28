@@ -2,11 +2,7 @@
 from typing import Optional, cast
 from PyQt5 import QtCore  # type: ignore
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtNetwork import (
-    QNetworkRequest,
-    QNetworkAccessManager,
-    QNetworkReply,
-)  # type: ignore
+from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager, QNetworkReply  # type: ignore
 from pineboolib.core import decorators
 
 

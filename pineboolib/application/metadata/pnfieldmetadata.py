@@ -82,26 +82,7 @@ class PNFieldMetaData(IFieldMetaData):
         iCK: bool = False,
     ) -> None:
         self.d = PNFieldMetaDataPrivate(
-            n,
-            a,
-            aN,
-            isPrimaryKey,
-            t,
-            length_,
-            c,
-            v,
-            ed,
-            pI,
-            pD,
-            iNX,
-            uNI,
-            coun,
-            defValue,
-            oT,
-            rX,
-            vG,
-            gen,
-            iCK,
+            n, a, aN, isPrimaryKey, t, length_, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK
         )
 
     """
@@ -347,9 +328,7 @@ class PNFieldMetaData(IFieldMetaData):
         if r.cardinality() == PNRelationMetaData.RELATION_M1:
             isRelM1 = True
         if isRelM1 and self.d.relationM1_:
-            logger.debug(
-                "addRelationMD: Se ha intentado crear más de una relación muchos a uno para el mismo campo"
-            )
+            logger.debug("addRelationMD: Se ha intentado crear más de una relación muchos a uno para el mismo campo")
             return
         if self.d.fieldName_ is None:
             logger.warning("addRelationMD: no fieldName")
@@ -996,12 +975,7 @@ class PNFieldMetaDataPrivate(object):
                 self.type_ = "string"
             else:
                 self.type_ = "uint"
-            logger.info(
-                "%s:: El campo %s no tiene especificado tipo y se especifica tipo %s",
-                __name__,
-                self.fieldName_,
-                self.type_,
-            )
+            logger.info("%s:: El campo %s no tiene especificado tipo y se especifica tipo %s", __name__, self.fieldName_, self.type_)
 
         if int(length_) < 0:
             self.length_ = 0

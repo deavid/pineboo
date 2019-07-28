@@ -36,26 +36,13 @@ def NotImplementedWarn(fn: T_FN) -> T_FN:
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
-        x_args = [clean_repr(a) for a in args] + [
-            "%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())
-        ]
+        x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
         keyname = fn.__name__ + repr(x_args)
         now = time.time()
-        if (
-            keyname not in MSG_EMITTED
-            or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT
-        ):
+        if keyname not in MSG_EMITTED or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT:
             MSG_EMITTED[keyname] = now
-            logger.warning(
-                "Not yet impl.: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret)
-            )
-            logger.trace(
-                "Not yet impl.: %s(%s) -> %s",
-                fn.__name__,
-                ", ".join(x_args),
-                repr(ret),
-                stack_info=True,
-            )
+            logger.warning("Not yet impl.: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
+            logger.trace("Not yet impl.: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret), stack_info=True)
         return ret
 
     mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
@@ -74,19 +61,12 @@ def NotImplementedDebug(fn: T_FN) -> T_FN:
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
-        x_args = [clean_repr(a) for a in args] + [
-            "%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())
-        ]
+        x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
         keyname = fn.__name__ + repr(x_args)
         now = time.time()
-        if (
-            keyname not in MSG_EMITTED
-            or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT
-        ):
+        if keyname not in MSG_EMITTED or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT:
             MSG_EMITTED[keyname] = now
-            logger.debug(
-                "Not yet impl.: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret)
-            )
+            logger.debug("Not yet impl.: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
     mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
@@ -100,22 +80,12 @@ def WorkingOnThis(fn: T_FN) -> T_FN:
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
-        x_args = [clean_repr(a) for a in args] + [
-            "%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())
-        ]
+        x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
         keyname = fn.__name__ + repr(x_args)
         now = time.time()
-        if (
-            keyname not in MSG_EMITTED
-            or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT
-        ):
+        if keyname not in MSG_EMITTED or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT:
             MSG_EMITTED[keyname] = now
-            logger.info(
-                "WARN: In Progress: %s(%s) -> %s",
-                fn.__name__,
-                ", ".join(x_args),
-                repr(ret),
-            )
+            logger.info("WARN: In Progress: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
     mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
@@ -129,22 +99,12 @@ def BetaImplementation(fn: T_FN) -> T_FN:
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
-        x_args = [clean_repr(a) for a in args] + [
-            "%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())
-        ]
+        x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
         keyname = fn.__name__ + repr(x_args)
         now = time.time()
-        if (
-            keyname not in MSG_EMITTED
-            or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT
-        ):
+        if keyname not in MSG_EMITTED or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT:
             MSG_EMITTED[keyname] = now
-            logger.info(
-                "WARN: Beta impl.: %s(%s) -> %s",
-                fn.__name__,
-                ", ".join(x_args),
-                repr(ret),
-            )
+            logger.info("WARN: Beta impl.: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
     mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
@@ -162,19 +122,12 @@ def Empty(fn: T_FN) -> T_FN:
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
-        x_args = [clean_repr(a) for a in args] + [
-            "%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())
-        ]
+        x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
         keyname = fn.__name__
         now = time.time()
-        if (
-            keyname not in MSG_EMITTED
-            or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT
-        ):
+        if keyname not in MSG_EMITTED or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT:
             MSG_EMITTED[keyname] = now
-            logger.info(
-                "WARN: Empty: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret)
-            )
+            logger.info("WARN: Empty: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
     mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
@@ -188,22 +141,12 @@ def Incomplete(fn: T_FN) -> T_FN:
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
-        x_args = [clean_repr(a) for a in args] + [
-            "%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())
-        ]
+        x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
         keyname = fn.__name__ + repr(x_args)
         now = time.time()
-        if (
-            keyname not in MSG_EMITTED
-            or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT
-        ):
+        if keyname not in MSG_EMITTED or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT:
             MSG_EMITTED[keyname] = now
-            logger.info(
-                "WARN: Incomplete: %s(%s) -> %s",
-                fn.__name__,
-                ", ".join(x_args),
-                repr(ret),
-            )
+            logger.info("WARN: Incomplete: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
     mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
@@ -216,22 +159,12 @@ def needRevision(fn: T_FN) -> T_FN:
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
-        x_args = [clean_repr(a) for a in args] + [
-            "%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())
-        ]
+        x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
         keyname = fn.__name__ + repr(x_args)
         now = time.time()
-        if (
-            keyname not in MSG_EMITTED
-            or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT
-        ):
+        if keyname not in MSG_EMITTED or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT:
             MSG_EMITTED[keyname] = now
-            logger.info(
-                "WARN: Needs help: %s(%s) -> %s",
-                fn.__name__,
-                ", ".join(x_args),
-                repr(ret),
-            )
+            logger.info("WARN: Needs help: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
         return ret
 
     mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore
@@ -245,23 +178,12 @@ def Deprecated(fn: T_FN) -> T_FN:
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
-        x_args = [clean_repr(a) for a in args] + [
-            "%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())
-        ]
+        x_args = [clean_repr(a) for a in args] + ["%s=%s" % (k, clean_repr(v)) for k, v in list(kwargs.items())]
         keyname = fn.__name__ + repr(x_args)
         now = time.time()
-        if (
-            keyname not in MSG_EMITTED
-            or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT
-        ):
+        if keyname not in MSG_EMITTED or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT:
             MSG_EMITTED[keyname] = now
-            logger.info(
-                "WARN: Deprecated: %s(%s) -> %s",
-                fn.__name__,
-                ", ".join(x_args),
-                repr(ret),
-                stack_info=False,
-            )
+            logger.info("WARN: Deprecated: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret), stack_info=False)
         return ret
 
     mock_fn: T_FN = cast(T_FN, newfn)  # type: ignore

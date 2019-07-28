@@ -38,9 +38,7 @@ class FormDBWidget(QtCore.QObject):
     def _connect(self, sender, signal, receiver, slot):
         from pineboolib import pncontrolsfactory
 
-        signal_slot = pncontrolsfactory.connect(
-            sender, signal, receiver, slot, caller=self
-        )
+        signal_slot = pncontrolsfactory.connect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
         self._formconnections.add(signal_slot)
@@ -49,9 +47,7 @@ class FormDBWidget(QtCore.QObject):
         # print(" > > > disconnect:", self)
         from pineboolib import pncontrolsfactory
 
-        signal_slot = pncontrolsfactory.disconnect(
-            sender, signal, receiver, slot, caller=self
-        )
+        signal_slot = pncontrolsfactory.disconnect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
 
@@ -88,9 +84,7 @@ class FormDBWidget(QtCore.QObject):
             from pineboolib import pncontrolsfactory
 
             pncontrolsfactory.check_gc_referrers(
-                "FormDBWidget.iface:" + self.iface.__class__.__name__,
-                weakref.ref(self.iface),
-                self._action.name,
+                "FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name
             )
             del self.iface.ctx
             del self.iface
@@ -101,9 +95,7 @@ class FormDBWidget(QtCore.QObject):
         for signal, slot in self._formconnections:
             try:
                 signal.disconnect(slot)
-                self.logger.debug(
-                    "Señal desconectada al limpiar: %s %s" % (signal, slot)
-                )
+                self.logger.debug("Señal desconectada al limpiar: %s %s" % (signal, slot))
             except Exception:
                 # self.logger.exception("Error al limpiar una señal: %s %s" % (signal, slot))
                 pass

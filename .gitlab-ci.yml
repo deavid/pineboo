@@ -27,7 +27,7 @@ test:
     - flake8 pineboolib/
     - mypy -p pineboolib
     - pytest pineboolib/
-    - black --check --fast pineboolib/
+    - black --check --fast -l 140 pineboolib/
 
 run:
   script:

@@ -30,9 +30,7 @@ class Project(object):
 
     logger = logging.getLogger("main.Project")
     _app: Optional[QtCore.QCoreApplication] = None
-    _conn: Optional[
-        "IConnection"
-    ] = None  # Almacena la conexión principal a la base de datos
+    _conn: Optional["IConnection"] = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
     options: Values
     modules: Dict[str, "Module"]
@@ -94,9 +92,7 @@ class Project(object):
     def init_conn(self, connection: "IConnection") -> None:
         self._conn = connection
         self.apppath = filedir("..")
-        self.tmpdir = config.value(
-            "ebcomportamiento/kugar_temp_dir", filedir("../tempdata")
-        )
+        self.tmpdir = config.value("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))
         if not os.path.exists(self.tmpdir):
             os.mkdir(self.tmpdir)
 
@@ -114,9 +110,7 @@ class Project(object):
 
         self.main_form_name = "eneboo"  # FIXME: Belongs to loader.main .. or dgi-qt5
         if config.value("ebcomportamiento/mdi_mode"):
-            self.main_form_name = (
-                "eneboo_mdi"
-            )  # FIXME: Belongs to loader.main .. or dgi-qt5
+            self.main_form_name = "eneboo_mdi"  # FIXME: Belongs to loader.main .. or dgi-qt5
 
         self._DGI.extraProjectInit()
 
@@ -160,13 +154,9 @@ class Project(object):
             raise Exception("DGI not loaded")
 
         if not self.conn or not self.conn.conn:
-            raise NotConnectedError(
-                "Cannot execute Pineboo Project without a connection in place"
-            )
+            raise NotConnectedError("Cannot execute Pineboo Project without a connection in place")
 
-        from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import (
-            load_models,
-        )
+        from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import load_models
 
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
@@ -174,13 +164,8 @@ class Project(object):
         if self.deleteCache and os.path.exists(_dir("cache/%s" % self.conn.DBName())):
 
             self.message_manager().send("splash", "showMessage", ["Borrando caché ..."])
-            self.logger.debug(
-                "DEVELOP: DeleteCache Activado\nBorrando %s",
-                _dir("cache/%s" % self.conn.DBName()),
-            )
-            for root, dirs, files in os.walk(
-                _dir("cache/%s" % self.conn.DBName()), topdown=False
-            ):
+            self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", _dir("cache/%s" % self.conn.DBName()))
+            for root, dirs, files in os.walk(_dir("cache/%s" % self.conn.DBName()), topdown=False):
                 for name in files:
                     os.remove(os.path.join(root, name))
                 for name in dirs:
@@ -203,17 +188,7 @@ class Project(object):
         # Conectar:
 
         # Se verifica que existen estas tablas
-        for table in (
-            "flareas",
-            "flmodules",
-            "flfiles",
-            "flgroups",
-            "fllarge",
-            "flserial",
-            "flusers",
-            "flvar",
-            "flmetadata",
-        ):
+        for table in ("flareas", "flmodules", "flfiles", "flgroups", "fllarge", "flserial", "flusers", "flvar", "flmetadata"):
             self.conn.manager().createSystemTable(table)
 
         cursor_ = self.conn.dbAux().cursor()
@@ -244,9 +219,7 @@ class Project(object):
 
         self.modules["sys"] = Module("sys", "sys", "Administración", icono)
 
-        cursor_.execute(
-            """ SELECT idmodulo, nombre, sha FROM flfiles WHERE NOT sha = '' ORDER BY idmodulo, nombre """
-        )
+        cursor_.execute(""" SELECT idmodulo, nombre, sha FROM flfiles WHERE NOT sha = '' ORDER BY idmodulo, nombre """)
 
         size_ = cursor_.rowcount
 
@@ -268,9 +241,7 @@ class Project(object):
                 continue  # I
             fileobj = File(idmodulo, nombre, sha, db_name=self.conn.DBName())
             if nombre in self.files:
-                self.logger.warning(
-                    "run: file %s already loaded, overwritting..." % nombre
-                )
+                self.logger.warning("run: file %s already loaded, overwritting..." % nombre)
             self.files[nombre] = fileobj
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey + "\n")
@@ -287,21 +258,16 @@ class Project(object):
 
                 elif file_name.endswith(".mtd"):
                     if not config.value("ebcomportamiento/orm_parser_disabled", False):
-                        if os.path.exists(
-                            "%s_model.py" % _dir("cache", fileobj.filekey[:-4])
-                        ):
+                        if os.path.exists("%s_model.py" % _dir("cache", fileobj.filekey[:-4])):
                             continue
                 else:
                     continue
 
             cur2 = self.conn.dbAux().cursor()
-            sql = (
-                "SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha = %s"
-                % (
-                    self.conn.driver().formatValue("string", idmodulo, False),
-                    self.conn.driver().formatValue("string", nombre, False),
-                    self.conn.driver().formatValue("string", sha, False),
-                )
+            sql = "SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha = %s" % (
+                self.conn.driver().formatValue("string", idmodulo, False),
+                self.conn.driver().formatValue("string", nombre, False),
+                self.conn.driver().formatValue("string", sha, False),
             )
             cur2.execute(sql)
             for (contenido,) in cur2:
@@ -310,24 +276,13 @@ class Project(object):
                 if str(nombre).endswith(".kut") or str(nombre).endswith(".ts"):
                     encode_ = "utf-8"
 
-                folder = _dir(
-                    "cache",
-                    "/".join(
-                        fileobj.filekey.split("/")[
-                            : len(fileobj.filekey.split("/")) - 1
-                        ]
-                    ),
-                )
-                if (
-                    os.path.exists(folder) and not file_name
-                ):  # Borra la carpeta si no existe el fichero destino
+                folder = _dir("cache", "/".join(fileobj.filekey.split("/")[: len(fileobj.filekey.split("/")) - 1]))
+                if os.path.exists(folder) and not file_name:  # Borra la carpeta si no existe el fichero destino
                     for root, dirs, files in os.walk(folder):
                         for f in files:
                             os.remove(os.path.join(root, f))
 
-                self.message_manager().send(
-                    "splash", "showMessage", ["Volcando a caché %s..." % nombre]
-                )
+                self.message_manager().send("splash", "showMessage", ["Volcando a caché %s..." % nombre])
 
                 if contenido and not os.path.exists(file_name):
                     f2 = open(file_name, "wb")
@@ -335,48 +290,31 @@ class Project(object):
                     f2.write(txt)
                     f2.close()
 
-            if (
-                self.parseProject
-                and nombre.endswith(".qs")
-                and config.value("application/isDebuggerMode", False)
-            ):
-                self.message_manager().send(
-                    "splash",
-                    "showMessage",
-                    ["Convirtiendo %s ( %d/ %d) ..." % (nombre, p, size_)],
-                )
+            if self.parseProject and nombre.endswith(".qs") and config.value("application/isDebuggerMode", False):
+                self.message_manager().send("splash", "showMessage", ["Convirtiendo %s ( %d/ %d) ..." % (nombre, p, size_)])
                 if os.path.exists(file_name):
 
                     self.parseScript(file_name, "(%d de %d)" % (p, size_))
 
         tiempo_fin = time.time()
-        self.logger.info(
-            "Descarga del proyecto completo a disco duro: %.3fs",
-            (tiempo_fin - tiempo_ini),
-        )
+        self.logger.info("Descarga del proyecto completo a disco duro: %.3fs", (tiempo_fin - tiempo_ini))
 
         # Cargar el núcleo común del proyecto
         idmodulo = "sys"
         for root, dirs, files in os.walk(filedir("..", "share", "pineboo")):
             for nombre in files:
                 if root.find("modulos") == -1:
-                    fileobj = File(
-                        idmodulo, nombre, basedir=root, db_name=self.conn.DBName()
-                    )
+                    fileobj = File(idmodulo, nombre, basedir=root, db_name=self.conn.DBName())
                     self.files[nombre] = fileobj
                     self.modules[idmodulo].add_project_file(fileobj)
                     if self.parseProject and nombre.endswith(".qs"):
                         self.parseScript(_dir(root, nombre))
 
         if not config.value("ebcomportamiento/orm_load_disabled", False):
-            self.message_manager().send(
-                "splash", "showMessage", ["Cargando objetos ..."]
-            )
+            self.message_manager().send("splash", "showMessage", ["Cargando objetos ..."])
             load_models()
 
-        self.message_manager().send(
-            "splash", "showMessage", ["Cargando traducciones ..."]
-        )
+        self.message_manager().send("splash", "showMessage", ["Cargando traducciones ..."])
 
         # FIXME: ACLs needed at this level?
         # self.acl_ = FLAccessControlLists()
@@ -384,13 +322,7 @@ class Project(object):
 
         return True
 
-    def call(
-        self,
-        function: str,
-        aList: List[Any],
-        object_context: Any = None,
-        showException: bool = True,
-    ) -> Optional[Any]:
+    def call(self, function: str, aList: List[Any], object_context: Any = None, showException: bool = True) -> Optional[Any]:
         """
         LLama a una función del projecto.
         @param function. Nombre de la función a llamar.
@@ -401,13 +333,7 @@ class Project(object):
         """
         # FIXME: No deberíamos usar este método. En Python hay formas mejores
         # de hacer esto.
-        self.logger.trace(
-            "JS.CALL: fn:%s args:%s ctx:%s",
-            function,
-            aList,
-            object_context,
-            stack_info=True,
-        )
+        self.logger.trace("JS.CALL: fn:%s args:%s ctx:%s", function, aList, object_context, stack_info=True)
 
         # Tipicamente flfactalma.iface.beforeCommit_articulos()
         if function[-2:] == "()":
@@ -419,11 +345,7 @@ class Project(object):
             if not aFunction[0] in self.actions:
                 if len(aFunction) > 1:
                     if showException:
-                        self.logger.error(
-                            "No existe la acción %s en el módulo %s",
-                            aFunction[1],
-                            aFunction[0],
-                        )
+                        self.logger.error("No existe la acción %s en el módulo %s", aFunction[1], aFunction[0])
                 else:
                     if showException:
                         self.logger.error("No existe la acción %s", aFunction[0])
@@ -453,11 +375,7 @@ class Project(object):
 
             if not object_context:
                 if showException:
-                    self.logger.error(
-                        "No existe el script para la acción %s en el módulo %s",
-                        aFunction[0],
-                        aFunction[0],
-                    )
+                    self.logger.error("No existe el script para la acción %s en el módulo %s", aFunction[0], aFunction[0])
                 return None
 
         fn = None
@@ -477,19 +395,13 @@ class Project(object):
 
         if fn is None:
             if showException:
-                self.logger.error(
-                    "No existe la función %s en %s", function_name, aFunction[0]
-                )
-            return (
-                True
-            )  # FIXME: Esto devuelve true? debería ser false, pero igual se usa por el motor para detectar propiedades
+                self.logger.error("No existe la función %s en %s", function_name, aFunction[0])
+            return True  # FIXME: Esto devuelve true? debería ser false, pero igual se usa por el motor para detectar propiedades
 
         try:
             return fn(*aList)
         except Exception:
-            self.logger.exception(
-                "JSCALL: Error executing function %s", stack_info=True
-            )
+            self.logger.exception("JSCALL: Error executing function %s", stack_info=True)
 
         return None
 
@@ -504,9 +416,7 @@ class Project(object):
             raise IOError
         python_script_path = (scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or self.no_python_cache:
-            file_name_l = scriptname.split(
-                os.sep
-            )  # FIXME: is a bad idea to split by os.sep
+            file_name_l = scriptname.split(os.sep)  # FIXME: is a bad idea to split by os.sep
             file_name = file_name_l[len(file_name_l) - 2]
 
             msg = "Convirtiendo a Python . . . %s.qs %s" % (file_name, txt_)
@@ -528,9 +438,7 @@ class Project(object):
             try:
                 postparse.pythonify([scriptname])
             except Exception:
-                self.logger.exception(
-                    "El fichero %s no se ha podido convertir", scriptname
-                )
+                self.logger.exception("El fichero %s no se ha podido convertir", scriptname)
 
     def test(self, name=None):
         """

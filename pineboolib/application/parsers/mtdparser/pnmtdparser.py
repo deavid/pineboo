@@ -38,10 +38,7 @@ def mtd_parse(table_name: str) -> None:
 
     dest_file = "%s_model.py" % mtd_file[: len(mtd_file) - 4]
     if dest_file.find("share/pineboo/tables") > -1:
-        dest_file = dest_file.replace(
-            "share/pineboo/tables",
-            "tempdata/cache/%s/sys/file.mtd" % project.conn.DBName(),
-        )
+        dest_file = dest_file.replace("share/pineboo/tables", "tempdata/cache/%s/sys/file.mtd" % project.conn.DBName())
         sys_dir = dest_file[: dest_file.find("/file.mtd")]
         if not os.path.exists(sys_dir):
             os.mkdir(sys_dir)
@@ -64,13 +61,9 @@ def generate_model(dest_file, mtd_table) -> List[str]:
     pk_found = False
     data.append("# -*- coding: utf-8 -*-")
     # data.append("from sqlalchemy.ext.declarative import declarative_base")
-    data.append(
-        "from sqlalchemy import Column, Integer, Numeric, String, BigInteger, Boolean, DateTime, ForeignKey, LargeBinary"
-    )
+    data.append("from sqlalchemy import Column, Integer, Numeric, String, BigInteger, Boolean, DateTime, ForeignKey, LargeBinary")
     data.append("from sqlalchemy.orm import relationship, validates")
-    data.append(
-        "from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import Calculated, load_model"
-    )
+    data.append("from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import Calculated, load_model")
     data.append("from pineboolib.application import project")
     data.append("")
     # data.append("Base = declarative_base()")
@@ -83,9 +76,7 @@ def generate_model(dest_file, mtd_table) -> List[str]:
     #        data.append("load_model('%s')" % rel.foreignTable())
 
     data.append("")
-    data.append(
-        "class %s%s(Base):" % (mtd_table.name()[0].upper(), mtd_table.name()[1:])
-    )
+    data.append("class %s%s(Base):" % (mtd_table.name()[0].upper(), mtd_table.name()[1:]))
     data.append("    __tablename__ = '%s'" % mtd_table.name())
     data.append("")
 
@@ -97,19 +88,11 @@ def generate_model(dest_file, mtd_table) -> List[str]:
 
     for field in mtd_table.fieldList():  # Crea los campos
         if field.name() in validator_list:
-            logger.warning(
-                "Hay un campo %s duplicado en %s.mtd. Omitido",
-                field.name(),
-                mtd_table.name(),
-            )
+            logger.warning("Hay un campo %s duplicado en %s.mtd. Omitido", field.name(), mtd_table.name())
         else:
             field_data = []
             field_data.append("    ")
-            field_data.append(
-                "%s" % field.name() + "_"
-                if field.name() in reserved_words
-                else field.name()
-            )
+            field_data.append("%s" % field.name() + "_" if field.name() in reserved_words else field.name())
             field_data.append(" = Column('%s', " % field.name())
             field_data.append(field_type(field))
             field_data.append(")")
@@ -137,19 +120,9 @@ def generate_model(dest_file, mtd_table) -> List[str]:
                 # comprobamos si existe el campo...
                 if foreign_table_mtd.field(r.foreignField()):
 
-                    foreign_object = "%s%s" % (
-                        r.foreignTable()[0].upper(),
-                        r.foreignTable()[1:],
-                    )
-                    relation_ = "    %s_%s = relationship('%s'" % (
-                        r.foreignTable(),
-                        r.foreignField(),
-                        foreign_object,
-                    )
-                    relation_ += ", foreign_keys='%s.%s'" % (
-                        foreign_object,
-                        r.foreignField(),
-                    )
+                    foreign_object = "%s%s" % (r.foreignTable()[0].upper(), r.foreignTable()[1:])
+                    relation_ = "    %s_%s = relationship('%s'" % (r.foreignTable(), r.foreignField(), foreign_object)
+                    relation_ += ", foreign_keys='%s.%s'" % (foreign_object, r.foreignField())
                     relation_ += ")"
 
                     data.append(relation_)
@@ -161,9 +134,7 @@ def generate_model(dest_file, mtd_table) -> List[str]:
     data.append("")
     data.append("    @validates('%s')" % "','".join(validator_list))
     data.append("    def validate(self, key, value):")
-    data.append(
-        "        self.__dict__[key] = value #Chapuza para que el atributo ya contenga el valor"
-    )
+    data.append("        self.__dict__[key] = value #Chapuza para que el atributo ya contenga el valor")
     data.append("        self.bufferChanged(key)")
     data.append("        return value #Ahora si se asigna de verdad")
     data.append("")
@@ -259,9 +230,7 @@ def field_type(field) -> str:
     if field.isPrimaryKey() or field.isCompoundKey():
         ret += ", primary_key=True"
 
-    if (
-        not field.isPrimaryKey() and not field.isCompoundKey()
-    ) and field.type() == "serial":
+    if (not field.isPrimaryKey() and not field.isCompoundKey()) and field.type() == "serial":
         ret += ", autoincrement=True"
 
     if field.isUnique():

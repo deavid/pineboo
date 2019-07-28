@@ -21,9 +21,7 @@ class FLTranslator(QTranslator):
     translation_from_ = None
     ts_translation_contexts: Dict[str, Dict[str, str]] = {}
 
-    def __init__(
-        self, parent=None, name: str = None, multiLang=False, sysTrans=False
-    ) -> None:
+    def __init__(self, parent=None, name: str = None, multiLang=False, sysTrans=False) -> None:
         super(FLTranslator, self).__init__()
         self.logger = logging.getLogger("FLTranslator")
         self._prj = parent
@@ -33,9 +31,7 @@ class FLTranslator(QTranslator):
         self.lang_ = name[name.rfind("_") + 1 :]
         self.mulTiLang_ = multiLang
         self.sysTrans_ = sysTrans
-        self.translation_from_qm = config.value(
-            "ebcomportamiento/translations_from_qm", False
-        )
+        self.translation_from_qm = config.value("ebcomportamiento/translations_from_qm", False)
 
     """
     Carga en el traductor el contenido de un fichero de traducciones existente en la caché de disco
@@ -51,20 +47,10 @@ class FLTranslator(QTranslator):
         if project.conn is None:
             raise Exception("Project is not connected yet")
         if self.idM_ == "sys":
-            ts_file = filedir(
-                "../share/pineboo/translations/%s.%s" % (self.idM_, self.lang_)
-            )
+            ts_file = filedir("../share/pineboo/translations/%s.%s" % (self.idM_, self.lang_))
         else:
             ts_file = filedir(
-                "%s/cache/%s/%s/file.ts/%s.%s/%s"
-                % (
-                    project.tmpdir,
-                    project.conn.DBName(),
-                    self.idM_,
-                    self.idM_,
-                    self.lang_,
-                    key,
-                )
+                "%s/cache/%s/%s/file.ts/%s.%s/%s" % (project.tmpdir, project.conn.DBName(), self.idM_, self.idM_, self.lang_, key)
             )
         # qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
 
@@ -125,18 +111,11 @@ class FLTranslator(QTranslator):
                 if context_dict_key not in self.ts_translation_contexts.keys():
                     self.ts_translation_contexts[context_dict_key] = {}
                 for message in context.findall("message"):
-                    translation_elem, source_elem = (
-                        message.find("translation"),
-                        message.find("source"),
-                    )
-                    translation_text = (
-                        translation_elem is not None and translation_elem.text
-                    )
+                    translation_elem, source_elem = (message.find("translation"), message.find("source"))
+                    translation_text = translation_elem is not None and translation_elem.text
                     source_text = source_elem is not None and source_elem.text
                     if translation_text and source_text:
-                        self.ts_translation_contexts[context_dict_key][
-                            source_text
-                        ] = translation_text
+                        self.ts_translation_contexts[context_dict_key][source_text] = translation_text
 
             return True
         except Exception:

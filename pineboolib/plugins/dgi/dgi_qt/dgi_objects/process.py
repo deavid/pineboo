@@ -116,6 +116,4 @@ class Process(QtCore.QProcess):
         return 0  # FIXME: Probably we need to return the exit code
 
     running = property(getIsRunning)
-    workingDirectory = property(
-        getWorkingDirectory, setWorkingDirectory
-    )  # type: ignore
+    workingDirectory = property(getWorkingDirectory, setWorkingDirectory)  # type: ignore

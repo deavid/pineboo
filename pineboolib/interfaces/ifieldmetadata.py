@@ -2,9 +2,7 @@ from typing import List, Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .itablemetadata import ITableMetaData  # noqa: F401
-    from pineboolib.application.metadata.pnrelationmetadata import (
-        PNRelationMetaData,
-    )  # noqa: F401
+    from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData  # noqa: F401
 
 
 class IFieldMetaData:

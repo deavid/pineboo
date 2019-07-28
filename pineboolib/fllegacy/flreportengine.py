@@ -69,9 +69,7 @@ class FLReportEngine(object):
             # self.qGroupDict_
             lev = 0
 
-            while lev < levelMax and str(self.qry_.value(self.qGroupDict_[lev])) == str(
-                vA[lev]
-            ):
+            while lev < levelMax and str(self.qry_.value(self.qGroupDict_[lev])) == str(vA[lev]):
                 lev += 1
 
             for i in range(lev, levelMax):
@@ -128,9 +126,7 @@ class FLReportEngine(object):
 
         self.rd = QtXml.QDomDocument("KugarData")
 
-        self.d_.rows_ = (
-            self.rd.createDocumentFragment()
-        )  # FIXME: Don't set the private from the public.
+        self.d_.rows_ = self.rd.createDocumentFragment()  # FIXME: Don't set the private from the public.
         self.d_.setQuery(q)
         q.setForwardOnly(True)
         if q.exec_() and q.next():
@@ -224,9 +220,7 @@ class FLReportEngine(object):
     def renderReport(self, init_row=0, init_col=0, flags=False, pages=None) -> bool:
         if self.rd and self.rt and self.rt.find("KugarTemplate") > -1:
             data = self.rd.toString(1)
-            self.report_ = self.parser_.parse(
-                self.d_.template_, self.rt, data, self.report_, flags
-            )
+            self.report_ = self.parser_.parse(self.d_.template_, self.rt, data, self.report_, flags)
 
             return True if self.report_ else False
 
@@ -276,9 +270,7 @@ class FLReportEngine(object):
 
     def initData(self) -> None:
         if not self.rd:
-            raise Exception(
-                "RD is missing. Initialize properly before calling initData"
-            )
+            raise Exception("RD is missing. Initialize properly before calling initData")
         n = self.rd.firstChild()
         while not n.isNull():
             if n.nodeName() == "KugarData":

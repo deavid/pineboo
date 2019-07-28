@@ -49,10 +49,7 @@ class AQS(object):
     """
 
     def ColorDialog_getColor(
-        self,
-        color: Optional[Union[int, str, QColor]] = None,
-        parent: Optional["QWidget"] = None,
-        name: Optional[str] = None,
+        self, color: Optional[Union[int, str, QColor]] = None, parent: Optional["QWidget"] = None, name: Optional[str] = None
     ) -> Any:
         from PyQt5.QtWidgets import QColorDialog  # type: ignore
 
@@ -75,12 +72,7 @@ class AQS(object):
     """
 
     @classmethod
-    def toXml(
-        cls: Type["AQS"],
-        obj_: "QWidget",
-        include_children: bool = True,
-        include_complex_types: bool = False,
-    ):
+    def toXml(cls: Type["AQS"], obj_: "QWidget", include_children: bool = True, include_complex_types: bool = False):
         xml_ = QDomDocument()
 
         if not obj_:
@@ -151,9 +143,7 @@ class AQS(object):
         return ba.sha1()
 
     @classmethod
-    def Application_setOverrideCursor(
-        self, shape: "QCursor", replace: bool = False
-    ) -> None:
+    def Application_setOverrideCursor(self, shape: "QCursor", replace: bool = False) -> None:
         QApplication.setOverrideCursor(shape)
 
     @classmethod

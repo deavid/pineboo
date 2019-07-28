@@ -42,15 +42,11 @@ class FLSettings(object):
             if isinstance(ret, (int, float, str)):
                 return int(ret)
             else:
-                raise ValueError(
-                    "Configuration key %s cannot be converted to integer" % key
-                )
+                raise ValueError("Configuration key %s cannot be converted to integer" % key)
         else:
             return _def
 
-    def readDoubleEntry(
-        self, key: str, _def: Union[bytes, str, SupportsFloat] = 0
-    ) -> float:
+    def readDoubleEntry(self, key: str, _def: Union[bytes, str, SupportsFloat] = 0) -> float:
         ret = self.s.value(key)
         if ret is None:
             ret = _def

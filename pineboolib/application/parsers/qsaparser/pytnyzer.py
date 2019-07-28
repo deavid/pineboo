@@ -223,9 +223,7 @@ QSA_KNOWN_ATTRS = {
 DISALLOW_CONVERSION_FOR_NONSTRICT = {"connect", "disconnect"}
 
 
-def id_translate(
-    name: str, qsa_exclude: Set[str] = None, transform: Dict[str, str] = None
-) -> str:
+def id_translate(name: str, qsa_exclude: Set[str] = None, transform: Dict[str, str] = None) -> str:
     orig_name = name
     python_keywords = [
         "and",
@@ -302,11 +300,7 @@ def id_translate(
         name = name + "_"
 
     if qsa_exclude is not None:
-        qsa_lower = {
-            x.lower(): x
-            for x in qsa_exclude | QSA_KNOWN_ATTRS
-            if x.lower() != x and x.lower() not in qsa_exclude
-        }
+        qsa_lower = {x.lower(): x for x in qsa_exclude | QSA_KNOWN_ATTRS if x.lower() != x and x.lower() not in qsa_exclude}
         if orig_name.lower() in qsa_lower:
             new_name = qsa_lower[orig_name.lower()]
             count_diff_chars = len([1 for a, b in zip(new_name, orig_name) if a != b])
@@ -355,9 +349,7 @@ class ASTPythonBase(object):
     def can_process_tag(self, tagname) -> Any:
         return False
 
-    def generate(
-        self, break_mode=False, include_pass=True, **kwargs
-    ) -> Generator[Tuple[str, str], None, None]:
+    def generate(self, break_mode=False, include_pass=True, **kwargs) -> Generator[Tuple[str, str], None, None]:
         yield "type", "value"
 
     def local_var(self, name: str, is_member=False) -> str:
@@ -406,9 +398,7 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
             self.generate = self._generate  # type: ignore
 
     def generate(self, **kwargs):
-        yield "debug", "* not-known-seq * %s" % ElementTree.tostring(
-            self.elem, encoding="UTF-8"
-        )
+        yield "debug", "* not-known-seq * %s" % ElementTree.tostring(self.elem, encoding="UTF-8")
 
     def debug(self, text) -> None:
         if self.debug_file is None:
@@ -452,13 +442,7 @@ class Source(ASTPython):
         self.locals = set()
         self.locals_transform = {}
 
-    def generate(
-        self,
-        break_mode=False,
-        include_pass=True,
-        declare_identifiers: Set = None,
-        **kwargs
-    ):
+    def generate(self, break_mode=False, include_pass=True, declare_identifiers: Set = None, **kwargs):
         elems = 0
         after_lines = []
         prev_ast_type = None
@@ -474,9 +458,7 @@ class Source(ASTPython):
                 yield "line", ""
             prev_ast_type = ast_type
 
-            for dtype, data in ast_python.generate(
-                break_mode=break_mode, plusplus_as_instruction=True
-            ):
+            for dtype, data in ast_python.generate(break_mode=break_mode, plusplus_as_instruction=True):
                 if dtype == "line+1":
                     after_lines.append(data)
                     continue
@@ -579,9 +561,7 @@ class Function(ASTPython):
         # if returns:  yield "debug", "Returns: %s" % returns
         for source in self.elem.findall("Source"):
             source.set("parent_", self.elem)
-            for obj in parse_ast(source, parent=self).generate(
-                declare_identifiers=id_list
-            ):
+            for obj in parse_ast(source, parent=self).generate(declare_identifiers=id_list):
                 yield obj
         yield "end", "block-def-%s" % (name)
         if anonymous:
@@ -748,9 +728,7 @@ class TryCatch(ASTPython):
         for ident in self.elem.findall("Identifier"):
             ident.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(ident, parent=self).generate(
-                isolate=False, is_member=True
-            ):
+            for dtype, data in parse_ast(ident, parent=self).generate(isolate=False, is_member=True):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -762,9 +740,7 @@ class TryCatch(ASTPython):
             self.source.locals.add(identifier)
             # yield "line", "%s = str(%s)" % (identifier, identifier)
             yield "line", "%s = qsa.format_exc()" % (identifier)
-        for obj in parse_ast(catchblock, parent=self).generate(
-            include_pass=identifier is None
-        ):
+        for obj in parse_ast(catchblock, parent=self).generate(include_pass=identifier is None):
             yield obj
         yield "end", "block-except"
 
@@ -921,9 +897,7 @@ class ForIn(ASTPython):
             if e.tag == "ForInitialize":
                 e = list(e)[0]
             expr = []
-            for dtype, data in parse_ast(e, parent=self).generate(
-                isolate=False, is_member=True
-            ):
+            for dtype, data in parse_ast(e, parent=self).generate(isolate=False, is_member=True):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -1148,9 +1122,7 @@ class With(ASTPython):
         yield "line", " #WITH_START"
         source = cast(Source, parse_ast(source_elem, parent=self))
         source.locals.add(" ".join(var_expr))
-        source.locals_transform = {
-            x: "%s.%s" % (" ".join(var_expr), x) for x in With.python_keywords
-        }
+        source.locals_transform = {x: "%s.%s" % (" ".join(var_expr), x) for x in With.python_keywords}
 
         for obj in source.generate(break_mode=True):
             obj_ = None
@@ -1165,9 +1137,7 @@ class With(ASTPython):
                 if obj_1.startswith(t):
                     obj_1 = "%s.%s" % (" ".join(var_expr), obj_1)
                 elif obj_1.startswith("connect(%s" % t):
-                    obj_1 = obj_1.replace(
-                        "connect(%s" % t, "connect(%s.%s" % (" ".join(var_expr), t)
-                    )
+                    obj_1 = obj_1.replace("connect(%s" % t, "connect(%s.%s" % (" ".join(var_expr), t))
                 elif obj_1.find(".") == -1 and obj_1.find(t) > -1:
                     obj_1 = obj_1.replace(t, "%s.%s" % (" ".join(var_expr), t))
 
@@ -1242,9 +1212,7 @@ class InstructionUpdate(ASTPython):
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg, parent=self).generate(
-                isolate=False, is_member=(n == 0)
-            ):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False, is_member=(n == 0)):
                 if dtype == "expr":
                     if data is None:
                         raise ValueError(ElementTree.tostring(arg))
@@ -1405,15 +1373,8 @@ class Member(ASTPython):
             arg_expr.append(expr)
 
         # Deteccion de llamada a modulo externo
-        if (
-            len(arguments) >= 3
-            and arguments[1] == "iface"
-            and arguments[0] != "self"
-            and arguments[0].startswith("__undef__")
-        ):
-            arguments[0] = 'qsa.from_project("%s")' % arguments[0].replace(
-                "__undef__", ""
-            )
+        if len(arguments) >= 3 and arguments[1] == "iface" and arguments[0] != "self" and arguments[0].startswith("__undef__"):
+            arguments[0] = 'qsa.from_project("%s")' % arguments[0].replace("__undef__", "")
         # Lectura del self.iface.__init
         if (
             len(arguments) >= 3
@@ -1446,17 +1407,10 @@ class Member(ASTPython):
                     classname = full_fun_name.split("_")[0]
 
                 arguments[2] = arguments[2][2:]
-                arguments[0:2] = [
-                    'super(getattr(self._module, "%s"), %s)'
-                    % (classname, ".".join(arguments[0:2]))
-                ]
+                arguments[0:2] = ['super(getattr(self._module, "%s"), %s)' % (classname, ".".join(arguments[0:2]))]
 
         # Lectura del self.iface.__init() al nuevo estilo yeboyebo
-        if (
-            len(arguments) >= 2
-            and arguments[0:1] == ["_i"]
-            and arguments[1].startswith("__")
-        ):
+        if len(arguments) >= 2 and arguments[0:1] == ["_i"] and arguments[1].startswith("__"):
             # From: self.iface.__function()
             # to: super(className, self.iface).function()
             parent = self.elem.get("parent_")
@@ -1481,10 +1435,7 @@ class Member(ASTPython):
                 else:
                     classname = full_fun_name.split("_")[0]
                 arguments[1] = arguments[1][2:]
-                arguments[0:1] = [
-                    'super(getattr(self._module, "%s"), %s)'
-                    % (classname, ".".join(arguments[0:1]))
-                ]
+                arguments[0:1] = ['super(getattr(self._module, "%s"), %s)' % (classname, ".".join(arguments[0:1]))]
 
         replace_members = [
             "toString()",
@@ -1514,9 +1465,7 @@ class Member(ASTPython):
                     try:
                         part2 = arguments[idx + 1 :]
                     except IndexError:
-                        part2 = (
-                            []
-                        )  # Para los que son últimos y no tienen parte adicional
+                        part2 = []  # Para los que son últimos y no tienen parte adicional
                     if member == "toString()":
                         arguments = ["qsa.parseString(%s)" % ".".join(part1)] + part2
                     #    arguments = ["str(%s)" % (".".join(part1))] + part2
@@ -1529,10 +1478,7 @@ class Member(ASTPython):
                     elif member == "right":
                         value = arg[6:]
                         value = value[: len(value) - 1]
-                        arguments = [
-                            "%s[(len(%s) - (%s)):]"
-                            % (".".join(part1), ".".join(part1), value)
-                        ] + part2
+                        arguments = ["%s[(len(%s) - (%s)):]" % (".".join(part1), ".".join(part1), value)] + part2
                     elif member == "substring":
                         value = arg[10:]
                         value = value[: len(value) - 1]
@@ -1542,9 +1488,7 @@ class Member(ASTPython):
                         value = arg[4:]
                         value = value[: len(value) - 1]
                         if value.find(",") > -1:
-                            if (value.find("(") < value.find(",")) and value.find(
-                                ")"
-                            ) < value.find(","):
+                            if (value.find("(") < value.find(",")) and value.find(")") < value.find(","):
                                 i, k = value.split(",")
                             # if (len(value.split(",")) == 2 and value.find("(") == -1) or value.find("(") < value.find(","):
                             #    i, l = value.split(",")
@@ -1595,9 +1539,7 @@ class Member(ASTPython):
                                     part2[i] = str(part2[i]).replace("arg", "str")
                                 sPart2 = ", " + ", ".join(part2)
                             sPart1 = re.sub(r"%\d", "%s", sPart1)
-                            arguments = [
-                                "%s %% (str(%s" % (sPart1, value + ")" + sPart2 + ")")
-                            ]
+                            arguments = ["%s %% (str(%s" % (sPart1, value + ")" + sPart2 + ")")]
 
                     elif member == "join":
                         value = arg[5:]
@@ -1606,9 +1548,7 @@ class Member(ASTPython):
                     elif member == "match":
                         value = arg[6:]
                         value = value[: len(value) - 1]
-                        arguments = [
-                            "qsa.re.match(%s, %s)" % (value, ".".join(part1))
-                        ] + part2
+                        arguments = ["qsa.re.match(%s, %s)" % (value, ".".join(part1))] + part2
                     elif member == "push":
                         value = arg[5:]
                         value = value[: len(value) - 1]
@@ -1616,10 +1556,7 @@ class Member(ASTPython):
                     elif member == "attributeValue":
                         value = arg[15:]
                         value = value[: len(value) - 1]
-                        arguments = [
-                            "%s.attributes().namedItem(%s).nodeValue()"
-                            % (".".join(part1), value)
-                        ] + part2
+                        arguments = ["%s.attributes().namedItem(%s).nodeValue()" % (".".join(part1), value)] + part2
                     elif member == "replace":
                         value = arg[8:-1]
                         part_list = []
@@ -1631,32 +1568,19 @@ class Member(ASTPython):
                             if part_list[1] == ' "':
                                 part_list[1] = '","'
                         if part_list[0].find("re.compile") > -1:
-                            arguments = [
-                                "%s.sub(%s,%s)"
-                                % (
-                                    part_list[0],
-                                    ",".join(part_list[1:]),
-                                    ".".join(part1),
-                                )
-                            ] + part2
+                            arguments = ["%s.sub(%s,%s)" % (part_list[0], ",".join(part_list[1:]), ".".join(part1))] + part2
                         else:
                             if not part2:
-                                if ".".join(part1) and "replace(" in " ".join(
-                                    arguments[0:1]
-                                ):
+                                if ".".join(part1) and "replace(" in " ".join(arguments[0:1]):
                                     # arguments = ['numeroCSV', 'replace(".", ",")']
                                     rep_str = arguments[0]
-                                    rep_from_to = (
-                                        arguments[1].replace("replace", "").strip()
-                                    )
+                                    rep_from_to = arguments[1].replace("replace", "").strip()
                                     if rep_from_to[0] == "(" and rep_from_to[-1] == ")":
                                         rep_from_to = rep_from_to[1:-1]
 
                                     rep_extra = arguments[2:]
                                     # print(arguments)
-                                    arguments = [
-                                        "qsa.replace(%s, %s)" % (rep_str, rep_from_to)
-                                    ] + rep_extra
+                                    arguments = ["qsa.replace(%s, %s)" % (rep_str, rep_from_to)] + rep_extra
                                     # print(arguments)
                                     # print("*")
 
@@ -1679,9 +1603,7 @@ class ArrayMember(ASTPython):
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg, parent=self).generate(
-                isolate=False, is_member=(n == 0)
-            ):
+            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False, is_member=(n == 0)):
                 # if data.find(".") > -1:
                 #    l = data.split(".")
                 #    data = "%s['%s']" % (l[0], l[1])
@@ -1809,9 +1731,7 @@ class DictObject(ASTPython):
             for dtype, data in parse_ast(child, parent=self).generate():
                 empty = False
                 if key:
-                    yield dtype, "'%s'" % data if not data.startswith(
-                        "'"
-                    ) else "%s" % data
+                    yield dtype, "'%s'" % data if not data.startswith("'") else "%s" % data
                     key = False
                 else:
                     yield dtype, data
@@ -1900,18 +1820,14 @@ class Constant(ASTPython):
 
                 elif child.tag == "regex":
                     val = ""
-                    for dtype, data in parse_ast(child, parent=self).generate(
-                        isolate=False
-                    ):
+                    for dtype, data in parse_ast(child, parent=self).generate(isolate=False):
                         if data:
                             val += data
                     yield "expr", 'qsa.re.compile(r"/%s/i")' % val
 
                 elif child.tag == "regexbody":
                     val = ""
-                    for dtype, data in parse_ast(child, parent=self).generate(
-                        isolate=False
-                    ):
+                    for dtype, data in parse_ast(child, parent=self).generate(isolate=False):
                         if data:
                             val += data
                     yield "expr", 'r"%s"' % val
@@ -1920,9 +1836,7 @@ class Constant(ASTPython):
                     arguments = []
                     for n, arg in enumerate(child):
                         expr = []
-                        for dtype, data in parse_ast(arg, parent=self).generate(
-                            isolate=False
-                        ):
+                        for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                             if dtype == "expr":
                                 expr.append(data)
                             else:
@@ -1936,9 +1850,7 @@ class Constant(ASTPython):
 
                     yield "expr", "qsa.Array([%s])" % (", ".join(arguments))
                 else:
-                    for dtype, data in parse_ast(child, parent=self).generate(
-                        isolate=False
-                    ):
+                    for dtype, data in parse_ast(child, parent=self).generate(isolate=False):
                         yield dtype, data
             return
         if ctype == "String":
@@ -2197,9 +2109,7 @@ def file_template(ast: Any) -> Generator[Tuple[Any, Any], Any, None]:
         cls.set("parent_", ast)
         sourceclasses.append(cls)
 
-    mainclass = ElementTree.SubElement(
-        sourceclasses, "Class", name="FormInternalObj", extends="qsa.FormDBWidget"
-    )
+    mainclass = ElementTree.SubElement(sourceclasses, "Class", name="FormInternalObj", extends="qsa.FormDBWidget")
     mainsource = ElementTree.SubElement(mainclass, "Source")
 
     constructor = ElementTree.SubElement(mainsource, "Function", name="_class_init")
@@ -2209,9 +2119,7 @@ def file_template(ast: Any) -> Generator[Tuple[Any, Any], Any, None]:
     for child in ast:
         if child.tag != "Function":
             child.set("constructor", "1")
-            if (
-                child.tag != "Class"
-            ):  # Limpiamos las class, se cuelan desde el cambio de xml
+            if child.tag != "Class":  # Limpiamos las class, se cuelan desde el cambio de xml
                 csource.append(child)
         else:
             mainsource.append(child)
@@ -2266,11 +2174,7 @@ def write_python_file(fobj, ast) -> None:
                 pass
             endblock = indent.pop()
             if endblock != data:
-                line = "# END-ERROR!! was %s but %s found. (%s)" % (
-                    endblock,
-                    data,
-                    repr(indent),
-                )
+                line = "# END-ERROR!! was %s but %s found. (%s)" % (endblock, data, repr(indent))
 
         if line is not None:
             ASTPython.numline += 1
@@ -2300,9 +2204,7 @@ def pythonize(filename, destfilename, debugname=None) -> None:
     write_python_file(f1, ast)
     f1.close()
     if black:
-        new_code = black.format_file_contents(
-            Path(destfilename).read_text(), fast=True, mode=BLACK_FILEMODE
-        )
+        new_code = black.format_file_contents(Path(destfilename).read_text(), fast=True, mode=BLACK_FILEMODE)
         f1 = open(destfilename, "w", encoding="UTF-8")
         f1.write(new_code)
         f1.close()
@@ -2310,34 +2212,13 @@ def pythonize(filename, destfilename, debugname=None) -> None:
 
 def main() -> None:
     parser = OptionParser()
-    parser.add_option(
-        "-q",
-        "--quiet",
-        action="store_false",
-        dest="verbose",
-        default=True,
-        help="don't print status messages to stdout",
-    )
+    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
 
-    parser.add_option(
-        "--optdebug",
-        action="store_true",
-        dest="optdebug",
-        default=False,
-        help="debug optparse module",
-    )
+    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
 
-    parser.add_option(
-        "--debug",
-        action="store_true",
-        dest="debug",
-        default=False,
-        help="prints lots of useless messages",
-    )
+    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
 
-    parser.add_option(
-        "--path", dest="storepath", default=None, help="store PY results in PATH"
-    )
+    parser.add_option("--path", dest="storepath", default=None, help="store PY results in PATH")
 
     (options, args) = parser.parse_args()
     if options.optdebug:

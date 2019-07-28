@@ -9,9 +9,7 @@ logger = logging.getLogger("messageBox")
 
 class MessageBox(QMessageBox):
     @classmethod
-    def msgbox(
-        cls, typename, text, button0, button1=None, button2=None, title=None, form=None
-    ) -> Any:
+    def msgbox(cls, typename, text, button0, button1=None, button2=None, title=None, form=None) -> Any:
         from pineboolib.application import project
 
         if project._splash:

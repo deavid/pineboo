@@ -23,15 +23,9 @@ class FLPixmapView(QtWidgets.QScrollArea):
         self.pixmap_ = QtGui.QPixmap()
         self.pixmapView_ = QLabel(self)
         self.lay_.addWidget(self.pixmapView_)
-        self.pixmapView_.setAlignment(
-            cast(
-                QtCore.Qt.AlignmentFlag, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignCenter
-            )
-        )
+        self.pixmapView_.setAlignment(cast(QtCore.Qt.AlignmentFlag, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignCenter))
         self.pixmapView_.installEventFilter(self)
-        self.setStyleSheet(
-            "QScrollArea { border: 1px solid darkgray; border-radius: 3px; }"
-        )
+        self.setStyleSheet("QScrollArea { border: 1px solid darkgray; border-radius: 3px; }")
         self._parent = parent
 
     def setPixmap(self, pix: QtGui.QPixmap) -> None:
@@ -61,26 +55,12 @@ class FLPixmapView(QtWidgets.QScrollArea):
             return
 
         new_pix = self.pixmap_
-        if (
-            self.autoScaled_ is not None
-            and self.pixmap_ is not None
-            and self.pixmapView_ is not None
-        ):
-            if (
-                self.pixmap_.height() > self.pixmapView_.height()
-                or self.pixmap_.width() > self.pixmapView_.width()
-            ):
-                new_pix = self.pixmap_.scaled(
-                    self.pixmapView_.size(), QtCore.Qt.KeepAspectRatio
-                )
+        if self.autoScaled_ is not None and self.pixmap_ is not None and self.pixmapView_ is not None:
+            if self.pixmap_.height() > self.pixmapView_.height() or self.pixmap_.width() > self.pixmapView_.width():
+                new_pix = self.pixmap_.scaled(self.pixmapView_.size(), QtCore.Qt.KeepAspectRatio)
 
-            elif (
-                self.pixmap_.height() < self.pixmapView_.pixmap().height()
-                or self.pixmap_.width() < self.pixmapView_.pixmap().width()
-            ):
-                new_pix = self.pixmap_.scaled(
-                    self.pixmapView_.size(), QtCore.Qt.KeepAspectRatio
-                )
+            elif self.pixmap_.height() < self.pixmapView_.pixmap().height() or self.pixmap_.width() < self.pixmapView_.pixmap().width():
+                new_pix = self.pixmap_.scaled(self.pixmapView_.size(), QtCore.Qt.KeepAspectRatio)
 
         if self.pixmapView_ is not None:
             self.pixmapView_.clear()

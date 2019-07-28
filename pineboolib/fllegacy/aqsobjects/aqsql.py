@@ -52,14 +52,7 @@ class AQSql(object):
     """
 
     @classmethod
-    def update(
-        self,
-        table_or_cursor: Union[str, "FLSqlCursor"],
-        fields,
-        values,
-        where="",
-        conn=None,
-    ):
+    def update(self, table_or_cursor: Union[str, "FLSqlCursor"], fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
             from pineboolib.application.database.pnsqlcursor import PNSqlCursor
@@ -117,14 +110,7 @@ class AQSql(object):
     """
 
     @classmethod
-    def insert(
-        self,
-        table_or_cursor: Union[str, "FLSqlCursor"],
-        fields,
-        values,
-        where="",
-        conn=None,
-    ):
+    def insert(self, table_or_cursor: Union[str, "FLSqlCursor"], fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
             from pineboolib.application.database.pnsqlcursor import PNSqlCursor
@@ -173,9 +159,7 @@ class AQSql(object):
     """
 
     @classmethod
-    def del_(
-        self, cur_or_table: Union[str, "FLSqlCursor"], where="", conn_name="default"
-    ):
+    def del_(self, cur_or_table: Union[str, "FLSqlCursor"], where="", conn_name="default"):
 
         if not isinstance(cur_or_table, str):
             cur = cur_or_table
@@ -183,9 +167,7 @@ class AQSql(object):
                 return False
 
             if not cur.metadata():
-                logger.warning(
-                    "No hay metadatos para '%s%s'" % (cur.curName(), cur.db())
-                )
+                logger.warning("No hay metadatos para '%s%s'" % (cur.curName(), cur.db()))
                 return False
 
             if not cur.select(where):

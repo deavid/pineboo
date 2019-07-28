@@ -14,9 +14,7 @@ class CheckBox(QWidget):
 
         self._label = QtWidgets.QLabel(self)
         self._cb = QtWidgets.QCheckBox(self)
-        spacer = QtWidgets.QSpacerItem(
-            1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
+        spacer = QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         _lay = QtWidgets.QHBoxLayout()
         _lay.addWidget(self._cb)
         _lay.addWidget(self._label)

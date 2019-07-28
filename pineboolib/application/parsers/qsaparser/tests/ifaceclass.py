@@ -19,9 +19,7 @@ def do_test(code):
                 if str(expression[0]) == "new":
                     if expression[1].type == ("Item", "FuncCall"):
                         if str(expression[1].arglist) != "this":
-                            print(
-                                "`this` must be the olny arg passed to the constructor!"
-                            )
+                            print("`this` must be the olny arg passed to the constructor!")
                             return False
 
                         classname = expression[1].name
@@ -62,17 +60,11 @@ def analyzeClass(code, classname, parentlist=[]):
     if cclass.extends:
         print("class %s is a child of %s." % (classname, str(cclass.extends)))
         if str(cclass.extends) == classname:
-            print(
-                "%s fails in analysis because extends a class with the same name."
-                % classname
-            )
+            print("%s fails in analysis because extends a class with the same name." % classname)
             return False
 
         if str(cclass.extends) in parentlist:
-            print(
-                "%s fails in analysis because extends a class already in the hierarchy."
-                % classname
-            )
+            print("%s fails in analysis because extends a class already in the hierarchy." % classname)
             return False
 
         if not analyzeClass(code, str(cclass.extends)):
@@ -94,10 +86,7 @@ def analyzeClass(code, classname, parentlist=[]):
         if cclass.extends:
             cextends = code.byDefName[str(cclass.extends)]
             if cextends.constructor:
-                print(
-                    "#ERROR# Parent class has one constructor and constructor function for %s NOT found!"
-                    % classname
-                )
+                print("#ERROR# Parent class has one constructor and constructor function for %s NOT found!" % classname)
 
     print("%s is a valid class." % (".".join(cclass.childclasses)))
 

@@ -30,11 +30,7 @@ class PNSqlDrivers(object, metaclass=Singleton):
         self.driversDefaultPort: Dict[str, int] = {}
         self.desktopFile: Dict[str, str] = {}
 
-        dir_list = [
-            file
-            for file in os.listdir(filedir("plugins/sql"))
-            if not file[0] == "_" and file.find(".py") > -1
-        ]
+        dir_list = [file for file in os.listdir(filedir("plugins/sql")) if not file[0] == "_" and file.find(".py") > -1]
         for item in dir_list:
             file_name = item[: item.find(".py")]
             try:
@@ -74,9 +70,7 @@ class PNSqlDrivers(object, metaclass=Singleton):
 
         if self.driver():
             # self.driverName = driverName
-            logger.info(
-                "Driver %s v%s", self.driver().driverName(), self.driver().version()
-            )
+            logger.info("Driver %s v%s", self.driver().driverName(), self.driver().version())
             return True
         else:
             return False

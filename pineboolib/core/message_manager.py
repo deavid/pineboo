@@ -11,9 +11,7 @@ class Manager(object):
     def __init__(self, dgi: dgi_schema) -> None:
         self._dgi = dgi
 
-    def send(
-        self, type_: str, function_: str = None, data_: Iterable[Any] = None
-    ) -> Any:
+    def send(self, type_: str, function_: str = None, data_: Iterable[Any] = None) -> Any:
         if self._dgi is None:
             return None
         obj_ = getattr(self._dgi, type_, None)

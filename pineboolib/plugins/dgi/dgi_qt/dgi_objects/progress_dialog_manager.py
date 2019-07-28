@@ -13,12 +13,7 @@ class ProgressDialogManager(object):
         from PyQt5 import QtCore  # type: ignore
 
         if project._DGI:
-            pd_widget = project.DGI.QProgressDialog(
-                str(title),
-                str(project.DGI.QApplication.translate("scripts", "Cancelar")),
-                0,
-                steps,
-            )
+            pd_widget = project.DGI.QProgressDialog(str(title), str(project.DGI.QApplication.translate("scripts", "Cancelar")), 0, steps)
             if pd_widget is not None:
                 pd_widget.setObjectName(id_)
                 pd_widget.setWindowModality(QtCore.Qt.WindowModal)

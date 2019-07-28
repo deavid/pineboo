@@ -171,9 +171,7 @@ class FLManagerModules(object):
     """
 
     def content(self, n) -> Any:
-        cursor = self.conn_.dbAux().execute_query(
-            "SELECT contenido FROM flfiles WHERE nombre='%s' AND NOT sha = ''" % n
-        )
+        cursor = self.conn_.dbAux().execute_query("SELECT contenido FROM flfiles WHERE nombre='%s' AND NOT sha = ''" % n)
 
         for contenido in cursor:
             return contenido[0]
@@ -255,9 +253,7 @@ class FLManagerModules(object):
 
         if not shaKey and not self.conn_.manager().isSystemTable(name_):
 
-            cursor = self.conn_.execute_query(
-                "SELECT sha FROM flfiles WHERE nombre='%s'" % n
-            )
+            cursor = self.conn_.execute_query("SELECT sha FROM flfiles WHERE nombre='%s'" % n)
 
             for contenido in cursor:
                 shaKey = contenido[0]
@@ -273,40 +269,21 @@ class FLManagerModules(object):
             raise Exception("DGI not loaded")
 
         if project.DGI.alternative_content_cached():
-            data = project.DGI.content_cached(
-                project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey
-            )
+            data = project.DGI.content_cached(project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey)
             if data is not None:
                 return data
 
         if data is None:
             """Ruta por defecto"""
-            if os.path.exists(
-                "%s/cache/%s/%s/file.%s/%s"
-                % (project.tmpdir, self.conn_.DBName(), modId, ext_, name_)
-            ):
+            if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (project.tmpdir, self.conn_.DBName(), modId, ext_, name_)):
                 utf8_ = True if ext_ == "kut" else False
                 data = self.contentFS(
-                    "%s/cache/%s/%s/file.%s/%s/%s.%s"
-                    % (
-                        project.tmpdir,
-                        self.conn_.DBName(),
-                        modId,
-                        ext_,
-                        name_,
-                        shaKey,
-                        ext_,
-                    ),
-                    utf8_,
+                    "%s/cache/%s/%s/file.%s/%s/%s.%s" % (project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey, ext_), utf8_
                 )
 
         if data is None:
-            if os.path.exists(
-                filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_))
-            ):
-                data = self.contentFS(
-                    filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_))
-                )
+            if os.path.exists(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_))):
+                data = self.contentFS(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_)))
             else:
                 data = self.content(n)
 
@@ -327,9 +304,7 @@ class FLManagerModules(object):
             return
 
         format_val = self.conn_.manager().formatAssignValue("nombre", "string", n, True)
-        format_val2 = self.conn_.managere().formatAssignValue(
-            "idmodulo", "string", idM, True
-        )
+        format_val2 = self.conn_.managere().formatAssignValue("idmodulo", "string", idM, True)
 
         from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
         from pineboolib.fllegacy.flutil import FLUtil
@@ -377,13 +352,7 @@ class FLManagerModules(object):
     @return QWidget correspondiente al formulario construido.
     """
 
-    def createForm(
-        self,
-        action: Union["flaction.FLAction", "XMLAction"],
-        connector=None,
-        parent=None,
-        name=None,
-    ):
+    def createForm(self, action: Union["flaction.FLAction", "XMLAction"], connector=None, parent=None, name=None):
         from pineboolib import pncontrolsfactory
         from pineboolib.fllegacy.flaction import FLAction
 
@@ -405,13 +374,7 @@ class FLManagerModules(object):
     @param name. Nombre del formRecord
     """
 
-    def createFormRecord(
-        self,
-        a: Union["flaction.FLAction", "XMLAction"],
-        connector=None,
-        parent_or_cursor=None,
-        name=None,
-    ) -> Any:
+    def createFormRecord(self, a: Union["flaction.FLAction", "XMLAction"], connector=None, parent_or_cursor=None, name=None) -> Any:
         logger.trace("createFormRecord: init")
         from pineboolib import pncontrolsfactory
         from pineboolib.fllegacy.flaction import FLAction
@@ -646,9 +609,7 @@ class FLManagerModules(object):
 
     def shaOfFile(self, n: str) -> Optional[str]:
         if not n[:3] == "sys" and not self.conn_.manager().isSystemTable(n):
-            formatVal = self.conn_.manager().formatAssignValue(
-                "nombre", "string", n, True
-            )
+            formatVal = self.conn_.manager().formatAssignValue("nombre", "string", n, True)
             q = PNSqlQuery(None, self.conn_.dbAux())
             # q.setForwardOnly(True)
             q.exec_("SELECT sha FROM flfiles WHERE %s" % formatVal)
@@ -686,9 +647,7 @@ class FLManagerModules(object):
 
         q = PNSqlQuery(None, self.conn_.dbAux())
         q.setTablesList("flmodules,flareas")
-        q.setSelect(
-            "idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion"
-        )
+        q.setSelect("idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion")
         q.setFrom("flmodules left join flareas on flmodules.idarea = flareas.idarea")
         q.setWhere("1 = 1")
         q.setForwardOnly(True)
@@ -718,9 +677,7 @@ class FLManagerModules(object):
             infoMod.idArea = "sys"
             infoMod.descripcion = "Administracion"
             infoMod.version = "0.0"
-            infoMod.icono = self.contentFS(
-                "%s/%s" % (filedir("../share/pineboo"), "/sys.xpm")
-            )
+            infoMod.icono = self.contentFS("%s/%s" % (filedir("../share/pineboo"), "/sys.xpm"))
             infoMod.areaDescripcion = "Sistema"
             self.dictInfoMods[infoMod.idModulo.upper()] = infoMod
 
@@ -767,9 +724,7 @@ class FLManagerModules(object):
             if n[: n.find(".mtd")] in project.DGI.sys_mtds() or n == "flfiles.mtd":
                 return "sys"
 
-        cursor = self.conn_.execute_query(
-            "SELECT idmodulo FROM flfiles WHERE nombre='%s'" % n
-        )
+        cursor = self.conn_.execute_query("SELECT idmodulo FROM flfiles WHERE nombre='%s'" % n)
 
         for idmodulo in cursor:
             return idmodulo[0]
@@ -782,13 +737,7 @@ class FLManagerModules(object):
         idDB = "noDB"
         if self.conn_.dbAux():
             db_aux = self.conn_.dbAux()
-            idDB = "%s%s%s%s%s" % (
-                db_aux.database(),
-                db_aux.host(),
-                db_aux.user(),
-                db_aux.driverName(),
-                db_aux.port(),
-            )
+            idDB = "%s%s%s%s%s" % (db_aux.database(), db_aux.host(), db_aux.user(), db_aux.driverName(), db_aux.port())
 
         from pineboolib.core.settings import settings
 
@@ -815,13 +764,7 @@ class FLManagerModules(object):
 
         db_aux = self.conn_.dbAux()
 
-        idDB = "%s%s%s%s%s" % (
-            db_aux.database(),
-            db_aux.host(),
-            db_aux.user(),
-            db_aux.driverName(),
-            db_aux.port(),
-        )
+        idDB = "%s%s%s%s%s" % (db_aux.database(), db_aux.host(), db_aux.user(), db_aux.driverName(), db_aux.port())
 
         from pineboolib.core.settings import settings
 
@@ -829,10 +772,7 @@ class FLManagerModules(object):
         self.activeIdArea_ = settings.value("Modules/activeIdArea/%s" % idDB, None)
         self.shaLocal_ = settings.value("Modules/shaLocal/%s" % idDB, None)
 
-        if (
-            self.activeIdModule_ is None
-            or self.activeIdModule_ not in self.listAllIdModules()
-        ):
+        if self.activeIdModule_ is None or self.activeIdModule_ not in self.listAllIdModules():
             self.setActiveIdModule(None)
 
     """

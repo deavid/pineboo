@@ -74,17 +74,12 @@ class dgi_aqnext(dgi_schema):
     def alternative_content_cached(self):
         return True
 
-    def content_cached(
-        self, tmp_folder, db_name, module_id, file_ext, file_name, sha_key
-    ):
+    def content_cached(self, tmp_folder, db_name, module_id, file_ext, file_name, sha_key):
         from pineboolib.core.utils.utils_base import filedir
 
         data_ = None
         if module_id == "sys" and file_name in self.sys_mtds():
-            path_ = filedir(
-                "./plugins/dgi/dgi_aqnext/system_files/%s/%s.%s"
-                % (file_ext, file_name, file_ext)
-            )
+            path_ = filedir("./plugins/dgi/dgi_aqnext/system_files/%s/%s.%s" % (file_ext, file_name, file_ext))
             if os.path.exists(path_) and project.conn:
                 data_ = project.conn.managerModules().contentFS(path_, False)
 
@@ -105,9 +100,7 @@ class dgi_aqnext(dgi_schema):
     # def interactiveGUI(self):
     # return "Django"
 
-    def __content_cached__old__(
-        self, tmp_dir, db_name, module_id, ext_, name_, sha_key
-    ):
+    def __content_cached__old__(self, tmp_dir, db_name, module_id, ext_, name_, sha_key):
         data = None
         utf8_ = False
         if not project.conn:
@@ -121,15 +114,11 @@ class dgi_aqnext(dgi_schema):
             if os.path.exists(legacy_path):
                 data = project.conn.managerModules().contentFS(legacy_path, True)
         else:
-            if os.path.exists(
-                "%s/cache/%s/%s/file.%s/%s" % (tmp_dir, db_name, module_id, ext_, name_)
-            ):
+            if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (tmp_dir, db_name, module_id, ext_, name_)):
                 if ext_ == "kut":
                     utf8_ = True
                 data = project.conn.managerModules().contentFS(
-                    "%s/cache/%s/%s/file.%s/%s/%s.%s"
-                    % (tmp_dir, db_name, module_id, ext_, name_, sha_key, ext_),
-                    utf8_,
+                    "%s/cache/%s/%s/file.%s/%s/%s.%s" % (tmp_dir, db_name, module_id, ext_, name_, sha_key, ext_), utf8_
                 )
 
         return data
@@ -144,9 +133,7 @@ class dgi_aqnext(dgi_schema):
         if app is None:
             app = "**"
 
-        for file_name in glob.iglob(
-            "%s/legacy/%s/%s" % (folder_, app, script_name), recursive=True
-        ):
+        for file_name in glob.iglob("%s/legacy/%s/%s" % (folder_, app, script_name), recursive=True):
             if file_name.endswith(script_name):
                 ret_ = file_name
                 break
@@ -180,11 +167,7 @@ class dgi_aqnext(dgi_schema):
                 delattr(qsa_dict_modules, action.name)  # Borramos el script del arbol
 
             # Se crea el script
-            setattr(
-                qsa_dict_modules,
-                action.name,
-                DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % app),
-            )
+            setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % app))
             project.actions[action.name] = action
             if prefix == "":
                 return
@@ -194,9 +177,7 @@ class dgi_aqnext(dgi_schema):
 
         if "%s_legacy" in action_xml.name not in project.actions.keys():
             if action_xml.name in project.actions.keys():
-                project.actions["%s_legacy" % action_xml.name] = project.actions[
-                    action_xml.name
-                ]
+                project.actions["%s_legacy" % action_xml.name] = project.actions[action_xml.name]
                 del project.actions[action_xml.name]
 
         if prefix == "form":
@@ -209,10 +190,7 @@ class dgi_aqnext(dgi_schema):
             action_xml.table = action_xml.name
             action_xml.scriptform = script_name
             project.actions[action_xml.name] = action_xml
-            delayed_action = DelayedObjectProxyLoader(
-                action_xml.load,
-                name="QSA.Module.%s.Action.form%s" % (app, action_xml.name),
-            )
+            delayed_action = DelayedObjectProxyLoader(action_xml.load, name="QSA.Module.%s.Action.form%s" % (app, action_xml.name))
             # print("Creando", "form" + module_name)
             setattr(qsa_dict_modules, "form" + action_xml.name, delayed_action)
 
@@ -220,17 +198,14 @@ class dgi_aqnext(dgi_schema):
             if hasattr(qsa_dict_modules, "formRecord" + action_xml.name):
                 # Cambiamos a legacy el script existente
                 legacy = getattr(qsa_dict_modules, action_xml.name)
-                setattr(
-                    qsa_dict_modules, "formRecord%s_legacy" % action_xml.name, legacy
-                )
+                setattr(qsa_dict_modules, "formRecord%s_legacy" % action_xml.name, legacy)
                 delattr(qsa_dict_modules, action_xml.name)
 
             action_xml.table = action_xml.name
             action_xml.scriptformrecord = script_name
             project.actions[action_xml.name] = action_xml
             delayed_action = DelayedObjectProxyLoader(
-                action_xml.formRecordWidget,
-                name="QSA.Module.%s.Action.formRecord%s" % (app, action_xml.name),
+                action_xml.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (app, action_xml.name)
             )
             setattr(qsa_dict_modules, "formRecord" + action_xml.name, delayed_action)
             # print("Creando **** ", getattr(qsa_dict_modules, "formRecord" + module_name))
@@ -238,9 +213,7 @@ class dgi_aqnext(dgi_schema):
     def load_meta_model(self, action_name, opt=None):
         import importlib
 
-        module_name = project.conn.managerModules().idModuleOfFile(
-            "%s.mtd" % action_name
-        )
+        module_name = project.conn.managerModules().idModuleOfFile("%s.mtd" % action_name)
         module = None
         ret_ = None
         model_file = "models.%s.%s" % (module_name, action_name)
@@ -248,9 +221,7 @@ class dgi_aqnext(dgi_schema):
             try:
                 module = importlib.import_module(model_file)
             except ImportError:
-                logger.warning(
-                    "DGI: load_meta_model. No se encuentra el model de %s", action_name
-                )
+                logger.warning("DGI: load_meta_model. No se encuentra el model de %s", action_name)
                 module = None
                 ret_ = None
 
@@ -278,18 +249,13 @@ class dgi_aqnext(dgi_schema):
         if module is not None:
             cursor = module.widget.cursor()
         else:
-            logger.warning(
-                "*** DGI.get_master_cursor creando cursor %s sin action asociada ***",
-                prefix,
-            )
+            logger.warning("*** DGI.get_master_cursor creando cursor %s sin action asociada ***", prefix)
             from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
             cursor = FLSqlCursor(prefix)
 
         if cursor is None:
-            logger.warning(
-                "*** DGI.get_master_cursor no encuentra cursor de %s***", prefix
-            )
+            logger.warning("*** DGI.get_master_cursor no encuentra cursor de %s***", prefix)
 
         if cursor and not cursor.meta_model():
             # print("**************************", prefix)
@@ -377,9 +343,7 @@ class dgi_aqnext(dgi_schema):
                 calculateFields = self.get_foreign_fields(meta_model, template)
                 for field in calculateFields:
                     if hasattr(meta_model, field["func"]):
-                        dict_[field["verbose_name"]] = str(
-                            getattr(meta_model, field["func"])(meta_model)
-                        )
+                        dict_[field["verbose_name"]] = str(getattr(meta_model, field["func"])(meta_model))
 
                 desc_function = getattr(meta_model, "getDesc", None)
                 desc = None
@@ -439,9 +403,7 @@ class dgi_aqnext(dgi_schema):
             dict[key]["verbose_name"] = field.alias() if key != "pk" else "Pk"
             """ FIXME: help_text """
             dict[key]["help_text"] = None
-            dict[key]["locked"] = (
-                True if field.name() == mtd.primaryKey() else False
-            )  # FIXME: hay que ver el criterio de locked
+            dict[key]["locked"] = True if field.name() == mtd.primaryKey() else False  # FIXME: hay que ver el criterio de locked
             dict[key]["field"] = False
 
             dict[key]["visible"] = False if key in ["pk", "desc"] else True
@@ -562,17 +524,11 @@ class dgi_aqnext(dgi_schema):
         if cursor.first():
             ret[cursor.valueBuffer("descripcion")] = {}
             ret[cursor.valueBuffer("descripcion")]["pk"] = cursor.valueBuffer("id")
-            ret[cursor.valueBuffer("descripcion")]["filtro"] = cursor.valueBuffer(
-                "filtro"
-            ).replace('"', "'")
-            ret[cursor.valueBuffer("descripcion")]["default"] = cursor.valueBuffer(
-                "inicial"
-            )
+            ret[cursor.valueBuffer("descripcion")]["filtro"] = cursor.valueBuffer("filtro").replace('"', "'")
+            ret[cursor.valueBuffer("descripcion")]["default"] = cursor.valueBuffer("inicial")
         return ret
 
-    def _convert_to_ordered_dict(
-        self, data: Union[List[Dict[str, Any]], Dict[str, Any]]
-    ):
+    def _convert_to_ordered_dict(self, data: Union[List[Dict[str, Any]], Dict[str, Any]]):
         ret_ = []
 
         if isinstance(data, list):
@@ -598,16 +554,8 @@ class pagination_class(object):
 
     def __init__(self, data_, query={}):
         self.count = len(data_)
-        self._limit = (
-            50
-            if "p_l" not in query.keys() or query["p_l"] == "true"
-            else int(query["p_l"])
-        )
-        self._page = (
-            0
-            if "p_c" not in query.keys() or query["p_c"] == "true"
-            else int(query["p_c"])
-        )
+        self._limit = 50 if "p_l" not in query.keys() or query["p_l"] == "true" else int(query["p_l"])
+        self._page = 0 if "p_c" not in query.keys() or query["p_c"] == "true" else int(query["p_c"])
 
     def get_next_offset(self):
         ret_ = None

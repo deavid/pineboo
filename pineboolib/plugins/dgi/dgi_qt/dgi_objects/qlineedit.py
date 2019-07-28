@@ -7,9 +7,7 @@ from typing import Union, Optional, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qframe import QFrame  # noqa: F401
-    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import (
-        QGroupBox,
-    )  # noqa: F401
+    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox  # noqa: F401
     from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget import QWidget  # noqa: F401
 
 
@@ -18,11 +16,7 @@ class QLineEdit(QtWidgets.QLineEdit):
     _parent = None
     WindowOrigin = 0
 
-    def __init__(
-        self,
-        parent: Optional[Union["QGroupBox", "QWidget", "QFrame"]] = None,
-        name: str = None,
-    ) -> None:
+    def __init__(self, parent: Optional[Union["QGroupBox", "QWidget", "QFrame"]] = None, name: str = None) -> None:
         super(QLineEdit, self).__init__(parent)
         self._parent = parent
         if name:

@@ -66,10 +66,7 @@ def base_model(name: str) -> Any:
     if path is None:
         raise Exception("File %s.mtd not found" % name)
     if path.find("share/pineboo/tables") > -1:
-        path = path.replace(
-            "share/pineboo/tables",
-            "tempdata/cache/%s/sys/file.mtd" % project.conn.DBName(),
-        )
+        path = path.replace("share/pineboo/tables", "tempdata/cache/%s/sys/file.mtd" % project.conn.DBName())
     if path:
         path = "%s_model.py" % path[:-4]
         if os.path.exists(path):
@@ -80,9 +77,7 @@ def base_model(name: str) -> Any:
                 loader = machinery.SourceFileLoader(name, path)
                 return loader.load_module()  # type: ignore
             except Exception as exc:
-                logger.warning(
-                    "Error recargando model base:\n%s\n%s", exc, traceback.format_exc()
-                )
+                logger.warning("Error recargando model base:\n%s\n%s", exc, traceback.format_exc())
                 pass
 
     return None
@@ -110,9 +105,7 @@ def load_model(nombre):
     db_name = project.conn.DBName()
 
     mod = None
-    file_path = filedir(
-        "..", "tempdata", "cache", db_name, "models", "%s_model.py" % nombre
-    )
+    file_path = filedir("..", "tempdata", "cache", db_name, "models", "%s_model.py" % nombre)
 
     if os.path.exists(file_path):
         module_path = "tempdata.cache.%s.models.%s_model" % (db_name, nombre)
@@ -121,18 +114,14 @@ def load_model(nombre):
             try:
                 mod = importlib.reload(sys.modules[module_path])
             except Exception as exc:
-                logger.warning(
-                    "Error recargando módulo:\n%s\n%s", exc, traceback.format_exc()
-                )
+                logger.warning("Error recargando módulo:\n%s\n%s", exc, traceback.format_exc())
                 pass
         else:
             # print("Cargando", module_path)
             try:
                 mod = importlib.import_module(module_path)
             except Exception as exc:
-                logger.warning(
-                    "Error cargando módulo:\n%s\n%s", exc, traceback.format_exc()
-                )
+                logger.warning("Error cargando módulo:\n%s\n%s", exc, traceback.format_exc())
                 pass
             # models_[nombre] = mod
 
@@ -184,9 +173,7 @@ def load_models() -> None:
             if class_ is not None:
                 setattr(qsa_dict_modules, model_name, class_)
 
-    for root, dirs, files in os.walk(
-        filedir("..", "tempdata", "cache", db_name, "models")
-    ):
+    for root, dirs, files in os.walk(filedir("..", "tempdata", "cache", db_name, "models")):
         for nombre in files:  # Buscamos los presonalizados
             if nombre.endswith("pyc"):
                 continue

@@ -9,12 +9,8 @@ from pineboolib import logging
 from typing import Any, Optional, List, Dict, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib.application.database.pncursortablemodel import (
-        PNCursorTableModel,
-    )  # noqa: F401
-    from pineboolib.application.metadata.pnfieldmetadata import (
-        PNFieldMetaData,
-    )  # noqa: F401
+    from pineboolib.application.database.pncursortablemodel import PNCursorTableModel  # noqa: F401
+    from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
@@ -118,12 +114,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     onlyTable_ = False
 
-    def __init__(
-        self,
-        parent: Optional[Any] = None,
-        name: Optional[str] = None,
-        popup: bool = False,
-    ):
+    def __init__(self, parent: Optional[Any] = None, name: Optional[str] = None, popup: bool = False):
         super(FLDataTable, self).__init__(parent)
 
         if parent:
@@ -184,9 +175,7 @@ class FLDataTable(QtWidgets.QTableView):
             if self.cursor_ and not self.cursor_ == c:
                 self.cursor_.restoreEditionFlag(self)
                 self.cursor_.restoreBrowseFlag(self)
-                self.cursor_.d._current_changed.disconnect(
-                    self.ensureRowSelectedVisible
-                )
+                self.cursor_.d._current_changed.disconnect(self.ensureRowSelectedVisible)
                 self.cursor_.cursorUpdated.disconnect(self.refresh)
 
                 cur_chg = True
@@ -347,9 +336,7 @@ class FLDataTable(QtWidgets.QTableView):
     Ver FLDataTable::function_get_color
     """
 
-    def setFunctionGetColor(
-        self, f: Optional[str], iface: Optional[Any] = None
-    ) -> None:
+    def setFunctionGetColor(self, f: Optional[str], iface: Optional[Any] = None) -> None:
         self.fltable_iface = iface
         self.function_get_color = f
 
@@ -399,11 +386,7 @@ class FLDataTable(QtWidgets.QTableView):
         if e.type() == QtCore.QEvent.KeyPress:
             key_event = e
 
-            if (
-                key_event.key() == QtCore.Qt.Key_Escape
-                and self.popup_
-                and self.parentWidget()
-            ):
+            if key_event.key() == QtCore.Qt.Key_Escape and self.popup_ and self.parentWidget():
                 self.parentWidget().hide()
                 return True
 
@@ -425,10 +408,7 @@ class FLDataTable(QtWidgets.QTableView):
             if key_event.key() == QtCore.Qt.Key_Right and c == nc - 1:
                 return True
 
-            if (
-                key_event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return)
-                and r > -1
-            ):
+            if key_event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return) and r > -1:
                 self.recordChoosed.emit()
                 return True
 
@@ -437,12 +417,7 @@ class FLDataTable(QtWidgets.QTableView):
 
             if not config.value("ebcomportamiento/FLTableShortCut", False):
                 if key_event.key() == QtCore.Qt.Key_A and not self.popup_:
-                    if (
-                        self.cursor_
-                        and not self.readonly_
-                        and not self.editonly_
-                        and not self.onlyTable_
-                    ):
+                    if self.cursor_ and not self.readonly_ and not self.editonly_ and not self.onlyTable_:
 
                         self.cursor_.insertRecord()
                         return True
@@ -450,12 +425,7 @@ class FLDataTable(QtWidgets.QTableView):
                         return False
 
                 if key_event.key() == QtCore.Qt.Key_C and not self.popup_:
-                    if (
-                        self.cursor_
-                        and not self.readonly_
-                        and not self.editonly_
-                        and not self.onlyTable_
-                    ):
+                    if self.cursor_ and not self.readonly_ and not self.editonly_ and not self.onlyTable_:
                         self.cursor_.copyRecord()
                         return True
                     else:
@@ -469,12 +439,7 @@ class FLDataTable(QtWidgets.QTableView):
                         return False
 
                 if key_event.key() == QtCore.Qt.Key_Delete and not self.popup_:
-                    if (
-                        self.cursor_
-                        and not self.readonly_
-                        and not self.editonly_
-                        and not self.onlyTable_
-                    ):
+                    if self.cursor_ and not self.readonly_ and not self.editonly_ and not self.onlyTable_:
                         self.cursor_.deleteRecord()
                         return True
                     else:
@@ -494,9 +459,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
 
     @decorators.NotImplementedWarn
-    def paintCell(
-        self, p: Any, row: int, col: int, cr: Any, selected: bool, cg: Any
-    ) -> None:
+    def paintCell(self, p: Any, row: int, col: int, cr: Any, selected: bool, cg: Any) -> None:
         pass
 
     """
@@ -515,11 +478,7 @@ class FLDataTable(QtWidgets.QTableView):
     def contextMenuEvent(self, e: Any) -> None:
         super(FLDataTable, self).contextMenuEvent(e)
 
-        if (
-            not self.cursor_
-            or not self.cursor_.isValid()
-            or not self.cursor_.metadata()
-        ):
+        if not self.cursor_ or not self.cursor_.isValid() or not self.cursor_.metadata():
             return
 
         mtd = self.cursor_.metadata()
@@ -548,9 +507,7 @@ class FLDataTable(QtWidgets.QTableView):
         tmp_pos = e.globalPos()
 
         for rel in rel_list:
-            cur = FLSqlCursor(
-                rel.foreignTable(), True, db.connectionName(), None, None, popup
-            )
+            cur = FLSqlCursor(rel.foreignTable(), True, db.connectionName(), None, None, popup)
 
             if cur.d.metadata_:
                 mtd = cur.metadata()
@@ -584,9 +541,7 @@ class FLDataTable(QtWidgets.QTableView):
 
                 sub_menu = popup.addMenu(sub_popup)
                 sub_menu.hovered.connect(sub_popup_frame.show)
-                sub_popup_frame.move(
-                    tmp_pos.x() + 200, tmp_pos.y()
-                )  # FIXME: Hay que mejorar esto ...
+                sub_popup_frame.move(tmp_pos.x() + 200, tmp_pos.y())  # FIXME: Hay que mejorar esto ...
 
         popup.move(tmp_pos.x(), tmp_pos.y())
 
@@ -654,16 +609,7 @@ class FLDataTable(QtWidgets.QTableView):
     """ Uso interno """
 
     @decorators.NotImplementedWarn
-    def getCellStyle(
-        self,
-        brush: Any,
-        pen: Any,
-        field: Any,
-        fieldTMD: Any,
-        row: Any,
-        selected: Any,
-        cg: Any,
-    ) -> None:
+    def getCellStyle(self, brush: Any, pen: Any, field: Any, fieldTMD: Any, row: Any, selected: Any, cg: Any) -> None:
         pass
 
     paintFieldName_: Optional[str] = None
@@ -940,10 +886,7 @@ class FLDataTable(QtWidgets.QTableView):
         mtd = model.metadata()
         mtdfield = mtd.indexFieldObject(logIdx)
         if not mtdfield.visibleGrid():
-            raise ValueError(
-                "Se ha devuelto el field %s.%s que no es visible en el grid"
-                % (mtd.name(), mtdfield.name())
-            )
+            raise ValueError("Se ha devuelto el field %s.%s que no es visible en el grid" % (mtd.name(), mtdfield.name()))
 
         return mtdfield
 

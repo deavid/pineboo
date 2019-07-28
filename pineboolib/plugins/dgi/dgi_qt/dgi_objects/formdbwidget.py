@@ -21,17 +21,11 @@ class FormDBWidget(QtWidgets.QWidget):
             super().__init__(parent)
 
             self._module = sys.modules[self.__module__]
-            self._module.connect = (
-                self._connect
-            )  # FIXME: Please don't write to the module. Fails flake8/mypy.
+            self._module.connect = self._connect  # FIXME: Please don't write to the module. Fails flake8/mypy.
             self._module.disconnect = self._disconnect
             self._action = action
             self.cursor_ = None
-            self.parent_ = (
-                parent or parent.parentWidget()
-                if parent and hasattr(parent, "parentWidget")
-                else parent
-            )
+            self.parent_ = parent or parent.parentWidget() if parent and hasattr(parent, "parentWidget") else parent
 
             from pineboolib import pncontrolsfactory
 
@@ -46,9 +40,7 @@ class FormDBWidget(QtWidgets.QWidget):
         # print(" > > > connect:", sender, " signal ", str(signal))
         from pineboolib import pncontrolsfactory
 
-        signal_slot = pncontrolsfactory.connect(
-            sender, signal, receiver, slot, caller=self
-        )
+        signal_slot = pncontrolsfactory.connect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
 
@@ -58,18 +50,13 @@ class FormDBWidget(QtWidgets.QWidget):
         # print(" > > > disconnect:", self)
         from pineboolib import pncontrolsfactory
 
-        signal_slot = pncontrolsfactory.disconnect(
-            sender, signal, receiver, slot, caller=self
-        )
+        signal_slot = pncontrolsfactory.disconnect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
 
         for sl in self._formconnections:
 
-            if (
-                sl[0].signal == signal_slot[0].signal
-                and sl[1].__name__ == signal_slot[1].__name__
-            ):
+            if sl[0].signal == signal_slot[0].signal and sl[1].__name__ == signal_slot[1].__name__:
                 self._formconnections.remove(sl)
                 break
 
@@ -101,9 +88,7 @@ class FormDBWidget(QtWidgets.QWidget):
             from pineboolib import pncontrolsfactory
 
             pncontrolsfactory.check_gc_referrers(
-                "FormDBWidget.iface:" + self.iface.__class__.__name__,
-                weakref.ref(self.iface),
-                self._action.name,
+                "FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name
             )
             del self.iface.ctx
             del self.iface
@@ -114,9 +99,7 @@ class FormDBWidget(QtWidgets.QWidget):
         for signal, slot in self._formconnections:
             try:
                 signal.disconnect(slot)
-                self.logger.debug(
-                    "Señal desconectada al limpiar: %s %s" % (signal, slot)
-                )
+                self.logger.debug("Señal desconectada al limpiar: %s %s" % (signal, slot))
             except Exception:
                 # self.logger.exception("Error al limpiar una señal: %s %s" % (signal, slot))
                 pass
@@ -124,9 +107,7 @@ class FormDBWidget(QtWidgets.QWidget):
 
     def child(self, child_name):
         try:
-            ret = self.findChild(
-                QtWidgets.QWidget, child_name, QtCore.Qt.FindChildrenRecursively
-            )
+            ret = self.findChild(QtWidgets.QWidget, child_name, QtCore.Qt.FindChildrenRecursively)
             if ret is None and self.parent():
                 ret = getattr(self.parent(), child_name, None)
 
@@ -137,18 +118,14 @@ class FormDBWidget(QtWidgets.QWidget):
             if ret is not None:
                 from pineboolib import pncontrolsfactory
 
-                if isinstance(
-                    ret, (pncontrolsfactory.FLFieldDB, pncontrolsfactory.FLTableDB)
-                ) and hasattr(ret, "_loaded"):
+                if isinstance(ret, (pncontrolsfactory.FLFieldDB, pncontrolsfactory.FLTableDB)) and hasattr(ret, "_loaded"):
                     if ret._loaded is False:
                         ret.load()
             else:
                 self.logger.warning("WARN: No se encontro el control %s", child_name)
             return ret
         except Exception:
-            self.logger.exception(
-                "child: Error trying to get child of <%s>", child_name
-            )
+            self.logger.exception("child: Error trying to get child of <%s>", child_name)
             return None
 
     def cursor(self):

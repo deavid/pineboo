@@ -49,9 +49,7 @@ class FLAccessControlMainWindow(FLAccessControl):
                     a.setVisible(False)
 
     def setFromObject(self, object) -> None:
-        print(
-            "FLAccessControlMainWindow::setFromObject %s" % "No implementado todavía."
-        )
+        print("FLAccessControlMainWindow::setFromObject %s" % "No implementado todavía.")
 
 
 class FLAccessControlForm(FLAccessControl):
@@ -62,9 +60,7 @@ class FLAccessControlForm(FLAccessControl):
             from PyQt5 import QtGui  # type: ignore
 
             self.pal = QtGui.QPalette()
-            bg = QtGui.QColor(
-                qApp.palette().color(QtGui.QPalette.Active, QtGui.QPalette.Background)
-            )
+            bg = QtGui.QColor(qApp.palette().color(QtGui.QPalette.Active, QtGui.QPalette.Background))
 
             self.pal.setColor(QtGui.QPalette.Foreground, bg)
             self.pal.setColor(QtGui.QPalette.Text, bg)
@@ -133,10 +129,7 @@ class FLAccessControlForm(FLAccessControl):
                     w.setDisabled(True)
 
             else:
-                print(
-                    "WARN: FLAccessControlFactory: No se encuentra el control %s para procesar ACLS."
-                    % it
-                )
+                print("WARN: FLAccessControlFactory: No se encuentra el control %s para procesar ACLS." % it)
 
     def setFromObject(self, object) -> None:
         print("FLAccessControlform::setFromObject: No implementado todavía.")

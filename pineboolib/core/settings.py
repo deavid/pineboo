@@ -25,9 +25,7 @@ class PinebooSettings(QSettings):
     def dump_qsize(value: QSize) -> Dict[str, Any]:
         return {"__class__": "QSize", "width": value.width(), "height": value.height()}
 
-    def dump_value(
-        self, value: Union[QSize, str, bool, int, List[str], Dict[Any, Any]]
-    ) -> str:
+    def dump_value(self, value: Union[QSize, str, bool, int, List[str], Dict[Any, Any]]) -> str:
         if isinstance(value, QSize):
             value = self.dump_qsize(value)
         return json.dumps(value)
@@ -57,31 +55,19 @@ class PinebooSettings(QSettings):
     def _value(self, key: str, default: Any = None) -> Any:
         value = super().value(key, None)
         if value is None:
-            logger.debug(
-                "%s.value(%s) -> Default: %s %r",
-                self.application,
-                key,
-                type(default),
-                default,
-            )
+            logger.debug("%s.value(%s) -> Default: %s %r", self.application, key, type(default), default)
             return default
         try:
             ret = self.load_value(value)
-            logger.debug(
-                "%s.value(%s) -> Loaded: %s %r", self.application, key, type(ret), ret
-            )
+            logger.debug("%s.value(%s) -> Loaded: %s %r", self.application, key, type(ret), ret)
             return ret
         except Exception as exc:
             # No format, just string
             logger.debug("Error trying to parse json for %s: %s (%s)", key, exc, value)
             return value
 
-    def set_value(
-        self, key: str, value: Union[QSize, str, bool, int, List[str]]
-    ) -> None:
-        logger.debug(
-            "%s.set_value(%s) <- %s %r", self.application, key, type(value), value
-        )
+    def set_value(self, key: str, value: Union[QSize, str, bool, int, List[str]]) -> None:
+        logger.debug("%s.set_value(%s) <- %s %r", self.application, key, type(value), value)
         return super().setValue(key, self.dump_value(value))
 
     setValue = set_value

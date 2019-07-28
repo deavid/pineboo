@@ -111,9 +111,7 @@ class FLFormSearchDB(FLFormDB):
         self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
         self.layout_.addWidget(self.bottomToolbar)
 
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0)
-        )
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
         sizePolicy.setHeightForWidth(True)
 
         pbSize = self.iconSize
@@ -124,9 +122,7 @@ class FLFormSearchDB(FLFormDB):
             pushButtonExport.setSizePolicy(sizePolicy)
             pushButtonExport.setMinimumSize(pbSize)
             pushButtonExport.setMaximumSize(pbSize)
-            pushButtonExport.setIcon(
-                pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-properties.png"))
-            )
+            pushButtonExport.setIcon(pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-properties.png")))
             pushButtonExport.setShortcut(QKeySequence(self.tr("F3")))
             pushButtonExport.setWhatsThis("Exportar a XML(F3)")
             pushButtonExport.setToolTip("Exportar a XML(F3)")
@@ -140,9 +136,7 @@ class FLFormSearchDB(FLFormDB):
                 push_button_snapshot.setSizePolicy(sizePolicy)
                 push_button_snapshot.setMinimumSize(pbSize)
                 push_button_snapshot.setMaximumSize(pbSize)
-                push_button_snapshot.setIcon(
-                    pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-paste.png"))
-                )
+                push_button_snapshot.setIcon(pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-paste.png")))
                 push_button_snapshot.setShortcut(QKeySequence(self.tr("F8")))
                 push_button_snapshot.setWhatsThis("Capturar pantalla(F8)")
                 push_button_snapshot.setToolTip("Capturar pantalla(F8)")
@@ -150,9 +144,7 @@ class FLFormSearchDB(FLFormDB):
                 self.bottomToolbar.widget_hlayout.addWidget(push_button_snapshot)
                 push_button_snapshot.clicked.connect(self.saveSnapShot)
 
-            spacer = QtWidgets.QSpacerItem(
-                20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-            )
+            spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
             self.bottomToolbar.widget_hlayout.addItem(spacer)
 
         if not self.pushButtonAccept:
@@ -163,17 +155,11 @@ class FLFormSearchDB(FLFormDB):
         self.pushButtonAccept.setSizePolicy(sizePolicy)
         self.pushButtonAccept.setMaximumSize(pbSize)
         self.pushButtonAccept.setMinimumSize(pbSize)
-        self.pushButtonAccept.setIcon(
-            pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-save.png"))
-        )
+        self.pushButtonAccept.setIcon(pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-save.png")))
         # pushButtonAccept->setAccel(QKeySequence(Qt::Key_F10)); FIXME
         self.pushButtonAccept.setFocus()
-        self.pushButtonAccept.setWhatsThis(
-            "Seleccionar registro actual y cerrar formulario (F10)"
-        )
-        self.pushButtonAccept.setToolTip(
-            "Seleccionar registro actual y cerrar formulario (F10)"
-        )
+        self.pushButtonAccept.setWhatsThis("Seleccionar registro actual y cerrar formulario (F10)")
+        self.pushButtonAccept.setToolTip("Seleccionar registro actual y cerrar formulario (F10)")
         self.pushButtonAccept.setFocusPolicy(QtCore.Qt.NoFocus)
         self.bottomToolbar.widget_hlayout.addWidget(self.pushButtonAccept)
         self.pushButtonAccept.show()
@@ -186,17 +172,11 @@ class FLFormSearchDB(FLFormDB):
         self.pushButtonCancel.setSizePolicy(sizePolicy)
         self.pushButtonCancel.setMaximumSize(pbSize)
         self.pushButtonCancel.setMinimumSize(pbSize)
-        self.pushButtonCancel.setIcon(
-            pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-stop.png"))
-        )
+        self.pushButtonCancel.setIcon(pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-stop.png")))
         self.pushButtonCancel.setFocusPolicy(QtCore.Qt.NoFocus)
         # pushButtonCancel->setAccel(Esc); FIXME
-        self.pushButtonCancel.setWhatsThis(
-            "Cerrar formulario sin seleccionar registro (Esc)"
-        )
-        self.pushButtonCancel.setToolTip(
-            "Cerrar formulario sin seleccionar registro (Esc)"
-        )
+        self.pushButtonCancel.setWhatsThis("Cerrar formulario sin seleccionar registro (Esc)")
+        self.pushButtonCancel.setToolTip("Cerrar formulario sin seleccionar registro (Esc)")
         self.bottomToolbar.widget_hlayout.addWidget(self.pushButtonCancel)
         self.pushButtonCancel.show()
 
@@ -397,13 +377,9 @@ class FLFormSearchDB(FLFormDB):
         self.exec_()
 
     def child(self, childName) -> Any:
-        return self.findChild(
-            QtWidgets.QWidget, childName, QtCore.Qt.FindChildrenRecursively
-        )
+        return self.findChild(QtWidgets.QWidget, childName, QtCore.Qt.FindChildrenRecursively)
 
-    def accepted(
-        self
-    ) -> bool:  # type: ignore   # FIXME: QDialog has a signal called "accepted"
+    def accepted(self) -> bool:  # type: ignore   # FIXME: QDialog has a signal called "accepted"
         return self.accepted_
 
     def setMainWidget(self, w=None):

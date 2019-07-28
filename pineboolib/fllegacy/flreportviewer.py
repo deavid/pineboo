@@ -201,9 +201,7 @@ class FLReportViewer(QtWidgets.QWidget):
         # if self.loop_:
         #    print("FLReportViewer::exec(): Se ha detectado una llamada recursiva")
         #    return
-        if self.rptViewer_.rptEngine_ and hasattr(
-            self.rptViewer_.rptEngine_, "parser_"
-        ):
+        if self.rptViewer_.rptEngine_ and hasattr(self.rptViewer_.rptEngine_, "parser_"):
             pdf_file = self.rptViewer_.rptEngine_.parser_.get_file_name()
             from pineboolib.application import project
 
@@ -318,10 +316,7 @@ class FLReportViewer(QtWidgets.QWidget):
 
         util = FLUtil()
         fileName = pncontrolsfactory.FileDialog.getSaveFileName(
-            self,
-            util.translate("app", "Exportar a CSV"),
-            "",
-            util.translate("app", "Fichero CSV (*.csv *.txt)"),
+            self, util.translate("app", "Exportar a CSV"), "", util.translate("app", "Fichero CSV (*.csv *.txt)")
         )
 
         if not fileName or fileName == "":
@@ -333,9 +328,7 @@ class FLReportViewer(QtWidgets.QWidget):
         q = pncontrolsfactory.MessageBox.question(
             self,
             util.translate("app", "Sobreescribir {}").format(fileName),
-            util.translate(
-                "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
-            ).format(fileName),
+            util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
             util.translate("app", "&Sí"),
             util.translate("app", "&No"),
             "",
@@ -356,11 +349,8 @@ class FLReportViewer(QtWidgets.QWidget):
             QtWidgets.QMessageBox.critical(
                 self,
                 util.translate("app", "Error abriendo fichero"),
-                util.translate(
-                    "app", "No se pudo abrir el fichero {} para escribir: {}"
-                ).format(
-                    fileName,
-                    QtWidgets.QApplication.translate("QFile", file.errorString()),
+                util.translate("app", "No se pudo abrir el fichero {} para escribir: {}").format(
+                    fileName, QtWidgets.QApplication.translate("QFile", file.errorString())
                 ),
             )
 
@@ -372,10 +362,7 @@ class FLReportViewer(QtWidgets.QWidget):
 
         util = FLUtil()
         fileName = pncontrolsfactory.FileDialog.getSaveFileName(
-            self,
-            util.translate("app", "Exportar a PDF"),
-            "",
-            util.translate("app", "Fichero PDF (*.pdf)"),
+            self, util.translate("app", "Exportar a PDF"), "", util.translate("app", "Fichero PDF (*.pdf)")
         )
 
         if fileName[0] == "":
@@ -389,9 +376,7 @@ class FLReportViewer(QtWidgets.QWidget):
             q = pncontrolsfactory.QMessageBox.question(
                 self,
                 util.translate("app", "Sobreescribir {}").format(fileName),
-                util.translate(
-                    "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
-                ).format(fileName),
+                util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
                 util.translate("app", "&Sí"),
                 util.translate("app", "&No"),
                 "",
@@ -426,9 +411,7 @@ class FLReportViewer(QtWidgets.QWidget):
         q = pncontrolsfactory.QMessageBox.question(
             self,
             util.translate("app", "Sobreescribir {}").format(fileName),
-            util.translate(
-                "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
-            ).format(fileName),
+            util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
             util.translate("app", "&Sí"),
             util.translate("app", "&No"),
             "",
@@ -470,12 +453,7 @@ class FLReportViewer(QtWidgets.QWidget):
         if show:
             self.rptViewer_.hide()
             wrv.setCentralWidget(self.initCentralWidget_)
-            self.ui["leDocumento"].setText(
-                "doc-"
-                + str(QtCore.QDateTime.currentDateTime())
-                .replace(":", ",")
-                .replace(" ", "")
-            )
+            self.ui["leDocumento"].setText("doc-" + str(QtCore.QDateTime.currentDateTime()).replace(":", ",").replace(" ", ""))
             self.ui_["frEMail"].show()
             self.initCentralWidget_.show()
         else:
@@ -505,9 +483,7 @@ class FLReportViewer(QtWidgets.QWidget):
             q = pncontrolsfactory.QMessageBox.question(
                 self,
                 util.translate("app", "Sobreescribir {}").format(fileName),
-                util.translate(
-                    "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
-                ).format(fileName),
+                util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
                 util.translate("app", "&Sí"),
                 util.translate("app", "&No"),
                 "",
@@ -839,9 +815,7 @@ class FLReportViewer(QtWidgets.QWidget):
         return -1
 
     def pageDimensions(self) -> Any:
-        if self.rptViewer_.rptEngine_ and hasattr(
-            self.rptViewer_.rptEngine_, "parser_"
-        ):
+        if self.rptViewer_.rptEngine_ and hasattr(self.rptViewer_.rptEngine_, "parser_"):
             return self.rptViewer_.rptEngine_.parser_._page_size
         return -1
 

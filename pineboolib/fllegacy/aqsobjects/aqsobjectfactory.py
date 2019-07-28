@@ -8,21 +8,9 @@ from pineboolib.fllegacy.aqsobjects.aqutil import AQUtil as AQUtil_class
 from pineboolib.fllegacy.aqsobjects.aqsql import AQSql  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqsmtpclient import AQSmtpClient  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqs import AQS as AQS_class
-from pineboolib.fllegacy.aqsobjects.aqods import (
-    AQOdsGenerator,
-    AQOdsSpreadSheet,
-    AQOdsSheet,
-    AQOdsRow,
-)  # noqa: F401
-from pineboolib.fllegacy.aqsobjects.aqods import (
-    AQOdsColor,
-    AQOdsStyle,
-    AQOdsImage,
-)  # noqa: F401
-from pineboolib.fllegacy.aqsobjects.aqboolflagstate import (
-    AQBoolFlagState,
-    AQBoolFlagStateList,
-)  # noqa: F401
+from pineboolib.fllegacy.aqsobjects.aqods import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow  # noqa: F401
+from pineboolib.fllegacy.aqsobjects.aqods import AQOdsColor, AQOdsStyle, AQOdsImage  # noqa: F401
+from pineboolib.fllegacy.aqsobjects.aqboolflagstate import AQBoolFlagState, AQBoolFlagStateList  # noqa: F401
 from typing import Any
 
 AQUtil = AQUtil_class()

@@ -56,19 +56,8 @@ class dgi_qt(dgi_schema):
     def msgBoxWarning(self, t):
         from PyQt5.QtWidgets import qApp  # type: ignore
 
-        parent = (
-            qApp.focusWidget().parent()
-            if hasattr(qApp.focusWidget(), "parent")
-            else qApp.focusWidget()
-        )
-        self.MessageBox.warning(
-            t,
-            self.MessageBox.Ok,
-            self.MessageBox.NoButton,
-            self.MessageBox.NoButton,
-            "Pineboo",
-            parent,
-        )
+        parent = qApp.focusWidget().parent() if hasattr(qApp.focusWidget(), "parent") else qApp.focusWidget()
+        self.MessageBox.warning(t, self.MessageBox.Ok, self.MessageBox.NoButton, self.MessageBox.NoButton, "Pineboo", parent)
 
     def createUI(self, n, connector=None, parent=None, name=None) -> Any:
         import pineboolib.pncontrolsfactory
@@ -116,9 +105,7 @@ class dgi_qt(dgi_schema):
 
             qtWidgetPlugings = filedir("./plugins/qtwidgetsplugins")
             if qtWidgetPlugings not in uic.widgetPluginPath:
-                logger.info(
-                    "Añadiendo path %s a uic.widgetPluginPath", qtWidgetPlugings
-                )
+                logger.info("Añadiendo path %s a uic.widgetPluginPath", qtWidgetPlugings)
                 uic.widgetPluginPath.append(qtWidgetPlugings)
             uic.loadUi(form_path, w_)
 

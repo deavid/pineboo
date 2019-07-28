@@ -99,9 +99,7 @@ class PNSqlQuery(object):
     _posicion: int
     _cursor: "IApiCursor"
 
-    def __init__(
-        self, cx=None, connection_name: Union[str, "IConnection"] = "default"
-    ) -> None:
+    def __init__(self, cx=None, connection_name: Union[str, "IConnection"] = "default") -> None:
         # super(FLSqlQuery, self).__init__()
 
         if project.conn is None:
@@ -419,9 +417,7 @@ class PNSqlQuery(object):
                     dialog = project.DGI.QInputDialog
 
                     if dialog is not None:
-                        v = dialog.getText(
-                            None, "Entrada de parámetros de la consulta", pD
-                        )
+                        v = dialog.getText(None, "Entrada de parámetros de la consulta", pD)
                         if v:
                             v = v[0]
 
@@ -506,9 +502,7 @@ class PNSqlQuery(object):
 
     def showDebug(self) -> None:
         if not self.isActive():
-            logger.warning(
-                "DEBUG : La consulta no está activa : No se ha ejecutado exec() o la sentencia SQL no es válida"
-            )
+            logger.warning("DEBUG : La consulta no está activa : No se ha ejecutado exec() o la sentencia SQL no es válida")
 
         logger.warning("DEBUG : Nombre de la consulta : %s", self.d.name_)
         logger.warning("DEBUG : Niveles de agrupamiento :")
@@ -571,9 +565,7 @@ class PNSqlQuery(object):
             else:
                 ret = self._row[self._fieldNameToPosDict[n]]
         except Exception as e:
-            logger.debug(
-                "_value_quick: Error %s, falling back to default implementation", e
-            )
+            logger.debug("_value_quick: Error %s, falling back to default implementation", e)
             ret = self._value_std(n, raw)
         return ret
 
@@ -813,10 +805,7 @@ class PNSqlQuery(object):
 
         table_list = table_list.replace(" ", "")
         for tabla in table_list.split(","):
-            if (
-                not self.db().manager().existsTable(tabla)
-                and len(table_list.split(",")) >= 1
-            ):
+            if not self.db().manager().existsTable(tabla) and len(table_list.split(",")) >= 1:
                 self.invalidTablesList = True
 
             self.d.tablesList_.append(tabla)

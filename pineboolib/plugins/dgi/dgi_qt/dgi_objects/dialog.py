@@ -27,9 +27,7 @@ class Dialog(QDialog):
         self.okButton = QPushButton("&Aceptar")
         self.cancelButton = QPushButton("&Cancelar")
         self.buttonBox.addButton(self.okButton, QtWidgets.QDialogButtonBox.AcceptRole)
-        self.buttonBox.addButton(
-            self.cancelButton, QtWidgets.QDialogButtonBox.RejectRole
-        )
+        self.buttonBox.addButton(self.cancelButton, QtWidgets.QDialogButtonBox.RejectRole)
         self.okButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
         self._tab = QTabWidget()

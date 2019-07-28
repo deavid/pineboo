@@ -81,9 +81,7 @@ class IManager(object):
     def metadata(self, n, quick: bool = False) -> Optional[Any]:  # PNTableMetaData"
         return None
 
-    def metadataField(
-        self, field, v: bool = False, ed: bool = False
-    ) -> Any:  # "PNFieldMetaData"
+    def metadataField(self, field, v: bool = False, ed: bool = False) -> Any:  # "PNFieldMetaData"
         raise Exception("must be implemented")
 
     def metadataRelation(self, relation) -> Any:  # "PNRelationMetaData"

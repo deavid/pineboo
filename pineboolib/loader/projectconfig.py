@@ -19,9 +19,7 @@ class ProjectConfig:
         connstring: Optional[str] = None,
     ) -> None:
         if connstring:
-            username, password, type, host, port, database = self.translate_connstring(
-                connstring
-            )
+            username, password, type, host, port, database = self.translate_connstring(connstring)
         self.database = database
         self.host = host
         self.port = port
@@ -55,9 +53,7 @@ class ProjectConfig:
         if version_ is None:
             version = 1.0
         else:
-            version = float(
-                version_
-            )  # FIXME: Esto es muy mala idea. Tratar versiones como float causará problemas al comparar.
+            version = float(version_)  # FIXME: Esto es muy mala idea. Tratar versiones como float causará problemas al comparar.
 
         for profile in root.findall("profile-data"):
             invalid_password = False
@@ -71,9 +67,7 @@ class ProjectConfig:
                     invalid_password = True
 
             if invalid_password:
-                self.logger.warning(
-                    "No se puede cargar un profile con contraseña por consola"
-                )
+                self.logger.warning("No se puede cargar un profile con contraseña por consola")
                 return False
 
         from pineboolib.application.database.pnsqldrivers import PNSqlDrivers
@@ -84,11 +78,7 @@ class ProjectConfig:
             raise ValueError("database-name not found")
         self.database = dbname_elem.text
         for db in root.findall("database-server"):
-            host_elem, port_elem, type_elem = (
-                db.find("host"),
-                db.find("port"),
-                db.find("type"),
-            )
+            host_elem, port_elem, type_elem = (db.find("host"), db.find("port"), db.find("type"))
             if host_elem is None or port_elem is None or type_elem is None:
                 raise ValueError("host, port and type are required")
             self.host = host_elem.text
@@ -96,17 +86,12 @@ class ProjectConfig:
             self.type = type_elem.text
             # FIXME: Move this to project, or to the connection handler.
             if self.type not in sql_drivers_manager.aliasList():
-                self.logger.warning(
-                    "Esta versión de pineboo no soporta el driver '%s'" % self.type
-                )
+                self.logger.warning("Esta versión de pineboo no soporta el driver '%s'" % self.type)
                 self.database = None
                 return False
 
         for credentials in root.findall("database-credentials"):
-            username_elem, password_elem = (
-                credentials.find("username"),
-                credentials.find("password"),
-            )
+            username_elem, password_elem = (credentials.find("username"), credentials.find("password"))
             if username_elem is None:
                 self.username = ""
             else:
@@ -121,9 +106,7 @@ class ProjectConfig:
         return True
 
     @classmethod
-    def translate_connstring(
-        cls, connstring: str
-    ) -> Tuple[Any, Any, Any, Any, Any, Any]:
+    def translate_connstring(cls, connstring: str) -> Tuple[Any, Any, Any, Any, Any, Any]:
         """Translate a DSN connection string into user, pass, etc.
 
         Acepta un parámetro "connstring" que tenga la forma user@host/dbname
@@ -152,15 +135,9 @@ class ProjectConfig:
 
         if _user_pass:
             user_pass = _user_pass.split(":") + ["", "", ""]
-            user, passwd, driver_alias = (
-                user_pass[0],
-                user_pass[1] or passwd,
-                user_pass[2] or driver_alias,
-            )
+            user, passwd, driver_alias = (user_pass[0], user_pass[1] or passwd, user_pass[2] or driver_alias)
             if user_pass[3]:
-                raise ValueError(
-                    "La cadena de usuario debe tener el formato user:pass:driver."
-                )
+                raise ValueError("La cadena de usuario debe tener el formato user:pass:driver.")
 
         if _host_port:
             host_port = _host_port.split(":") + [""]
@@ -175,12 +152,6 @@ class ProjectConfig:
         if not re.match(r"\d+", port):
             raise ValueError("puerto no valido")
         cls.logger.debug(
-            "user:%s, passwd:%s, driver_alias:%s, host:%s, port:%s, dbname:%s",
-            user,
-            "*" * len(passwd),
-            driver_alias,
-            host,
-            port,
-            dbname,
+            "user:%s, passwd:%s, driver_alias:%s, host:%s, port:%s, dbname:%s", user, "*" * len(passwd), driver_alias, host, port, dbname
         )
         return user, passwd, driver_alias, host, port, dbname

@@ -25,12 +25,8 @@ class dgi_schema(object):
         # ... Worse than it seems: looks like this class is prepared to be constructed without
         # ... calling __init__, on purpose, to have different behavior than calling it.
 
-        self._desktopEnabled = (
-            True
-        )  # Indica si se usa en formato escritorio con interface Qt
-        self.setUseMLDefault(
-            True
-        )  # FIXME: Setters are wrong. Inside private context, even wronger.
+        self._desktopEnabled = True  # Indica si se usa en formato escritorio con interface Qt
+        self.setUseMLDefault(True)  # FIXME: Setters are wrong. Inside private context, even wronger.
         self.setLocalDesktop(True)
         self._name = "dgi_shema"
         self._alias = "Default Schema"
@@ -62,9 +58,7 @@ class dgi_schema(object):
     def setUseDesktop(self, val):
         self._desktopEnabled = val
 
-    def localDesktop(
-        self
-    ):  # Indica si son ventanas locales o remotas a traves de algún parser
+    def localDesktop(self):  # Indica si son ventanas locales o remotas a traves de algún parser
         return self._localDesktop
 
     def setLocalDesktop(self, val):
@@ -146,10 +140,7 @@ class dgi_schema(object):
 
     def resolveObject(self, module_name, name):
         cls = None
-        mod_name_full = "pineboolib.plugins.dgi.dgi_%s.dgi_objects.%s" % (
-            module_name,
-            name.lower(),
-        )
+        mod_name_full = "pineboolib.plugins.dgi.dgi_%s.dgi_objects.%s" % (module_name, name.lower())
         try:
             # FIXME: Please, no.
             mod_ = import_module(mod_name_full)

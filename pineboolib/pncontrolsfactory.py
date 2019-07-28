@@ -153,11 +153,7 @@ def resolveObject(name: str) -> Any:
     if obj_:
         return obj_
 
-    logger.warning(
-        "resolveObject: class <%s> not found in dgi <%s>",
-        name,
-        project.DGI.alias().lower(),
-    )
+    logger.warning("resolveObject: class <%s> not found in dgi <%s>", name, project.DGI.alias().lower())
     return ObjectNotFoundInCurrentDGI
 
 
@@ -382,15 +378,8 @@ def slot_done(fn: Callable, signal: Any, sender: Any, caller: Any) -> Callable:
         if caller is not None:
             try:
                 if signal.signal != caller.signal_test.signal:
-                    signal_name = signal.signal[
-                        1 : signal.signal.find("(")
-                    ]  # Quitamos el caracter "2" inicial y parámetros
-                    logger.debug(
-                        "Emitir evento test: %s, args:%s kwargs:%s",
-                        signal_name,
-                        args if args else "",
-                        kwargs if kwargs else "",
-                    )
+                    signal_name = signal.signal[1 : signal.signal.find("(")]  # Quitamos el caracter "2" inicial y parámetros
+                    logger.debug("Emitir evento test: %s, args:%s kwargs:%s", signal_name, args if args else "", kwargs if kwargs else "")
                     caller.signal_test.emit(signal_name, sender)
             except Exception:
                 pass
@@ -400,13 +389,9 @@ def slot_done(fn: Callable, signal: Any, sender: Any, caller: Any) -> Callable:
     return new_fn
 
 
-def connect(
-    sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = None
-) -> Optional[Tuple[Any, Any]]:
+def connect(sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = None) -> Optional[Tuple[Any, Any]]:
     if caller is not None:
-        logger.trace(
-            "* * * Connect:: %s %s %s %s %s", caller, sender, signal, receiver, slot
-        )
+        logger.trace("* * * Connect:: %s %s %s %s %s", caller, sender, signal, receiver, slot)
     else:
         logger.trace("? ? ? Connect:: %s %s %s %s", sender, signal, receiver, slot)
     signal_slot = solve_connection(sender, signal, receiver, slot)
@@ -435,9 +420,7 @@ def connect(
     return signal_slot
 
 
-def disconnect(
-    sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = None
-) -> Optional[Tuple[Any, Any]]:
+def disconnect(sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = None) -> Optional[Tuple[Any, Any]]:
     signal_slot = solve_connection(sender, signal, receiver, slot)
     if not signal_slot:
         return None
@@ -450,9 +433,7 @@ def disconnect(
     return signal_slot
 
 
-def solve_connection(
-    sender: Any, signal: str, receiver: Any, slot: str
-) -> Optional[Tuple[Any, Any]]:
+def solve_connection(sender: Any, signal: str, receiver: Any, slot: str) -> Optional[Tuple[Any, Any]]:
     if sender is None:
         logger.error("Connect Error:: %s %s %s %s", sender, signal, receiver, slot)
         return None
@@ -489,11 +470,7 @@ def solve_connection(
     # if not oSignal and sender.__class__.__name__ == "FormInternalObj":
     #    oSignal = getattr(sender.parent(), sg_name, None)
     if not oSignal:
-        logger.error(
-            "ERROR: No existe la señal %s para la clase %s",
-            signal,
-            sender.__class__.__name__,
-        )
+        logger.error("ERROR: No existe la señal %s para la clase %s", signal, sender.__class__.__name__)
         return None
 
     if remote_fn:
@@ -506,9 +483,7 @@ def solve_connection(
     elif m:
         remote_obj = getattr(receiver, m.group(1), None)
         if remote_obj is None:
-            raise AttributeError(
-                "Object %s not found on %s" % (remote_obj, str(receiver))
-            )
+            raise AttributeError("Object %s not found on %s" % (remote_obj, str(receiver)))
         remote_fn = getattr(remote_obj, m.group(2), None)
         if remote_fn is None:
             raise AttributeError("Object %s not found on %s" % (remote_fn, remote_obj))
@@ -521,24 +496,12 @@ def solve_connection(
                 if hasattr(receiver, "iface"):
                     oSlot = getattr(receiver.iface, slot, None)
             if not oSlot:
-                logger.error(
-                    "Al realizar connect %s:%s -> %s:%s ; "
-                    "el es QObject pero no tiene slot",
-                    sender,
-                    signal,
-                    receiver,
-                    slot,
-                )
+                logger.error("Al realizar connect %s:%s -> %s:%s ; " "el es QObject pero no tiene slot", sender, signal, receiver, slot)
                 return None
             return oSignal, oSlot
     else:
         logger.error(
-            "Al realizar connect %s:%s -> %s:%s ; "
-            "el slot no se reconoce y el receptor no es QObject.",
-            sender,
-            signal,
-            receiver,
-            slot,
+            "Al realizar connect %s:%s -> %s:%s ; " "el slot no se reconoce y el receptor no es QObject.", sender, signal, receiver, slot
         )
     return None
 

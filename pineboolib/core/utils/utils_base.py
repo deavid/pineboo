@@ -6,20 +6,8 @@ import io
 import os.path
 import shutil
 from PyQt5.QtGui import QPixmap  # type: ignore
-from PyQt5.QtCore import (
-    QObject,
-    QFileInfo,
-    QFile,
-    QIODevice,
-    QUrl,
-    QDir,
-    pyqtSignal,
-)  # type: ignore
-from PyQt5.QtNetwork import (
-    QNetworkAccessManager,
-    QNetworkReply,
-    QNetworkRequest,
-)  # type: ignore
+from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir, pyqtSignal  # type: ignore
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest  # type: ignore
 from pineboolib.core import decorators
 from typing import Optional, Union, Any, List, cast
 from types import FrameType
@@ -79,42 +67,22 @@ class DefFun:
 
     def __str__(self) -> Any:
         if self.realfun:
-            logger.debug(
-                "%r: Redirigiendo Propiedad a función %r",
-                self.parent.__class__.__name__,
-                self.funname,
-            )
+            logger.debug("%r: Redirigiendo Propiedad a función %r", self.parent.__class__.__name__, self.funname)
             return self.realfun()
 
-        logger.debug(
-            "WARN: %r: Propiedad no implementada %r",
-            self.parent.__class__.__name__,
-            self.funname,
-        )
+        logger.debug("WARN: %r: Propiedad no implementada %r", self.parent.__class__.__name__, self.funname)
         return 0
 
     def __call__(self, *args: Any) -> Any:
         if self.realfun:
-            logger.debug(
-                "%r: Redirigiendo Llamada a función %s %s",
-                self.parent.__class__.__name__,
-                self.funname,
-                args,
-            )
+            logger.debug("%r: Redirigiendo Llamada a función %s %s", self.parent.__class__.__name__, self.funname, args)
             return self.realfun(*args)
 
-        logger.debug(
-            "%r: Método no implementado %s %s",
-            self.parent.__class__.__name__,
-            self.funname.encode("UTF-8"),
-            args,
-        )
+        logger.debug("%r: Método no implementado %s %s", self.parent.__class__.__name__, self.funname.encode("UTF-8"), args)
         return None
 
 
-def traceit(
-    frame: FrameType, event: str, arg: Any
-) -> Callable[[FrameType, str, Any], Any]:
+def traceit(frame: FrameType, event: str, arg: Any) -> Callable[[FrameType, str, Any], Any]:
     """Print a trace line for each Python line executed or call.
 
     This function is intended to be the callback of sys.settrace.
@@ -180,9 +148,7 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
     def doDownload(self) -> None:
         if self.url_ is None or self.dir_ is None:
             raise ValueError("setLE was not called first")
-        request = QNetworkRequest(
-            QUrl("%s/%s/%s" % (self.url_.text(), self.dir_, self.filename))
-        )
+        request = QNetworkRequest(QUrl("%s/%s/%s" % (self.url_.text(), self.dir_, self.filename)))
         self.reply = self.manager.get(request)
         # self.reply.sslErrors.connect(self.sslErrors)
         self.currentDownload.append(self.reply)
@@ -239,9 +205,7 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
             self.result = reply.errorString()
 
 
-def copy_dir_recursive(
-    from_dir: str, to_dir: str, replace_on_conflict: bool = False
-) -> bool:
+def copy_dir_recursive(from_dir: str, to_dir: str, replace_on_conflict: bool = False) -> bool:
     dir = QDir()
     dir.setPath(from_dir)
 
@@ -347,12 +311,7 @@ class StructMyDict(dict):
 def version_check(mod_name: str, mod_ver: str, min_ver: str) -> None:
     """Compare two version numbers and raise a warning if "minver" is not met."""
     if version_normalize(mod_ver) < version_normalize(min_ver):
-        logger.warning(
-            "La version de <%s> es %s. La mínima recomendada es %s.",
-            mod_name,
-            mod_ver,
-            min_ver,
-        )
+        logger.warning("La version de <%s> es %s. La mínima recomendada es %s.", mod_name, mod_ver, min_ver)
 
 
 def version_normalize(v: str) -> List[int]:
@@ -399,10 +358,7 @@ def load2xml(form_path_or_str: str) -> ElementTree:
             parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
             return ET.parse(file_ptr or form_path_or_str, parser)
         except Exception:
-            logger.exception(
-                "Error cargando UI después de intentar con UTF8 e ISO \n%s",
-                form_path_or_str,
-            )
+            logger.exception("Error cargando UI después de intentar con UTF8 e ISO \n%s", form_path_or_str)
             raise
 
 
@@ -471,9 +427,7 @@ def parse_for_duplicates(text: str) -> str:
 
             duplicate_ = False
 
-        if (section.find(">") == -1 and section.find("<") > -1) or section.endswith(
-            "--"
-        ):
+        if (section.find(">") == -1 and section.find("<") > -1) or section.endswith("--"):
             ret_ += ">"
 
     # print(ret_)
@@ -501,9 +455,7 @@ def indent(elem: Element, level: int = 0) -> None:
             elem.tail = i
 
 
-def format_double(
-    d: Union[int, str, float], part_integer: int, part_decimal: int
-) -> str:
+def format_double(d: Union[int, str, float], part_integer: int, part_decimal: int) -> str:
     if isinstance(d, str) and d == "":
         return d
     # import locale
@@ -531,11 +483,7 @@ def format_double(
     str_integer = format_int(str_integer, part_integer)
 
     # Fixme: Que pasa cuando la parte entera sobrepasa el limite, se coge el maximo valor o
-    ret_ = "%s%s%s" % (
-        str_integer,
-        decimal_separator if found_comma else "",
-        str_decimal if part_decimal > 0 else "",
-    )
+    ret_ = "%s%s%s" % (str_integer, decimal_separator if found_comma else "", str_decimal if part_decimal > 0 else "")
     return ret_
 
 

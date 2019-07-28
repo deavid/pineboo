@@ -53,15 +53,11 @@ class MainForm(QMainWindow):
     def load(self) -> None:
         from pineboolib.application import project
 
-        self.ui_ = project.conn.managerModules().createUI(
-            filedir("plugins/mainform/pineboo/mainform.ui"), None, self
-        )
+        self.ui_ = project.conn.managerModules().createUI(filedir("plugins/mainform/pineboo/mainform.ui"), None, self)
 
         self.w_ = self
         frameGm = self.frameGeometry()
-        screen = QApplication.desktop().screenNumber(
-            QApplication.desktop().cursor().pos()
-        )
+        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
         centerPoint = QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
@@ -202,9 +198,7 @@ class MainForm(QMainWindow):
             icon = action.mod.mod.mainform.actions[action.name].icon
             self.formTab.addTab(widget, icon, widget.windowTitle())
         except Exception as e:
-            logger.warning(
-                "addFormTab: No pude localizar icono para %s: %s", action.name, e
-            )
+            logger.warning("addFormTab: No pude localizar icono para %s: %s", action.name, e)
             self.formTab.addTab(widget, widget.windowTitle())
 
         self.formTab.setCurrentWidget(widget)
@@ -258,9 +252,7 @@ class MainForm(QMainWindow):
         if not module.loaded:
             module.load()
         if not module.loaded:
-            logger.warning(
-                "moduleLoad: Ignorando modulo %s por fallo al cargar", module.name
-            )
+            logger.warning("moduleLoad: Ignorando modulo %s por fallo al cargar", module.name)
             return False
         logger.trace("moduleLoad: Running module %s . . . ", module.name)
         iconsize = QtCore.QSize(22, 22)
@@ -283,13 +275,7 @@ class MainForm(QMainWindow):
 
     def closeEvent(self, evnt) -> None:
 
-        res = QMessageBox.information(
-            QApplication.activeWindow(),
-            "Salir de Pineboo",
-            "¿ Desea salir ?",
-            QMessageBox.Yes,
-            QMessageBox.No,
-        )
+        res = QMessageBox.information(QApplication.activeWindow(), "Salir de Pineboo", "¿ Desea salir ?", QMessageBox.Yes, QMessageBox.No)
 
         if res == QMessageBox.No:
             evnt.ignore()
@@ -309,10 +295,7 @@ class MainForm(QMainWindow):
         # print(mod.name, ac.name, project.areas[mod.areaid].descripcion)
         # Comprueba si el area ya se ha creado
         if mod.areaid not in self.mPAreas.keys():
-            areaM = self.menuPineboo.addMenu(
-                QtGui.QIcon("share/icons/gtk-open.png"),
-                project.areas[mod.areaid].descripcion,
-            )
+            areaM = self.menuPineboo.addMenu(QtGui.QIcon("share/icons/gtk-open.png"), project.areas[mod.areaid].descripcion)
             self.mPAreas[mod.areaid] = areaM
         else:
             areaM = self.mPAreas[mod.areaid]
