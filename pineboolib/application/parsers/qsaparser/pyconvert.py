@@ -190,3 +190,5 @@ def main() -> None:
     with Pool(CPU_COUNT) as p:
         # TODO: Add proper signatures to Python files to avoid reparsing
         pycode_list: List[bool] = p.map(pythonify_item, itemlist, chunksize=1)
+        if not all(pycode_list):
+            raise Exception("Conversion failed for some files")
