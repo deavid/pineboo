@@ -21,19 +21,18 @@ if TYPE_CHECKING:
 
 
 class Module(object):
-    """Esta clase almacena la información de los módulos cargados
-    """
+    """Stores information about loaded modules."""
 
     logger = logging.getLogger("application.Module")
 
     def __init__(self, areaid: str, name: str, description: str, icon: str) -> None:
-        """Constructor
-        @param areaid. Identificador de area.
-        @param name. Nombre del módulo
-        @param description. Descripción del módulo
-        @param icon. Icono del módulo
+        """__init__.
+        
+        @param areaid. Area Identifier
+        @param name. Module name
+        @param description. Module Description
+        @param icon. Module Icon.
         """
-
         self.areaid = areaid
         self.name = name
         self.description = description  # En python2 era .decode(UTF-8)
@@ -43,14 +42,16 @@ class Module(object):
         self.loaded = False
 
     def add_project_file(self, fileobj: "File") -> None:
-        """Añade ficheros al array que controla que ficehros tengo.
-        @param fileobj. Objeto File con información del fichero
+        """To add files to the array that controls what files I have.
+        
+        @param fileobj. File object with file information
         """
         self.files[fileobj.filename] = fileobj
 
     def load(self) -> bool:
-        """Carga las acciones pertenecientes a este módulo
-        @return Boolean. True si ok, False si hay problemas
+        """Load the actions belonging to this module.
+        
+        @return Boolean True if ok, False if there are problems.
         """
         from .moduleactions import ModuleActions
 
