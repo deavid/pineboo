@@ -1,7 +1,7 @@
 import os
 import os.path
 import collections
-from typing import Any, Optional, Dict, Union
+from typing import Any, Optional, Dict, Union, Generator
 
 from PyQt5 import QtCore  # type: ignore
 
@@ -12,15 +12,27 @@ from pineboolib.application.utils.date_conversion import date_dma_to_amd
 logger = logging.getLogger(__name__)
 
 
-def Boolean(x: Union[bool, int, str, float] = False) -> bool:
+def Boolean(x: Union[bool, str, float] = False) -> bool:
     """
-    Retorna Booelan de una cadena de texto
+    Retorna Boolean de una cadena de texto
     """
-    ret = False
-    if x in ["true", "True", True, 1] or isinstance(x, int) > 0 or isinstance(x, float) > 0:
-        ret = True
-
-    return ret
+    if isinstance(x, bool):
+        return x
+    if isinstance(x, str):
+        x = x.lower().strip()[0]
+        if x in ["y", "t"]:
+            return True
+        if x in ["n", "f"]:
+            return False
+        raise ValueError("Cannot convert %r to Boolean" % x)
+    if isinstance(x, int):
+        return x != 0
+    if isinstance(x, float):
+        if abs(x) < 0.01:
+            return False
+        else:
+            return True
+    raise ValueError("Cannot convert %r to Boolean" % x)
 
 
 class QString(str):
@@ -89,7 +101,7 @@ function anon(%s) {
     else:
         mod = importlib.import_module(module_path)
     forminternalobj = getattr(mod, "FormInternalObj", None)
-
+    os.remove(dest_filename)
     return getattr(forminternalobj(), "anon", None)
 
 
@@ -117,59 +129,39 @@ class Array(object):
     Objeto tipo Array
     """
 
-    dict_: Dict[Any, Any]
+    # NOTE: To avoid infinite recursion on getattr/setattr, all attributes MUST be defined at class-level.
+    _dict: Dict[Any, Any] = {}
+    _pos_iter = 0
 
     def __init__(self, *args: Any) -> None:
-        self.pos_iter = 0
-        self.dict_ = collections.OrderedDict()
+        self._pos_iter = 0
+        self._dict = collections.OrderedDict()
 
         if not len(args):
             return
         elif len(args) == 1:
             if isinstance(args[0], list):
-                for f in args[0]:
-                    self.__setitem__(f, f)
+                for n, f in enumerate(args[0]):
+                    self._dict[n] = f
 
             elif isinstance(args[0], dict):
                 dict_ = args[0]
-                for f in dict_.keys():
-                    self.__setitem__(f, dict_[f])
+                for k, v in dict_.items():
+                    self._dict[k] = v
 
             elif isinstance(args[0], int):
                 return
 
         elif isinstance(args[0], str):
-
             for f in args:
                 self.__setitem__(f, f)
 
-    def __iter__(self) -> "Array":
+    def __iter__(self) -> Generator[Any, None, None]:
         """
         iterable
         """
-        self.pos_iter = 0
-        return self
-
-    def __next__(self) -> Any:
-        """
-        iterable
-        """
-        ret_ = None
-        i = 0
-        if self.dict_:
-            for k in self.dict_.keys():
-                if i == self.pos_iter:
-                    ret_ = self.dict_[k]
-                    break
-
-                i += 1
-
-        if ret_ is None:
-            raise StopIteration
-        else:
-            self.pos_iter += 1
-
-        return ret_
+        for v in self._dict.values():
+            yield v
 
     def __setitem__(self, key: Union[str, int], value: Any) -> None:
         """
@@ -180,7 +172,7 @@ class Array(object):
         # field_key = key
         # while field_key in self.dict_.keys():
         #    field_key = "%s_bis" % field_key
-        self.dict_[key] = value
+        self._dict[key] = value
 
     def __getitem__(self, key: Union[str, int, slice]) -> Any:
         """
@@ -190,26 +182,40 @@ class Array(object):
         """
         if isinstance(key, int):
             i = 0
-            for k in self.dict_.keys():
+            for k in self._dict.keys():
                 if key == i:
-                    return self.dict_[k]
+                    return self._dict[k]
                 i += 1
 
         elif isinstance(key, slice):
             logger.warning("FIXME: Array __getitem__%s con slice" % key)
         else:
-            return self.dict_[key] if key in self.dict_.keys() else None
+            return self._dict[key] if key in self._dict.keys() else None
 
         return None
 
     def length(self) -> int:
-        return len(self.dict_)
+        return len(self._dict)
 
-    def __getattr__(self, k: Union[str, int]) -> Any:
-        return self.dict_[k]
+    def __getattr__(self, k: str) -> Any:
+        return self._dict[k]
 
-    def __setattr__(self, k: Union[str, int], val: Any) -> None:
-        self.dict_[k] = val
+    def __setattr__(self, k: str, val: Any) -> None:
+        if k[0] == "_":
+            return super().__setattr__(k, val)
+        self._dict[k] = val
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, Array):
+            return other._dict == self._dict
+        if isinstance(other, list):
+            return other == list(self._dict.values())
+        if isinstance(other, dict):
+            return other == self._dict
+        return False
+
+    def __repr__(self) -> str:
+        return "<%s %r>" % (self.__class__.__name__, list(self._dict.values()))
 
     def splice(self, *args: Any) -> None:
         if len(args) == 2:  # Delete
@@ -218,14 +224,14 @@ class Array(object):
             i = 0
             x = 0
             new = {}
-            for m in self.dict_.keys():
+            for m in self._dict.keys():
                 if i >= pos_ini and x <= length_:
-                    new[m] = self.dict_[m]
+                    new[m] = self._dict[m]
                     x += 1
 
                 i += 1
 
-            self.dict_ = new
+            self._dict = new
 
         elif len(args) > 2 and args[1] == 0:  # Insertion
             for i in range(2, len(args)):
@@ -238,9 +244,9 @@ class Array(object):
             i = 0
             x = 0
             new = {}
-            for m in self.dict_.keys():
+            for m in self._dict.keys():
                 if i < pos_ini:
-                    new[m] = self.dict_[m]
+                    new[m] = self._dict[m]
                 else:
                     if x < replacement_size:
                         if x == 0:
@@ -249,27 +255,24 @@ class Array(object):
 
                         x += 1
                     else:
-                        new[m] = self.dict_[m]
+                        new[m] = self._dict[m]
 
                 i += 1
 
-            self.dict_ = new
+            self._dict = new
 
     def __len__(self) -> int:
-        return len(self.dict_)
+        return len(self._dict)
 
     def __str__(self) -> str:
-        return " ".join(self.dict_.keys())
+        return repr(list(self._dict.values()))
 
     def append(self, val: Any) -> None:
-        k = repr(val)
-        while True:
-            if hasattr(self.dict_, k):
-                k = "%s_" % k
-            else:
-                break
+        k = len(self._dict)
+        while k in self._dict:
+            k += 1
 
-        self.dict_[k] = val
+        self._dict[k] = val
 
 
 class Date(object):

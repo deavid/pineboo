@@ -22,3 +22,6 @@ monkeytype.sqlite3
 .pytype/*
 pineboolib/application/parsers/qsaparser/lextab.py
 .mypy_cache
+build/
+dist/
+pineboo.egg-info/
