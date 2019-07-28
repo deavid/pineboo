@@ -82,3 +82,4 @@ xmltodict
 sphinx
 sphinx-autodoc-typehints
 pydocstyle
+sphinx-rtd-theme
