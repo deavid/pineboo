@@ -27,7 +27,7 @@ test:
     - flake8 pineboolib/
     - mypy -p pineboolib
     - pytest pineboolib/
-    - black --check --fast -l 140 pineboolib/
+    - black --check --fast -l 140 --exclude='(\.eggs|\.git|\.hg|\.mypy_cache|\.nox|\.tox|\.venv|_build|buck-out|build|dist|lextab.py)' pineboolib/
 
 run:
   script:
