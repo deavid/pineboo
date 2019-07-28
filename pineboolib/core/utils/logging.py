@@ -1,4 +1,5 @@
-"""Replacement for Python logging that adds trace and other methods
+"""
+Replacement for Python logging that adds trace and other methods.
 
 It allows MyPy/PyType to properly keep track of the new message types
 """
@@ -21,16 +22,26 @@ NOTSET = 0
 
 
 class Logger(python_logging.Logger):
+    """
+    Replaced Logger object.
+
+    Adds message, hint, notice  and trace
+    """
+
     def message(self, message: str, *args: Any, **kwargs: Any) -> None:
+        """Log a message."""
         self.log(MESSAGE, message, *args, **kwargs)
 
     def hint(self, message: str, *args: Any, **kwargs: Any) -> None:
+        """Log a hint."""
         self.log(HINT, message, *args, **kwargs)
 
     def notice(self, message: str, *args: Any, **kwargs: Any) -> None:
+        """Log a notice."""
         self.log(NOTICE, message, *args, **kwargs)
 
     def trace(self, message: str, *args: Any, **kwargs: Any) -> None:
+        """Log a trace."""
         self.log(TRACE, message, *args, **kwargs)
 
 
@@ -40,6 +51,7 @@ python_logging.Logger.manager.loggerClass = Logger  # type: ignore
 def getLogger(name: str = None) -> Logger:
     """
     Return a logger with the specified name, creating it if necessary.
+
     If no name is specified, return the root logger.
     """
     if name:
@@ -48,7 +60,7 @@ def getLogger(name: str = None) -> Logger:
         raise Exception("Pineboo getLogger does not allow for root logger")
 
 
-def addLoggingLevel(levelName: str, levelNum: int) -> None:
+def _addLoggingLevel(levelName: str, levelNum: int) -> None:
     methodName = levelName.lower()
 
     # This method was inspired by the answers to Stack Overflow post
@@ -64,7 +76,7 @@ def addLoggingLevel(levelName: str, levelNum: int) -> None:
         setattr(python_logging.getLoggerClass(), methodName, logForLevel)
 
 
-addLoggingLevel("TRACE", TRACE)
-addLoggingLevel("NOTICE", NOTICE)
-addLoggingLevel("HINT", HINT)
-addLoggingLevel("MESSAGE", MESSAGE)
+_addLoggingLevel("TRACE", TRACE)
+_addLoggingLevel("NOTICE", NOTICE)
+_addLoggingLevel("HINT", HINT)
+_addLoggingLevel("MESSAGE", MESSAGE)
