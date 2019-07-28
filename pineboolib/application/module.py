@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 
 class Module(object):
-    """This class has to store the information of the loaded modules."""
+    """Stores information about loaded modules."""
 
     logger = logging.getLogger("application.Module")
 
