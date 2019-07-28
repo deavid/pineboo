@@ -1,3 +1,4 @@
+"""Module for parseTable function."""
 from .utils import logging
 from .utils.get_table_obj import getTableObj
 from .utils.struct import TableStruct
@@ -6,7 +7,8 @@ logger = logging.getLogger("core.parsetable")
 
 
 def parseTable(nombre: str, contenido: str, encoding: str = "UTF-8", remove_blank_text: bool = True) -> TableStruct:
-    # FIXME: parseTable is something too specific to be in utils.py
+    """Parse MTD and convert to table object."""
+
     from io import StringIO
     from xml import etree
 

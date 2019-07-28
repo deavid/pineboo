@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+"""
+Utilities for more descriptive errors.
+
+This module contains a set of functions aimed to reduce the amount of verbosity
+so error and tracebacks are easy to follow and fit better on GUI
+"""
+
 import re
 from .utils import logging
 
@@ -6,11 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 def translate(mod: str, txt: str) -> str:
+    """Emulates QS translate function. Does nothing."""
     # FIXME: qsa_sys is not something we should import here
     return txt
 
 
 def error_manager(e: str) -> str:
+    """Process an error text and return a better version for GUI."""
     from .utils.utils_base import filedir
 
     tmpdir = filedir("../tempdata")
@@ -25,6 +34,7 @@ def error_manager(e: str) -> str:
 
 
 def process_error(error_str: str) -> str:
+    """Retrieve hints for a given error string."""
     ret = "\n=========== Error Manager =============\n\n"
 
     if "AttributeError: 'dict' object has no attribute" in error_str:

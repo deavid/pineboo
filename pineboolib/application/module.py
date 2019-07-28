@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage load and storage of Eneboo/Pineboo modules.
 
