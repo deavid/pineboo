@@ -1,4 +1,5 @@
-"""Manage load and storage of Eneboo/Pineboo modules.
+"""
+Manage load and storage of Eneboo/Pineboo modules.
 
 What are modules?
 -------------------
@@ -21,17 +22,18 @@ if TYPE_CHECKING:
 
 
 class Module(object):
-    """Stores information about loaded modules."""
+    """Information about loaded modules."""
 
     logger = logging.getLogger("application.Module")
 
     def __init__(self, areaid: str, name: str, description: str, icon: str) -> None:
-        """__init__.
-        
+        """
+        Create module instance.
+
         @param areaid. Area Identifier
         @param name. Module name
         @param description. Module Description
-        @param icon. Module Icon.
+        @param icon. Module Icon
         """
         self.areaid = areaid
         self.name = name
@@ -42,15 +44,17 @@ class Module(object):
         self.loaded = False
 
     def add_project_file(self, fileobj: "File") -> None:
-        """To add files to the array that controls what files I have.
-        
+        """
+        Add files to project array.
+
         @param fileobj. File object with file information
         """
         self.files[fileobj.filename] = fileobj
 
     def load(self) -> bool:
-        """Load the actions belonging to this module.
-        
+        """
+        Load actions belonging to this module.
+
         @return Boolean True if ok, False if there are problems.
         """
         from .moduleactions import ModuleActions
