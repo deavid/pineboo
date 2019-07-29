@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+Module for PNSqlCursor class.
+"""
 import weakref
 import importlib
 import traceback
@@ -48,6 +51,9 @@ logger = logging.getLogger(__name__)
 
 
 class PNSqlCursor(QtCore.QObject):
+    """
+    Database Cursor class.
+    """
 
     """
     Insertar, en este modo el buffer se prepara para crear un nuevo registro
@@ -105,7 +111,7 @@ class PNSqlCursor(QtCore.QObject):
         r: Optional["PNRelationMetaData"] = None,
         parent=None,
     ) -> None:
-
+        """Create a new cursor."""
         super().__init__()
         if name is None:
             logger.warning("Se está iniciando un cursor Huerfano (%s). Posiblemente sea una declaración en un qsa parseado", self)
@@ -159,11 +165,12 @@ class PNSqlCursor(QtCore.QObject):
         #            break
         self.init(act_.name(), autopopulate, cR, r)
 
-    """
-    Código de inicialización común para los constructores
-    """
-
     def init(self, name: str, autopopulate: bool, cR: Optional["PNSqlCursor"], r: Optional["PNRelationMetaData"]) -> None:
+        """
+        Initialize class.
+
+        Common init code for constructors.
+        """
         # logger.warning("FLSqlCursor(%s): Init() %s (%s, %s)" , name, self, cR, r, stack_info=True)
 
         # if self.d.metadata_ and not self.d.metadata_.aqWasDeleted() and not
@@ -248,9 +255,11 @@ class PNSqlCursor(QtCore.QObject):
         # self.first()
 
     def conn(self) -> "IConnection":
+        """Get current connection for this cursor."""
         return self.db()
 
     def table(self) -> str:
+        """Get current table or empty string."""
         m = self.d.metadata_
         if m:
             return m.name()
@@ -261,46 +270,44 @@ class PNSqlCursor(QtCore.QObject):
     #    return DefFun(self, name)
 
     def setName(self, name: str, autop: bool) -> None:
+        """Set cursor name."""
         self.name = name
+        # FIXME: autopop probably means it should do a refresh upon construction.
         # autop = autopopulate para que??
 
-    """
-    Para obtener los metadatos de la tabla.
-
-    @return Objeto PNTableMetaData con los metadatos de la tabla asociada al cursor
-    """
-
     def metadata(self) -> "PNTableMetaData":
+        """
+        Retrieve PNTableMetaData for current table.
+
+        @return PNTableMetaData object with metadata related to cursor table.
+        """
         if self.d.metadata_ is None:
             raise Exception("metadata is empty!")
 
         return self.d.metadata_
 
-    """
-    Informa del registro seleccionado actualmente por el cursor
-    @retunr int con el número de registro
-    """
-
     def currentRegister(self) -> int:
+        """
+        Get current row number selected by the cursor.
+
+        @return Integer cotining record number.
+        """
         return self.d._currentregister
 
-    """
-    Para obtener el modo de acceso actual del cursor.
-
-    @return Constante PNSqlCursor::Mode que define en que modo de acceso esta preparado
-        el buffer del cursor
-    """
-
     def modeAccess(self) -> int:
+        """
+        Get current access mode for cursor.
+
+        @return PNSqlCursor::Mode constant defining mode access prepared
+        """
         return self.d.modeAccess_
 
-    """
-    Para obtener el filtro principal del cursor.
-
-    @return Cadena de texto con el filtro principal
-    """
-
     def mainFilter(self) -> str:
+        """
+        Retrieve main filter for cursor.
+
+        @return String containing the WHERE clause part that will be appended on select.
+        """
         ret_ = None
         if hasattr(self.d._model, "where_filters"):
             ret_ = self.d._model.where_filters["main-filter"]
@@ -310,25 +317,25 @@ class PNSqlCursor(QtCore.QObject):
 
         return ret_
 
-    """
-    Para obtener la accion asociada al cursor.
-
-    @return  Objeto FLAction
-    """
-
     def action(self) -> Optional["FLAction"]:
+        """
+        Get FLAction related to this cursor.
+
+        @return FLAction object.
+        """
         return self._action if self._action else None
 
     def actionName(self) -> str:
+        """Get action name from FLAction related to the cursor. Returns empty string if none is set."""
         return self._action.name() if self._action else ""
 
-    """
-    Establece la accion asociada al cursor.
-
-    @param a Objeto FLAction
-    """
-
     def setAction(self, a: Union[str, "FLAction"]) -> bool:
+        """
+        Set action to be related to this cursor.
+
+        @param FLAction object
+        @return True if success, otherwise False.
+        """
         action = None
 
         if isinstance(a, str):
@@ -391,14 +398,13 @@ class PNSqlCursor(QtCore.QObject):
         self.d.activatedCommitActions_ = True
         return True
 
-    """
-    Establece el filtro principal del cursor.
-
-    @param f Cadena con el filtro, corresponde con una clausura WHERE
-    @param doRefresh Si TRUE tambien refresca el cursor
-    """
-
     def setMainFilter(self, f: str, doRefresh: bool = True) -> None:
+        """
+        Set main cursor filter.
+
+        @param f String containing the filter in SQL WHERE format (excluding WHERE)
+        @param doRefresh By default, refresh the cursor afterwards. Set to False to avoid this.
+        """
         # if f == "":
         #    f = "1 = 1"
 
@@ -412,39 +418,35 @@ class PNSqlCursor(QtCore.QObject):
             if doRefresh:
                 self.refresh()
 
-    """
-    Establece el modo de acceso para el cursor.
-
-    @param m Constante PNSqlCursor::Mode que indica en que modo de acceso
-    se quiere establecer el cursor
-    """
-
     def setModeAccess(self, m: int) -> None:
+        """
+        Set cursor access mode.
+
+        @param m PNSqlCursor::Mode constant which inidicates access mode.
+        """
         self.d.modeAccess_ = m
 
-    """
-    Devuelve el nombre de la conexión que el cursor usa
-
-    @return Nombre de la conexión
-    """
-
     def connectionName(self) -> str:
+        """
+        Get database connection alias name.
+
+        @return String containing the connection name.
+        """
         return self.db().connectionName()
 
-    """
-    Establece el valor de un campo del buffer de forma atómica y fuera de transacción.
-
-    Invoca a la función, cuyo nombre se pasa como parámetro, del script del contexto del cursor
-    (ver PNSqlCursor::ctxt_) para obtener el valor del campo. El valor es establecido en el campo de forma
-    atómica, bloqueando la fila durante la actualización. Esta actualización se hace fuera de la transacción
-    actual, dentro de una transacción propia, lo que implica que el nuevo valor del campo está inmediatamente
-    disponible para las siguientes transacciones.
-
-    @param fN Nombre del campo
-    @param functionName Nombre de la función a invocar del script
-    """
-
     def setAtomicValueBuffer(self, fN: str, functionName: str) -> None:
+        """
+        Set a buffer field value in atomic fashion and outside transaction.
+
+        Invoca a la función, cuyo nombre se pasa como parámetro, del script del contexto del cursor
+        (ver PNSqlCursor::ctxt_) para obtener el valor del campo. El valor es establecido en el campo de forma
+        atómica, bloqueando la fila durante la actualización. Esta actualización se hace fuera de la transacción
+        actual, dentro de una transacción propia, lo que implica que el nuevo valor del campo está inmediatamente
+        disponible para las siguientes transacciones.
+
+        @param fN Nombre del campo
+        @param functionName Nombre de la función a invocar del script
+        """
         if not self.d.buffer_ or not fN or not self.d.metadata_:
             return
 
@@ -510,14 +512,13 @@ class PNSqlCursor(QtCore.QObject):
 
             project.app.processEvents()
 
-    """
-    Establece el valor de un campo del buffer con un valor.
-
-    @param fN Nombre del campo
-    @param v Valor a establecer para el campo
-    """
-
     def setValueBuffer(self, fN: str, v: Any) -> None:
+        """
+        Set buffer value for a particular field.
+
+        @param fN field name
+        @param v Value to be set to the buffer field.
+        """
 
         if not self.buffer():
             return
@@ -607,13 +608,12 @@ class PNSqlCursor(QtCore.QObject):
             self.bufferChanged.emit(fN)
         project.app.processEvents()
 
-    """
-    Devuelve el valor de un campo del self.d.buffer_.
-
-    @param fN Nombre del campo
-    """
-
     def valueBuffer(self, fN: str) -> Any:
+        """
+        Retrieve a value from a field buffer (self.d.buffer_).
+
+        @param fN field name
+        """
         fN = str(fN)
 
         if project.DGI.use_model():
@@ -700,15 +700,15 @@ class PNSqlCursor(QtCore.QObject):
         return v
 
     def fetchLargeValue(self, value: str) -> Any:
+        """Retrieve large value from database."""
         return self.db().manager().fetchLargeValue(value)
 
-    """
-    Devuelve el valor de un campo del buffer copiado antes de sufrir cambios.
-
-    @param fN Nombre del campo
-    """
-
     def valueBufferCopy(self, fN: str) -> Any:
+        """
+        Retrieve original value for a field before it was changed.
+
+        @param fN field name
+        """
         if not self.bufferCopy() or not self.d.metadata_:
             return None
 
@@ -753,13 +753,13 @@ class PNSqlCursor(QtCore.QObject):
 
         return v
 
-    """
-    Establece el valor de FLSqlCursor::edition.
-
-    @param b TRUE o FALSE
-    """
-
     def setEdition(self, b: bool, m: Optional[str] = None) -> None:
+        """
+        Put cursor into "edition" mode.
+
+        @param b TRUE or FALSE
+        """
+        # FIXME: What is "edition" ??
         if m is None:
             self.d.edition_ = b
             return
@@ -789,7 +789,7 @@ class PNSqlCursor(QtCore.QObject):
             self.d.edition_ = b
 
     def restoreEditionFlag(self, m: str) -> None:
-
+        """Restore Edition flag to its previous value."""
         if not self.d.edition_states_:
             return
 
@@ -801,13 +801,12 @@ class PNSqlCursor(QtCore.QObject):
         if i:
             self.d.edition_states_.erase(i)
 
-    """
-    Establece el valor de FLSqlCursor::browse.
-
-    @param b TRUE o FALSE
-    """
-
     def setBrowse(self, b: bool, m: Optional[str] = None) -> None:
+        """
+        Put cursor into browse mode.
+
+        @param b TRUE or FALSE
+        """
         if not m:
             self.d.browse_ = b
             return
@@ -837,6 +836,7 @@ class PNSqlCursor(QtCore.QObject):
             self.d.browse_ = b
 
     def restoreBrowseFlag(self, m: bool) -> None:
+        """Restores browse flag to its previous state."""
         if not self.d.browse_states_:
             return
 
@@ -848,48 +848,50 @@ class PNSqlCursor(QtCore.QObject):
         if i:
             self.d.browse_states_.erase(i)
 
-    def meta_model(self) -> Any:
-        return self._meta_model if project.DGI.use_model() else None
-
-    """
-    Establece el contexto de ejecución de scripts, este puede ser del master o del form_record
-
-    Ver FLSqlCursor::ctxt_.
-
-    @param c Contexto de ejecucion
-    """
+    def meta_model(self) -> bool:
+        """
+        Check if DGI requires models (SqlAlchemy?).
+        """
+        return self._meta_model if project.DGI.use_model() else False
 
     def setContext(self, c: Any = None) -> None:
+        """
+        Set cursor context for script execution.
+
+        This can be for master or formRecord.
+
+        See FLSqlCursor::ctxt_.
+
+        @param c Execution Context
+        """
         if c:
             self.d.ctxt_ = weakref.ref(c)
 
-    """
-    Para obtener el contexto de ejecución de scripts.
-
-    Ver FLSqlCursor::ctxt_.
-
-    @return Contexto de ejecución
-    """
-
     def context(self) -> Any:
+        """
+        Retrieve current context of execution of scripts for this cursor.
+
+        See FLSqlCursor::ctxt_.
+
+        @return Execution context
+        """
         if self.d.ctxt_:
             return self.d.ctxt_()
         else:
             logger.debug("%s.context(). No hay contexto" % self.curName())
             return None
 
-    """
-    Dice si un campo está deshabilitado.
-
-    Un campo estará deshabilitado, porque esta clase le dará un valor automáticamente.
-    Estos campos son los que están en una relación con otro cursor, por lo que
-    su valor lo toman del campo foráneo con el que se relacionan.
-
-    @param fN Nombre del campo a comprobar
-    @return TRUE si está deshabilitado y FALSE en caso contrario
-    """
-
     def fieldDisabled(self, fN: str) -> bool:
+        """
+        Check if a field is disabled.
+
+        Un campo estará deshabilitado, porque esta clase le dará un valor automáticamente.
+        Estos campos son los que están en una relación con otro cursor, por lo que
+        su valor lo toman del campo foráneo con el que se relacionan.
+
+        @param fN Nombre del campo a comprobar
+        @return TRUE si está deshabilitado y FALSE en caso contrario
+        """
         if self.modeAccess() in (self.Insert, self.Edit):
 
             if self.d.cursorRelation_ is not None and self.d.relation_ is not None:
@@ -905,58 +907,54 @@ class PNSqlCursor(QtCore.QObject):
         else:
             return False
 
-    """
-    Indica si hay una transaccion en curso.
-
-    @return TRUE si hay una transaccion en curso, FALSE en caso contrario
-    """
-
     def inTransaction(self) -> bool:
+        """
+        Check if there is a transaction in progress.
+
+        @return TRUE if there is one.
+        """
         if self.db():
             if self.db().transaction_ > 0:
                 return True
 
         return False
 
-    """
-    Inicia un nuevo nivel de transacción.
-
-    Si ya hay una transacción en curso simula un nuevo nivel de anidamiento de
-    transacción mediante un punto de salvaguarda.
-
-    @param  lock Actualmente no se usa y no tiene ningún efecto. Se mantiene por compatibilidad hacia atrás
-    @return TRUE si la operación tuvo exito
-    """
-
     def transaction(self, lock: bool = False) -> bool:
+        """
+        Start a new transaction.
+
+        Si ya hay una transacción en curso simula un nuevo nivel de anidamiento de
+        transacción mediante un punto de salvaguarda.
+
+        @param  lock Actualmente no se usa y no tiene ningún efecto. Se mantiene por compatibilidad hacia atrás
+        @return TRUE si la operación tuvo exito
+        """
         if not self.db() and not self.db().db():
             logger.warning("transaction(): No hay conexión con la base de datos")
             return False
 
         return self.db().doTransaction(self)
 
-    """
-    Deshace las operaciones de una transacción y la acaba.
-
-    @return TRUE si la operación tuvo exito
-    """
-
     def rollback(self) -> bool:
+        """
+        Undo operations from a transaction and cleans up.
+
+        @return TRUE if success.
+        """
         if not self.db() and not self.db().db():
             logger.warning("rollback(): No hay conexión con la base de datos")
             return False
 
         return self.db().doRollback(self)
 
-    """
-    Hace efectiva la transacción y la acaba.
-
-    @param notify Si TRUE emite la señal cursorUpdated y pone el cursor en modo BROWSE,
-          si FALSE no hace ninguna de estas dos cosas y emite la señal de autoCommit
-    @return TRUE si la operación tuvo exito
-    """
-
     def commit(self, notify: bool = True) -> bool:
+        """
+        Finishes and commits transaction.
+
+        @param notify If TRUE emits signal cursorUpdated and sets cursor on BROWSE,
+              If FALSE skips and emits autoCommit signal.
+        @return TRUE if success.
+        """
         if not self.db() and not self.db().db():
             logger.warning("commit(): No hay conexión con la base de datos")
             return False
@@ -968,18 +966,18 @@ class PNSqlCursor(QtCore.QObject):
         return r
 
     def size(self) -> int:
+        """Get number of records in the cursor."""
         return self.d._model.size()
 
-    """
-    Abre el formulario asociado a la tabla origen en el modo indicado.
-
-    @param m Modo de apertura (FLSqlCursor::Mode)
-    @param wait Indica que se espera a que el formulario cierre para continuar
-    @param cont Indica que se abra el formulario de edición de registros con el botón de
-         aceptar y continuar
-    """
-
     def openFormInMode(self, m: int, wait: bool = True, cont: bool = True) -> None:
+        """
+        Open form associated with the table in the specified mode.
+
+        @param m Opening mode. (FLSqlCursor::Mode)
+        @param wait Indica que se espera a que el formulario cierre para continuar
+        @param cont Indica que se abra el formulario de edición de registros con el botón de
+        aceptar y continuar
+        """
         if not self.d.metadata_:
             return
         from pineboolib import pncontrolsfactory
@@ -1048,25 +1046,24 @@ class PNSqlCursor(QtCore.QObject):
             #     self.updateBufferCopy()
 
     def isNull(self, fN: str) -> bool:
-
+        """Get if a field is null."""
         if not self.d.buffer_:
             raise Exception("No buffer set")
         return self.d.buffer_.isNull(fN)
 
     def isCopyNull(self, fN: str) -> bool:
-
+        """Get if a field was null before changing."""
         if not self.d.bufferCopy_:
             raise Exception("No buffer_copy set")
         return self.d.bufferCopy_.isNull(fN)
 
-    """
-    Copia el contenido del FLSqlCursor::buffer_ actual en FLSqlCursor::bufferCopy_.
-
-    Al realizar esta copia se podra comprobar posteriormente si el buffer actual y la copia realizada
-    difieren mediante el metodo FLSqlCursor::isModifiedBuffer().
-    """
-
     def updateBufferCopy(self) -> None:
+        """
+        Copy contents of FLSqlCursor::buffer_ into FLSqlCursor::bufferCopy_.
+
+        This copy allows later to check if the buffer was changed using
+        FLSqlCursor::isModifiedBuffer().
+        """
         if not self.buffer():
             return None
 
@@ -1082,15 +1079,14 @@ class PNSqlCursor(QtCore.QObject):
             for field in self.d.buffer_.fieldsList():
                 bufferCopy.setValue(field.name, self.d.buffer_.value(field.name), False)
 
-    """
-    Indica si el contenido actual del buffer difiere de la copia guardada.
-
-    Ver FLSqlCursor::bufferCopy_ .
-
-    @return TRUE si el buffer y la copia son distintas, FALSE en caso contrario
-    """
-
     def isModifiedBuffer(self) -> bool:
+        """
+        Check if current buffer contents are different from the original copy.
+
+        See FLSqlCursor::bufferCopy_ .
+
+        @return True if different. False if equal.
+        """
 
         if self.d.buffer_ is None:
             return False
@@ -1101,58 +1097,64 @@ class PNSqlCursor(QtCore.QObject):
         else:
             return False
 
-    """
-    Establece el valor de FLSqlCursor::askForCancelChanges_ .
-
-    @param a Valor a establecer (TRUE o FALSE)
-    """
-
     def setAskForCancelChanges(self, a: bool) -> None:
+        """
+        Set value for FLSqlCursor::askForCancelChanges_ .
+
+        @param a If True, a popup will appear warning the user for unsaved changes on cancel.
+        """
         self.d.askForCancelChanges_ = a
 
-    """
-    Activa o desactiva los chequeos de integridad referencial.
-
-    @param a TRUE los activa y FALSE los desactiva
-    """
-
     def setActivatedCheckIntegrity(self, a: bool) -> None:
+        """
+        Enable or disable integrity checks.
+
+        @param a TRUE los activa y FALSE los desactiva
+        """
         self.d.activatedCheckIntegrity_ = a
 
     def activatedCheckIntegrity(self) -> bool:
+        """Retrieve if integrity checks are enabled."""
         return self.d.activatedCheckIntegrity_
 
-    """
-    Activa o desactiva las acciones a realizar antes y después de un commit
-
-    @param a TRUE las activa y FALSE las desactiva
-    """
-
     def setActivatedCommitActions(self, a: bool) -> None:
+        """
+        Enable or disable before/after commit actions.
+
+        @param a True to enable, False to disable.
+        """
         self.d.activatedCommitActions_ = a
 
     def activatedCommitActions(self) -> bool:
+        """
+        Retrieve wether before/after commits are enabled.
+        """
         return self.d.activatedCommitActions_
 
     def setActivatedBufferChanged(self, activated_bufferchanged: bool) -> None:
+        """Enable or disable bufferChanged signals."""
         self._activatedBufferChanged = activated_bufferchanged
 
     def activatedBufferChanged(self) -> bool:
+        """Retrieve if bufferChanged signals are enabled."""
         return self._activatedBufferChanged
 
     def setActivatedBufferCommited(self, activated_buffercommited: bool) -> None:
+        """Enable or disable bufferCommited signals."""
         self._activatedBufferCommited = activated_buffercommited
 
     def activatedBufferCommited(self) -> bool:
+        """Retrieve wether bufferCommited signals are enabled."""
         return self._activatedBufferCommited
 
-    """
-    Se comprueba la integridad referencial al intentar borrar, tambien se comprueba la no duplicidad de
-    claves primarias y si hay nulos en campos que no lo permiten cuando se inserta o se edita.
-    Si alguna comprobacion falla devuelve un mensaje describiendo el fallo.
-    """
-
     def msgCheckIntegrity(self) -> str:
+        """
+        Get message for integrity checks.
+
+        Se comprueba la integridad referencial al intentar borrar, tambien se comprueba la no duplicidad de
+        claves primarias y si hay nulos en campos que no lo permiten cuando se inserta o se edita.
+        Si alguna comprobacion falla devuelve un mensaje describiendo el fallo.
+        """
         msg = ""
 
         if self.d.buffer_ is None or self.d.metadata_ is None:
