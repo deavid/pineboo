@@ -11,7 +11,8 @@ Welcome to Pineboo's documentation!
    :caption: Contents:
 
    code/core
-   code/application
+   code/application/application
+   code/application/database
    code/other
 
 Indices and tables
