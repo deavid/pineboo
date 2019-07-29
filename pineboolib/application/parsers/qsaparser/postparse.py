@@ -617,7 +617,7 @@ def pythonify(filelist):
     execute(options, filelist)
 
 
-def pythonify2(filename: str) -> str:
+def pythonify2(filename: str, known_refs: Dict[str, Tuple[str, str]] = {}) -> str:
     from .pytnyzer import pythonize2
 
     filecontent = open(filename, "r", encoding="latin-1").read()
@@ -630,7 +630,7 @@ def pythonify2(filename: str) -> str:
     tree_data = flscriptparse.calctree(prog, alias_mode=0)
     ast = post_parse(tree_data)
 
-    return pythonize2(ast)
+    return pythonize2(ast, known_refs)
 
 
 def execute(options, args):

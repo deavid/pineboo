@@ -3,7 +3,7 @@ PyConvert module.
 
 Converts QS projects into Python packages that can be parsed with MyPy
 """
-# import sys
+import sys
 import os
 import os.path
 import codecs
@@ -91,19 +91,22 @@ class PythonifyItem(object):
     dst_path: str = ""
     n: int = 0
     len: int = 1
+    known: Dict[str, Tuple[str, str]] = {}
 
-    def __init__(self, src: str, dst: str, n: int, len: int):
+    def __init__(self, src: str, dst: str, n: int, len: int, known: Dict[str, Tuple[str, str]]):
         """Create object just from args."""
         self.src_path = src
         self.dst_path = dst
         self.n = n
         self.len = len
+        self.known = known
 
 
 def pythonify_item(o: PythonifyItem) -> bool:
+    """Parse QS into Python. For multiprocessing.map."""
     logger.info("(%.2f%%) Parsing QS %r", 100 * o.n / o.len, o.src_path)
     try:
-        pycode = postparse.pythonify2(o.src_path)
+        pycode = postparse.pythonify2(o.src_path, known_refs=o.known)
     except Exception:
         logger.exception("El fichero %s no se ha podido convertir", o.src_path)
         return False
@@ -115,6 +118,9 @@ def pythonify_item(o: PythonifyItem) -> bool:
 
 def main() -> None:
     """Get options and start conversion."""
+    filter_mod = sys.argv[1] if len(sys.argv) > 1 else None
+    filter_file = sys.argv[2] if len(sys.argv) > 2 else None
+
     pytnyzer.STRICT_MODE = False
     log_format = "%(levelname)s: %(name)s: %(message)s"
     logging.basicConfig(format=log_format, level=0)
@@ -128,10 +134,16 @@ def main() -> None:
     # Step 1 - Create base package path
     _touch_dir(dst_path)
     _touch(os.path.join(dst_path, "__init__.py"))
+    mypy_ini = os.path.join(src_path, "mypy.ini")
+    if not os.path.exists(mypy_ini):
+        with open(mypy_ini, "w") as f1:
+            f1.write("[mypy]\n")
+            f1.write("python_version = 3.7\n")
+            f1.write("check_untyped_defs = True\n")
 
     # Step 2 - Create module folders
     module_files_in: ModList = get_modules(src_path)
-    known_modules = {}
+    known_modules: Dict[str, Tuple[str, str]] = {}
     module_files_ok: ModList = []
     for mpath, mname in module_files_in:
         xml_name = os.path.join(mpath, "%s.xml" % mname)
@@ -149,7 +161,7 @@ def main() -> None:
 
         _touch_dir(os.path.join(dst_path, mpath))
         _touch(os.path.join(dst_path, mpath, "__init__.py"))
-        known_modules[mname] = (mpath.replace(os.sep, "."), mname)
+        known_modules[mname] = (package_name + "." + mpath.replace(os.sep, "."), mname)
         module_files_ok.append((mpath, mname))
 
     # Step 3 - Read module XML and identify objects
@@ -160,19 +172,24 @@ def main() -> None:
             continue
         for action in actions.values():
             if action.scriptform:
-                module_pubname = "form%s" % action.scriptform
-                known_modules[module_pubname] = (mpath.replace(os.sep, "."), action.scriptform)
+                module_pubname = "form%s" % action.name
+                known_modules[module_pubname] = (package_name + "." + mpath.replace(os.sep, "."), action.scriptform)
             if action.scriptformrecord:
-                module_pubname = "formRecord%s" % action.scriptformrecord
-                known_modules[module_pubname] = (mpath.replace(os.sep, "."), action.scriptformrecord)
+                module_pubname = "formRecord%s" % action.name
+                known_modules[module_pubname] = (package_name + "." + mpath.replace(os.sep, "."), action.scriptformrecord)
 
-    # for alias, (path, name) in known_modules.items():
-    #     logger.debug("from %s import %s as %s", path, name, alias)
+    if filter_mod is not None:
+        for alias, (path, name) in known_modules.items():
+            if filter_mod not in path and filter_mod not in name:
+                continue
+            logger.debug("from %s import %s as %s", path, name, alias)
 
     # Step 4 - Retrieve QS file list for conversion
     logger.info("Retrieving QS File list...")
     qs_files: List[Tuple[str, str]] = []
     for mpath, mname in module_files_ok:
+        if filter_mod is not None and filter_mod not in mpath and filter_mod not in mname:
+            continue
         rootdir = os.path.join(src_path, mpath)
         for root, subFolders, files in os.walk(rootdir):
 
@@ -181,14 +198,16 @@ def main() -> None:
                 dst_filename = os.path.join(dst_path, mpath, fname.replace(".qs", ".py"))
                 return src_filename, dst_filename
 
+            if filter_file is not None:
+                files = [fname for fname in files if filter_file in fname]
             qs_files += [get_fname_pair(fname) for fname in files if fname.endswith(".qs")]
 
     # Step 5 - Convert QS into Python
     logger.info("Converting %d QS files...", len(qs_files))
 
-    itemlist = [PythonifyItem(src=src, dst=dst, n=n, len=len(qs_files)) for n, (src, dst) in enumerate(qs_files)]
+    itemlist = [PythonifyItem(src=src, dst=dst, n=n, len=len(qs_files), known=known_modules) for n, (src, dst) in enumerate(qs_files)]
     with Pool(CPU_COUNT) as p:
         # TODO: Add proper signatures to Python files to avoid reparsing
-        pycode_list: List[bool] = p.map(pythonify_item, itemlist, chunksize=1)
+        pycode_list: List[bool] = p.map(pythonify_item, itemlist, chunksize=2)
         if not all(pycode_list):
             raise Exception("Conversion failed for some files")
