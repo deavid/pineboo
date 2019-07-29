@@ -159,7 +159,7 @@ class FieldStruct(object):
 class PNBuffer(object):
     """
     Cursor buffer.
-    
+
     When a query is done, after first(), a PNBuffer is created which holds
     the fields of the record.
     """
@@ -190,7 +190,7 @@ class PNBuffer(object):
     def count(self) -> int:
         """
         Return the number of fields that make up the buffer.
-        
+
         @return int
         """
         return len(self.fieldList_)
@@ -203,7 +203,7 @@ class PNBuffer(object):
     def primeInsert(self, row: int = None) -> None:
         """
         Set the initial values ​​of the buffer fields.
-        
+
         @param row = cursor line.
         """
         if self.inicialized_:
@@ -260,7 +260,7 @@ class PNBuffer(object):
     def row(self) -> int:
         """
         Set the cursor line referenced by the buffer.
-        
+
         @return int = reference line.
         """
         return self.line_
@@ -268,7 +268,7 @@ class PNBuffer(object):
     def setRow(self, l: int) -> None:
         """
         Set the cursor line referenced by the buffer.
-        
+
         @param l = cursor register index.
         """
         self.line_ = l
@@ -276,7 +276,7 @@ class PNBuffer(object):
     def setNull(self, name) -> bool:
         """
         Empty the value of the specified field.
-        
+
         @param name = field name.
         """
         return self.setValue(name, None)
@@ -284,7 +284,7 @@ class PNBuffer(object):
     def isGenerated(self, name: str) -> bool:
         """
         Specify whether it is a generated field or not.
-        
+
         @return True or False.
         """
         return self.fieldDict_[name].generated
@@ -292,9 +292,9 @@ class PNBuffer(object):
     def setGenerated(self, f: Union[int, str, "ifieldmetadata.IFieldMetaData"], value: bool) -> None:
         """
         Set that is a generated field.
-        
+
         @param f = FLField Metadata of the field to be marked.
-        @param value = True or False.       
+        @param value = True or False.
         """
         if not isinstance(f, str) and not isinstance(f, int):
             f = f.name()
@@ -303,7 +303,7 @@ class PNBuffer(object):
     def clearValues(self, b: bool) -> None:
         """
         Set all values ​​to None and check field.modified to True.
-        
+
         @param b bool = True or False (does nothing).
         """
         if not b:
@@ -315,7 +315,7 @@ class PNBuffer(object):
     def isEmpty(self) -> bool:
         """
         Return if the field is initialized.
-        
+
         @return bool = True or False.
         """
         return self.inicialized_
@@ -323,7 +323,7 @@ class PNBuffer(object):
     def isNull(self, n: Union[str, int]) -> bool:
         """
         Return if the field is empty.
-        
+
         @param n = field identification to check if empty.
         @return bool = True or False.
         """
@@ -345,7 +345,7 @@ class PNBuffer(object):
     def value(self, n: Union[str, int]) -> T_VALUE2:
         """
         Return the value of a field.
-        
+
         @param n field identification.
         @return Any = field value.
         """
@@ -385,7 +385,7 @@ class PNBuffer(object):
     def setValue(self, name: str, value: T_VALUE2, mark_: bool = True) -> bool:
         """
         Set the value of a field.
-        
+
         @param name = Field name.
         @param value = new value.
         @param mark_. If True verifies that it has changed from the value assigned in primeUpdate and mark it as modified (Default to True).
@@ -414,7 +414,7 @@ class PNBuffer(object):
     def cursor(self) -> "isqlcursor.ISqlCursor":
         """
         Indicate the parent cursor.
-        
+
         @return parent cursor.
         """
         return self.cursor_
@@ -422,7 +422,7 @@ class PNBuffer(object):
     def modifiedFields(self) -> List[str]:
         """
         Return the modified fields from primeUpdate.
-        
+
         @return array = List of modified fields.
         """
         lista = []
@@ -442,7 +442,7 @@ class PNBuffer(object):
     def pK(self) -> Optional[str]:
         """
         Return which buffer field is the primary key.
-        
+
         @return field name Primary key.
         """
         for f in self.fieldsList():
@@ -454,7 +454,7 @@ class PNBuffer(object):
     def indexField(self, name) -> Optional[int]:
         """
         Return the position of a given field.
-        
+
         @param name = field name.
         @return field position.
         """
@@ -473,7 +473,7 @@ class PNBuffer(object):
     def field(self, n) -> Optional[FieldStruct]:
         """
         Retrieve a field by ID/position or by name.
-        
+
         Ignores errors and returns None if not found.
         Still can raise Exception if called with a bad type.
         """
