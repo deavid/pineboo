@@ -2155,7 +2155,7 @@ def file_template(ast: Any, import_refs: Dict[str, Tuple[str, str]] = {}) -> Gen
     yield "line", "    form: FormInternalObj = FormInternalObj()"
     yield "line", "    iface = form.iface"
     yield "line", "else:"
-    yield "line", "    form: Any = None"
+    yield "line", "    form = None"
 
 
 def write_python_file(fobj, ast, import_refs: Dict[str, Tuple[str, str]] = {}) -> None:
