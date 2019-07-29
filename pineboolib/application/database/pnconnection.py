@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Defines the PNConnection class.
-
+"""
+Defines the PNConnection class.
 """
 from PyQt5 import QtCore, QtWidgets  # type: ignore
 
@@ -19,6 +19,8 @@ if TYPE_CHECKING:
     from pineboolib.fllegacy import flmanager
     from pineboolib.fllegacy import flmanagermodules
     from .pnsqldrivers import PNSqlDrivers
+    from .pnsqlcursor import PNSqlCursor
+    from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +46,13 @@ class PNConnection(QtCore.QObject, IConnection):
     _dbAux = None
     _isOpen: bool
     driver_ = None
+    lastActiveCursor_: Optional["PNSqlCursor"]
 
-    def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name=None) -> None:
+    def __init__(
+        self, db_name: str, db_host: str, db_port: int, db_userName: str, db_password: str, driverAlias: str, name: str = None
+    ) -> None:
+        """Database connection through a sql driver."""
+
         from .pnsqldrivers import PNSqlDrivers
 
         super(PNConnection, self).__init__()
@@ -81,11 +88,12 @@ class PNConnection(QtCore.QObject, IConnection):
         self.stackSavePoints_ = []
         self.queueSavePoints_ = []
         self.interactiveGUI_ = True
-
+        self.lastActiveCursor_ = None
         self.driver().db_ = self
 
     @decorators.NotImplementedWarn
-    def finish(self):
+    def finish(self) -> None:
+        """Set the connection as terminated."""
         pass
 
     def connectionName(self) -> Any:
@@ -93,9 +101,10 @@ class PNConnection(QtCore.QObject, IConnection):
         return self.name
 
     def useConn(self, name_or_conn: Union[str, IConnection] = "default") -> IConnection:
-        """Select another connection which can be not the default one.
+        """
+        Select another connection which can be not the default one.
 
-        Permite seleccionar una conexion que no es la default, Si no existe la crea
+        Allow you to select a connection.
         """
         name: str
         if isinstance(name_or_conn, IConnection):
@@ -124,9 +133,13 @@ class PNConnection(QtCore.QObject, IConnection):
         return connection
 
     def dictDatabases(self) -> Dict[str, "IConnection"]:
+        """Return dict with own database connections."""
+
         return self.connAux
 
     def removeConn(self, name="default") -> bool:
+        """Delete a connection specified by name."""
+
         try:
             conn_ = self.useConn(name).conn
             if conn_ is not None:
@@ -139,12 +152,18 @@ class PNConnection(QtCore.QObject, IConnection):
         return True
 
     def isOpen(self) -> bool:
+        """Indicate if a connection is open."""
+
         return self._isOpen
 
     def tables(self, t_: Optional[str] = None) -> List[str]:
+        """Return a list of available tables in the database, according to a given filter."""
+
         return self.driver().tables(t_)
 
-    def database(self, name=None) -> "IConnection":
+    def database(self, name: str = None) -> "IConnection":
+        """Return the connection to a database."""
+
         if name is None:
             return self  # El tipo de retorno debe ser consistente
             # return self.DBName()  # Si no especificamos name, retorna str con el nombre de la BD
@@ -152,31 +171,48 @@ class PNConnection(QtCore.QObject, IConnection):
         return self.useConn(name)
 
     def DBName(self) -> str:
+        """Return the database name."""
+
         try:
             return self.driver().DBName()
         except Exception as e:
             logger.error("DBName: %s", e)
             return self.db_name
 
-    def driver(self):
+    def driver(self) -> Any:
+        """Return the instance of the driver that is using the connection."""
+
         return self.driver_
 
-    def session(self):
+    def session(self) -> Any:
+        """
+        Sqlalchemy session.
+
+        When using the ORM option this function returns the session for sqlAlchemy.
+        """
+
         return self.driver().session()
 
-    def engine(self):
+    def engine(self) -> Any:
+        """Sqlalchemy connection."""
+
         return self.driver().engine()
 
-    def declarative_base(self):
+    def declarative_base(self) -> Any:
+        """Contain the declared models for Sqlalchemy."""
+
         return self.driver().declarative_base()
 
     def cursor(self) -> "IApiCursor":
+        """Return a cursor to the database."""
+
         if self.conn is None:
             raise Exception("cursor. Empty conn!!")
 
         return self.conn.cursor()
 
-    def conectar(self, db_name, db_host, db_port, db_userName, db_password) -> Any:
+    def conectar(self, db_name: str, db_host: str, db_port: int, db_userName: str, db_password: str) -> Any:
+        """Request a connection to the database."""
 
         self.db_name = db_name
         self.db_host = db_host
@@ -188,40 +224,63 @@ class PNConnection(QtCore.QObject, IConnection):
 
         return self.driver().connect(db_name, db_host, db_port, db_userName, db_password)
 
-    def driverName(self) -> Any:
+    def driverName(self) -> str:
+        """Return sql driver name."""
+
         return self.driver().driverName()
 
-    def driverAlias(self) -> Any:
+    def driverAlias(self) -> str:
+        """Return sql driver alias."""
         return self.driver().alias_
 
-    def driverNameToDriverAlias(self, name) -> Any:
+    def driverNameToDriverAlias(self, name: str) -> str:
+        """Return the alias from the name of a sql driver."""
+
         if self.driverSql is None:
             raise Exception("driverNameoDriverAlias. Sql driver manager is not defined")
 
         return self.driverSql.nameToAlias(name)
 
-    def lastError(self) -> Any:
+    def lastError(self) -> str:
+        """Return the last error reported by the sql driver."""
+
         return self.driver().lastError()
 
-    def host(self) -> Any:
+    def host(self) -> str:
+        """Return the name of the database host."""
+
         return self.db_host
 
-    def port(self) -> Any:
+    def port(self) -> int:
+        """Return the port used by the database."""
+
         return self.db_port
 
-    def user(self) -> Any:
+    def user(self) -> str:
+        """Return the user name used by the database."""
+
         return self.db_userName
 
     def password(self) -> Any:
+        """Return the password used by the database."""
+
         return self.db_password
 
     def seek(self, offs, whence=0) -> Any:
+        """Position the cursor at a position in the database."""
+
         if self.conn is None:
             raise Exception("seek. Empty conn!!")
 
         return self.conn.seek(offs, whence)
 
     def manager(self) -> "flmanager.FLManager":
+        """
+        Flmanager instance that manages the connection.
+
+        Flmanager manages metadata of fields, tables, queries, etc .. to then be managed this data by the controls of the application.
+        """
+
         if not self._manager:
             # FIXME: Should not load from FL*
             from pineboolib.fllegacy.flmanager import FLManager
@@ -231,39 +290,66 @@ class PNConnection(QtCore.QObject, IConnection):
         return self._manager
 
     @decorators.NotImplementedWarn
-    def md5TuplesStateTable(self, curname):
+    def md5TuplesStateTable(self, curname: str) -> bool:
+        """
+        Return the sum md5 with the total records inserted, deleted and modified in the database so far.
+
+        Useful to know if the database has been modified from a given moment.
+        """
+
         return True
 
-    @decorators.NotImplementedWarn
     def setInteractiveGUI(self, b):
-        pass
+        """Set if it is an interactive GUI."""
+
+        self.interactiveGUI_ = b
 
     @decorators.NotImplementedWarn
-    def setQsaExceptions(self, b):
+    def setQsaExceptions(self, b: bool) -> None:
+        """See properties of the qsa exceptions."""
         pass
 
     def db(self) -> "IConnection":
+        """Return the connection itself."""
+
         return self
 
     def dbAux(self) -> "IConnection":
+        """
+        Return the auxiliary connection to the database.
+
+        This connection is useful for out of transaction operations.
+        """
+
         return self.useConn("dbAux")
 
-    def formatValue(self, t, v, upper) -> Any:
+    def formatValue(self, t: str, v: Any, upper: bool) -> Any:
+        """Return a correctly formatted value to be assigned as a where filter."""
+
         return self.driver().formatValue(t, v, upper)
 
     def formatValueLike(self, t, v, upper) -> str:
+        """Return a correctly formatted value to be assigned as a WHERE LIKE filter."""
+
         return self.driver().formatValueLike(t, v, upper)
 
-    def canSavePoint(self) -> Any:
+    def canSavePoint(self) -> bool:
+        """Inform if the sql driver can manage savepoints."""
+
         return self.dbAux().driver().canSavePoint()
 
-    def canTransaction(self) -> Any:
+    def canTransaction(self) -> bool:
+        """Inform if the sql driver can manage transactions."""
         return self.driver().canTransaction()
 
     def lastActiveCursor(self):
+        """Return the last active cursor in the sql driver."""
+
         return self.lastActiveCursor_
 
-    def doTransaction(self, cursor) -> bool:
+    def doTransaction(self, cursor: "PNSqlCursor") -> bool:
+        """Make a transaction or savePoint according to transaction level."""
+
         if not cursor or not self.db():
             return False
 
@@ -323,9 +409,13 @@ class PNConnection(QtCore.QObject, IConnection):
             return True
 
     def transactionLevel(self) -> int:
+        """Indicate the level of transaction."""
+
         return self.transaction_
 
-    def doRollback(self, cur) -> bool:
+    def doRollback(self, cur: "PNSqlCursor") -> bool:
+        """Drop a transaction or savepoint depending on the transaction level."""
+
         if not cur or not self.conn:
             return False
 
@@ -430,9 +520,13 @@ class PNConnection(QtCore.QObject, IConnection):
             return True
 
     def interactiveGUI(self) -> bool:
+        """Return if it is an interactive GUI."""
+
         return self.interactiveGUI_
 
-    def doCommit(self, cur, notify=True) -> bool:
+    def doCommit(self, cur: "PNSqlCursor", notify: bool = True) -> bool:
+        """Approve changes to a transaction or a save point based on your transaction level."""
+
         if not cur and not self.db():
             return False
 
@@ -458,7 +552,7 @@ class PNConnection(QtCore.QObject, IConnection):
             if config.value("application/isDebuggerMode", False):
                 project.message_manager().send("status_help_msg", "send", ["Terminando transacción... %s" % self.transaction_])
             try:
-                if self.driver().commitTransaction():
+                if self.commit():
                     self.lastActiveCursor_ = None
 
                     if not self.canSavePoint():
@@ -520,19 +614,29 @@ class PNConnection(QtCore.QObject, IConnection):
 
             return True
 
-    def canDetectLocks(self) -> Any:
+    def canDetectLocks(self) -> bool:
+        """Indicate if the connection detects locks in the database."""
+
         if not self.db():
             return False
 
         return self.driver().canDetectLocks()
 
-    def commit(self) -> Any:
+    def commit(self) -> bool:
+        """Send the commit order to the database."""
+
         if not self.db():
             return False
 
         return self.driver().commitTransaction()
 
     def managerModules(self) -> "flmanagermodules.FLManagerModules":
+        """
+        Instance of the FLManagerModules class.
+
+        Contains functions to control the state, health, etc ... of the database tables.
+        """
+
         if not self._managerModules:
             from pineboolib.fllegacy.flmanagermodules import FLManagerModules
 
@@ -540,67 +644,86 @@ class PNConnection(QtCore.QObject, IConnection):
 
         return self._managerModules
 
-    def canOverPartition(self) -> Any:
+    def canOverPartition(self) -> bool:
+        """Return True if the database supports the OVER statement."""
         if not self.db():
             return False
 
         return self.dbAux().driver().canOverPartition()
 
-    def savePoint(self, savePoint) -> Any:
+    def savePoint(self, save_point: int) -> bool:
+        """Create a save point."""
+
         if not self.db():
             return False
 
-        return self.driver().savePoint(savePoint)
+        return self.driver().savePoint(save_point)
 
-    def releaseSavePoint(self, savePoint) -> Any:
+    def releaseSavePoint(self, save_point: int) -> bool:
+        """Release a save point."""
         if not self.db():
             return False
 
-        return self.driver().releaseSavePoint(savePoint)
+        return self.driver().releaseSavePoint(save_point)
 
     def Mr_Proper(self):
+        """Clean the database of unnecessary tables and records."""
+
         if not self.db():
             return
 
         self.dbAux().driver().Mr_Proper()
 
-    def rollbackSavePoint(self, savePoint) -> Any:
+    def rollbackSavePoint(self, save_point: int) -> bool:
+        """Roll back a save point."""
         if not self.db():
             return False
 
-        return self.driver().rollbackSavePoint(savePoint)
+        return self.driver().rollbackSavePoint(save_point)
 
-    def transaction(self) -> Any:
+    def transaction(self) -> bool:
+        """Create a transaction."""
+
         if not self.db():
             return False
 
         return self.driver().transaction()
 
-    def commitTransaction(self) -> Any:
+    def commitTransaction(self) -> bool:
+        """Release a transaction."""
+
         if not self.db():
             return False
 
         return self.driver().commitTransaction()
 
-    def rollbackTransaction(self) -> Any:
+    def rollbackTransaction(self) -> bool:
+        """Roll back a transaction."""
+
         if not self.db():
             return False
 
         return self.driver().rollbackTransaction()
 
-    def nextSerialVal(self, table, field) -> Any:
+    def nextSerialVal(self, table: str, field: str) -> Any:
+        """Indicate next available value of a serial type field."""
+
         if not self.db():
             return False
 
         return self.dbAux().driver().nextSerialVal(table, field)
 
-    def existsTable(self, name) -> Any:
+    def existsTable(self, name: str) -> bool:
+        """Indicate the existence of a table in the database."""
+
         if not self.db():
             return False
 
         return self.dbAux().driver().existsTable(name)
 
-    def createTable(self, tmd) -> bool:
+    def createTable(self, tmd: "PNTableMetaData") -> bool:
+        """Create a table in the database, from a PNTableMetaData."""
+
         if not self.db():
             return False
 
@@ -624,35 +747,47 @@ class PNConnection(QtCore.QObject, IConnection):
 
         return True
 
-    def mismatchedTable(self, tablename, tmd) -> Any:
+    def mismatchedTable(self, tablename: str, tmd: "PNTableMetaData") -> bool:
+        """Compare an existing table with a PNTableMetaData and return if there are differences."""
+
         if not self.db():
-            return None
+            return False
 
         return self.dbAux().driver().mismatchedTable(tablename, tmd, self)
 
-    def normalizeValue(self, text) -> Optional[str]:
+    def normalizeValue(self, text: str) -> Optional[str]:
+        """Return the value of a correctly formatted string to the database type from a string."""
+
         if getattr(self.driver(), "normalizeValue", None):
             return self.driver().normalizeValue(text)
 
         logger.warning("PNConnection: El driver %s no dispone de normalizeValue(text)", self.driverName())
         return text
 
-    def queryUpdate(self, name, update, filter) -> Any:
+    def queryUpdate(self, name: str, update: str, filter: str) -> Optional[str]:
+        """Return a correct UPDATE query for the database type."""
+
         if not self.db():
             return None
 
         return self.driver().queryUpdate(name, update, filter)
 
     def execute_query(self, q) -> Any:
+        """Execute a query in a database cursor."""
+
         if not self.db():
             return None
         return self.driver().execute_query(q)
 
-    def alterTable(self, mtd_1, mtd_2, key, force=False) -> Any:
+    def alterTable(self, mtd_1: "PNTableMetaData", mtd_2: "PNTableMetaData", key: str, force: bool = False) -> bool:
+        """Modify the fields of a table in the database based on the differences of two PNTableMetaData."""
+
         if not self.db():
-            return None
+            return False
 
         return self.dbAux().driver().alterTable(mtd_1, mtd_2, key, force)
 
     def __str__(self):
+        """Return the name of the database in text format."""
+
         return self.DBName()
