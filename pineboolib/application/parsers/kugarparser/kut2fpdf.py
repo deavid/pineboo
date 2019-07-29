@@ -548,18 +548,21 @@ class Kut2FPDF(object):
 
         if calculation_type is not None and xml.tag != "Field":
             if calculation_type == "6":
-                function_name = xml.get("FunctionName") or ""
-                try:
-                    nodo = self._parser_tools.convertToNode(data_row)
+                function_name = xml.get("FunctionName")
+                if function_name and data_row:
+                    try:
+                        nodo = self._parser_tools.convertToNode(data_row)
 
-                    ret_ = project.call(function_name, [nodo, field_name], None, False)
-                    if ret_ is False:
+                        ret_ = project.call(function_name, [nodo, field_name], None, False)
+                        if ret_ is False:
+                            return
+                        else:
+                            text = str(ret_)
+
+                    except Exception:
+                        self.logger.exception("KUT2FPDF:: Error llamando a function %s", function_name)
                         return
-                    else:
-                        text = str(ret_)
-
-                except Exception:
-                    self.logger.exception("KUT2FPDF:: Error llamando a function %s", function_name)
+                else:
                     return
             elif calculation_type == "1":
                 text = self._parser_tools.calculate_sum(field_name, self.last_data_processed, self._xml_data, self.actual_data_level)
@@ -693,7 +696,7 @@ class Kut2FPDF(object):
         font_full_name = "%s%s" % (font_name, font_style)
 
         if font_full_name not in self._avalible_fonts:
-            font_found: Union[str, bool] = False
+            font_found: Optional[str] = None
             if font_full_name not in self._unavalible_fonts:
                 font_found = self._parser_tools.find_font(font_full_name, font_style)
             if font_found:
@@ -964,7 +967,10 @@ class Kut2FPDF(object):
         import os
 
         if not file_name.lower().endswith(".png"):
-            file_name = self._parser_tools.parseKey(file_name)
+            file_name_ = self._parser_tools.parseKey(file_name)
+            if file_name_ is None:
+                return
+            file_name = file_name_
 
         if os.path.exists(file_name):
             x = self.calculateLeftStart(x)
