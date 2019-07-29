@@ -1,5 +1,5 @@
 """
-Kugar Parser package
+Kugar Parser package.
 
 Generates a PDF for now.
 """
