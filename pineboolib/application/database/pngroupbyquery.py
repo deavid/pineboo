@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Manage a group by a PNSqlQuery instance."""
+"""Manage a group by from a Query instance."""
 
 
 class PNGroupByQuery(object):
