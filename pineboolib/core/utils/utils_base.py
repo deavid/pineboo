@@ -1,4 +1,9 @@
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
+"""
+Collection of utility functions.
+
+Just an assortment of functions that don't depend on externals and don't fit other modules.
+"""
 import os
 import re
 import sys
@@ -14,19 +19,20 @@ from types import FrameType
 from xml.etree.ElementTree import ElementTree, Element
 from . import logging
 
-from typing import Callable, TYPE_CHECKING
+from typing import Callable, TypeVar, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.application.types import Date  # noqa: F401
 
 logger = logging.getLogger(__name__)
+T1 = TypeVar("T1")
 
 # FIXME: Move commaSeparator to Pineboo internals, not aqApp
 decimal_separator = ","  # FIXME: Locale dependent. ES: "," EN: "."
 
 
 def auto_qt_translate_text(text: Optional[str]) -> str:
-    """ función utilizada para eliminar los QT_TRANSLATE de eneboo. Esta función ahora mismo no traduce nada."""
+    """Remove QT_TRANSLATE from Eneboo XML files. This function does not translate."""
     if not isinstance(text, str):
         text = str(text)
 
@@ -41,9 +47,12 @@ def auto_qt_translate_text(text: Optional[str]) -> str:
 aqtt = auto_qt_translate_text
 
 
-def one(x: List[Any], default: Any = None) -> Any:
-    """ Se le pasa una lista de elementos (normalmente de un xml) y devuelve el primero o None;
-    sirve para ahorrar try/excepts y limpiar código"""
+def one(x: List[T1], default: Any = None) -> Optional[T1]:
+    """
+    Retrieve first element of the list or None/default.
+
+    Useful to avoid try/except cluttering and clean code.
+    """
     try:
         return x[0]
     except IndexError:
@@ -52,20 +61,23 @@ def one(x: List[Any], default: Any = None) -> Any:
 
 class DefFun:
     """
-        Emuladores de funciones por defecto.
-        Tiene una doble funcionalidad. Por un lado, permite convertir llamadas a propiedades en llamadas a la función de verdad.
-        Por otro, su principal uso, es omitir las llamadas a funciones inexistentes, de forma que nos advierta en consola
-        pero que el código se siga ejecutando. (ESTO ES PELIGROSO)
+    Default function emulator.
 
-        ** EN DESUSO **
+    Double functionality. First, it can convert calls to properties into calls to real functions.
+    Second, its main use is omit calls to non-existent functions, so it warns on console but
+    the code should keep running. (THIS IS DANGEROUS)
+
+    *** DEPRECATED ***
     """
 
     def __init__(self, parent: Any, funname: str, realfun: Any = None) -> None:
+        """Build a new DefFun."""
         self.parent = parent
         self.funname = funname
         self.realfun = realfun
 
     def __str__(self) -> Any:
+        """Emulate call function... when converted to string."""
         if self.realfun:
             logger.debug("%r: Redirigiendo Propiedad a función %r", self.parent.__class__.__name__, self.funname)
             return self.realfun()
@@ -74,6 +86,7 @@ class DefFun:
         return 0
 
     def __call__(self, *args: Any) -> Any:
+        """Emulate call function."""
         if self.realfun:
             logger.debug("%r: Redirigiendo Llamada a función %s %s", self.parent.__class__.__name__, self.funname, args)
             return self.realfun(*args)
@@ -83,7 +96,8 @@ class DefFun:
 
 
 def traceit(frame: FrameType, event: str, arg: Any) -> Callable[[FrameType, str, Any], Any]:
-    """Print a trace line for each Python line executed or call.
+    """
+    Print a trace line for each Python line executed or call.
 
     This function is intended to be the callback of sys.settrace.
     """
@@ -108,15 +122,28 @@ def traceit(frame: FrameType, event: str, arg: Any) -> Callable[[FrameType, str,
 
 
 class TraceBlock:
+    """
+    With Decorator to add traces on a particular block.
+
+    Use it like:
+
+    with TraceBlock():
+        code
+    """
+
     def __enter__(self) -> Callable[[FrameType, str, Any], Any]:
+        """Create tracing context on enter."""
         sys.settrace(traceit)
         return traceit
 
     def __exit__(self, type: Any, value: Any, traceback: Any) -> None:
+        """Remove tracing context on exit."""
         sys.settrace(None)
 
 
 def trace_function(f: Callable) -> Callable:
+    """Add tracing to decorated function."""
+
     def wrapper(*args: Any) -> Any:
         with TraceBlock():
             return f(*args)
@@ -125,6 +152,10 @@ def trace_function(f: Callable) -> Callable:
 
 
 class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
+    """
+    Emulator for Eneboo downloadManager.
+    """
+
     manager: QNetworkAccessManager
     currentDownload: List[Any]
     reply = None
@@ -135,17 +166,20 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
     url_ = None
 
     def __init__(self) -> None:
+        """Create a new downloadManager."""
         super(downloadManager, self).__init__()
         self.manager = QNetworkAccessManager()
         self.currentDownload = []
         cast(pyqtSignal, self.manager.finished).connect(self.downloadFinished)
 
     def setLE(self, filename: str, dir_: str, urllineedit: Any) -> None:
+        """Configure manager."""
         self.filename = filename
         self.dir_ = dir_
         self.url_ = urllineedit
 
     def doDownload(self) -> None:
+        """Download as configured."""
         if self.url_ is None or self.dir_ is None:
             raise ValueError("setLE was not called first")
         request = QNetworkRequest(QUrl("%s/%s/%s" % (self.url_.text(), self.dir_, self.filename)))
@@ -153,8 +187,8 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
         # self.reply.sslErrors.connect(self.sslErrors)
         self.currentDownload.append(self.reply)
 
-    def saveFileName(self, url: str) -> Any:
-        # path = url.path()
+    def saveFileName(self, url: str) -> str:
+        """Get suitable filename for saving a download."""
         path = url
         basename = QFileInfo(path).fileName()
 
@@ -162,16 +196,16 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
             basename = "download"
 
         if os.path.exists(basename):
-            i = 0
-            basename = basename + "."
-            while os.path.exists("%s%s" % (basename, i)):
-                i = i + 1
+            i = 1
+            while os.path.exists("%s.%s" % (basename, i)):
+                i += 1
 
-            basename = "%s%s" % (basename, i)
+            basename = "%s.%s" % (basename, i)
 
         return basename
 
     def saveToDisk(self, filename: str, data: Any) -> bool:
+        """Store download to file."""
         if self.dir_ is None:
             raise ValueError("setLE was not called first")
         fi = "%s/%s" % (self.dir_, filename)
@@ -187,11 +221,17 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
         return True
 
     def isHttpRedirect(self, reply: Any) -> bool:
+        """Return True if REPLY is some kind of HTTP Redirect."""
         statusCode = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
         return statusCode in [301, 302, 303, 305, 307, 308]
 
     @decorators.pyqtSlot(QNetworkReply)
     def downloadFinished(self, reply: Any) -> None:
+        """
+        Slot called when the downloadFinishes.
+
+        Stores the data retrieved on the file specified before
+        """
         url = reply.url()
         if not reply.error():
             if not self.isHttpRedirect(reply):
@@ -206,6 +246,12 @@ class downloadManager(QObject):  # FIXME: PLZ follow python naming PEP8
 
 
 def copy_dir_recursive(from_dir: str, to_dir: str, replace_on_conflict: bool = False) -> bool:
+    """
+    Copy a folder recursively.
+
+    *** DEPRECATED ***
+    Use python shutil.copytree for this.
+    """
     dir = QDir()
     dir.setPath(from_dir)
 
@@ -244,6 +290,7 @@ def copy_dir_recursive(from_dir: str, to_dir: str, replace_on_conflict: bool = F
 
 
 def text2bool(text: str) -> bool:
+    """Convert input text into boolean, if possible."""
     text = str(text).strip().lower()
     if text.startswith("t"):
         return True
@@ -271,6 +318,8 @@ def text2bool(text: str) -> bool:
 
 
 def ustr(*t1: Union[bytes, str, int, "Date", None]) -> str:
+    """Convert and concatenate types to text."""
+
     def ustr1(t: Union[bytes, str, int, "Date", None]) -> str:
 
         if isinstance(t, str):
@@ -298,13 +347,17 @@ def ustr(*t1: Union[bytes, str, int, "Date", None]) -> str:
 
 
 class StructMyDict(dict):
+    """Dictionary that can be read/written using properties."""
+
     def __getattr__(self, name: str) -> Any:
+        """Get property."""
         try:
             return self[name]
         except KeyError as e:
             raise AttributeError(e)
 
     def __setattr__(self, name: str, value: Any) -> None:
+        """Set property."""
         self[name] = value
 
 
@@ -320,6 +373,7 @@ def version_normalize(v: str) -> List[int]:
 
 
 def load2xml(form_path_or_str: str) -> ElementTree:
+    """Parse a Eneboo style XML."""
     from xml.etree import ElementTree as ET
 
     """
@@ -345,7 +399,7 @@ def load2xml(form_path_or_str: str) -> ElementTree:
         or form_path_or_str.find("DOCTYPE KugarData") > -1
         or form_path_or_str.find("DOCTYPE svg") > -1
     ):
-        form_path_or_str = parse_for_duplicates(form_path_or_str)
+        form_path_or_str = _parse_for_duplicates(form_path_or_str)
         file_ptr = io.StringIO(form_path_or_str)
     elif not os.path.exists(form_path_or_str):
         raise Exception("File %s not found" % form_path_or_str[:200])
@@ -362,7 +416,8 @@ def load2xml(form_path_or_str: str) -> ElementTree:
             raise
 
 
-def parse_for_duplicates(text: str) -> str:
+def _parse_for_duplicates(text: str) -> str:
+    """load2xml helper for Kugar XML."""
     ret_ = ""
     text = text.replace("+", "__PLUS__")
     text = text.replace("(", "__LPAREN__")
@@ -436,6 +491,8 @@ def parse_for_duplicates(text: str) -> str:
 
 def indent(elem: Element, level: int = 0) -> None:
     """
+    Generate pretty-printed version of given XML.
+
     copy and paste from http://effbot.org/zone/element-lib.htm#prettyprint
     it basically walks your tree and adds spaces and newlines so the tree is
     printed in a nice way
@@ -456,6 +513,7 @@ def indent(elem: Element, level: int = 0) -> None:
 
 
 def format_double(d: Union[int, str, float], part_integer: int, part_decimal: int) -> str:
+    """Convert number into string with fixed point style."""
     if isinstance(d, str) and d == "":
         return d
     # import locale
@@ -487,7 +545,8 @@ def format_double(d: Union[int, str, float], part_integer: int, part_decimal: in
     return ret_
 
 
-def format_int(value: Union[str, int, float, None], part_intenger: int = None) -> str:
+def format_int(value: Union[str, int, float, None], part_integer: int = None) -> str:
+    """Convert integer into string."""
     if value is None:
         return ""
     str_integer = "{:,d}".format(int(value))
@@ -501,6 +560,7 @@ def format_int(value: Union[str, int, float, None], part_intenger: int = None) -
 
 
 def unformat_number(new_str: str, old_str: Optional[str], type_: str) -> str:
+    """Undoes some of the locale formatting to ensure float(x) works."""
     ret_ = new_str
     if old_str is not None:
 
@@ -545,11 +605,12 @@ def unformat_number(new_str: str, old_str: Optional[str], type_: str) -> str:
 
 
 def is_deployed() -> bool:
-    """Returns True only if the code is running inside a PyInstaller bundle"""
+    """Return wether we're running inside a PyInstaller bundle."""
     return getattr(sys, "frozen", False)
 
 
 def get_base_dir() -> str:
+    """Obtain pinebolib installation path."""
     base_dir = os.path.dirname(__file__)
     base_dir = "%s/../.." % base_dir
 
@@ -562,6 +623,8 @@ def get_base_dir() -> str:
 
 def filedir(*path: str) -> str:
     """
+    Get file full path reltive to the project.
+
     filedir(path1[, path2, path3 , ...])
     @param array de carpetas de la ruta
     @return devuelve la ruta absoluta resultado de concatenar los paths que se le pasen y aplicarlos desde la ruta del proyecto.
@@ -572,6 +635,7 @@ def filedir(*path: str) -> str:
 
 
 def download_files() -> None:
+    """Download data for PyInstaller bundles."""
     if os.path.exists(filedir("forms")):
         return
 
@@ -582,6 +646,6 @@ def download_files() -> None:
 
 
 def pixmap_fromMimeSource(name: str) -> Any:
-
+    """Convert mime source into a pixmap."""
     file_name = filedir("../share/icons", name)
     return QPixmap(file_name) if os.path.exists(file_name) else None

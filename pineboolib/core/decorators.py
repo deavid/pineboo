@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
+"""
+Collection of useful decorators.
+
+These are mainly intended to tell other devs whether a funcitionality is considered unstable or beta
+"""
 import time
 import re
 import functools
 from .utils import logging
 from PyQt5 import QtCore  # type: ignore
-
-"""
-Esta libreria se usa para especificar estados de una función que no son final
-"""
 from typing import Callable, Any, Dict, TypeVar, cast
 
 T_FN = TypeVar("T_FN", bound=Callable[..., Any])
@@ -19,15 +20,18 @@ MINIMUM_TIME_FOR_REPRINT = 300
 
 
 def clean_repr(x: Any) -> str:
+    """Clean up error texts to make them easier to read on GUI (Internal use only)."""
     return CLEAN_REGEX.sub("", repr(x))
 
 
-"""
-Aviso no implementado
-"""
-
-
 def NotImplementedWarn(fn: T_FN) -> T_FN:
+    """
+    Mark function as not implemented. Its contents do almost nothing at all. Emits a Warning.
+
+    This one is specific to warn users that when QSA runs the code, it's going to be wrong.
+    Adds a Stack/traceback to aid devs locating from where the code was called from.
+    """
+
     @functools.wraps(fn)
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
@@ -45,12 +49,14 @@ def NotImplementedWarn(fn: T_FN) -> T_FN:
     return mock_fn
 
 
-"""
-Aviso no implementado. Igual que la anterior, pero solo informa en caso de debug
-"""
-
-
 def NotImplementedDebug(fn: T_FN) -> T_FN:
+    """
+    Mark function as not implemented. Its contents do almost nothing at all. Emits a Debug.
+
+    In this case, just a Debug, so mainly intended for devs.
+    This means the function not doing anything is usually harmless.
+    """
+
     @functools.wraps(fn)
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
@@ -67,12 +73,9 @@ def NotImplementedDebug(fn: T_FN) -> T_FN:
     return mock_fn
 
 
-"""
-Avisa que hay otro desarollador trabajando en una función
-"""
-
-
 def WorkingOnThis(fn: T_FN) -> T_FN:
+    """Emit a message to tell other devs that someone is already working on this function."""
+
     @functools.wraps(fn)
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
@@ -89,12 +92,9 @@ def WorkingOnThis(fn: T_FN) -> T_FN:
     return mock_fn
 
 
-"""
-Aviso de implementación de una función en pruebas
-"""
-
-
 def BetaImplementation(fn: T_FN) -> T_FN:
+    """Mark function as beta. This means that more or less works but it might need more tweaking or errors may arise."""
+
     @functools.wraps(fn)
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
@@ -111,12 +111,13 @@ def BetaImplementation(fn: T_FN) -> T_FN:
     return mock_fn
 
 
-"""
-Similar a NotImplemented, pero sin traceback. Para funciones que de momento no necesitamos (clonadas del motor C++ por ejemplo)
-"""
-
-
 def Empty(fn: T_FN) -> T_FN:
+    """
+    Mark function as Empty, not doing anything. Similar to NotImplemented* but does no add traceback.
+
+    This functions are those that we don't think we will need
+    """
+
     @functools.wraps(fn)
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
@@ -133,12 +134,9 @@ def Empty(fn: T_FN) -> T_FN:
     return mock_fn
 
 
-"""
-Avisa de que la funcionalidad está incompleta de desarrollo
-"""
-
-
 def Incomplete(fn: T_FN) -> T_FN:
+    """Mark the function as Incomplete, meaning that functionaility is still missing."""
+
     @functools.wraps(fn)
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
@@ -155,12 +153,9 @@ def Incomplete(fn: T_FN) -> T_FN:
     return mock_fn
 
 
-"""
-Avisa de que la funcionalidad tiene que ser revisada
-"""
-
-
 def needRevision(fn: T_FN) -> T_FN:
+    """Mark the function as needs to be revised. Some bug might have been found and needs help from other devs."""
+
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -176,12 +171,9 @@ def needRevision(fn: T_FN) -> T_FN:
     return mock_fn
 
 
-"""
-Avisa de que la funcionalidad está dejando de ser usada, en pro de otra
-"""
-
-
 def Deprecated(fn: T_FN) -> T_FN:
+    """Mark functionality as deprecated in favor of other one."""
+
     @functools.wraps(fn)
     def newfn(*args: Any, **kwargs: Any) -> Any:
         global MSG_EMITTED
@@ -199,6 +191,13 @@ def Deprecated(fn: T_FN) -> T_FN:
 
 
 def pyqtSlot(*args: Any) -> Callable[[T_FN], T_FN]:
+    """
+    Create Qt Slot from classm method.
+
+    Same as QtCore.pyQtSlot but with Typing information for mypy.
+    Please use this one instead of QtCore.pyQtSlot().
+    """
+
     def _pyqtSlot(fn: T_FN) -> T_FN:
         return cast(T_FN, QtCore.pyqtSlot(*args)(fn))
 

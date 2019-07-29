@@ -9,8 +9,10 @@ Welcome to Pineboo's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-   
-   code
+
+   code/core
+   code/application
+   code/other
 
 Indices and tables
 ==================

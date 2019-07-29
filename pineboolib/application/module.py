@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+Manage load and storage of Eneboo/Pineboo modules.
+
+What are modules?
+-------------------
+
+Modules are the declaration of Pineboo source packages where all related functionality
+is stored within. Its composed of a name and description; and they contain code, forms, etc.
+"""
+
 import os.path
 from pineboolib.core.utils import logging
 
@@ -12,19 +23,19 @@ if TYPE_CHECKING:
 
 
 class Module(object):
-    """Esta clase almacena la información de los módulos cargados
-    """
+    """Information about loaded modules."""
 
     logger = logging.getLogger("application.Module")
 
     def __init__(self, areaid: str, name: str, description: str, icon: str) -> None:
-        """Constructor
-        @param areaid. Identificador de area.
-        @param name. Nombre del módulo
-        @param description. Descripción del módulo
-        @param icon. Icono del módulo
         """
+        Create module instance.
 
+        @param areaid. Area Identifier
+        @param name. Module name
+        @param description. Module Description
+        @param icon. Module Icon
+        """
         self.areaid = areaid
         self.name = name
         self.description = description  # En python2 era .decode(UTF-8)
@@ -34,14 +45,18 @@ class Module(object):
         self.loaded = False
 
     def add_project_file(self, fileobj: "File") -> None:
-        """Añade ficheros al array que controla que ficehros tengo.
-        @param fileobj. Objeto File con información del fichero
+        """
+        Add files to project array.
+
+        @param fileobj. File object with file information
         """
         self.files[fileobj.filename] = fileobj
 
     def load(self) -> bool:
-        """Carga las acciones pertenecientes a este módulo
-        @return Boolean. True si ok, False si hay problemas
+        """
+        Load actions belonging to this module.
+
+        @return Boolean True if ok, False if there are problems.
         """
         from .moduleactions import ModuleActions
 

@@ -111,7 +111,7 @@ class FLTranslator(QTranslator):
                 if context_dict_key not in self.ts_translation_contexts.keys():
                     self.ts_translation_contexts[context_dict_key] = {}
                 for message in context.findall("message"):
-                    translation_elem, source_elem = message.find("translation"), message.find("source")
+                    translation_elem, source_elem = (message.find("translation"), message.find("source"))
                     translation_text = translation_elem is not None and translation_elem.text
                     source_text = source_elem is not None and source_elem.text
                     if translation_text and source_text:
