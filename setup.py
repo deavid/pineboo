@@ -19,7 +19,7 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "pineboo-parse=pineboolib.application.parsers.qsaparser.postparse:main",
-            # "pineboo-pyconvert=pineboolib.application.parsers.qsaparser.pyconvert:main",
+            "pineboo-pyconvert=pineboolib.application.parsers.qsaparser.pyconvert:main",
             "pineboo-core=pineboolib.loader.main:startup_no_X",
             "pineboo=pineboolib.loader.main:startup",
         ]
