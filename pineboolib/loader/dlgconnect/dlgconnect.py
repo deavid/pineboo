@@ -79,7 +79,7 @@ class DlgConnect(QtWidgets.QWidget):
         driver_list = self.pNSqlDrivers.aliasList()
         self.ui.cbDBType.clear()
         self.ui.cbDBType.addItems(driver_list)
-        self.ui.cbDBType.setCurrentText(self.pNSqlDrivers.defaultDriverName)
+        self.ui.cbDBType.setCurrentText(self.pNSqlDrivers.defaultDriverName())
         self.ui.leURL.setText("localhost")
         self.ui.leDBUser.setText("")
         self.ui.leDBPassword.setText("")

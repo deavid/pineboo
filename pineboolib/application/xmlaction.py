@@ -1,7 +1,7 @@
 from pineboolib.core.utils import logging
 import os.path
 
-from pineboolib.core.utils.struct import XMLStruct
+from pineboolib.core.utils.struct import ActionStruct
 from .utils.path import _path, coalesce_path
 
 from typing import Optional, Any, Union, TYPE_CHECKING
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from .database.pnsqlcursor import PNSqlCursor  # noqa: F401
 
 
-class XMLAction(XMLStruct):
+class XMLAction(ActionStruct):
     """
     Contiene información de las actions especificadas en el .xml del módulo
     """

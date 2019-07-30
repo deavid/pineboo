@@ -10,9 +10,7 @@ Welcome to Pineboo's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   code/core
-   code/application
-   code/other
+   code/pineboolib/index
 
 Indices and tables
 ==================

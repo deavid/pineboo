@@ -1956,9 +1956,7 @@ def disableObj(container=None, component=None):
     c = testObj(container, component)
     if not c:
         return False
-    clase = (
-        "FLFieldDB" if isinstance(c, project.DGI.FLFieldDB) else "FLTableDB" if isinstance(c, project.DGI.FLTableDB) else c.className()
-    )
+    clase = "FLFieldDB" if isinstance(c, project.DGI.FLFieldDB) else "FLTableDB" if isinstance(c, project.DGI.FLTableDB) else c.className()
     if clase in ["QToolButton", "QPushButton"]:
         runObjMethod(container, component, u"setEnabled", False)
     elif clase == u"FLFieldDB":

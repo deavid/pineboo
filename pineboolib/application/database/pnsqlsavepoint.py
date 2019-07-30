@@ -1,52 +1,62 @@
 # -*- coding: utf-8 -*-
+"""
+Module for PNSqlSavePoint class.
+"""
 
-# Completada Si
 from pineboolib.core import decorators
-from typing import Any, List
+from typing import Any, List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .pnsqlcursor import PNSqlCursor
+    from .pnbuffer import PNBuffer
 
 
-"""
-Información sobre una operación.
+class OpInfo:
+    """
+    OpInfo Class.
 
-La información de una operación es;
-la clave primaria,
-operacion realizada (0 = insertar, 1 = editar, 2 = borrar),
-buffer con el contenido del registro afectado por la operación,
-posición del registro actual del cursor,
-orden del cursor,
-filtro del cursor,
-nombre del cursor (de la tabla),
-cursor asociado.
-"""
+    Information about an operation.
 
+    The information of an operation is; the primary key,
+    operation performed (0 = insert, 1 = edit, 2 = delete),
+    buffer with the contents of the record affected by the operation,
+    position of the current cursor record,
+    cursor order, cursor filter, cursor name (from the table),
+    associated cursor.
+    """
 
-class opInfo:
-
-    primaryKey = None
-    op = None
-    buffer = None
-    at = None
-    sort = None
-    filter = None
-    name = None
-    cursor = None
-    autoDelete_ = None
+    primaryKey: str
+    op: int
+    buffer: "PNBuffer"
+    at: int
+    sort: str
+    filter: str
+    name: str
+    cursor: "PNSqlCursor"
+    autoDelete_: bool
 
     def __init__(self, *args, **kwargs) -> None:
+        """Initialize a virtual save point."""
         if len(args) > 0:
 
-            self.opInfo2(*args)
-
-        else:
-
-            self.opInfo1()
+            self.opInfo(*args)
 
         self.setAutoDelete(False)
 
-    def opInfo1(self) -> None:
-        return
+    def opInfo(self, pK: str, o: Any, b: "PNBuffer", a: int, s: str, f: str, n: str, c: "PNSqlCursor") -> None:
+        """
+        Save initialization values.
 
-    def opInfo2(self, pK, o, b, a, s, f, n, c) -> None:  # * c:
+        @param pK. primaryKey.
+        @param o. option (1,2,3)
+        @param b. PNBuffer
+        @param a. cursor postition.
+        @param s. sort.
+        @param f. filter.
+        @param n. cursor name.
+        @param c. cursor object.
+        """
+
         self.primaryKey = pK
         self.op = o
         self.buffer = b
@@ -56,135 +66,92 @@ class opInfo:
         self.name = n
         self.cursor = c
 
-        # c.destroyed.connect(self.cursorDestroyed())
-
-    def __del__(self) -> None:
-        pass
-
-    # @decorators.pyqtSlot()
-    # def cursorDestroyed(self):
-    #    self.cursor = None
-
-    def setAutoDelete(self, b) -> None:
+    def setAutoDelete(self, b: bool) -> None:
+        """I specify if I do autoDelete when closing."""
         self.autoDelete_ = b
-
-    """
-    Punto de salvaguarda de un conjunto de operaciones básicas
-    sobre cursores (insertar, editar y borrar).
-
-    Mediante esta clase se puede guardar un grupo de operaciones básicas
-    sobre cursores (insertar, editar y borrar).
-    Deshacer un punto de salvaguarda, significa que todas las operaciones
-    almacenadas son canceladas realizando las acciones necesarias para que
-    no tengan efecto.
-
-    Para el correcto funcionamiento hay que ir guardando los buffer's (QSqlRecord)
-    con el contenido de los registros a modificar o modificados por una operación,
-    indicando el nombre de la clave primaria y el cursor al que pertenece.
-
-    Ejemplo:
-      \\code
-      FLSqlCursor cur( "articulos" );
-      FLSqlSavePoint savePoint();
-
-      QSqlRecord * buffer = cur.primeInsert();
-      buffer->setValue( "id",    53981 );
-      buffer->setValue( "name",  "Thingy" );
-      buffer->setValue( "price", 105.75 );
-      cur.insert();
-      savePoint.saveInsert( "id", buffer, &cur );
-
-      cur.first();
-      buffer = cur.primeUpdate();
-      savePoint.saveEdit( "id", buffer, &cur );
-      buffer->setValue( "name",  "Pepe" );
-      cur.update();
-
-      cur.last();
-      buffer = cur.primeDelete();
-      savePoint.saveDel( "id", buffer, &cur );
-      cur.del();
-
-      savePoint.undo(); // Deshace todas las operaciones anteriores
-      \\endcode
-
-    @author InfoSiAL S.L.
-    """
 
 
 class PNSqlSavePoint:
+    """
+    PNSqlSavePoint Class.
+
+    Safeguard point of a set of basic operations about cursors (insert, edit and delete).
+
+    Through this class you can save a group of basic operations
+    about cursors (insert, edit and delete).
+    Undo a safeguard point, means that all operations
+    stored are canceled by performing the necessary actions so that
+    They have no effect.
+
+    For proper operation you must keep the buffer's (QSqlRecord)
+    with the content of the records to be modified or modified by an operation,
+    indicating the name of the primary key and the cursor to which it belongs.
+    """
 
     """
     Pila para almacenar informacion de las operaciones.
     """
 
-    opInfos: List[opInfo] = []
+    opInfos: List[OpInfo] = []
 
     """
     Identificador del punto de salvaguarda
     """
-    id_ = None
+    id_: int
     countRefSavePoint = 0
-    """
-    constructor.
-
-
-
-    @param id Identificador para el punto de salvaguarda.
-    """
 
     def __init__(self, _id=None) -> None:
+        """
+        Initialize the safeguard point.
 
-        self.opInfos.append(opInfo())
+        @param id SavePoint identifier.
+        """
+
+        self.opInfos.append(OpInfo())
         self.opInfos[0].setAutoDelete(True)
 
-        if _id:
-            self.id_ = _id
-        else:
-            self.id_ = self.opInfos[0]
-
+        self.id_ = _id
         self.countRefSavePoint = self.countRefSavePoint + 1
 
-    """
-    destructor.
-    """
-
     def __del__(self) -> None:
+        """Process when the savePoint point is destroyed."""
+
         if self.opInfos:
             self.opInfos = []
 
         self.countRefSavePoint = self.countRefSavePoint - 1
 
-    """
-    Establece el identificador del punto de salvaguarda.
-    """
+    def setId(self, id_: int) -> None:
+        """
+        Set the SavePoint identifier.
 
-    def setId(self, id_) -> None:
+        @param id_. Identifier
+        """
         self.id_ = id_
 
-    """
-    Obtiene el identificador del punto de salvaguarda.
-    """
+    def id(self) -> int:
+        """
+        Return the identifier.
 
-    def id(self) -> Any:
+        @return identifier.
+        """
+
         return self.id_
 
-    """
-    Limpia el punto de salvaguarda.
-
-    Todas las operaciones almacenadas son eliminadas, por lo tanto, despues de
-    invocar a este método ya no se podrán deshacer.
-    """
-
     def clear(self) -> None:
+        """
+        Clean the safeguard point.
+
+        All stored operations are deleted, therefore, after invoke this method can no longer be undone.
+        """
+
         self.opInfos.clear()
 
-    """
-    Deshace el punto de salvaguarda.
-    """
-
     @decorators.BetaImplementation
-    def undo(self):
+    def undo(self) -> None:
+        """
+        Undo the SavePoint.
+        """
 
         while self.opInfos:
             opInf = self.opInfos.pop()
@@ -197,56 +164,54 @@ class PNSqlSavePoint:
             del opInf
         self.clear()
 
-    """
-    Guarda el buffer con el contenido del registro insertado.
-
-    @param primaryKey Nombre del campo que es clave primaria.
-    @param buffer buffer con el contenido del registro.
-    @param cursor Cursor asociado.
-    """
-
     @decorators.BetaImplementation
-    def saveInsert(self, primaryKey, buffer, cursor):
+    def saveInsert(self, primaryKey: str, buffer: Optional["PNBuffer"], cursor: Optional["PNSqlCursor"]) -> None:
+        """
+        Save the buffer with the contents of the inserted record.
+
+        @param primaryKey Name of the field that is primary key.
+        @param buffer buffer with the contents of the record.
+        @param cursor Cursor associated.
+        """
         if not cursor or not buffer:
             return
-        self.opInfos.append(opInfo(primaryKey, 0, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
+        self.opInfos.append(OpInfo(primaryKey, 0, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
 
-    """
-    Guarda el buffer con el contenido del registro a editar.
+    def saveEdit(self, primaryKey: str, buffer: Optional["PNBuffer"], cursor: Optional["PNSqlCursor"]) -> None:
+        """
+        Save the buffer with the contents of the record to be edited.
 
-    @param primaryKey Nombre del campo que es clave primaria.
-    @param buffer buffer con el contenido del registro.
-    @param cursor Cursor asociado.
-    """
+        @param primaryKey Name of the field that is primary key.
+        @param buffer buffer with the contents of the record.
+        @param cursor Cursor associated.
 
-    def saveEdit(self, primaryKey, buffer, cursor) -> None:
+        """
         if not cursor or not buffer:
             return
 
-        self.opInfos.append(opInfo(primaryKey, 1, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
-
-    """
-    Guarda el buffer con el contenido del registro a borrar.
-
-    @param primaryKey Nombre del campo que es clave primaria.
-    @param buffer buffer con el contenido del registro.
-    @param cursor Cursor asociado.
-    """
+        self.opInfos.append(OpInfo(primaryKey, 1, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
 
     @decorators.BetaImplementation
-    def saveDel(self, primaryKey, buffer, cursor):
+    def saveDel(self, primaryKey: str, buffer: Optional["PNBuffer"], cursor: Optional["PNSqlCursor"]) -> None:
+        """
+        Save the buffer with the contents of the record to be deleted.
+
+        @param primaryKey Name of the field that is primary key.
+        @param buffer buffer with the contents of the record.
+        @param cursor Cursor associated.
+
+        """
         if not cursor or not buffer:
             return
-        self.opInfos.append(opInfo(primaryKey, 2, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
-
-    """
-    Deshace una operacion de insertar.
-
-    @param opInf Información de la operación.
-    """
+        self.opInfos.append(OpInfo(primaryKey, 2, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
 
     @decorators.BetaImplementation
-    def undoInsert(self, opInf):
+    def undoInsert(self, opInf: OpInfo) -> None:
+        """
+        Undo an insert operation.
+
+        @param opInf Operation information.
+        """
 
         cursor_ = opInf.cursor
         owner = False
@@ -260,7 +225,7 @@ class PNSqlSavePoint:
         if not cursor_:
             return
 
-        if opInf.buffer.contains(opInf.primaryKey) and not opInf.buffer.isNull(opInf.primaryKey):
+        if opInf.buffer.indexField(opInf.primaryKey) and not opInf.buffer.isNull(opInf.primaryKey):
             valuePrimaryKey = str(opInf.buffer.value(opInf.primaryKey))  # FIXME: (deavid) plz add notes on what needs to be fixed here.
             ok = cursor_.select(opInf.primaryKey + "='" + valuePrimaryKey + "'")
             if ok and cursor_.next():
@@ -270,14 +235,13 @@ class PNSqlSavePoint:
             cursor_.select(opInf.filter, opInf.sort)
             cursor_.seek(opInf.at)
 
-    """
-    Deshace una operacion de editar.
-
-    @param opInf Información de la operación.
-    """
-
     @decorators.BetaImplementation
-    def undoEdit(self, opInf):
+    def undoEdit(self, opInf: OpInfo) -> None:
+        """
+        Undo an edit operation.
+
+        @param opInf Operation information.
+        """
         cursor_ = opInf.cursor
         owner = False
 
@@ -304,14 +268,13 @@ class PNSqlSavePoint:
         else:
             del cursor_
 
-    """
-    Deshace una operacion de borrar.
-
-    @param opInf Información de la operación.
-    """
-
     @decorators.BetaImplementation
-    def undoDel(self, opInf):
+    def undoDel(self, opInf: OpInfo) -> None:
+        """
+        Undo an delete operation.
+
+        @param opInf Operation information.
+        """
         cursor_ = opInf.cursor
         owner = False
         if not cursor_:

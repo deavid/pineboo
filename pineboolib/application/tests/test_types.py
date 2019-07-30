@@ -1,6 +1,8 @@
 import unittest
-
+from pineboolib.loader.main import init_cli
 from pineboolib.application.types import Boolean, QString, Function, Object, Array, Date
+
+init_cli()  # FIXME: This should be avoided
 
 
 class TestBoolean(unittest.TestCase):

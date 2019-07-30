@@ -1,6 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# ------ Pythonyzer ... reads XML AST created by postparse.py and creates an equivalent Python file.
+"""
+Pythonyzer
+
+reads XML AST created by postparse.py and creates an equivalent Python file.
+"""
+import copy
 from optparse import OptionParser
 import os
 import os.path
@@ -320,7 +325,7 @@ def id_translate(name: str, qsa_exclude: Set[str] = None, transform: Dict[str, s
         if transform is not None and name in transform:
             return transform[name]
 
-        if name.startswith("formRecord"):
+        if STRICT_MODE and name.startswith("formRecord"):
             return 'qsa.from_project("%s")' % name
         if STRICT_MODE:
             return "__undef__" + name
@@ -1373,7 +1378,13 @@ class Member(ASTPython):
             arg_expr.append(expr)
 
         # Deteccion de llamada a modulo externo
-        if len(arguments) >= 3 and arguments[1] == "iface" and arguments[0] != "self" and arguments[0].startswith("__undef__"):
+        if (
+            STRICT_MODE
+            and len(arguments) >= 3
+            and arguments[1] == "iface"
+            and arguments[0] != "self"
+            and arguments[0].startswith("__undef__")
+        ):
             arguments[0] = 'qsa.from_project("%s")' % arguments[0].replace("__undef__", "")
         # Lectura del self.iface.__init
         if (
@@ -2035,6 +2046,8 @@ class DeclarationBlock(ASTPython):
     def generate(self, **kwargs):
         # mode = self.elem.get("mode")
         is_constructor = self.elem.get("constructor")
+        is_definition = True if self.elem.get("definition") else False
+
         # if mode == "CONST": yield "debug", "Const Declaration:"
         for var in self.elem:
             var.set("parent_", self.elem)
@@ -2048,6 +2061,11 @@ class DeclarationBlock(ASTPython):
                     yield dtype, data
             if is_constructor:
                 expr[0] = "self." + expr[0]
+            if is_definition:
+                # Transform: ['iface', '=', 'ifaceCtx(self)']
+                # To: ['iface', ':', 'ifaceCtx']
+                expr[1] = ":"
+                expr[2] = expr[2].replace("(self)", "")
             yield "line", " ".join(expr)
 
 
@@ -2094,12 +2112,15 @@ def parse_ast(elem, parent=None) -> ASTPythonBase:
     return elemparser
 
 
-def file_template(ast: Any) -> Generator[Tuple[Any, Any], Any, None]:
+def file_template(ast: Any, import_refs: Dict[str, Tuple[str, str]] = {}) -> Generator[Tuple[Any, Any], Any, None]:
     yield "line", "# -*- coding: utf-8 -*-"
+    yield "line", "from typing import TYPE_CHECKING"
     if not STRICT_MODE:
         yield "line", "from pineboolib.qsa import *  # noqa: F403"
     yield "line", "from pineboolib import qsa"
     # yield "line", "from pineboolib.qsaglobals import *"
+    for alias, (path, name) in import_refs.items():
+        yield "line", "from %s import %s as %s" % (path, name, alias)
     yield "line", ""
     yield "line", "# /** @file */"
     yield "line", ""
@@ -2118,26 +2139,33 @@ def file_template(ast: Any) -> Generator[Tuple[Any, Any], Any, None]:
 
     for child in ast:
         if child.tag != "Function":
-            child.set("constructor", "1")
             if child.tag != "Class":  # Limpiamos las class, se cuelan desde el cambio de xml
+                def_iface = copy.deepcopy(child)
+                def_iface.set("definition", "1")
+                child.set("constructor", "1")
                 csource.append(child)
+                mainsource.insert(0, def_iface)
         else:
             mainsource.append(child)
 
     for dtype, data in parse_ast(sourceclasses).generate():
         yield dtype, data
     yield "line", ""
-    yield "line", "form = None"
+    yield "line", "if TYPE_CHECKING:"
+    yield "line", "    form: FormInternalObj = FormInternalObj()"
+    yield "line", "    iface = form.iface"
+    yield "line", "else:"
+    yield "line", "    form = None"
 
 
-def write_python_file(fobj, ast) -> None:
+def write_python_file(fobj, ast, import_refs: Dict[str, Tuple[str, str]] = {}) -> None:
     indent: List[str] = []
     indent_text = "    "
     last_line_for_indent: Dict[int, int] = {}
     numline = 0
     ASTPython.numline = 1
     last_dtype = None
-    for dtype, data in file_template(ast):
+    for dtype, data in file_template(ast, import_refs=import_refs):
         # if isinstance(data, bytes):
         #    data = data.decode("UTF-8", "replace")
         line = None
@@ -2208,6 +2236,29 @@ def pythonize(filename, destfilename, debugname=None) -> None:
         f1 = open(destfilename, "w", encoding="UTF-8")
         f1.write(new_code)
         f1.close()
+
+
+def pythonize2(root_ast: ElementTree.Element, known_refs: Dict[str, Tuple[str, str]] = {}) -> str:
+    from io import StringIO
+
+    ASTPython.debug_file = None
+    ident: ElementTree.Element
+    ident_set = set()
+    if known_refs:
+        for ident in root_ast.findall(".//Identifier[@name]"):
+            name = ident.get("name")
+            if name is None:
+                continue
+            if name in known_refs:
+                ident_set.add(name)
+    known_refs_found: Dict[str, Tuple[str, str]] = {k: known_refs[k] for k in ident_set}
+    f1 = StringIO()
+    write_python_file(f1, root_ast, import_refs=known_refs_found)
+    if black:
+        new_code = black.format_file_contents(f1.getvalue(), fast=True, mode=BLACK_FILEMODE)
+    else:
+        new_code = f1.getvalue()
+    return new_code
 
 
 def main() -> None:

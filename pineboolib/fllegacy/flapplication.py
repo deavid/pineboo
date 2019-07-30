@@ -18,6 +18,7 @@ from typing import Any, Optional, Union, Dict, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib import pncontrolsfactory
+    from pineboolib.application.database.pnsqlcursor import PNSqlCursor
 
 
 logger = logging.getLogger("FLApplication")
@@ -1203,13 +1204,13 @@ class FLApplication(QtCore.QObject):
             self.call(self.script_entry_function_, [], self)
             self.script_entry_function_ = None
 
-    def emitTransactionBegin(self, o) -> None:
+    def emitTransactionBegin(self, o: "PNSqlCursor") -> None:
         db_signals.emitTransactionBegin(o)
 
-    def emitTransactionEnd(self, o) -> None:
+    def emitTransactionEnd(self, o: "PNSqlCursor") -> None:
         db_signals.emitTransactionEnd(o)
 
-    def emitTransactionRollback(self, o) -> None:
+    def emitTransactionRollback(self, o: "PNSqlCursor") -> None:
         db_signals.emitTransactionRollback(o)
 
     @decorators.NotImplementedWarn
@@ -1730,4 +1731,5 @@ class FLPopuWarn(QtWidgets.QWhatsThis):
 """
 
 
-aqApp = FLApplication()
+# aqApp = FLApplication()
+aqApp: FLApplication
