@@ -17,6 +17,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     package_data={"pineboolib": ["py.typed"]},
     keywords="erp pineboo eneboo accounting sales warehouse",
+    python_requires="~=3.6",
     entry_points={
         "console_scripts": [
             "pineboo-parse=pineboolib.application.parsers.qsaparser.postparse:main",
