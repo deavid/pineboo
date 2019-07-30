@@ -86,3 +86,4 @@ sphinx-rtd-theme
 pyroma
 dlint
 defusedxml
+bandit
