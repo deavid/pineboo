@@ -94,11 +94,9 @@ def init_gui():
     """Create GUI singletons."""
     from pineboolib.plugins.mainform.eneboo import eneboo
     from pineboolib.plugins.mainform.eneboo_mdi import eneboo_mdi
-    from pineboolib.plugins.mainform.pineboo import pineboo
 
     eneboo.mainWindow = eneboo.MainForm()
     eneboo_mdi.mainWindow = eneboo_mdi.MainForm()
-    pineboo.mainWindow = pineboo.MainForm()
 
 
 def setup_gui(app: QtCore.QCoreApplication, options: Values):
