@@ -225,7 +225,7 @@ class PNSqlSavePoint:
         if not cursor_:
             return
 
-        if opInf.buffer.field(opInf.primaryKey) and not opInf.buffer.isNull(opInf.primaryKey):
+        if opInf.primaryKey in opInf.buffer.fieldsList() and not opInf.buffer.isNull(opInf.primaryKey):
             valuePrimaryKey = str(opInf.buffer.value(opInf.primaryKey))  # FIXME: (deavid) plz add notes on what needs to be fixed here.
             ok = cursor_.select(opInf.primaryKey + "='" + valuePrimaryKey + "'")
             if ok and cursor_.next():
