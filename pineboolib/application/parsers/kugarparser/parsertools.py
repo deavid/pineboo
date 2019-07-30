@@ -1,66 +1,69 @@
 # -*- coding: utf-8 -*-
+"""
+Variety of tools for KUT.
+"""
 import os
 import sys
-from pineboolib import logging
 import datetime
 import fnmatch
-import xml.etree.ElementTree
+from xml.etree.ElementTree import Element, ElementTree
+from typing import Any, Iterable, Optional, SupportsInt, Union, List
 
+from pineboolib import logging
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.utils.xpm import cacheXPM
 from pineboolib.application import project
 
 
-from typing import Any, Iterable, Optional, SupportsInt, TypeVar, Union, List, TYPE_CHECKING
-
-_T2 = TypeVar("_T2")
-
-if TYPE_CHECKING:
-    import xml
-
-
-"""
-Esta clase ofrece algunas funciones comunes de los diferentes parser de kut.
-"""
-
-
 class KParserTools(object):
+    """
+    Common functions for different KUT parsers.
+    """
+
     _fix_altura = None
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Create base class for tools."""
         self.logger = logging.getLogger("ParseTools")
         self.pagina = 0
         self._fix_ratio_h = 0.927  # Corrector de altura 0.927
         self._fix_ratio_w = 0.92
 
-    """
-    Retorna un objecto xml desde una cadena de texto.
-    @param data. Cadena de texto.
-    @return xml.
-    """
+    def loadKut(self, data: str) -> ElementTree:
+        """
+        Parse KUT xml from text.
 
-    def loadKut(self, data: str) -> "xml.etree.ElementTree.ElementTree":
+        @param data. Input text (kut sources)
+        @return xml.
+        """
         return load2xml(data)
 
-    """
-    Corrige la altura para ajustarse a un kut original.
-    @param value. Número a corregir.
-    @return Número corregido.
-    """
+    def ratio_correction_h(self, value: float) -> int:
+        """
+        Revise height to become similar to the original kut.
 
-    def ratio_correction_h(self, value) -> int:
-        return value * self._fix_ratio_h
+        @param value. Input number to revise.
+        @return Revised number.
+        """
+        return int(value * self._fix_ratio_h)
 
-    def ratio_correction_w(self, value) -> int:
-        return value * self._fix_ratio_w
+    def ratio_correction_w(self, value: float) -> int:
+        """
+        Revise width to become similar to the original kut.
 
-    """
-    Cuando es un calculatedField , se envia un dato al qsa de tipo node.
-    @param data. xml con información de la linea de datos afectada.
-    @return Node con la información facilitada.
-    """
+        @param value. Input number to revise.
+        @return Revised number.
+        """
+        return int(value * self._fix_ratio_w)
 
-    def convertToNode(self, data) -> Any:
+    def convertToNode(self, data: Element) -> Element:
+        """
+        Convert XML line to Node XML.
+
+        When it's a calculatedField sends data to QSA of Node type.
+        @param data. xml with related line info.
+        @return Node with original data contents.
+        """
 
         # node = Node()
         from pineboolib import pncontrolsfactory
@@ -74,35 +77,27 @@ class KParserTools(object):
 
         return ele
 
-    """
-    Coge la altura especificada en un elemento xml.
-    @param xml. Elemento del que hay que extraer la altura.
-    @return Valor de la altura o 0 si no existe tal dato.
-    """
+    def getHeight(self, xml: Element) -> int:
+        """
+        Retrieve height specified in xaml.
 
-    def getHeight(self, xml) -> int:
-        ret_ = 0
-        if xml is None:
-            pass
-        else:
-            h = int(xml.get("Height"))
-            if h:
-                ret_ = h
+        @param xml. Element to extract the height from.
+        @return Height or zero if does not exist.
+        """
+        return int(xml.get("Height") or "0")
 
-        return ret_
+    def getSpecial(self, name: str, page_num: Optional[int] = None) -> str:
+        """
+        Retrieve value of special type.
 
-    """
-    Devuelve un valor de tipo especial.
-    @param name. Nombre del tipo especial a cargar.
-    @param page_num. Número de página por si es un tipo "NúmPágina".
-    @return Valor requerido según tipo especial especificado.
-    """
-
-    def getSpecial(self, name: str, page_num=None) -> str:
+        @param name. Name of special type to load.
+        @param page_num. PAge number if it is "PageNo" type.
+        @return Required value.
+        """
         self.logger.debug("%s:getSpecial %s" % (__name__, name))
         ret = "None"
         if name[0] == "[":
-            name = name[1 : len(name) - 1]
+            name = name[1:-1]
         if name in ("Fecha", "Date"):
             ret = str(datetime.date.__format__(datetime.date.today(), "%d.%m.%Y"))
         if name in ("NúmPágina", "PageNo", "NÃºmPÃ¡gina"):
@@ -110,16 +105,16 @@ class KParserTools(object):
 
         return ret
 
-    """
-    Devuelve un valor de tipo de dato calculado.
-    @param field. Nombre del campo.
-    @param dataType. Tipo de dato. Dependiendo de este se devolvera el valor de una manera u otra.
-    @param precision. Numero de decimales
-    @param data. Linea del xml de datos afectada
-    @return Valor calculado.
-    """
+    def calculated(self, value: Any, data_type: int, p: Union[bytes, str, SupportsInt] = None, data: Element = None) -> Any:
+        """
+        Get value of type "calculated".
 
-    def calculated(self, value: Any, data_type, p: Union[bytes, str, SupportsInt] = None, data=None) -> Any:
+        @param field. Field name
+        @param dataType. Data type. Changes how value is returned.
+        @param precision. Number of decimal places.
+        @param data. XML data line related.
+        @return calculated value.
+        """
 
         p = 0 if p is None else int(p)
 
@@ -149,13 +144,14 @@ class KParserTools(object):
 
         return ret_
 
-    """
-    Retorna el nombre de un fichero .png que está cacheado en tempdata. Si no existe lo crea.
-    @param. Nombre de la cadena que especifica la tupla afectada en fllarge.
-    @return. Ruta completa del fichero en tempdata.
-    """
+    def parseKey(self, ref_key: str = None) -> Optional[str]:
+        """
+        Get filename of .png file cached on tempdata. If it does not exist it is created.
 
-    def parseKey(self, ref_key: str = None) -> Any:
+        @param. String of related tuple in fllarge.
+        @return. Path to the file in tempdata.
+        """
+
         ret = None
         table_name = "fllarge"
         if ref_key is not None:
@@ -207,15 +203,15 @@ class KParserTools(object):
 
         return ret
 
-    """
-    Retorna el tamaño adecuado el código de página especificado en el .kut.
-    @param size. Código de tamaño del documento(0..31).
-    @param orientation. 0 vertical, 1 apaisado.
-    @param custom. Cuando se especifican size (30 o 31), recogemos el valor de custom.
-    @return Array con los valores del tamaño de la página.
-    """
+    def converPageSize(self, size: int, orientation: int, custom: Optional[List[int]] = None) -> List[int]:
+        """
+        Get page size for the page code specified on .kut file.
 
-    def converPageSize(self, size, orientation, Custom: Optional[List[int]] = None) -> List[int]:
+        @param size. Size code specified on doc (0..31).
+        @param orientation. 0 portrait, 1 landscape.
+        @param custom. Where size is (30 or 31), custom is returned.
+        @return Array with the size values.
+        """
         r = None
         if size == 0:
             r = [595, 842]  # "A4"
@@ -272,7 +268,7 @@ class KParserTools(object):
         elif size == 29:
             r = [791, 1255]  # "TABLOID"
         elif size in (30, 31):
-            r = Custom  # "CUSTOM"
+            r = custom  # "CUSTOM"
         if r is None:
             self.logger.warning("porcessXML:No se encuentra pagesize para %s. Usando A4" % size)
             r = [595, 842]
@@ -282,13 +278,13 @@ class KParserTools(object):
 
         return r
 
-    """
-    Busca y retorna el path de un tipo de letra dado
-    @param font_name. Nombre del tipo de letra
-    @return Path del fichero ".ttf" o None
-    """
+    def find_font(self, font_name: str, font_style: str) -> Optional[str]:
+        """
+        Find and retrieve path for a specified font.
 
-    def find_font(self, font_name: str, font_style) -> Union[bool, str]:
+        @param font_name. Font name required
+        @return Path to ".ttf" or None
+        """
         fonts_folders: List[str] = []
         if sys.platform.find("win") > -1:
             windir = os.environ.get("WINDIR")
@@ -309,7 +305,7 @@ class KParserTools(object):
             fonts_folders = ["/Library/Fonts", "/System/Library/Fonts", "~/Library/Fonts"]
         else:
             self.logger.warning("KUTPARSERTOOLS: Plataforma desconocida %s", sys.platform)
-            return False
+            return None
 
         font_name = font_name.replace(" ", "_")
 
@@ -356,9 +352,12 @@ class KParserTools(object):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
-        return False
+        return None
 
-    def calculate_sum(self, field_name, line, xml_list: Iterable, level: int) -> str:
+    def calculate_sum(self, field_name: str, line: Element, xml_list: Iterable, level: int) -> str:
+        """
+        Calculate sum for specified element line.
+        """
         val = 0.0
         for l in xml_list:
             lev_ = int(l.get("level"))
@@ -371,7 +370,8 @@ class KParserTools(object):
 
         return str(val)
 
-    def restore_text(self, t: str) -> Any:
+    def restore_text(self, t: str) -> str:
+        """Un-replace text for special characters."""
         ret_ = t
         ret_ = ret_.replace("__RPAREN__", ")")
         ret_ = ret_.replace("__LPAREN__", "(")

@@ -1,4 +1,7 @@
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
+"""
+Defines PNCursorTableModel class.
+"""
 import math
 import threading
 import time
@@ -28,7 +31,7 @@ DEBUG = False
 
 class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
-    Esta clase es el enlace entre FLSqlCursor y el SGBD
+    Link between FLSqlCursor and database.
     """
 
     logger = logging.getLogger("CursorTableModel")
@@ -56,9 +59,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     def __init__(self, conn: "IConnection", parent: "PNSqlCursor") -> None:
         """
-        Constructor
-        @param conn. Objeto PNConnection
-        @param parent. FLSqlCursor relacionado
+        Constructor.
+
+        @param conn. PNConnection Object
+        @param parent. related FLSqlCursor
         """
         super(PNCursorTableModel, self).__init__()
         if parent is None:
@@ -143,15 +147,18 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     def disable_refresh(self, disable: bool) -> None:
         """
-        Desactiva el refresco. Ej. FLSqlQuery.setForwardOnly(True)
-        @param disable. True o False
+        Disable refresh.
+
+        e.g. FLSqlQuery.setForwardOnly(True).
+        @param disable. True or False
         """
         self._disable_refresh = disable
 
     def sort(self, column: int, order: QtCore.Qt.SortOrder = QtCore.Qt.AscendingOrder) -> None:
         """
-        Indica el tipo de orden a usar y sobre que columna
-        @param col. Columna usada
+        Change order by used ASC/DESC and column.
+
+        @param col. Column to sort by
         @param order. 0 ASC, 1 DESC
         """
         col = column
@@ -188,16 +195,18 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self._sortOrder = "%s %s" % (col_name, ord)
             self.refresh()
 
-    def getSortOrder(self) -> Any:
+    def getSortOrder(self) -> str:
         """
-        Retorna una cadena de texto con el valor de sortOrder
-        @return Cadena de texto con información de columna y orden
+        Get current sort order.
+
+        Returns string  with sortOrder value.
+        @return string  with info about column and order
         """
         return self._sortOrder
 
     def setSortOrder(self, sort_order: Union[List[str], str]) -> None:
         """
-        Setea el ORDERBY
+        Set current ORDER BY.
         """
         self._sortOrder = ""
         if isinstance(sort_order, list):
@@ -213,11 +222,15 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     #    return self.color_function_
 
     def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.DisplayRole) -> Any:
-        """ (overload of QAbstractTableModel)
-        Retorna información de un registro. Puede ser desde Alineación, color de fondo, valor ... dependiendo del rol
-        @param index. Posición del registro
-        @param role. Tipo de información solicitada
-        @return Inofrmación del objeto solicitada
+        """
+        Retrieve information about a record.
+
+        (overload of QAbstractTableModel)
+        Could return alignment, backgroun color, value... depending on role.
+
+        @param index. Register position
+        @param role. information type required
+        @return solicited data
         """
         row = index.row()
         col = index.column()
@@ -433,21 +446,21 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         return None
 
-    """
-    Cuando el driver SQL soporta Thread, recoge info de la tabla
-    """
-
     def threadFetch(self) -> None:
+        """
+        Retrieve information of the table.
+
+        Only used when SQL driver supports Thread.
+        """
         if not self.metadata():
             return
 
         self.refreshFetch(2000)
 
-    """
-    Actualiza los registros virtuales que gestiona el modelo
-    """
-
     def updateRows(self) -> None:
+        """
+        Update virtual records managed by its model.
+        """
         if self.USE_THREADS:
             ROW_BATCH_COUNT = 200 if self.threadFetcher.is_alive() else 0
         elif self.USE_TIMER:
@@ -473,16 +486,16 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         bottomRight = self.index(torow, self.cols - 1)
         self.dataChanged.emit(topLeft, bottomRight)
 
-    """
-    Recoge nuevos datos del la BD
-    @param index. Tableindex padre.
-    @param tablename. Nombre de la tabla a recoger datos.
-    @param where_filter. Filtro usado para recoger datos.
-    """
-
     def fetchMore(
         self, index: QtCore.QModelIndex, tablename: Optional[str] = None, where_filter: Optional[str] = None, size_hint: int = 1000
     ) -> None:
+        """
+        Retrieve new data from DB.
+
+        @param index. parent Tableindex.
+        @param tablename. Table name to fetch from.
+        @param where_filter. Filter to be used to get data.
+        """
         if not self.sql_str:
             return
 
@@ -571,12 +584,12 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 tiempo_final - tiempo_inicial,
             )
 
-    """
-    Comprueba que los campos referidos en una Query existen. Si algun campo no existe lo marca como a omitir
-    @param qry. Query con los campos a usar
-    """
-
     def _refresh_field_info(self) -> None:
+        """
+        Check if query fields do exist.
+
+        If any field does not exist it gets marked as ommitted.
+        """
         is_query = self.metadata().isQuery()
         qry_tables = []
         qry = None
@@ -633,11 +646,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
                 self.sql_fields.append(field.name())
 
-    """
-    Refresca la información que va a gestionar esta clase
-    """
-
     def refresh(self) -> None:
+        """
+        Refresh information mananged by this class.
+        """
         if self._initialized is None and self.parent_view:  # Si es el primer refresh y estoy conectado a un FLDatatable()
             self._initialized = True
             QtCore.QTimer.singleShot(1, self.refresh)
@@ -737,20 +749,20 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.fetchMore(parent, self.metadata().name(), self.where_filter, size_hint=SZ_FETCH)
         # print("%s:: rows: %s" % (self._curname, self.rows))
 
-    """
-    Recoge info actualizada de la BD de una cierta cantidad de registros
-    @param n. Número de registros a recoger
-    """
-
     def refreshFetch(self, n: int) -> None:
+        """
+        Refresh new information from DB for a certain amount of records.
+
+        @param n. Number of records to fetch
+        """
         self.driver_sql().refreshFetch(n, self._curname, self.metadata().name(), self.cursorDB(), self.sql_str, self.where_filter)
 
-    """
-    Actualiza el index de la fila, que se usa para localizar registros virtuales del TableModel
-    @param rownum. Número de fila
-    """
-
     def indexUpdateRow(self, rownum: int) -> None:
+        """
+        Update row index, used to locate virtual registers on TableModel.
+
+        @param rownum. Row number
+        """
         row = self._data[rownum]
         if self.pkpos:
             key = tuple([row[x] for x in self.pkpos])
@@ -759,12 +771,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             key = tuple([row[x] for x in self.ckpos])
             self.ckidx[key] = rownum
 
-    """
-    Actualiza el index de un rango de filas, que se usan para localizar registros en el tableModel
-    @param  rowramge. Array desde:hasta
-    """
-
     def indexUpdateRowRange(self, rowrange: Tuple[int, int]) -> None:
+        """
+        Update index for a range of rows.
+
+        Used to locate records in TableModel.
+        @param  rowrange. Tuple (from, to)
+        """
         rows = self._data[rowrange[0] : rowrange[1]]
         if self.pkpos:
             for n, row in enumerate(rows):
@@ -775,14 +788,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 key = tuple([row[x] for x in self.ckpos])
                 self.ckidx[key] = n + rowrange[0]
 
-    """
-    Devuelve el valor de una columna de una fila determinada
-    @param row. Fila
-    @param fieldName. Nombre del campo.
-    @return Valor contenido
-    """
-
     def value(self, row: Optional[int], fieldName: str) -> Any:
+        """
+        Retrieve column value for a row.
+
+        @param row. Row number to retrieve
+        @param fieldName. Field name.
+        @return Value
+        """
         if row is None or row < 0 or row >= self.rows:
             return None
         col = None
@@ -815,13 +828,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         return campo
 
-    """
-    Actualiza los datos de un registro del tableModel en la BD
-    @param pKValue. Pirmary Key del registro a actualizar en la BD
-    @param dict_update. Campos que se actualizarán
-    """
-
     def updateValuesDB(self, pKValue: Any, dict_update: Dict[str, Any]) -> bool:
+        """
+        Update record data from tableModel into DB.
+
+        @param pKValue. Pirmary Key of the record to be updated
+        @param dict_update. Fields to be updated
+        """
         self.logger.trace("updateValuesDB: init: pKValue %s, dict_update %s", pKValue, dict_update)
         row = self.findPKRow([pKValue])
         # if row is None:
@@ -891,13 +904,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         return True
 
-    """
-    Asigna un valor una fila usando un diccionario
-    @param row. Columna afectada
-    @param update_dict. array clave-valor indicando el listado de claves y valores a actualizar
-    """
-
     def setValuesDict(self, row: int, update_dict: Dict[str, Any]) -> None:
+        """
+        Set value to a row using a Dict.
+
+        @param row. Row to update
+        @param update_dict. Key-Value where key is the fieldname and value is the value to update
+        """
 
         if DEBUG:
             self.logger.info("CursorTableModel.setValuesDict(row %s) = %r", row, update_dict)
@@ -925,23 +938,23 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         except Exception:
             self.logger.exception("CursorTableModel.setValuesDict(row %s) = %r :: ERROR:", row, update_dict)
 
-    """
-    Asigna un valor una celda
-    @param row. Columna afectada
-    @param fieldname. Nonbre de la fila afectada. Se puede obtener la columna con self.metadata().indexPos(fieldname)
-    @param value. Valor a asignar. Puede ser texto, pixmap, etc...
-    """
-
     def setValue(self, row: int, fieldname: str, value: Any) -> None:
+        """
+        Set value to a cell.
+
+        @param row. related row
+        @param fieldname. name of the field to update.
+        @param value. Value to write. Text, Pixmap, etc.
+        """
         # Reimplementación para que todo pase por el método genérico.
         self.setValuesDict(row, {fieldname: value})
 
-    """
-    Crea una nueva linea en el tableModel
-    @param buffer . PNBuffer a añadir
-    """
+    def Insert(self, fl_cursor: "PNSqlCursor") -> bool:  # FIXME: Should be "insert" in lowercase.
+        """
+        Create new row in TableModel.
 
-    def Insert(self, fl_cursor: "PNSqlCursor") -> bool:
+        @param buffer . PNBuffer to be added.
+        """
         # Metemos lineas en la tabla de la bd
         # pKValue = None
         buffer = fl_cursor.buffer()
@@ -992,12 +1005,12 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return True
         return False
 
-    """
-    Borra una linea en el tableModel
-    @param cursor . Objecto FLSqlCursor
-    """
+    def Delete(self, cursor: "PNSqlCursor") -> None:  # FIXME: Should be "delete" in lowercase.
+        """
+        Delete a row from tableModel.
 
-    def Delete(self, cursor: "PNSqlCursor") -> None:
+        @param cursor . FLSqlCursor object
+        """
         pKName = self.metadata().primaryKey()
         mtdfield = self.metadata().field(pKName)
         if mtdfield is None:
@@ -1017,13 +1030,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         # conn.commit()
 
-    """
-    Delvuelve el index de un registro a raíz de Su Primary Key
-    @param pklist. Lista con la PK a encontrar. Hay que meterno entre [] aunque solo sea un registro.
-    @return index de la linea buscada
-    """
-
     def findPKRow(self, pklist: Iterable[Any]) -> Optional[int]:
+        """
+        Retrieve row index of a record given a primary key.
+
+        @param pklist. Primary Key list to find. Use a List [] even for a single record.
+        @return row index.
+        """
         if not isinstance(pklist, (tuple, list)):
             raise ValueError("findPKRow expects a list as first argument. Enclose PK inside brackets [self.pkvalue]")
         if not self.indexes_valid:
@@ -1049,13 +1062,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return None
         return self.pkidx[pklist]
 
-    """
-    Delvuelve el index de un registro a raíz de Su Composed Key
-    @param cklist. Lista con la CK a encontrar.
-    @return index de la linea buscada
-    """
-
     def findCKRow(self, cklist: Iterable[Any]) -> Optional[int]:
+        """
+        Retrieve row index from its Composite Key.
+
+        @param cklist. CK list to find.
+        @return row index.
+        """
         if not isinstance(cklist, (tuple, list)):
             raise ValueError("findCKRow expects a list as first argument.")
         if not self.indexes_valid:
@@ -1068,72 +1081,71 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return None
         return self.ckidx[cklist]
 
-    """
-    Devuelve el nombre del campo que es PK
-    @return nombre del campo PK
-    """
-
     def pK(self) -> str:
+        """
+        Get field name of the primary key.
+
+        @return field name
+        """
         return self.metadata().primaryKey()
 
-    """
-    Devuelve el tipo de un campo determinado
-    @param fieldName. Nombre del campo
-    @return Tipo de campo
-    """
-
     def fieldType(self, fieldName: str) -> str:
+        """
+        Retrieve field type for a given field name.
+
+        @param fieldName. required field name.
+        @return field type.
+        """
         field = self.metadata().field(fieldName)
         if field is None:
             raise Exception("field %s not found" % fieldName)
         return field.type()
 
-    """
-    Devuelve el alias de un campo determinado
-    @param fieldName. Nombre del campo
-    @return alias del campo
-    """
-
     def alias(self, fieldName: str) -> str:
+        """
+        Retrieve alias name for a field name.
+
+        @param fieldName. field name requested.
+        @return alias for the field.
+        """
         field = self.metadata().field(fieldName)
         if field is None:
             raise Exception("field %s not found" % fieldName)
         return field.alias()
 
-    """
-    Devuelve el número de columnas
-    @return Número de columnas
-    """
-
     def columnCount(self, *args: List[Any]) -> int:
+        """
+        Get current column count.
+
+        @return Number of columns present.
+        """
         # if args:
         #    self.logger.warning("columnCount%r: wrong arg count", args, stack_info=True)
         return self.cols
 
-    """
-    Actualiza el número de columnas existentes en el tableModel
-    """
-
     def updateColumnsCount(self) -> None:
+        """
+        Set number of columns in tableModel.
+        """
         self.cols = len(self.metadata().fieldList())
         self.loadColAliases()
         if self.metadata().isQuery():
             self._refresh_field_info()
 
-    """
-    Devuelve el número de lineas
-    @return Número de lineas
-    """
-
     def rowCount(self, parent: QtCore.QModelIndex = None) -> int:
+        """
+        Get current row count.
+
+        @return Row number present in table.
+        """
         return self.rowsLoaded
 
-    """
-    Devuelve el tamaño de registros seleccionados con el cursor
-    @return lineas seleccionadas
-    """
-
     def size(self) -> int:
+        """
+        Get amount of data selected on the cursor.
+
+        @return number of retrieved rows.
+        """
 
         size = 0
         mtd = self.metadata()
@@ -1159,15 +1171,15 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         return size
 
-    """
-    Devuelve datos de la cebecera
-    @param section. Columna
-    @param orientation. Horizontal, Vertical
-    @param role. Solo es util QtCore.Qt.DisplayRole, El resto de roles es omitido por headerData
-    @return info segun sección, orientación y rol.
-    """
-
     def headerData(self, section: int, orientation: QtCore.Qt.Orientation, role: int = QtCore.Qt.DisplayRole) -> Any:
+        """
+        Retrieve header data.
+
+        @param section. Column
+        @param orientation. Horizontal, Vertical
+        @param role. QtCore.Qt.DisplayRole only. Every other option is ommitted.
+        @return info for section, orientation and role.
+        """
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
                 if not self.col_aliases:
@@ -1177,48 +1189,50 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 return section + 1
         return None
 
-    """
-    Carga los alias de las diferentes columnas.
-    """
-
     def loadColAliases(self) -> None:
+        """
+        Load column alias for every column.
+        """
         self.col_aliases = [str(self.metadata().indexFieldObject(i).alias()) for i in range(self.cols)]
 
-    """
-    Devuelve el FLFieldMetadata de un campo
-    @param fieldName. Nombre del campo
-    @return FLFieldMetadata
-    """
-
     def fieldMetadata(self, fieldName: str) -> "PNFieldMetaData":
+        """
+        Retrieve FLFieldMetadata for given fieldName.
+
+        @param fieldName. field name.
+        @return FLFieldMetadata
+        """
         field = self.metadata().field(fieldName)
         if field is None:
             raise Exception("fieldName %s not found" % fieldName)
         return field
 
-    """
-    Devuelve el FLTableMetaData de este tableModel
-    @return Objeto FLTableMetaData
-    """
-
     def metadata(self) -> "PNTableMetaData":
+        """
+        Retrieve FLTableMetaData for this tableModel.
+
+        @return Objeto FLTableMetaData
+        """
         if self._parent.d.metadata_ is None:
             raise Exception("Metadata not set")
         return self._parent.d.metadata_
 
     def driver_sql(self) -> Any:
+        """Get SQL Driver used."""
         return self._driver_sql
 
-    """
-    Devuelve el cursor a la BD usado
-    @return Objeto cursor
-    """
-
     def cursorDB(self) -> "IApiCursor":
+        """
+        Get currently used database cursor.
+
+        @return cursor object
+        """
         return self._cursor_db
 
     def db(self) -> "IConnection":
+        """Get current connection."""
         return self._cursorConn
 
     def set_parent_view(self, parent_view: QtWidgets.QTableView) -> None:
+        """Set the parent view."""
         self.parent_view = parent_view

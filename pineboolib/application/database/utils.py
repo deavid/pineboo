@@ -1,3 +1,7 @@
+"""
+Provide some functions based on data.
+"""
+
 from pineboolib.core.utils import logging
 
 from typing import Any, Union, List, Optional
@@ -8,42 +12,42 @@ logger = logging.getLogger("database.utils")
 
 def nextCounter(*args) -> Any:
     """
-    Este metodo devuelve el siguiente valor de un campo tipo contador de una tabla.
+    Return the following value of a counter type field of a table.
 
-    Este metodo es muy util cuando se insertan registros en los que
-    la referencia es secuencial y no nos acordamos de cual fue el ultimo
-    numero usado. El valor devuelto es un QVariant del tipo de campo es
-    el que se busca la ultima referencia. Lo más aconsejable es que el tipo
-    del campo sea 'String' porque así se le puede dar formato y ser
-    usado para generar un código de barras. De todas formas la función
-    soporta tanto que el campo sea de tipo 'String' como de tipo 'double'.
+    This method is very useful when inserting records in which
+    the reference is sequential and we don't remember which one was the last
+    number used The return value is a QVariant of the field type is
+    the one that looks for the last reference. The most advisable thing is that the type
+    of the field be 'String' because this way it can be formatted and be
+    used to generate a barcode. The function anyway
+    supports both that the field is of type 'String' and of type 'double'.
 
-    @param name Nombre del campo
-    @param cursor_ Cursor a la tabla donde se encuentra el campo.
-    @return Qvariant con el numero siguiente.
+    @param name Field name
+    @param cursor_ Cursor to the table where the field is located.
+    @return Qvariant with the following number.
     @author Andrés Otón Urbano.
     """
     """
-    dpinelo: Este método es una extensión de nextCounter pero permitiendo la introducción de una primera
-    secuencia de caracteres. Es útil cuando queremos mantener diversos contadores dentro de una misma tabla.
-    Ejemplo, Tabla Grupo de clientes: Agregamos un campo prefijo, que será una letra: A, B, C, D.
-    Queremos que la numeración de los clientes sea del tipo A00001, o B000023. Con esta función, podremos
-    seguir usando los métodos counter cuando agregamos esa letra.
+    dpinelo: This method is an extension of nextCounter but allowing the introduction of a first
+    character sequence It is useful when we want to keep different counters within the same table.
+    Example, Customer Group Table: We add a prefix field, which will be a letter: A, B, C, D.
+    We want customer numbering to be of type A00001, or B000023. With this function, we can
+    Keep using the counter methods when we add that letter.
 
-    Este metodo devuelve el siguiente valor de un campo tipo contador de una tabla para una serie determinada.
+    This method returns the following value of a counter type field of a table for a given series.
 
-    Este metodo es muy util cuando se insertan registros en los que
-    la referencia es secuencial según una secuencia y no nos acordamos de cual fue el último
-    numero usado. El valor devuelto es un QVariant del tipo de campo es
-    el que se busca la ultima referencia. Lo más aconsejable es que el tipo
-    del campo sea 'String' porque así se le puede dar formato y ser
-    usado para generar un código de barras. De todas formas la función
-    soporta tanto que el campo sea de tipo 'String' como de tipo 'double'.
+    This method is very useful when inserting records in which
+    the reference is sequential according to a sequence and we don't remember which one was the last
+    number used The return value is a QVariant of the field type is
+    the one that looks for the last reference. The most advisable thing is that the type
+    of the field be 'String' because this way it can be formatted and be
+    used to generate a barcode. The function anyway
+    supports both that the field is of type 'String' and of type 'double'.
 
-    @param serie serie que diferencia los contadores
-    @param name Nombre del campo
-    @param cursor_ Cursor a la tabla donde se encuentra el campo.
-    @return Qvariant con el numero siguiente.
+    @param series series that differentiates counters
+    @param name Field name
+    @param cursor_ Cursor to the table where the field is located.
+    @return Qvariant with the following number.
     @author Andrés Otón Urbano.
     """
     from .pnsqlquery import PNSqlQuery
@@ -172,15 +176,15 @@ def nextCounter(*args) -> Any:
 
 def sqlSelect(f: str, s: str, w, tL: Optional[Union[str, List]] = None, size: int = 0, connName: str = "default") -> Any:
     """
-    Ejecuta una query de tipo select, devolviendo los resultados del primer registro encontrado
+    Execute a query of type select, returning the results of the first record found.
 
-    @param f: Sentencia from de la query
-    @param s: Sentencia select de la query, que será el nombre del campo a devolver
-    @param w: Sentencia where de la query
-    @param tL: Sentencia tableslist de la query. Necesario cuando en la sentencia from se incluya más de una tabla
-    @param size: Número de líneas encontradas. (-1 si hay error)
-    @param connName Nombre de la conexion
-    @return Valor resultante de la query o falso si no encuentra nada.
+    @param f: from the query statement.
+    @param s: Select statement of the query, which will be the name of the field to return.
+    @param w: Where statement of the query.
+    @param tL: Tableslist statement of the query. Required when more than one table is included in the from statement.
+    @param size: Number of lines found. (-1 if there is error).
+    @param connName Connection name.
+    @return Value resulting from the query or false if it finds nothing.
     """
     if w is None or w == "":
         return False
@@ -211,8 +215,7 @@ def sqlSelect(f: str, s: str, w, tL: Optional[Union[str, List]] = None, size: in
 
 def quickSqlSelect(f: str, s: str, w: str, connName: str = "default") -> Any:
     """
-    Versión rápida de sqlSelect. Ejecuta directamente la consulta sin realizar comprobaciones.
-    Usar con precaución.
+    Quick version of sqlSelect. Run the query directly without checking.Use with caution.
     """
     from .pnsqlquery import PNSqlQuery
 
@@ -228,15 +231,15 @@ def quickSqlSelect(f: str, s: str, w: str, connName: str = "default") -> Any:
     return q.value(0) if q.first() else False
 
 
-def sqlInsert(t, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connName: str = "default") -> Any:
+def sqlInsert(t, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connName: str = "default") -> bool:
     """
-    Realiza la inserción de un registro en una tabla mediante un objeto FLSqlCursor
+    Perform the insertion of a record in a table using an FLSqlCursor object.
 
-    @param t Nombre de la tabla
-    @param fL Lista separada con comas de los nombres de los campos
-    @param vL Lista separada con comas de los valores correspondientes
-    @param connName Nombre de la conexion
-    @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
+    @param t Table name.
+    @param fL Comma separated list of field names.
+    @param vL Comma separated list of corresponding values.
+    @param connName Connection name.
+    @return True in case of successful insertion, false in any other case.
     """
 
     fL: List[str] = fL_.split(",") if isinstance(fL_, str) else fL_
@@ -265,14 +268,14 @@ def sqlInsert(t, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connNam
 
 def sqlUpdate(t, fL: Union[str, List[str]], vL: Union[str, List[str]], w, connName: str = "default") -> bool:
     """
-    Realiza la modificación de uno o más registros en una tabla mediante un objeto FLSqlCursor
+    Modify one or more records in a table using an FLSqlCursor object.
 
-    @param t Nombre de la tabla
-    @param fL Lista separada con comas de los nombres de los campos
-    @param vL Lista separada con comas de los valores correspondientes
-    @param w Sentencia where para identificar los registros a editar.
-    @param connName Nombre de la conexion
-    @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
+    @param t Table name.
+    @param fL Comma separated list of field names.
+    @param vL Comma separated list of corresponding values.
+    @param w Where statement to identify the records to be edited.
+    @param connName Connection name.
+    @return True in case of successful insertion, false in any other case.
     """
     from .pnsqlcursor import PNSqlCursor
 
@@ -300,12 +303,12 @@ def sqlUpdate(t, fL: Union[str, List[str]], vL: Union[str, List[str]], w, connNa
 
 def sqlDelete(t: str, w: str, connName: str = "default") -> bool:
     """
-    Borra uno o más registros en una tabla mediante un objeto FLSqlCursor
+    Delete one or more records in a table using an FLSqlCursor object.
 
-    @param t Nombre de la tabla
-    @param w Sentencia where para identificar los registros a borrar.
-    @param connName Nombre de la conexion
-    @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
+    @param t Table name.
+    @param w Where statement to identify the records to be deleted.
+    @param connName Connection name.
+    @return True in case of successful insertion, false in any other case.
     """
     from .pnsqlcursor import PNSqlCursor
 
@@ -327,15 +330,14 @@ def sqlDelete(t: str, w: str, connName: str = "default") -> bool:
 
 def quickSqlDelete(t: str, w: str, connName: str = "default") -> None:
     """
-    Versión rápida de sqlDelete. Ejecuta directamente la consulta sin realizar comprobaciones y sin disparar señales de commits.
-    Usar con precaución.
+    Quick version of sqlDelete. Execute the query directly without checking and without committing signals.Use with caution.
     """
     execSql("DELETE FROM %s WHERE %s" % (t, w))
 
 
 def execSql(sql: str, connName: str = "default") -> bool:
     """
-    Uso interno
+    Run a query.
     """
     from pineboolib.application import project
 

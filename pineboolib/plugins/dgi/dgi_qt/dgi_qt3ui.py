@@ -869,7 +869,7 @@ def _loadVariant(variant, widget=None) -> Any:
         libs_1: List[Any] = [QtCore.Qt]
 
         if text.find("WordBreak|") > -1:
-            if widget is not None:
+            if widget is not None and hasattr(widget, "setWordWrap"):
                 widget.setWordWrap(True)
             text = text.replace("WordBreak|", "")
 

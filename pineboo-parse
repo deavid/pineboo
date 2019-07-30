@@ -1,0 +1,63 @@
+#!/usr/bin/python3
+
+"""
+    Cómo usar este fichero:
+
+    Este fichero es muy útil para comprobar y depurar el conversor QS a Python.
+    Lo primero es crear un enlace simbólico de sistema para poder acceder
+    a él bajo el nombre de flparser:
+
+    $ sudo ln -s $(pwd)/pineboo-parse /usr/local/bin/flparser
+
+    Luego, para escanear un proyecto basta con usar:
+
+    $ pineboo-parse --exec-py --full   LISTA FICHEROS A CONVERTIR
+
+    Esto generará un .qs.xml, un .py y un .py.debug , por cada fichero que se le pase.
+
+    En el caso de un proyecto en Git, podemos hacer:
+
+    $ cd ~/git/abanq.modules/miproyecto
+    $ pineboo-parse --cache --exec-py --full $(git ls-files -- "*qs")
+
+    La opción cache evita volver a parsear ficheros que fueron generados. Que esté
+    generado no implica que estén correctos, pero es un paso. Muy útil si queremos
+    obtener otra vez la lista de errores sin comprobar todos los ficheros de nuevo.
+    Si el fichero original es más nuevo que el destino, también comprueba.
+
+    Al final podremos ver qué ficheros han tenido problemas para convertirse o al parsear
+    en Python.
+
+    Los ficheros .py.debug contienen la lista de ejecuciones anidadas para trazar cómo
+    está parseando el fichero, qué ruta ha seguido y en qué línea está escribiendo.
+    Pueden ser muy grandes. Para un fichero de 1600 líneas en Python, la depuración
+    supera las 80000.
+
+    Hay una emulación de anidado de llamada para poder seguir la traza. Hay que tener en
+    cuenta que es ejecución "cooperativa" usando generadores y yield, por lo que primero
+    devuelve el resultado y luego sigue ejecutando la función. Para representar esto se
+    ha incluído las flechas <--- para ver visualmente el retorno del dato dónde está
+    llegando.
+
+    Esta herramienta realiza tres pasos, que se pueden dividir en otros:
+
+        1. QS Parser
+            1.1. Parseo del fichero QS según las reglas en flscriptparser
+            1.2. Generación de un XML AST (Abstract Syntax Tree) en memoria
+            1.3. Reducción/Simplificación del AST (postparse)
+            1.4. Escritura del XML a disco
+        2. Pythonificador
+            2.1. Lee el XML del paso anterior.
+            2.2. Para cada nodo, busca la clase apropiada por el nombre del Tag y
+                ésta se encarga de entregar una línea o una expresión
+            2.3. Escribir el fichero Python indentando correctamente
+        3. Ejecutador de Python
+            3.1. Prepara el sistema como Pineboo para realizar la carga del módulo
+            3.2. Importa el fichero en Python para ver si da el OK o explota
+
+"""
+
+from pineboolib.application.parsers.qsaparser import postparse
+
+if __name__ == "__main__":
+    postparse.main()

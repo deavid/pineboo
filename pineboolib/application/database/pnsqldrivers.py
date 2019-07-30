@@ -1,34 +1,44 @@
 # -*- coding: utf-8 -*-
+"""
+Module for PNSqlDrivers class.
+"""
+
 import importlib
 import sys
-from typing import Dict
 
 from pineboolib.core.utils import logging
 from pineboolib.core.utils.singleton import Singleton
+
+from typing import Dict, Any, List
 
 logger = logging.getLogger(__name__)
 
 
 class PNSqlDrivers(object, metaclass=Singleton):
     """
-    Esta clase gestiona los diferentes controladores de BD.
+    PNSqlDrivers class.
+
+    Manage the different available sql drivers.
     """
 
-    driver_ = None
-    only_pure_python_ = None
+    _driver: Any
+    _default_driver_name: str
+    _drivers_dict: Dict[str, str]
+    _driver_defaultr_port: Dict[str, int]
+    _desktop_file: Dict[str, bool]
+    # _only_pure_python = None
 
-    def __init__(self, _DGI=None):
-        """
-        Constructor
-        """
-        from pineboolib.core.utils.utils_base import filedir
+    def __init__(self, _DGI: Any = None) -> None:
+        """Collect the information of the available cursors."""
+
+        from pineboolib.core.utils.utils_base import filedir  # , is_deployed
         import os
 
-        self.only_pure_python_ = getattr(sys, "frozen", False)
+        # self._only_pure_python = is_deployed()
 
-        self.driversdict: Dict[str, str] = {}
-        self.driversDefaultPort: Dict[str, int] = {}
-        self.desktopFile: Dict[str, str] = {}
+        self._drivers_dict = {}
+        self._driver_defaultr_port = {}
+        self._desktop_file = {}
 
         dir_list = [file for file in os.listdir(filedir("plugins/sql")) if not file[0] == "_" and file.find(".py") > -1]
         for item in dir_list:
@@ -41,32 +51,29 @@ class PNSqlDrivers(object, metaclass=Singleton):
             except Exception:
                 logger.exception("Unexpected error loading driver %s", file_name)
                 continue
-            driver_ = getattr(mod_, file_name.upper())()
-            if driver_.pure_python() or driver_.safe_load():
-                self.driversdict[file_name] = driver_.alias_
-                self.driversDefaultPort[driver_.alias_] = driver_.defaultPort_
-                self.desktopFile[driver_.alias_] = driver_.desktopFile()
+            _driver = getattr(mod_, file_name.upper())()
+            if _driver.pure_python() or _driver.safe_load():
+                self._drivers_dict[file_name] = _driver.alias_
+                self._driver_defaultr_port[_driver.alias_] = _driver.defaultPort_
+                self._desktop_file[_driver.alias_] = _driver.desktopFile()
 
-        self.defaultDriverName = "FLsqlite"
+        self._defautl_driver_name = "FLsqlite"
 
-    """
-    Apunta hacia un controlador dado.
-    @param driverName. Nombre del controlado que se desea usar.
-    @return True o False.
-    """
+    def loadDriver(self, driver_name: str) -> bool:
+        """
+        Load an sql driver specified by name.
 
-    def loadDriver(self, driver_name):
-
-        if driver_name is None:
-            logger.info("Seleccionado driver por defecto %s", self.defaultDriverName)
-            driver_name = self.defaultDriverName
+        This driver is stored in the internal variable _driver.
+        @param driver_name =  Sql driver name.
+        @return True or False.
+        """
 
         module_path = "pineboolib.plugins.sql.%s" % driver_name.lower()
         if module_path in sys.modules:
-            module_ = importlib.reload(sys.modules[module_path])
+            module_obj = importlib.reload(sys.modules[module_path])
         else:
-            module_ = importlib.import_module(module_path)
-        self.driver_ = getattr(module_, driver_name.upper())()
+            module_obj = importlib.import_module(module_path)
+        self._driver = getattr(module_obj, driver_name.upper())()
 
         if self.driver():
             # self.driverName = driverName
@@ -75,85 +82,111 @@ class PNSqlDrivers(object, metaclass=Singleton):
         else:
             return False
 
-    """
-    Retorna el Alias de un controlador a partir de su Nombre
-    @param name. Nombre del controlador.
-    @return Alias o None.
-    """
+    def nameToAlias(self, name: str) -> str:
+        """
+        Return the alias of a driver from the name.
 
-    def nameToAlias(self, name):
+        @param name =  Driver name.
+        @return Alias or None.
+        """
+
         name = name.lower()
-        if name in self.driversdict.keys():
-            return self.driversdict[name]
-        else:
-            return None
+        if name in self._drivers_dict.keys():
+            return self._drivers_dict[name]
 
-    """
-    Retorna el Nombre de un controlador a partir de su nombre
-    @param alias. Alias con el que se conoce al controlador
-    @return Nombre o None.
-    """
+        raise Exception("No driver found matching name!")
 
-    def aliasToName(self, alias):
+    def aliasToName(self, alias: str) -> str:
+        """
+        Return the alias of a controller from its name.
+
+        @param alias =  Alias ​​with which the controller is known.
+        @return Driver name or None.
+        """
         if not alias:
-            return self.defaultDriverName
+            return self._defautl_driver_name
 
-        for key, value in self.driversdict.items():
+        for key, value in self._drivers_dict.items():
             if value == alias:
                 return key
 
-        return None
+        raise Exception("No driver found matching alias!")
 
-    """
-    Puerto por defecto que una un controlador.
-    @param alias. Alias del controlador.
-    @return Puerto por defecto.
-    """
+    def port(self, alias: str) -> str:
+        """
+        Return the default port of an sql driver.
 
-    def port(self, alias):
-        for k, value in self.driversDefaultPort.items():
+        @param alias. Driver Alias.
+        @return Default port or '0'.
+        """
+        for k, value in self._driver_defaultr_port.items():
             if k == alias:
                 return "%s" % value
 
-    """
-    Indica si la BD a la que se conecta el controlador es de tipo escriotrio
-    @param alias. Alias del controlador.
-    @return True o False.
-    """
+        return "0"
 
-    def isDesktopFile(self, alias):
-        for k, value in self.desktopFile.items():
+    def isDesktopFile(self, alias: str) -> bool:
+        """
+        Indicate if the BD to which the controller is connected is desktop.
+
+        @param alias. Driver Alias.
+        @return True or False.
+        """
+        for k, value in self._desktop_file.items():
             if k == alias:
                 return value
 
-    """
-    Lista los alias de los controladores disponibles
-    @return lista.
-    """
+        raise Exception("Alias not found in list!")
 
-    def aliasList(self):
+    def aliasList(self) -> List[str]:
+        """
+        List the aliases of the available drivers.
+
+        @return List of available aliases.
+        """
 
         list = []
-        for key, value in self.driversdict.items():
+        for key, value in self._drivers_dict.items():
             list.append(value)
 
         return list
 
-    """
-    Enlace con el controlador usado
-    @return Objecto controlador
-    """
+    def driver(self) -> Any:
+        """
+        Link to the used controller.
 
-    def driver(self):
-        return self.driver_
+        @return Driver instance.
+        """
+
+        return self._driver
 
     """
     Informa del nombre del controlador
     @return Nombre del controlador
     """
 
-    def driverName(self):
-        return self.driver().name()
+    def driverName(self) -> None:
+        """
+        Indicate the name of the activated driver.
+        """
 
-    def __getattr__(self, k):
-        return getattr(self.driver_, k)
+        if self._driver is None:
+            raise Exception("No sql driver selected!")
+
+        return self._driver.name()
+
+    def __getattr__(self, attr_name):
+        """
+        Return an attribute of the sql driver, if it is not found.
+
+        @param attr_name: Attribute name.
+        """
+        return getattr(self._driver, attr_name)
+
+    def defaultDriverName(self) -> str:
+        """
+        Return the name of the default sql driver.
+
+        @return Default driver name.
+        """
+        return self._defautl_driver_name

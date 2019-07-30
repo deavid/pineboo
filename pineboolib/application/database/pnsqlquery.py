@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+Module for PNSqlQuery class.
+"""
+
 from pineboolib.core.utils import logging
 from pineboolib.core import decorators
 from pineboolib.core.settings import config
@@ -18,7 +23,9 @@ logger = logging.getLogger(__name__)
 
 class PNSqlQueryPrivate(object):
     """
-    Nombre de la consulta
+    PNSqlQueryPrivate class.
+
+    Store internal values ​​of the query.
     """
 
     name_: str
@@ -69,7 +76,11 @@ class PNSqlQueryPrivate(object):
     """
     fieldMetaDataList_: Dict[str, IFieldMetaData]
 
+    _last_query: Union[bool, str]
+
     def __init__(self, name: Optional[str] = None) -> None:
+        """Create a new instance of PNSqlQueryPrivate."""
+
         if name:
             self.name_ = name
         self.parameterDict_ = {}
@@ -77,16 +88,15 @@ class PNSqlQueryPrivate(object):
         self.fieldMetaDataList_ = {}
         self.orderBy_ = None
         self.where_ = ""
+        self._last_query = False
 
 
 class PNSqlQuery(object):
     """
-    Maneja consultas con características específicas para AbanQ, hereda de QSqlQuery.
+    Handle queries with specific features.
 
-    Ofrece la funcionalidad para manejar consultas de QSqlQuery y además ofrece métodos
-    para trabajar con consultas parametrizadas y niveles de agrupamiento.
-
-    @author InfoSiAL S.L.
+    It offers the functionality to handle QSqlQuery queries and also offers methods
+    to work with parameterized queries and grouping levels.
     """
 
     countRefQuery: int = 0
@@ -100,7 +110,9 @@ class PNSqlQuery(object):
     _cursor: "IApiCursor"
 
     def __init__(self, cx=None, connection_name: Union[str, "IConnection"] = "default") -> None:
-        # super(FLSqlQuery, self).__init__()
+        """
+        Initialize a new query.
+        """
 
         if project.conn is None:
             raise Exception("Project is not connected yet")
@@ -127,6 +139,10 @@ class PNSqlQuery(object):
             self.d = retornoQry.d
 
     def __del__(self) -> None:
+        """
+        Delete cursor properties when closing.
+        """
+
         try:
             del self.d
             del self._datos
@@ -140,17 +156,28 @@ class PNSqlQuery(object):
 
     @property
     def sql_inspector(self) -> sql_tools.sql_inspector:
+        """
+        Return a sql inspector instance.
+
+        Collect a query and return information about its composition.
+        @return sql_inspector
+        """
+
         if self._sql_inspector is None:
             logger.warning("sql_inspector: Query has not executed yet", stack_info=True)
             sql = self.sql()
             self._sql_inspector = sql_tools.sql_inspector(sql.lower())
         return self._sql_inspector
 
-    """
-    Ejecuta la consulta
-    """
-
     def exec_(self, sql: Optional[str] = None) -> bool:
+        """
+        Run a query.
+
+        This can be specified or calculated from the values ​​previously provided.
+        @param sql. query text.
+        @return True or False return if the execution is successful.
+        """
+
         if self.invalidTablesList:
             return False
 
@@ -162,7 +189,10 @@ class PNSqlQuery(object):
         self._sql_inspector = sql_tools.sql_inspector(sql.lower())
 
         sql = self.db().driver().fix_query(sql)
+        if sql is None:
+            raise Exception("The query is empty!")
 
+        self._last_query = sql
         try:
 
             self._cursor = self.db().cursor()
@@ -182,86 +212,92 @@ class PNSqlQuery(object):
 
         return True
 
-    """
-    Añade la descripción parámetro al diccionario de parámetros.
-
-    @param p Objeto FLParameterQuery con la descripción del parámetro a añadir
-    """
-
     def addParameter(self, p: Optional["PNParameterQuery"]) -> None:
+        """
+        Add the parameter description to the parameter dictionary.
+
+        @param p FLParameterQuery object with the description of the parameter to add.
+        """
+
         if p:
             self.d.parameterDict_[p.name()] = p
 
-    """
-    Añade la descripción de un grupo al diccionario de grupos.
-
-    @param g Objeto FLGroupByQuery con la descripción del grupo a añadir
-    """
-
     def addGroup(self, g: Optional["PNGroupByQuery"]) -> None:
+        """
+        Add a group description to the group dictionary.
+
+        @param g PNGroupByQuery object with the description of the group to add.
+        """
+
         if g:
             if not self.d.groupDict_:
                 self.d.groupDict_ = {}
 
             self.d.groupDict_[g.level()] = g.field()
 
-    """
-    Para establecer el nombre de la consulta.
+    def setName(self, name: str) -> None:
+        """
+        To set the name of the query.
 
-    @param n Nombre de la consulta
-    """
-
-    def setName(self, n: str) -> None:
-        self.d.name_ = n
-
-    """
-    Para obtener el nombre de la consulta
-    """
+        @param name. query name.
+        """
+        self.d.name_ = name
 
     def name(self) -> str:
+        """
+        To get the name of the query.
+        """
+
         return self.d.name_
 
-    """
-    Para obtener la parte SELECT de la sentencia SQL de la consulta
-    """
-
     def select(self) -> str:
+        """
+        To get the SELECT part of the SQL statement from the query.
+
+        @return text string with the query SELECT.
+        """
+
         return ",".join(self.d.fieldList_)
 
-    """
-    Para obtener la parte FROM de la sentencia SQL de la consulta
-    """
-
     def from_(self) -> str:
+        """
+        To get the FROM part of the SQL statement from the query.
+
+        @return text string with the query FROM.
+        """
+
         return self.d.from_
 
-    """
-    Para obtener la parte WHERE de la sentencia SQL de la consulta
-    """
-
     def where(self) -> str:
+        """
+        To get the WHERE part of the SQL statement from the query.
+
+        @return text string with the query WHERE.
+        """
+
         return self.d.where_
 
-    """
-    Para obtener la parte ORDER BY de la sentencia SQL de la consulta
-    """
-
     def orderBy(self) -> Optional[str]:
+        """
+        To get the ORDERBY part of the SQL statement from the query.
+
+        @return text string with the query ORDERBY.
+        """
+
         return self.d.orderBy_
 
-    """
-    Para establecer la parte SELECT de la sentencia SQL de la consulta.
-
-    @param  s Cadena de texto con la parte SELECT de la sentencia SQL que
-            genera la consulta. Esta cadena NO debe incluir la palabra reservada
-            SELECT, ni tampoco el caracter '*' como comodín. Solo admite la lista
-            de campos que deben aparecer en la consulta separados por la cadena
-            indicada en el parámetro 'sep'
-    @param  sep Cadena utilizada como separador en la lista de campos. Por defecto
-              se utiliza la coma.
-    """
-
     def setSelect(self, select: Union[str, List, "Array"], sep: str = ",") -> None:
+        """
+        To set the SELECT part of the SQL statement of the query.
+
+        @param s Text string with the SELECT part of the SQL statement that
+            Generate the query. This string should NOT include the reserved word.
+            SELECT, nor the character '*' as a wild card. Only support the list
+            of fields that should appear in the query separated by the string
+            indicated in the parameter 'sep'
+        @param sep String used as a separator in the field list. Default the comma is used.
+        """
+
         list_fields = []
 
         if isinstance(select, str):
@@ -324,53 +360,46 @@ class PNSqlQuery(object):
 
             # self.d.select_ = ",".join(self.d.fieldList_)
 
-    """
-    Para establecer la parte FROM de la sentencia SQL de la consulta.
-
-    @param f Cadena de texto con la parte FROM de la sentencia SQL que
-           genera la consulta
-    """
-
     def setFrom(self, f: str) -> None:
+        """
+        To set the FROM part of the SQL statement of the query.
+
+        @param f Text string with the FROM part of the SQL statement that generate the query
+        """
+
         self.d.from_ = f
         # self.d.from_ = f.strip_whitespace()
         # self.d.from_ = self.d.from_.simplifyWhiteSpace()
 
-    """
-    Para establecer la parte WHERE de la sentencia SQL de la consulta.
-
-    @param s Cadena de texto con la parte WHERE de la sentencia SQL que
-        genera la consulta
-    """
-
     def setWhere(self, w: str) -> None:
+        """
+        To set the WHERE part of the SQL statement of the query.
+
+        @param s Text string with the WHERE part of the SQL statement that generates the query.
+        """
+
         self.d.where_ = w
         # self.d.where_ = w.strip_whitespace()
         # self.d.where_ = self.d.where_.simplifyWhiteSpace()
 
-    """
-    Para establecer la parte ORDER BY de la sentencia SQL de la consulta.
-
-    @param s Cadena de texto con la parte ORDER BY de la sentencia SQL que
-           genera la consulta
-    """
-
     def setOrderBy(self, w: str) -> None:
+        """
+        To set the ORDER BY part of the SQL statement of the query.
+
+        @param s Text string with the ORDER BY part of the SQL statement that generate the query
+        """
         self.d.orderBy_ = w
         # self.d.orderBy_ = w.strip_whitespace()
         # self.d.orderBy_ = self.d.orderBy_.simplifyWhiteSpace()
 
-    """
-    Para obtener la sentencia completa SQL de la consulta.
-
-    Este método une las tres partes de la consulta (SELECT, FROM Y WHERE),
-    sustituye los parámetros por el valor que tienen en el diccionario y devuelve
-    todo en una cadena de texto.
-
-    @return Cadena de texto con la sentencia completa SQL que genera la consulta
-    """
-
     def sql(self) -> str:
+        """
+        To get the full SQL statement of the query.
+
+        This method joins the three parts of the query (SELECT, FROM AND WHERE),
+        replace the parameters with the value they have in the dictionary and return all in a text string.
+        @return Text string with the full SQL statement that generates the query.
+        """
         # for tableName in self.d.tablesList_:
         #    if not self.d.db_.manager().existsTable(tableName) and not self.d.db_.manager().createTable(tableName):
         #        return
@@ -425,82 +454,78 @@ class PNSqlQuery(object):
 
         return res
 
-    """
-    Para obtener los parametros de la consulta.
-
-    @return Diccionario de parámetros
-    """
-
     def parameterDict(self) -> Dict[str, Any]:
+        """
+         To obtain the parameters of the query.
+
+        @return Parameter dictionary
+        """
         return self.d.parameterDict_
 
-    """
-    Para obtener los niveles de agrupamiento de la consulta.
-
-    @return Diccionario de niveles de agrupamiento
-    """
-
     def groupDict(self) -> Dict[int, Any]:
+        """
+        To obtain the grouping levels of the query.
+
+        @return Dictionary of grouping levels.
+        """
+
         return self.d.groupDict_
 
-    """
-    Para obtener la lista de nombres de los campos.
-
-    @return Lista de cadenas de texto con los nombres de los campos de la
-          consulta
-    """
-
     def fieldList(self) -> List[str]:
+        """
+        To get the list of field names.
+
+        @return List of text strings with the names of the fields in the query.
+        """
+
         if self.d.fieldList_:
             return self.d.fieldList_
         else:
             return self.sql_inspector.field_names()
 
-    """
-    Asigna un diccionario de parámetros, al diccionario de parámetros de la consulta.
-
-    El diccionario de parámetros del tipo FLGroupByQueryDict , ya construido,
-    es asignado como el nuevo diccionario de grupos de la consulta, en el caso de que
-    ya exista un diccionario de grupos, este es destruido y sobreescrito por el nuevo.
-    El diccionario pasado a este método pasa a ser propiedad de la consulta, y ella es la
-    encargada de borrarlo. Si el diccionario que se pretende asignar es nulo o vacío este
-    método no hace nada.
-
-    @param gd Diccionario de parámetros
-    """
-
     def setGroupDict(self, gd: Dict[int, Any]) -> None:
+        """
+        Assign a parameter dictionary to the query parameter dictionary.
+
+        The parameter dictionary of the FLGroupByQueryDict type, already built,
+        It is assigned as the new group dictionary of the query, in the event that
+        There is already a dictionary of groups, this is destroyed and overwritten by the new one.
+        The dictionary passed to this method becomes the property of the query, and she is the
+        responsible for deleting it. If the dictionary to be assigned is null or empty this
+        method does nothing.
+
+        @param gd Dictionary of parameters.
+        """
         if not gd:
             return
 
         self.d.groupDict_ = gd
 
-    """
-    Asigna un diccionario de grupos, al diccionario de grupos de la consulta.
-
-    El diccionario de grupos del tipo FLParameterQueryDict , ya construido,
-    es asignado como el nuevo diccionario de parámetros de la consulta, en el caso de que
-    ya exista un diccionario de parámetros, este es destruido y sobreescrito por el nuevo.
-    El diccionario pasado a este método pasa a ser propiedad de la consulta, y ella es la
-    encargada de borrarlo. Si el diccionario que se pretende asignar es nulo o vacío este
-    método no hace nada.
-
-    @param pd Diccionario de parámetros
-    """
-
     def setParameterDict(self, pd: Dict[str, Any]) -> None:
+        """
+        Assign a group dictionary to the group dictionary of the query.
+
+        The group dictionary of the FLParameterQueryDict type, already built,
+        It is assigned as the new dictionary of query parameters, in the event that
+        There is already a dictionary of parameters, it is destroyed and overwritten by the new one.
+        The dictionary passed to this method becomes the property of the query, and she is the
+        responsible for deleting it. If the dictionary to be assigned is null or empty this
+        method does nothing.
+
+        @param pd Parameter dictionary
+        """
+
         if not pd:
             return
 
         self.d.parameterDict_ = pd
 
-    """
-    Este método muestra el contenido de la consulta, por la sálida estándar.
-
-    Está pensado sólo para tareas de depuración
-    """
-
     def showDebug(self) -> None:
+        """
+        Show the content of the query, by the standard output.
+
+        It is intended only for debugging tasks.
+        """
         if not self.isActive():
             logger.warning("DEBUG : La consulta no está activa : No se ha ejecutado exec() o la sentencia SQL no es válida")
 
@@ -542,20 +567,8 @@ class PNSqlQuery(object):
 
         logger.warning(linea)
 
-    """
-    Obtiene el valor de un campo de la consulta.
-
-    Dado un nombre de un campo de la consulta, este método devuelve un objeto QVariant
-    con el valor de dicho campo. El nombre debe corresponder con el que se coloco en
-    la parte SELECT de la sentenica SQL de la consulta.
-
-    @param n Nombre del campo de la consulta
-    @param raw Si TRUE y el valor del campo es una referencia a un valor grande
-             (ver FLManager::storeLargeValue()) devuelve el valor de esa referencia,
-             en vez de contenido al que apunta esa referencia
-    """
-
     def _value_quick(self, n: Union[str, int], raw: bool = False) -> Any:
+        """Quick mode."""
         # Fast version of self.value
         if self._fieldNameToPosDict is None:
             self._fieldNameToPosDict = {v: n for n, v in enumerate(self.d.fieldList_)}
@@ -570,6 +583,8 @@ class PNSqlQuery(object):
         return ret
 
     def _value_std(self, n: Union[str, int, None], raw: bool = False) -> Any:
+        """Standart mode."""
+
         if n is None:
             logger.trace("value::invalid use with n=None.", stack_info=True)
             return None
@@ -592,143 +607,36 @@ class PNSqlQuery(object):
         return ret
 
     def value(self, n: Union[str, int], raw: bool = False) -> Any:
+        """
+        Get the value of a query field.
+
+        Given a name of a query field, this method returns a QVariant object
+        with the value of that field. The name must correspond to the one placed in
+        the SELECT part of the SQL statement of the query.
+
+        @param n Name of the query field
+        @param raw If TRUE and the value of the field is a reference to a large value
+             (see FLManager :: storeLargeValue ()) returns the value of that reference,
+             instead of content to which that reference points
+
+        """
         _value = self._value_std
 
         if config.value("ebcomportamiento/std_query", False):
             _value = self._value_std
         return _value(n, raw)
 
-    """
-    def _value_std(self, n, raw=False):
-        # Eneboo version
-        pos = None
-        name = None
-        table_name = None
-        field_name = None
-        # field = None
-        mtd_field = None
-        retorno = None
-        if n is None:
-            self.logger.trace("value::invalid use with n=None.", stack_info=True)
-            return None
-        if isinstance(n, str):
-            pos = self.fieldNameToPos(n)
-            name = n
-        else:
-            pos = n
-            name = self.posToFieldName(n)
-
-        if name not in self.fields_cache.keys():
-            self.logger.debug("value()::name %s not in cache", name)
-
-            if name:
-                tables_list = self.tablesList()
-                if name.find(".") > -1 and name[0 : name.find(".")] in tables_list:
-                    table_name = name[0 : name.find(".")]
-                    field_name = name[name.find(".") + 1 :]
-                else:
-                    if not tables_list and self.from_():
-                        tl = self.from_().replace(" ", "")
-                        tables_list = tl.split(",")
-
-                    for t in tables_list:
-                        mtd = (
-                            self.d.db_.manager().metadata(t, True)
-                            if t.find("=") == -1
-                            else None
-                        )
-                        name_fixed = name
-                        if name_fixed.upper().startswith(
-                            "SUM("
-                        ) or name_fixed.upper().startswith("COUNT("):
-                            name_fixed = name_fixed.replace(")", "")
-                            name_fixed = name_fixed.replace("SUM(", "")
-                            name_fixed = name_fixed.replace("COUNT(", "")
-
-                        if mtd is not None and name_fixed in mtd.fieldNames():
-                            table_name = t
-                            field_name = name_fixed
-                            break
-
-                if field_name is not None:
-                    mtd_field = (
-                        self.d.db_.manager()
-                        .metadata(table_name, False)
-                        .field(field_name)
-                    )
-                    self.fields_cache[name] = mtd_field
-
-        else:
-            mtd_field = self.fields_cache[name]
-
-        try:
-            if self._row is not None:
-                retorno = self._row[pos]
-        except Exception:
-            self.logger.exception("value::error retrieving row position %s", pos)
-
-        if retorno is None:
-            if mtd_field is not None:
-                # retorno = self.db().formatValue(mtd_field.type(), None, False)
-                if mtd_field.type() in ("double", "uint", "int"):
-                    retorno = 0
-                elif mtd_field.type() == "string":
-                    retorno = ""
-                elif mtd_field.type() == "bytearray":
-                    retorno = bytearray()
-            elif name and name.find("SUM(") > -1:
-                retorno = 0
-        else:
-            import datetime
-
-            if isinstance(retorno, str):  # str
-                if mtd_field is not None:
-                    if mtd_field.type() == "date":
-                        retorno = pineboolib.qsa.Date(retorno)
-
-                    elif mtd_field.type() == "pixmap":
-                        if not raw:
-                            if not self.d.db_.manager().isSystemTable(
-                                mtd_field.metadata().name()
-                            ):
-                                raw = True
-                        if raw:
-                            retorno = self.d.db_.manager().fetchLargeValue(retorno)
-                    elif mtd_field.type() == "string":
-                        if retorno == "None":
-                            retorno = ""
-
-                elif retorno.find(":") > -1:
-                    if retorno.find(":") < retorno.find("."):
-                        retorno = retorno[: retorno.find(".")]
-
-            elif isinstance(retorno, datetime.date):  # date
-                retorno = pineboolib.qsa.Date(str(retorno))
-
-            elif isinstance(retorno, float):  # float
-                if retorno == int(retorno):
-                    retorno = int(retorno)
-
-            elif isinstance(retorno, (datetime.time, datetime.timedelta)):  # time
-                retorno = str(retorno)[:8]
-            # elif isinstance(retorno, memoryview):
-            #    retorno = bytearray(retorno)
-            elif not isinstance(retorno, (str, int, bool, float, pineboolib.qsa.Date)):
-                retorno = float(retorno)
-
-        return retorno
-    """
-    """
-    Indica si un campo de la consulta es nulo o no
-
-    Dado un nombre de un campo de la consulta, este método devuelve true si el campo de la consulta es nulo.
-    El nombre debe corresponder con el que se coloco en
-    la parte SELECT de la sentenica SQL de la consulta.
-
-    @param n Nombre del campo de la consulta
-    """
-
     def isNull(self, n: str) -> bool:
+        """
+        Indicate whether a query field is null or not.
+
+        Given a name of a query field, this method returns true if the query field is null.
+        The name must correspond to the one placed in
+        the SELECT part of the SQL statement of the query.
+
+        @param n Name of the query field
+        """
+
         if isinstance(n, str):
             pos_ = self.fieldNameToPos(n)
 
@@ -736,16 +644,13 @@ class PNSqlQuery(object):
 
         raise Exception("isNull. field not found %s" % n)
 
-    """
-    Devuelve el nombre de campo, dada su posicion en la consulta.
-
-    @param p Posicion del campo en la consulta, empieza en cero y de izquierda
-       a derecha
-    @return Nombre del campo correspondiente. Si no existe el campo devuelve
-      QString::null
-    """
-
     def posToFieldName(self, p: int) -> str:
+        """
+        Return the field name, given its position in the query.
+
+        @param p Position of the field in the query, start at zero and left to right.
+        @return Name of the corresponding field. If the field does not exist, it returns None.
+        """
         return self.sql_inspector.posToFieldName(p)
         # if p < 0 or p >= len(self.d.fieldList_):
         #    return None
@@ -757,14 +662,14 @@ class PNSqlQuery(object):
 
         # return ret_
 
-    """
-    Devuelve la posición de una campo en la consulta, dado su nombre.
-
-    @param n Nombre del campo
-    @return Posicion del campo en la consulta. Si no existe el campo devuelve -1
-    """
-
     def fieldNameToPos(self, name: str) -> int:
+        """
+        Return the position of a field in the query, given its name.
+
+        @param n Field Name.
+        @return Position of the field in the query. If the field does not exist, return -1.
+        """
+
         return self.sql_inspector.fieldNameToPos(name.lower())
         # i = 0
         # for field in self.d.fieldList_:
@@ -776,27 +681,24 @@ class PNSqlQuery(object):
         # else:
         #    return False
 
-    """
-    Para obtener la lista de nombres de las tablas de la consulta.
-
-    @return Lista de nombres de las tablas que entran a formar parte de la
-        consulta
-    """
-
     def tablesList(self) -> List[str]:
+        """
+        To get the list of names of the query tables.
+
+        @return List of names of the tables that become part of the query.
+        """
+
         if self.d.tablesList_:
             return self.d.tablesList_
         else:
             return self.sql_inspector.table_names()
 
-    """
-    Establece la lista de nombres de las tablas de la consulta
-
-    @param tl Cadena de texto con los nombres de las tablas
-        separados por comas, p.e. "tabla1,tabla2,tabla3"
-    """
-
     def setTablesList(self, tl: Union[str, List]) -> None:
+        """
+        Set the list of names of the query tables.
+
+        @param tl Text list (or a list) with the names of the tables separated by commas, e.g. "table1, table2, table3"
+        """
         self.d.tablesList_ = []
         if isinstance(tl, list):
             table_list = ",".join(tl)
@@ -810,42 +712,43 @@ class PNSqlQuery(object):
 
             self.d.tablesList_.append(tabla)
 
-    """
-    Establece el valor de un parámetro.
-
-    @param name Nombre del parámetro
-    @param v Valor para el parámetros
-    """
-
     def setValueParam(self, name: str, v: Any) -> None:
+        """
+        Set the value of a parameter.
+
+        @param name Parameter name.
+        @param v Value for the parameters.
+        """
+
         self.d.parameterDict_[name] = v
 
-    """
-    Obtiene el valor de un parámetro.
-
-    @param name Nombre del parámetro.
-    """
-
     def valueParam(self, name: str) -> Any:
+        """
+        Get the value of a parameter.
+
+        @param name Parameter name.
+        """
+
         if name in self.d.parameterDict_.keys():
             return self.d.parameterDict_[name]
         else:
             return None
 
-    """
-    Redefinicion del método size() de QSqlQuery
-    """
-
     def size(self) -> int:
+        """
+        Report the number of results returned by the query.
+
+        @return number of results.
+        """
         return len(self._datos)
 
-    """
-    Para obtener la lista de definiciones de campos de la consulta
-
-    @return Objeto con la lista de deficiones de campos de la consulta
-    """
-
     def fieldMetaDataList(self) -> Any:
+        """
+        To get the list of query field definitions.
+
+        @return Object with the list of deficiencies in the query fields.
+        """
+
         if not self.d.fieldMetaDataList_:
             self.d.fieldMetaDataList_ = {}
         table = None
@@ -867,61 +770,106 @@ class PNSqlQuery(object):
 
     countRefQuery = 0
 
-    """
-    Para obtener la base de datos sobre la que trabaja
-    """
-
     def db(self) -> "IConnection":
+        """
+        Get the database you work on.
+
+        @return PNConnection user by the query.
+        """
         return self.d.db_
 
     def isValid(self) -> bool:
+        """
+        Return if the query has an invalid defined table.
+
+        @return True or False.
+        """
+
         return False if self.invalidTablesList else True
 
     def isActive(self) -> bool:
+        """
+        Indicate whether the data has been collected completely.
+
+        @return True or False.
+        """
         return self._is_active
 
     def at(self) -> Any:
+        """
+        Return the current position in the result list.
+
+        @return line position.
+        """
+
         return self._posicion
 
     def lastQuery(self) -> Union[bool, str]:
-        return self.sql()
+        """
+        Return the last query made.
+
+        @return query string.
+        """
+
+        return self._last_query
 
     def numRowsAffected(self) -> int:
+        """
+        Return Number of lines selected in the query.
+
+        @return number of lines.
+        """
         return len(self._datos)
 
     @decorators.NotImplementedWarn
     def lastError(self):
+        """Not Implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def isSelect(self):
+        """Not Implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def QSqlQuery_size(self):
+        """Not Implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def driver(self):
+        """Not Implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def result(self):
+        """Not Implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def isForwardOnly(self):
+        """Not Implemented."""
         pass
 
     def setForwardOnly(self, forward) -> None:
+        """Deprecated."""
         # No sirve para nada , por ahora
         pass
 
     @decorators.NotImplementedWarn
     def QSqlQuery_value(self, i):
+        """Not Implemented."""
         pass
 
     def seek(self, i: int, relative=False) -> bool:
+        """
+        Position the cursor on a given result.
+
+        @param i Position to search.
+        @param relative Boolean indicates if the position is relative or absolut.
+        @return True or False.
+        """
+
         if not self._cursor:
             return False
 
@@ -938,6 +886,11 @@ class PNSqlQuery(object):
         return False
 
     def next(self) -> bool:
+        """
+        Position the query cursor in the next record.
+
+        @return True or False.
+        """
         if not self._cursor:
             return False
 
@@ -950,6 +903,11 @@ class PNSqlQuery(object):
         return False
 
     def prev(self) -> bool:
+        """
+        Position the query cursor in the provious record.
+
+        @return True or False.
+        """
         if not self._cursor:
             return False
 
@@ -962,6 +920,11 @@ class PNSqlQuery(object):
         return False
 
     def first(self) -> bool:
+        """
+        Position the query cursor in the first record.
+
+        @return True or False.
+        """
         if not self._cursor:
             return False
 
@@ -973,6 +936,11 @@ class PNSqlQuery(object):
         return False
 
     def last(self) -> bool:
+        """
+        Position the query cursor in the last record.
+
+        @return True or False.
+        """
         if not self._cursor:
             return False
 
@@ -985,24 +953,30 @@ class PNSqlQuery(object):
 
     @decorators.NotImplementedWarn
     def prepare(self, query):
+        """Not Implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def bindValue(self, *args):
+        """Not Implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def addBindValue(self, *args):
+        """Not Implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def boundValue(self, *args):
+        """Not Implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def boundValues(self):
+        """Not Implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def executedQuery(self):
+        """Not Implemented."""
         pass
