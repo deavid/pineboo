@@ -41,4 +41,5 @@ class MainForm(QMainWindow):
         self.w_.setObjectName("container")
 
 
-mainWindow = MainForm()
+mainWindow: MainForm
+# mainWindow = MainForm()

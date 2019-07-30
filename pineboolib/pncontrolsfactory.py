@@ -19,8 +19,6 @@ logger = logging.getLogger("PNControlsFactory")
 Conjunto de controles usados en Pineboo. Estos son cargados desde el DGI seleccionado en el proyecto
 """
 
-qsa_sys = SysType()
-
 
 class ObjectNotFoundInCurrentDGI(object):
     pass
@@ -302,9 +300,6 @@ class System_class(object):
         return ret_
 
 
-System = System_class()
-
-
 class ProxySlot:
     PROXY_FUNCTIONS: Dict[str, Callable] = {}
 
@@ -569,3 +564,8 @@ from pineboolib.application.packager.aqunpacker import AQUnpacker  # noqa:
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
 
 # aqApp -- imported from loader.main after reload_from_DGI() call, as it is a cyclic dependency
+
+# System = System_class()
+# qsa_sys = SysType()
+qsa_sys: SysType
+System: System_class

@@ -1,8 +1,7 @@
 """
-Manage  the buffers used by PNSqlCursor.
+Manage buffers used by PNSqlCursor.
 
-What are buffer?
--------------------
+*What is a buffer?*
 
 Buffers are the data records pointed to by a PNSqlCursor.
 """

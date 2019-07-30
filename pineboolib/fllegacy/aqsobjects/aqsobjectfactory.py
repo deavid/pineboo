@@ -13,8 +13,10 @@ from pineboolib.fllegacy.aqsobjects.aqods import AQOdsColor, AQOdsStyle, AQOdsIm
 from pineboolib.fllegacy.aqsobjects.aqboolflagstate import AQBoolFlagState, AQBoolFlagStateList  # noqa: F401
 from typing import Any
 
-AQUtil = AQUtil_class()
-AQS = AQS_class()
+# AQUtil = AQUtil_class()
+# AQS = AQS_class()
+AQUtil: AQUtil_class
+AQS: AQS_class
 
 """
 FLFormDB
