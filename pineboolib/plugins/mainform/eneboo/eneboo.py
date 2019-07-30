@@ -806,7 +806,7 @@ class MainForm(QtWidgets.QMainWindow):
     def initScript(self) -> None:
         from pineboolib.core.utils.utils_base import filedir
 
-        mw = mainWindow
+        mw = self
         mw.createUi(filedir("plugins/mainform/eneboo/mainform.ui"))
 
         mw.init()
@@ -819,11 +819,11 @@ class MainForm(QtWidgets.QMainWindow):
 
     def reinitSript(self) -> None:
 
-        main_wid = pncontrolsfactory.aqApp.mainWidget() if mainWindow.w_ is None else mainWindow.w_
+        main_wid = pncontrolsfactory.aqApp.mainWidget() if self.w_ is None else self.w_
         if main_wid is None or main_wid.objectName() != "container":
             return
 
-        mw = mainWindow
+        mw = self
         # mw.initFormWidget(main_wid)
         mw.writeState()
         mw.removeAllPages()
@@ -837,7 +837,7 @@ class MainForm(QtWidgets.QMainWindow):
         pass
 
     def triggerAction(self, signature) -> None:
-        mw = mainWindow
+        mw = self
         sgt = signature.split(":")
         # ok = True
         ac = mw.ag_menu_.findChild(QtWidgets.QAction, sgt[2])

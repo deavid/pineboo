@@ -26,7 +26,7 @@ class MainForm(QMainWindow):
     def initScript(self) -> None:
         from pineboolib.core.utils.utils_base import filedir
 
-        mw = mainWindow
+        mw = self
         mw.createUi(filedir("plugins/mainform/eneboo_mdi/mainform.ui"))
         from pineboolib.fllegacy.flapplication import aqApp
 
