@@ -80,7 +80,7 @@ class Kut2FPDF(object):
         self.reset_page_count = False
         self.new_page = False
 
-    def parse(self, name: str, kut: str, data: str, report: FPDF = None, flags: List[int] = []) -> Optional[str]:
+    def parse(self, name: str, kut: str, data: str, report: "FPDF" = None, flags: List[int] = []) -> Optional[str]:
         """
         Parse string containing ".kut" file into a pdf and return its file path.
 
