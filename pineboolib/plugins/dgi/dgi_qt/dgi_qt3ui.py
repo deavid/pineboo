@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+Module dgi_qt3ui.
+
+Loads old Qt3 UI files and creates a Qt5 UI.
+"""
 from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
 from xml.etree import ElementTree as ET
 from binascii import unhexlify
@@ -221,7 +226,7 @@ def loadMenuBar(xml: ET.Element, widget) -> None:
         mB = widget.menuBar()
     else:
         mB = QtWidgets.QMenuBar(widget)
-        widget.layout().setMenuBar(mB)
+        widget._layout().setMenuBar(mB)
     for x in xml:
         if x.tag == "property":
             name = x.get("name")
@@ -325,7 +330,7 @@ def createWidget(classname: str, parent=None) -> Any:
     return cls(parent)
 
 
-def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> None:
+class loadWidget:
     translate_properties = {
         "caption": "windowTitle",
         "name": "objectName",
@@ -334,26 +339,237 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
         "accel": "shortcut",
         "layoutMargin": "contentsMargins",
     }
-    if widget is None:
-        raise ValueError
-    if parent is None:
-        parent = widget
-    if origWidget is None:
-        origWidget = widget
-    # if project.DGI.localDesktop():
-    #    if not hasattr(origWidget, "ui_"):
-    #        origWidget.ui_ = {}
-    # else:
-    #    origWidget.ui_ = {}
+    widget: QtWidgets.QWidget
+    parent: QtWidgets.QWidget
+    origWidget: QtWidgets.QWidget
 
-    def process_property(xmlprop, widget=widget):
+    def __init__(
+        self,
+        xml: ET.Element,
+        widget: QtWidgets.QWidget,
+        parent: Optional[QtWidgets.QWidget] = None,
+        origWidget: Optional[QtWidgets.QWidget] = None,
+    ) -> None:
+        logger.trace("loadWidget: xml: %s widget: %s parent: %s origWidget: %s", xml, widget, parent, origWidget)
+        if widget is None:
+            raise ValueError
+        if parent is None:
+            parent = widget
+        if origWidget is None:
+            origWidget = widget
+        self.widget = widget
+        self.origWidget = origWidget
+        self.parent = parent
+        del widget
+        del origWidget
+        del parent
+        # if project.DGI.localDesktop():
+        #    if not hasattr(origWidget, "ui_"):
+        #        origWidget.ui_ = {}
+        # else:
+        #    origWidget.ui_ = {}
+
+        nwidget = None
+        if self.widget == self.origWidget:
+            class_ = xml.get("class")
+            if class_ is None:
+                class_ = type(self.widget).__name__
+
+            nwidget = createWidget(class_, parent=self.origWidget)
+            self.parent = nwidget
+        layouts_pending_process: List[Tuple[ET.Element, str]] = []
+        properties = []
+        unbold_fonts = []
+        has_layout_defined = False
+
+        for c in xml:
+            if c.tag == "layout":
+                # logger.warning("Trying to replace layout. Ignoring. %s, %s", repr(c.tag), widget._layout)
+                classname = c.get("class")
+                if classname is None:
+                    raise Exception("Expected class attr")
+                lay_ = getattr(QtWidgets, classname)()
+                lay_.setObjectName(c.get("name"))
+                self.widget.setLayout(lay_)
+                continue
+
+            if c.tag == "property":
+                properties.append(c)
+                continue
+
+            if c.tag in ("vbox", "hbox", "grid"):
+                if has_layout_defined:  # nos saltamos una nueva definición del layout ( mezclas de ui incorrectas)
+                    # El primer layout que se define es el que se respeta
+                    continue
+
+                if c.tag.find("box") > -1:
+                    layout_type = "Q%s%sLayout" % (c.tag[0:2].upper(), c.tag[2:])
+                else:
+                    layout_type = "QGridLayout"
+                _LayoutClass = getattr(QtWidgets, layout_type)
+                self.widget._layout = cast(QtWidgets.QLayout, _LayoutClass())
+
+                lay_name = None
+                lay_margin_v = 2
+                lay_margin_h = 2
+                lay_spacing = 2
+                for p in c.findall("property"):
+                    p_name = p.get("name")
+                    number_elem = p.find("number")
+
+                    if p_name == "name":
+                        lay_name_e = p.find("cstring")
+                        if lay_name_e is not None:
+                            lay_name = lay_name_e.text
+                    elif p_name == "margin":
+                        if number_elem is not None:
+                            if number_elem.text is None:
+                                raise ValueError("margin no contiene valor")
+                            lay_margin = int(number_elem.text)
+
+                        if c.tag == "hbox":
+                            lay_margin_h = lay_margin
+                        elif c.tag == "vbox":
+                            lay_margin_v = lay_margin
+                        else:
+                            lay_margin_h = lay_margin_v = lay_margin
+
+                    elif p_name == "spacing":
+                        if number_elem is not None:
+                            if number_elem.text is None:
+                                raise ValueError("spacing no contiene valor")
+                            lay_spacing = int(number_elem.text)
+                    elif p_name == "sizePolicy":
+                        self.widget.setSizePolicy(loadVariant(p, self.widget))
+
+                self.widget._layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+                self.widget._layout.setObjectName(lay_name or "layout")
+                self.widget._layout.setContentsMargins(lay_margin_h, lay_margin_v, lay_margin_h, lay_margin_v)
+                self.widget._layout.setSpacing(lay_spacing)
+
+                lay_type = "grid" if c.tag == "grid" else "box"
+                layouts_pending_process += [(c, lay_type)]
+                has_layout_defined = True
+                continue
+
+            if c.tag == "item":
+                if isinstance(self.widget, pncontrolsfactory.QMenu):
+                    continue
+                else:
+                    prop1: Dict[str, Any] = {}
+                    for p in c.findall("property"):
+                        k, v = loadProperty(p)
+                        prop1[k] = v
+
+                    self.widget.addItem(prop1["text"])
+                continue
+
+            if c.tag == "attribute":
+                k = c.get("name")
+                v = loadVariant(c)
+                attrs = getattr(self.widget, "_attrs", None)
+                if attrs is not None:
+                    attrs[k] = v
+                else:
+                    logger.warning("qt3ui: [NOT ASSIGNED] attribute %r => %r" % (k, v), self.widget.__class__, repr(c.tag))
+                continue
+            if c.tag == "widget":
+                # Si dentro del widget hay otro significa
+                # que estamos dentro de un contenedor.
+                # Según el tipo de contenedor, los widgets
+                # se agregan de una forma u otra.
+                classname = c.get("class")
+                if classname is None:
+                    raise Exception("Expected class attr")
+                new_widget = createWidget(classname, parent=self.parent)
+                new_widget.hide()
+                new_widget._attrs = {}
+                loadWidget(c, new_widget, self.parent, self.origWidget)
+                prop_name = c.find("./property[@name='name']/cstring")
+                path = prop_name.text if prop_name is not None else ""
+                if project._DGI and not project.DGI.localDesktop():
+                    self.origWidget.ui_[path] = new_widget
+                new_widget.setContentsMargins(0, 0, 0, 0)
+                new_widget.show()
+
+                gb = isinstance(self.widget, QtWidgets.QGroupBox)
+                wd = isinstance(self.widget, QtWidgets.QWidget)
+                if isinstance(self.widget, QtWidgets.QTabWidget):
+                    title = new_widget._attrs.get("title", "UnnamedTab")
+                    self.widget.addTab(new_widget, title)
+                elif gb or wd:
+                    lay = getattr(self.widget, "layout")()
+                    if not lay and not isinstance(self.widget, pncontrolsfactory.QToolBar):
+                        lay = QtWidgets.QVBoxLayout()
+                        self.widget.setLayout(lay)
+
+                    if isinstance(self.widget, pncontrolsfactory.QToolBar):
+                        if isinstance(new_widget, QtWidgets.QAction):
+                            self.widget.addAction(new_widget)
+                        else:
+                            self.widget.addWidget(new_widget)
+                    else:
+                        lay.addWidget(new_widget)
+                else:
+                    if Options.DEBUG_LEVEL > 50:
+                        logger.warning("qt3ui: Unknown container widget xml tag", self.widget.__class__, repr(c.tag))
+                unbold_fonts.append(new_widget)
+                continue
+
+            if c.tag == "action":
+                acName = c.get("name")
+                if root is None:
+                    raise Exception("No se encuentra root")
+
+                for xmlaction in root.findall("actions//action"):
+                    prop_name = xmlaction.find("./property[@name='name']/cstring")
+                    if prop_name is not None and prop_name.text == acName:
+                        self.process_action(xmlaction, self.widget)
+                        continue
+
+                continue
+
+            if c.tag == "separator":
+                self.widget.addSeparator()
+                continue
+
+            if c.tag == "column":
+                for p in c.findall("property"):
+                    k, v = loadProperty(p)
+                    if k == "text":
+                        self.widget.setHeaderLabel(v)
+                    elif k == "clickable":
+                        self.widget.setClickable(bool(v))
+                    elif k == "resizable":
+                        self.widget.setResizable(bool(v))
+
+                continue
+
+            logger.info("%s: Unknown widget xml tag %s %s", __name__, self.widget.__class__, repr(c.tag))
+
+        for c in properties:
+            self.process_property(c)
+        for c, m in layouts_pending_process:
+            self.process_layout_box(c, mode=m)
+        for new_widget in unbold_fonts:
+            f = new_widget.font()
+            f.setBold(False)
+            f.setItalic(False)
+            new_widget.setFont(f)
+
+        # if not project.DGI.localDesktop():
+        #    if nwidget is not None and origWidget.objectName() not in origWidget.ui_:
+        #        origWidget.ui_[origWidget.objectName()] = nwidget
+
+    def process_property(self, xmlprop, widget=None):
+        if widget is None:
+            widget = self.widget
         set_fn: Optional[Callable] = None
-        pname = xmlprop.get("name")
-        if pname in translate_properties:
-            pname = translate_properties[pname]
+        pname = xmlprop.get("name") or ""
+        pname = self.translate_properties.get(pname, pname)
         setpname = "set" + pname[0].upper() + pname[1:]
         if pname == "layoutSpacing":
-            set_fn = widget.layout.setSpacing
+            set_fn = widget._layout.setSpacing
         elif pname == "margin":
             set_fn = widget.setContentsMargins
         elif pname in ("paletteBackgroundColor", "paletteForegroundColor"):
@@ -376,7 +592,7 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
         elif pname == "lineStep" and isinstance(widget, pncontrolsfactory.QSpinBox):
             set_fn = widget.setSingleStep
         elif pname == "newLine":
-            set_fn = origWidget.addToolBarBreak
+            set_fn = self.origWidget.addToolBarBreak
         elif pname == "functionGetColor":
             set_fn = widget.setFunctionGetColor
         elif pname == "cursor":
@@ -437,18 +653,20 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
             # if Options.DEBUG_LEVEL > 50:
             #    print(etree.ElementTree.tostring(xmlprop))
 
-    def process_action(xmlaction, toolBar):
+    def process_action(self, xmlaction, toolBar):
         action = createWidget("QAction")
         for p in xmlaction:
             pname = p.get("name")
-            if pname in translate_properties:
-                pname = translate_properties[pname]
+            if pname in self.translate_properties:
+                pname = self.translate_properties[pname]
 
-            process_property(p, action)
+            self.process_property(p, action)
         toolBar.addAction(action)
         # origWidget.ui_[action.objectName()] = action
 
-    def process_layout_box(xmllayout, widget=widget, mode="box"):
+    def process_layout_box(self, xmllayout, widget=None, mode="box"):
+        if widget is None:
+            widget = self.widget
         for c in xmllayout:
             try:
                 row = int(c.get("row")) or 0
@@ -468,7 +686,7 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
                         widget.addButton(new_widget)
                         continue
 
-                loadWidget(c, new_widget, parent, origWidget)
+                loadWidget(c, new_widget, self.parent, self.origWidget)
                 # path = c.find("./property[@name='name']/cstring").text
                 # if not project.DGI.localDesktop():
                 #    origWidget.ui_[path] = new_widget
@@ -476,15 +694,15 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
                 #    new_widget.show()
                 if mode == "box":
                     try:
-                        widget.layout.addWidget(new_widget)
+                        widget._layout.addWidget(new_widget)
                     except Exception:
-                        logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget.layout)
+                        logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget._layout)
 
                 elif mode == "grid":
                     rowSpan = c.get("rowspan") or 1
                     colSpan = c.get("colspan") or 1
                     try:
-                        widget.layout.addWidget(new_widget, row, col, int(rowSpan), int(colSpan))
+                        widget._layout.addWidget(new_widget, row, col, int(rowSpan), int(colSpan))
                     except Exception:
                         logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget)
                         logger.trace("Detalle:", stack_info=True)
@@ -527,210 +745,17 @@ def loadWidget(xml: ET.Element, widget=None, parent=None, origWidget=None) -> No
                 #                                                  1 else "Vertical", policy_name, width, height, hPolicy, vPolicy))
                 new_spacer = QtWidgets.QSpacerItem(width, height, hPolicy, vPolicy)
                 if mode == "grid":
-                    widget.layout.addItem(new_spacer, row, col, int(rowSpan), int(colSpan))
+                    widget._layout.addItem(new_spacer, row, col, int(rowSpan), int(colSpan))
                 else:
-                    widget.layout.addItem(new_spacer)
+                    widget._layout.addItem(new_spacer)
                 # print("Spacer %s.%s --> %s" % (spacer_name, new_spacer, widget.objectName()))
             else:
                 logger.warning("qt3ui: Unknown layout xml tag", repr(c.tag))
 
-        widget.setLayout(widget.layout)
-        # widget.layout.setContentsMargins(1, 1, 1, 1)
-        # widget.layout.setSpacing(1)
-        # widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
-
-    nwidget = None
-    if widget == origWidget:
-        class_ = xml.get("class")
-        if class_ is None:
-            class_ = type(widget).__name__
-
-        nwidget = createWidget(class_, parent=origWidget)
-        parent = nwidget
-    layouts_pending_process: List[Tuple[ET.Element, str]] = []
-    properties = []
-    unbold_fonts = []
-    has_layout_defined = False
-
-    for c in xml:
-        if c.tag == "layout":
-            # logger.warning("Trying to replace layout. Ignoring. %s, %s", repr(c.tag), widget.layout)
-            classname = c.get("class")
-            if classname is None:
-                raise Exception("Expected class attr")
-            lay_ = getattr(QtWidgets, classname)()
-            lay_.setObjectName(c.get("name"))
-            widget.setLayout(lay_)
-            continue
-
-        if c.tag == "property":
-            properties.append(c)
-            continue
-
-        if c.tag in ("vbox", "hbox", "grid"):
-            if has_layout_defined:  # nos saltamos una nueva definición del layout ( mezclas de ui incorrectas)
-                # El primer layout que se define es el que se respeta
-                continue
-
-            if c.tag.find("box") > -1:
-                layout_type = "Q%s%sLayout" % (c.tag[0:2].upper(), c.tag[2:])
-            else:
-                layout_type = "QGridLayout"
-
-            widget.layout = getattr(QtWidgets, layout_type)()
-
-            lay_name = None
-            lay_margin_v = 2
-            lay_margin_h = 2
-            lay_spacing = 2
-            for p in c.findall("property"):
-                p_name = p.get("name")
-                number_elem = p.find("number")
-
-                if p_name == "name":
-                    lay_name_e = p.find("cstring")
-                    if lay_name_e is not None:
-                        lay_name = lay_name_e.text
-                elif p_name == "margin":
-                    if number_elem is not None:
-                        if number_elem.text is None:
-                            raise ValueError("margin no contiene valor")
-                        lay_margin = int(number_elem.text)
-
-                    if c.tag == "hbox":
-                        lay_margin_h = lay_margin
-                    elif c.tag == "vbox":
-                        lay_margin_v = lay_margin
-                    else:
-                        lay_margin_h = lay_margin_v = lay_margin
-
-                elif p_name == "spacing":
-                    if number_elem is not None:
-                        if number_elem.text is None:
-                            raise ValueError("spacing no contiene valor")
-                        lay_spacing = int(number_elem.text)
-                elif p_name == "sizePolicy":
-                    widget.setSizePolicy(loadVariant(p, widget))
-
-            widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
-            widget.layout.setObjectName(lay_name)
-            widget.layout.setContentsMargins(lay_margin_h, lay_margin_v, lay_margin_h, lay_margin_v)
-            widget.layout.setSpacing(lay_spacing)
-
-            lay_type = "grid" if c.tag == "grid" else "box"
-            layouts_pending_process += [(c, lay_type)]
-            has_layout_defined = True
-            continue
-
-        if c.tag == "item":
-            if isinstance(widget, pncontrolsfactory.QMenu):
-                continue
-            else:
-                prop1: Dict[str, Any] = {}
-                for p in c.findall("property"):
-                    k, v = loadProperty(p)
-                    prop1[k] = v
-
-                widget.addItem(prop1["text"])
-            continue
-
-        if c.tag == "attribute":
-            k = c.get("name")
-            v = loadVariant(c)
-            attrs = getattr(widget, "_attrs", None)
-            if attrs is not None:
-                attrs[k] = v
-            else:
-                logger.warning("qt3ui: [NOT ASSIGNED] attribute %r => %r" % (k, v), widget.__class__, repr(c.tag))
-            continue
-        if c.tag == "widget":
-            # Si dentro del widget hay otro significa
-            # que estamos dentro de un contenedor.
-            # Según el tipo de contenedor, los widgets
-            # se agregan de una forma u otra.
-            classname = c.get("class")
-            if classname is None:
-                raise Exception("Expected class attr")
-            new_widget = createWidget(classname, parent=parent)
-            new_widget.hide()
-            new_widget._attrs = {}
-            loadWidget(c, new_widget, parent, origWidget)
-            prop_name = c.find("./property[@name='name']/cstring")
-            path = prop_name.text if prop_name is not None else ""
-            if project._DGI and not project.DGI.localDesktop():
-                origWidget.ui_[path] = new_widget
-            new_widget.setContentsMargins(0, 0, 0, 0)
-            new_widget.show()
-
-            gb = isinstance(widget, QtWidgets.QGroupBox)
-            wd = isinstance(widget, QtWidgets.QWidget)
-            if isinstance(widget, QtWidgets.QTabWidget):
-                title = new_widget._attrs.get("title", "UnnamedTab")
-                widget.addTab(new_widget, title)
-            elif gb or wd:
-                lay = getattr(widget, "layout")()
-                if not lay and not isinstance(widget, pncontrolsfactory.QToolBar):
-                    lay = QtWidgets.QVBoxLayout()
-                    widget.setLayout(lay)
-
-                if isinstance(widget, pncontrolsfactory.QToolBar):
-                    if isinstance(new_widget, QtWidgets.QAction):
-                        widget.addAction(new_widget)
-                    else:
-                        widget.addWidget(new_widget)
-                else:
-                    lay.addWidget(new_widget)
-            else:
-                if Options.DEBUG_LEVEL > 50:
-                    logger.warning("qt3ui: Unknown container widget xml tag", widget.__class__, repr(c.tag))
-            unbold_fonts.append(new_widget)
-            continue
-
-        if c.tag == "action":
-            acName = c.get("name")
-            if root is None:
-                raise Exception("No se encuentra root")
-
-            for xmlaction in root.findall("actions//action"):
-                prop_name = xmlaction.find("./property[@name='name']/cstring")
-                if prop_name is not None and prop_name.text == acName:
-                    process_action(xmlaction, widget)
-                    continue
-
-            continue
-
-        if c.tag == "separator":
-            widget.addSeparator()
-            continue
-
-        if c.tag == "column":
-            for p in c.findall("property"):
-                k, v = loadProperty(p)
-                if k == "text":
-                    widget.setHeaderLabel(v)
-                elif k == "clickable":
-                    widget.setClickable(bool(v))
-                elif k == "resizable":
-                    widget.setResizable(bool(v))
-
-            continue
-
-        if Options.DEBUG_LEVEL > 50:
-            logger.warning("%s: Unknown widget xml tag %s %s", __name__, widget.__class__, repr(c.tag))
-
-    for c in properties:
-        process_property(c)
-    for c, m in layouts_pending_process:
-        process_layout_box(c, mode=m)
-    for new_widget in unbold_fonts:
-        f = new_widget.font()
-        f.setBold(False)
-        f.setItalic(False)
-        new_widget.setFont(f)
-
-    # if not project.DGI.localDesktop():
-    #    if nwidget is not None and origWidget.objectName() not in origWidget.ui_:
-    #        origWidget.ui_[origWidget.objectName()] = nwidget
+        widget.setLayout(widget._layout)
+        # widget._layout.setContentsMargins(1, 1, 1, 1)
+        # widget._layout.setSpacing(1)
+        # widget._layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
 
 def loadIcon(xml: "ET.Element") -> None:
