@@ -1,6 +1,6 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtCore  # type: ignore
-from typing import Set, Tuple
+from typing import Set, Tuple, Any, Dict
 import sys
 import weakref
 
@@ -15,7 +15,7 @@ class FormDBWidget(QtCore.QObject):
     signal_test = QtCore.pyqtSignal(str, QtCore.QObject)
     _loaded = None
 
-    _cursors = {}
+    _cursors: Dict[str, Any]
 
     def __init__(self, action=None, project=None, parent=None):
         if project is None:

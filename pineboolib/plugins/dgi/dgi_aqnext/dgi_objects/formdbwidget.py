@@ -1,11 +1,15 @@
 # # -*- coding: utf-8 -*-
+"""
+FormDBWidget module.
+"""
+from typing import Any, Dict
 from PyQt5 import QtCore  # type: ignore
 import sys
 import weakref
 
 
 class FormDBWidget(QtCore.QObject):
-    """description of class"""
+    """Replacement for FormDBWidget that does not depend on GUI."""
 
     closed = QtCore.pyqtSignal()
     cursor_ = None
@@ -13,10 +17,12 @@ class FormDBWidget(QtCore.QObject):
     iface = None
     signal_test = QtCore.pyqtSignal(str, QtCore.QObject)
     _loaded = None
-    _formconnections: set = None
-    _cursors = {}
+    _formconnections: set
+    _cursors: Dict[str, Any]
 
     def __init__(self, action=None, project=None, parent=None):
+        """Create FormDBWidget."""
+
         if project is None:
             parent = QtCore.QObject()
 

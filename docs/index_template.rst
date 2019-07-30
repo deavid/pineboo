@@ -135,6 +135,7 @@
    code/pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/auth
    code/pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/flsqlcursor
    code/pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/formdbwidget
+   code/pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/index
    code/pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/qlistview
    code/pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/qmainwindow
    code/pineboolib/plugins/dgi/dgi_aqnext/index
@@ -210,6 +211,7 @@
    code/pineboolib/plugins/dgi/dgi_qt/index
    code/pineboolib/plugins/dgi/dgi_schema
    code/pineboolib/plugins/dgi/dgi_server/dgi_objects/formdbwidget
+   code/pineboolib/plugins/dgi/dgi_server/dgi_objects/index
    code/pineboolib/plugins/dgi/dgi_server/dgi_objects/qlistview
    code/pineboolib/plugins/dgi/dgi_server/dgi_objects/qmainwindow
    code/pineboolib/plugins/dgi/dgi_server/dgi_server
@@ -224,6 +226,7 @@
    code/pineboolib/plugins/qtwidgetsplugins/FLFieldDB
    code/pineboolib/plugins/qtwidgetsplugins/FLTable
    code/pineboolib/plugins/qtwidgetsplugins/FLTableDB
+   code/pineboolib/plugins/qtwidgetsplugins/index
    code/pineboolib/plugins/sql/flmysql_innodb
    code/pineboolib/plugins/sql/flmysql_innodb2
    code/pineboolib/plugins/sql/flmysql_myisam
