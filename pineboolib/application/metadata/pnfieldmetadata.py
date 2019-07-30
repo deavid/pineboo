@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+"""Manage the data of a field in a table."""
+
 from pineboolib.core.utils.utils_base import aqtt
 
 from pineboolib.core.utils import logging
@@ -16,30 +18,7 @@ logger = logging.getLogger("PNFieldMetadata")
 
 
 class PNFieldMetaData(IFieldMetaData):
-    """
-  @param n Nombre del campo
-  @param a Alias del campo, utilizado en etiquetas de los formularios
-  @param aN TRUE si permite nulos (NULL), FALSE si los permite (NOT NULL)
-  @param _isPrimaryKey TRUE si es clave primaria, FALSE si no es clave primaria, ser
-        clave primaria implica ser Indice y Único
-  @param t Tipo del campo
-  @param l Longitud del campo en caracteres, siempre que se de tipo cadena
-       de caracteres
-  @param c Indica si el campo es calculado
-  @param v Indica si el campo es visible
-  @param ed Indica si el campo es editable
-  @param pI Indica el número de dígitos de la parte entera
-  @param pD Indica el número de decimales
-  @param iNX TRUE si el campo es índice
-  @param uNI TRUE si el campo determina registros únicos
-  @param coun Indica si es un contador. Para referencias automáticas
-  @param defValue Valor por defecto para el campo
-  @param oT Indica si las modificaciones en el campo son fuera de transaccion
-  @param rX Expresion regular utilizada como mascara de validacion
-  @param vG Indica si el campo es visible en la rejilla de la tabla
-  @param gen Indica si el campo es generado.
-  @param iCK Indica si es clave compuesta
-    """
+    """PNFieldMetaData Class."""
 
     Serial = "serial"
     Unlock = "unlock"
@@ -47,6 +26,32 @@ class PNFieldMetaData(IFieldMetaData):
     count_ = 0
 
     def __init__(self, *args, **kwargs) -> None:
+        """
+        Initialize the metadata with the collected data.
+
+        @param n Field Name.
+        @param to Alias ​​del campo, used in form labels.
+        @param aN TRUE if it allows nulls (NULL), FALSE if it allows them (NOT NULL).
+        @param _isPrimaryKey TRUE if it is a primary key, FALSE if it is not a primary key, be
+                primary key implies being Index and Unique.
+        @param t Field type.
+        @param l Length of the field in characters, provided it is of type string
+               of characters.
+        @param c Indicates if the field is calculated.
+        @param v Indicates if the field is visible.
+        @param ed Indicates if the field is editable.
+        @param pI Indicates the number of digits of the whole part.
+        @param pD Indicates the number of decimals.
+        @param iNX TRUE if the field is index.
+        @param uNI TRUE if the field determines unique records.
+        @param coun Indicates if it is an accountant. For automatic references.
+        @param defValue Default value for the field.
+        @param oT Indicates if the changes in the field are out of transaction.
+        @param rX Regular expression used as a validation mask.
+        @param vG Indicates if the field is visible in the grid of the table.
+        @param gen Indicates if the field is generated.
+        @param iCK Indicates if it is a composite key.
+        """
 
         if len(args) == 1:
             self.inicializeFLFieldMetaData(args[0])
@@ -54,7 +59,9 @@ class PNFieldMetaData(IFieldMetaData):
             self.inicializeNewFLFieldMetaData(*args, **kwargs)
         ++self.count_
 
-    def inicializeFLFieldMetaData(self, other) -> None:
+    def inicializeFLFieldMetaData(self, other: "PNFieldMetaData") -> None:
+        """Initialize by copying information from another metadata."""
+
         self.d = PNFieldMetaDataPrivate()
         self.copy(other)
 
@@ -81,246 +88,250 @@ class PNFieldMetaData(IFieldMetaData):
         gen: bool = True,
         iCK: bool = False,
     ) -> None:
+        """
+        Initialize with the information collected.
+
+        @param n Field Name.
+        @param to Alias ​​del campo, used in form labels.
+        @param aN TRUE if it allows nulls (NULL), FALSE if it allows them (NOT NULL).
+        @param _isPrimaryKey TRUE if it is a primary key, FALSE if it is not a primary key, be
+                primary key implies being Index and Unique.
+        @param t Field type.
+        @param l Length of the field in characters, provided it is of type string
+               of characters.
+        @param c Indicates if the field is calculated.
+        @param v Indicates if the field is visible.
+        @param ed Indicates if the field is editable.
+        @param pI Indicates the number of digits of the whole part.
+        @param pD Indicates the number of decimals.
+        @param iNX TRUE if the field is index.
+        @param uNI TRUE if the field determines unique records.
+        @param coun Indicates if it is an accountant. For automatic references.
+        @param defValue Default value for the field.
+        @param oT Indicates if the changes in the field are out of transaction.
+        @param rX Regular expression used as a validation mask.
+        @param vG Indicates if the field is visible in the grid of the table.
+        @param gen Indicates if the field is generated.
+        @param iCK Indicates if it is a composite key.
+        """
         self.d = PNFieldMetaDataPrivate(
             n, a, aN, isPrimaryKey, t, length_, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK
         )
 
-    """
-    Obtiene el nombre del campo.
-
-    @return Nombre del campo
-    """
-
     def name(self) -> str:
+        """
+        Get the name of the field.
+
+        @return Field Name.
+        """
         if self.d.fieldName_ is None:
             return ""
         return self.d.fieldName_
 
-    """
-    Establece el nombre para el campo
+    def setName(self, n: str) -> None:
+        """
+        Set the name for the field.
 
-    @param n Nombre del campo
-    """
+        @param n Field Name
+        """
 
-    def setName(self, n) -> None:
         self.d.fieldName_ = n
 
-    """
-    Obtiene el alias del campo.
-
-    @return Alias del campo
-    """
-
     def alias(self) -> str:
+        """
+        Get the alias of the field.
+
+        @return Alias Name.
+        """
+
         return aqtt(self.d.alias_)
 
-    """
-    Obtiene si permite nulos.
-
-    @return TRUE si permite nulos, FALSE en caso contrario
-    """
-
     def allowNull(self) -> bool:
-        if self.d.allowNull_ is None:
-            return False
+        """
+        Get if it allows nulls.
+
+        @return TRUE if it allows nulls, FALSE otherwise
+        """
+
         return self.d.allowNull_
 
-    """
-    Obtiene si es clave primaria.
-
-    @return TRUE si es clave primaria, FALSE en caso contrario
-    """
-
     def isPrimaryKey(self) -> bool:
-        if self.d.isPrimaryKey_ is None:
-            return False
+        """
+        Get if it is primary key.
+
+        @return TRUE if it is primary key, FALSE otherwise
+        """
+
         return self.d.isPrimaryKey_
 
-    def setIsPrimaryKey(self, b) -> None:
+    def setIsPrimaryKey(self, b: bool) -> None:
+        """
+        Set if it is primary key.
+
+        @return TRUE if it is primary key, FALSE otherwise
+        """
+
         self.d.isPrimaryKey_ = b
 
-    """
-    Obtiene si es clave compuesta.
-
-    @return TRUE si es clave compuesta, FALSE en caso contrario
-    """
-
     def isCompoundKey(self) -> bool:
+        """
+        Get if it is a composite key.
+
+        @return TRUE if it is a composite key, FALSE otherwise
+        """
+
         if self.d.isCompoundKey_ is None:
             return False
         return self.d.isCompoundKey_
 
-    """
-    Obtiene el tipo del campo.
-
-    @return El tipo del campo
-    """
-
     def type(self) -> str:
+        """
+        Return the type of the field.
+
+        @return The field type.
+        """
+
         return str(self.d.type_)
 
-    """
-    Obtiene la longitud del campo.
-
-    @return La longitud del campo
-    """
-
     def length(self) -> int:
+        """
+        Get the length of the field.
+
+        @return The length of the field.
+        """
+
         return int(self.d.length_ or 0)
 
-    """
-    Obtiene si el campo es calculado.
-
-    @return TRUE si el campo es calculado, FALSE en caso contrario
-    """
-
     def calculated(self) -> Any:
+        """
+        Get if the field is calculated.
+
+        @return TRUE if the field is calculated, FALSE otherwise
+        """
+
         return self.d.calculated_
 
-    """
-    Establece si el campo es calculado.
-
-    @param c Valor TRUE si se quiere poner el campo como calculado, FALSE en caso contrario
-    """
-
     def setCalculated(self, c) -> None:
+        """
+        Set if the field is calculated.
+
+        @param c Value TRUE if you want to set the field as calculated, FALSE otherwise.
+        """
         self.d.calculated_ = c
 
-    """
-    Obtiene si el campo es editable.
-
-    @return TRUE si el campo es editable, FALSE en caso contrario
-    """
-
     def editable(self) -> bool:
+        """
+        Get if the field is editable.
+
+        @return TRUE if the field is editable, FALSE otherwise
+        """
         return self.d.editable_ if self.d.editable_ is not None else False
 
-    """
-    Establece si el campo es editable.
-
-    @param ed Valor TRUE si se quiere que el campo sea editable, FALSE
-          en caso contrario
-    """
-
     def setEditable(self, ed: bool) -> None:
+        """
+        Set whether the field is editable.
+
+        @param ed Value TRUE if you want the field to be editable, FALSE otherwise.
+        """
         self.d.editable_ = ed
 
-    """
-    Obtiene si el campo es visible.
-
-    @return TRUE si el campo es visible, FALSE en caso contrario
-    """
-
     def visible(self) -> bool:
-        return self.d.visible_ if self.d.visible_ is not None else False
+        """
+        Get if the field is visible.
 
-    """
-    Obtiene si el campo es visible en la rejilla de la tabla.
-
-    @return TRUE si el campo es visible en la rejilla de la tabla, FALSE en caso contrario
-    """
+        @return TRUE if the field is visible, FALSE otherwise
+        """
+        return self.d.visible_
 
     def visibleGrid(self) -> bool:
+        """
+        Get if the field is visible in the grid of the table.
+
+        @return TRUE if the field is visible in the grid of the table, FALSE otherwise
+        """
         return self.d.visibleGrid_
 
-    """
-    @return TRUE si el campo es generado, es decir, se incluye en las consultas
-    """
-
     def generated(self) -> bool:
+        """@return TRUE if the field is generated, that is, it is included in the queries."""
+
         return self.d.generated_
 
-    def setGenerated(self, value) -> None:
+    def setGenerated(self, value: bool) -> None:
+        """Set a field as generated."""
+
         self.d.generated_ = value
 
-    """
-    Establece si el campo es visible.
-
-    @param v Valor TRUE si se quiere poner el campo como visible, FALSE
-         en caso contrario
-    """
-
     def setVisible(self, v: bool) -> None:
+        """
+        Set if the field is visible.
+
+        @param v Value TRUE if you want to make the field visible, FALSE otherwise.
+        """
+
         self.d.visible_ = v
 
-    """
-    Establece si el campo es visible en la rejilla de la tabla.
-
-    @param v Valor TRUE si se quiere poner el campo como visible, FALSE
-         en caso contrario
-    """
-
     def setVisibleGrid(self, v) -> None:
+        """
+        Set whether the field is visible in the grid of the table.
+
+        @param v Value TRUE if you want to make the field visible, FALSE otherwise.
+        """
+
         self.d.visibleGrid_ = v
 
-    """
-    Obtiene el número de dígitos de la parte entera.
-
-    @return El número de dígitos de la parte entera del campo
-    """
-
     def partInteger(self) -> int:
+        """
+        Get the number of digits of the whole part.
+
+        @return The number of digits of the entire part of the field.
+        """
+
         return int(self.d.partInteger_ or 0)
 
-    """
-    Obtiene el número de dígitos de la parte decimal.
-
-    @return El número de dígitos de la parte decimal del campo
-    """
-
     def partDecimal(self) -> int:
+        """
+        Get the number of digits of the decimal part.
+
+        @return The number of digits of the decimal part of the field.
+        """
+
         return int(self.d.partDecimal_ or 0)
 
-    """
-    Obtiene si el campo es contador.
+    def isCounter(self) -> bool:
+        """
+        Get if the field is a counter.
 
-    @return TRUE si el campo es una referencia con contador
-    """
-
-    def isCounter(self) -> Any:
+        @return TRUE if the field is a reference with counter
+        """
         return self.d.contador_
 
-    """
-    Obtiene si el campo es índice.
+    def isIndex(self) -> bool:
+        """
+        Get if the field is index.
 
-    @return TRUE si el campo es índice, FALSE en caso contrario
-    """
-
-    def isIndex(self) -> Any:
+        @return TRUE if the field is index, FALSE otherwise
+        """
         return self.d.isIndex_
 
-    """
-    Obtiene si el campo determina registros únicos.
+    def isUnique(self) -> bool:
+        """
+        Get if the field determines unique records.
 
-    @return TRUE si el campo determina registros únicos, FALSE en caso contrario
-    """
-
-    def isUnique(self) -> Any:
+        @return TRUE if the field determines unique records, FALSE otherwise
+        """
         return self.d.isUnique_
 
-    """
-    Tipo de datos lista de relaciones
-    """
-    # typedef QPtrList<FLRelationMetaData> FLRelationMetaDataList; //
-    # FLRelationMetaDataList.py
-
-    """
-    Añade una relacion con otra tabla para este campo.
-
-    Añade un nuevo objeto FLRelationMetaData, a la lista
-    de relaciones para este campo.
-
-    Hay que notar que para un campo solo puede existir una
-    sola relacion del tipo M1 (muchos a uno), por lo que en
-    el caso de que se quieran añadir varias relaciones de
-    este tipo para el campo solo se tendrá en cuenta la primera.
-    Relaciones del tipo 1M (uno a muchos) pueden existir todas
-    las que sean necesarias. Ver FLRelationMetaData::Cardinality.
-
-    @param r Objeto FlRelationMetaData con la definicion de la
-         relacion a añadir """
-
     def addRelationMD(self, r: "PNRelationMetaData") -> None:
+        """
+        Add a relationship with another table for this field.
+
+        Add a new FLRelationMetaData object to the list of relationships for this field.
+        Note that for one field there can only be one single ratio of type M1 (many to one), so in
+        in case you want to add several relationships of this type for the field only the first one will be taken into account.
+        Type 1M relationships (one to many) may all exist those necessary. See FLRelationMetaData :: Cardinality.
+
+        @param r FlRelationMetaData object with the definition of the relationship to add.
+        """
 
         isRelM1 = False
         # print("FLFieldMetadata(%s).addRelationMD(card %s)" % (self.name(), r.cardinality()))
@@ -343,103 +354,75 @@ class PNFieldMetaData(IFieldMetaData):
 
         self.d.relationList_.append(r)
 
-    """
-    Para obtener la lista de definiciones de las relaciones.
-
-     No incluye la relacion M1
-
-    @return Objeto con la lista de deficiones de la relaciones del campo
-    """
-
     def relationList(self) -> List["PNRelationMetaData"]:
+        """
+        To get the list of relationship definitions.
+
+        Does not include the M1 relationship
+
+        @return Object with the list of deficits in the field relations
+        """
+
         return self.d.relationList_
 
-    """
-    Para obtener la relacion muchos a uno para este campo.
-
-       No incluida en relationList()
-
-    @return Objeto FLRelationMetaData con la descripcion de la relacion
-        muchos a uno para este campo
-    """
-
     def relationM1(self) -> Optional["PNRelationMetaData"]:
+        """
+        Get the many-to-one relationship for this field.
+
+        Not included in relationList ()
+
+        @return Object FLRelationMetaData with the description of the relationship many to one for this field.
+        """
         return self.d.relationM1_
 
-    """
-    Establece un campo asociado para este campo, y el nombre
-    del campo de la tabla foránea que se debe utilizar para filtrar según
-    el valor del campo asociado.
-
-    Ver FLFieldMetaData::associatedField_
-    Ver FLFieldMetaData::associatedFieldFilterTo_
-
-    @param r Objeto FLFieldMetaData que define el campo que se quiere asociar a este
-    @param f Nombre del campo a aplicar el filtro
-    """
-    # def setAssociatedField(self, *r, f):
-    #    self.d.associatedField_ = r
-    #    self.d.associatedFieldFilterTo_ = f
-
-    """
-    Sobrecargada por conveniencia
-
-    @param r Nombre del campo que se quiere asociar a este
-    @param f Nombre del campo a aplicar el filtro
-    """
-    # def setAssociatedField(self, rName, f):
-    #    self.d.associatedFieldName_ = rName
-    #    self.d.associatedFieldFilterTo_ = f
-
     def setAssociatedField(self, r_or_name: Union[str, IFieldMetaData], f: str) -> None:
+        """
+        Set an associated field for this field, and the name of the foreign table field to use to filter.
+
+            according to the value of the associated field.
+
+        @param r FLFieldMetaData object or Name that defines the field to be associated with this
+        @param f Name of the field to apply the filter
+
+        """
         name = r_or_name.name() if not isinstance(r_or_name, str) else r_or_name
 
         self.d.associatedFieldName_ = name
         self.d.associatedFieldFilterTo_ = f
 
-    """
-    Devuelve el campo asociado para este campo.
-
-    Ver FLFieldMetaData::associatedField_
-
-    @return Objeto FLFieldMetaData que define el campo asociado a este, o 0
-      si no hay campo asociado
-    """
-
     def associatedField(self) -> Optional["ITableMetaData"]:
+        """
+        Return the associated field for this field.
+
+        @return FLFieldMetaData object that defines the field associated with it, or 0 if there is no associated field.
+        """
         mtd = self.metadata()
         return mtd and mtd.field(self.d.associatedFieldName_)
 
-    """
-    Devuelve el nombre del campo que hay que filtrar según el campo asociado.
-
-    Ver FLFieldMetaData::associatedFieldFilterTo_
-
-    @return Nombre del campo de la tabla foránea M-1, al que hay que aplicar el filtro
-      según el valor del campo asociado
-    """
-
     def associatedFieldFilterTo(self) -> str:
+        """
+        Return the name of the field to be filtered according to the associated field.
+
+        @return Field name of the foreign table M-1, to which the filter must be applied according to the value of the associated field.
+        """
         return self.d.associatedFieldFilterTo_
 
-    """
-    Devuelve el nombre del campo asociado este.
-
-    Ver FLFieldMetaData::associatedField_
-
-    @return Nombre del campo asociado
-    """
-
     def associatedFieldName(self) -> Optional[str]:
+        """
+        Return the name of the associated field this.
+
+        @return Name of the associated field.
+        """
+
         return self.d.associatedFieldName_
 
-    """
-    Devuelve el valor por defecto para el campo.
-
-    @return Valor que se asigna por defecto al campo
-    """
-
     def defaultValue(self) -> Optional[Union[str, bool]]:
+        """
+        Return the default value for the field.
+
+        @return Value that is assigned to the field by default
+        """
+
         if self.d.defaultValue_ in (None, "null"):
             self.d.defaultValue_ = None
 
@@ -448,55 +431,48 @@ class PNFieldMetaData(IFieldMetaData):
 
         return self.d.defaultValue_
 
-    """
-    Devuelve si el campo se modifica fuera de transaccion,
-    ver FLFieldMetaData::outTransaction_.
-
-    @return TRUE si el campo se modifica fuera de transaccion, FALSE en caso contrario
-    """
-
     def outTransaction(self) -> bool:
+        """
+        Return if the field is modified out of transaction.
+
+        @return TRUE if the field is modified out of transaction, FALSE otherwise
+        """
         return self.d.outTransaction_ if self.d.outTransaction_ is not None else False
 
-    """
-    Devuelve la expresion regular que sirve como mascara de validacion para el campo.
-
-    @return Cadena de caracteres que contiene una expresion regular, utilizada como
-        mascara para validar los valores introducidos en el campo
-    """
-
     def regExpValidator(self) -> Optional[str]:
+        """
+        Return the regular expression that serves as a validation mask for the field.
+
+        @return Character string containing a regular expression, used as
+            mask to validate the values ​​entered in the field
+        """
         return self.d.regExpValidator_
 
-    """
-    Devuelve la lista de opciones para el campo
-
-    @return Lista de opciones del campo
-    """
-
     def optionsList(self) -> List[str]:
+        """
+        Return the list of options for the field.
+
+        @return List of field options
+        """
         return self.d.optionsList_
 
-    """
-    Devuelve el index de un campo determinado
-
-    @return Lista de opciones del campo
-    """
-
     def getIndexOptionsList(self, name: str) -> Optional[int]:
+        """
+        Return the index of a given field.
+
+        @return List of field options.
+        """
         if name in self.d.optionsList_:
             return self.d.optionsList_.index(name)
 
         return None
 
-    """
-    Establece la lista de opciones para el campo
-
-    @param ol Cadena de texto con la opciones para el campo
-          separada por comas, p.e. "opcion1,opcion2,opcion3"
-    """
-
     def setOptionsList(self, ol: str) -> None:
+        """
+        Set the list of options for the field.
+
+        @param ol Text string with options for the field.
+        """
         self.d.optionsList_ = []
         if ol.find("QT_TRANSLATE") != -1:
             for componente in ol.split(";"):
@@ -510,64 +486,66 @@ class PNFieldMetaData(IFieldMetaData):
         else:
             self.d.hasOptionsList_ = False
 
-    """
-    Obtiene si el campo es de tipo Check
-    """
-
     def isCheck(self) -> bool:
+        """
+        Get if the field is of type Check.
+        """
+
         if self.d.type_ == self.Check:
             return True
         else:
             return False
 
-    """
-    Obtiene si el campo tiene lista de opciones
-    """
-
     def hasOptionsList(self) -> bool:
+        """
+        Get if the field has a list of options.
+        """
+
         return self.d.hasOptionsList_ if self.d.hasOptionsList_ is not None else False
 
-    """
-    Ver FLFieldMetaData::fullyCaclulated_
-    """
+    def fullyCalculated(self) -> bool:
+        """
+        Return if a field is fully calculated.
+        """
 
-    def fullyCalculated(self) -> Any:
         return self.d.fullyCalculated_
 
     def setFullyCalculated(self, c: bool) -> None:
+        """
+        Specify if a field is fully calculated.
+        """
+
         self.d.fullyCalculated_ = c
         if c:
             self.d.generated_ = True
 
-    """
-    Ver FLFieldMetaData::trimmed_
-    """
+    def trimed(self) -> bool:
+        """Return if a field is trimmed."""
 
-    def trimed(self) -> Any:
         return self.d.trimmed_
 
     def setTrimed(self, t: bool) -> None:
+        """Specify if a field is trimmed."""
+
         self.d.trimmed_ = t
 
-    """
-    Establece el objeto FLTableMetaData al que pertenece
-    """
-
     def setMetadata(self, mtd: "ITableMetaData") -> None:
+        """
+        Set the PNTableMetaData object to which it belongs.
+        """
         self.d.mtd_ = mtd
 
-    """
-    Obtiene el objeto FLTableMetaData al que pertenece
-    """
-
     def metadata(self) -> Optional["ITableMetaData"]:
+        """
+        Get the FLTableMetaData object to which it belongs.
+        """
+
         return self.d.mtd_
 
-    """
-    Obtiene el tipo del campo convertido a un tipo equivalente de la clase QVariant
-    """
-
     def flDecodeType(self, fltype_) -> Optional[str]:
+        """
+        Get the type of the field converted to an equivalent type of the QVariant class.
+        """
 
         _type = None
         # print("Decode", fltype)
@@ -592,28 +570,31 @@ class PNFieldMetaData(IFieldMetaData):
         # print("Return", _type)
         return _type
 
-    """
-    Devuelve diferentes opciones de búsqueda para este campo.
-
-    @return lista de las distintas opciones
-    """
-
     def searchOptions(self) -> Any:
+        """
+        Return different search options for this field.
+
+        @return list of different options
+        """
+
         return self.d.searchOptions_
 
-    """
-    Establece la lista de opciones para el campo
-
-    @param ol Cadena de texto con la opciones para el campo
-          separada por comas, p.e. "opcion1,opcion2,opcion3"
-    """
-
     def setSearchOptions(self, ol) -> None:
+        """
+        Set the list of options for the field.
+
+        @param ol Text string with options for the field.
+        """
+
         self.d.searchOptions_ = []
         for dato in ol.split(","):
             self.d.searchOptions_.append(dato)
 
-    def copy(self, other) -> None:
+    def copy(self, other: "PNFieldMetaData") -> None:
+        """
+        Copy the metadata of another pnfieldmetadata.
+        """
+
         if other is self:
             return
 
@@ -657,6 +638,10 @@ class PNFieldMetaData(IFieldMetaData):
         # self = copy.deepcopy(other)
 
     def formatAssignValue(self, fieldName: str, value: Any, upper: bool) -> str:
+        """
+        Return the correct comparison for a given field.
+        """
+
         if value is None or not fieldName:
             return "1 = 1"
 
@@ -691,10 +676,14 @@ class PNFieldMetaData(IFieldMetaData):
         return "%s = %s" % (fName, formatV)
 
     def __len__(self) -> int:
+        """Return the length of a field."""
+
         return self.d.length_ if self.d.length_ is not None else 0
 
 
 class PNFieldMetaDataPrivate(object):
+    """PNFieldMetaDataPrivate Class."""
+
     """
     Nombre del campo en la tabla
     """
@@ -710,12 +699,12 @@ class PNFieldMetaDataPrivate(object):
     """
     Almacena si el campo permite ser nulo
     """
-    allowNull_ = None
+    allowNull_: bool
 
     """
     Almacena si el campo es clave primaria
     """
-    isPrimaryKey_ = None
+    isPrimaryKey_: bool
 
     """
     Tipo del campo
@@ -731,25 +720,25 @@ class PNFieldMetaDataPrivate(object):
     Indica si el campo es calculado de forma diferida.
     Esto indica que el campo se calcula al editar o insertar un registro, en el commit.
     """
-    calculated_ = None
+    calculated_: bool
 
     """
     Indica si el campo es totalmente calculado.
     Esto indica que el valor campo del campo es dinámico y se calcula en cada refresco.
     Un campo totalmente calculado implica que es generado.
     """
-    fullyCalculated_ = None
+    fullyCalculated_: bool
 
     """
     Indica que al leer el campo de la base de datos los espacios mas a la derecha
     son eliminados.
     """
-    trimmed_ = None
+    trimmed_: bool
 
     """
     Indica si el campo es visible
     """
-    visible_ = None
+    visible_: bool
 
     """
     Indica si el campo es editable
@@ -769,12 +758,12 @@ class PNFieldMetaDataPrivate(object):
     """
     Indica si el campo es índice
     """
-    isIndex_ = None
+    isIndex_: bool
 
     """
     Indica si el campo es único
     """
-    isUnique_ = None
+    isUnique_: bool
 
     """
     Indica si el campo es un contador de referencia y abanq en el
@@ -783,7 +772,7 @@ class PNFieldMetaDataPrivate(object):
 
     @author Andrés Otón Urbano (andresoton@eresmas.com)
     """
-    contador_ = None
+    contador_: bool
 
     """
     Lista de relaciones para este campo
@@ -897,15 +886,21 @@ class PNFieldMetaDataPrivate(object):
     mtd_: Optional["ITableMetaData"] = None
 
     def __init__(self, *args, **kwargs) -> None:
+        """Initialize the class."""
 
         self.regExpValidator_ = ""
         self.searchOptions_ = []
+        self.allowNull_ = False
+        self.isPrimaryKey_ = False
+
         if not args:
             self.inicializeEmpty()
         else:
             self.inicialize(*args, **kwargs)
 
     def inicializeEmpty(self) -> None:
+        """Fill in the data without information."""
+
         self.relationList_ = []
         self.relationM1_ = None
         self.associatedFieldFilterTo_ = ""
@@ -935,6 +930,33 @@ class PNFieldMetaDataPrivate(object):
         gen: bool,
         iCK: bool,
     ) -> None:
+        """
+        Fill in the data with information.
+
+        @param n Field Name.
+        @param to Alias ​​del campo, used in form labels.
+        @param aN TRUE if it allows nulls (NULL), FALSE if it allows them (NOT NULL).
+        @param _isPrimaryKey TRUE if it is a primary key, FALSE if it is not a primary key, be
+                primary key implies being Index and Unique.
+        @param t Field type.
+        @param l Length of the field in characters, provided it is of type string
+               of characters.
+        @param c Indicates if the field is calculated.
+        @param v Indicates if the field is visible.
+        @param ed Indicates if the field is editable.
+        @param pI Indicates the number of digits of the whole part.
+        @param pD Indicates the number of decimals.
+        @param iNX TRUE if the field is index.
+        @param uNI TRUE if the field determines unique records.
+        @param coun Indicates if it is an accountant. For automatic references.
+        @param defValue Default value for the field.
+        @param oT Indicates if the changes in the field are out of transaction.
+        @param rX Regular expression used as a validation mask.
+        @param vG Indicates if the field is visible in the grid of the table.
+        @param gen Indicates if the field is generated.
+        @param iCK Indicates if it is a composite key.
+        """
+
         self.fieldName_ = n.lower()
         self.alias_ = a
         if c:
@@ -996,13 +1018,15 @@ class PNFieldMetaDataPrivate(object):
             self.partDecimal_ = 0
 
     def __del_(self):
+        """
+        Delete properties when deleted.
+        """
         self.clearRelationList()
         if self.relationM1_ and self.relationM1_.deref():
             self.relationM1_ = None
 
-    """
-    Limpia la lista de definiciones de relaciones
-    """
-
     def clearRelationList(self) -> None:
+        """
+        Clear the list of relationship definitions.
+        """
         self.relationList_ = []
