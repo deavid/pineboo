@@ -251,7 +251,8 @@ class MainForm(QtWidgets.QMainWindow):
         self.initialized_mods_ = []
         self.act_sig_map_ = QtCore.QSignalMapper(self.w_)
         self.act_sig_map_.setObjectName("pinebooActSignalMap")
-        self.act_sig_map_.mapped[str].connect(self.triggerAction)
+        # self.act_sig_map_.mapped[str].connect(self.triggerAction)
+        self.act_sig_map_.mapped.connect(self.triggerAction)
         self.initTabWidget()
         self.initHelpMenu()
         self.initConfigMenu()
@@ -356,13 +357,14 @@ class MainForm(QtWidgets.QMainWindow):
         fm.setMainWidget()
         if not fm.mainWidget():
             return
-
-        tw.addTab(fm, self.ag_menu_.findChild(QtWidgets.QAction, action_name).icon(), fm.windowTitle())
+        if self.ag_menu_:
+            tw.addTab(fm, self.ag_menu_.findChild(QtWidgets.QAction, action_name).icon(), fm.windowTitle())
         fm.setIdMDI(action_name)
         fm.show()
-        # idx = tw.indexOf(fm)
-        # self.tw_.setCurrentPage(idx)
-        self.tw_.setCurrentWidget(fm)
+        if self.tw_:
+            # idx = tw.indexOf(fm)
+            # self.tw_.setCurrentPage(idx)
+            self.tw_.setCurrentWidget(fm)
         fm.installEventFilter(self.w_)
         # if len(tw.pages()) == 1 and self.tw_corner is not None:
         #    self.tw_corner.show()
@@ -390,8 +392,11 @@ class MainForm(QtWidgets.QMainWindow):
         self.cloneAction(action, new_ag_rec_)
 
         self.ag_rec_ = new_ag_rec_
-
+        if self.dck_rec_ is None:
+            return
         lw = self.dck_rec_.lw_
+        if lw is None:
+            return
         if check_max and lw.topLevelItemCount() >= self.MAX_RECENT:
             last_name = lw.topLevelItem(lw.topLevelItemCount() - 1).text(1)
             ac = self.ag_rec_.findChild(QtWidgets.QAction, last_name)
@@ -421,10 +426,10 @@ class MainForm(QtWidgets.QMainWindow):
         self.cloneAction(action, new_ag_mar)
 
         self.ag_mar_ = new_ag_mar
+        if self.dck_mar_:
+            self.dck_mar_.update(self.ag_mar_, True)
 
-        self.dck_mar_.update(self.ag_mar_, True)
-
-    def addMarkFromItem(self, item: Any, pos: int) -> bool:
+    def addMarkFromItem(self, item: Any, pos: QtCore.QPoint) -> bool:
         """Add a new item to the Bookmarks docket."""
 
         if not item:
@@ -437,18 +442,19 @@ class MainForm(QtWidgets.QMainWindow):
         popMenu.move(pos)
         popMenu.addAction(self.qsa_sys.translate("Añadir Marcadores"))
         res = popMenu.exec_()
-        if res:
+        if res and self.ag_menu_ is not None:
             ac = self.ag_menu_.findChild(QtWidgets.QAction, item.text(1))
             if ac:
                 self.addMark(ac)
 
         return True
 
-    def removeMarkFromItem(self, item: Any, pos: int) -> bool:
+    def removeMarkFromItem(self, item: Any, pos: QtCore.QPoint) -> bool:
         """Add a new item to the Bookmarks docket."""
-        if not item or not self.ag_mar_ or self.dck_mar_.lw_.invisibleRootItem().childCount() == 0:
+        if not item or not self.ag_mar_ or self.dck_mar_ is None:
             return False
-
+        if self.dck_mar_.lw_ is None or self.dck_mar_.lw_.invisibleRootItem().childCount() == 0:
+            return False
         if item.text(1) is None:
             return True
 
@@ -513,11 +519,11 @@ class MainForm(QtWidgets.QMainWindow):
         if self.ag_menu_ is None:
             raise Exception("ag_menu_ is empty!")
 
-        if self.ag_rec_ is None:
-            raise Exception("ag_rec_ is empty!")
+        if not self.ag_rec_:
+            self.ag_rec_ = pncontrolsfactory.QActionGroup(self.w_)
 
-        if self.ag_mar_ is None:
-            raise Exception("ag_mar_ is empty!")
+        if not self.ag_mar_:
+            self.ag_mar_ = QActionGroup(self.w_)
 
         self.dck_mod_.update(self.ag_menu_)
         self.dck_rec_.update(self.ag_rec_)
@@ -621,6 +627,8 @@ class MainForm(QtWidgets.QMainWindow):
     def initTabWidget(self) -> None:
         """Initialize the TabWidget."""
         self.tw_ = self.w_.findChild(QtWidgets.QTabWidget, "tabWidget")
+        if self.tw_ is None:
+            raise Exception("no tabWidget found")
         self.tw_.setTabsClosable(True)
         self.tw_.tabCloseRequested[int].connect(self.removeCurrentPage)
         self.tw_.removeTab(0)
@@ -724,9 +732,8 @@ class MainForm(QtWidgets.QMainWindow):
 
         return ac
 
-    def addActions(self, node, actGroup, wi) -> None:
+    def addWidgetActions(self, node, actGroup, wi) -> None:
         """Add actions belonging to a widget."""
-
         actions = node.elementsByTagName("action")
         i = 0
         while i < actions.length():
@@ -758,8 +765,9 @@ class MainForm(QtWidgets.QMainWindow):
             return None
 
         w = mng.createUI(ui_file)
-
-        if w is not None and not isinstance(w, QMainWindow):
+        if w is None:
+            raise Exception("Failed to create UI from %r" % ui_file)
+        if not isinstance(w, QMainWindow):
             if w:
                 self.main_widgets_[w.objectName()] = w
 
@@ -781,7 +789,7 @@ class MainForm(QtWidgets.QMainWindow):
         # ag.menuText = ag.text = self.qsa_sys.translate("Acciones")
         if not reduced:
             bars = root.namedItem("toolbars").toElement()
-            self.addActions(bars, ag, w)
+            self.addWidgetActions(bars, ag, w)
 
         menu = root.namedItem("menubar").toElement()
         items = menu.elementsByTagName("item")
@@ -815,7 +823,7 @@ class MainForm(QtWidgets.QMainWindow):
                 sub_menu_ag_name = pncontrolsfactory.QAction(sub_menu_ag)
                 sub_menu_ag_name.setObjectName("%s_actiongroup_name" % sub_menu_ag.objectName())
                 sub_menu_ag_name.setText(self.qsa_sys.toUnicode(itn.attribute("text"), "UTF-8"))
-                self.addActions(itn, sub_menu_ag, w)
+                self.addWidgetActions(itn, sub_menu_ag, w)
                 i += 1
 
         conns = root.namedItem("connections").toElement()
@@ -832,8 +840,9 @@ class MainForm(QtWidgets.QMainWindow):
                     signal_fix = "triggered"
                     signal = "triggered()"
                 slot = itn.namedItem("slot").toElement().text()
-                getattr(ac, signal_fix).connect(self.act_sig_map_.map)
-                self.act_sig_map_.setMapping(ac, "%s:%s:%s" % (signal, slot, ac.name))
+                if self.act_sig_map_ is not None:
+                    getattr(ac, signal_fix).connect(self.act_sig_map_.map)
+                    self.act_sig_map_.setMapping(ac, "%s:%s:%s" % (signal, slot, ac.name))
                 # getattr(ac, signal).connect(self.act_sig_map_.map)
                 # ac.triggered.connect(self.triggerAction)
 
@@ -902,6 +911,8 @@ class MainForm(QtWidgets.QMainWindow):
         mw = self
         sgt = signature.split(":")
         # ok = True
+        if mw.ag_menu_ is None:
+            raise Exception("Not initialized")
         ac = mw.ag_menu_.findChild(QtWidgets.QAction, sgt[2])
         if ac is None:
             logger.debug("triggerAction: Action not Found: %s" % signature)
@@ -977,7 +988,7 @@ class MainForm(QtWidgets.QMainWindow):
 
 
 class DockListView(QtCore.QObject):
-    """ DockListWiew class """
+    """DockListWiew class."""
 
     w_ = None
     lw_ = None
@@ -986,13 +997,13 @@ class DockListView(QtCore.QObject):
     set_visible = QtCore.pyqtSignal(bool)
     Close = QtCore.pyqtSignal(bool)
 
-    def __init__(self, parent=None, name: str = "", title: str = "") -> None:
+    def __init__(self, parent=None, name: str = "dockListView", title: str = "") -> None:
         """Initialize the DockListView instance."""
 
         super(DockListView, self).__init__(parent)
         if parent is None:
             return
-
+        self._name = name
         self.w_ = QtWidgets.QDockWidget(name, parent)
         self.w_.setObjectName("%sListView" % name)
         self.lw_ = QTreeWidget(self.w_)
@@ -1092,11 +1103,13 @@ class DockListView(QtCore.QObject):
 
         self.w_ = w
         self.lw_ = w.widget()
-        self.lw_.doubleClicked.connect(self.activateAction)
+        if self.lw_ and self.lw_.doubleClicked:
+            self.lw_.doubleClicked.connect(self.activateAction)
 
     def change_state(self, s: bool) -> None:
         """Change the display status."""
-
+        if self.w_ is None:
+            raise Exception("not initialized")
         if s:
             self.w_.show()
         else:
@@ -1122,6 +1135,8 @@ class DockListView(QtCore.QObject):
         self.ag_ = action_group
 
         if not self.ag_:
+            return
+        if not self.lw_:
             return
 
         self.lw_.clear()
@@ -1173,11 +1188,11 @@ class DockListView(QtCore.QObject):
                             this_item = parent_item
                         else:
                             this_item = QTreeWidgetItem(parent_item)
-
-                        this_item.setIcon(0, ac.icon())  # Code el icono mal!!
-                        if class_name == "QAction":
-                            this_item.setText(1, action_name)
-                        this_item.setText(0, node.attribute("text").replace("&", ""))
+                        if this_item is not None:
+                            this_item.setIcon(0, ac.icon())  # Code el icono mal!!
+                            if class_name == "QAction":
+                                this_item.setText(1, action_name)
+                            this_item.setText(0, node.attribute("text").replace("&", ""))
                     if this_item is not None and node.attribute("enabled") == "false":
                         this_item.setEnabled(False)
 
