@@ -4,14 +4,15 @@ Package dgi_objects
 .. automodule:: pineboolib.plugins.dgi.dgi_qt.dgi_objects
     :members:
     :undoc-members:
-
+    :inherited-members:
+    
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   dlg_about/index
    checkbox
    dialog
-   dlg_about/index
    filedialog
    flcheckbox
    flcodbar

@@ -30,7 +30,8 @@ if [ "$1" = "tpl" ]; then
     sed -e "s|%MODULE%|$MODULE|g" -e "s|%MODNAME%|$MODNAME|g" "$TEMPLATE" > "$DSTFILE"
     if [ "$MODNAME_PRE" == "index" ]; then
         echo "" >> "$DSTFILE"
-        grep -E "code/$MODPATH/[^/]+(/index)?$" index_template.rst | grep -v "code/$MODPATH/index" | sed "s|code/$MODPATH/||" >> "$DSTFILE"
+        grep -E "code/$MODPATH/[^/]+(/index)?$" index_template.rst | grep "index" | grep -v "code/$MODPATH/index" | sed "s|code/$MODPATH/||" >> "$DSTFILE"
+        grep -E "code/$MODPATH/[^/]+(/index)?$" index_template.rst | grep -v "index" | grep -v "code/$MODPATH/index" | sed "s|code/$MODPATH/||" >> "$DSTFILE"
     fi
 
 

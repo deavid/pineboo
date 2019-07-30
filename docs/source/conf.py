@@ -58,3 +58,6 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 
 typehints_fully_qualified = True
+autoclass_content = "both"
+autodoc_member_order = "bysource"
+autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]

@@ -4,7 +4,8 @@ Package mainform
 .. automodule:: pineboolib.plugins.mainform
     :members:
     :undoc-members:
-
+    :inherited-members:
+    
 .. toctree::
    :maxdepth: 2
    :caption: Contents:

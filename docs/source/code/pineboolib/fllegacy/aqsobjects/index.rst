@@ -4,7 +4,8 @@ Package aqsobjects
 .. automodule:: pineboolib.fllegacy.aqsobjects
     :members:
     :undoc-members:
-
+    :inherited-members:
+    
 .. toctree::
    :maxdepth: 2
    :caption: Contents:

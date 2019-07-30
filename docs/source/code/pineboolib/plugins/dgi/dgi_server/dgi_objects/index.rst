@@ -1,7 +1,7 @@
-Package sql
+Package dgi_objects
 ===============================================================
 
-.. automodule:: pineboolib.plugins.sql
+.. automodule:: pineboolib.plugins.dgi.dgi_server.dgi_objects
     :members:
     :undoc-members:
     :inherited-members:
@@ -10,11 +10,6 @@ Package sql
    :maxdepth: 2
    :caption: Contents:
 
-   flmysql_innodb
-   flmysql_innodb2
-   flmysql_myisam
-   flmysql_myisam2
-   flqpsql
-   flqpsql2
-   flremoteclient
-   flsqlite
+   formdbwidget
+   qlistview
+   qmainwindow

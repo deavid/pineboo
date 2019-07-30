@@ -4,7 +4,8 @@ Package pineboolib
 .. automodule:: pineboolib
     :members:
     :undoc-members:
-
+    :inherited-members:
+    
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -15,5 +16,5 @@ Package pineboolib
    interfaces/index
    loader/index
    plugins/index
-   pncontrolsfactory
    qsa/index
+   pncontrolsfactory
