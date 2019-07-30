@@ -87,3 +87,6 @@ pyroma
 dlint
 defusedxml
 bandit
+coverage
+radon
+xenon
