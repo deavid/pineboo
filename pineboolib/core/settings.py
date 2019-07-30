@@ -95,6 +95,8 @@ class PinebooSettings(QSettings):
     def set_value(self, key: str, value: Union[QSize, str, bool, int, List[str]]) -> None:
         """Set a value into INI file for specified key."""
         logger.debug("%s.set_value(%s) <- %s %r", self.application, key, type(value), value)
+        curtime = time.time()
+        self.cache[key] = (curtime, value)
         return super().setValue(key, self.dump_value(value))
 
     setValue = set_value
