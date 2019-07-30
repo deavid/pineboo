@@ -1731,4 +1731,5 @@ class FLPopuWarn(QtWidgets.QWhatsThis):
 """
 
 
-aqApp = FLApplication()
+# aqApp = FLApplication()
+aqApp: FLApplication

@@ -72,6 +72,35 @@ def _excepthook(type, value, tback):
     return traceback.print_exception(type, value, tback)
 
 
+def init_cli():
+    """Create CLI singletons."""
+    # FIXME: Order of import is REALLY important here. FIX.
+    from pineboolib.fllegacy.aqsobjects import aqsobjectfactory
+
+    aqsobjectfactory.AQUtil = aqsobjectfactory.AQUtil_class()
+    aqsobjectfactory.AQS = aqsobjectfactory.AQS_class()
+
+    from pineboolib.fllegacy import flapplication
+
+    flapplication.aqApp = flapplication.FLApplication()
+
+    from pineboolib import pncontrolsfactory
+
+    pncontrolsfactory.System = pncontrolsfactory.System_class()
+    pncontrolsfactory.qsa_sys = pncontrolsfactory.SysType()
+
+
+def init_gui():
+    """Create GUI singletons."""
+    from pineboolib.plugins.mainform.eneboo import eneboo
+    from pineboolib.plugins.mainform.eneboo_mdi import eneboo_mdi
+    from pineboolib.plugins.mainform.pineboo import pineboo
+
+    eneboo.mainWindow = eneboo.MainForm()
+    eneboo_mdi.mainWindow = eneboo_mdi.MainForm()
+    pineboo.mainWindow = pineboo.MainForm()
+
+
 def setup_gui(app: QtCore.QCoreApplication, options: Values):
     """Initialize GUI app."""
     from pineboolib.core.utils.utils_base import filedir
@@ -130,6 +159,7 @@ def exec_main(options: Values) -> int:
     # from pineboolib.pnsqldrivers import PNSqlDrivers
 
     # FIXME: This function should not initialize the program
+    init_cli()
 
     # TODO: Refactorizar función en otras más pequeñas
     from pineboolib.application import project  # FIXME: next time, proper singleton
@@ -172,6 +202,8 @@ def exec_main(options: Values) -> int:
         download_files()
 
     _DGI = load_dgi(options.dgi, options.dgi_parameter)
+    if options.enable_gui:
+        init_gui()
 
     if _DGI.useDesktop() and not options.enable_gui:
         raise Exception("Selected DGI <%s> is not compatible with <pineboo-core>. Use <pineboo> instead" % options.dgi)

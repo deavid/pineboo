@@ -431,4 +431,5 @@ class OutputWindow(QPlainTextEdit):
         self.appendPlainText(str(txt))
 
 
-mainWindow = MainForm()
+mainWindow: MainForm
+# mainWindow = MainForm()
