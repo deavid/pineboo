@@ -181,7 +181,7 @@ def exec_main(options: Values) -> int:
     if options.trace_debug:
         from pineboolib.core.utils.utils_base import traceit
 
-        sys.settrace(traceit)
+        sys.settrace(traceit)  # noqa: DUO111 "sys" function found that could lead to arbitrary code execution
     if options.trace_signals:
         from .utils import monkey_patch_connect
 

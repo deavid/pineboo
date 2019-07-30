@@ -84,3 +84,5 @@ sphinx-autodoc-typehints
 pydocstyle
 sphinx-rtd-theme
 pyroma
+dlint
+defusedxml
