@@ -1,6 +1,4 @@
-   code/pineboolib
-   code/pineboolib/application
-   code/pineboolib/application/database
+   code/pineboolib/application/database/index
    code/pineboolib/application/database/pnbuffer
    code/pineboolib/application/database/pnconnection
    code/pineboolib/application/database/pncursortablemodel
@@ -13,7 +11,8 @@
    code/pineboolib/application/database/pnsqlsavepoint
    code/pineboolib/application/database/utils
    code/pineboolib/application/file
-   code/pineboolib/application/metadata
+   code/pineboolib/application/index
+   code/pineboolib/application/metadata/index
    code/pineboolib/application/metadata/pncompoundkeymetadata
    code/pineboolib/application/metadata/pnfieldmetadata
    code/pineboolib/application/metadata/pnfieldmetadatalist
@@ -22,57 +21,55 @@
    code/pineboolib/application/metadata/pntablemetadata
    code/pineboolib/application/module
    code/pineboolib/application/moduleactions
-   code/pineboolib/application/packager
    code/pineboolib/application/packager/aqunpacker
-   code/pineboolib/application/parsers
-   code/pineboolib/application/parsers/kugarparser
+   code/pineboolib/application/packager/index
+   code/pineboolib/application/parsers/index
+   code/pineboolib/application/parsers/kugarparser/index
    code/pineboolib/application/parsers/kugarparser/kut2fpdf
    code/pineboolib/application/parsers/kugarparser/parsertools
-   code/pineboolib/application/parsers/mtdparser
+   code/pineboolib/application/parsers/mtdparser/index
    code/pineboolib/application/parsers/mtdparser/pnmtdparser
    code/pineboolib/application/parsers/mtdparser/pnormmodelsfactory
-   code/pineboolib/application/parsers/qsaparser
    code/pineboolib/application/parsers/qsaparser/flalign
    code/pineboolib/application/parsers/qsaparser/flclasses
    code/pineboolib/application/parsers/qsaparser/flex
    code/pineboolib/application/parsers/qsaparser/flscriptparse
+   code/pineboolib/application/parsers/qsaparser/index
    code/pineboolib/application/parsers/qsaparser/postparse
    code/pineboolib/application/parsers/qsaparser/pyconvert
    code/pineboolib/application/parsers/qsaparser/pytnyzer
-   code/pineboolib/application/parsers/qsaparser/tests
    code/pineboolib/application/parsers/qsaparser/tests/ifaceclass
+   code/pineboolib/application/parsers/qsaparser/tests/index
    code/pineboolib/application/parsers/qsaparser/xml2json
    code/pineboolib/application/parsers/qsaparser/xmlparse
    code/pineboolib/application/projectmodule
    code/pineboolib/application/proxy
-   code/pineboolib/application/tests
+   code/pineboolib/application/tests/index
    code/pineboolib/application/tests/test_types
    code/pineboolib/application/types
-   code/pineboolib/application/utils
    code/pineboolib/application/utils/check_dependencies
    code/pineboolib/application/utils/convert_flaction
    code/pineboolib/application/utils/date_conversion
    code/pineboolib/application/utils/geometry
+   code/pineboolib/application/utils/index
    code/pineboolib/application/utils/mobilemode
    code/pineboolib/application/utils/path
    code/pineboolib/application/utils/sql_tools
    code/pineboolib/application/utils/xpm
    code/pineboolib/application/xmlaction
-   code/pineboolib/core
    code/pineboolib/core/decorators
    code/pineboolib/core/error_manager
    code/pineboolib/core/exceptions
+   code/pineboolib/core/index
    code/pineboolib/core/message_manager
    code/pineboolib/core/parsetable
    code/pineboolib/core/settings
-   code/pineboolib/core/utils
    code/pineboolib/core/utils/get_table_obj
+   code/pineboolib/core/utils/index
    code/pineboolib/core/utils/logging
    code/pineboolib/core/utils/singleton
    code/pineboolib/core/utils/struct
    code/pineboolib/core/utils/utils_base
-   code/pineboolib/fllegacy
-   code/pineboolib/fllegacy/aqsobjects
    code/pineboolib/fllegacy/aqsobjects/aqboolflagstate
    code/pineboolib/fllegacy/aqsobjects/aqods
    code/pineboolib/fllegacy/aqsobjects/aqs
@@ -83,6 +80,7 @@
    code/pineboolib/fllegacy/aqsobjects/aqsqlcursor
    code/pineboolib/fllegacy/aqsobjects/aqsqlquery
    code/pineboolib/fllegacy/aqsobjects/aqutil
+   code/pineboolib/fllegacy/aqsobjects/index
    code/pineboolib/fllegacy/flaccesscontrol
    code/pineboolib/fllegacy/flaccesscontrolfactory
    code/pineboolib/fllegacy/flaccesscontrollists
@@ -109,47 +107,45 @@
    code/pineboolib/fllegacy/fltranslator
    code/pineboolib/fllegacy/flutil
    code/pineboolib/fllegacy/flvar
+   code/pineboolib/fllegacy/index
    code/pineboolib/fllegacy/systype
-   code/pineboolib/interfaces
+   code/pineboolib/index
    code/pineboolib/interfaces/cursoraccessmode
    code/pineboolib/interfaces/dgi_schema
    code/pineboolib/interfaces/iapicursor
    code/pineboolib/interfaces/iconnection
    code/pineboolib/interfaces/ifieldmetadata
    code/pineboolib/interfaces/imanager
+   code/pineboolib/interfaces/index
    code/pineboolib/interfaces/isqlcursor
    code/pineboolib/interfaces/itablemetadata
-   code/pineboolib/loader
    code/pineboolib/loader/conn_dialog
    code/pineboolib/loader/connection
    code/pineboolib/loader/dgi
-   code/pineboolib/loader/dlgconnect
    code/pineboolib/loader/dlgconnect/dlgconnect
+   code/pineboolib/loader/dlgconnect/index
+   code/pineboolib/loader/index
    code/pineboolib/loader/init_project
    code/pineboolib/loader/main
    code/pineboolib/loader/options
    code/pineboolib/loader/preload
    code/pineboolib/loader/projectconfig
    code/pineboolib/loader/utils
-   code/pineboolib/plugins
-   code/pineboolib/plugins/dgi
-   code/pineboolib/plugins/dgi/dgi_aqnext
    code/pineboolib/plugins/dgi/dgi_aqnext/dgi_aqnext
    code/pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/auth
    code/pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/flsqlcursor
    code/pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/formdbwidget
    code/pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/qlistview
    code/pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/qmainwindow
-   code/pineboolib/plugins/dgi/dgi_fcgi
+   code/pineboolib/plugins/dgi/dgi_aqnext/index
    code/pineboolib/plugins/dgi/dgi_fcgi/dgi_fcgi
-   code/pineboolib/plugins/dgi/dgi_jsonrpc
+   code/pineboolib/plugins/dgi/dgi_fcgi/index
    code/pineboolib/plugins/dgi/dgi_jsonrpc/dgi_jsonrpc
-   code/pineboolib/plugins/dgi/dgi_qt
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects
+   code/pineboolib/plugins/dgi/dgi_jsonrpc/index
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/checkbox
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/dialog
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/dlg_about
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/dlg_about/about_pineboo
+   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/dlg_about/index
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/filedialog
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/flcheckbox
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/flcodbar
@@ -174,6 +170,7 @@
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/flworkspace
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/formdbwidget
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/groupbox
+   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/index
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/lineedit
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/messagebox
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/numberedit
@@ -210,20 +207,23 @@
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/status_help_msg
    code/pineboolib/plugins/dgi/dgi_qt/dgi_qt
    code/pineboolib/plugins/dgi/dgi_qt/dgi_qt3ui
+   code/pineboolib/plugins/dgi/dgi_qt/index
    code/pineboolib/plugins/dgi/dgi_schema
-   code/pineboolib/plugins/dgi/dgi_server
    code/pineboolib/plugins/dgi/dgi_server/dgi_objects/formdbwidget
    code/pineboolib/plugins/dgi/dgi_server/dgi_objects/qlistview
    code/pineboolib/plugins/dgi/dgi_server/dgi_objects/qmainwindow
    code/pineboolib/plugins/dgi/dgi_server/dgi_server
-   code/pineboolib/plugins/mainform
+   code/pineboolib/plugins/dgi/dgi_server/index
+   code/pineboolib/plugins/dgi/index
+   code/pineboolib/plugins/index
    code/pineboolib/plugins/mainform/eneboo/eneboo
+   code/pineboolib/plugins/mainform/eneboo/index
    code/pineboolib/plugins/mainform/eneboo_mdi/eneboo_mdi
-   code/pineboolib/plugins/mainform/pineboo/pineboo
+   code/pineboolib/plugins/mainform/eneboo_mdi/index
+   code/pineboolib/plugins/mainform/index
    code/pineboolib/plugins/qtwidgetsplugins/FLFieldDB
    code/pineboolib/plugins/qtwidgetsplugins/FLTable
    code/pineboolib/plugins/qtwidgetsplugins/FLTableDB
-   code/pineboolib/plugins/sql
    code/pineboolib/plugins/sql/flmysql_innodb
    code/pineboolib/plugins/sql/flmysql_innodb2
    code/pineboolib/plugins/sql/flmysql_myisam
@@ -232,10 +232,11 @@
    code/pineboolib/plugins/sql/flqpsql2
    code/pineboolib/plugins/sql/flremoteclient
    code/pineboolib/plugins/sql/flsqlite
-   code/pineboolib/plugins/test
+   code/pineboolib/plugins/sql/index
    code/pineboolib/plugins/test/flsqlcursormock
+   code/pineboolib/plugins/test/index
    code/pineboolib/pncontrolsfactory
-   code/pineboolib/qsa
    code/pineboolib/qsa/emptyscript
+   code/pineboolib/qsa/index
    code/pineboolib/qsa/input
    code/pineboolib/qsa/qsa
