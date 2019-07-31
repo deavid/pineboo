@@ -12,14 +12,14 @@ init_cli()  # FIXME: This should be avoided
 class TestBoolean(unittest.TestCase):
     """Test booleans."""
 
-    def test_true(self):
+    def test_true(self) -> None:
         """Test for true."""
         self.assertEqual(Boolean(1), True)
         self.assertEqual(Boolean("True"), True)
         self.assertEqual(Boolean("Yes"), True)
         self.assertEqual(Boolean(0.8), True)
 
-    def test_false(self):
+    def test_false(self) -> None:
         """Test for false."""
         self.assertEqual(Boolean(0), False)
         self.assertEqual(Boolean("False"), False)
@@ -29,7 +29,7 @@ class TestBoolean(unittest.TestCase):
 class TestQString(unittest.TestCase):
     """Test QString."""
 
-    def test_basic(self):
+    def test_basic(self) -> None:
         """Basic testing."""
         s = QString("hello world")
         self.assertEqual(s, "hello world")
@@ -40,7 +40,7 @@ class TestQString(unittest.TestCase):
 class TestFunction(unittest.TestCase):
     """Test function. Parses QSA into Python."""
 
-    def test_basic(self):
+    def test_basic(self) -> None:
         """Basic testing."""
         source = "return x + 1"
         fn = Function("x", source)
@@ -50,14 +50,14 @@ class TestFunction(unittest.TestCase):
 class TestObject(unittest.TestCase):
     """Test object."""
 
-    def test_basic1(self):
+    def test_basic1(self) -> None:
         """Basic testing."""
         o = Object()
         o.prop1 = 1
         o.prop2 = 2
         self.assertEqual(o.prop1, o["prop1"])
 
-    def test_basic2(self):
+    def test_basic2(self) -> None:
         """Basic testing."""
         o = Object({"prop1": 1})
         self.assertEqual(o.prop1, o["prop1"])
@@ -66,13 +66,13 @@ class TestObject(unittest.TestCase):
 class TestArray(unittest.TestCase):
     """Test Array class."""
 
-    def test_basic1(self):
+    def test_basic1(self) -> None:
         """Basic testing."""
         a = Array()
         a.value = 1
         self.assertEqual(a.value, a["value"])
 
-    def test_basic2(self):
+    def test_basic2(self) -> None:
         """Basic testing."""
         test_arr = [0, 1, 2, 3, 4]
         a = Array(test_arr)
@@ -87,13 +87,13 @@ class TestArray(unittest.TestCase):
         a.append(10)
         self.assertEqual(a[5], 10)
 
-    def test_repr(self):
+    def test_repr(self) -> None:
         """Test repr method."""
         test_arr = [3, 4, 5, 6, 7]
         a1 = Array(test_arr)
         self.assertEqual(repr(a1), "<Array %r>" % test_arr)
 
-    def test_iter(self):
+    def test_iter(self) -> None:
         """Test iterating arrays."""
 
         test_arr = [3, 4, 5, 6, 7]
@@ -111,7 +111,7 @@ class TestDate(unittest.TestCase):
     """Test Date class."""
 
     # FIXME: Complete unit tests
-    def test_basic1(self):
+    def test_basic1(self) -> None:
         """Basic testing."""
         d = Date("2001-02-25")
         self.assertEqual(d.getDay(), 25)
