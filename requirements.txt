@@ -39,3 +39,9 @@ sphinx-autodoc-typehints
 pydocstyle
 sphinx-rtd-theme
 pyroma
+dlint
+defusedxml
+bandit
+coverage
+radon
+xenon

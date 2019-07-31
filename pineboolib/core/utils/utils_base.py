@@ -133,12 +133,12 @@ class TraceBlock:
 
     def __enter__(self) -> Callable[[FrameType, str, Any], Any]:
         """Create tracing context on enter."""
-        sys.settrace(traceit)
+        sys.settrace(traceit)  # noqa: DUO111 "sys" function found that could lead to arbitrary code execution
         return traceit
 
     def __exit__(self, type: Any, value: Any, traceback: Any) -> None:
         """Remove tracing context on exit."""
-        sys.settrace(None)
+        sys.settrace(None)  # noqa: DUO111 "sys" function found that could lead to arbitrary code execution
 
 
 def trace_function(f: Callable) -> Callable:

@@ -1862,133 +1862,16 @@ class FLFieldDB(QtWidgets.QWidget):
                 project.DGI._par.addQueque("%s_setAlias" % self.objectName(), self.fieldAlias_)
 
         if type_ in ("uint", "int", "double", "string"):
-            if ol:
-
-                self.editor_ = pncontrolsfactory.QComboBox()
-                style_ = self.editor_.styleSheet()
-                self.editor_.setParent(self)
-
-                self.editor_.name = "editor"
-                self.editor_.setEditable(False)
-                # self.editor_.setAutoCompletion(True)
-                self.editor_.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-                self.editor_.setMinimumSize(self.iconSize)
-                self.editor_.setFont(self.font())
-                # if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
-                # if not field.allowNull():
-                # self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
-                # self.editor_.setStyleSheet('background-color:' + self.notNullColor().name())
-                if not field.allowNull() and field.editable():
-                    self.editor_.setStyleSheet("background-color:%s; color:%s" % (self.notNullColor(), QtGui.QColor(Qt.black).name()))
-                else:
-                    self.editor_.setStyleSheet(style_)
-
-                olTranslated = []
-                olNoTranslated = field.optionsList()
-                for olN in olNoTranslated:
-                    olTranslated.append(olN)
-                self.editor_.addItems(olTranslated)
-                if project._DGI and not project.DGI.localDesktop():
-                    project.DGI._par.addQueque("%s_setOptionsList" % self.objectName(), olTranslated)
-                self.editor_.installEventFilter(self)
-                if self.showed:
-                    try:
-                        self.editor_.activated.disconnect(self.updateValue)
-                    except Exception:
-                        self.logger.exception("Error al desconectar señal")
-                self.editor_.activated.connect(self.updateValue)
-
-            else:
-                self.editor_ = pncontrolsfactory.FLLineEdit(self, "editor")
-                self.editor_.setFont(self.font())
-                if self.iconSize:
-                    self.editor_.setMinimumSize(self.iconSize)
-                    self.editor_.setMaximumHeight(self.iconSize.height())
-                self.editor_._tipo = type_
-                self.editor_.partDecimal = partDecimal
-                if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
-                    if not field.allowNull() and field.editable() and type_ not in ("time", "date"):
-                        # self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
-                        self.editor_.setStyleSheet("background-color:%s; color:%s" % (self.notNullColor(), QtGui.QColor(Qt.black).name()))
-                    self.editor_.installEventFilter(self)
-
-                if type_ == "double":
-                    self.editor_.setValidator(
-                        FLDoubleValidator(
-                            ((pow(10, partInteger) - 1) * -1), pow(10, partInteger) - 1, self.editor_.partDecimal, self.editor_
-                        )
-                    )
-                    self.editor_.setAlignment(Qt.AlignRight)
-                else:
-                    if type_ == "uint":
-                        self.editor_.setValidator(FLUIntValidator(0, pow(10, partInteger), self.editor_))
-                        pass
-                    elif type_ == "int":
-                        self.editor_.setValidator(FLIntValidator(((pow(10, partInteger) - 1) * -1), pow(10, partInteger) - 1, self.editor_))
-                        self.editor_.setAlignment(Qt.AlignRight)
-                    else:
-                        self.editor_.setMaxValue(len_)
-                        if rX:
-                            self.editor_.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp(rX), self.editor_))
-
-                        self.editor_.setAlignment(Qt.AlignLeft)
-
-                        self.keyF4Pressed.connect(self.toggleAutoCompletion)
-                        if self.autoCompMode_ == "OnDemandF4":
-                            self.editor_.setToolTip("Para completado automático pulsar F4")
-                            self.editor_.setWhatsThis("Para completado automático pulsar F4")
-                        elif self.autoCompMode_ == "AlwaysAuto":
-                            self.editor_.setToolTip("Completado automático permanente activado")
-                            self.editor_.setWhatsThis("Completado automático permanente activado")
-                        else:
-                            self.editor_.setToolTip("Completado automático desactivado")
-                            self.editor_.setWhatsThis("Completado automático desactivado")
-
-                self.editor_.installEventFilter(self)
-
-                if self.showed:
-                    try:
-                        self.editor_.lostFocus.disconnect(self.emitLostFocus)
-                        self.editor_.textChanged.disconnect(self.updateValue)
-                        self.editor_.textChanged.disconnect(self.emitTextChanged)
-                    except Exception:
-                        self.logger.exception("Error al desconectar señal")
-
-                self.editor_.lostFocus.connect(self.emitLostFocus)
-                self.editor_.textChanged.connect(self.updateValue)
-                self.editor_.textChanged.connect(self.emitTextChanged)
-
-                if hasPushButtonDB and self.pushButtonDB:
-                    if project._DGI and not project.DGI.localDesktop():
-                        project.DGI._par.addQueque("%s_setHasPushButton" % self.objectName(), True)
-                    if self.showed:
-                        try:
-                            self.KeyF2Pressed.disconnect(self.pushButtonDB.animateClick())
-                            self.labelClicked.disconnect(self.openFormRecordRelation)
-                        except Exception:
-                            self.logger.exception("Error al desconectar señal")
-
-                    self.keyF2Pressed.connect(self.pushButtonDB.animateClick)  # FIXME
-                    self.labelClicked.connect(self.openFormRecordRelation)
-                    if not self.textLabelDB:
-                        raise ValueError("textLabelDB is not defined!")
-
-                    self.textLabelDB.installEventFilter(self)
-                    tlf = self.textLabelDB.font()
-                    tlf.setUnderline(True)
-                    self.textLabelDB.setFont(tlf)
-                    cB = QtGui.QColor(Qt.darkBlue)
-                    # self.textLabelDB.palette().setColor(self.textLabelDB.foregroundRole(), cB)
-                    self.textLabelDB.setStyleSheet("color:" + cB.name())
-                    self.textLabelDB.setCursor(Qt.PointingHandCursor)
-
-            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(7), QtWidgets.QSizePolicy.Policy(0))
-            sizePolicy.setHeightForWidth(True)
-            self.editor_.setSizePolicy(sizePolicy)
-            if self.FLWidgetFieldDBLayout is not None:
-                self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
-                self.FLWidgetFieldDBLayout.addWidget(self.editor_)
-
+            self.initEditorControlForNumber(
+                has_option_list=ol,
+                field=field,
+                type_=type_,
+                partDecimal=partDecimal,
+                partInteger=partInteger,
+                len_=len_,
+                rX=rX,
+                hasPushButtonDB=hasPushButtonDB,
+            )
         elif type_ == "serial":
             self.editor_ = pncontrolsfactory.FLLineEdit(self, "editor")
             self.editor_.setFont(self.font())
@@ -2308,6 +2191,131 @@ class FLFieldDB(QtWidgets.QWidget):
         if self._refreshLaterEditor is not None:
             self.refresh(self._refreshLaterEditor)
             self._refreshLaterEditor = None
+
+    def initEditorControlForNumber(self, has_option_list: bool, field, type_, partDecimal, partInteger, len_, rX, hasPushButtonDB) -> None:
+        if has_option_list:
+            self.editor_ = pncontrolsfactory.QComboBox()
+            style_ = self.editor_.styleSheet()
+            self.editor_.setParent(self)
+
+            self.editor_.name = "editor"
+            self.editor_.setEditable(False)
+            # self.editor_.setAutoCompletion(True)
+            self.editor_.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+            self.editor_.setMinimumSize(self.iconSize)
+            self.editor_.setFont(self.font())
+            # if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
+            # if not field.allowNull():
+            # self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
+            # self.editor_.setStyleSheet('background-color:' + self.notNullColor().name())
+            if not field.allowNull() and field.editable():
+                self.editor_.setStyleSheet("background-color:%s; color:%s" % (self.notNullColor(), QtGui.QColor(Qt.black).name()))
+            else:
+                self.editor_.setStyleSheet(style_)
+
+            olTranslated = []
+            olNoTranslated = field.optionsList()
+            for olN in olNoTranslated:
+                olTranslated.append(olN)
+            self.editor_.addItems(olTranslated)
+            if project._DGI and not project.DGI.localDesktop():
+                project.DGI._par.addQueque("%s_setOptionsList" % self.objectName(), olTranslated)
+            self.editor_.installEventFilter(self)
+            if self.showed:
+                try:
+                    self.editor_.activated.disconnect(self.updateValue)
+                except Exception:
+                    self.logger.exception("Error al desconectar señal")
+            self.editor_.activated.connect(self.updateValue)
+
+        else:
+            self.editor_ = pncontrolsfactory.FLLineEdit(self, "editor")
+            self.editor_.setFont(self.font())
+            if self.iconSize:
+                self.editor_.setMinimumSize(self.iconSize)
+                self.editor_.setMaximumHeight(self.iconSize.height())
+            self.editor_._tipo = type_
+            self.editor_.partDecimal = partDecimal
+            if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
+                if not field.allowNull() and field.editable() and type_ not in ("time", "date"):
+                    # self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
+                    self.editor_.setStyleSheet("background-color:%s; color:%s" % (self.notNullColor(), QtGui.QColor(Qt.black).name()))
+                self.editor_.installEventFilter(self)
+
+            if type_ == "double":
+                self.editor_.setValidator(
+                    FLDoubleValidator(((pow(10, partInteger) - 1) * -1), pow(10, partInteger) - 1, self.editor_.partDecimal, self.editor_)
+                )
+                self.editor_.setAlignment(Qt.AlignRight)
+            else:
+                if type_ == "uint":
+                    self.editor_.setValidator(FLUIntValidator(0, pow(10, partInteger), self.editor_))
+                    pass
+                elif type_ == "int":
+                    self.editor_.setValidator(FLIntValidator(((pow(10, partInteger) - 1) * -1), pow(10, partInteger) - 1, self.editor_))
+                    self.editor_.setAlignment(Qt.AlignRight)
+                else:
+                    self.editor_.setMaxValue(len_)
+                    if rX:
+                        self.editor_.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp(rX), self.editor_))
+
+                    self.editor_.setAlignment(Qt.AlignLeft)
+
+                    self.keyF4Pressed.connect(self.toggleAutoCompletion)
+                    if self.autoCompMode_ == "OnDemandF4":
+                        self.editor_.setToolTip("Para completado automático pulsar F4")
+                        self.editor_.setWhatsThis("Para completado automático pulsar F4")
+                    elif self.autoCompMode_ == "AlwaysAuto":
+                        self.editor_.setToolTip("Completado automático permanente activado")
+                        self.editor_.setWhatsThis("Completado automático permanente activado")
+                    else:
+                        self.editor_.setToolTip("Completado automático desactivado")
+                        self.editor_.setWhatsThis("Completado automático desactivado")
+
+            self.editor_.installEventFilter(self)
+
+            if self.showed:
+                try:
+                    self.editor_.lostFocus.disconnect(self.emitLostFocus)
+                    self.editor_.textChanged.disconnect(self.updateValue)
+                    self.editor_.textChanged.disconnect(self.emitTextChanged)
+                except Exception:
+                    self.logger.exception("Error al desconectar señal")
+
+            self.editor_.lostFocus.connect(self.emitLostFocus)
+            self.editor_.textChanged.connect(self.updateValue)
+            self.editor_.textChanged.connect(self.emitTextChanged)
+
+            if hasPushButtonDB and self.pushButtonDB:
+                if project._DGI and not project.DGI.localDesktop():
+                    project.DGI._par.addQueque("%s_setHasPushButton" % self.objectName(), True)
+                if self.showed:
+                    try:
+                        self.KeyF2Pressed.disconnect(self.pushButtonDB.animateClick())
+                        self.labelClicked.disconnect(self.openFormRecordRelation)
+                    except Exception:
+                        self.logger.exception("Error al desconectar señal")
+
+                self.keyF2Pressed.connect(self.pushButtonDB.animateClick)  # FIXME
+                self.labelClicked.connect(self.openFormRecordRelation)
+                if not self.textLabelDB:
+                    raise ValueError("textLabelDB is not defined!")
+
+                self.textLabelDB.installEventFilter(self)
+                tlf = self.textLabelDB.font()
+                tlf.setUnderline(True)
+                self.textLabelDB.setFont(tlf)
+                cB = QtGui.QColor(Qt.darkBlue)
+                # self.textLabelDB.palette().setColor(self.textLabelDB.foregroundRole(), cB)
+                self.textLabelDB.setStyleSheet("color:" + cB.name())
+                self.textLabelDB.setCursor(Qt.PointingHandCursor)
+
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(7), QtWidgets.QSizePolicy.Policy(0))
+        sizePolicy.setHeightForWidth(True)
+        self.editor_.setSizePolicy(sizePolicy)
+        if self.FLWidgetFieldDBLayout is not None:
+            self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
+            self.FLWidgetFieldDBLayout.addWidget(self.editor_)
 
     """
     Borra imagen en campos tipo Pixmap.

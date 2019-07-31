@@ -859,7 +859,7 @@ def main():
         elif options.output == "yaml":
             import yaml
 
-            print(yaml.dump(tree_data["content"]))
+            print(yaml.safe_dump(tree_data["content"]))
 
         else:
             print("Unknown outputmode", options.output)
