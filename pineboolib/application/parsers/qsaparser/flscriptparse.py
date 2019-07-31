@@ -1,8 +1,6 @@
-# -----------------------------------------------------------------------------
-# flscriptparse.py
-#
-# Simple parser for FacturaLUX SCripting Language (QSA).
-# -----------------------------------------------------------------------------
+"""
+Simple parser for FacturaLUX Scripting Language (QSA).
+"""
 from optparse import OptionParser
 import pprint
 import sys
@@ -54,14 +52,17 @@ ok_count = 0
 
 
 def cleanNoPython(data):
+    """Remove NOPYTHON blocks."""
     return re.sub(r"\/\/___NOPYTHON\[\[.*?\/\/\]\]___NOPYTHON\s*", "", data, flags=re.DOTALL)
 
 
 def cleanNoPythonNever(data):
+    """Remove NOPYTHON_NEVER blocks."""
     return re.sub(r"\/\/___NOPYTHON_NEVER\[\[.*?\/\/\]\]___NOPYTHON_NEVER\s*", "", data, flags=re.DOTALL)
 
 
 def cnvrt(val):
+    """Convert special XML characters into XML entities."""
     val = str(val)
     val = val.replace("&", "&amp;")
     val = val.replace('"', "&quot;")
@@ -72,6 +73,7 @@ def cnvrt(val):
 
 
 def p_parse(token):
+    """Parse a single token."""
     global input_data
 
     lexspan = list(token.lexspan(0))
@@ -136,6 +138,7 @@ def p_parse(token):
 
 
 def p_error(t):
+    """Process and report errors in parsing."""
     global error_count
     global ok_count
     global last_error_token
@@ -557,6 +560,7 @@ input_data = ""
 
 
 def print_context(token):
+    """Report errors in console when parsing fails."""
     global input_data
     if token is None:
         return
@@ -573,6 +577,7 @@ def print_context(token):
 
 
 def my_tokenfunc(*args, **kwargs):
+    """Tokenizer function."""
     # print("Call token:" ,args, kwargs)
     ret = lex.lexer.token(*args, **kwargs)
     # print "Return (",args, kwargs,") = " , ret
@@ -580,6 +585,7 @@ def my_tokenfunc(*args, **kwargs):
 
 
 def print_tokentree(token, depth=0):
+    """Debug output. Unused."""
     print("  " * depth, token.__class__, "=", token)
 
     if str(token.__class__) == "ply.yacc.YaccProduction":
@@ -599,6 +605,7 @@ def print_tokentree(token, depth=0):
 
 
 def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
+    """Extract parsed AST and generate a custom structure for later XML generation."""
     # if depth > 5: return
     # source_data = [
     #     'source',
@@ -683,6 +690,7 @@ def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
 
 
 def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):
+    """Export AST into different formats, mainly used for XML export."""
     global hashes, ranges
     if depth == 0:
         hashes = []
@@ -792,6 +800,7 @@ def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):
 
 
 def parse(data, clean=True):
+    """Parse QS String."""
     global input_data
     global error_count
     global seen_tokens
@@ -821,6 +830,7 @@ def parse(data, clean=True):
 
 
 def main():
+    """Manage direct script calls for flscriptparse. Deprecated."""
     global start
     parser = OptionParser()
     # parser.add_option("-f", "--file", dest="filename",
