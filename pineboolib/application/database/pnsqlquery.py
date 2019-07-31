@@ -103,7 +103,7 @@ class PNSqlQuery(object):
     invalidTablesList = False
     _is_active: bool
     _fieldNameToPosDict: Optional[Dict[str, int]]
-    _sql_inspector: Optional[sql_tools.sql_inspector]
+    _sql_inspector: Optional[sql_tools.SqlInspector]
     _row: List[Any]
     _datos: List[Any]
     _posicion: int
@@ -155,7 +155,7 @@ class PNSqlQuery(object):
         self.countRefQuery = self.countRefQuery - 1
 
     @property
-    def sql_inspector(self) -> sql_tools.sql_inspector:
+    def sql_inspector(self) -> sql_tools.SqlInspector:
         """
         Return a sql inspector instance.
 
@@ -166,7 +166,7 @@ class PNSqlQuery(object):
         if self._sql_inspector is None:
             logger.warning("sql_inspector: Query has not executed yet", stack_info=True)
             sql = self.sql()
-            self._sql_inspector = sql_tools.sql_inspector(sql.lower())
+            self._sql_inspector = sql_tools.SqlInspector(sql.lower())
         return self._sql_inspector
 
     def exec_(self, sql: Optional[str] = None) -> bool:
@@ -186,7 +186,7 @@ class PNSqlQuery(object):
         if not sql:
             return False
 
-        self._sql_inspector = sql_tools.sql_inspector(sql.lower())
+        self._sql_inspector = sql_tools.SqlInspector(sql.lower())
 
         sql = self.db().driver().fix_query(sql)
         if sql is None:
