@@ -2,7 +2,7 @@
 LINTER=$1
 APP=$2
 if [ "$LINTER" = "pylint" ]; then
-    (cd .. && pylint3 pineboolib/$APP --load-plugins=pylint_json2html --output-format=jsonextended) \
+    (cd .. && pylint pineboolib/$APP --load-plugins=pylint_json2html --output-format=jsonextended) \
         | pylint-json2html -f jsonextended -o source/linters/pylint/static/pylint_$APP.html;
     exit 0;
 fi
