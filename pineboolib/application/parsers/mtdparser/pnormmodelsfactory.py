@@ -1,24 +1,7 @@
 # -*- coding: utf-8 -*-
-from pineboolib.application.utils.path import _path
-from pineboolib.core.utils.utils_base import filedir
-from importlib import machinery
-
-from sqlalchemy import String  # type: ignore
-
-import importlib
-import traceback
-import sys
-import os
-from pineboolib import logging
-
-from typing import Any
-
-logger = logging.getLogger("PNControlsFactory")
-
-# processed_: List[str] = []
-
 """
-Esta librería crea y registra modelos sqlAlchemy en el arbol qsa.
+Create and register sqlAlchemy models in QSA tree.
+
 Para llamar a uno de estos se puede hacer desde cualquier script de la siguiente manera
 
 from pineboolib.qsa import *
@@ -53,9 +36,27 @@ Ejemplo de uso:
         instance.saluda()
 
 """
+from pineboolib.application.utils.path import _path
+from pineboolib.core.utils.utils_base import filedir
+from importlib import machinery
+
+from sqlalchemy import String  # type: ignore
+
+import importlib
+import traceback
+import sys
+import os
+from pineboolib import logging
+
+from typing import Any
+
+logger = logging.getLogger("PNControlsFactory")
+
+# processed_: List[str] = []
 
 
 def base_model(name: str) -> Any:
+    """Import and return sqlAlchemy model for given table name."""
     # print("Base", name)
     from pineboolib.application import project
 
@@ -84,6 +85,7 @@ def base_model(name: str) -> Any:
 
 
 def load_model(nombre):
+    """Import and return sqlAlchemy model for given table name."""
 
     if nombre is None:
         return
@@ -136,6 +138,7 @@ def load_model(nombre):
 
 
 def empty_base():
+    """Cleanup sqlalchemy models."""
     from pineboolib.application import project
 
     if project.conn is None:
@@ -147,6 +150,7 @@ def empty_base():
 
 
 def load_models() -> None:
+    """Load all sqlAlchemy models."""
 
     from pineboolib import qsa as qsa_dict_modules
     from pineboolib.application import project
