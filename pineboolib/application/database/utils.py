@@ -4,13 +4,18 @@ Provide some functions based on data.
 
 from pineboolib.core.utils import logging
 
-from typing import Any, Union, List, Optional
+from typing import Any, Union, List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .pnsqlcursor import PNSqlCursor
 
 
 logger = logging.getLogger("database.utils")
 
 
-def nextCounter(*args) -> Any:
+def nextCounter(
+    name_or_series: str, cursor_or_name: Union[str, "PNSqlCursor"], cursor_: Optional["PNSqlCursor"] = None
+) -> Optional[Union[str, int]]:
     """
     Return the following value of a counter type field of a table.
 
@@ -50,131 +55,138 @@ def nextCounter(*args) -> Any:
     @return Qvariant with the following number.
     @author Andrés Otón Urbano.
     """
+    if cursor_ is None:
+        from .pnsqlcursor import PNSqlCursor
+
+        if not isinstance(cursor_or_name, PNSqlCursor):
+            raise ValueError
+        return _nextCounter_2(name_or_series, cursor_or_name)
+    else:
+        if not isinstance(cursor_or_name, str):
+            raise ValueError
+        return _nextCounter_3(name_or_series, cursor_or_name, cursor_)
+
+
+def _nextCounter_2(name: str, cursor_: "PNSqlCursor") -> Optional[Union[str, int]]:
     from .pnsqlquery import PNSqlQuery
 
-    if len(args) == 2:
-        name = args[0]
-        cursor_ = args[1]
-
-        if not cursor_:
-            return None
-
-        tMD = cursor_.metadata()
-        if not tMD:
-            return None
-
-        field = tMD.field(name)
-        if not field:
-            return None
-
-        type_ = field.type()
-
-        if type_ not in ["string", "double"]:
-            return None
-
-        _len = int(field.length())
-        cadena = None
-
-        q = PNSqlQuery(None, cursor_.db().connectionName())
-        q.setForwardOnly(True)
-        q.setTablesList(tMD.name())
-        q.setSelect(name)
-        q.setFrom(tMD.name())
-        q.setWhere("LENGTH(%s)=%s" % (name, _len))
-        q.setOrderBy(name + " DESC")
-
-        if not q.exec_():
-            return None
-
-        maxRange = 10 ** _len
-        numero = maxRange
-
-        while numero >= maxRange:
-            if not q.next():
-                numero = 1
-                break
-
-            try:
-                numero = int(q.value(0))
-                numero = numero + 1
-            except Exception:
-                pass
-
-        if type_ == "string":
-            cadena = str(numero)
-
-            if len(cadena) < _len:
-                relleno = None
-                relleno = cadena.rjust(_len, "0")
-                cadena = relleno
-
-            return cadena
-
-        if type_ == "double":
-            return numero
-
+    if not cursor_:
         return None
 
-    else:
-        serie = args[0]
-        name = args[1]
-        cursor_ = args[2]
+    tMD = cursor_.metadata()
+    if not tMD:
+        return None
 
-        if not cursor_:
-            return None
+    field = tMD.field(name)
+    if not field:
+        return None
 
-        tMD = cursor_.metadata()
-        if not tMD:
-            return None
+    type_ = field.type()
 
-        field = tMD.field(name)
-        if not field:
-            return None
+    if type_ not in ["string", "double"]:
+        return None
 
-        type_ = field.type()
-        if type_ not in ["string", "double"]:
-            return None
+    _len = int(field.length())
+    cadena = None
 
-        _len = field.length() - len(serie)
-        cadena = None
+    q = PNSqlQuery(None, cursor_.db().connectionName())
+    q.setForwardOnly(True)
+    q.setTablesList(tMD.name())
+    q.setSelect(name)
+    q.setFrom(tMD.name())
+    q.setWhere("LENGTH(%s)=%s" % (name, _len))
+    q.setOrderBy(name + " DESC")
 
-        where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (name, field.length(), name, len(serie), serie)
-        select = "substring(%s FROM %d) as %s" % (name, len(serie) + 1, name)
-        q = PNSqlQuery(None, cursor_.db().connectionName())
-        q.setForwardOnly(True)
-        q.setTablesList(tMD.name())
-        q.setSelect(select)
-        q.setFrom(tMD.name())
-        q.setWhere(where)
-        q.setOrderBy(name + " DESC")
+    if not q.exec_():
+        return None
 
-        if not q.exec_():
-            return None
+    maxRange: int = 10 ** _len
+    numero: int = maxRange
 
-        maxRange = 10 ** _len
-        numero = maxRange
+    while numero >= maxRange:
+        if not q.next():
+            numero = 1
+            break
 
-        while numero >= maxRange:
-            if not q.next():
-                numero = 1
-                break
-
+        try:
             numero = int(q.value(0))
             numero = numero + 1
+        except Exception:
+            pass
 
-        if type_ in ["string", "double"]:
-            cadena = numero
-            if len(cadena) < _len:
-                relleno = "0" * (_len - len(cadena))
-                cadena = relleno + cadena
+    if type_ == "string":
+        cadena = str(numero)
 
-            # res = serie + cadena
-            return cadena
+        if len(cadena) < _len:
+            relleno = None
+            relleno = cadena.rjust(_len, "0")
+            cadena = relleno
 
+        return cadena
+
+    if type_ == "double":
+        return numero
+
+    return None
+
+
+def _nextCounter_3(serie: str, name: str, cursor_: "PNSqlCursor") -> Optional[str]:
+    from .pnsqlquery import PNSqlQuery
+
+    if not cursor_:
         return None
 
+    tMD = cursor_.metadata()
+    if not tMD:
+        return None
 
-def sqlSelect(f: str, s: str, w, tL: Optional[Union[str, List]] = None, size: int = 0, connName: str = "default") -> Any:
+    field = tMD.field(name)
+    if not field:
+        return None
+
+    type_ = field.type()
+    if type_ not in ["string", "double"]:
+        return None
+
+    _len: int = field.length() - len(serie)
+
+    where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (name, field.length(), name, len(serie), serie)
+    select = "substring(%s FROM %d) as %s" % (name, len(serie) + 1, name)
+    q = PNSqlQuery(None, cursor_.db().connectionName())
+    q.setForwardOnly(True)
+    q.setTablesList(tMD.name())
+    q.setSelect(select)
+    q.setFrom(tMD.name())
+    q.setWhere(where)
+    q.setOrderBy(name + " DESC")
+
+    if not q.exec_():
+        return None
+
+    maxRange: int = 10 ** _len
+    numero: int = maxRange
+
+    while numero >= maxRange:
+        if not q.next():
+            numero = 1
+            break
+
+        numero = int(q.value(0))
+        numero = numero + 1
+
+    if type_ in ["string", "double"]:
+        cadena: str = str(numero)
+        if len(cadena) < _len:
+            relleno = "0" * (_len - len(cadena))
+            cadena = relleno + cadena
+
+        # res = serie + cadena
+        return cadena
+
+    return None
+
+
+def sqlSelect(f: str, s: str, w: str, tL: Optional[Union[str, List]] = None, size: int = 0, connName: str = "default") -> Any:
     """
     Execute a query of type select, returning the results of the first record found.
 
@@ -186,7 +198,7 @@ def sqlSelect(f: str, s: str, w, tL: Optional[Union[str, List]] = None, size: in
     @param connName Connection name.
     @return Value resulting from the query or false if it finds nothing.
     """
-    if w is None or w == "":
+    if not w:
         return False
 
     from .pnsqlquery import PNSqlQuery
@@ -231,7 +243,7 @@ def quickSqlSelect(f: str, s: str, w: str, connName: str = "default") -> Any:
     return q.value(0) if q.first() else False
 
 
-def sqlInsert(t, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connName: str = "default") -> bool:
+def sqlInsert(t: str, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connName: str = "default") -> bool:
     """
     Perform the insertion of a record in a table using an FLSqlCursor object.
 
@@ -266,7 +278,7 @@ def sqlInsert(t, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connNam
     return c.commitBuffer()
 
 
-def sqlUpdate(t, fL: Union[str, List[str]], vL: Union[str, List[str]], w, connName: str = "default") -> bool:
+def sqlUpdate(t: str, fL: Union[str, List[str]], vL: Union[str, List[str]], w: str, connName: str = "default") -> bool:
     """
     Modify one or more records in a table using an FLSqlCursor object.
 
