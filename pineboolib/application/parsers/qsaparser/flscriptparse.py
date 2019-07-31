@@ -7,7 +7,7 @@ import sys
 import math
 import hashlib
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple, Optional, TextIO
 
 import ply.yacc as yacc  # type: ignore
 import ply.lex as lex  # type: ignore
@@ -25,11 +25,11 @@ reserv += list(flex.reserved)
 
 endoffile = None
 
-hashes: List[Any] = []
-ranges: List[Any] = []
+hashes: List[Tuple[str, str]] = []
+ranges: List[List[Any]] = []
 
 seen_tokens = []
-tokelines: Dict[str, int] = {}
+tokelines: Dict[int, int] = {}
 last_lexspan = None
 
 precedence = (
@@ -51,17 +51,17 @@ last_error_line = -1
 ok_count = 0
 
 
-def cleanNoPython(data):
+def cleanNoPython(data: str) -> str:
     """Remove NOPYTHON blocks."""
     return re.sub(r"\/\/___NOPYTHON\[\[.*?\/\/\]\]___NOPYTHON\s*", "", data, flags=re.DOTALL)
 
 
-def cleanNoPythonNever(data):
+def cleanNoPythonNever(data: str) -> str:
     """Remove NOPYTHON_NEVER blocks."""
     return re.sub(r"\/\/___NOPYTHON_NEVER\[\[.*?\/\/\]\]___NOPYTHON_NEVER\s*", "", data, flags=re.DOTALL)
 
 
-def cnvrt(val):
+def cnvrt(val: str) -> str:
     """Convert special XML characters into XML entities."""
     val = str(val)
     val = val.replace("&", "&amp;")
@@ -72,11 +72,11 @@ def cnvrt(val):
     return val
 
 
-def p_parse(token):
+def p_parse(token: Any) -> None:
     """Parse a single token."""
     global input_data
 
-    lexspan = list(token.lexspan(0))
+    lexspan: List[int] = list(token.lexspan(0))
     # data = str(token.lexer.lexdata[lexspan[0]:lexspan[1]])
     # context = [
     #     str(token.lexer.lexdata[lexspan[0] - 32:lexspan[0]]),
@@ -89,20 +89,21 @@ def p_parse(token):
         endoffile = fromline, lexspan, token.slice[0]
     # print(repr(token.slice), context, lexspan)
 
-    token[0] = {
+    tok0: Dict[str, Any] = {
         "00-toktype": str(token.slice[0]),
         "02-size": lexspan,
         "50-contents": [{"01-type": s.type, "99-value": s.value} for s in token.slice[1:]],
     }
+    token[0] = tok0
 
-    for n in reversed(range(len(token[0]["50-contents"]))):
-        contents = token[0]["50-contents"][n]
-        if contents["01-type"] == token[0]["00-toktype"]:
+    for n in reversed(range(len(tok0["50-contents"]))):
+        contents = tok0["50-contents"][n]
+        if contents["01-type"] == tok0["00-toktype"]:
             # If the first element is same type, unpack left. This is for recursing lists
             # Makes tree calculation faster and less recursive.
-            token[0]["50-contents"][n : n + 1] = contents["99-value"]["50-contents"]
+            tok0["50-contents"][n : n + 1] = contents["99-value"]["50-contents"]
 
-    numelems = len([s for s in token.slice[1:] if s.type != "empty" and s.value is not None])
+    numelems: int = len([s for s in token.slice[1:] if s.type != "empty" and s.value is not None])
 
     rspan = lexspan[0]
     if str(token.slice[0]) == "empty" or numelems == 0:
@@ -137,7 +138,7 @@ def p_parse(token):
     last_lexspan = lexspan
 
 
-def p_error(t):
+def p_error(t: Any) -> Any:
     """Process and report errors in parsing."""
     global error_count
     global ok_count
@@ -559,7 +560,7 @@ parser = yacc.yacc(method="LALR", debug=0, optimize=1, write_tables=1, debugfile
 input_data = ""
 
 
-def print_context(token):
+def print_context(token: Any) -> None:
     """Report errors in console when parsing fails."""
     global input_data
     if token is None:
@@ -576,7 +577,7 @@ def print_context(token):
     print((" " * (column - 1)) + "^", column, "#ERROR#", token)
 
 
-def my_tokenfunc(*args, **kwargs):
+def my_tokenfunc(*args, **kwargs) -> Any:
     """Tokenizer function."""
     # print("Call token:" ,args, kwargs)
     ret = lex.lexer.token(*args, **kwargs)
@@ -584,7 +585,7 @@ def my_tokenfunc(*args, **kwargs):
     return ret
 
 
-def print_tokentree(token, depth=0):
+def print_tokentree(token: Any, depth: int = 0) -> None:
     """Debug output. Unused."""
     print("  " * depth, token.__class__, "=", token)
 
@@ -604,7 +605,7 @@ def print_tokentree(token, depth=0):
             print_tokentree(tk.value, depth + 1)
 
 
-def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
+def calctree(obj: Dict[str, Any], depth: int = 0, num: List[str] = [], otype: str = "source", alias_mode: int = 1) -> Dict[str, Any]:
     """Extract parsed AST and generate a custom structure for later XML generation."""
     # if depth > 5: return
     # source_data = [
@@ -664,10 +665,10 @@ def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
                     tree_obj = calctree(value, depth + 1, num + [str(n)], ctype, alias_mode=alias_mode)
                 except Exception as e:
                     print("ERROR: trying to calculate member:", e)
-                    tree_obj = None
+                    continue
             else:
                 print("PANIC: *** Stack overflow trying to calculate member %d on:" % n, ctype)
-                tree_obj = None
+                continue
 
             if type(tree_obj) is dict:
                 if (tree_obj["has_data"] or alias_mode == 0) and ctype != otype:
@@ -689,7 +690,9 @@ def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
     return final_obj
 
 
-def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):
+def printtree(
+    tree: Dict[str, Any], depth: int = 0, otype: str = "source", mode: Optional[str] = None, output: TextIO = sys.stdout
+) -> Tuple[Any, Any, Any]:
     """Export AST into different formats, mainly used for XML export."""
     global hashes, ranges
     if depth == 0:
@@ -706,7 +709,7 @@ def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):
     closingtokens = ["RBRACE", "RPAREN", "RBRACKET", "SEMI"]
     nuevalinea = False
     name = ""
-    lines = []
+    lines: List[str] = []
     L = 0
 
     for ctype, value in tree["content"]:
@@ -791,15 +794,15 @@ def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):
             output.write("\n")
             output.flush()
     if mode == "xml":
-        for row in lines:
-            output.write(row)
+        for strrow in lines:
+            output.write(strrow)
             output.write("\n")
             output.flush()
 
     return name, lines, tree["range"]
 
 
-def parse(data, clean=True):
+def parse(data: str, clean: bool = True) -> Optional[Dict[str, Any]]:
     """Parse QS String."""
     global input_data
     global error_count
@@ -829,18 +832,14 @@ def parse(data, clean=True):
     return p
 
 
-def main():
+def main() -> None:
     """Manage direct script calls for flscriptparse. Deprecated."""
     global start
     parser = OptionParser()
-    # parser.add_option("-f", "--file", dest="filename",
-    #                  help="write report to FILE", metavar="FILE")
     parser.add_option("-O", "--output", dest="output", default="none", help="Set output TYPE: xml|hash", metavar="TYPE")
     parser.add_option("--start", dest="start", default=None, help="Set start block", metavar="STMT")
     parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
-
     parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
-
     parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
 
     (options, args) = parser.parse_args()
@@ -874,7 +873,7 @@ def main():
         else:
             print("Unknown outputmode", options.output)
 
-    prog = "$$$"
+    prog: Dict[str, Any]
     if len(args) > 0:
         for filename in args:
             fs = filename.split("/")
@@ -883,13 +882,14 @@ def main():
             data = open(filename).read()
             sys.stderr.write(" parsing ...")
             sys.stderr.flush()
-            prog = parse(data)
-            sys.stderr.write(" formatting ...")
-            sys.stderr.flush()
-            if prog:
+            prog_ = parse(data)
+            if prog_ is not None:
+                prog = prog_
+                sys.stderr.write(" formatting ...")
+                sys.stderr.flush()
                 do_it()
-            sys.stderr.write(" Done.\n")
-            sys.stderr.flush()
+                sys.stderr.write(" Done.\n")
+                sys.stderr.flush()
 
     else:
 
@@ -904,16 +904,22 @@ def main():
                         print("Start setted to:", start)
                     if comm[0] == "parse":
                         print()
-                        prog = parse(line)
                         line = ""
+                        prog_ = parse(line)
+                        if prog_ is None:
+                            continue
+                        prog = prog_
+
                 else:
                     line += line1
             except EOFError:
                 break
             line += "\n"
         print()
-        prog = parse(line)
-        do_it()
+        prog_ = parse(line)
+        if prog_ is not None:
+            prog = prog_
+            do_it()
     """
     import yaml
 
