@@ -26,3 +26,5 @@ build/
 dist/
 pineboo.egg-info/
 .coverage
+docs/source/_static/linters/pytest-coverage
+docs/source/linters/pylint/static
