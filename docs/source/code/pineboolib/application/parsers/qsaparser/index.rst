@@ -10,13 +10,8 @@ Package qsaparser
    :maxdepth: 2
    :caption: Contents:
 
-   tests/index
-   flalign
-   flclasses
    flex
    flscriptparse
    postparse
    pyconvert
    pytnyzer
-   xml2json
-   xmlparse

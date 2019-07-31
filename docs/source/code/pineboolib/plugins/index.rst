@@ -12,6 +12,5 @@ Package plugins
 
    dgi/index
    mainform/index
-   qtwidgetsplugins/index
    sql/index
    test/index
