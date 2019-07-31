@@ -273,7 +273,7 @@ class FLApplication(QtCore.QObject):
         self.container_.setObjectName("container")
         self.container_.setWindowIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("pineboo.png")))
         if self.db() is not None:
-            self.container_.setWindowTitle(self.db().database())
+            self.container_.setWindowTitle(self.db().DBName())
         else:
             self.container_.setWindowTitle("Pineboo %s" % project.version)
 
@@ -449,10 +449,9 @@ class FLApplication(QtCore.QObject):
     def setMainWidget(self, w) -> None:
         if not self.container_:
             return
-
         from pineboolib import pncontrolsfactory
 
-        if w == self.container_ or not w:
+        if w == self.container_ or w is None:
             pncontrolsfactory.QApplication.setActiveWindow(self.container_)
             self.main_widget_ = None
             return
@@ -462,7 +461,7 @@ class FLApplication(QtCore.QObject):
 
         # mw = self.main_widget_ if isinstance(self.main_widget_, QMainWindow) else None
         mw = self.main_widget_
-        if not mw:
+        if mw is None:
             return
 
         if self.toogle_bars_:
@@ -1467,7 +1466,7 @@ class FLApplication(QtCore.QObject):
 
             active_id_module = self.db().managerModules().activeIdModule()
 
-            windows_opened = settings.value("windowsOpened/Main", None)
+            windows_opened = settings.value("windowsOpened/Main", [])
 
             for it in windows_opened:
                 if it in self.db().managerModules().listAllIdModules():
