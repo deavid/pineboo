@@ -246,8 +246,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.initialized_mods_ = []
         self.act_sig_map_ = QtCore.QSignalMapper(self.w_)
         self.act_sig_map_.setObjectName("pinebooActSignalMap")
-        self.act_sig_map_.mapped[str].connect(self.triggerAction)
-        # self.act_sig_map_.mapped.connect(self.triggerAction) #This is a wrong way.
+        self.act_sig_map_.mapped[str].connect(self.triggerAction)  # type: ignore
         self.initTabWidget()
         self.initHelpMenu()
         self.initConfigMenu()
