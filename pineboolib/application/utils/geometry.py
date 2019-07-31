@@ -1,3 +1,7 @@
+"""
+Manage form sizes.
+"""
+
 from pineboolib.core.settings import settings
 from typing import TYPE_CHECKING
 
@@ -7,9 +11,10 @@ if TYPE_CHECKING:
 
 def saveGeometryForm(name: str, geo: "QSize") -> None:
     """
-    Guarda la geometría de una ventana
-    @param name, Nombre de la ventana
-    @param geo, QSize con los valores de la ventana
+    Save the geometry of a window.
+
+    @param name, window name.
+    @param geo, QSize with window values.
     """
     from pineboolib.application import project  # FIXME
 
@@ -22,9 +27,10 @@ def saveGeometryForm(name: str, geo: "QSize") -> None:
 
 def loadGeometryForm(name: str) -> "QSize":
     """
-    Carga la geometría de una ventana
-    @param name, Nombre de la ventana
-    @return QSize con los datos de la geometríca de la ventana guardados.
+    Load the geometry of a window.
+
+    @param name, window name
+    @return QSize with the saved window geometry data.
     """
     from pineboolib.application import project  # FIXME
 

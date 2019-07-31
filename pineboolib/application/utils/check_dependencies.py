@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""Check the application dependencies."""
+
 import sys
 from pineboolib.core.utils import logging
 import traceback
@@ -11,6 +14,13 @@ DEPENDENCIES_CHECKED: Dict[str, str] = {}
 
 
 def check_dependencies(dict_: Dict[str, str], exit: bool = True) -> bool:
+    """
+    Check if a package is installed and return the result.
+
+    @param dict_. Dictated with the name of the agency and the module to be checked.
+    @param exit . Exit if dependence fails.
+    """
+
     global DEPENDENCIES_CHECKED
     from importlib import import_module
 

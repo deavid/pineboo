@@ -1,3 +1,7 @@
+"""
+To resolve file and folder paths.
+"""
+
 from pineboolib import logging
 import os.path
 from typing import Optional
@@ -7,9 +11,10 @@ logger = logging.getLogger(__name__)
 
 def _dir(*x) -> str:
     """
-    Calcula la ruta de una carpeta
-    @param x. str o array con la ruta de la carpeta
-    @return str con ruta absoluta a una carpeta
+    Calculate the path of a folder.
+
+    @param x. str or array with the folder path.
+    @return str with absolute path to a folder.
     """
     from pineboolib.application import project  # type: ignore
 
@@ -18,8 +23,9 @@ def _dir(*x) -> str:
 
 def coalesce_path(*filenames) -> Optional[str]:
     """
-    Retorna el primer fichero existente de un grupo de ficheros
-    @return ruta al primer fichero encontrado
+    Return the first existing file in a group of files.
+
+    @return path to the first file found.
     """
     for filename in filenames:
         if filename is None:
@@ -38,8 +44,9 @@ def coalesce_path(*filenames) -> Optional[str]:
 
 def _path(filename: str, showNotFound: bool = True) -> Optional[str]:
     """
-    Retorna el primer fichero existente de un grupo de ficheros
-    @return ruta al fichero
+    Return the first existing file in a group of files.
+
+    @return path to file.
     """
     from pineboolib.application import project
 
