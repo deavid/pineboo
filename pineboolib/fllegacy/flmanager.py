@@ -312,7 +312,7 @@ class FLManager(QtCore.QObject, IManager):
                         continue
 
                     elif e.tagName() == "FTSFunction":
-                        ftsfun = e.text() == "true"
+                        ftsfun = e.text()
                         no = no.nextSibling()
                         continue
 
@@ -320,7 +320,7 @@ class FLManager(QtCore.QObject, IManager):
             tmd = PNTableMetaData(name, a, q)
             cK = None
             assocs = []
-            tmd.setFTSFunction(ftsfun)
+            tmd.setFTSFunction(ftsfun or "")
             tmd.setConcurWarn(cw)
             tmd.setDetectLocks(dl)
             no = n.firstChild()
