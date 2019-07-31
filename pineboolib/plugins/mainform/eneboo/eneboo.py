@@ -46,8 +46,6 @@ class MainForm(QtWidgets.QMainWindow):
 
         self.qsa_sys = pncontrolsfactory.SysType()
 
-        pncontrolsfactory.aqApp.main_widget_ = self
-
     def eventFilter(self, o: QtWidgets.QWidget, e: QtGui.QInputEvent) -> bool:
         """Process GUI events."""
         if self.dck_mod_ is None or self.dck_rec_ is None or self.dck_mar_ is None:
@@ -73,9 +71,6 @@ class MainForm(QtWidgets.QMainWindow):
                     e.ignore()
 
                 return True
-
-            elif isinstance(o, pncontrolsfactory.FLFormDB):
-                self.formClosed()
 
             elif isinstance(o, pncontrolsfactory.QDockWidget):
                 o.topLevelChanged.emit(False)
@@ -251,8 +246,8 @@ class MainForm(QtWidgets.QMainWindow):
         self.initialized_mods_ = []
         self.act_sig_map_ = QtCore.QSignalMapper(self.w_)
         self.act_sig_map_.setObjectName("pinebooActSignalMap")
-        # self.act_sig_map_.mapped[str].connect(self.triggerAction)
-        self.act_sig_map_.mapped.connect(self.triggerAction)
+        self.act_sig_map_.mapped[str].connect(self.triggerAction)
+        # self.act_sig_map_.mapped.connect(self.triggerAction) #This is a wrong way.
         self.initTabWidget()
         self.initHelpMenu()
         self.initConfigMenu()
@@ -334,13 +329,6 @@ class MainForm(QtWidgets.QMainWindow):
 
         for i in range(self.tw_.count()):
             self.tw_.widget(i).close()
-
-    def formClosed(self) -> None:
-        """Handle form close."""
-        if self.tw_ is None:
-            return
-        if self.tw_.count() == 1:
-            self.tw_corner.hide()
 
     def addForm(self, action_name: str, icono: "QPixmap") -> None:
         """Add new tab."""
@@ -531,7 +519,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.connect(pncontrolsfactory.aqApp.aboutQt)
         self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.connect(pncontrolsfactory.aqApp.aboutPineboo)
         self.w_.findChild(QtWidgets.QAction, "fontAction").triggered.connect(pncontrolsfactory.aqApp.chooseFont)
-        # self.w_.findChild(QtWidgets.QAction, "style").triggered.connect(aqApp.showStyles)
+        self.w_.findChild(QtWidgets.QMenu, "style").triggered.connect(pncontrolsfactory.aqApp.showStyles)
         self.w_.findChild(QtWidgets.QAction, "helpIndexAction").triggered.connect(pncontrolsfactory.aqApp.helpIndex)
         self.w_.findChild(QtWidgets.QAction, "urlEnebooAction").triggered.connect(pncontrolsfactory.aqApp.urlPineboo)
 
@@ -877,6 +865,8 @@ class MainForm(QtWidgets.QMainWindow):
         """Startup process."""
 
         from pineboolib.core.utils.utils_base import filedir
+
+        pncontrolsfactory.aqApp.main_widget_ = self
 
         mw = self
         mw.createUi(filedir("plugins/mainform/eneboo/mainform.ui"))
