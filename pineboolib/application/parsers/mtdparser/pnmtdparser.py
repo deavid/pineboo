@@ -1,32 +1,38 @@
 # -*- coding: utf-8 -*-
+"""
+MTD Parser to sqlAlchemy model.
+
+Creates a Python file side by side with the original MTD file.
+Can be overloaded with a custom class to enhance/change available
+functions. See pineboolib/pnobjectsfactory.py
+"""
+
 from pineboolib import logging
-from typing import List
+from typing import List, cast
 from pineboolib.application.utils.path import _path
 from pineboolib.application import project
+from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
+from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
 import os
 
 logger = logging.getLogger(__name__)
 
 reserved_words = ["pass"]
 
-"""
-    Esta librería es un parser de mtd a model de sqlAlchemy.
-    Se crea un fichero .py y se aloja al lado del .mtd relacionado.
-    También se puede sobrecargar con una clase personalizada para aumentar/modificar
-        las funciones disponibles. Ver pineboolib.pnobjectsfactory.py
-"""
-
 
 def mtd_parse(table_name: str) -> None:
+    """
+    Parse MTD into SqlAlchemy model.
+    """
     if table_name.find("alteredtable") > -1 or table_name.startswith("fllarge_"):
         return
 
     if project.conn is None:
         raise Exception("Project is not connected yet")
-    mtd = project.conn.manager().metadata(table_name)
-    if mtd is None:
+    mtd_ = project.conn.manager().metadata(table_name)
+    if mtd_ is None:
         return
-
+    mtd: PNTableMetaData = cast(PNTableMetaData, mtd_)
     if mtd.isQuery():
         return
 
@@ -55,8 +61,10 @@ def mtd_parse(table_name: str) -> None:
             f.close()
 
 
-def generate_model(dest_file, mtd_table) -> List[str]:
-
+def generate_model(dest_file: str, mtd_table: PNTableMetaData) -> List[str]:
+    """
+    Create a list of lines from a mtd_table (PNTableMetaData).
+    """
     data = []
     pk_found = False
     data.append("# -*- coding: utf-8 -*-")
@@ -186,7 +194,10 @@ def generate_model(dest_file, mtd_table) -> List[str]:
     return data
 
 
-def field_type(field) -> str:
+def field_type(field: PNFieldMetaData) -> str:
+    """
+    Get text representation for sqlAlchemy of a field type given its PNFieldMetaData.
+    """
     ret = "String"
     if field.type() in ("int, serial"):
         ret = "Integer"
@@ -220,7 +231,7 @@ def field_type(field) -> str:
         if project.conn is None:
             raise Exception("Project is not connected yet")
         rel = field.relationM1()
-        if project.conn.manager().existsTable(rel.foreignTable()):
+        if rel and project.conn.manager().existsTable(rel.foreignTable()):
             ret += ", ForeignKey('%s.%s'" % (rel.foreignTable(), rel.foreignField())
             if rel.deleteCascade():
                 ret += ", ondelete='CASCADE'"

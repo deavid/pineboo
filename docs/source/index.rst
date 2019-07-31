@@ -11,6 +11,7 @@ Welcome to Pineboo's documentation!
    :caption: Contents:
 
    code/pineboolib/index
+   linters/index
 
 Indices and tables
 ==================

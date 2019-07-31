@@ -90,3 +90,4 @@ bandit
 coverage
 radon
 xenon
+pylint-json2html
