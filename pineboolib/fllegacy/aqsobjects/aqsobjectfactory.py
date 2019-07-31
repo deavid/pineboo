@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+AQSobjectsFactory Module.
 
+This module provides the different classes and AQS functions to be used in the module scripts.
+"""
 # AQSObjects
 from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqsqlquery import AQSqlQuery  # noqa: F401
@@ -11,19 +15,21 @@ from pineboolib.fllegacy.aqsobjects.aqs import AQS as AQS_class
 from pineboolib.fllegacy.aqsobjects.aqods import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqods import AQOdsColor, AQOdsStyle, AQOdsImage  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqboolflagstate import AQBoolFlagState, AQBoolFlagStateList  # noqa: F401
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib import pncontrolsfactory
+    from PyQt5 import QtWidgets
 
 # AQUtil = AQUtil_class()
 # AQS = AQS_class()
 AQUtil: AQUtil_class
 AQS: AQS_class
 
-"""
-FLFormDB
-"""
 
+def AQFormDB(action_name: str, parent: "QtWidgets.QWidget") -> "pncontrolsfactory.FLFormDB":
+    """Return a FLFormDB instance."""
 
-def AQFormDB(action_name, parent, other) -> Any:
     from pineboolib.application.utils.convert_flaction import convertFLAction
     from pineboolib.application import project
 

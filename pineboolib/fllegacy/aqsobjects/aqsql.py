@@ -1,58 +1,43 @@
 # -*- coding: utf-8 -*-
+"""
+AQSql Module.
+
+Provide queries to DB.
+"""
+
 from pineboolib.application import project
 from pineboolib import logging
 
-from typing import Union, Any, TYPE_CHECKING
+from typing import Union, Any, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.fllegacy.flsqlcursor import FLSqlCursor  # noqa: F401
+    from pineboolib.interfaces.iconnection import IConnection
 
 logger = logging.getLogger(__name__)
-"""
-Provee consultas a DB
-"""
 
 
 class AQSql(object):
+    """AQSql Class."""
 
-    Insert = 0
-    Edit = 1
-    Del = 2
-    Browse = 3
-
-    """
-    Obtiene la base de datos de una conexion.
-
-    @param connectionNmae Nombre de la conexion
-    @return La base de datos correspondiente al nombre de conexion indicado
-    """
+    Insert: int = 0
+    Edit: int = 1
+    Del: int = 2
+    Browse: int = 3
 
     @classmethod
-    def database(self, connection_name="default") -> Any:
+    def database(self, connection_name: str = "default") -> "IConnection":
+        """Return the database of a connection."""
+
         if project.conn is None:
             raise Exception("Project is not connected yet")
         return project.conn.useConn(connection_name)
 
-    """
-    Actualiza un conjunto de registros de un cursor con nuevos valores
-
-    Si hay un error SQL, eleva una excepción con el mensaje de error
-
-    Ejemplo:
-
-    var cur = new AQSqlCursor("clientes");
-    try {
-      AQSql.update(cur,
-                   ["nombre","cifnif","codserie"],
-                   ["juan","ZYX","A"],
-                   "codcliente='1'");
-    } catch (e) {
-      sys.errorMsgBox("Error SQL: " + e);
-    }
-    """
-
     @classmethod
-    def update(self, table_or_cursor: Union[str, "FLSqlCursor"], fields, values, where="", conn=None):
+    def update(
+        self, table_or_cursor: Union[str, "FLSqlCursor"], fields: List[str], values: List[Any], where: str = "", conn: str = "default"
+    ):
+        """Update a set of cursor records with new values."""
 
         if isinstance(table_or_cursor, str):
             from pineboolib.application.database.pnsqlcursor import PNSqlCursor
@@ -92,25 +77,11 @@ class AQSql(object):
 
         return ok
 
-    """
-    Inserta un registro en un cursor
-
-    Si hay un error SQL, eleva una excepción con el mensaje de error
-
-    Ejemplo:
-
-    var cur = new AQSqlCursor("clientes");
-    try {
-        AQSql.insert(cur,
-            ["codcliente","nombre","cifnif","codserie"],
-            ["1","pepe","XYZ","A"]);
-        } catch (e) {
-            sys.errorMsgBox("Error SQL: " + e);
-            }
-    """
-
     @classmethod
-    def insert(self, table_or_cursor: Union[str, "FLSqlCursor"], fields, values, where="", conn=None):
+    def insert(
+        self, table_or_cursor: Union[str, "FLSqlCursor"], fields: List[str], values: List[Any], where: str = "", conn: str = "default"
+    ):
+        """Insert a record in a cursor."""
 
         if isinstance(table_or_cursor, str):
             from pineboolib.application.database.pnsqlcursor import PNSqlCursor
@@ -143,23 +114,9 @@ class AQSql(object):
 
         return ok
 
-    """
-    Elimina un conjunto de registros de un cursor
-
-    Si hay un error SQL, eleva una excepción con el mensaje de error
-
-    Ejemplo:
-
-    var cur = new AQSqlCursor("clientes");
-    try {
-        AQSql.del_(cur, "codcliente='1'");
-        } catch (e) {
-        sys.errorMsgBox("Error SQL: " + e);
-        }
-    """
-
     @classmethod
-    def del_(self, cur_or_table: Union[str, "FLSqlCursor"], where="", conn_name="default"):
+    def del_(self, cur_or_table: Union[str, "FLSqlCursor"], where: str = "", conn_name: str = "default"):
+        """Remove a recordset from a cursor."""
 
         if not isinstance(cur_or_table, str):
             cur = cur_or_table
