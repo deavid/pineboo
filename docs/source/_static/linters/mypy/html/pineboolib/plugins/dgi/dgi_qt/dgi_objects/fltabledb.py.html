@@ -5359,10 +5359,8 @@ Explicit (x2)">        border_left = pncontrolsfactory.AQOdsStyle.Border_left</s
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">        italic = pncontrolsfactory.AQOdsStyle.Text_italic</span>
 <span class="line-precise" title="No Anys on this line!">        ods_gen = pncontrolsfactory.AQOdsGenerator</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">        spread_sheet = pncontrolsfactory.AQOdsSpreadSheet(ods_gen)</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x2)">        sheet = pncontrolsfactory.AQOdsSheet(spread_sheet, mtd.alias())</span>
+<span class="line-precise" title="No Anys on this line!">        spread_sheet = pncontrolsfactory.AQOdsSpreadSheet(ods_gen)</span>
+<span class="line-precise" title="No Anys on this line!">        sheet = pncontrolsfactory.AQOdsSheet(spread_sheet, mtd.alias())</span>
 <span class="line-precise" title="No Anys on this line!">        tdb_num_rows = cursor.size()</span>
 <span class="line-precise" title="No Anys on this line!">        tdb_num_cols = len(mtd.fieldNames())</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -5371,8 +5369,7 @@ Unannotated (x2)">        sheet = pncontrolsfactory.AQOdsSheet(spread_sheet, mtd
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">        pd = util.createProgressDialog("Procesando", tdb_num_rows)</span>
 <span class="line-precise" title="No Anys on this line!">        util.setProgress(1)</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">        row = pncontrolsfactory.AQOdsRow(sheet)</span>
+<span class="line-precise" title="No Anys on this line!">        row = pncontrolsfactory.AQOdsRow(sheet)</span>
 <span class="line-precise" title="Any Types on this line: 
 Unannotated (x1)">        row.addBgColor(pncontrolsfactory.AQOdsColor(0xE7E7E7))</span>
 <span class="line-precise" title="No Anys on this line!">        for i in range(tdb_num_cols):</span>
@@ -5415,8 +5412,7 @@ Unimported (x1)">                row.opIn(field.alias())</span>
 Explicit (x3)">            if pd.wasCanceled():</span>
 <span class="line-empty" title="No Anys on this line!">                break</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">            row = pncontrolsfactory.AQOdsRow(sheet)</span>
+<span class="line-precise" title="No Anys on this line!">            row = pncontrolsfactory.AQOdsRow(sheet)</span>
 <span class="line-precise" title="No Anys on this line!">            for c in range(tdb_num_cols):</span>
 <span class="line-empty" title="No Anys on this line!">                # idx = tdb.indexOf(c)  # Busca si la columna se ve</span>
 <span class="line-empty" title="No Anys on this line!">                # if idx == -1:</span>
@@ -5427,8 +5423,7 @@ Unannotated (x1)">            row = pncontrolsfactory.AQOdsRow(sheet)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">                    val = cursor.valueBuffer(field.name())</span>
 <span class="line-precise" title="No Anys on this line!">                    if field.type() == "double":</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">                        row.setFixedPrecision(mtd.fieldPartDecimal(field.name()))</span>
+<span class="line-precise" title="No Anys on this line!">                        row.setFixedPrecision(mtd.fieldPartDecimal(field.name()))</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)
 Omitted Generics (x1)
@@ -5481,8 +5476,7 @@ Explicit (x2)">                                pix = QPixmap(val)</span>
 Unannotated (x2)
 Omitted Generics (x1)
 Unimported (x1)">                                    row.opIn(</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x6)">                                        pncontrolsfactory.AQOdsImage(</span>
+<span class="line-precise" title="No Anys on this line!">                                        pncontrolsfactory.AQOdsImage(</span>
 <span class="line-precise" title="No Anys on this line!">                                            pix_name,</span>
 <span class="line-precise" title="No Anys on this line!">                                            round((pix.width() * 2.54) / 98, 2) * 20,</span>
 <span class="line-precise" title="No Anys on this line!">                                            round((pix.height() * 2.54) / 98, 2) * 20,</span>

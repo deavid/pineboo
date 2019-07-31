@@ -1,0 +1,2772 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+
+<title>
+    Bandit Report
+</title>
+
+<style>
+
+html * {
+    font-family: "Arial", sans-serif;
+}
+
+pre {
+    font-family: "Monaco", monospace;
+}
+
+.bordered-box {
+    border: 1px solid black;
+    padding-top:.5em;
+    padding-bottom:.5em;
+    padding-left:1em;
+}
+
+.metrics-box {
+    font-size: 1.1em;
+    line-height: 130%;
+}
+
+.metrics-title {
+    font-size: 1.5em;
+    font-weight: 500;
+    margin-bottom: .25em;
+}
+
+.issue-description {
+    font-size: 1.3em;
+    font-weight: 500;
+}
+
+.candidate-issues {
+    margin-left: 2em;
+    border-left: solid 1px; LightGray;
+    padding-left: 5%;
+    margin-top: .2em;
+    margin-bottom: .2em;
+}
+
+.issue-block {
+    border: 1px solid LightGray;
+    padding-left: .5em;
+    padding-top: .5em;
+    padding-bottom: .5em;
+    margin-bottom: .5em;
+}
+
+.issue-sev-high {
+    background-color: Pink;
+}
+
+.issue-sev-medium {
+    background-color: NavajoWhite;
+}
+
+.issue-sev-low {
+    background-color: LightCyan;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="metrics">
+    <div class="metrics-box bordered-box">
+        <div class="metrics-title">
+            Metrics:<br>
+        </div>
+        Total lines of code: <span id="loc">44732</span><br>
+        Total lines skipped (#nosec): <span id="nosec">0</span>
+    </div>
+</div>
+
+
+
+
+<br>
+<div id="results">
+    
+<div id="issue-0">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/database/pnconnection.py" target="_blank">pineboolib/application/database/pnconnection.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+148	            del self.connAux[name]
+149	        except Exception:
+150	            pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-1">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/application/database/pncursortablemodel.py" target="_blank">pineboolib/application/database/pncursortablemodel.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+987	        if campos:
+988	            sql = &quot;&quot;&quot;INSERT INTO %s (%s) VALUES (%s)&quot;&quot;&quot; % (fl_cursor.d.curName_, campos, valores)
+989	            # conn = self._cursorConn.db()
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-2">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/application/database/pncursortablemodel.py" target="_blank">pineboolib/application/database/pncursortablemodel.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+1020	        val = self.db().manager().formatValue(typePK, self.value(cursor.d._currentregister, pKName))
+1021	        sql = &quot;DELETE FROM %s WHERE %s = %s&quot; % (tableName, pKName, val)
+1022	        # conn = self._cursorConn.db()
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-3">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/application/database/pncursortablemodel.py" target="_blank">pineboolib/application/database/pncursortablemodel.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+1167	            q = PNSqlQuery(None, self.db().name)
+1168	            q.exec_(&quot;SELECT COUNT(*) FROM %s WHERE %s&quot; % (from_, where_))
+1169	            if q.first():
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-4">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/database/pnsqlcursor.py" target="_blank">pineboolib/application/database/pnsqlcursor.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+226	                # cR.d._current_changed.disconnect(self.refresh)
+227	            except Exception:
+228	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-5">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/database/pnsqlcursor.py" target="_blank">pineboolib/application/database/pnsqlcursor.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+234	
+235	            except Exception:
+236	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-6">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/application/database/pnsqlcursor.py" target="_blank">pineboolib/application/database/pnsqlcursor.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+480	            ret = q.exec_(
+481	                &quot;UPDATE  %s SET %s = %s WHERE %s&quot;
+482	                % (
+483	                    self.d.metadata_.name(),
+484	                    fN,
+485	                    self.db().manager().formatValue(type, v),
+486	                    self.db().manager().formatAssignValue(self.d.metadata_.field(pK), pKV),
+487	                )
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-7">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/application/database/pnsqlcursor.py" target="_blank">pineboolib/application/database/pnsqlcursor.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+577	                q.exec_(
+578	                    &quot;UPDATE %s SET %s = %s WHERE %s;&quot;
+579	                    % (
+580	                        self.d.metadata_.name(),
+581	                        fN,
+582	                        manager.formatValue(type_, vv),
+583	                        manager.formatAssignValue(self.d.metadata_.field(pK), pKV),
+584	                    )
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-8">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/application/database/pnsqlcursor.py" target="_blank">pineboolib/application/database/pnsqlcursor.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+657	                q = PNSqlQuery(None, &quot;dbAux&quot;)
+658	                sql_query = &quot;SELECT %s FROM %s WHERE %s&quot; % (
+659	                    fN,
+660	                    self.d.metadata_.name(),
+661	                    self.db().manager().formatAssignValue(self.d.metadata_.field(pK), pKV),
+662	                )
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-9">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/database/pnsqlquery.py" target="_blank">pineboolib/application/database/pnsqlquery.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+151	                del self._cursor
+152	        except Exception:
+153	            pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-10">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/database/pnsqlquery.py" target="_blank">pineboolib/application/database/pnsqlquery.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+347	                field = f[f.index(&quot;.&quot;) + 1 :]
+348	            except Exception:
+349	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-11">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/application/database/pnsqlquery.py" target="_blank">pineboolib/application/database/pnsqlquery.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+417	        elif not self.d.where_:
+418	            res = &quot;SELECT %s FROM %s&quot; % (select, self.d.from_)
+419	        else:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-12">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/application/database/pnsqlquery.py" target="_blank">pineboolib/application/database/pnsqlquery.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+419	        else:
+420	            res = &quot;SELECT %s FROM %s WHERE %s&quot; % (select, self.d.from_, self.d.where_)
+421	
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-13">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/database/utils.py" target="_blank">pineboolib/application/database/utils.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+99	                numero = numero + 1
+100	            except Exception:
+101	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-14">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/application/database/utils.py" target="_blank">pineboolib/application/database/utils.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+222	    if not w:
+223	        sql = &quot;select &quot; + s + &quot; from &quot; + f
+224	    else:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-15">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/application/database/utils.py" target="_blank">pineboolib/application/database/utils.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+224	    else:
+225	        sql = &quot;select &quot; + s + &quot; from &quot; + f + &quot; where &quot; + w
+226	
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-16">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/application/database/utils.py" target="_blank">pineboolib/application/database/utils.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+334	    &quot;&quot;&quot;
+335	    execSql(&quot;DELETE FROM %s WHERE %s&quot; % (t, w))
+336	
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-17">
+<div class="issue-block issue-sev-low">
+    <b>blacklist: </b> Using Element to parse untrusted XML data is known to be vulnerable to XML attacks. Replace Element with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.<br>
+    <b>Test ID:</b> B405<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/parsers/kugarparser/kut2fpdf.py" target="_blank">pineboolib/application/parsers/kugarparser/kut2fpdf.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree</a><br>
+
+<div class="code">
+<pre>
+9	import os
+10	from xml.etree.ElementTree import Element
+11	from pineboolib.application import project
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-18">
+<div class="issue-block issue-sev-low">
+    <b>blacklist: </b> Using Element to parse untrusted XML data is known to be vulnerable to XML attacks. Replace Element with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.<br>
+    <b>Test ID:</b> B405<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/parsers/kugarparser/parsertools.py" target="_blank">pineboolib/application/parsers/kugarparser/parsertools.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree</a><br>
+
+<div class="code">
+<pre>
+8	import fnmatch
+9	from xml.etree.ElementTree import Element, ElementTree
+10	from typing import Any, Iterable, Optional, SupportsInt, Union, List
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-19">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/application/parsers/kugarparser/parsertools.py" target="_blank">pineboolib/application/parsers/kugarparser/parsertools.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+178	                q = PNSqlQuery()
+179	                q.exec_(&quot;SELECT contenido FROM %s WHERE refkey=&#x27;%s&#x27;&quot; % (table_name, ref_key))
+180	                if q.next():
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-20">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_tmp_directory: </b> Probable insecure usage of temp file/directory.<br>
+    <b>Test ID:</b> B108<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>MEDIUM<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/flscriptparse.py" target="_blank">pineboolib/application/parsers/qsaparser/flscriptparse.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b108_hardcoded_tmp_directory.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b108_hardcoded_tmp_directory.html</a><br>
+
+<div class="code">
+<pre>
+16	
+17	tempDir = &quot;/tmp&quot;
+18	
+19	# Get the token map
+20	tokens = flex.tokens
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-21">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/flscriptparse.py" target="_blank">pineboolib/application/parsers/qsaparser/flscriptparse.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+153	                    print_context(t)
+154	                except Exception:
+155	                    pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-22">
+<div class="issue-block issue-sev-low">
+    <b>hardcoded_password_string: </b> Possible hardcoded password: 'EOF'<br>
+    <b>Test ID:</b> B105<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>MEDIUM<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/flscriptparse.py" target="_blank">pineboolib/application/parsers/qsaparser/flscriptparse.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html</a><br>
+
+<div class="code">
+<pre>
+174	    if t is None:
+175	        if last_error_token != &quot;EOF&quot;:
+176	            print(&quot;ERROR: End of the file reached.&quot;)
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-23">
+<div class="issue-block issue-sev-low">
+    <b>hardcoded_password_string: </b> Possible hardcoded password: 'EOF'<br>
+    <b>Test ID:</b> B105<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>MEDIUM<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/flscriptparse.py" target="_blank">pineboolib/application/parsers/qsaparser/flscriptparse.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html</a><br>
+
+<div class="code">
+<pre>
+185	                    print(&quot;ERROR:&quot;, e)
+186	        last_error_token = &quot;EOF&quot;
+187	        return t
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-24">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/flscriptparse.py" target="_blank">pineboolib/application/parsers/qsaparser/flscriptparse.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+599	                print(tk.endlexpos, end=&quot; &quot;)
+600	            except Exception:
+601	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-25">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Use of insecure MD2, MD4, MD5, or SHA1 hash function.<br>
+    <b>Test ID:</b> B303<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/flscriptparse.py" target="_blank">pineboolib/application/parsers/qsaparser/flscriptparse.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5</a><br>
+
+<div class="code">
+<pre>
+752	                # if len(tlines)&gt;1:
+753	                txthash = hashlib.sha1(txtinline.encode(&quot;utf8&quot;)).hexdigest()[:16]
+754	                # hashes.append((&quot;depth:&quot;,depth,&quot;hash:&quot;,txthash,&quot;element:&quot;,ctype+&quot;:&quot;+tname))
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-26">
+<div class="issue-block issue-sev-high">
+    <b>blacklist: </b> The input method in Python 2 will read from standard input, evaluate and run the resulting string as python source code. This is similar, though in many ways worse, then using eval. On Python 2, use raw_input instead, input is safe in Python 3.<br>
+    <b>Test ID:</b> B322<br>
+    <b>Severity: </b>HIGH<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/flscriptparse.py" target="_blank">pineboolib/application/parsers/qsaparser/flscriptparse.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b322-input" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b322-input</a><br>
+
+<div class="code">
+<pre>
+898	            try:
+899	                line1 = input(&quot;flscript&gt; &quot;)
+900	                if line1.startswith(&quot;#&quot;):
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-27">
+<div class="issue-block issue-sev-low">
+    <b>blacklist: </b> Using ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.<br>
+    <b>Test ID:</b> B405<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/postparse.py" target="_blank">pineboolib/application/parsers/qsaparser/postparse.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree</a><br>
+
+<div class="code">
+<pre>
+9	import imp
+10	from xml.etree import ElementTree
+11	from xml.dom import minidom  # type: ignore
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-28">
+<div class="issue-block issue-sev-low">
+    <b>blacklist: </b> Using minidom to parse untrusted XML data is known to be vulnerable to XML attacks. Replace minidom with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.<br>
+    <b>Test ID:</b> B408<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/postparse.py" target="_blank">pineboolib/application/parsers/qsaparser/postparse.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b408-import-xml-minidom" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b408-import-xml-minidom</a><br>
+
+<div class="code">
+<pre>
+10	from xml.etree import ElementTree
+11	from xml.dom import minidom  # type: ignore
+12	import logging
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-29">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.dom.minidom.parseString to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.dom.minidom.parseString with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B318<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/postparse.py" target="_blank">pineboolib/application/parsers/qsaparser/postparse.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b313-b320-xml-bad-minidom" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b313-b320-xml-bad-minidom</a><br>
+
+<div class="code">
+<pre>
+919	
+920	            xml_str = minidom.parseString(ElementTree.tostring(ast)).toprettyxml(indent=&quot;   &quot;)
+921	            with open(destname, &quot;w&quot;, encoding=&quot;UTF-8&quot;) as f:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-30">
+<div class="issue-block issue-sev-low">
+    <b>blacklist: </b> Using xml.etree.ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.<br>
+    <b>Test ID:</b> B405<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/pyconvert.py" target="_blank">pineboolib/application/parsers/qsaparser/pyconvert.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree</a><br>
+
+<div class="code">
+<pre>
+9	import codecs
+10	import xml.etree.ElementTree as ET
+11	from multiprocessing import Pool
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-31">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/pyconvert.py" target="_blank">pineboolib/application/parsers/qsaparser/pyconvert.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+71	    try:
+72	        tree = ET.parse(source=codecs.open(path, &quot;r&quot;, encoding=&quot;iso-8859-15&quot;))
+73	    except Exception:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-32">
+<div class="issue-block issue-sev-low">
+    <b>blacklist: </b> Using ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.<br>
+    <b>Test ID:</b> B405<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/pytnyzer.py" target="_blank">pineboolib/application/parsers/qsaparser/pytnyzer.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree</a><br>
+
+<div class="code">
+<pre>
+12	import re
+13	from xml.etree import ElementTree
+14	from typing import Any, Generator, Tuple, Type, List, Dict, Set, cast, Optional, TextIO
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-33">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.XMLParser to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.XMLParser with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/pytnyzer.py" target="_blank">pineboolib/application/parsers/qsaparser/pytnyzer.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+2406	    ASTPython.debug_file = open(debugname, &quot;w&quot;) if debugname else None
+2407	    parser = ElementTree.XMLParser(encoding=&quot;UTF-8&quot;)
+2408	    try:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-34">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/application/parsers/qsaparser/pytnyzer.py" target="_blank">pineboolib/application/parsers/qsaparser/pytnyzer.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+2408	    try:
+2409	        ast_tree = ElementTree.parse(open(filename, &quot;r&quot;, encoding=&quot;UTF-8&quot;), parser)
+2410	    except Exception:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-35">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>MEDIUM<br>
+    <b>File: </b><a href="pineboolib/application/projectmodule.py" target="_blank">pineboolib/application/projectmodule.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+203	        cursor_.execute(
+204	            &quot;&quot;&quot; SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = %s &quot;&quot;&quot;
+205	            % self.conn.driver().formatValue(&quot;bool&quot;, &quot;True&quot;, False)
+206	        )
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-36">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/application/projectmodule.py" target="_blank">pineboolib/application/projectmodule.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+266	            cur2 = self.conn.dbAux().cursor()
+267	            sql = &quot;SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha = %s&quot; % (
+268	                self.conn.driver().formatValue(&quot;string&quot;, idmodulo, False),
+269	                self.conn.driver().formatValue(&quot;string&quot;, nombre, False),
+270	                self.conn.driver().formatValue(&quot;string&quot;, sha, False),
+271	            )
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-37">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/core/parsetable.py" target="_blank">pineboolib/core/parsetable.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+16	    try:
+17	        tree = etree.ElementTree.parse(file_alike)
+18	    except Exception:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-38">
+<div class="issue-block issue-sev-low">
+    <b>blacklist: </b> Using Element to parse untrusted XML data is known to be vulnerable to XML attacks. Replace Element with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.<br>
+    <b>Test ID:</b> B405<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/core/utils/get_table_obj.py" target="_blank">pineboolib/core/utils/get_table_obj.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree</a><br>
+
+<div class="code">
+<pre>
+3	&quot;&quot;&quot;
+4	from xml.etree.ElementTree import Element, ElementTree
+5	from .struct import TableStruct
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-39">
+<div class="issue-block issue-sev-low">
+    <b>blacklist: </b> Using Element to parse untrusted XML data is known to be vulnerable to XML attacks. Replace Element with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.<br>
+    <b>Test ID:</b> B405<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/core/utils/struct.py" target="_blank">pineboolib/core/utils/struct.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree</a><br>
+
+<div class="code">
+<pre>
+9	from typing import Any, List, Optional, Dict
+10	from xml.etree.ElementTree import Element
+11	from .utils_base import aqtt
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-40">
+<div class="issue-block issue-sev-low">
+    <b>blacklist: </b> Using ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.<br>
+    <b>Test ID:</b> B405<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/core/utils/utils_base.py" target="_blank">pineboolib/core/utils/utils_base.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree</a><br>
+
+<div class="code">
+<pre>
+18	from types import FrameType
+19	from xml.etree.ElementTree import ElementTree, Element
+20	from . import logging
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-41">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/core/utils/utils_base.py" target="_blank">pineboolib/core/utils/utils_base.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+118	        print(&quot;%s:%s:%s %s&quot; % (name, lineno, event, line.rstrip()))
+119	    except Exception:
+120	        pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-42">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/core/utils/utils_base.py" target="_blank">pineboolib/core/utils/utils_base.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+330	                t = int(t)
+331	            except Exception:
+332	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-43">
+<div class="issue-block issue-sev-low">
+    <b>blacklist: </b> Using ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.<br>
+    <b>Test ID:</b> B405<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/core/utils/utils_base.py" target="_blank">pineboolib/core/utils/utils_base.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree</a><br>
+
+<div class="code">
+<pre>
+376	    &quot;&quot;&quot;Parse a Eneboo style XML.&quot;&quot;&quot;
+377	    from xml.etree import ElementTree as ET
+378	
+379	    &quot;&quot;&quot;
+380	    class xml_parser(ET.TreeBuilder):
+381	
+382	
+383	        def start(self, tag, attrs):
+384	            return super(xml_parser, self).start(tag, attrs)
+385	
+386	        def end(self, tag):
+387	            return super(xml_parser, self).end(tag)
+388	
+389	        def data(self, data):
+390	            super(xml_parser, self).data(data)
+391	
+392	        def close(self):
+393	            return super(xml_parser, self).close()
+394	    &quot;&quot;&quot;
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-44">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.XMLParser to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.XMLParser with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/core/utils/utils_base.py" target="_blank">pineboolib/core/utils/utils_base.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+407	    try:
+408	        parser = ET.XMLParser(html=0)
+409	        return ET.parse(file_ptr or form_path_or_str, parser)
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-45">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/core/utils/utils_base.py" target="_blank">pineboolib/core/utils/utils_base.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+408	        parser = ET.XMLParser(html=0)
+409	        return ET.parse(file_ptr or form_path_or_str, parser)
+410	    except Exception:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-46">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.XMLParser to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.XMLParser with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/core/utils/utils_base.py" target="_blank">pineboolib/core/utils/utils_base.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+411	        try:
+412	            parser = ET.XMLParser(html=0, encoding=&quot;ISO-8859-15&quot;)
+413	            return ET.parse(file_ptr or form_path_or_str, parser)
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-47">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/core/utils/utils_base.py" target="_blank">pineboolib/core/utils/utils_base.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+412	            parser = ET.XMLParser(html=0, encoding=&quot;ISO-8859-15&quot;)
+413	            return ET.parse(file_ptr or form_path_or_str, parser)
+414	        except Exception:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-48">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/fllegacy/aqsobjects/aqs.py" target="_blank">pineboolib/fllegacy/aqsobjects/aqs.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+99	                val = val()
+100	            except Exception:
+101	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-49">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.fromstring to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.fromstring with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/fllegacy/flmanager.py" target="_blank">pineboolib/fllegacy/flmanager.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+470	
+471	        root_ = etree.ElementTree.fromstring(qry_)
+472	        elem_select = root_.find(&quot;select&quot;)
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-50">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/fllegacy/flmanager.py" target="_blank">pineboolib/fllegacy/flmanager.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+1534	            if not q.value(0) == sha:
+1535	                sql = &quot;UPDATE %s SET contenido = &#x27;%s&#x27; WHERE refkey =&#x27;%s&#x27;&quot; % (tableLarge, largeValue, refKey)
+1536	                if not util.execSql(sql, &quot;Aux&quot;):
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-51">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/fllegacy/flmanager.py" target="_blank">pineboolib/fllegacy/flmanager.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+1539	        else:
+1540	            sql = &quot;INSERT INTO %s (contenido,refkey) VALUES (&#x27;%s&#x27;,&#x27;%s&#x27;)&quot; % (tableLarge, largeValue, refKey)
+1541	            if not util.execSql(sql, &quot;Aux&quot;):
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-52">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/fllegacy/flmanagermodules.py" target="_blank">pineboolib/fllegacy/flmanagermodules.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+173	    def content(self, n) -&gt; Any:
+174	        cursor = self.conn_.dbAux().execute_query(&quot;SELECT contenido FROM flfiles WHERE nombre=&#x27;%s&#x27; AND NOT sha = &#x27;&#x27;&quot; % n)
+175	
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-53">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/fllegacy/flmanagermodules.py" target="_blank">pineboolib/fllegacy/flmanagermodules.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+255	
+256	            cursor = self.conn_.execute_query(&quot;SELECT sha FROM flfiles WHERE nombre=&#x27;%s&#x27;&quot; % n)
+257	
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-54">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/fllegacy/flmanagermodules.py" target="_blank">pineboolib/fllegacy/flmanagermodules.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+614	            # q.setForwardOnly(True)
+615	            q.exec_(&quot;SELECT sha FROM flfiles WHERE %s&quot; % formatVal)
+616	            if q.next():
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-55">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/fllegacy/flmanagermodules.py" target="_blank">pineboolib/fllegacy/flmanagermodules.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+726	
+727	        cursor = self.conn_.execute_query(&quot;SELECT idmodulo FROM flfiles WHERE nombre=&#x27;%s&#x27;&quot; % n)
+728	
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-56">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/fllegacy/flnetwork.py" target="_blank">pineboolib/fllegacy/flnetwork.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+42	            self.reply.downloadProgress.disconnect(self._slotNetworkProgress)
+43	        except Exception:
+44	            pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-57">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/fllegacy/flnetwork.py" target="_blank">pineboolib/fllegacy/flnetwork.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+54	            self.reply.downloadProgress.disconnect(self._slotNetworkProgress)
+55	        except Exception:
+56	            pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-58">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/fllegacy/flutil.py" target="_blank">pineboolib/fllegacy/flutil.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+744	        if found is None:
+745	            sql = &quot;INSERT INTO flsettings (flkey, valor) VALUES (&#x27;%s&#x27;, &#x27;%s&#x27;)&quot; % (key, value)
+746	        else:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-59">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/fllegacy/flutil.py" target="_blank">pineboolib/fllegacy/flutil.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+746	        else:
+747	            sql = &quot;UPDATE flsettings SET valor = &#x27;%s&#x27; WHERE %s&quot; % (value, where)
+748	        try:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-60">
+<div class="issue-block issue-sev-low">
+    <b>blacklist: </b> Using ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.<br>
+    <b>Test ID:</b> B405<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/loader/dlgconnect/dlgconnect.py" target="_blank">pineboolib/loader/dlgconnect/dlgconnect.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree</a><br>
+
+<div class="code">
+<pre>
+4	import hashlib
+5	from xml.etree import ElementTree as ET
+6	
+7	from PyQt5 import QtWidgets  # type: ignore
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-61">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/loader/dlgconnect/dlgconnect.py" target="_blank">pineboolib/loader/dlgconnect/dlgconnect.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+140	        fileName = os.path.join(self.profile_dir, &quot;%s.xml&quot; % self.ui.cbProfiles.currentText())
+141	        tree = ET.parse(fileName)
+142	        root = tree.getroot()
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-62">
+<div class="issue-block issue-sev-low">
+    <b>hardcoded_password_string: </b> Possible hardcoded password: ''<br>
+    <b>Test ID:</b> B105<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>MEDIUM<br>
+    <b>File: </b><a href="pineboolib/loader/dlgconnect/dlgconnect.py" target="_blank">pineboolib/loader/dlgconnect/dlgconnect.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html</a><br>
+
+<div class="code">
+<pre>
+166	                    if not user_pass:
+167	                        user_pass = &quot;&quot;
+168	                    user_pass = hashlib.sha256(user_pass.encode()).hexdigest()
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-63">
+<div class="issue-block issue-sev-low">
+    <b>hardcoded_password_string: </b> Possible hardcoded password: ''<br>
+    <b>Test ID:</b> B105<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>MEDIUM<br>
+    <b>File: </b><a href="pineboolib/loader/dlgconnect/dlgconnect.py" target="_blank">pineboolib/loader/dlgconnect/dlgconnect.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html</a><br>
+
+<div class="code">
+<pre>
+232	        auto_login = self.ui.cbAutoLogin.isChecked()
+233	        pass_profile_text = &quot;&quot;
+234	        if not auto_login:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-64">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/loader/dlgconnect/dlgconnect.py" target="_blank">pineboolib/loader/dlgconnect/dlgconnect.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+300	        file_name = os.path.join(self.profile_dir, &quot;%s.xml&quot; % self.ui.cbProfiles.currentText())
+301	        tree = ET.parse(file_name)
+302	        root = tree.getroot()
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-65">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/loader/dlgconnect/dlgconnect.py" target="_blank">pineboolib/loader/dlgconnect/dlgconnect.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+362	        try:
+363	            tree = ET.parse(fileName)
+364	            root = tree.getroot()
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-66">
+<div class="issue-block issue-sev-low">
+    <b>blacklist: </b> Using ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.<br>
+    <b>Test ID:</b> B405<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/loader/projectconfig.py" target="_blank">pineboolib/loader/projectconfig.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree</a><br>
+
+<div class="code">
+<pre>
+43	        import os.path
+44	        from xml.etree import ElementTree as ET
+45	
+46	        if not os.path.isfile(file_name):
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-67">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/loader/projectconfig.py" target="_blank">pineboolib/loader/projectconfig.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+48	
+49	        tree = ET.parse(file_name)
+50	        root = tree.getroot()
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-68">
+<div class="issue-block issue-sev-low">
+    <b>hardcoded_password_string: </b> Possible hardcoded password: ''<br>
+    <b>Test ID:</b> B105<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>MEDIUM<br>
+    <b>File: </b><a href="pineboolib/loader/projectconfig.py" target="_blank">pineboolib/loader/projectconfig.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html</a><br>
+
+<div class="code">
+<pre>
+116	        user = &quot;postgres&quot;
+117	        passwd = &quot;&quot;
+118	        host = &quot;127.0.0.1&quot;
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-69">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/formdbwidget.py" target="_blank">pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/formdbwidget.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+104	                self.logger.debug(&quot;Señal desconectada al limpiar: %s %s&quot; % (signal, slot))
+105	            except Exception:
+106	                # self.logger.exception(&quot;Error al limpiar una señal: %s %s&quot; % (signal, slot))
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-70">
+<div class="issue-block issue-sev-low">
+    <b>blacklist: </b> Using fromstring to parse untrusted XML data is known to be vulnerable to XML attacks. Replace fromstring with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.<br>
+    <b>Test ID:</b> B405<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_jsonrpc/dgi_jsonrpc.py" target="_blank">pineboolib/plugins/dgi/dgi_jsonrpc/dgi_jsonrpc.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree</a><br>
+
+<div class="code">
+<pre>
+6	from xml import etree
+7	from xml.etree.ElementTree import fromstring
+8	
+9	from xmljson import yahoo as xml2json  # type: ignore
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-71">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.fromstring to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.fromstring with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_jsonrpc/dgi_jsonrpc.py" target="_blank">pineboolib/plugins/dgi/dgi_jsonrpc/dgi_jsonrpc.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+311	
+312	        json = xml2json.data(fromstring(xml))
+313	        json = self.manageProperties(json)
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-72">
+<div class="issue-block issue-sev-medium">
+    <b>blacklist: </b> Using xml.etree.ElementTree.fromstring to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.fromstring with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called<br>
+    <b>Test ID:</b> B314<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_jsonrpc/dgi_jsonrpc.py" target="_blank">pineboolib/plugins/dgi/dgi_jsonrpc/dgi_jsonrpc.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b313-b320-xml-bad-elementtree</a><br>
+
+<div class="code">
+<pre>
+435	    def addToJson(self, xml: xml.etree.ElementTree.Element) -&gt; str:
+436	        _json = xml2json.data(fromstring(etree.ElementTree.tostring(xml)))
+437	        _jsonStr = dumps(_json, sort_keys=True, indent=2)
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-73">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformrecorddb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformrecorddb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+376	                self.cursor().autocommit.connect(self.disablePushButtonCancel)
+377	            except Exception:
+378	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-74">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformrecorddb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformrecorddb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+444	                    return
+445	            except Exception:
+446	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-75">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformrecorddb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformrecorddb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+567	                self.iface.acceptedForm()
+568	            except Exception:
+569	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-76">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformrecorddb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformrecorddb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+581	                self.iface.afterCommitBuffer()
+582	            except Exception:
+583	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-77">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformrecorddb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformrecorddb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+595	                self.iface.afterCommitTransaction()
+596	            except Exception:
+597	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-78">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformrecorddb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformrecorddb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+609	                self.iface.canceledForm()
+610	            except Exception:
+611	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-79">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformsearchdb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformsearchdb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+224	                QtCore.QTimer.singleShot(50, self.iface.init)
+225	            except Exception:
+226	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-80">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformsearchdb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformsearchdb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+341	                self.cursor_.recordChoosed.disconnect(self.accept)
+342	            except Exception:
+343	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-81">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformsearchdb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformsearchdb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+365	                self.cursor_.recordChoosed.disconnect(self.accept)
+366	            except Exception:
+367	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-82">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+559	                    self.cursorAux.newBuffer.disconnect(self.refresh)
+560	                except Exception:
+561	                    pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-83">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+752	                self.lineEditSearch.textChanged.disconnect(self.filterRecords)
+753	            except Exception:
+754	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-84">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+1924	                self.lineEditSearch.textChanged.disconnect(self.filterRecords)
+1925	            except Exception:
+1926	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-85">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+2181	                self.comboBoxFieldToSearch2.currentIndexChanged.disconnect(self.putSecondCol)
+2182	            except Exception:
+2183	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-86">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+2191	                self.comboBoxFieldToSearch2.currentIndexChanged.disconnect(self.putSecondCol)
+2192	            except Exception:
+2193	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-87">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+2199	                    self.comboBoxFieldToSearch.currentIndexChanged.disconnect(self.putFirstCol)
+2200	                except Exception:
+2201	                    pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-88">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+2214	                self.lineEditSearch.textChanged.disconnect(self.filterRecords)
+2215	            except Exception:
+2216	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-89">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+2537	                logger.debug(&quot;functionQSA:%s:&quot;, functionQSA)
+2538	            except Exception:
+2539	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-90">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_objects/formdbwidget.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_objects/formdbwidget.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+102	                self.logger.debug(&quot;Señal desconectada al limpiar: %s %s&quot; % (signal, slot))
+103	            except Exception:
+104	                # self.logger.exception(&quot;Error al limpiar una señal: %s %s&quot; % (signal, slot))
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-91">
+<div class="issue-block issue-sev-low">
+    <b>blacklist: </b> Using ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.<br>
+    <b>Test ID:</b> B405<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_qt/dgi_qt3ui.py" target="_blank">pineboolib/plugins/dgi/dgi_qt/dgi_qt3ui.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree" target="_blank">https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree</a><br>
+
+<div class="code">
+<pre>
+7	from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
+8	from xml.etree import ElementTree as ET
+9	from binascii import unhexlify
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-92">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_server/dgi_objects/formdbwidget.py" target="_blank">pineboolib/plugins/dgi/dgi_server/dgi_objects/formdbwidget.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+104	                self.logger.debug(&quot;Señal desconectada al limpiar: %s %s&quot; % (signal, slot))
+105	            except Exception:
+106	                # self.logger.exception(&quot;Error al limpiar una señal: %s %s&quot; % (signal, slot))
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-93">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_bind_all_interfaces: </b> Possible binding to all interfaces.<br>
+    <b>Test ID:</b> B104<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>MEDIUM<br>
+    <b>File: </b><a href="pineboolib/plugins/dgi/dgi_server/dgi_server.py" target="_blank">pineboolib/plugins/dgi/dgi_server/dgi_server.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b104_hardcoded_bind_all_interfaces.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b104_hardcoded_bind_all_interfaces.html</a><br>
+
+<div class="code">
+<pre>
+244	            raise Exception(&quot;parser not found&quot;)
+245	        run_simple(&quot;0.0.0.0&quot;, self._listenSocket, self._par.receive)
+246	
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-94">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+295	
+296	        strQry: Optional[str] = &quot;SELECT seq FROM flseqs WHERE tabla = &#x27;%s&#x27; AND campo =&#x27;%s&#x27;&quot; % (table, field)
+297	        try:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-95">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+317	            if ret &gt; cur_max:
+318	                strQry = &quot;UPDATE flseqs SET seq=%s WHERE tabla = &#x27;%s&#x27; AND campo = &#x27;%s&#x27;&quot; % (ret, table, field)
+319	        else:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-96">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+337	    def queryUpdate(self, name, update, filter) -&gt; str:
+338	        sql = &quot;UPDATE %s SET %s WHERE %s&quot; % (name, update, filter)
+339	        return sql
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-97">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+461	
+462	        sql = &quot;SELECT %s FROM %s WHERE %s &quot; % (fields, table, where)
+463	        sql = self.fix_query(sql)
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-98">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+642	            util.setLabelText(util.tr(&quot;Borrando registro %s&quot;) % item)
+643	            qry2.exec_(&quot;DELETE FROM flfiles WHERE nombre =&#x27;%s&#x27;&quot; % item)
+644	            if item.find(&quot;alteredtable&quot;) &gt; -1:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-99">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+923	
+924	                in_sql = &quot;INSERT INTO flfiles(nombre,contenido,idmodulo,sha) VALUES (&#x27;%s.mtd&#x27;,&#x27;%s&#x27;,&#x27;%s&#x27;,&#x27;%s&#x27;)&quot; % (
+925	                    renameOld,
+926	                    mtd1,
+927	                    self.db_.managerModules().idModuleOfFile(&quot;%s.mtd&quot; % oldMTD.name()),
+928	                    key,
+929	                )
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-100">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>MEDIUM<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+952	            # print(&quot;Lanzando!!&quot;, &quot;SELECT * FROM %s WHERE 1 = 1&quot; % (renameOld))
+953	            oldCursor.execute(&quot;SELECT * FROM %s WHERE 1 = 1&quot; % (renameOld))
+954	            result_set = oldCursor.fetchall()
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-101">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+1106	
+1107	        sql = &quot;&quot;&quot;INSERT INTO %s(%s) values (%s)&quot;&quot;&quot; % (table_name, &quot;, &quot;.join(fList), &quot;, &quot;.join(map(str, vList)))
+1108	
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-102">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam2.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam2.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+299	
+300	        strQry: Optional[str] = &quot;SELECT seq FROM flseqs WHERE tabla = &#x27;%s&#x27; AND campo =&#x27;%s&#x27;&quot; % (table, field)
+301	        try:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-103">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam2.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam2.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+321	            if ret &gt; cur_max:
+322	                strQry = &quot;UPDATE flseqs SET seq=%s WHERE tabla = &#x27;%s&#x27; AND campo = &#x27;%s&#x27;&quot; % (ret, table, field)
+323	        else:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-104">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam2.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam2.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+341	    def queryUpdate(self, name, update, filter) -&gt; str:
+342	        sql = &quot;UPDATE %s SET %s WHERE %s&quot; % (name, update, filter)
+343	        return sql
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-105">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam2.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam2.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+470	
+471	        sql = &quot;SELECT %s FROM %s WHERE %s &quot; % (fields, table, where)
+472	        sql = self.fix_query(sql)
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-106">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam2.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam2.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+653	            util.setLabelText(util.tr(&quot;Borrando registro %s&quot;) % item)
+654	            qry2.exec_(&quot;DELETE FROM flfiles WHERE nombre =&#x27;%s&#x27;&quot; % item)
+655	            if item.find(&quot;alteredtable&quot;) &gt; -1:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-107">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam2.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam2.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+934	
+935	                in_sql = &quot;INSERT INTO flfiles(nombre,contenido,idmodulo,sha) VALUES (&#x27;%s.mtd&#x27;,&#x27;%s&#x27;,&#x27;%s&#x27;,&#x27;%s&#x27;)&quot; % (
+936	                    renameOld,
+937	                    mtd1,
+938	                    self.db_.managerModules().idModuleOfFile(&quot;%s.mtd&quot; % oldMTD.name()),
+939	                    key,
+940	                )
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-108">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>MEDIUM<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam2.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam2.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+963	            # print(&quot;Lanzando!!&quot;, &quot;SELECT * FROM %s WHERE 1 = 1&quot; % (renameOld))
+964	            oldCursor.execute(&quot;SELECT * FROM %s WHERE 1 = 1&quot; % (renameOld))
+965	            result_set = oldCursor.fetchall()
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-109">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flmysql_myisam2.py" target="_blank">pineboolib/plugins/sql/flmysql_myisam2.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+1118	
+1119	        sql = &quot;&quot;&quot;INSERT INTO %s(%s) values (%s)&quot;&quot;&quot; % (table_name, &quot;, &quot;.join(fList), &quot;, &quot;.join(map(str, vList)))
+1120	
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-110">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flqpsql.py" target="_blank">pineboolib/plugins/sql/flqpsql.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+404	    def refreshQuery(self, curname, fields, table, where, cursor, conn) -&gt; None:
+405	        sql = &quot;DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s &quot; % (curname, fields, table, where)
+406	        try:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-111">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flqpsql.py" target="_blank">pineboolib/plugins/sql/flqpsql.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+438	        t.setForwardOnly(True)
+439	        ok = t.exec_(&quot;select relname from pg_class where relname = &#x27;%s&#x27;&quot; % name)
+440	        if ok:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-112">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flqpsql.py" target="_blank">pineboolib/plugins/sql/flqpsql.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+493	                q.setForwardOnly(True)
+494	                q.exec_(&quot;SELECT relname FROM pg_class WHERE relname=&#x27;%s&#x27;&quot; % seq)
+495	                if not q.next():
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-113">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flqpsql.py" target="_blank">pineboolib/plugins/sql/flqpsql.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+596	        stmt = (
+597	            &quot;select pg_attribute.attname, pg_attribute.atttypid, pg_attribute.attnotnull, pg_attribute.attlen, pg_attribute.atttypmod, &quot;
+598	            &quot;pg_attrdef.adsrc from pg_class, pg_attribute &quot;
+599	            &quot;left join pg_attrdef on (pg_attrdef.adrelid = pg_attribute.attrelid and pg_attrdef.adnum = pg_attribute.attnum)&quot;
+600	            &quot; where lower(pg_class.relname) = &#x27;%s&#x27; and pg_attribute.attnum &gt; 0 and pg_attribute.attrelid = pg_class.oid &quot;
+601	            &quot;and pg_attribute.attisdropped = false order by pg_attribute.attnum&quot; % tablename.lower()
+602	        )
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-114">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flqpsql.py" target="_blank">pineboolib/plugins/sql/flqpsql.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+763	    def constraintExists(self, name) -&gt; bool:
+764	        sql = &quot;SELECT constraint_name FROM information_schema.table_constraints where constraint_name=&#x27;%s&#x27;&quot; % name
+765	
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-115">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flqpsql.py" target="_blank">pineboolib/plugins/sql/flqpsql.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+773	    def queryUpdate(self, name, update, filter) -&gt; str:
+774	        return &quot;&quot;&quot;UPDATE %s SET %s WHERE %s RETURNING *&quot;&quot;&quot; % (name, update, filter)
+775	
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-116">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>MEDIUM<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flqpsql.py" target="_blank">pineboolib/plugins/sql/flqpsql.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+1125	            oldCursor = self.db_.dbAux().cursor()
+1126	            oldCursor.execute(&quot;SELECT %s FROM %s WHERE 1 = 1&quot; % (&quot;, &quot;.join(fieldNamesOld), renameOld))
+1127	            result_set = oldCursor.fetchall()
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-117">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flqpsql.py" target="_blank">pineboolib/plugins/sql/flqpsql.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+1286	
+1287	        sql = &quot;&quot;&quot;INSERT INTO %s(%s) values (%s)&quot;&quot;&quot; % (table_name, &quot;, &quot;.join(fList), &quot;, &quot;.join(map(str, vList)))
+1288	
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-118">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flqpsql.py" target="_blank">pineboolib/plugins/sql/flqpsql.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+1331	            util.setLabelText(util.translate(&quot;application&quot;, &quot;Borrando registro %s&quot;) % item)
+1332	            qry2.exec_(&quot;DELETE FROM flfiles WHERE nombre =&#x27;%s&#x27;&quot; % item)
+1333	            if item.find(&quot;alteredtable&quot;) &gt; -1:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-119">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flsqlite.py" target="_blank">pineboolib/plugins/sql/flsqlite.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+391	        where = self.process_booleans(where)
+392	        self.sql = &quot;SELECT %s FROM %s WHERE %s&quot; % (fields, table, where)
+393	
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-120">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>MEDIUM<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flsqlite.py" target="_blank">pineboolib/plugins/sql/flsqlite.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+433	
+434	        cursor.execute(&quot;SELECT name FROM sqlite_master WHERE type=&#x27;table&#x27; AND name=&#x27;%s&#x27;&quot; % name)
+435	
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-121">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flsqlite.py" target="_blank">pineboolib/plugins/sql/flsqlite.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+933	    def queryUpdate(self, name, update, filter) -&gt; str:
+934	        sql = &quot;UPDATE %s SET %s WHERE %s&quot; % (name, update, filter)
+935	        return sql
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-122">
+<div class="issue-block issue-sev-medium">
+    <b>hardcoded_sql_expressions: </b> Possible SQL injection vector through string-based query construction.<br>
+    <b>Test ID:</b> B608<br>
+    <b>Severity: </b>MEDIUM<br>
+    <b>Confidence: </b>LOW<br>
+    <b>File: </b><a href="pineboolib/plugins/sql/flsqlite.py" target="_blank">pineboolib/plugins/sql/flsqlite.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html</a><br>
+
+<div class="code">
+<pre>
+967	                util.setLabelText(util.tr(&quot;Borrando regisro %s&quot; % item))
+968	                qry2.exec_(&quot;delete from flfiles where nombre = &#x27;%s&#x27;&quot; % item)
+969	                if item.find(&quot;alteredtable&quot;) &gt; -1:
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-123">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/pncontrolsfactory.py" target="_blank">pineboolib/pncontrolsfactory.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+378	                    caller.signal_test.emit(signal_name, sender)
+379	            except Exception:
+380	                pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+<div id="issue-124">
+<div class="issue-block issue-sev-low">
+    <b>try_except_pass: </b> Try, Except, Pass detected.<br>
+    <b>Test ID:</b> B110<br>
+    <b>Severity: </b>LOW<br>
+    <b>Confidence: </b>HIGH<br>
+    <b>File: </b><a href="pineboolib/pncontrolsfactory.py" target="_blank">pineboolib/pncontrolsfactory.py</a> <br>
+    <b>More info: </b><a href="https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html" target="_blank">https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html</a><br>
+
+<div class="code">
+<pre>
+424	        signal.disconnect(slot)
+425	    except Exception:
+426	        pass
+</pre>
+</div>
+
+
+</div>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -177,36 +177,67 @@
 <span id="L167" class="lineno"><a class="lineno" href="#L167">167</a></span>
 <span id="L168" class="lineno"><a class="lineno" href="#L168">168</a></span>
 <span id="L169" class="lineno"><a class="lineno" href="#L169">169</a></span>
+<span id="L170" class="lineno"><a class="lineno" href="#L170">170</a></span>
+<span id="L171" class="lineno"><a class="lineno" href="#L171">171</a></span>
+<span id="L172" class="lineno"><a class="lineno" href="#L172">172</a></span>
+<span id="L173" class="lineno"><a class="lineno" href="#L173">173</a></span>
+<span id="L174" class="lineno"><a class="lineno" href="#L174">174</a></span>
+<span id="L175" class="lineno"><a class="lineno" href="#L175">175</a></span>
+<span id="L176" class="lineno"><a class="lineno" href="#L176">176</a></span>
+<span id="L177" class="lineno"><a class="lineno" href="#L177">177</a></span>
+<span id="L178" class="lineno"><a class="lineno" href="#L178">178</a></span>
+<span id="L179" class="lineno"><a class="lineno" href="#L179">179</a></span>
+<span id="L180" class="lineno"><a class="lineno" href="#L180">180</a></span>
+<span id="L181" class="lineno"><a class="lineno" href="#L181">181</a></span>
+<span id="L182" class="lineno"><a class="lineno" href="#L182">182</a></span>
+<span id="L183" class="lineno"><a class="lineno" href="#L183">183</a></span>
+<span id="L184" class="lineno"><a class="lineno" href="#L184">184</a></span>
+<span id="L185" class="lineno"><a class="lineno" href="#L185">185</a></span>
+<span id="L186" class="lineno"><a class="lineno" href="#L186">186</a></span>
+<span id="L187" class="lineno"><a class="lineno" href="#L187">187</a></span>
+<span id="L188" class="lineno"><a class="lineno" href="#L188">188</a></span>
+<span id="L189" class="lineno"><a class="lineno" href="#L189">189</a></span>
+<span id="L190" class="lineno"><a class="lineno" href="#L190">190</a></span>
+<span id="L191" class="lineno"><a class="lineno" href="#L191">191</a></span>
+<span id="L192" class="lineno"><a class="lineno" href="#L192">192</a></span>
+<span id="L193" class="lineno"><a class="lineno" href="#L193">193</a></span>
+<span id="L194" class="lineno"><a class="lineno" href="#L194">194</a></span>
+<span id="L195" class="lineno"><a class="lineno" href="#L195">195</a></span>
+<span id="L196" class="lineno"><a class="lineno" href="#L196">196</a></span>
+<span id="L197" class="lineno"><a class="lineno" href="#L197">197</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">AQS package.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication  # type: ignore</span>
-<span class="line-empty" title="No Anys on this line!">from PyQt5.QtXml import QDomDocument  # type: ignore</span>
-<span class="line-empty" title="No Anys on this line!">from PyQt5 import QtCore  # type: ignore</span>
-<span class="line-empty" title="No Anys on this line!">from PyQt5 import QtGui  # type: ignore</span>
+<span class="line-empty" title="No Anys on this line!">Main entrance to the different AQS resources.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication, QWidget</span>
+<span class="line-empty" title="No Anys on this line!">from PyQt5.QtGui import QColor, QPixmap, QCursor</span>
+<span class="line-empty" title="No Anys on this line!">from PyQt5.QtXml import QDomDocument</span>
+<span class="line-empty" title="No Anys on this line!">from PyQt5 import QtCore</span>
+<span class="line-empty" title="No Anys on this line!">from PyQt5 import QtGui</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.core.utils import logging</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from typing import Type, Any, Optional, Union</span>
-<span class="line-empty" title="No Anys on this line!">from PyQt5.Qt import QCursor  # type: ignore</span>
-<span class="line-empty" title="No Anys on this line!">from PyQt5.QtWidgets import QWidget  # type : ignore</span>
-<span class="line-empty" title="No Anys on this line!">from PyQt5.QtGui import QColor  # type: ignore</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">logger = logging.getLogger("AQS")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
-<span class="line-empty" title="No Anys on this line!">Clase AQS</span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class AQS(object):</span>
+<span class="line-empty" title="No Anys on this line!">    """AQS Class."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    Box = None</span>
 <span class="line-precise" title="No Anys on this line!">    Plain = None</span>
 <span class="line-precise" title="No Anys on this line!">    translate = ["DockLeft", "ContextMenu"]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def __init__(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialize the class."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        self.InDock: str = "InDock"</span>
 <span class="line-precise" title="No Anys on this line!">        self.OutSideDock: str = "OutSideDock"</span>
 <span class="line-precise" title="No Anys on this line!">        self.SmtpSslConnection: int = 1</span>
@@ -221,17 +252,18 @@
 <span class="line-precise" title="No Anys on this line!">        self.SmtpServerError: int = 16</span>
 <span class="line-precise" title="No Anys on this line!">        self.SmtpClientError: int = 17</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Muestra el dialog de selección de color</span>
-<span class="line-empty" title="No Anys on this line!">    @param color. Especifica el color inicial</span>
-<span class="line-empty" title="No Anys on this line!">    @param parent. Parent</span>
-<span class="line-empty" title="No Anys on this line!">    @param name. deprecated. Paramametro usado para compatibilidad</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    def ColorDialog_getColor(</span>
 <span class="line-empty" title="No Anys on this line!">        self, color: Optional[Union[int, str, QColor]] = None, parent: Optional["QWidget"] = None, name: Optional[str] = None</span>
 <span class="line-empty" title="No Anys on this line!">    ) -&gt; Any:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Display the color selection dialog.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param color. Specify the initial color.</span>
+<span class="line-empty" title="No Anys on this line!">        @param parent. Parent.</span>
+<span class="line-empty" title="No Anys on this line!">        @param name. deprecated. Parameter used for compatibility.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from PyQt5.QtWidgets import QColorDialog  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if color is None:</span>
@@ -248,17 +280,18 @@ Explicit (x1)">            qcolor = QColor(color)</span>
 <span class="line-precise" title="No Anys on this line!">        cL = QColorDialog(qcolor, parent)</span>
 <span class="line-precise" title="No Anys on this line!">        return cL.getColor()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Convierte un objeto a xml</span>
-<span class="line-empty" title="No Anys on this line!">    @param obj_. Objeto a procesar</span>
-<span class="line-empty" title="No Anys on this line!">    @param include_children. Incluir hijos del objeto dado</span>
-<span class="line-empty" title="No Anys on this line!">    @param include_complex_types. Incluir hijos complejos</span>
-<span class="line-empty" title="No Anys on this line!">    @return xml del objeto dado</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @classmethod</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def toXml(cls: Type["AQS"], obj_: "QWidget", include_children: bool = True, include_complex_types: bool = False):</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Convert an object to xml.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param obj_. Object to be processed</span>
+<span class="line-empty" title="No Anys on this line!">        @param include_children. Include children of the given object</span>
+<span class="line-empty" title="No Anys on this line!">        @param include_complex_types. Include complex children</span>
+<span class="line-empty" title="No Anys on this line!">        @return xml of the given object</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        xml_ = QDomDocument()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if not obj_:</span>
@@ -317,26 +350,31 @@ Unannotated (x3)">                itd = cls.toXml(child, include_children, inclu
 Unannotated (x3)">                xml_.firstChild().appendChild(itd.firstChild())</span>
 <span class="line-precise" title="No Anys on this line!">        return xml_</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Obtiene un QPixmap de un nombre de fichero dado</span>
-<span class="line-empty" title="No Anys on this line!">    @param name. Nombre del fichero</span>
-<span class="line-empty" title="No Anys on this line!">    @return QPixmap</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @staticmethod</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    def pixmap_fromMimeSource(name: str) -&gt; Any:</span>
+<span class="line-precise" title="No Anys on this line!">    def pixmap_fromMimeSource(name: str) -&gt; QPixmap:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Get a QPixmap of a given file name.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param name. File Name</span>
+<span class="line-empty" title="No Anys on this line!">        @return QPixmap</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.core.utils.utils_base import pixmap_fromMimeSource</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">        return pixmap_fromMimeSource(name)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="Any Types on this line: 
-Explicit (x2)">    Pixmap_fromMineSource = pixmap_fromMimeSource</span>
+<span class="line-precise" title="No Anys on this line!">    Pixmap_fromMineSource = pixmap_fromMimeSource</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @classmethod</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    def sha1(self, byte_array: bytes) -&gt; Any:</span>
+<span class="line-precise" title="No Anys on this line!">    def sha1(self, byte_array: bytes) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Return the sha1 of a set of bytes.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param byte_array: bytes to process.</span>
+<span class="line-empty" title="No Anys on this line!">        @return sha1 string</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.pncontrolsfactory import QByteArray</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
@@ -345,17 +383,30 @@ Explicit (x3)">        ba = QByteArray(byte_array)</span>
 Explicit (x3)">        return ba.sha1()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @classmethod</span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x1)">    def Application_setOverrideCursor(self, shape: "QCursor", replace: bool = False) -&gt; None:</span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x1)">        QApplication.setOverrideCursor(shape)</span>
+<span class="line-precise" title="No Anys on this line!">    def Application_setOverrideCursor(self, shape: "QCursor", replace: bool = False) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Set override cursor.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param. shape. QCursor instance to override.</span>
+<span class="line-empty" title="No Anys on this line!">        @param. replace. Not used.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        QApplication.setOverrideCursor(shape)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @classmethod</span>
 <span class="line-precise" title="No Anys on this line!">    def Application_restoreOverrideCursor(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Restore override cursor."""</span>
 <span class="line-precise" title="No Anys on this line!">        QApplication.restoreOverrideCursor()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    def __getattr__(self, name: str) -&gt; Any:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Return the attributes of the main classes, if it is not in the class.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param name. Attribute name.</span>
+<span class="line-empty" title="No Anys on this line!">        @return Attribute or None.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if name in self.translate:</span>
 <span class="line-precise" title="No Anys on this line!">            if name == "DockLeft":</span>
 <span class="line-precise" title="No Anys on this line!">                name = "LeftDockWidgetArea"</span>

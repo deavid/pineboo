@@ -8,7 +8,7 @@ if [ "$LINTER" = "pylint" ]; then
 fi
 PACKAGES=$( (cd ../pineboolib && find * -maxdepth 0 -type d \! -iname "_*") )
 # ----
-echo "Running PyLint3 . . ."
+echo "Running PyLint . . ."
 echo $PACKAGES | xargs -t -n1 -P2 $0 pylint
 # ----
 echo "Running MyPy . . ."
@@ -21,4 +21,7 @@ echo "Running Coverage . . ."
 cp -R ../htmlcov/* source/_static/linters/pytest-coverage/
 rm -R ../htmlcov
 cp source/_static/linters/pytest-coverage-style-tpl.css source/_static/linters/pytest-coverage/style.css
+# ----
+echo "Running Bandit . . ."
+(cd .. && bandit -r pineboolib/ -f html > docs/source/_static/linters/bandit/bandit_report.html)
 # ----

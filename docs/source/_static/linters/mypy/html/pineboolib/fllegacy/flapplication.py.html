@@ -1742,7 +1742,6 @@
 <span id="L1732" class="lineno"><a class="lineno" href="#L1732">1732</a></span>
 <span id="L1733" class="lineno"><a class="lineno" href="#L1733">1733</a></span>
 <span id="L1734" class="lineno"><a class="lineno" href="#L1734">1734</a></span>
-<span id="L1735" class="lineno"><a class="lineno" href="#L1735">1735</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -2086,11 +2085,11 @@ Explicit (x1)">        self.dict_main_widgets_ = {}</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        self.container_.setObjectName("container")</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        self.container_.setWindowIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("pineboo.png")))</span>
+Explicit (x2)">        self.container_.setWindowIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("pineboo.png")))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">        if self.db() is not None:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            self.container_.setWindowTitle(self.db().database())</span>
+Explicit (x4)">            self.container_.setWindowTitle(self.db().DBName())</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-precise" title="No Anys on this line!">            self.container_.setWindowTitle("Pineboo %s" % project.version)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -2104,7 +2103,7 @@ Explicit (x3)">        self.window_menu.setObjectName("windowMenu")</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">        self.window_cascade_action = pncontrolsfactory.QAction(</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x6)">            pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("cascada.png")), self.tr("Cascada"), self.container_</span>
+Explicit (x4)">            pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("cascada.png")), self.tr("Cascada"), self.container_</span>
 <span class="line-empty" title="No Anys on this line!">        )</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        self.window_menu.addAction(self.window_cascade_action)</span>
@@ -2112,7 +2111,7 @@ Explicit (x4)">        self.window_menu.addAction(self.window_cascade_action)</s
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">        self.window_tile_action = pncontrolsfactory.QAction(</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x6)">            pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("mosaico.png")), self.tr("Mosaico"), self.container_</span>
+Explicit (x4)">            pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("mosaico.png")), self.tr("Mosaico"), self.container_</span>
 <span class="line-empty" title="No Anys on this line!">        )</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        self.window_menu.addAction(self.window_tile_action)</span>
@@ -2120,7 +2119,7 @@ Explicit (x4)">        self.window_menu.addAction(self.window_tile_action)</span
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">        self.window_close_action = pncontrolsfactory.QAction(</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x6)">            pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("cerrar.png")), self.tr("Cerrar"), self.container_</span>
+Explicit (x4)">            pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("cerrar.png")), self.tr("Cerrar"), self.container_</span>
 <span class="line-empty" title="No Anys on this line!">        )</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        self.window_menu.addAction(self.window_close_action)</span>
@@ -2141,7 +2140,7 @@ Explicit (x4)">        vl = pncontrolsfactory.QVBoxLayout(w)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">        self.exit_button = pncontrolsfactory.QPushButton(</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">            pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("exit.png")), self.tr("Salir"), w</span>
+Explicit (x5)">            pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("exit.png")), self.tr("Salir"), w</span>
 <span class="line-empty" title="No Anys on this line!">        )</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">        self.exit_button.setObjectName("pbSalir")</span>
@@ -2351,11 +2350,10 @@ Explicit (x11)">        self.tool_box_.setCurrentIndex(self.tool_box_.indexOf(se
 Unannotated (x1)">    def setMainWidget(self, w) -&gt; None:</span>
 <span class="line-precise" title="No Anys on this line!">        if not self.container_:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        if w == self.container_ or not w:</span>
+Unannotated (x4)">        if w == self.container_ or w is None:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">            pncontrolsfactory.QApplication.setActiveWindow(self.container_)</span>
 <span class="line-precise" title="No Anys on this line!">            self.main_widget_ = None</span>
@@ -2369,7 +2367,7 @@ Unannotated (x1)">        self.main_widget_ = w</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        # mw = self.main_widget_ if isinstance(self.main_widget_, QMainWindow) else None</span>
 <span class="line-precise" title="No Anys on this line!">        mw = self.main_widget_</span>
-<span class="line-precise" title="No Anys on this line!">        if not mw:</span>
+<span class="line-precise" title="No Anys on this line!">        if mw is None:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
@@ -2526,7 +2524,7 @@ Explicit (x5)">                        new_module_action.setText(self.tr(descrip
 <span class="line-any" title="Any Types on this line: 
 Explicit (x7)">                        new_module_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">                        new_module_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("folder_update.png")))</span>
+Explicit (x5)">                        new_module_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("folder_update.png")))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">                        new_area_bar.addAction(new_module_action)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -2546,7 +2544,7 @@ Explicit (x5)">                        new_module_action.setText(self.tr(descrip
 <span class="line-any" title="Any Types on this line: 
 Explicit (x7)">                        new_module_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">                        new_module_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("reload.png")))</span>
+Explicit (x5)">                        new_module_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("reload.png")))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">                        new_area_bar.addAction(new_module_action)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -2566,7 +2564,7 @@ Explicit (x5)">                        new_module_action.setText(self.tr(descrip
 <span class="line-any" title="Any Types on this line: 
 Explicit (x7)">                        new_module_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">                        new_module_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("consola.png")))</span>
+Explicit (x5)">                        new_module_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("consola.png")))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">                        new_area_bar.addAction(new_module_action)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -2639,7 +2637,7 @@ Explicit (x3)">        font_action.setObjectName("fontAction")</span>
 Explicit (x5)">        font_action.setText(self.tr(descript_module))</span>
 <span class="line-empty" title="No Anys on this line!">        # font_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">        font_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("font.png")))</span>
+Explicit (x5)">        font_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("font.png")))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        config_tool_bar.addAction(font_action)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -2657,7 +2655,7 @@ Explicit (x3)">        style_action.setObjectName("styleAction")</span>
 Explicit (x5)">        style_action.setText(self.tr(descript_module))</span>
 <span class="line-empty" title="No Anys on this line!">        # style_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">        style_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("estilo.png")))</span>
+Explicit (x5)">        style_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("estilo.png")))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        config_tool_bar.addAction(style_action)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -2675,7 +2673,7 @@ Explicit (x3)">        help_action.setObjectName("helpAction")</span>
 Explicit (x5)">        help_action.setText(self.tr(descript_module))</span>
 <span class="line-empty" title="No Anys on this line!">        # help_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">        help_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("help_index.png")))</span>
+Explicit (x5)">        help_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("help_index.png")))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        config_tool_bar.addAction(help_action)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -2693,7 +2691,7 @@ Explicit (x3)">        about_pineboo_action.setObjectName("aboutPinebooAction")<
 Explicit (x5)">        about_pineboo_action.setText(self.tr(descript_module))</span>
 <span class="line-empty" title="No Anys on this line!">        # help_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">        about_pineboo_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("about.png")))</span>
+Explicit (x5)">        about_pineboo_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("about.png")))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        config_tool_bar.addAction(about_pineboo_action)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -2711,7 +2709,7 @@ Explicit (x3)">        visit_pineboo_action.setObjectName("visitPinebooAction")<
 Explicit (x5)">        visit_pineboo_action.setText(self.tr(descript_module))</span>
 <span class="line-empty" title="No Anys on this line!">        # help_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">        visit_pineboo_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("about.png")))</span>
+Explicit (x5)">        visit_pineboo_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("about.png")))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        config_tool_bar.addAction(visit_pineboo_action)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -2729,7 +2727,7 @@ Explicit (x3)">        about_qt_action.setObjectName("aboutQtAction")</span>
 Explicit (x5)">        about_qt_action.setText(self.tr(descript_module))</span>
 <span class="line-empty" title="No Anys on this line!">        # help_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">        about_qt_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("aboutqt.png")))</span>
+Explicit (x5)">        about_qt_action.setIcon(pncontrolsfactory.QIcon(AQS.pixmap_fromMimeSource("aboutqt.png")))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        config_tool_bar.addAction(about_qt_action)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -3879,7 +3877,7 @@ Explicit (x7)">                self.container_.resize(pncontrolsfactory.QApplica
 Explicit (x7)">            active_id_module = self.db().managerModules().activeIdModule()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            windows_opened = settings.value("windowsOpened/Main", None)</span>
+Explicit (x4)">            windows_opened = settings.value("windowsOpened/Main", [])</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">            for it in windows_opened:</span>

@@ -4679,22 +4679,18 @@ Explicit (x1)">        return v</span>
 <span class="line-empty" title="No Anys on this line!">        # if self.d.edition_states_ is None:</span>
 <span class="line-empty" title="No Anys on this line!">        #     return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">        i = self.d.edition_states_.find(m)</span>
+<span class="line-precise" title="No Anys on this line!">        i = self.d.edition_states_.find(m)</span>
 <span class="line-precise" title="No Anys on this line!">        if not i and state_changes:</span>
 <span class="line-precise" title="No Anys on this line!">            i = AQBoolFlagState()</span>
 <span class="line-precise" title="No Anys on this line!">            i.modifier_ = m</span>
 <span class="line-precise" title="No Anys on this line!">            i.prevValue_ = self.d.edition_</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">            self.d.edition_states_.append(i)</span>
+<span class="line-precise" title="No Anys on this line!">            self.d.edition_states_.append(i)</span>
 <span class="line-precise" title="No Anys on this line!">        elif i:</span>
 <span class="line-precise" title="No Anys on this line!">            if state_changes:</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">                self.d.edition_states_.pushOnTop(i)</span>
+<span class="line-precise" title="No Anys on this line!">                self.d.edition_states_.pushOnTop(i)</span>
 <span class="line-precise" title="No Anys on this line!">                i.prevValue_ = self.d.edition_</span>
 <span class="line-empty" title="No Anys on this line!">            else:</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">                self.d.edition_states_.erase(i)</span>
+<span class="line-precise" title="No Anys on this line!">                self.d.edition_states_.erase(i)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if state_changes:</span>
 <span class="line-precise" title="No Anys on this line!">            self.d.edition_ = b</span>
@@ -4704,15 +4700,13 @@ Unannotated (x1)">                self.d.edition_states_.erase(i)</span>
 <span class="line-precise" title="No Anys on this line!">        if not self.d.edition_states_:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">        i = self.d.edition_states_.find(m)</span>
+<span class="line-precise" title="No Anys on this line!">        i = self.d.edition_states_.find(m)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if i and i == self.d.edition_states_.current():</span>
 <span class="line-precise" title="No Anys on this line!">            self.d.edition_ = i.prevValue_</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if i:</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">            self.d.edition_states_.erase(i)</span>
+<span class="line-precise" title="No Anys on this line!">            self.d.edition_states_.erase(i)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setBrowse(self, b: bool, m: Optional[str] = None) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
@@ -4732,40 +4726,34 @@ Unannotated (x1)">            self.d.edition_states_.erase(i)</span>
 <span class="line-precise" title="No Anys on this line!">        if not self.d.browse_states_:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">        i = self.d.browse_states_.find(m)</span>
+<span class="line-precise" title="No Anys on this line!">        i = self.d.browse_states_.find(m)</span>
 <span class="line-precise" title="No Anys on this line!">        if not i and state_changes:</span>
 <span class="line-precise" title="No Anys on this line!">            i = AQBoolFlagState()</span>
 <span class="line-precise" title="No Anys on this line!">            i.modifier_ = m</span>
 <span class="line-precise" title="No Anys on this line!">            i.prevValue_ = self.d.browse_</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">            self.d.browse_states_.append(i)</span>
+<span class="line-precise" title="No Anys on this line!">            self.d.browse_states_.append(i)</span>
 <span class="line-precise" title="No Anys on this line!">        elif i:</span>
 <span class="line-precise" title="No Anys on this line!">            if state_changes:</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">                self.d.browse_states_.pushOnTop(i)</span>
+<span class="line-precise" title="No Anys on this line!">                self.d.browse_states_.pushOnTop(i)</span>
 <span class="line-precise" title="No Anys on this line!">                i.prevValue_ = self.d.browse_</span>
 <span class="line-empty" title="No Anys on this line!">            else:</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">                self.d.browse_states_.erase(i)</span>
+<span class="line-precise" title="No Anys on this line!">                self.d.browse_states_.erase(i)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if state_changes:</span>
 <span class="line-precise" title="No Anys on this line!">            self.d.browse_ = b</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    def restoreBrowseFlag(self, m: bool) -&gt; None:</span>
+<span class="line-precise" title="No Anys on this line!">    def restoreBrowseFlag(self, m: str) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Restores browse flag to its previous state."""</span>
 <span class="line-precise" title="No Anys on this line!">        if not self.d.browse_states_:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">        i = self.d.browse_states_.find(m)</span>
+<span class="line-precise" title="No Anys on this line!">        i = self.d.browse_states_.find(m)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if i and i == self.d.browse_states_.current():</span>
 <span class="line-precise" title="No Anys on this line!">            self.d.browse_ = i.prevValue_</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if i:</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">            self.d.browse_states_.erase(i)</span>
+<span class="line-precise" title="No Anys on this line!">            self.d.browse_states_.erase(i)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def meta_model(self) -&gt; bool:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>

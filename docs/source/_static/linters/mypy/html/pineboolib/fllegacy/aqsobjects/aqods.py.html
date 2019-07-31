@@ -392,9 +392,49 @@
 <span id="L382" class="lineno"><a class="lineno" href="#L382">382</a></span>
 <span id="L383" class="lineno"><a class="lineno" href="#L383">383</a></span>
 <span id="L384" class="lineno"><a class="lineno" href="#L384">384</a></span>
+<span id="L385" class="lineno"><a class="lineno" href="#L385">385</a></span>
+<span id="L386" class="lineno"><a class="lineno" href="#L386">386</a></span>
+<span id="L387" class="lineno"><a class="lineno" href="#L387">387</a></span>
+<span id="L388" class="lineno"><a class="lineno" href="#L388">388</a></span>
+<span id="L389" class="lineno"><a class="lineno" href="#L389">389</a></span>
+<span id="L390" class="lineno"><a class="lineno" href="#L390">390</a></span>
+<span id="L391" class="lineno"><a class="lineno" href="#L391">391</a></span>
+<span id="L392" class="lineno"><a class="lineno" href="#L392">392</a></span>
+<span id="L393" class="lineno"><a class="lineno" href="#L393">393</a></span>
+<span id="L394" class="lineno"><a class="lineno" href="#L394">394</a></span>
+<span id="L395" class="lineno"><a class="lineno" href="#L395">395</a></span>
+<span id="L396" class="lineno"><a class="lineno" href="#L396">396</a></span>
+<span id="L397" class="lineno"><a class="lineno" href="#L397">397</a></span>
+<span id="L398" class="lineno"><a class="lineno" href="#L398">398</a></span>
+<span id="L399" class="lineno"><a class="lineno" href="#L399">399</a></span>
+<span id="L400" class="lineno"><a class="lineno" href="#L400">400</a></span>
+<span id="L401" class="lineno"><a class="lineno" href="#L401">401</a></span>
+<span id="L402" class="lineno"><a class="lineno" href="#L402">402</a></span>
+<span id="L403" class="lineno"><a class="lineno" href="#L403">403</a></span>
+<span id="L404" class="lineno"><a class="lineno" href="#L404">404</a></span>
+<span id="L405" class="lineno"><a class="lineno" href="#L405">405</a></span>
+<span id="L406" class="lineno"><a class="lineno" href="#L406">406</a></span>
+<span id="L407" class="lineno"><a class="lineno" href="#L407">407</a></span>
+<span id="L408" class="lineno"><a class="lineno" href="#L408">408</a></span>
+<span id="L409" class="lineno"><a class="lineno" href="#L409">409</a></span>
+<span id="L410" class="lineno"><a class="lineno" href="#L410">410</a></span>
+<span id="L411" class="lineno"><a class="lineno" href="#L411">411</a></span>
+<span id="L412" class="lineno"><a class="lineno" href="#L412">412</a></span>
+<span id="L413" class="lineno"><a class="lineno" href="#L413">413</a></span>
+<span id="L414" class="lineno"><a class="lineno" href="#L414">414</a></span>
+<span id="L415" class="lineno"><a class="lineno" href="#L415">415</a></span>
+<span id="L416" class="lineno"><a class="lineno" href="#L416">416</a></span>
+<span id="L417" class="lineno"><a class="lineno" href="#L417">417</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">AQOds package.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">Generate .ods files (Opendocument Spreadsheet)</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
 <span class="line-empty" title="No Anys on this line!">from typing import Union, List, Any, Tuple, Optional</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">from odf.opendocument import OpenDocumentSpreadsheet  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">import odf  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!">from odf import table, style  # type: ignore</span>
@@ -410,6 +450,7 @@
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class AQOdsGenerator_class(object):</span>
+<span class="line-empty" title="No Anys on this line!">    """AQOdsGenerator_class Class."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">    doc_: Any = None</span>
@@ -418,16 +459,20 @@ Explicit (x2)">    doc_: Any = None</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def __init__(self):</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Initialize the class by checking dependencies.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application.utils.check_dependencies import check_dependencies</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        check_dependencies({"odf": "odfpy"})</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Genera el fichero ODS</span>
-<span class="line-empty" title="No Anys on this line!">    @param file_name. Nombre del fichero a generar</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def generateOds(self, file_name: str) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Generate the ODS file.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param file_name. File name to generate.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">        if self.doc_ is None:</span>
 <span class="line-precise" title="No Anys on this line!">            raise Exception("Document not set, cannot generate")</span>
@@ -435,175 +480,179 @@ Explicit (x1)">        if self.doc_ is None:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">        self.doc_.save(file_name, True)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Asigna el contenido del fichero</span>
-<span class="line-empty" title="No Anys on this line!">    @param document. Datos a añadir al fichero</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def set_doc_(self, document) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Assign the contents of the file.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param document. Data to add to the file</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)
 Explicit (x1)">        self.doc_ = document</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
-<span class="line-empty" title="No Anys on this line!">Genera documento ODS</span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class AQOdsSpreadSheet(object):</span>
-<span class="line-precise" title="No Anys on this line!">    spread_sheet = None</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Constructor</span>
-<span class="line-empty" title="No Anys on this line!">    @param generator. Generador de ficheros</span>
+<span class="line-empty" title="No Anys on this line!">    AQOdsSpreadSheet Class.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    Generate ODS document.</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    def __init__(self, generator) -&gt; None:</span>
-<span class="line-empty" title="No Anys on this line!">        from odf.opendocument import OpenDocumentSpreadsheet  # type: ignore</span>
+Unimported (x2)">    spread_sheet: "OpenDocumentSpreadsheet"</span>
+<span class="line-precise" title="No Anys on this line!">    generator_: "AQOdsGenerator_class"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        self.generator_ = generator</span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self, generator: AQOdsGenerator_class) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Initialize the file generator.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param generator. File generator.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        self.generator_ = generator</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x3)">        self.spread_sheet = OpenDocumentSpreadsheet()</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)
+Unannotated (x1)
 Unimported (x1)">        self.generator_.set_doc_(self.spread_sheet)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Cierra el documento</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def close(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Close the document.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        pass</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class AQOdsImage(object):</span>
-<span class="line-precise" title="No Anys on this line!">    name_ = None</span>
-<span class="line-precise" title="No Anys on this line!">    width_ = None</span>
-<span class="line-precise" title="No Anys on this line!">    height_ = None</span>
-<span class="line-precise" title="No Anys on this line!">    x_ = None</span>
-<span class="line-precise" title="No Anys on this line!">    y_ = None</span>
-<span class="line-precise" title="No Anys on this line!">    link_ = None</span>
+<span class="line-empty" title="No Anys on this line!">    """AQOdsImage Class."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">    def __init__(self, name, width, height, x, y, link) -&gt; None:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        self.name_ = name</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        self.width_ = width</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        self.height_ = height</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        self.x_ = x</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        self.y_ = y</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        self.link_ = link</span>
+<span class="line-precise" title="No Anys on this line!">    name_: str</span>
+<span class="line-precise" title="No Anys on this line!">    width_: float</span>
+<span class="line-precise" title="No Anys on this line!">    height_: float</span>
+<span class="line-precise" title="No Anys on this line!">    x_: int</span>
+<span class="line-precise" title="No Anys on this line!">    y_: int</span>
+<span class="line-precise" title="No Anys on this line!">    link_: str</span>
 <span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self, name: str, width: float, height: float, x: int, y: int, link: str) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Initialize the Image.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
-<span class="line-empty" title="No Anys on this line!">Hoja dentro del documento</span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">        @param name. Image Name</span>
+<span class="line-empty" title="No Anys on this line!">        @param width. Width.</span>
+<span class="line-empty" title="No Anys on this line!">        @param height. Tall.</span>
+<span class="line-empty" title="No Anys on this line!">        @param x. X position.</span>
+<span class="line-empty" title="No Anys on this line!">        @param me. Position and.</span>
+<span class="line-empty" title="No Anys on this line!">        @param link. Image link.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        self.name_ = name</span>
+<span class="line-precise" title="No Anys on this line!">        self.width_ = width</span>
+<span class="line-precise" title="No Anys on this line!">        self.height_ = height</span>
+<span class="line-precise" title="No Anys on this line!">        self.x_ = x</span>
+<span class="line-precise" title="No Anys on this line!">        self.y_ = y</span>
+<span class="line-precise" title="No Anys on this line!">        self.link_ = link</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class AQOdsSheet(object):</span>
+<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!">    AQOdsSheet Class.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    Sheet inside the document.</span>
+<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    num_rows_: int</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x2)">    spread_sheet_parent_: "OpenDocumentSpreadsheet"</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x2)">    sheet_: table.Table</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Constructor</span>
-<span class="line-empty" title="No Anys on this line!">    @param spread_sheet. Hoja de calculo.</span>
-<span class="line-empty" title="No Anys on this line!">    @param sheet_name. Nombre de la hoja</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self, spread_sheet: AQOdsSpreadSheet, sheet_name: str) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Initialize the sheet.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param spread_sheet. Spreadsheet.</span>
+<span class="line-empty" title="No Anys on this line!">        @param sheet_name. Name of the sheet.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    def __init__(self, spread_sheet, sheet_name) -&gt; None:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        self.spread_sheet_parent_ = spread_sheet.spread_sheet</span>
+Unimported (x2)">        self.spread_sheet_parent_ = spread_sheet.spread_sheet</span>
 <span class="line-precise" title="No Anys on this line!">        self.num_rows_ = 0</span>
-<span class="line-empty" title="No Anys on this line!">        from odf.table import Table  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unimported (x3)
-Unannotated (x1)">        self.sheet_ = Table(name=sheet_name)</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Numero de lineas</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+Unimported (x4)">        self.sheet_ = table.Table(name=sheet_name)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def rowsCount(self) -&gt; int:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Return number of lines.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @return Number of lines.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        return self.num_rows_</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Cierra la hoja</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def close(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Close the sheet."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)
-Unimported (x1)">        self.spread_sheet_parent_.spreadsheet.addElement(self.sheet_)</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
-<span class="line-empty" title="No Anys on this line!">Linea dentro de una hoja</span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
+Unimported (x5)">        self.spread_sheet_parent_.spreadsheet.addElement(self.sheet_)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class AQOdsRow(object):</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">    sheet_: Any</span>
+<span class="line-empty" title="No Anys on this line!">    """AQOdsRow."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    sheet_: AQOdsSheet</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x2)">    row_: table.TableRow</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Explicit (x2)">    cells_list_: List[Any]</span>
-<span class="line-precise" title="No Anys on this line!">    style_cell_text_: Optional[str] = None</span>
-<span class="line-precise" title="No Anys on this line!">    fix_precision_: Optional[int] = None</span>
-<span class="line-precise" title="No Anys on this line!">    row_color_ = None</span>
+Unimported (x2)">    cells_list_: List[table.TableCell]</span>
+<span class="line-precise" title="No Anys on this line!">    style_cell_text_: Optional[str]</span>
+<span class="line-precise" title="No Anys on this line!">    fix_precision_: Optional[int]</span>
+<span class="line-precise" title="No Anys on this line!">    row_color_: Optional[str]</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x2)">    property_cell_: List[Any]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Constructor</span>
-<span class="line-empty" title="No Anys on this line!">    @param sheet. Hoja del documento</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self, sheet: AQOdsSheet) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Initialize a line inside a sheet.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    def __init__(self, sheet) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        @param sheet. Parent Document Sheet.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)
-Explicit (x1)">        self.sheet_ = sheet</span>
+<span class="line-precise" title="No Anys on this line!">        self.sheet_ = sheet</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x4)">        self.row_ = table.TableRow()</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">        self.cells_list_ = []</span>
+Unimported (x1)">        self.cells_list_ = []</span>
 <span class="line-precise" title="No Anys on this line!">        self.fix_precision_ = None</span>
 <span class="line-precise" title="No Anys on this line!">        self.row_color_ = None</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x1)">        self.property_cell_ = []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Especifica el color de fondo de la linea</span>
-<span class="line-empty" title="No Anys on this line!">    @param color. Se especifica en formato hex(color)[2:]</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def addBgColor(self, color) -&gt; None:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        self.row_color_ = color</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Specify the background color of the line.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Añade opciones a la linea</span>
-<span class="line-empty" title="No Anys on this line!">    @param opt. Opciones de linea, cada celda acaba con la asignación del valor</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!">        @param color. It is specified in hex (color) format [2:]</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x1)">        self.row_color_ = color</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x1)
 Unimported (x1)
 Unannotated (x1)">    def opIn(self, opt: Union[float, str, "odf.element.Element", List, "AQOdsImage"]):</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Add options to the line.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param opt. Line options, each cell ends with the value assignment</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from odf.text import P, Span  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!">        from odf.draw import Frame, Image  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -622,7 +671,7 @@ Unimported (x1)">                opt = "%s" % opt</span>
 Omitted Generics (x2)
 Unimported (x1)">        if isinstance(opt, str):  # Último paso</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x6)">            cell, style = self.__newCell__()</span>
+Unimported (x6)">            cell, style = self.__newCell__()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            if self.style_cell_text_:</span>
 <span class="line-any" title="Any Types on this line: 
@@ -636,12 +685,11 @@ Unimported (x4)">                text_elem.addElement(txt_)</span>
 Unimported (x3)">                text_elem = P(text=opt)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x6)">            self.sheet_.spread_sheet_parent_.automaticstyles.addElement(style)</span>
+Unimported (x5)">            self.sheet_.spread_sheet_parent_.automaticstyles.addElement(style)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)
-Unimported (x1)">            cell.addElement(text_elem)</span>
+Unimported (x4)">            cell.addElement(text_elem)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            self.cells_list_.append(cell)</span>
+Unimported (x3)">            self.cells_list_.append(cell)</span>
 <span class="line-precise" title="No Anys on this line!">            self.fix_precision_ = None</span>
 <span class="line-precise" title="No Anys on this line!">            self.style_cell_text_ = None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -657,28 +705,23 @@ Unimported (x1)">                    self.opIn(l)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
 Omitted Generics (x1)
-Unimported (x1)
-Unannotated (x6)">            elif isinstance(opt, AQOdsImage):</span>
+Unimported (x1)">            elif isinstance(opt, AQOdsImage):</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)
-Unannotated (x1)">                href = self.sheet_.spread_sheet_parent_.addPictureFromFile(opt.link_)</span>
+Unimported (x4)">                href = self.sheet_.spread_sheet_parent_.addPictureFromFile(opt.link_)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x6)">                cell, style = self.__newCell__()</span>
+Unimported (x6)">                cell, style = self.__newCell__()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">                # p = P()</span>
 <span class="line-any" title="Any Types on this line: 
-Unimported (x3)
-Unannotated (x4)">                frame = Frame(width="%spt" % opt.width_, height="%spt" % opt.height_, x="%spt" % opt.x_, y="%spt" % opt.y_)</span>
+Unimported (x3)">                frame = Frame(width="%spt" % opt.width_, height="%spt" % opt.height_, x="%spt" % opt.x_, y="%spt" % opt.y_)</span>
 <span class="line-any" title="Any Types on this line: 
-Unimported (x5)
-Explicit (x1)">                frame.addElement(Image(href=href))</span>
+Unimported (x6)">                frame.addElement(Image(href=href))</span>
 <span class="line-empty" title="No Anys on this line!">                # p.addElement(frame)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)
-Unimported (x1)">                cell.addElement(frame)</span>
+Unimported (x4)">                cell.addElement(frame)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                self.cells_list_.append(cell)</span>
+Unimported (x3)">                self.cells_list_.append(cell)</span>
 <span class="line-empty" title="No Anys on this line!">                # self.coveredCell()</span>
 <span class="line-empty" title="No Anys on this line!">                # self.opIn(href)</span>
 <span class="line-empty" title="No Anys on this line!">                # print("FIXME:: Vacio", href)</span>
@@ -697,8 +740,7 @@ Unimported (x1)">                    self.property_cell_.append(prop)</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x3)">                elif opt.tagName == "style:style":</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)
-Unimported (x1)">                    self.sheet_.spread_sheet_parent_.automaticstyles.addElement(opt)</span>
+Unimported (x5)">                    self.sheet_.spread_sheet_parent_.automaticstyles.addElement(opt)</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x1)">                    self.style_cell_text_ = opt</span>
 <span class="line-empty" title="No Anys on this line!">                else:</span>
@@ -706,21 +748,19 @@ Unimported (x1)">                    self.style_cell_text_ = opt</span>
 Explicit (x4)
 Unimported (x2)">                    logger.warning("%s:Parámetro desconocido %s", __name__, opt.tagName)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Nueva celda. Esta se crea al asignar el valor a la anterior</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
-Explicit (x2)">    def __newCell__(self) -&gt; Tuple[Any, Any]:</span>
+Unimported (x2)">    def __newCell__(self) -&gt; Tuple[table.TableCell, style.Style]:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Return new cell This is created by assigning the value to the previous one.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @return Tuple(TableCell, Style)</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unimported (x4)
-Explicit (x4)">        style_cell = style.Style(name="stylecell_%s_%s" % (len(self.cells_list_), self.sheet_.rowsCount()), family="table-cell")</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">        if self.row_color_:  # Guardo color si hay</span>
+Unimported (x5)">        style_cell = style.Style(name="stylecell_%s_%s" % (len(self.cells_list_), self.sheet_.rowsCount()), family="table-cell")</span>
+<span class="line-precise" title="No Anys on this line!">        if self.row_color_:  # Guardo color si hay</span>
 <span class="line-any" title="Any Types on this line: 
-Unimported (x6)
-Unannotated (x1)">            style_cell.addElement(style.TableCellProperties(backgroundcolor="#%s" % self.row_color_))</span>
+Unimported (x6)">            style_cell.addElement(style.TableCellProperties(backgroundcolor="#%s" % self.row_color_))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">        for prop in self.property_cell_:  # Guardo prop cell si hay</span>
@@ -733,185 +773,192 @@ Explicit (x1)">        self.property_cell_ = []</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x5)">        return table.TableCell(valuetype="string", stylename=style_cell), style_cell</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Cierra la linea</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def close(self) -&gt; None:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">        for cell in self.cells_list_:  # Meto las celdas en la linea</span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x3)
-Explicit (x1)">            self.row_.addElement(cell)</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Close the line.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)">        self.sheet_.num_rows_ += 1  # Especifico cunatas lineas tiene ya la hoja</span>
+Unimported (x2)">        for cell in self.cells_list_:  # Meto las celdas en la linea</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unimported (x1)">        self.sheet_.sheet_.addElement(self.row_)  # Meto la nueva linea en la hoja</span>
+Unimported (x4)">            self.row_.addElement(cell)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    El campo se rellena con datos vacíos</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        self.sheet_.num_rows_ += 1  # Especifico cunatas lineas tiene ya la hoja</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x4)">        self.sheet_.sheet_.addElement(self.row_)  # Meto la nueva linea en la hoja</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def coveredCell(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Field is filled with empty data.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)
 Omitted Generics (x1)
 Unimported (x1)">        self.opIn(" ")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Especifica la precisión de los decimales del numero</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">    def setFixedPrecision(self, n: Optional[int]) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Specify the precision of number decimals.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    def setFixedPrecision(self, n) -&gt; None:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        self.fix_precision_ = n</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
-<span class="line-empty" title="No Anys on this line!">Especifica un color</span>
-<span class="line-empty" title="No Anys on this line!">@param color. Se especifica AQOdsColor(0xe7e7e7)</span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">        @param n. Decimal precision.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-precise" title="No Anys on this line!">        if n is not None:</span>
+<span class="line-precise" title="No Anys on this line!">            self.fix_precision_ = n</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">def AQOdsColor(color: int) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!">    Returnsa color from a hexadecimal value.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    @param color. Hexadecimal value.</span>
+<span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-precise" title="No Anys on this line!">    return hex(color)[2:]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
-<span class="line-empty" title="No Anys on this line!">Estilos de los objetos de un ODS</span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class AQOdsStyle_class(object):</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Alinea al centro  una celda</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!">    """AQOdsStyle_class."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    def alignCenter(self) -&gt; Any:</span>
-<span class="line-empty" title="No Anys on this line!">        from odf import style  # type: ignore</span>
+Unimported (x1)">    def alignCenter(self) -&gt; style.ParagraphProperties:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Align a cell to the center property.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @return Style Property.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x3)">        return style.ParagraphProperties(textalign="center")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Alinea a la derecha una celda</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    def alignRight(self) -&gt; Any:</span>
-<span class="line-empty" title="No Anys on this line!">        from odf import style  # type: ignore</span>
+Unimported (x1)">    def alignRight(self) -&gt; style.ParagraphProperties:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Align a cell to the right property.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @return Style Property.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x3)">        return style.ParagraphProperties(textalign="right")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Alinea a la izquierda una celda</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    def alignLeft(self) -&gt; Any:</span>
-<span class="line-empty" title="No Anys on this line!">        from odf import style  # type: ignore</span>
+Unimported (x1)">    def alignLeft(self) -&gt; style.ParagraphProperties:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Align a cell to the left property.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @return Style Property.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x3)">        return style.ParagraphProperties(textalign="left")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Texto negrita</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x1)">    def textBold(self) -&gt; style.Style:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Return text bold property.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @return Style Property.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    def textBold(self) -&gt; Any:</span>
-<span class="line-empty" title="No Anys on this line!">        from odf.style import Style, TextProperties  # type: ignore</span>
-<span class="line-empty" title="No Anys on this line!"></span>
+Unimported (x4)">        bold_style = style.Style(name="Bold", family="text")</span>
 <span class="line-any" title="Any Types on this line: 
-Unimported (x3)">        bold_style = Style(name="Bold", family="text")</span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x5)">        bold_style.addElement(TextProperties(fontweight="bold"))</span>
+Unimported (x6)">        bold_style.addElement(style.TextProperties(fontweight="bold"))</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x1)">        return bold_style</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Texto cursiva</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x1)">    def textItalic(self) -&gt; style.Style:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Return italic text.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @return Style Property.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    def textItalic(self) -&gt; Any:</span>
-<span class="line-empty" title="No Anys on this line!">        from odf.style import Style, TextProperties  # type: ignore</span>
-<span class="line-empty" title="No Anys on this line!"></span>
+Unimported (x4)">        italic_style = style.Style(name="Italic", family="text")</span>
 <span class="line-any" title="Any Types on this line: 
-Unimported (x3)">        italic_style = Style(name="Italic", family="text")</span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x5)">        italic_style.addElement(TextProperties(fontstyle="italic"))</span>
+Unimported (x6)">        italic_style.addElement(style.TextProperties(fontstyle="italic"))</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x1)">        return italic_style</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Borde inferior de una celda</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    def borderBottom(self) -&gt; Any:</span>
-<span class="line-empty" title="No Anys on this line!">        from odf import style  # type: ignore</span>
+Unimported (x1)">    def borderBottom(self) -&gt; style.TableCellProperties:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Return the property of the lower edge of a cell.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @return Table cell property.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x3)">        return style.TableCellProperties(borderbottom="1pt solid #000000")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Borde izquierdo de una celda</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    def borderLeft(self) -&gt; Any:</span>
+Unimported (x1)">    def borderLeft(self) -&gt; style.TableCellProperties:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Return the property of the left edge of a cell.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @return Table cell property.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from odf import style  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x3)">        return style.TableCellProperties(borderleft="1pt solid #000000")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Borde derecho de una celda</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    def borderRight(self) -&gt; Any:</span>
+Unimported (x1)">    def borderRight(self) -&gt; style.TableCellProperties:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Return the property of the right edge of a cell.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @return Table cell property.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from odf import style  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x3)">        return style.TableCellProperties(borderright="1pt solid #000000")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Borde superior de una celda</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    def borderTop(self) -&gt; Any:</span>
+Unimported (x1)">    def borderTop(self) -&gt; style.TableCellProperties:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Return the property of the upper edge of a cell.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @return Table cell property.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from odf import style  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x3)">        return style.TableCellProperties(bordertop="1pt solid #000000")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
-Explicit (x6)">    Align_center = property(alignCenter, None)</span>
+Explicit (x5)
+Unimported (x1)">    Align_center = property(alignCenter, None)</span>
 <span class="line-precise" title="Any Types on this line: 
-Explicit (x6)">    Align_right = property(alignRight, None)</span>
+Explicit (x5)
+Unimported (x1)">    Align_right = property(alignRight, None)</span>
 <span class="line-precise" title="Any Types on this line: 
-Explicit (x6)">    Align_left = property(alignLeft, None)</span>
+Explicit (x5)
+Unimported (x1)">    Align_left = property(alignLeft, None)</span>
 <span class="line-precise" title="Any Types on this line: 
-Explicit (x6)">    Text_bold = property(textBold, None)</span>
+Explicit (x5)
+Unimported (x1)">    Text_bold = property(textBold, None)</span>
 <span class="line-precise" title="Any Types on this line: 
-Explicit (x6)">    Text_italic = property(textItalic, None)</span>
+Explicit (x5)
+Unimported (x1)">    Text_italic = property(textItalic, None)</span>
 <span class="line-precise" title="Any Types on this line: 
-Explicit (x6)">    Border_bottom = property(borderBottom, None)</span>
+Explicit (x5)
+Unimported (x1)">    Border_bottom = property(borderBottom, None)</span>
 <span class="line-precise" title="Any Types on this line: 
-Explicit (x6)">    Border_top = property(borderTop, None)</span>
+Explicit (x5)
+Unimported (x1)">    Border_top = property(borderTop, None)</span>
 <span class="line-precise" title="Any Types on this line: 
-Explicit (x6)">    Border_right = property(borderRight, None)</span>
+Explicit (x5)
+Unimported (x1)">    Border_right = property(borderRight, None)</span>
 <span class="line-precise" title="Any Types on this line: 
-Explicit (x6)">    Border_left = property(borderLeft, None)</span>
+Explicit (x5)
+Unimported (x1)">    Border_left = property(borderLeft, None)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">AQOdsStyle = AQOdsStyle_class()</span>

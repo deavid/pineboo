@@ -30,9 +30,9 @@
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
 
         <h2 class="stats">
-            229 statements &nbsp;
+            230 statements &nbsp;
             <span class="run hide_run shortkey_r button_toggle_run">0 run</span>
-            <span class="mis shortkey_m button_toggle_mis">229 missing</span>
+            <span class="mis shortkey_m button_toggle_mis">230 missing</span>
             <span class="exc shortkey_x button_toggle_exc">0 excluded</span>
 
             
@@ -110,7 +110,7 @@
 <p id="n41" class="pln"><a href="#n41">41</a></p>
 <p id="n42" class="stm mis"><a href="#n42">42</a></p>
 <p id="n43" class="stm mis"><a href="#n43">43</a></p>
-<p id="n44" class="pln"><a href="#n44">44</a></p>
+<p id="n44" class="stm mis"><a href="#n44">44</a></p>
 <p id="n45" class="stm mis"><a href="#n45">45</a></p>
 <p id="n46" class="stm mis"><a href="#n46">46</a></p>
 <p id="n47" class="pln"><a href="#n47">47</a></p>
@@ -445,7 +445,7 @@
 <p id="t41" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t42" class="stm mis">    <span class="key">def</span> <span class="nam">__init__</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">database</span><span class="op">:</span> <span class="str">"PNConnection"</span><span class="op">)</span> <span class="op">-></span> <span class="key">None</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t43" class="stm mis">        <span class="nam">self</span><span class="op">.</span><span class="nam">db_</span> <span class="op">=</span> <span class="nam">database</span><span class="op">.</span><span class="nam">DBName</span><span class="op">(</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t44" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t44" class="stm mis">        <span class="nam">self</span><span class="op">.</span><span class="nam">dirs_</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
 <p id="t45" class="stm mis">        <span class="nam">self</span><span class="op">.</span><span class="nam">key_</span> <span class="op">=</span> <span class="str">"StaticLoader/%s/"</span> <span class="op">%</span> <span class="nam">self</span><span class="op">.</span><span class="nam">db_</span><span class="strut">&nbsp;</span></p>
 <p id="t46" class="stm mis">        <span class="nam">self</span><span class="op">.</span><span class="nam">enabled_</span> <span class="op">=</span> <span class="nam">config</span><span class="op">.</span><span class="nam">value</span><span class="op">(</span><span class="str">"%senabled"</span> <span class="op">%</span> <span class="nam">self</span><span class="op">.</span><span class="nam">key_</span><span class="op">,</span> <span class="key">False</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t47" class="pln"><span class="strut">&nbsp;</span></p>
@@ -460,7 +460,7 @@
 <p id="t56" class="stm mis">    <span class="key">def</span> <span class="nam">readSettings</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span> <span class="op">-></span> <span class="key">None</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t57" class="stm mis">        <span class="nam">self</span><span class="op">.</span><span class="nam">enabled_</span> <span class="op">=</span> <span class="nam">config</span><span class="op">.</span><span class="nam">value</span><span class="op">(</span><span class="str">"%senabled"</span> <span class="op">%</span> <span class="nam">self</span><span class="op">.</span><span class="nam">key_</span><span class="op">,</span> <span class="key">False</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t58" class="stm mis">        <span class="nam">self</span><span class="op">.</span><span class="nam">dirs_</span><span class="op">.</span><span class="nam">clear</span><span class="op">(</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t59" class="stm mis">        <span class="nam">dirs</span> <span class="op">=</span> <span class="nam">config</span><span class="op">.</span><span class="nam">value</span><span class="op">(</span><span class="str">"%sdirs"</span> <span class="op">%</span> <span class="nam">self</span><span class="op">.</span><span class="nam">key_</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t59" class="stm mis">        <span class="nam">dirs</span> <span class="op">=</span> <span class="nam">config</span><span class="op">.</span><span class="nam">value</span><span class="op">(</span><span class="str">"%sdirs"</span> <span class="op">%</span> <span class="nam">self</span><span class="op">.</span><span class="nam">key_</span><span class="op">,</span> <span class="op">[</span><span class="op">]</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t60" class="stm mis">        <span class="nam">i</span> <span class="op">=</span> <span class="num">0</span><span class="strut">&nbsp;</span></p>
 <p id="t61" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t62" class="stm mis">        <span class="key">while</span> <span class="nam">i</span> <span class="op">&lt;</span> <span class="nam">len</span><span class="op">(</span><span class="nam">dirs</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
@@ -744,7 +744,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-07-31 14:27
+            created at 2019-07-31 17:22
         </p>
     </div>
 </div>

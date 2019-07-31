@@ -1202,17 +1202,6 @@
 <span id="L1192" class="lineno"><a class="lineno" href="#L1192">1192</a></span>
 <span id="L1193" class="lineno"><a class="lineno" href="#L1193">1193</a></span>
 <span id="L1194" class="lineno"><a class="lineno" href="#L1194">1194</a></span>
-<span id="L1195" class="lineno"><a class="lineno" href="#L1195">1195</a></span>
-<span id="L1196" class="lineno"><a class="lineno" href="#L1196">1196</a></span>
-<span id="L1197" class="lineno"><a class="lineno" href="#L1197">1197</a></span>
-<span id="L1198" class="lineno"><a class="lineno" href="#L1198">1198</a></span>
-<span id="L1199" class="lineno"><a class="lineno" href="#L1199">1199</a></span>
-<span id="L1200" class="lineno"><a class="lineno" href="#L1200">1200</a></span>
-<span id="L1201" class="lineno"><a class="lineno" href="#L1201">1201</a></span>
-<span id="L1202" class="lineno"><a class="lineno" href="#L1202">1202</a></span>
-<span id="L1203" class="lineno"><a class="lineno" href="#L1203">1203</a></span>
-<span id="L1204" class="lineno"><a class="lineno" href="#L1204">1204</a></span>
-<span id="L1205" class="lineno"><a class="lineno" href="#L1205">1205</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
 <span class="line-empty" title="No Anys on this line!">"""</span>
@@ -1262,9 +1251,6 @@
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        self.qsa_sys = pncontrolsfactory.SysType()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">        pncontrolsfactory.aqApp.main_widget_ = self</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def eventFilter(self, o: QtWidgets.QWidget, e: QtGui.QInputEvent) -&gt; bool:</span>
 <span class="line-empty" title="No Anys on this line!">        """Process GUI events."""</span>
 <span class="line-precise" title="No Anys on this line!">        if self.dck_mod_ is None or self.dck_rec_ is None or self.dck_mar_ is None:</span>
@@ -1290,9 +1276,6 @@ Explicit (x2)">        pncontrolsfactory.aqApp.main_widget_ = self</span>
 <span class="line-unanalyzed" title="No Anys on this line!">                    e.ignore()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-unanalyzed" title="No Anys on this line!">                return True</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-unanalyzed" title="No Anys on this line!">            elif isinstance(o, pncontrolsfactory.FLFormDB):</span>
-<span class="line-unanalyzed" title="No Anys on this line!">                self.formClosed()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-unanalyzed" title="No Anys on this line!">            elif isinstance(o, pncontrolsfactory.QDockWidget):</span>
 <span class="line-unanalyzed" title="No Anys on this line!">                o.topLevelChanged.emit(False)</span>
@@ -1479,8 +1462,8 @@ Explicit (x5)">        self.w_.statusBar().hide()</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">        self.act_sig_map_ = QtCore.QSignalMapper(self.w_)</span>
 <span class="line-precise" title="No Anys on this line!">        self.act_sig_map_.setObjectName("pinebooActSignalMap")</span>
-<span class="line-empty" title="No Anys on this line!">        # self.act_sig_map_.mapped[str].connect(self.triggerAction)</span>
-<span class="line-precise" title="No Anys on this line!">        self.act_sig_map_.mapped.connect(self.triggerAction)</span>
+<span class="line-any" title="Any Types on this line: 
+Error (x3)">        self.act_sig_map_.mapped[str].connect(self.triggerAction)  # type: ignore</span>
 <span class="line-precise" title="No Anys on this line!">        self.initTabWidget()</span>
 <span class="line-precise" title="No Anys on this line!">        self.initHelpMenu()</span>
 <span class="line-precise" title="No Anys on this line!">        self.initConfigMenu()</span>
@@ -1589,15 +1572,6 @@ Explicit (x3)">            widget.close()</span>
 Explicit (x2)">        for i in range(self.tw_.count()):</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">            self.tw_.widget(i).close()</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    def formClosed(self) -&gt; None:</span>
-<span class="line-empty" title="No Anys on this line!">        """Handle form close."""</span>
-<span class="line-precise" title="No Anys on this line!">        if self.tw_ is None:</span>
-<span class="line-empty" title="No Anys on this line!">            return</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">        if self.tw_.count() == 1:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            self.tw_corner.hide()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def addForm(self, action_name: str, icono: "QPixmap") -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Add new tab."""</span>
@@ -1871,7 +1845,7 @@ Explicit (x4)">        pncontrolsfactory.aqApp.setMainWidget(self.w_)</span>
 <span class="line-unanalyzed" title="No Anys on this line!">        self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.connect(pncontrolsfactory.aqApp.aboutQt)</span>
 <span class="line-unanalyzed" title="No Anys on this line!">        self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.connect(pncontrolsfactory.aqApp.aboutPineboo)</span>
 <span class="line-unanalyzed" title="No Anys on this line!">        self.w_.findChild(QtWidgets.QAction, "fontAction").triggered.connect(pncontrolsfactory.aqApp.chooseFont)</span>
-<span class="line-empty" title="No Anys on this line!">        # self.w_.findChild(QtWidgets.QAction, "style").triggered.connect(aqApp.showStyles)</span>
+<span class="line-unanalyzed" title="No Anys on this line!">        self.w_.findChild(QtWidgets.QMenu, "style").triggered.connect(pncontrolsfactory.aqApp.showStyles)</span>
 <span class="line-unanalyzed" title="No Anys on this line!">        self.w_.findChild(QtWidgets.QAction, "helpIndexAction").triggered.connect(pncontrolsfactory.aqApp.helpIndex)</span>
 <span class="line-unanalyzed" title="No Anys on this line!">        self.w_.findChild(QtWidgets.QAction, "urlEnebooAction").triggered.connect(pncontrolsfactory.aqApp.urlPineboo)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -1924,7 +1898,7 @@ Explicit (x6)">            ag_action.setObjectName("%s_actiongroup_name" % ag.ob
 <span class="line-any" title="Any Types on this line: 
 Explicit (x9)">            ag_action.setText(mng.idAreaToDescription(ag.objectName()))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">            ag_action.setIcon(pncontrolsfactory.QIcon(aqsfac.AQS.pixmap_fromMimeSource("folder.png")))</span>
+Explicit (x5)">            ag_action.setIcon(pncontrolsfactory.QIcon(aqsfac.AQS.pixmap_fromMimeSource("folder.png")))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x7)">            modules = mng.listIdModules(ag.objectName())</span>
@@ -1979,7 +1953,7 @@ Explicit (x3)">                        staticLoad.setObjectName("staticLoaderSet
 Explicit (x3)
 Unannotated (x1)">                        staticLoad.setText(self.qsa_sys.translate("Configurar carga estática"))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">                        staticLoad.setIcon(pncontrolsfactory.QIcon(aqsfac.AQS.pixmap_fromMimeSource("folder_update.png")))</span>
+Explicit (x5)">                        staticLoad.setIcon(pncontrolsfactory.QIcon(aqsfac.AQS.pixmap_fromMimeSource("folder_update.png")))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">                        staticLoad.triggered.connect(self.act_sig_map_.map)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -1993,7 +1967,7 @@ Explicit (x3)">                        reInit.setObjectName("reinitAction")</spa
 Explicit (x3)
 Unannotated (x1)">                        reInit.setText(self.qsa_sys.translate("Recargar scripts"))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">                        reInit.setIcon(pncontrolsfactory.QIcon(aqsfac.AQS.pixmap_fromMimeSource("reload.png")))</span>
+Explicit (x5)">                        reInit.setIcon(pncontrolsfactory.QIcon(aqsfac.AQS.pixmap_fromMimeSource("reload.png")))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">                        reInit.triggered.connect(self.act_sig_map_.map)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -2007,7 +1981,7 @@ Explicit (x3)">        shConsole.setObjectName("shConsoleAction")</span>
 Explicit (x3)
 Unannotated (x1)">        shConsole.setText(self.qsa_sys.translate("Mostrar Consola de mensajes"))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">        shConsole.setIcon(pncontrolsfactory.QIcon(aqsfac.AQS.pixmap_fromMimeSource("consola.png")))</span>
+Explicit (x5)">        shConsole.setIcon(pncontrolsfactory.QIcon(aqsfac.AQS.pixmap_fromMimeSource("consola.png")))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        shConsole.triggered.connect(self.act_sig_map_.map)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -2021,7 +1995,7 @@ Explicit (x3)">        exit.setObjectName("exitAction")</span>
 Explicit (x3)
 Unannotated (x1)">        exit.setText(self.qsa_sys.translate("&amp;Salir"))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">        exit.setIcon(pncontrolsfactory.QIcon(aqsfac.AQS.pixmap_fromMimeSource("exit.png")))</span>
+Explicit (x5)">        exit.setIcon(pncontrolsfactory.QIcon(aqsfac.AQS.pixmap_fromMimeSource("exit.png")))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        exit.triggered.connect(self.act_sig_map_.map)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -2056,25 +2030,25 @@ Explicit (x2)">        self.tw_.removeTab(0)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        aboutQt = self.w_.findChild(QtWidgets.QAction, "aboutQtAction")</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">        aboutQt.setIcon(self.iconSet16x16(aqsfac.AQS.pixmap_fromMimeSource("aboutqt.png")))</span>
+Explicit (x3)">        aboutQt.setIcon(self.iconSet16x16(aqsfac.AQS.pixmap_fromMimeSource("aboutqt.png")))</span>
 <span class="line-empty" title="No Anys on this line!">        # aboutQt.triggered.connect(pncontrolsfactory.aqApp.aboutQt)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        aboutPineboo = self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction")</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">        aboutPineboo.setIcon(self.iconSet16x16(aqsfac.AQS.pixmap_fromMimeSource("pineboo-logo-32.png")))</span>
+Explicit (x3)">        aboutPineboo.setIcon(self.iconSet16x16(aqsfac.AQS.pixmap_fromMimeSource("pineboo-logo-32.png")))</span>
 <span class="line-empty" title="No Anys on this line!">        # aboutPineboo.triggered.connect(pncontrolsfactory.aqApp.aboutPineboo)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        helpIndex = self.w_.findChild(QtWidgets.QAction, "helpIndexAction")</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">        helpIndex.setIcon(self.iconSet16x16(aqsfac.AQS.pixmap_fromMimeSource("help_index.png")))</span>
+Explicit (x3)">        helpIndex.setIcon(self.iconSet16x16(aqsfac.AQS.pixmap_fromMimeSource("help_index.png")))</span>
 <span class="line-empty" title="No Anys on this line!">        # helpIndex.triggered.connect(pncontrolsfactory.aqApp.helpIndex)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        urlPineboo = self.w_.findChild(QtWidgets.QAction, "urlEnebooAction")</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">        urlPineboo.setIcon(self.iconSet16x16(aqsfac.AQS.pixmap_fromMimeSource("pineboo-logo-32.png")))</span>
+Explicit (x3)">        urlPineboo.setIcon(self.iconSet16x16(aqsfac.AQS.pixmap_fromMimeSource("pineboo-logo-32.png")))</span>
 <span class="line-empty" title="No Anys on this line!">        # urlPineboo.triggered.connect(pncontrolsfactory.aqApp.urlPineboo)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def initConfigMenu(self) -&gt; None:</span>
@@ -2082,7 +2056,7 @@ Explicit (x5)">        urlPineboo.setIcon(self.iconSet16x16(aqsfac.AQS.pixmap_fr
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        font = self.w_.findChild(QtWidgets.QAction, "fontAction")</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">        font.setIcon(self.iconSet16x16(aqsfac.AQS.pixmap_fromMimeSource("font.png")))</span>
+Explicit (x3)">        font.setIcon(self.iconSet16x16(aqsfac.AQS.pixmap_fromMimeSource("font.png")))</span>
 <span class="line-empty" title="No Anys on this line!">        # font.triggered.connect(pncontrolsfactory.aqApp.chooseFont)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
@@ -2091,7 +2065,7 @@ Explicit (x4)">        style = self.w_.findChild(QtWidgets.QMenu, "style")</span
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">        pncontrolsfactory.aqApp.initStyles()</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">        style.setIcon(self.iconSet16x16(aqsfac.AQS.pixmap_fromMimeSource("estilo.png")))</span>
+Explicit (x3)">        style.setIcon(self.iconSet16x16(aqsfac.AQS.pixmap_fromMimeSource("estilo.png")))</span>
 <span class="line-empty" title="No Anys on this line!">        # style.triggered.connect(pncontrolsfactory.aqApp.showStyles)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def initTextLabels(self) -&gt; None:</span>
@@ -2319,7 +2293,7 @@ Explicit (x6)">                menu_ag_name.setObjectName("%s_actiongroup_name" 
 Explicit (x3)
 Unannotated (x1)">                menu_ag_name.setText(self.qsa_sys.translate("Más"))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">                menu_ag_name.setIcon(pncontrolsfactory.QIcon(aqsfac.AQS.pixmap_fromMimeSource("plus.png")))</span>
+Explicit (x5)">                menu_ag_name.setIcon(pncontrolsfactory.QIcon(aqsfac.AQS.pixmap_fromMimeSource("plus.png")))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            i = 0</span>
 <span class="line-precise" title="No Anys on this line!">            while i &lt; items.length():</span>
@@ -2411,6 +2385,9 @@ Explicit (x2)">        ret = QtGui.QIcon(QtGui.QPixmap(img_))</span>
 <span class="line-empty" title="No Anys on this line!">        """Startup process."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.core.utils.utils_base import filedir</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        pncontrolsfactory.aqApp.main_widget_ = self</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        mw = self</span>
 <span class="line-precise" title="No Anys on this line!">        mw.createUi(filedir("plugins/mainform/eneboo/mainform.ui"))</span>
