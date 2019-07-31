@@ -30,18 +30,12 @@
    code/pineboolib/application/parsers/mtdparser/index
    code/pineboolib/application/parsers/mtdparser/pnmtdparser
    code/pineboolib/application/parsers/mtdparser/pnormmodelsfactory
-   code/pineboolib/application/parsers/qsaparser/flalign
-   code/pineboolib/application/parsers/qsaparser/flclasses
    code/pineboolib/application/parsers/qsaparser/flex
    code/pineboolib/application/parsers/qsaparser/flscriptparse
    code/pineboolib/application/parsers/qsaparser/index
    code/pineboolib/application/parsers/qsaparser/postparse
    code/pineboolib/application/parsers/qsaparser/pyconvert
    code/pineboolib/application/parsers/qsaparser/pytnyzer
-   code/pineboolib/application/parsers/qsaparser/tests/ifaceclass
-   code/pineboolib/application/parsers/qsaparser/tests/index
-   code/pineboolib/application/parsers/qsaparser/xml2json
-   code/pineboolib/application/parsers/qsaparser/xmlparse
    code/pineboolib/application/projectmodule
    code/pineboolib/application/proxy
    code/pineboolib/application/tests/index
@@ -226,7 +220,6 @@
    code/pineboolib/plugins/qtwidgetsplugins/FLFieldDB
    code/pineboolib/plugins/qtwidgetsplugins/FLTable
    code/pineboolib/plugins/qtwidgetsplugins/FLTableDB
-   code/pineboolib/plugins/qtwidgetsplugins/index
    code/pineboolib/plugins/sql/flmysql_innodb
    code/pineboolib/plugins/sql/flmysql_innodb2
    code/pineboolib/plugins/sql/flmysql_myisam

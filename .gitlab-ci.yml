@@ -25,11 +25,14 @@ before_script:
 test:
   script:
     - flake8 pineboolib/
-    - mypy -p pineboolib
-    - pytest pineboolib/
     - black --check --fast -l 140 --exclude='(\.eggs|\.git|\.hg|\.mypy_cache|\.nox|\.tox|\.venv|_build|buck-out|build|dist|lextab.py)' pineboolib/
+    - mypy -p pineboolib
+    - pytest --cov pineboolib/
+    - coverage report --fail-under=11
+    # PyDocStyle lacks "exclude":
+    - rm pineboolib/application/parsers/qsaparser/lextab.py
     - pydocstyle pineboolib/application/database pineboolib/application/metadata
-    - pydocstyle pineboolib/application/parsers/kugarparser pineboolib/application/parsers/mtdparser
+    - pydocstyle pineboolib/application/parsers
     - pydocstyle pineboolib/core
     - pyroma .
 
@@ -47,7 +50,10 @@ run:
 pages:
   script:
     # - pip install sphinx sphinx-rtd-theme
-    - cd docs ; make html
+    - cd docs
+    - ./create_docs.sh
+    - ./update_linters.sh
+    - make html
     - mv build/html/ ../public/
   artifacts:
     paths:
