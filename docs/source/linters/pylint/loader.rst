@@ -1,4 +1,4 @@
-pineboolib.loader (9.12 / 10)
+pineboolib.loader (9.2/10)
 ===================================
 
 .. raw:: html

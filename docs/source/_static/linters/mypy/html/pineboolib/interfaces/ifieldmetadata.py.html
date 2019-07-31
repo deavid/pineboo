@@ -151,8 +151,52 @@
 <span id="L141" class="lineno"><a class="lineno" href="#L141">141</a></span>
 <span id="L142" class="lineno"><a class="lineno" href="#L142">142</a></span>
 <span id="L143" class="lineno"><a class="lineno" href="#L143">143</a></span>
+<span id="L144" class="lineno"><a class="lineno" href="#L144">144</a></span>
+<span id="L145" class="lineno"><a class="lineno" href="#L145">145</a></span>
+<span id="L146" class="lineno"><a class="lineno" href="#L146">146</a></span>
+<span id="L147" class="lineno"><a class="lineno" href="#L147">147</a></span>
+<span id="L148" class="lineno"><a class="lineno" href="#L148">148</a></span>
+<span id="L149" class="lineno"><a class="lineno" href="#L149">149</a></span>
+<span id="L150" class="lineno"><a class="lineno" href="#L150">150</a></span>
+<span id="L151" class="lineno"><a class="lineno" href="#L151">151</a></span>
+<span id="L152" class="lineno"><a class="lineno" href="#L152">152</a></span>
+<span id="L153" class="lineno"><a class="lineno" href="#L153">153</a></span>
+<span id="L154" class="lineno"><a class="lineno" href="#L154">154</a></span>
+<span id="L155" class="lineno"><a class="lineno" href="#L155">155</a></span>
+<span id="L156" class="lineno"><a class="lineno" href="#L156">156</a></span>
+<span id="L157" class="lineno"><a class="lineno" href="#L157">157</a></span>
+<span id="L158" class="lineno"><a class="lineno" href="#L158">158</a></span>
+<span id="L159" class="lineno"><a class="lineno" href="#L159">159</a></span>
+<span id="L160" class="lineno"><a class="lineno" href="#L160">160</a></span>
+<span id="L161" class="lineno"><a class="lineno" href="#L161">161</a></span>
+<span id="L162" class="lineno"><a class="lineno" href="#L162">162</a></span>
+<span id="L163" class="lineno"><a class="lineno" href="#L163">163</a></span>
+<span id="L164" class="lineno"><a class="lineno" href="#L164">164</a></span>
+<span id="L165" class="lineno"><a class="lineno" href="#L165">165</a></span>
+<span id="L166" class="lineno"><a class="lineno" href="#L166">166</a></span>
+<span id="L167" class="lineno"><a class="lineno" href="#L167">167</a></span>
+<span id="L168" class="lineno"><a class="lineno" href="#L168">168</a></span>
+<span id="L169" class="lineno"><a class="lineno" href="#L169">169</a></span>
+<span id="L170" class="lineno"><a class="lineno" href="#L170">170</a></span>
+<span id="L171" class="lineno"><a class="lineno" href="#L171">171</a></span>
+<span id="L172" class="lineno"><a class="lineno" href="#L172">172</a></span>
+<span id="L173" class="lineno"><a class="lineno" href="#L173">173</a></span>
+<span id="L174" class="lineno"><a class="lineno" href="#L174">174</a></span>
+<span id="L175" class="lineno"><a class="lineno" href="#L175">175</a></span>
+<span id="L176" class="lineno"><a class="lineno" href="#L176">176</a></span>
+<span id="L177" class="lineno"><a class="lineno" href="#L177">177</a></span>
+<span id="L178" class="lineno"><a class="lineno" href="#L178">178</a></span>
+<span id="L179" class="lineno"><a class="lineno" href="#L179">179</a></span>
+<span id="L180" class="lineno"><a class="lineno" href="#L180">180</a></span>
+<span id="L181" class="lineno"><a class="lineno" href="#L181">181</a></span>
+<span id="L182" class="lineno"><a class="lineno" href="#L182">182</a></span>
+<span id="L183" class="lineno"><a class="lineno" href="#L183">183</a></span>
+<span id="L184" class="lineno"><a class="lineno" href="#L184">184</a></span>
 </pre></td>
-<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">from typing import List, Optional, Union, TYPE_CHECKING</span>
+<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">IFieldMetaData module.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">from typing import List, Optional, Union, TYPE_CHECKING</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">if TYPE_CHECKING:</span>
 <span class="line-empty" title="No Anys on this line!">    from .itablemetadata import ITableMetaData  # noqa: F401</span>
@@ -160,55 +204,71 @@
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class IFieldMetaData:</span>
-<span class="line-empty" title="No Anys on this line!">    """Abastract class for FieldMetaData.</span>
+<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!">    Abastract class for FieldMetaData.</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">    def __init__(self, *args, **kwargs) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Create new FieldMetaData."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def __len__(self) -&gt; int:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get size of field."""</span>
 <span class="line-empty" title="No Anys on this line!">        return 0</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def addRelationMD(self, r) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Add relation M1 or 1M."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def alias(self) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get alias for this field."""</span>
 <span class="line-empty" title="No Anys on this line!">        return ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def allowNull(self) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Determine if this field allos NULLs."""</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def associatedField(self) -&gt; Optional["ITableMetaData"]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return associated field."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def associatedFieldFilterTo(self) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return associated field filter in sql string format."""</span>
 <span class="line-empty" title="No Anys on this line!">        return ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def associatedFieldName(self) -&gt; Optional[str]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return associated field name."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def defaultValue(self) -&gt; Optional[Union[str, bool]]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return field default value."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def editable(self) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get if field is editable."""</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def formatAssignValue(self, fieldName: str, value: int, upper: bool) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Format a value for this field."""</span>
 <span class="line-empty" title="No Anys on this line!">        return ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def generated(self) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get if field is computed."""</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def getIndexOptionsList(self, name: str) -&gt; Optional[int]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get list of options."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def hasOptionsList(self) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return if this field has list of options."""</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def inicializeFLFieldMetaData(self, other) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialize."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def inicializeNewFLFieldMetaData(</span>
@@ -234,71 +294,93 @@ Unannotated (x1)">    def inicializeFLFieldMetaData(self, other) -&gt; None:</sp
 <span class="line-empty" title="No Anys on this line!">        gen: bool = True,</span>
 <span class="line-empty" title="No Anys on this line!">        iCK: bool = False,</span>
 <span class="line-empty" title="No Anys on this line!">    ) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialize."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def isCompoundKey(self) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return if this field is part of CK."""</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def isPrimaryKey(self) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return if this field is PK."""</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def length(self) -&gt; int:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return field size."""</span>
 <span class="line-empty" title="No Anys on this line!">        return 0</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def metadata(self) -&gt; Optional["ITableMetaData"]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return table metadata for this field."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def name(self) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get name of this field."""</span>
 <span class="line-empty" title="No Anys on this line!">        return ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def optionsList(self) -&gt; List[str]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get list of options for this field."""</span>
 <span class="line-empty" title="No Anys on this line!">        return []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def outTransaction(self) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return if this field should be updated outside of transaction."""</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def partDecimal(self) -&gt; int:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return the amount of digits after dot when formatting numbers."""</span>
 <span class="line-empty" title="No Anys on this line!">        return 0</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def partInteger(self) -&gt; int:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return amount of digits before decimal dot."""</span>
 <span class="line-empty" title="No Anys on this line!">        return 0</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def regExpValidator(self) -&gt; Optional[str]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Validate regexp."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def relationM1(self) -&gt; Optional["PNRelationMetaData"]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return M1 relationship in this field."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def setAssociatedField(self, r_or_name, f: str) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Set new associated field."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setEditable(self, ed: bool) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Set if this field should be editable."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setFullyCalculated(self, c: bool) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Set if this field should be fully calculated."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def setMetadata(self, mtd) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Set TableMetadata for this field."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setOptionsList(self, ol: str) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Set option list for this field."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setTrimed(self, t: bool) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Set if this field should be trimed."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setVisible(self, v: bool) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Set if this field should be visible."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def type(self) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return field type."""</span>
 <span class="line-empty" title="No Anys on this line!">        return ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def visible(self) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get if this field should be visible in UI."""</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def visibleGrid(self) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get if this field should be visible in grids."""</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 </pre></td>
 </tr></tbody>

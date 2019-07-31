@@ -102,8 +102,41 @@
 <span id="L92" class="lineno"><a class="lineno" href="#L92">92</a></span>
 <span id="L93" class="lineno"><a class="lineno" href="#L93">93</a></span>
 <span id="L94" class="lineno"><a class="lineno" href="#L94">94</a></span>
+<span id="L95" class="lineno"><a class="lineno" href="#L95">95</a></span>
+<span id="L96" class="lineno"><a class="lineno" href="#L96">96</a></span>
+<span id="L97" class="lineno"><a class="lineno" href="#L97">97</a></span>
+<span id="L98" class="lineno"><a class="lineno" href="#L98">98</a></span>
+<span id="L99" class="lineno"><a class="lineno" href="#L99">99</a></span>
+<span id="L100" class="lineno"><a class="lineno" href="#L100">100</a></span>
+<span id="L101" class="lineno"><a class="lineno" href="#L101">101</a></span>
+<span id="L102" class="lineno"><a class="lineno" href="#L102">102</a></span>
+<span id="L103" class="lineno"><a class="lineno" href="#L103">103</a></span>
+<span id="L104" class="lineno"><a class="lineno" href="#L104">104</a></span>
+<span id="L105" class="lineno"><a class="lineno" href="#L105">105</a></span>
+<span id="L106" class="lineno"><a class="lineno" href="#L106">106</a></span>
+<span id="L107" class="lineno"><a class="lineno" href="#L107">107</a></span>
+<span id="L108" class="lineno"><a class="lineno" href="#L108">108</a></span>
+<span id="L109" class="lineno"><a class="lineno" href="#L109">109</a></span>
+<span id="L110" class="lineno"><a class="lineno" href="#L110">110</a></span>
+<span id="L111" class="lineno"><a class="lineno" href="#L111">111</a></span>
+<span id="L112" class="lineno"><a class="lineno" href="#L112">112</a></span>
+<span id="L113" class="lineno"><a class="lineno" href="#L113">113</a></span>
+<span id="L114" class="lineno"><a class="lineno" href="#L114">114</a></span>
+<span id="L115" class="lineno"><a class="lineno" href="#L115">115</a></span>
+<span id="L116" class="lineno"><a class="lineno" href="#L116">116</a></span>
+<span id="L117" class="lineno"><a class="lineno" href="#L117">117</a></span>
+<span id="L118" class="lineno"><a class="lineno" href="#L118">118</a></span>
+<span id="L119" class="lineno"><a class="lineno" href="#L119">119</a></span>
+<span id="L120" class="lineno"><a class="lineno" href="#L120">120</a></span>
+<span id="L121" class="lineno"><a class="lineno" href="#L121">121</a></span>
+<span id="L122" class="lineno"><a class="lineno" href="#L122">122</a></span>
+<span id="L123" class="lineno"><a class="lineno" href="#L123">123</a></span>
+<span id="L124" class="lineno"><a class="lineno" href="#L124">124</a></span>
 </pre></td>
-<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">from typing import Any, Callable, Dict, Optional, TYPE_CHECKING</span>
+<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">IManager Module.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">from typing import Any, Callable, Dict, Optional, TYPE_CHECKING</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">if TYPE_CHECKING:</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application.database import pnsqlquery  # noqa: F401</span>
@@ -115,6 +148,10 @@
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class IManager(object):</span>
+<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!">    Abstract class for FLManager.</span>
+<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    __doc__: str</span>
 <span class="line-precise" title="No Anys on this line!">    buffer_: None</span>
 <span class="line-imprecise" title="Any Types on this line: 
@@ -141,91 +178,114 @@ Omitted Generics (x6)">    queryParameter: Callable</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def __init__(self, *args) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Create manager."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    def action(self, n: str) -&gt; Any:  # "pineboolib.fllegacy.flaction.FLAction"</span>
+<span class="line-empty" title="No Anys on this line!">        """Retrieve action object by name."""</span>
 <span class="line-precise" title="No Anys on this line!">        raise Exception("must be implemented")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)
 Explicit (x1)">    def alterTable(self, mtd1=..., mtd2=..., key=..., force=...) -&gt; Any:</span>
+<span class="line-empty" title="No Anys on this line!">        """Issue an alter table to db."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)
 Explicit (x1)">    def checkMetaData(self, mtd1, mtd2) -&gt; Any:</span>
+<span class="line-empty" title="No Anys on this line!">        """Validate MTD against DB."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def cleanupMetaData(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Clean up MTD."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def createSystemTable(self, n: str) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Create named system table."""</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)
 Explicit (x1)">    def createTable(self, n_or_tmd) -&gt; Any:</span>
+<span class="line-empty" title="No Anys on this line!">        """Create new table."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def existsTable(self, n: str, cache: bool = False) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Check if table does exist in db."""</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def fetchLargeValue(self, refKey: str) -&gt; Optional[str]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Fetch from fllarge."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def finish(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Finish?."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">    def formatAssignValue(self, *args, **kwargs) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Format value for DB update."""</span>
 <span class="line-empty" title="No Anys on this line!">        return ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">    def formatAssignValueLike(self, *args, **kwargs) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Format value for DB "LIKE" statement."""</span>
 <span class="line-empty" title="No Anys on this line!">        return ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    def formatValue(self, fMD_or_type: str, v: Any, upper: bool = False) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Format value for DB."""</span>
 <span class="line-empty" title="No Anys on this line!">        return ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">    def formatValueLike(self, *args, **kwargs) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Format value for DB LIKE."""</span>
 <span class="line-empty" title="No Anys on this line!">        return ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def init(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialize this object."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def initCount(self) -&gt; int:</span>
+<span class="line-empty" title="No Anys on this line!">        """Track number of inits."""</span>
 <span class="line-empty" title="No Anys on this line!">        return 0</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def isSystemTable(self, n: str) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return if given name is a system table."""</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def loadTables(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Load tables."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)
 Explicit (x1)">    def metadata(self, n, quick: bool = False) -&gt; Optional[Any]:  # PNTableMetaData"</span>
+<span class="line-empty" title="No Anys on this line!">        """Retrieve table metadata by table name."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)
 Explicit (x1)">    def metadataField(self, field, v: bool = False, ed: bool = False) -&gt; Any:  # "PNFieldMetaData"</span>
+<span class="line-empty" title="No Anys on this line!">        """Retrieve field metadata."""</span>
 <span class="line-precise" title="No Anys on this line!">        raise Exception("must be implemented")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)
 Explicit (x1)">    def metadataRelation(self, relation) -&gt; Any:  # "PNRelationMetaData"</span>
+<span class="line-empty" title="No Anys on this line!">        """Retrieve relationship."""</span>
 <span class="line-precise" title="No Anys on this line!">        raise Exception("must be implemented")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">    def query(self, n, parent=...) -&gt; Optional["pnsqlquery.PNSqlQuery"]:  # "PNSqlQuery"</span>
+<span class="line-empty" title="No Anys on this line!">        """Create query."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def storeLargeValue(self, mtd, largeValue: str) -&gt; Optional[str]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Store value in fllarge."""</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 </pre></td>
 </tr></tbody>

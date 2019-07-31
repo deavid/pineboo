@@ -80,83 +80,137 @@
 <span id="L70" class="lineno"><a class="lineno" href="#L70">70</a></span>
 <span id="L71" class="lineno"><a class="lineno" href="#L71">71</a></span>
 <span id="L72" class="lineno"><a class="lineno" href="#L72">72</a></span>
+<span id="L73" class="lineno"><a class="lineno" href="#L73">73</a></span>
+<span id="L74" class="lineno"><a class="lineno" href="#L74">74</a></span>
+<span id="L75" class="lineno"><a class="lineno" href="#L75">75</a></span>
+<span id="L76" class="lineno"><a class="lineno" href="#L76">76</a></span>
+<span id="L77" class="lineno"><a class="lineno" href="#L77">77</a></span>
+<span id="L78" class="lineno"><a class="lineno" href="#L78">78</a></span>
+<span id="L79" class="lineno"><a class="lineno" href="#L79">79</a></span>
+<span id="L80" class="lineno"><a class="lineno" href="#L80">80</a></span>
+<span id="L81" class="lineno"><a class="lineno" href="#L81">81</a></span>
+<span id="L82" class="lineno"><a class="lineno" href="#L82">82</a></span>
+<span id="L83" class="lineno"><a class="lineno" href="#L83">83</a></span>
+<span id="L84" class="lineno"><a class="lineno" href="#L84">84</a></span>
+<span id="L85" class="lineno"><a class="lineno" href="#L85">85</a></span>
+<span id="L86" class="lineno"><a class="lineno" href="#L86">86</a></span>
+<span id="L87" class="lineno"><a class="lineno" href="#L87">87</a></span>
+<span id="L88" class="lineno"><a class="lineno" href="#L88">88</a></span>
+<span id="L89" class="lineno"><a class="lineno" href="#L89">89</a></span>
+<span id="L90" class="lineno"><a class="lineno" href="#L90">90</a></span>
+<span id="L91" class="lineno"><a class="lineno" href="#L91">91</a></span>
+<span id="L92" class="lineno"><a class="lineno" href="#L92">92</a></span>
+<span id="L93" class="lineno"><a class="lineno" href="#L93">93</a></span>
+<span id="L94" class="lineno"><a class="lineno" href="#L94">94</a></span>
+<span id="L95" class="lineno"><a class="lineno" href="#L95">95</a></span>
+<span id="L96" class="lineno"><a class="lineno" href="#L96">96</a></span>
+<span id="L97" class="lineno"><a class="lineno" href="#L97">97</a></span>
+<span id="L98" class="lineno"><a class="lineno" href="#L98">98</a></span>
+<span id="L99" class="lineno"><a class="lineno" href="#L99">99</a></span>
 </pre></td>
-<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">from typing import List, Optional, Any, TYPE_CHECKING</span>
+<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">ITableMetadata module.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">from typing import List, Optional, Any, TYPE_CHECKING</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">if TYPE_CHECKING:</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData  # noqa</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class ITableMetaData:</span>
+<span class="line-empty" title="No Anys on this line!">    """Abstract class for PNTableMetaData."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def __init__(self, n: str, a: Optional[str], q: Optional[str]) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Create new tablemetadata."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def addFieldMD(self, f) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Add new field to this object."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    def field(self, fN: str) -&gt; Any:</span>
+<span class="line-empty" title="No Anys on this line!">        """Retrieve field by name."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def fieldIsIndex(self, field_name: str) -&gt; int:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get if a field is an index."""</span>
 <span class="line-precise" title="No Anys on this line!">        return -1</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def fieldList(self):</span>
+<span class="line-empty" title="No Anys on this line!">        """Return list of fields."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def fieldListOfCompoundKey(self, fN: str) -&gt; Optional[List["PNFieldMetaData"]]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return list of fields for CK."""</span>
 <span class="line-empty" title="No Anys on this line!">        return []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def fieldNameToAlias(self, fN: str) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get alias of field."""</span>
 <span class="line-empty" title="No Anys on this line!">        return ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def fieldNames(self) -&gt; List[str]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get list of field names."""</span>
 <span class="line-empty" title="No Anys on this line!">        return []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def fieldNamesUnlock(self) -&gt; List[str]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get field names for unlock fields."""</span>
 <span class="line-empty" title="No Anys on this line!">        return []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def inCache(self) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get if in cache."""</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def indexFieldObject(self, position: int):</span>
+<span class="line-empty" title="No Anys on this line!">        """Get field by position."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def indexPos(self, field_name: str) -&gt; int:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get field position by name."""</span>
 <span class="line-empty" title="No Anys on this line!">        return 0</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def inicializeNewFLTableMetaData(self, n: str, a: str, q: Optional[str]) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialize object."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def isQuery(self) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return true if is a query."""</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def name(self) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get table name."""</span>
 <span class="line-empty" title="No Anys on this line!">        return ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def primaryKey(self, prefixTable: bool) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get primary key field."""</span>
 <span class="line-empty" title="No Anys on this line!">        return ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def query(self) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get query string."""</span>
 <span class="line-empty" title="No Anys on this line!">        return ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def relation(self, fN: str, fFN: str, fTN: str):</span>
+<span class="line-empty" title="No Anys on this line!">        """Get relation object."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def setCompoundKey(self, cK) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Set CK."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setConcurWarn(self, b: bool) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Enable concurrency warning."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setDetectLocks(self, b: bool) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Enable Lock detection."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setFTSFunction(self, ftsfun: str) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Set Full-Text-Search function."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 </pre></td>
 </tr></tbody>

@@ -61,12 +61,30 @@
 <span id="L51" class="lineno"><a class="lineno" href="#L51">51</a></span>
 <span id="L52" class="lineno"><a class="lineno" href="#L52">52</a></span>
 <span id="L53" class="lineno"><a class="lineno" href="#L53">53</a></span>
+<span id="L54" class="lineno"><a class="lineno" href="#L54">54</a></span>
+<span id="L55" class="lineno"><a class="lineno" href="#L55">55</a></span>
+<span id="L56" class="lineno"><a class="lineno" href="#L56">56</a></span>
+<span id="L57" class="lineno"><a class="lineno" href="#L57">57</a></span>
+<span id="L58" class="lineno"><a class="lineno" href="#L58">58</a></span>
+<span id="L59" class="lineno"><a class="lineno" href="#L59">59</a></span>
+<span id="L60" class="lineno"><a class="lineno" href="#L60">60</a></span>
+<span id="L61" class="lineno"><a class="lineno" href="#L61">61</a></span>
+<span id="L62" class="lineno"><a class="lineno" href="#L62">62</a></span>
+<span id="L63" class="lineno"><a class="lineno" href="#L63">63</a></span>
+<span id="L64" class="lineno"><a class="lineno" href="#L64">64</a></span>
+<span id="L65" class="lineno"><a class="lineno" href="#L65">65</a></span>
+<span id="L66" class="lineno"><a class="lineno" href="#L66">66</a></span>
+<span id="L67" class="lineno"><a class="lineno" href="#L67">67</a></span>
+<span id="L68" class="lineno"><a class="lineno" href="#L68">68</a></span>
 </pre></td>
-<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">from typing import List, Any, Generator</span>
+<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">IApiCursor module.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">from typing import List, Any, Generator</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class IApiCursor:</span>
-<span class="line-empty" title="No Anys on this line!">    """Database internal cursor. Follows Python DBAPI for cursors. Do not confuse with FLSqlCuror"""</span>
+<span class="line-empty" title="No Anys on this line!">    """Database internal cursor. Follows Python DBAPI for cursors. Do not confuse with FLSqlCuror."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
 Omitted Generics (x2)">    description: List</span>
@@ -83,53 +101,65 @@ Explicit (x2)">    connection: Any</span>
 <span class="line-precise" title="No Anys on this line!">    statusmessage: str</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def close(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Close cursor."""</span>
 <span class="line-empty" title="No Anys on this line!">        pass</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">    def execute(self, query, vars=None) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Excecute SQL."""</span>
 <span class="line-empty" title="No Anys on this line!">        pass</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">    def executemany(self, query, vars_list) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Execute a list of SQL."""</span>
 <span class="line-empty" title="No Anys on this line!">        pass</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)
 Explicit (x1)">    def callproc(self, procname, *parameters) -&gt; Any:</span>
+<span class="line-empty" title="No Anys on this line!">        """Call a procedure in DB."""</span>
 <span class="line-empty" title="No Anys on this line!">        pass</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def setinputsizes(self, sizes) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Define input sizes."""</span>
 <span class="line-empty" title="No Anys on this line!">        pass</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x1)">    def fetch(self) -&gt; List[List[Any]]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Fetch records from last execution."""</span>
 <span class="line-empty" title="No Anys on this line!">        return []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x1)">    def __iter__(self) -&gt; Generator[List[Any], None, None]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Fetch in iterator fashion."""</span>
 <span class="line-empty" title="No Anys on this line!">        yield []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x1)">    def fetchone(self) -&gt; List[Any]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Fetch one record."""</span>
 <span class="line-empty" title="No Anys on this line!">        return []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x1)">    def fetchall(self) -&gt; List[Any]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Fetch remaining records."""</span>
 <span class="line-empty" title="No Anys on this line!">        return []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)
 Explicit (x1)">    def scroll(value, mode="relative") -&gt; Any:</span>
+<span class="line-empty" title="No Anys on this line!">        """Scroll cursor down without fetching."""</span>
 <span class="line-empty" title="No Anys on this line!">        pass</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    def nextset(self) -&gt; Any:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get next set of records from DB."""</span>
 <span class="line-empty" title="No Anys on this line!">        pass</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)
 Explicit (x1)">    def setoutputsize(size, column=None) -&gt; Any:</span>
+<span class="line-empty" title="No Anys on this line!">        """Define output size."""</span>
 <span class="line-empty" title="No Anys on this line!">        pass</span>
 </pre></td>
 </tr></tbody>
