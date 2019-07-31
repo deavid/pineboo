@@ -835,7 +835,7 @@ class PNSqlCursor(QtCore.QObject):
         if state_changes:
             self.d.browse_ = b
 
-    def restoreBrowseFlag(self, m: bool) -> None:
+    def restoreBrowseFlag(self, m: str) -> None:
         """Restores browse flag to its previous state."""
         if not self.d.browse_states_:
             return
