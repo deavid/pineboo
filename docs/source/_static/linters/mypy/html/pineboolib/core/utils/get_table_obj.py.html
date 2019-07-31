@@ -1,0 +1,77 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="../../../../mypy-html.css">
+</head>
+<body>
+<h2>pineboolib.core.utils.get_table_obj</h2>
+<table>
+<caption>pineboolib/core/utils/get_table_obj.py</caption>
+<tbody><tr>
+<td class="table-lines"><pre><span id="L1" class="lineno"><a class="lineno" href="#L1">1</a></span>
+<span id="L2" class="lineno"><a class="lineno" href="#L2">2</a></span>
+<span id="L3" class="lineno"><a class="lineno" href="#L3">3</a></span>
+<span id="L4" class="lineno"><a class="lineno" href="#L4">4</a></span>
+<span id="L5" class="lineno"><a class="lineno" href="#L5">5</a></span>
+<span id="L6" class="lineno"><a class="lineno" href="#L6">6</a></span>
+<span id="L7" class="lineno"><a class="lineno" href="#L7">7</a></span>
+<span id="L8" class="lineno"><a class="lineno" href="#L8">8</a></span>
+<span id="L9" class="lineno"><a class="lineno" href="#L9">9</a></span>
+<span id="L10" class="lineno"><a class="lineno" href="#L10">10</a></span>
+<span id="L11" class="lineno"><a class="lineno" href="#L11">11</a></span>
+<span id="L12" class="lineno"><a class="lineno" href="#L12">12</a></span>
+<span id="L13" class="lineno"><a class="lineno" href="#L13">13</a></span>
+<span id="L14" class="lineno"><a class="lineno" href="#L14">14</a></span>
+<span id="L15" class="lineno"><a class="lineno" href="#L15">15</a></span>
+<span id="L16" class="lineno"><a class="lineno" href="#L16">16</a></span>
+<span id="L17" class="lineno"><a class="lineno" href="#L17">17</a></span>
+<span id="L18" class="lineno"><a class="lineno" href="#L18">18</a></span>
+<span id="L19" class="lineno"><a class="lineno" href="#L19">19</a></span>
+<span id="L20" class="lineno"><a class="lineno" href="#L20">20</a></span>
+<span id="L21" class="lineno"><a class="lineno" href="#L21">21</a></span>
+<span id="L22" class="lineno"><a class="lineno" href="#L22">22</a></span>
+<span id="L23" class="lineno"><a class="lineno" href="#L23">23</a></span>
+<span id="L24" class="lineno"><a class="lineno" href="#L24">24</a></span>
+<span id="L25" class="lineno"><a class="lineno" href="#L25">25</a></span>
+<span id="L26" class="lineno"><a class="lineno" href="#L26">26</a></span>
+<span id="L27" class="lineno"><a class="lineno" href="#L27">27</a></span>
+<span id="L28" class="lineno"><a class="lineno" href="#L28">28</a></span>
+<span id="L29" class="lineno"><a class="lineno" href="#L29">29</a></span>
+</pre></td>
+<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">Module for getTableObj.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">from xml.etree.ElementTree import Element, ElementTree</span>
+<span class="line-empty" title="No Anys on this line!">from .struct import TableStruct</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">def getTableObj(tree: ElementTree, root: Element) -&gt; TableStruct:</span>
+<span class="line-empty" title="No Anys on this line!">    """Retrieve a basic table object for a given parsed XML."""</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">    table = TableStruct()</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">    table.xmltree = tree</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">    table.xmlroot = root</span>
+<span class="line-precise" title="No Anys on this line!">    elem_query = table.xmlroot.find("query")</span>
+<span class="line-precise" title="No Anys on this line!">    query_name = elem_query and elem_query.text or None</span>
+<span class="line-precise" title="No Anys on this line!">    elem_name = table.xmlroot.find("name")</span>
+<span class="line-precise" title="No Anys on this line!">    if elem_name is None:</span>
+<span class="line-precise" title="No Anys on this line!">        raise ValueError("XML Tag for &lt;name&gt; not found!")</span>
+<span class="line-precise" title="No Anys on this line!">    name = elem_name.text</span>
+<span class="line-precise" title="No Anys on this line!">    table.tablename = name or "noname"</span>
+<span class="line-precise" title="No Anys on this line!">    if query_name:</span>
+<span class="line-precise" title="No Anys on this line!">        table.name = query_name</span>
+<span class="line-precise" title="No Anys on this line!">        table.query_table = name</span>
+<span class="line-empty" title="No Anys on this line!">    else:</span>
+<span class="line-precise" title="No Anys on this line!">        table.name = name or "noname"</span>
+<span class="line-precise" title="No Anys on this line!">        table.query_table = None</span>
+<span class="line-precise" title="No Anys on this line!">    table.fields = []</span>
+<span class="line-precise" title="No Anys on this line!">    table.pk = []</span>
+<span class="line-precise" title="No Anys on this line!">    table.fields_idx = {}</span>
+<span class="line-precise" title="No Anys on this line!">    return table</span>
+</pre></td>
+</tr></tbody>
+</table>
+</body>
+</html>

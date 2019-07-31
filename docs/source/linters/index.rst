@@ -12,3 +12,4 @@ Instead, we gather their reports into this page.
    :caption: Contents:
 
    pylint/pylint
+   mypy/index
