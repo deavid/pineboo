@@ -14,6 +14,8 @@ import ply.lex as lex  # type: ignore
 
 from . import flex
 
+TreeData = Dict[str, Any]
+
 tempDir = "/tmp"
 
 # Get the token map
@@ -605,7 +607,7 @@ def print_tokentree(token: Any, depth: int = 0) -> None:
             print_tokentree(tk.value, depth + 1)
 
 
-def calctree(obj: Dict[str, Any], depth: int = 0, num: List[str] = [], otype: str = "source", alias_mode: int = 1) -> Dict[str, Any]:
+def calctree(obj: Dict[str, Any], depth: int = 0, num: List[str] = [], otype: str = "source", alias_mode: int = 1) -> TreeData:
     """Extract parsed AST and generate a custom structure for later XML generation."""
     # if depth > 5: return
     # source_data = [

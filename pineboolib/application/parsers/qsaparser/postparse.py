@@ -12,21 +12,23 @@ from xml.dom import minidom  # type: ignore
 import logging
 
 from . import flscriptparse
-from typing import List, Type, Optional, Dict, Tuple, Any
+from typing import List, Type, Optional, Dict, Tuple, Any, Callable, cast, Iterable
+
+TreeData = Dict[str, Any]
 
 logger = logging.getLogger("flparser.postparse")
 
 USEFUL_TOKENS = "ID,ICONST,FCONST,SCONST,CCONST,RXCONST".split(",")
 
-KNOWN_PARSERS = {}
+KNOWN_PARSERS: Dict[str, Type["TagObjectBase"]] = {}
 UNKNOWN_PARSERS = {}
 
 
-def parse_for(*tagnames):
+def parse_for(*tagnames: str) -> Callable:
     """Decorate functions for registering tags."""
     global KNOWN_PARSERS
 
-    def decorator(fn):
+    def decorator(fn: Type["TagObjectBase"]) -> Type["TagObjectBase"]:
         for n in tagnames:
             KNOWN_PARSERS[n] = fn
         return fn
@@ -34,7 +36,7 @@ def parse_for(*tagnames):
     return decorator
 
 
-def parse(tagname, treedata):
+def parse(tagname: str, treedata: TreeData) -> "TagObject":
     """Excecute registered function for given tagname on treedata."""
     global KNOWN_PARSERS, UNKNOWN_PARSERS
     if tagname not in KNOWN_PARSERS:
@@ -45,7 +47,7 @@ def parse(tagname, treedata):
     return fn(tagname, treedata)
 
 
-def getxmltagname(tagname):
+def getxmltagname(tagname: str) -> str:
     """Transform tag names."""
     if tagname == "source":
         return "Source"
@@ -64,21 +66,21 @@ class TagObjectBase:
     tags: List[str] = []
 
     @classmethod
-    def can_process_tag(cls, tagname):
+    def can_process_tag(cls, tagname: str) -> bool:
         """Return if tagname is in class known tags."""
         return tagname in cls.tags
 
-    def __init__(self, tagname):
+    def __init__(self, tagname: str) -> None:
         """Create base object for processing tags."""
         self.astname = tagname
 
-    def add_subelem(self, argn, subelem):
+    def add_subelem(self, argn: int, subelem: "TagObject") -> None:
         """Abstract function for adding sub elements."""
 
-    def add_value(self, argn, vtype, value):
+    def add_value(self, argn: int, vtype: str, value: str) -> None:
         """Abstract function for adding values."""
 
-    def add_other(self, argn, vtype, data):
+    def add_other(self, argn: int, vtype: str, data: str) -> None:
         """Abstract function for adding other types of data."""
 
 
@@ -88,11 +90,11 @@ xml_class_types: List[Type[TagObjectBase]] = []
 class TagObjectFactory(type):
     """Metaclass for registering tag processors."""
 
-    def __init__(cls, name, bases, dct):
+    def __init__(cls, name: str, bases: Any, dct: Any) -> None:
         """Register a new class as tag processor."""
         global xml_class_types
         if issubclass(cls, TagObjectBase):
-            xml_class_types.append(cls)
+            xml_class_types.append(cast(Type[TagObjectBase], cls))
         else:
             raise Exception("This metaclass must be used as a subclass of TagObjectBase")
         super().__init__(name, bases, dct)
@@ -110,21 +112,21 @@ class TagObject(TagObjectBase, metaclass=TagObjectFactory):
     promote_child_if_alone = False
 
     @classmethod
-    def tagname(self, tagname):
+    def tagname(self, tagname: str) -> str:
         """Return processed target tag name."""
         return self.__name__
 
-    def __init__(self, tagname):
+    def __init__(self, tagname: str) -> None:
         """Create new processor."""
         super().__init__(tagname)
         self.xml = ElementTree.Element(self.tagname(tagname))
-        self.xmlname = None
+        self.xmlname: Optional[str] = None
         self.subelems: List[Any] = []
         self.values: List[Tuple[str, str]] = []
         if self.name_is_first_id:
             self.xml.set("name", "")
 
-    def adopt_children(self, argn, subelem):
+    def adopt_children(self, argn: int, subelem: "TagObject"):
         """Simplify tree by "merging" childs into itself."""
         for child in list(subelem.xml):
             if self.set_child_argn:
@@ -134,15 +136,15 @@ class TagObject(TagObjectBase, metaclass=TagObjectFactory):
                     del child.attrib["argn"]
             self.xml.append(child)
 
-    def omit_subelem(self, argn, subelem):
+    def omit_subelem(self, argn: int, subelem: "TagObject"):
         """Abstract function. Simplifies XML by removing unwanted terms."""
         return
 
-    def is_in(self, listobj):
+    def is_in(self, listobj: Iterable) -> bool:
         """Return if the class type appears in any of the items."""
         return self.__class__ in listobj or self.astname in listobj
 
-    def get(self, listobj, default=None):
+    def get(self, listobj: Dict[Any, str], default=None) -> Any:
         """Retrieve value from list based on this class type."""
         if self.__class__ in listobj:
             return listobj[self.__class__]
@@ -150,7 +152,7 @@ class TagObject(TagObjectBase, metaclass=TagObjectFactory):
             return listobj[self.astname]
         return default
 
-    def add_subelem(self, argn, subelem):
+    def add_subelem(self, argn: int, subelem: "TagObject") -> None:
         """Add a new XML child."""
         if subelem.is_in(self.omit_tags):
             return self.omit_subelem(argn, subelem)
@@ -165,7 +167,7 @@ class TagObject(TagObjectBase, metaclass=TagObjectFactory):
         self.xml.append(subelem.xml)
         self.subelems.append(subelem)
 
-    def add_value(self, argn, vtype, value):
+    def add_value(self, argn: int, vtype: str, value: str) -> None:
         """Add a new XML value."""
         self.values.append((vtype, value))
         if vtype == "ID" and self.name_is_first_id and self.xmlname is None:
@@ -175,12 +177,12 @@ class TagObject(TagObjectBase, metaclass=TagObjectFactory):
 
         self.xml.set("arg%02d" % argn, vtype + ":" + repr(value))
 
-    def add_other(self, argn, vtype, data):
+    def add_other(self, argn: int, vtype: str, data: str) -> None:
         """Add extra data to XML."""
         if self.debug_other:
             self.xml.set("arg%02d" % argn, vtype)
 
-    def polish(self):
+    def polish(self) -> "TagObject":
         """Clean up the structure by removing or merging some data."""
         if self.promote_child_if_alone:
             if len(self.values) == 0 and len(self.subelems) == 1:
@@ -417,7 +419,7 @@ class Constant(ListObject):
 
     tags = ["constant"]
 
-    def add_value(self, argn, vtype, value):
+    def add_value(self, argn: int, vtype: str, value: str) -> None:
         """Add value notation."""
         value = str(value)  # str(value,"ISO-8859-15","replace")
         if vtype == "SCONST":
@@ -688,7 +690,7 @@ def parse_unknown(tagname, treedata):
     return xmlelem.polish()
 
 
-def post_parse(treedata):
+def post_parse(treedata: TreeData):
     """Parse a xml. Convenience function."""
     source = parse("source", treedata)
     # print UNKNOWN_PARSERS.keys()
@@ -698,7 +700,7 @@ def post_parse(treedata):
 class Module(object):
     """Python code tester. Deprecated."""
 
-    def __init__(self, name, path):
+    def __init__(self, name: str, path: str) -> None:
         """Create Module."""
         self.name = name
         self.path = path
@@ -726,7 +728,7 @@ class Module(object):
         return result
 
 
-def parseArgs(argv):
+def parseArgs(argv: List[str]) -> Tuple[Any, List[str]]:
     """Define parsing arguments for the program."""
     parser = OptionParser()
     parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
@@ -755,7 +757,7 @@ def parseArgs(argv):
     return (options, args)
 
 
-def main():
+def main() -> None:
     """Run the program from command line."""
     log_format = "%(asctime)s - %(levelname)s: %(name)s: %(message)s"
     logging.basicConfig(format=log_format, level=0)
@@ -766,7 +768,7 @@ def main():
     execute(options, args)
 
 
-def pythonify(filelist):
+def pythonify(filelist: List[str]) -> None:
     """Convert to python the files included in the list."""
     if not isinstance(filelist, list):
         raise ValueError("First argument must be a list")
@@ -786,13 +788,13 @@ def pythonify2(filename: str, known_refs: Dict[str, Tuple[str, str]] = {}) -> st
     if prog["error_count"] > 0:
         raise Exception("Found %d errors parsing %r" % (prog["error_count"], filename))
 
-    tree_data = flscriptparse.calctree(prog, alias_mode=0)
+    tree_data: TreeData = flscriptparse.calctree(prog, alias_mode=0)
     ast = post_parse(tree_data)
 
     return pythonize2(ast, known_refs)
 
 
-def execute(options, args):
+def execute(options: Any, args: List[str]) -> None:
     """Execute conversion orders given by options and args. Can be used to emulate program calls."""
     from pineboolib.application.parsers.qsaparser import pytnyzer
 
