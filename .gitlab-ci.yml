@@ -28,8 +28,10 @@ test:
     - mypy -p pineboolib
     - pytest pineboolib/
     - black --check --fast -l 140 --exclude='(\.eggs|\.git|\.hg|\.mypy_cache|\.nox|\.tox|\.venv|_build|buck-out|build|dist|lextab.py)' pineboolib/
+    # PyDocStyle lacks "exclude":
+    - rm pineboolib/application/parsers/qsaparser/lextab.py
     - pydocstyle pineboolib/application/database pineboolib/application/metadata
-    - pydocstyle pineboolib/application/parsers/kugarparser pineboolib/application/parsers/mtdparser
+    - pydocstyle pineboolib/application/parsers
     - pydocstyle pineboolib/core
     - pyroma .
 
