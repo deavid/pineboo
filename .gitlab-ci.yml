@@ -28,7 +28,9 @@ test:
     - mypy -p pineboolib
     - pytest pineboolib/
     - black --check --fast -l 140 --exclude='(\.eggs|\.git|\.hg|\.mypy_cache|\.nox|\.tox|\.venv|_build|buck-out|build|dist|lextab.py)' pineboolib/
-    - pydocstyle pineboolib/core pineboolib/application/parsers/kugarparser pineboolib/application/database
+    - pydocstyle pineboolib/application/database pineboolib/application/metadata
+    - pydocstyle pineboolib/application/parsers/kugarparser pineboolib/application/parsers/mtdparser
+    - pydocstyle pineboolib/core
     - pyroma .
 
 run:
