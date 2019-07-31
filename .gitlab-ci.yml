@@ -33,7 +33,7 @@ test:
     - rm pineboolib/application/parsers/qsaparser/lextab.py
     - pydocstyle pineboolib/application/database pineboolib/application/metadata
     - pydocstyle pineboolib/application/parsers
-    - pydocstyle pineboolib/core
+    - pydocstyle pineboolib/core pineboolib/interfaces
     - pyroma .
 
 run:
