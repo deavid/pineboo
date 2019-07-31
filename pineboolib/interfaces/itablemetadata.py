@@ -1,4 +1,7 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData  # noqa
 
 
 class ITableMetaData:
@@ -11,14 +14,14 @@ class ITableMetaData:
     def field(self, fN: str) -> Any:
         return
 
-    def fieldIsIndex(self, field_name: Optional[str]) -> int:
+    def fieldIsIndex(self, field_name: str) -> int:
         return -1
 
     def fieldList(self):
         return
 
-    def fieldListOfCompoundKey(self, fN: str) -> None:
-        return
+    def fieldListOfCompoundKey(self, fN: str) -> Optional[List["PNFieldMetaData"]]:
+        return []
 
     def fieldNameToAlias(self, fN: str) -> str:
         return ""
@@ -35,7 +38,7 @@ class ITableMetaData:
     def indexFieldObject(self, position: int):
         return
 
-    def indexPos(self, field_name: Optional[str]) -> int:
+    def indexPos(self, field_name: str) -> int:
         return 0
 
     def inicializeNewFLTableMetaData(self, n: str, a: str, q: Optional[str]) -> None:
@@ -65,5 +68,5 @@ class ITableMetaData:
     def setDetectLocks(self, b: bool) -> None:
         return
 
-    def setFTSFunction(self, ftsfun: None) -> None:
+    def setFTSFunction(self, ftsfun: str) -> None:
         return
