@@ -46,3 +46,4 @@ coverage
 radon
 xenon
 pylint-json2html
+pytest-cov

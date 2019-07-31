@@ -9,9 +9,16 @@ fi
 PACKAGES=$( (cd ../pineboolib && find * -maxdepth 0 -type d \! -iname "_*") )
 # ----
 echo "Running PyLint3 . . ."
-echo $PACKAGES | xargs -t -n1 -P4 $0 pylint
+echo $PACKAGES | xargs -t -n1 -P2 $0 pylint
 # ----
 echo "Running MyPy . . ."
 (cd .. && mypy -p pineboolib --html-report=docs/source/_static/linters/mypy)
 cp source/_static/linters/mypy-html-tpl.css source/_static/linters/mypy/mypy-html.css
+# ----
+echo "Running Coverage . . ."
+(cd .. && pytest --cov pineboolib/)
+(cd .. && coverage html)
+cp -R ../htmlcov/* source/_static/linters/pytest-coverage/
+rm -R ../htmlcov
+cp source/_static/linters/pytest-coverage-style-tpl.css source/_static/linters/pytest-coverage/style.css
 # ----

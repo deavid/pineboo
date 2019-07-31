@@ -13,3 +13,4 @@ Instead, we gather their reports into this page.
 
    pylint/pylint
    mypy/index
+   pytest-coverage/index

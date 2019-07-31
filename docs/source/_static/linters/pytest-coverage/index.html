@@ -1,0 +1,2219 @@
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Coverage report</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+    
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.ba-throttle-debounce.min.js"></script>
+    <script type="text/javascript" src="jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="jquery.hotkeys.js"></script>
+    <script type="text/javascript" src="coverage_html.js"></script>
+    <script type="text/javascript">
+        jQuery(document).ready(coverage.index_ready);
+    </script>
+</head>
+<body class="indexfile">
+
+<div id="header">
+    <div class="content">
+        <h1>Coverage report:
+            <span class="pc_cov">11%</span>
+        </h1>
+
+        <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
+
+        <form id="filter_container">
+            <input id="filter" type="text" value="" placeholder="filter..." />
+        </form>
+    </div>
+</div>
+
+<div class="help_panel">
+    <img id="panel_icon" src="keybd_open.png" alt="Hide keyboard shortcuts" />
+    <p class="legend">Hot-keys on this page</p>
+    <div>
+    <p class="keyhelp">
+        <span class="key">n</span>
+        <span class="key">s</span>
+        <span class="key">m</span>
+        <span class="key">x</span>
+        
+        <span class="key">c</span> &nbsp; change column sorting
+    </p>
+    </div>
+</div>
+
+<div id="index">
+    <table class="index">
+        <thead>
+            
+            <tr class="tablehead" title="Click to sort">
+                <th class="name left headerSortDown shortkey_n">Module</th>
+                <th class="shortkey_s">statements</th>
+                <th class="shortkey_m">missing</th>
+                <th class="shortkey_x">excluded</th>
+                
+                <th class="right shortkey_c">coverage</th>
+            </tr>
+        </thead>
+        
+        <tfoot>
+            <tr class="total">
+                <td class="name left">Total</td>
+                <td>34153</td>
+                <td>30461</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="3692 34153">11%</td>
+            </tr>
+        </tfoot>
+        <tbody>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib___init___py.html">pineboolib/__init__.py</a></td>
+                <td>2</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="2 2">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application___init___py.html">pineboolib/application/__init__.py</a></td>
+                <td>2</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="2 2">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_database___init___py.html">pineboolib/application/database/__init__.py</a></td>
+                <td>2</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="2 2">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_database_pnbuffer_py.html">pineboolib/application/database/pnbuffer.py</a></td>
+                <td>269</td>
+                <td>221</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="48 269">18%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_database_pnconnection_py.html">pineboolib/application/database/pnconnection.py</a></td>
+                <td>443</td>
+                <td>443</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 443">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_database_pncursortablemodel_py.html">pineboolib/application/database/pncursortablemodel.py</a></td>
+                <td>736</td>
+                <td>736</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 736">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_database_pngroupbyquery_py.html">pineboolib/application/database/pngroupbyquery.py</a></td>
+                <td>11</td>
+                <td>11</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 11">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_database_pnparameterquery_py.html">pineboolib/application/database/pnparameterquery.py</a></td>
+                <td>21</td>
+                <td>21</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 21">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_database_pnsignals_py.html">pineboolib/application/database/pnsignals.py</a></td>
+                <td>21</td>
+                <td>7</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="14 21">67%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_database_pnsqlcursor_py.html">pineboolib/application/database/pnsqlcursor.py</a></td>
+                <td>1843</td>
+                <td>1575</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="268 1843">15%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_database_pnsqldrivers_py.html">pineboolib/application/database/pnsqldrivers.py</a></td>
+                <td>83</td>
+                <td>83</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 83">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_database_pnsqlquery_py.html">pineboolib/application/database/pnsqlquery.py</a></td>
+                <td>415</td>
+                <td>320</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="95 415">23%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_database_pnsqlsavepoint_py.html">pineboolib/application/database/pnsqlsavepoint.py</a></td>
+                <td>132</td>
+                <td>132</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 132">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_database_utils_py.html">pineboolib/application/database/utils.py</a></td>
+                <td>179</td>
+                <td>168</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="11 179">6%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_file_py.html">pineboolib/application/file.py</a></td>
+                <td>22</td>
+                <td>22</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 22">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_metadata___init___py.html">pineboolib/application/metadata/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_metadata_pncompoundkeymetadata_py.html">pineboolib/application/metadata/pncompoundkeymetadata.py</a></td>
+                <td>24</td>
+                <td>14</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="10 24">42%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_metadata_pnfieldmetadata_py.html">pineboolib/application/metadata/pnfieldmetadata.py</a></td>
+                <td>331</td>
+                <td>228</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="103 331">31%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_metadata_pnfieldmetadatalist_py.html">pineboolib/application/metadata/pnfieldmetadatalist.py</a></td>
+                <td>5</td>
+                <td>5</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 5">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_metadata_pnrelationmetadata_py.html">pineboolib/application/metadata/pnrelationmetadata.py</a></td>
+                <td>69</td>
+                <td>36</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="33 69">48%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_metadata_pnrelationmetadatalist_py.html">pineboolib/application/metadata/pnrelationmetadatalist.py</a></td>
+                <td>5</td>
+                <td>5</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 5">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_metadata_pntablemetadata_py.html">pineboolib/application/metadata/pntablemetadata.py</a></td>
+                <td>339</td>
+                <td>254</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="85 339">25%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_module_py.html">pineboolib/application/module.py</a></td>
+                <td>53</td>
+                <td>41</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="12 53">23%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_moduleactions_py.html">pineboolib/application/moduleactions.py</a></td>
+                <td>57</td>
+                <td>57</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 57">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_packager___init___py.html">pineboolib/application/packager/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_packager_aqunpacker_py.html">pineboolib/application/packager/aqunpacker.py</a></td>
+                <td>31</td>
+                <td>19</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="12 31">39%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_parsers___init___py.html">pineboolib/application/parsers/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_parsers_kugarparser___init___py.html">pineboolib/application/parsers/kugarparser/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_parsers_kugarparser_kut2fpdf_py.html">pineboolib/application/parsers/kugarparser/kut2fpdf.py</a></td>
+                <td>630</td>
+                <td>630</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 630">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_parsers_kugarparser_parsertools_py.html">pineboolib/application/parsers/kugarparser/parsertools.py</a></td>
+                <td>238</td>
+                <td>238</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 238">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_parsers_mtdparser___init___py.html">pineboolib/application/parsers/mtdparser/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_parsers_mtdparser_pnmtdparser_py.html">pineboolib/application/parsers/mtdparser/pnmtdparser.py</a></td>
+                <td>172</td>
+                <td>172</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 172">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_parsers_mtdparser_pnormmodelsfactory_py.html">pineboolib/application/parsers/mtdparser/pnormmodelsfactory.py</a></td>
+                <td>90</td>
+                <td>90</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 90">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_parsers_qsaparser___init___py.html">pineboolib/application/parsers/qsaparser/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_parsers_qsaparser_flex_py.html">pineboolib/application/parsers/qsaparser/flex.py</a></td>
+                <td>76</td>
+                <td>6</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="70 76">92%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_parsers_qsaparser_flscriptparse_py.html">pineboolib/application/parsers/qsaparser/flscriptparse.py</a></td>
+                <td>350</td>
+                <td>232</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="118 350">34%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_parsers_qsaparser_lextab_py.html">pineboolib/application/parsers/qsaparser/lextab.py</a></td>
+                <td>9</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="9 9">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_parsers_qsaparser_postparse_py.html">pineboolib/application/parsers/qsaparser/postparse.py</a></td>
+                <td>517</td>
+                <td>218</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="299 517">58%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_parsers_qsaparser_pyconvert_py.html">pineboolib/application/parsers/qsaparser/pyconvert.py</a></td>
+                <td>158</td>
+                <td>158</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 158">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_parsers_qsaparser_pytnyzer_py.html">pineboolib/application/parsers/qsaparser/pytnyzer.py</a></td>
+                <td>1540</td>
+                <td>1126</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="414 1540">27%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_projectmodule_py.html">pineboolib/application/projectmodule.py</a></td>
+                <td>319</td>
+                <td>253</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="66 319">21%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_proxy_py.html">pineboolib/application/proxy.py</a></td>
+                <td>21</td>
+                <td>21</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 21">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_tests___init___py.html">pineboolib/application/tests/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_tests_test_types_py.html">pineboolib/application/tests/test_types.py</a></td>
+                <td>72</td>
+                <td>1</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="71 72">99%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_types_py.html">pineboolib/application/types.py</a></td>
+                <td>272</td>
+                <td>122</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="150 272">55%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_utils___init___py.html">pineboolib/application/utils/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_utils_check_dependencies_py.html">pineboolib/application/utils/check_dependencies.py</a></td>
+                <td>57</td>
+                <td>27</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="30 57">53%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_utils_convert_flaction_py.html">pineboolib/application/utils/convert_flaction.py</a></td>
+                <td>22</td>
+                <td>22</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 22">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_utils_date_conversion_py.html">pineboolib/application/utils/date_conversion.py</a></td>
+                <td>62</td>
+                <td>55</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="7 62">11%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_utils_geometry_py.html">pineboolib/application/utils/geometry.py</a></td>
+                <td>16</td>
+                <td>16</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 16">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_utils_mobilemode_py.html">pineboolib/application/utils/mobilemode.py</a></td>
+                <td>15</td>
+                <td>15</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 15">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_utils_path_py.html">pineboolib/application/utils/path.py</a></td>
+                <td>23</td>
+                <td>16</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="7 23">30%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_utils_sql_tools_py.html">pineboolib/application/utils/sql_tools.py</a></td>
+                <td>318</td>
+                <td>294</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="24 318">8%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_utils_xpm_py.html">pineboolib/application/utils/xpm.py</a></td>
+                <td>22</td>
+                <td>18</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="4 22">18%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_application_xmlaction_py.html">pineboolib/application/xmlaction.py</a></td>
+                <td>176</td>
+                <td>176</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 176">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_core___init___py.html">pineboolib/core/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_core_decorators_py.html">pineboolib/core/decorators.py</a></td>
+                <td>122</td>
+                <td>85</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="37 122">30%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_core_error_manager_py.html">pineboolib/core/error_manager.py</a></td>
+                <td>50</td>
+                <td>43</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="7 50">14%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_core_exceptions_py.html">pineboolib/core/exceptions.py</a></td>
+                <td>3</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="3 3">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_core_message_manager_py.html">pineboolib/core/message_manager.py</a></td>
+                <td>21</td>
+                <td>21</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 21">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_core_parsetable_py.html">pineboolib/core/parsetable.py</a></td>
+                <td>24</td>
+                <td>19</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="5 24">21%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_core_settings_py.html">pineboolib/core/settings.py</a></td>
+                <td>61</td>
+                <td>35</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="26 61">43%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_core_utils___init___py.html">pineboolib/core/utils/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_core_utils_get_table_obj_py.html">pineboolib/core/utils/get_table_obj.py</a></td>
+                <td>22</td>
+                <td>19</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="3 22">14%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_core_utils_logging_py.html">pineboolib/core/utils/logging.py</a></td>
+                <td>42</td>
+                <td>7</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="35 42">83%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_core_utils_singleton_py.html">pineboolib/core/utils/singleton.py</a></td>
+                <td>7</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="7 7">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_core_utils_struct_py.html">pineboolib/core/utils/struct.py</a></td>
+                <td>61</td>
+                <td>25</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="36 61">59%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_core_utils_utils_base_py.html">pineboolib/core/utils/utils_base.py</a></td>
+                <td>354</td>
+                <td>276</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="78 354">22%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy___init___py.html">pineboolib/fllegacy/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_aqsobjects___init___py.html">pineboolib/fllegacy/aqsobjects/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_aqsobjects_aqboolflagstate_py.html">pineboolib/fllegacy/aqsobjects/aqboolflagstate.py</a></td>
+                <td>24</td>
+                <td>12</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="12 24">50%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_aqsobjects_aqods_py.html">pineboolib/fllegacy/aqsobjects/aqods.py</a></td>
+                <td>168</td>
+                <td>102</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="66 168">39%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_aqsobjects_aqs_py.html">pineboolib/fllegacy/aqsobjects/aqs.py</a></td>
+                <td>97</td>
+                <td>56</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="41 97">42%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_aqsobjects_aqsettings_py.html">pineboolib/fllegacy/aqsobjects/aqsettings.py</a></td>
+                <td>3</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="3 3">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_aqsobjects_aqsmtpclient_py.html">pineboolib/fllegacy/aqsobjects/aqsmtpclient.py</a></td>
+                <td>3</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="3 3">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_aqsobjects_aqsobjectfactory_py.html">pineboolib/fllegacy/aqsobjects/aqsobjectfactory.py</a></td>
+                <td>22</td>
+                <td>8</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="14 22">64%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_aqsobjects_aqsql_py.html">pineboolib/fllegacy/aqsobjects/aqsql.py</a></td>
+                <td>97</td>
+                <td>78</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="19 97">20%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_aqsobjects_aqsqlcursor_py.html">pineboolib/fllegacy/aqsobjects/aqsqlcursor.py</a></td>
+                <td>3</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="3 3">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_aqsobjects_aqsqlquery_py.html">pineboolib/fllegacy/aqsobjects/aqsqlquery.py</a></td>
+                <td>3</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="3 3">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_aqsobjects_aqutil_py.html">pineboolib/fllegacy/aqsobjects/aqutil.py</a></td>
+                <td>14</td>
+                <td>4</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="10 14">71%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flaccesscontrol_py.html">pineboolib/fllegacy/flaccesscontrol.py</a></td>
+                <td>102</td>
+                <td>79</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="23 102">23%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flaccesscontrolfactory_py.html">pineboolib/fllegacy/flaccesscontrolfactory.py</a></td>
+                <td>168</td>
+                <td>145</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="23 168">14%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flaccesscontrollists_py.html">pineboolib/fllegacy/flaccesscontrollists.py</a></td>
+                <td>130</td>
+                <td>130</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 130">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flaction_py.html">pineboolib/fllegacy/flaction.py</a></td>
+                <td>64</td>
+                <td>64</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 64">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flapplication_py.html">pineboolib/fllegacy/flapplication.py</a></td>
+                <td>1121</td>
+                <td>923</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="198 1121">18%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flgroupbyquery_py.html">pineboolib/fllegacy/flgroupbyquery.py</a></td>
+                <td>3</td>
+                <td>3</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 3">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flmanager_py.html">pineboolib/fllegacy/flmanager.py</a></td>
+                <td>940</td>
+                <td>940</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 940">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flmanagermodules_py.html">pineboolib/fllegacy/flmanagermodules.py</a></td>
+                <td>392</td>
+                <td>392</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 392">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flmodulesstaticloader_py.html">pineboolib/fllegacy/flmodulesstaticloader.py</a></td>
+                <td>229</td>
+                <td>229</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 229">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flnetwork_py.html">pineboolib/fllegacy/flnetwork.py</a></td>
+                <td>59</td>
+                <td>37</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="22 59">37%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flparameterquery_py.html">pineboolib/fllegacy/flparameterquery.py</a></td>
+                <td>3</td>
+                <td>3</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 3">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flpicture_py.html">pineboolib/fllegacy/flpicture.py</a></td>
+                <td>393</td>
+                <td>393</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 393">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flposprinter_py.html">pineboolib/fllegacy/flposprinter.py</a></td>
+                <td>70</td>
+                <td>38</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="32 70">46%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flreportengine_py.html">pineboolib/fllegacy/flreportengine.py</a></td>
+                <td>178</td>
+                <td>144</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="34 178">19%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flreportpages_py.html">pineboolib/fllegacy/flreportpages.py</a></td>
+                <td>113</td>
+                <td>113</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 113">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flreportviewer_py.html">pineboolib/fllegacy/flreportviewer.py</a></td>
+                <td>517</td>
+                <td>354</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="163 517">32%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flsettings_py.html">pineboolib/fllegacy/flsettings.py</a></td>
+                <td>54</td>
+                <td>42</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="12 54">22%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flsmtpclient_py.html">pineboolib/fllegacy/flsmtpclient.py</a></td>
+                <td>265</td>
+                <td>152</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="113 265">43%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flsqlconnections_py.html">pineboolib/fllegacy/flsqlconnections.py</a></td>
+                <td>5</td>
+                <td>5</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 5">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flsqlcursor_py.html">pineboolib/fllegacy/flsqlcursor.py</a></td>
+                <td>3</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="3 3">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flsqlquery_py.html">pineboolib/fllegacy/flsqlquery.py</a></td>
+                <td>3</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="3 3">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flstylepainter_py.html">pineboolib/fllegacy/flstylepainter.py</a></td>
+                <td>1012</td>
+                <td>932</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="80 1012">8%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_fltranslations_py.html">pineboolib/fllegacy/fltranslations.py</a></td>
+                <td>48</td>
+                <td>48</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 48">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_fltranslator_py.html">pineboolib/fllegacy/fltranslator.py</a></td>
+                <td>86</td>
+                <td>66</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="20 86">23%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flutil_py.html">pineboolib/fllegacy/flutil.py</a></td>
+                <td>493</td>
+                <td>396</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="97 493">20%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_flvar_py.html">pineboolib/fllegacy/flvar.py</a></td>
+                <td>33</td>
+                <td>24</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="9 33">27%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_fllegacy_systype_py.html">pineboolib/fllegacy/systype.py</a></td>
+                <td>150</td>
+                <td>103</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="47 150">31%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_interfaces___init___py.html">pineboolib/interfaces/__init__.py</a></td>
+                <td>3</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="3 3">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_interfaces_cursoraccessmode_py.html">pineboolib/interfaces/cursoraccessmode.py</a></td>
+                <td>5</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="5 5">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_interfaces_dgi_schema_py.html">pineboolib/interfaces/dgi_schema.py</a></td>
+                <td>1</td>
+                <td>1</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 1">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_interfaces_iapicursor_py.html">pineboolib/interfaces/iapicursor.py</a></td>
+                <td>37</td>
+                <td>37</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 37">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_interfaces_iconnection_py.html">pineboolib/interfaces/iconnection.py</a></td>
+                <td>145</td>
+                <td>145</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 145">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_interfaces_ifieldmetadata_py.html">pineboolib/interfaces/ifieldmetadata.py</a></td>
+                <td>79</td>
+                <td>39</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="40 79">51%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_interfaces_imanager_py.html">pineboolib/interfaces/imanager.py</a></td>
+                <td>63</td>
+                <td>24</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="39 63">62%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_interfaces_isqlcursor_py.html">pineboolib/interfaces/isqlcursor.py</a></td>
+                <td>194</td>
+                <td>194</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 194">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_interfaces_itablemetadata_py.html">pineboolib/interfaces/itablemetadata.py</a></td>
+                <td>48</td>
+                <td>23</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="25 48">52%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_loader___init___py.html">pineboolib/loader/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_loader_conn_dialog_py.html">pineboolib/loader/conn_dialog.py</a></td>
+                <td>17</td>
+                <td>17</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 17">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_loader_connection_py.html">pineboolib/loader/connection.py</a></td>
+                <td>17</td>
+                <td>17</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 17">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_loader_dgi_py.html">pineboolib/loader/dgi.py</a></td>
+                <td>48</td>
+                <td>30</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="18 48">38%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_loader_dlgconnect___init___py.html">pineboolib/loader/dlgconnect/__init__.py</a></td>
+                <td>1</td>
+                <td>1</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 1">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_loader_dlgconnect_dlgconnect_py.html">pineboolib/loader/dlgconnect/dlgconnect.py</a></td>
+                <td>278</td>
+                <td>278</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 278">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_loader_init_project_py.html">pineboolib/loader/init_project.py</a></td>
+                <td>44</td>
+                <td>44</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 44">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_loader_main_py.html">pineboolib/loader/main.py</a></td>
+                <td>160</td>
+                <td>134</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="26 160">16%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_loader_options_py.html">pineboolib/loader/options.py</a></td>
+                <td>38</td>
+                <td>38</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 38">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_loader_preload_py.html">pineboolib/loader/preload.py</a></td>
+                <td>19</td>
+                <td>19</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 19">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_loader_projectconfig_py.html">pineboolib/loader/projectconfig.py</a></td>
+                <td>108</td>
+                <td>108</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 108">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_loader_utils_py.html">pineboolib/loader/utils.py</a></td>
+                <td>45</td>
+                <td>45</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 45">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins___init___py.html">pineboolib/plugins/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi___init___py.html">pineboolib/plugins/dgi/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_aqnext___init___py.html">pineboolib/plugins/dgi/dgi_aqnext/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_aqnext_dgi_aqnext_py.html">pineboolib/plugins/dgi/dgi_aqnext/dgi_aqnext.py</a></td>
+                <td>395</td>
+                <td>395</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 395">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_aqnext_dgi_objects___init___py.html">pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_aqnext_dgi_objects_auth_py.html">pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/auth.py</a></td>
+                <td>4</td>
+                <td>4</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 4">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_aqnext_dgi_objects_flsqlcursor_py.html">pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/flsqlcursor.py</a></td>
+                <td>181</td>
+                <td>181</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 181">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_aqnext_dgi_objects_formdbwidget_py.html">pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/formdbwidget.py</a></td>
+                <td>99</td>
+                <td>99</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 99">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_aqnext_dgi_objects_qlistview_py.html">pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/qlistview.py</a></td>
+                <td>3</td>
+                <td>3</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 3">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_aqnext_dgi_objects_qmainwindow_py.html">pineboolib/plugins/dgi/dgi_aqnext/dgi_objects/qmainwindow.py</a></td>
+                <td>3</td>
+                <td>3</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 3">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_fcgi___init___py.html">pineboolib/plugins/dgi/dgi_fcgi/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_fcgi_dgi_fcgi_py.html">pineboolib/plugins/dgi/dgi_fcgi/dgi_fcgi.py</a></td>
+                <td>50</td>
+                <td>50</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 50">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_jsonrpc___init___py.html">pineboolib/plugins/dgi/dgi_jsonrpc/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_jsonrpc_dgi_jsonrpc_py.html">pineboolib/plugins/dgi/dgi_jsonrpc/dgi_jsonrpc.py</a></td>
+                <td>305</td>
+                <td>305</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 305">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt___init___py.html">pineboolib/plugins/dgi/dgi_qt/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects___init___py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_checkbox_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/checkbox.py</a></td>
+                <td>26</td>
+                <td>26</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 26">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_dialog_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/dialog.py</a></td>
+                <td>47</td>
+                <td>47</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 47">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_dlg_about___init___py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/dlg_about/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_dlg_about_about_pineboo_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/dlg_about/about_pineboo.py</a></td>
+                <td>37</td>
+                <td>37</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 37">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_filedialog_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/filedialog.py</a></td>
+                <td>17</td>
+                <td>17</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 17">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_flcheckbox_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flcheckbox.py</a></td>
+                <td>5</td>
+                <td>5</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 5">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_flcodbar_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flcodbar.py</a></td>
+                <td>282</td>
+                <td>282</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 282">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_fldatatable_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fldatatable.py</a></td>
+                <td>446</td>
+                <td>446</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 446">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_fldateedit_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fldateedit.py</a></td>
+                <td>26</td>
+                <td>26</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 26">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_fldoublevalidator_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fldoublevalidator.py</a></td>
+                <td>31</td>
+                <td>31</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 31">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_flfielddb_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flfielddb.py</a></td>
+                <td>2022</td>
+                <td>2022</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 2022">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_flformdb_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformdb.py</a></td>
+                <td>409</td>
+                <td>409</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 409">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_flformrecorddb_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformrecorddb.py</a></td>
+                <td>506</td>
+                <td>506</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 506">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_flformsearchdb_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformsearchdb.py</a></td>
+                <td>226</td>
+                <td>226</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 226">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_flintvalidator_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flintvalidator.py</a></td>
+                <td>21</td>
+                <td>21</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 21">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_fllineedit_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fllineedit.py</a></td>
+                <td>119</td>
+                <td>119</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 119">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_fllistviewitem_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fllistviewitem.py</a></td>
+                <td>67</td>
+                <td>67</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 67">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_flpixmapview_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flpixmapview.py</a></td>
+                <td>71</td>
+                <td>71</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 71">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_flspinbox_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flspinbox.py</a></td>
+                <td>13</td>
+                <td>13</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 13">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_fltable_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltable.py</a></td>
+                <td>10</td>
+                <td>10</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 10">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_fltabledb_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb.py</a></td>
+                <td>1399</td>
+                <td>1399</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 1399">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_fltexteditoutput_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltexteditoutput.py</a></td>
+                <td>23</td>
+                <td>23</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 23">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_fltimeedit_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltimeedit.py</a></td>
+                <td>13</td>
+                <td>13</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 13">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_fluintvalidator_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/fluintvalidator.py</a></td>
+                <td>18</td>
+                <td>18</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 18">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_flwidget_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flwidget.py</a></td>
+                <td>8</td>
+                <td>8</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 8">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_flworkspace_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/flworkspace.py</a></td>
+                <td>5</td>
+                <td>5</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 5">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_formdbwidget_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/formdbwidget.py</a></td>
+                <td>118</td>
+                <td>118</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 118">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_groupbox_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/groupbox.py</a></td>
+                <td>9</td>
+                <td>9</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 9">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_lineedit_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/lineedit.py</a></td>
+                <td>24</td>
+                <td>24</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 24">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_messagebox_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/messagebox.py</a></td>
+                <td>69</td>
+                <td>69</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 69">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_numberedit_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/numberedit.py</a></td>
+                <td>50</td>
+                <td>50</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 50">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_process_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/process.py</a></td>
+                <td>86</td>
+                <td>86</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 86">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_progress_dialog_manager_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/progress_dialog_manager.py</a></td>
+                <td>51</td>
+                <td>51</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 51">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qaction_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qaction.py</a></td>
+                <td>24</td>
+                <td>24</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 24">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qbuttongroup_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qbuttongroup.py</a></td>
+                <td>18</td>
+                <td>18</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 18">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qbytearray_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qbytearray.py</a></td>
+                <td>12</td>
+                <td>12</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 12">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qcheckbox_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qcheckbox.py</a></td>
+                <td>13</td>
+                <td>13</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 13">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qcombobox_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qcombobox.py</a></td>
+                <td>32</td>
+                <td>32</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 32">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qdateedit_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qdateedit.py</a></td>
+                <td>38</td>
+                <td>38</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 38">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qdialog_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qdialog.py</a></td>
+                <td>29</td>
+                <td>29</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 29">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qframe_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qframe.py</a></td>
+                <td>17</td>
+                <td>17</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 17">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qgroupbox_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qgroupbox.py</a></td>
+                <td>49</td>
+                <td>49</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 49">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qhboxlayout_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qhboxlayout.py</a></td>
+                <td>11</td>
+                <td>11</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 11">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qlabel_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qlabel.py</a></td>
+                <td>28</td>
+                <td>28</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 28">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qline_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qline.py</a></td>
+                <td>18</td>
+                <td>18</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 18">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qlineedit_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qlineedit.py</a></td>
+                <td>30</td>
+                <td>30</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 30">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qlistview_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qlistview.py</a></td>
+                <td>83</td>
+                <td>83</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 83">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qmainwindow_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qmainwindow.py</a></td>
+                <td>9</td>
+                <td>9</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 9">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qmdiarea_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qmdiarea.py</a></td>
+                <td>14</td>
+                <td>14</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 14">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qpushbutton_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qpushbutton.py</a></td>
+                <td>47</td>
+                <td>47</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 47">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qradiobutton_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qradiobutton.py</a></td>
+                <td>32</td>
+                <td>32</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 32">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qtable_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qtable.py</a></td>
+                <td>180</td>
+                <td>180</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 180">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qtabwidget_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qtabwidget.py</a></td>
+                <td>38</td>
+                <td>38</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 38">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qtextedit_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qtextedit.py</a></td>
+                <td>33</td>
+                <td>33</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 33">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qtimeedit_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qtimeedit.py</a></td>
+                <td>14</td>
+                <td>14</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 14">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qtoolbar_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qtoolbar.py</a></td>
+                <td>9</td>
+                <td>9</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 9">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qtoolbutton_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qtoolbutton.py</a></td>
+                <td>29</td>
+                <td>29</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 29">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qvboxlayout_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qvboxlayout.py</a></td>
+                <td>11</td>
+                <td>11</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 11">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_qwidget_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/qwidget.py</a></td>
+                <td>5</td>
+                <td>5</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 5">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_radiobutton_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/radiobutton.py</a></td>
+                <td>3</td>
+                <td>3</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 3">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_splash_screen_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/splash_screen.py</a></td>
+                <td>20</td>
+                <td>20</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 20">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_objects_status_help_msg_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_objects/status_help_msg.py</a></td>
+                <td>4</td>
+                <td>4</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 4">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_qt_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_qt.py</a></td>
+                <td>78</td>
+                <td>78</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 78">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_qt_dgi_qt3ui_py.html">pineboolib/plugins/dgi/dgi_qt/dgi_qt3ui.py</a></td>
+                <td>721</td>
+                <td>721</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 721">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_schema_py.html">pineboolib/plugins/dgi/dgi_schema.py</a></td>
+                <td>102</td>
+                <td>102</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 102">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_server___init___py.html">pineboolib/plugins/dgi/dgi_server/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_server_dgi_objects___init___py.html">pineboolib/plugins/dgi/dgi_server/dgi_objects/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_server_dgi_objects_formdbwidget_py.html">pineboolib/plugins/dgi/dgi_server/dgi_objects/formdbwidget.py</a></td>
+                <td>101</td>
+                <td>101</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 101">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_server_dgi_objects_qlistview_py.html">pineboolib/plugins/dgi/dgi_server/dgi_objects/qlistview.py</a></td>
+                <td>2</td>
+                <td>2</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 2">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_server_dgi_objects_qmainwindow_py.html">pineboolib/plugins/dgi/dgi_server/dgi_objects/qmainwindow.py</a></td>
+                <td>2</td>
+                <td>2</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 2">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_dgi_dgi_server_dgi_server_py.html">pineboolib/plugins/dgi/dgi_server/dgi_server.py</a></td>
+                <td>158</td>
+                <td>158</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 158">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_mainform___init___py.html">pineboolib/plugins/mainform/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_mainform_eneboo___init___py.html">pineboolib/plugins/mainform/eneboo/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_mainform_eneboo_eneboo_py.html">pineboolib/plugins/mainform/eneboo/eneboo.py</a></td>
+                <td>803</td>
+                <td>803</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 803">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_mainform_eneboo_mdi___init___py.html">pineboolib/plugins/mainform/eneboo_mdi/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_mainform_eneboo_mdi_eneboo_mdi_py.html">pineboolib/plugins/mainform/eneboo_mdi/eneboo_mdi.py</a></td>
+                <td>28</td>
+                <td>28</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 28">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_sql___init___py.html">pineboolib/plugins/sql/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_sql_flmysql_innodb_py.html">pineboolib/plugins/sql/flmysql_innodb.py</a></td>
+                <td>13</td>
+                <td>13</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 13">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_sql_flmysql_innodb2_py.html">pineboolib/plugins/sql/flmysql_innodb2.py</a></td>
+                <td>13</td>
+                <td>13</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 13">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_sql_flmysql_myisam_py.html">pineboolib/plugins/sql/flmysql_myisam.py</a></td>
+                <td>937</td>
+                <td>937</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 937">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_sql_flmysql_myisam2_py.html">pineboolib/plugins/sql/flmysql_myisam2.py</a></td>
+                <td>943</td>
+                <td>943</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 943">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_sql_flqpsql_py.html">pineboolib/plugins/sql/flqpsql.py</a></td>
+                <td>1007</td>
+                <td>1007</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 1007">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_sql_flqpsql2_py.html">pineboolib/plugins/sql/flqpsql2.py</a></td>
+                <td>70</td>
+                <td>70</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 70">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_sql_flremoteclient_py.html">pineboolib/plugins/sql/flremoteclient.py</a></td>
+                <td>153</td>
+                <td>153</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 153">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_sql_flsqlite_py.html">pineboolib/plugins/sql/flsqlite.py</a></td>
+                <td>571</td>
+                <td>571</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 571">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_test___init___py.html">pineboolib/plugins/test/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_plugins_test_flsqlcursormock_py.html">pineboolib/plugins/test/flsqlcursormock.py</a></td>
+                <td>43</td>
+                <td>43</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 43">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_pncontrolsfactory_py.html">pineboolib/pncontrolsfactory.py</a></td>
+                <td>405</td>
+                <td>259</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="146 405">36%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_qsa___init___py.html">pineboolib/qsa/__init__.py</a></td>
+                <td>3</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="3 3">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_qsa_emptyscript_py.html">pineboolib/qsa/emptyscript.py</a></td>
+                <td>22</td>
+                <td>22</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 22">0%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_qsa_input_py.html">pineboolib/qsa/input.py</a></td>
+                <td>24</td>
+                <td>15</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="9 24">38%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="pineboolib_qsa_qsa_py.html">pineboolib/qsa/qsa.py</a></td>
+                <td>355</td>
+                <td>233</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="122 355">34%</td>
+            </tr>
+            
+        </tbody>
+    </table>
+
+    <p id="no_rows">
+        No items found using the specified filter.
+    </p>
+</div>
+
+<div id="footer">
+    <div class="content">
+        <p>
+            <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
+            created at 2019-07-31 14:27
+        </p>
+    </div>
+</div>
+
+</body>
+</html>
