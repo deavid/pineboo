@@ -31,9 +31,7 @@ test:
     - coverage report --fail-under=11
     # PyDocStyle lacks "exclude":
     - rm pineboolib/application/parsers/qsaparser/lextab.py
-    - pydocstyle pineboolib/application/database pineboolib/application/metadata
-    - pydocstyle pineboolib/application/parsers
-    - pydocstyle pineboolib/core pineboolib/interfaces
+    - pydocstyle pineboolib/application pineboolib/core pineboolib/interfaces
     - pyroma .
 
 run:

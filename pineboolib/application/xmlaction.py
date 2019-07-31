@@ -1,3 +1,6 @@
+"""
+XMLAction module.
+"""
 from pineboolib.core.utils import logging
 import os.path
 
@@ -16,7 +19,7 @@ if TYPE_CHECKING:
 
 class XMLAction(ActionStruct):
     """
-    Contiene información de las actions especificadas en el .xml del módulo
+    Information related to actions specified in XML modules.
     """
 
     logger = logging.getLogger("main.XMLAction")
@@ -25,7 +28,7 @@ class XMLAction(ActionStruct):
 
     def __init__(self, *args, project, name=None, **kwargs) -> None:
         """
-        Constructor
+        Constructor.
         """
         super(XMLAction, self).__init__(*args, **kwargs)
         self.mod = None
@@ -45,13 +48,13 @@ class XMLAction(ActionStruct):
         self.formrecord_widget: Optional[FLFormRecordDB] = None
         self._loaded = False
 
-    """
-    Carga FLFormRecordDB por defecto
-    @param cursor. Asigna un cursor al FLFormRecord
-    @return widget con form inicializado
-    """
-
     def loadRecord(self, cursor: Optional["PNSqlCursor"]) -> "FLFormRecordDB":
+        """
+        Load FLFormRecordDB by default.
+
+        @param cursor. Asigna un cursor al FLFormRecord
+        @return widget con form inicializado
+        """
         self._loaded = getattr(self.formrecord_widget, "_loaded", False)
         if not self._loaded:
             if self.formrecord_widget and getattr(self.formrecord_widget, "widget", None):
@@ -88,6 +91,9 @@ class XMLAction(ActionStruct):
         return self.formrecord_widget
 
     def load(self) -> "FLFormDB":
+        """
+        Load master form.
+        """
         self._loaded = getattr(self.mainform_widget, "_loaded", False)
         if not self._loaded:
             if self.mainform_widget is not None and getattr(self.mainform_widget, "widget", None):
@@ -116,23 +122,23 @@ class XMLAction(ActionStruct):
 
         return self.mainform_widget
 
-    """
-    Llama a la función main de una action
-    """
-
     def execMainScript(self, name) -> None:
+        """
+        Execute function for main action.
+        """
         a = self.project.conn.manager().action(name)
         if not a:
             self.logger.warning("No existe la acción %s", name)
             return
         self.project.call("%s.main" % a.name(), [], None, False)
 
-    """
-    Retorna el widget del formRecord. Esto es necesario porque a veces no hay un FLformRecordDB inicialidado todavía
-    @return wigdet del formRecord.
-    """
-
     def formRecordWidget(self) -> "FLFormRecordDB":
+        """
+        Return formrecord widget.
+
+        This is needed because sometimes there isn't a FLFormRecordDB initialized yet.
+        @return wigdet del formRecord.
+        """
         if not getattr(self.formrecord_widget, "_loaded", None):
             self.loadRecord(None)
 
@@ -140,12 +146,13 @@ class XMLAction(ActionStruct):
             raise Exception("Unexpected: No form loaded")
         return self.formrecord_widget
 
-    """
-    Abre el FLFormRecordDB por defecto
-    @param cursor. Cursor a usar por el FLFormRecordDB
-    """
     # FIXME: cursor is FLSqlCursor but should be something core, not "FL". Also, an interface
     def openDefaultFormRecord(self, cursor: "PNSqlCursor", wait: bool = True) -> None:
+        """
+        Open FLFormRecord specified on defaults.
+
+        @param cursor. Cursor a usar por el FLFormRecordDB
+        """
         self.logger.info("Opening default formRecord for Action %s", self.name)
         w = self.loadRecord(cursor)
         # w.init()
@@ -157,6 +164,9 @@ class XMLAction(ActionStruct):
                     w.show()
 
     def openDefaultForm(self) -> None:
+        """
+        Open Main FLForm specified on defaults.
+        """
         self.logger.info("Opening default form for Action %s", self.name)
         w = self.load()
 
@@ -164,11 +174,10 @@ class XMLAction(ActionStruct):
             if self.project.DGI.localDesktop():
                 w.show()
 
-    """
-    Ejecuta el script por defecto
-    """
-
     def execDefaultScript(self) -> None:
+        """
+        Execute script specified on default.
+        """
         self.logger.info("Executing default script for Action %s", self.name)
         script = self.load_script(self.scriptform, None)
 
@@ -181,13 +190,13 @@ class XMLAction(ActionStruct):
         else:
             self.mainform_widget.main()
 
-    """
-    Convierte un script qsa en .py y lo carga
-    @param scriptname. Nombre del script a convertir
-    @param parent. Objecto al que carga el script, si no se especifica es a self.script
-    """
-
     def load_script(self, scriptname: Optional[str], parent: Optional["FLFormDB"] = None) -> Any:  # returns loaded script
+        """
+        Transform QS script into Python and starts it up.
+
+        @param scriptname. Nombre del script a convertir
+        @param parent. Objecto al que carga el script, si no se especifica es a self.script
+        """
         # FIXME: Parent logic is broken. We're loading scripts to two completely different objects.
         from importlib import machinery
 
@@ -274,4 +283,5 @@ class XMLAction(ActionStruct):
         return script_loaded
 
     def unknownSlot(self) -> None:
+        """Log error for actions with unknown slots or scripts."""
         self.logger.error("Executing unknown script for Action %s", self.name)

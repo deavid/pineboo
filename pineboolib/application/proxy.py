@@ -1,14 +1,21 @@
+"""
+Proxy Module.
+"""
 from typing import Callable
 from pineboolib import logging
 from typing import Any
 
 
 class DelayedObjectProxyLoader(object):
+    """
+    Delay load of an object until its first accessed.
+    """
+
     logger = logging.getLogger("application.DelayedObjectProxyLoader")
 
     def __init__(self, obj: Callable, *args, **kwargs) -> None:
         """
-        Constructor
+        Constructor.
         """
         self._name = "unnamed-loader"
         if "name" in kwargs:
@@ -21,7 +28,8 @@ class DelayedObjectProxyLoader(object):
 
     def __load(self):
         """
-        Carga un objeto nuevo
+        Load a new object.
+
         @return objeto nuevo o si ya existe , cacheado
         """
         self.logger.debug("DelayedObjectProxyLoader: loading %s %s( *%s **%s)", self._name, self._obj, self._args, self._kwargs)
@@ -31,7 +39,8 @@ class DelayedObjectProxyLoader(object):
 
     def __getattr__(self, name: str) -> Any:  # Solo se lanza si no existe la propiedad.
         """
-        Retorna una función buscada
+        Return attribute or method from internal object.
+
         @param name. Nombre del la función buscada
         @return el objecto del XMLAction afectado
         """

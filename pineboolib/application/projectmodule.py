@@ -1,3 +1,6 @@
+"""
+Project Module.
+"""
 import os
 import time
 from typing import List, Optional, Any, Dict, TYPE_CHECKING
@@ -25,7 +28,9 @@ if TYPE_CHECKING:
 
 class Project(object):
     """
-    Esta es la clase principal del proyecto. Se puede acceder a esta con pineboolib.project desde cualquier parte del projecto
+    Singleton for the whole application.
+
+    Can be accessed with pineboolib.project from anywhere.
     """
 
     logger = logging.getLogger("main.Project")
@@ -49,9 +54,7 @@ class Project(object):
     _msg_mng = None
 
     def __init__(self) -> None:
-        """
-        Constructor
-        """
+        """Constructor."""
         self._conn = None
         self._DGI = None
         self.tree = None
@@ -70,26 +73,31 @@ class Project(object):
 
     @property
     def app(self) -> QtCore.QCoreApplication:
+        """Retrieve current Qt Application or throw error."""
         if self._app is None:
             raise Exception("No application set")
         return self._app
 
     def set_app(self, app: QtCore.QCoreApplication):
+        """Set Qt Application."""
         self._app = app
 
     @property
     def conn(self) -> "IConnection":
+        """Retrieve current connection or throw."""
         if self._conn is None:
             raise Exception("Project is not initialized")
         return self._conn
 
     @property
     def DGI(self) -> "dgi_schema":
+        """Retrieve current DGI or throw."""
         if self._DGI is None:
             raise Exception("Project is not initialized")
         return self._DGI
 
     def init_conn(self, connection: "IConnection") -> None:
+        """Initialize project with a connection."""
         self._conn = connection
         self.apppath = filedir("..")
         self.tmpdir = config.value("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))
@@ -100,7 +108,7 @@ class Project(object):
         self.parseProject = config.value("ebcomportamiento/parseProject", False)
 
     def init_dgi(self, DGI: "dgi_schema") -> None:
-        """Load and associate the defined DGI onto this project"""
+        """Load and associate the defined DGI onto this project."""
         # FIXME: Actually, DGI should be loaded here, or kind of.
         from pineboolib.core.message_manager import Manager
 
@@ -115,14 +123,17 @@ class Project(object):
         self._DGI.extraProjectInit()
 
     def load_modules(self) -> None:
+        """Load all modules."""
         for module_name, mod_obj in self.modules.items():
             mod_obj.load()
             self.tables.update(mod_obj.tables)
 
     def setDebugLevel(self, q: int) -> None:
         """
-        Especifica el nivel de debug de la aplicación
+        Set debug level for application.
+
         @param q Número con el nivel espeficicado
+        ***DEPRECATED***
         """
         Project.debugLevel = q
         # self._DGI.pnqt3ui.Options.DEBUG_LEVEL = q
@@ -134,12 +145,11 @@ class Project(object):
     #     """
     #     return self.acl_
     def acl(self):
-        """Devuelve el ACL cargado"""
+        """Return loaded ACL."""
         raise CodeDoesNotBelongHereException("ACL Does not belong to PROJECT. Go away.")
 
     def run(self) -> bool:
-        """Arranca el proyecto. Conecta a la BD y carga los datos
-        """
+        """Run project. Connects to DB and loads data."""
 
         if self.actions:
             del self.actions
@@ -324,7 +334,8 @@ class Project(object):
 
     def call(self, function: str, aList: List[Any], object_context: Any = None, showException: bool = True) -> Optional[Any]:
         """
-        LLama a una función del projecto.
+        Call to a QS project function.
+
         @param function. Nombre de la función a llamar.
         @param aList. Array con los argumentos.
         @param objectContext. Contexto en el que se ejecuta la función.
@@ -407,7 +418,8 @@ class Project(object):
 
     def parseScript(self, scriptname: str, txt_: str = "") -> None:
         """
-        Convierte un script .qs a .py lo deja al lado
+        Convert QS script into Python and stores it in the same folder.
+
         @param scriptname, Nombre del script a convertir
         """
 
@@ -442,7 +454,8 @@ class Project(object):
 
     def test(self, name=None):
         """
-        Lanza los test
+        Start GUI tests.
+
         @param name, Nombre del test específico. Si no se especifica se lanzan todos los tests disponibles
         @return Texto con la valoración de los test aplicados
         """
@@ -485,14 +498,17 @@ class Project(object):
 
     def get_temp_dir(self) -> str:
         """
-        Retorna la carpeta temporal predefinida de pineboo
+        Return temporary folder defined for pineboo.
+
         @return ruta a la carpeta temporal
+        ***DEPRECATED***
         """
         # FIXME: anti-pattern in Python. Getters for plain variables are wrong.
         raise CodeDoesNotBelongHereException("Use project.tmpdir instead, please.")
         # return self.tmpdir
 
     def load_version(self):
+        """Initialize current version numbers."""
         self.version = "0.12"
         if config.value("application/dbadmin_enabled", False):
             self.version = "DBAdmin v%s" % self.version
@@ -500,4 +516,5 @@ class Project(object):
             self.version = "Quick v%s" % self.version
 
     def message_manager(self):
+        """Return message manager for splash and progress."""
         return self._msg_mng

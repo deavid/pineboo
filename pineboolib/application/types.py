@@ -1,3 +1,7 @@
+"""
+Data Types for QSA.
+"""
+
 import os
 import os.path
 import collections
@@ -14,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def Boolean(x: Union[bool, str, float] = False) -> bool:
     """
-    Retorna Boolean de una cadena de texto
+    Return boolean from string.
     """
     if isinstance(x, bool):
         return x
@@ -37,12 +41,13 @@ def Boolean(x: Union[bool, str, float] = False) -> bool:
 
 class QString(str):
     """
-    Clase QString para simular la original que no existe en PyQt5
+    Emulate original QString as was removed from PyQt5.
     """
 
     def mid(self, start: int, length: Optional[int] = None) -> str:
         """
-        Recoje una sub cadena a partir de una cadena
+        Cut sub-string.
+
         @param start. Posición inicial
         @param length. Longitud de la cadena. Si no se especifica , es hasta el final
         @return sub cadena de texto.
@@ -54,6 +59,11 @@ class QString(str):
 
 
 def Function(*args: str) -> Any:
+    """
+    Load QS string code and create a function from it.
+
+    Parses it to Python and return the pointer to the function.
+    """
 
     import importlib
     import sys as python_sys
@@ -107,7 +117,7 @@ function anon(%s) {
 
 def Object(x: Optional[Dict[str, Any]] = None) -> StructMyDict:
     """
-    Objeto tipo object
+    Object type "object".
     """
     if x is None:
         x = {}
@@ -117,7 +127,8 @@ def Object(x: Optional[Dict[str, Any]] = None) -> StructMyDict:
 
 def String(value: str) -> str:
     """
-    Devuelve una cadena de texto
+    Convert something into string.
+
     @param value. Valor a convertir
     @return cadena de texto.
     """
@@ -126,7 +137,7 @@ def String(value: str) -> str:
 
 class Array(object):
     """
-    Objeto tipo Array
+    Array type object.
     """
 
     # NOTE: To avoid infinite recursion on getattr/setattr, all attributes MUST be defined at class-level.
@@ -134,6 +145,7 @@ class Array(object):
     _pos_iter = 0
 
     def __init__(self, *args: Any) -> None:
+        """Create new array."""
         self._pos_iter = 0
         self._dict = collections.OrderedDict()
 
@@ -158,14 +170,15 @@ class Array(object):
 
     def __iter__(self) -> Generator[Any, None, None]:
         """
-        iterable
+        Iterate through values.
         """
         for v in self._dict.values():
             yield v
 
     def __setitem__(self, key: Union[str, int], value: Any) -> None:
         """
-        Especificamos una nueva entrada
+        Set item.
+
         @param key. Nombre del registro
         @param value. Valor del registro
         """
@@ -176,7 +189,8 @@ class Array(object):
 
     def __getitem__(self, key: Union[str, int, slice]) -> Any:
         """
-        Recogemos el valor de un registro
+        Get item.
+
         @param key. Valor que idenfica el registro a recoger
         @return Valor del registro especificado
         """
@@ -195,17 +209,21 @@ class Array(object):
         return None
 
     def length(self) -> int:
+        """Return array size."""
         return len(self._dict)
 
     def __getattr__(self, k: str) -> Any:
+        """Support for attribute style access."""
         return self._dict[k]
 
     def __setattr__(self, k: str, val: Any) -> None:
+        """Support for attribute style writes."""
         if k[0] == "_":
             return super().__setattr__(k, val)
         self._dict[k] = val
 
     def __eq__(self, other: Any) -> bool:
+        """Support for equality comparisons."""
         if isinstance(other, Array):
             return other._dict == self._dict
         if isinstance(other, list):
@@ -215,9 +233,11 @@ class Array(object):
         return False
 
     def __repr__(self) -> str:
+        """Support for repr."""
         return "<%s %r>" % (self.__class__.__name__, list(self._dict.values()))
 
     def splice(self, *args: Any) -> None:
+        """Cut or replace array."""
         if len(args) == 2:  # Delete
             pos_ini = args[0]
             length_ = args[1]
@@ -262,12 +282,15 @@ class Array(object):
             self._dict = new
 
     def __len__(self) -> int:
+        """Return size of array."""
         return len(self._dict)
 
     def __str__(self) -> str:
+        """Support for str."""
         return repr(list(self._dict.values()))
 
     def append(self, val: Any) -> None:
+        """Append new value."""
         k = len(self._dict)
         while k in self._dict:
             k += 1
@@ -277,13 +300,14 @@ class Array(object):
 
 class Date(object):
     """
-    Case que gestiona un objeto tipo Date
+    Case que gestiona un objeto tipo Date.
     """
 
     date_: QtCore.QDate
     time_: QtCore.QTime
 
     def __init__(self, *args: Union["Date", QtCore.QDate, str, QtCore.QTime, int]) -> None:
+        """Create new Date object."""
         super(Date, self).__init__()
         if not args:
             self.date_ = QtCore.QDate.currentDate()
@@ -325,7 +349,8 @@ class Date(object):
 
     def toString(self, pattern: Optional[str] = None) -> str:
         """
-        Retorna una cadena de texto con los datos de fecha y hora.
+        Return string with date & time data.
+
         @return cadena de texto con los datos de fecha y hora
         """
         if pattern:
@@ -343,6 +368,7 @@ class Date(object):
         return texto
 
     def getTime(self) -> int:
+        """Get integer representing date & time."""
         pattern = "%s%s%s%s%s%s" % (
             self.date_.toString("yyyy"),
             self.date_.toString("MM"),
@@ -355,14 +381,16 @@ class Date(object):
 
     def getYear(self) -> int:
         """
-        Retorna el año
+        Return year from date.
+
         @return año
         """
         return self.date_.year()
 
     def setYear(self, year: Union[str, int]) -> "Date":
         """
-        Setea un año dado
+        Set year into current date.
+
         @param yyyy. Año a setear
         """
         self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (year, self.date_.toString("MM"), self.date_.toString("dd")), "yyyy-MM-dd")
@@ -371,14 +399,16 @@ class Date(object):
 
     def getMonth(self) -> int:
         """
-        Retorna el mes
+        Get month as a number from current date.
+
         @return mes
         """
         return self.date_.month()
 
     def setMonth(self, mm: Union[str, int]) -> "Date":
         """
-        Setea un mes dado
+        Set month into current date.
+
         @param mm. Mes a setear
         """
         if isinstance(mm, int):
@@ -393,14 +423,16 @@ class Date(object):
 
     def getDay(self) -> int:
         """
-        Retorna el día
+        Get day from current date.
+
         @return día
         """
         return self.date_.day()
 
     def setDay(self, dd: Union[str, int]) -> "Date":
         """
-        Setea un dia dado
+        Set given day.
+
         @param dd. Dia a setear
         """
         if isinstance(dd, int):
@@ -415,28 +447,32 @@ class Date(object):
 
     def getHours(self) -> int:
         """
-        Retorna horas
+        Get Hour from Date.
+
         @return horas
         """
         return self.time_.hour()
 
     def getMinutes(self) -> int:
         """
-        Retorna minutos
+        Get Minutes from Date.
+
         @return minutos
         """
         return self.time_.minute()
 
     def getSeconds(self) -> int:
         """
-        Retorna segundos
+        Get Seconds from Date.
+
         @return segundos
         """
         return self.time_.second()
 
     def getMilliseconds(self) -> int:
         """
-        Retorna milisegundos
+        Get Milliseconds from Date.
+
         @return milisegundos
         """
         return self.time_.msec()
@@ -446,7 +482,8 @@ class Date(object):
 
     def setDate(self, date: Any) -> "Date":
         """
-        Se especifica fecha
+        Set Date from any format.
+
         @param date. Fecha a setear
         """
         year_ = self.date_.toString("yyyy")
@@ -462,7 +499,8 @@ class Date(object):
 
     def addDays(self, d: int) -> "Date":
         """
-        Se añaden dias a una fecha dada
+        Return result of adding a particular amount of days to current date.
+
         @param d. Dias a sumar (o restar) a la fecha dada
         @return nueva fecha calculada
         """
@@ -470,7 +508,8 @@ class Date(object):
 
     def addMonths(self, m: int) -> "Date":
         """
-        Se añaden meses a una fecha dada
+        Return result of adding given number of months to this date.
+
         @param m. Meses a sumar (o restar) a la fecha dada
         @return nueva fecha calculada
         """
@@ -478,7 +517,8 @@ class Date(object):
 
     def addYears(self, y: int) -> "Date":
         """
-        Se añaden años a una fecha dada
+        Return result of adding given number of years to this date.
+
         @param y. Años a sumar (o restar) a la fecha dada
         @return nueva fecha calculada
         """
@@ -486,27 +526,35 @@ class Date(object):
 
     @classmethod
     def parse(cls, value: str) -> "Date":
+        """Parse a ISO string into a date."""
         return Date(value, "yyyy-MM-dd")
 
     def __str__(self) -> str:
+        """Support for str()."""
         return self.toString()
 
     def __lt__(self, other: Union[str, "Date"]) -> bool:
+        """Support for comparisons."""
         return str(self) < str(other)
 
     def __le__(self, other: Union[str, "Date"]) -> bool:
+        """Support for comparisons."""
         return str(self) <= str(other)
 
     def __ge__(self, other: Union[str, "Date"]) -> bool:
+        """Support for comparisons."""
         return str(self) >= str(other)
 
     def __gt__(self, other: Union[str, "Date"]) -> bool:
+        """Support for comparisons."""
         return str(self) > str(other)
 
     def __eq__(self, other: Any) -> bool:
+        """Support for comparisons."""
         return str(other) == str(self)
 
     def __ne__(self, other: Any) -> bool:
+        """Support for comparisons."""
         return not self.__eq__(other)
 
 

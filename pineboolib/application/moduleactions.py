@@ -1,3 +1,6 @@
+"""
+ModuleActions module.
+"""
 from pineboolib.core.utils import logging
 
 from pineboolib.core.exceptions import ForbiddenError
@@ -9,15 +12,16 @@ from typing import Any, TYPE_CHECKING, NoReturn
 
 
 class ModuleActions(object):
-    """Genera un arbol con las acciones de los diferentes módulos
-    @param name. Nombre del la función buscada
-    @return el objecto del XMLAction afectado
+    """
+    Generate tree with actions from modules.
     """
 
     logger = logging.getLogger("application.ModuleActions")
 
     def __init__(self, module: Any, path: str, modulename: str) -> None:
-        """Constructor
+        """
+        Constructor.
+
         @param module. Identificador del módulo
         @param path. Ruta del módulo
         @param modulename. Nombre del módulo
@@ -36,8 +40,7 @@ class ModuleActions(object):
             self.logger.error("El módulo no tiene un path válido %s", self.module_name)
 
     def load(self) -> None:
-        """Carga las actions del módulo en el projecto
-        """
+        """Load module actions into project."""
         # Ojo: Almacena un arbol con los módulos cargados
         if TYPE_CHECKING:
             qsa_dict_modules = self.mod
@@ -90,23 +93,24 @@ class ModuleActions(object):
                     setattr(qsa_dict_modules, "formRecord" + name, delayed_action)
 
     def __contains__(self, k) -> bool:
-        """Busca si es propietario de una action
-        """
+        """Determine if it is the owner of an action."""
         return k in self.project.actions  # FIXME: Actions should be loaded to their parent, not the singleton
 
     def __getitem__(self, name) -> Any:
-        """Recoge una action determinada
+        """
+        Retrieve particular action by name.
+
         @param name. Nombre de la action
         @return Retorna el XMLAction de la action dada
         """
         return self.project.actions[name]  # FIXME: Actions should be loaded to their parent, not the singleton
 
-    """
-    Añade una action a propiedad del módulo
-    @param name. Nombre de la action
-    @param action_. Action a añadir a la propiedad del módulo
-    """
-
     def __setitem__(self, name, action_) -> NoReturn:
+        """
+        Add action to a module property.
+
+        @param name. Nombre de la action
+        @param action_. Action a añadir a la propiedad del módulo
+        """
         raise ForbiddenError("Actions are not writable!")
         # self.project.actions[name] = action_
