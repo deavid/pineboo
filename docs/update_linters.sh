@@ -23,5 +23,7 @@ rm -R ../htmlcov
 cp source/_static/linters/pytest-coverage-style-tpl.css source/_static/linters/pytest-coverage/style.css
 # ----
 echo "Running Bandit . . ."
-(cd .. && bandit -r pineboolib/ -f html > docs/source/_static/linters/bandit/bandit_report.html)
+(cd .. && bandit -r pineboolib/ -f html > docs/source/_static/linters/bandit/bandit_report.html) || /bin/true
 # ----
+
+exit 0
