@@ -340,7 +340,7 @@ class MainForm(QtWidgets.QMainWindow):
             if tw.widget(i).action().name() == action_name:
                 tw.widget(i).close()
 
-        fm = pncontrolsfactory.AQFormDB(action_name, tw, None)
+        fm = pncontrolsfactory.AQFormDB(action_name, tw)
         fm.setMainWidget()
         if not fm.mainWidget():
             return
