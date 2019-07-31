@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+"""
+Simplify AST-XML structures for later generation of Python files.
+"""
 from optparse import OptionParser
 import os
 import os.path
@@ -20,6 +23,7 @@ UNKNOWN_PARSERS = {}
 
 
 def parse_for(*tagnames):
+    """Decorate functions for registering tags."""
     global KNOWN_PARSERS
 
     def decorator(fn):
@@ -31,6 +35,7 @@ def parse_for(*tagnames):
 
 
 def parse(tagname, treedata):
+    """Excecute registered function for given tagname on treedata."""
     global KNOWN_PARSERS, UNKNOWN_PARSERS
     if tagname not in KNOWN_PARSERS:
         UNKNOWN_PARSERS[tagname] = 1
@@ -41,6 +46,7 @@ def parse(tagname, treedata):
 
 
 def getxmltagname(tagname):
+    """Transform tag names."""
     if tagname == "source":
         return "Source"
     if tagname == "funcdeclaration":
@@ -53,30 +59,37 @@ def getxmltagname(tagname):
 
 
 class TagObjectBase:
+    """Base class for registering tag processors."""
+
     tags: List[str] = []
 
     @classmethod
     def can_process_tag(cls, tagname):
+        """Return if tagname is in class known tags."""
         return tagname in cls.tags
 
     def __init__(self, tagname):
+        """Create base object for processing tags."""
         self.astname = tagname
 
     def add_subelem(self, argn, subelem):
-        pass
+        """Abstract function for adding sub elements."""
 
     def add_value(self, argn, vtype, value):
-        pass
+        """Abstract function for adding values."""
 
     def add_other(self, argn, vtype, data):
-        pass
+        """Abstract function for adding other types of data."""
 
 
 xml_class_types: List[Type[TagObjectBase]] = []
 
 
 class TagObjectFactory(type):
+    """Metaclass for registering tag processors."""
+
     def __init__(cls, name, bases, dct):
+        """Register a new class as tag processor."""
         global xml_class_types
         if issubclass(cls, TagObjectBase):
             xml_class_types.append(cls)
@@ -86,6 +99,8 @@ class TagObjectFactory(type):
 
 
 class TagObject(TagObjectBase, metaclass=TagObjectFactory):
+    """Process XML tags for simplification. Main class with shared functionality."""
+
     set_child_argn = False
     name_is_first_id = False
     debug_other = True
@@ -96,9 +111,11 @@ class TagObject(TagObjectBase, metaclass=TagObjectFactory):
 
     @classmethod
     def tagname(self, tagname):
+        """Return processed target tag name."""
         return self.__name__
 
     def __init__(self, tagname):
+        """Create new processor."""
         super().__init__(tagname)
         self.xml = ElementTree.Element(self.tagname(tagname))
         self.xmlname = None
@@ -108,6 +125,7 @@ class TagObject(TagObjectBase, metaclass=TagObjectFactory):
             self.xml.set("name", "")
 
     def adopt_children(self, argn, subelem):
+        """Simplify tree by "merging" childs into itself."""
         for child in list(subelem.xml):
             if self.set_child_argn:
                 child.set("argn", str(argn))
@@ -117,12 +135,15 @@ class TagObject(TagObjectBase, metaclass=TagObjectFactory):
             self.xml.append(child)
 
     def omit_subelem(self, argn, subelem):
+        """Abstract function. Simplifies XML by removing unwanted terms."""
         return
 
     def is_in(self, listobj):
+        """Return if the class type appears in any of the items."""
         return self.__class__ in listobj or self.astname in listobj
 
     def get(self, listobj, default=None):
+        """Retrieve value from list based on this class type."""
         if self.__class__ in listobj:
             return listobj[self.__class__]
         if self.astname in listobj:
@@ -130,6 +151,7 @@ class TagObject(TagObjectBase, metaclass=TagObjectFactory):
         return default
 
     def add_subelem(self, argn, subelem):
+        """Add a new XML child."""
         if subelem.is_in(self.omit_tags):
             return self.omit_subelem(argn, subelem)
         if subelem.is_in(self.adopt_childs_tags):
@@ -144,6 +166,7 @@ class TagObject(TagObjectBase, metaclass=TagObjectFactory):
         self.subelems.append(subelem)
 
     def add_value(self, argn, vtype, value):
+        """Add a new XML value."""
         self.values.append((vtype, value))
         if vtype == "ID" and self.name_is_first_id and self.xmlname is None:
             self.xmlname = value
@@ -153,10 +176,12 @@ class TagObject(TagObjectBase, metaclass=TagObjectFactory):
         self.xml.set("arg%02d" % argn, vtype + ":" + repr(value))
 
     def add_other(self, argn, vtype, data):
+        """Add extra data to XML."""
         if self.debug_other:
             self.xml.set("arg%02d" % argn, vtype)
 
     def polish(self):
+        """Clean up the structure by removing or merging some data."""
         if self.promote_child_if_alone:
             if len(self.values) == 0 and len(self.subelems) == 1:
                 return self.subelems[0]
@@ -164,101 +189,137 @@ class TagObject(TagObjectBase, metaclass=TagObjectFactory):
 
 
 class ListObject(TagObject):
+    """Base class for list objects."""
+
     set_child_argn = False
     debug_other = False
 
 
 class NamedObject(TagObject):
+    """Base class for objects with names."""
+
     name_is_first_id = True
     debug_other = False
 
 
 class ListNamedObject(TagObject):
+    """Base class for list objects with names."""
+
     name_is_first_id = True
     set_child_argn = False
     debug_other = False
 
 
 class TypedObject(ListObject):
+    """Base class for typed objects."""
+
     type_arg = 0
 
     def add_other(self, argn, vtype, value):
+        """Add extra data to XML."""
         if argn == self.type_arg:
             self.xml.set("type", vtype)
 
 
 class Source(ListObject):
+    """Process Source tags."""
+
     tags = ["source", "basicsource", "classdeclarationsource", "statement_list", "statement_block"]
     adopt_childs_tags = ["source_element", "statement_list", "statement", "statement_block"]
 
 
 class Identifier(NamedObject):
+    """Process Identifier tags."""
+
     tags = ["identifier", "optid"]
 
     def polish(self):
+        """Fix astname attribute."""
         if self.xmlname is None:
             self.astname = "empty"
         return self
 
 
 class Arguments(ListObject):
+    """Process Argument tags."""
+
     tags = ["arglist"]
     adopt_childs_tags = ["vardecl_list"]
 
 
 class VariableType(NamedObject):
+    """Process VariableType tags."""
+
     tags = ["optvartype"]
 
     def polish(self):
+        """Fix astname attribute."""
         if self.xmlname is None:
             self.astname = "empty"
         return self
 
 
 class ExtendsType(NamedObject):
+    """Process ExtendsType tags."""
+
     tags = ["optextends"]
 
     def polish(self):
+        """Fix astname attribute."""
         if self.xmlname is None:
             self.astname = "empty"
         return self
 
 
 class Function(ListNamedObject):
+    """Process Function tags."""
+
     tags = ["funcdeclaration"]
     callback_subelem = ListNamedObject.callback_subelem.copy()
     callback_subelem[VariableType] = "add_vartype"
 
     def add_vartype(self, argn, subelem):
+        """Add returns notation."""
         self.xml.set("returns", str(subelem.xmlname))
 
 
 class FunctionAnon(ListObject):
+    """Process FunctionAnon tags."""
+
     tags = ["funcdeclaration_anon"]
 
 
 class FunctionAnonExec(ListObject):
+    """Process FunctionAnonExec tags."""
+
     tags = ["funcdeclaration_anon_exec"]
 
 
 class Variable(NamedObject):
+    """Process Variable tags."""
+
     tags = ["vardecl"]
     callback_subelem = NamedObject.callback_subelem.copy()
     callback_subelem[VariableType] = "add_vartype"
 
     def add_vartype(self, argn, subelem):
+        """Add type notation."""
         self.xml.set("type", str(subelem.xmlname))
 
 
 class DeclarationBlock(ListObject):
+    """Process DeclarationBlock tags."""
+
     tags = ["vardeclaration"]
     adopt_childs_tags = ["vardecl_list"]
 
     def add_other(self, argn, vtype, value):
+        """Add debug info."""
         if argn == 0:
             self.xml.set("mode", vtype)
 
     def polish(self):
+        """Cleanup."""
         # if len(self.values) == 0 and len(self.subelems) == 1:
         #    self.subelems[0].xml.set("mode",self.xml.get("mode"))
         #    return self.subelems[0]
@@ -266,15 +327,20 @@ class DeclarationBlock(ListObject):
 
 
 class Class(ListNamedObject):
+    """Process Class tags."""
+
     tags = ["classdeclaration"]
     callback_subelem = ListNamedObject.callback_subelem.copy()
     callback_subelem[ExtendsType] = "add_exttype"
 
     def add_exttype(self, argn, subelem):
+        """Add extends notation."""
         self.xml.set("extends", str(subelem.xmlname))
 
 
 class Member(TagObject):
+    """Process Member tags."""
+
     debug_other = False
     set_child_argn = False
     tags = ["member_var", "member_call"]
@@ -282,6 +348,8 @@ class Member(TagObject):
 
 
 class ArrayMember(TagObject):
+    """Process ArrayMember tags."""
+
     debug_other = False
     set_child_argn = False
     tags = ["array_member"]
@@ -289,49 +357,68 @@ class ArrayMember(TagObject):
 
 
 class InstructionCall(TagObject):
+    """Process InstructionCall tags."""
+
     debug_other = False
     tags = ["callinstruction"]
 
 
 class InstructionStore(TagObject):
+    """Process InstructionStore tags."""
+
     promote_child_if_alone = True
     debug_other = False
     tags = ["storeinstruction"]
 
 
 class InstructionFlow(TypedObject):
+    """Process InstructionFlow tags."""
+
     debug_other = True
     tags = ["flowinstruction"]
 
 
 class Instruction(TagObject):
+    """Process Instruction tags."""
+
     promote_child_if_alone = True
     debug_other = False
     tags = ["instruction"]
 
 
 class OpMath(TypedObject):
+    """Process OpMath tags."""
+
     debug_other = True
     tags = ["mathoperator"]
 
 
 class Compare(TypedObject):
+    """Process Compare tags."""
+
     debug_other = True
     tags = ["cmp_symbol", "boolcmp_symbol"]
 
 
 class FunctionCall(NamedObject):
+    """Process FunctionCall tags."""
+
     tags = ["funccall_1"]
 
 
 class CallArguments(ListObject):
+    """Process CallArguments tags."""
+
     tags = ["callargs"]
 
 
 class Constant(ListObject):
+    """Process Constant tags."""
+
     tags = ["constant"]
 
     def add_value(self, argn, vtype, value):
+        """Add value notation."""
         value = str(value)  # str(value,"ISO-8859-15","replace")
         if vtype == "SCONST":
             vtype = "String"
@@ -354,9 +441,12 @@ class Constant(ListObject):
 
 
 class InlineUpdate(ListObject):
+    """Process InlineUpdate tags."""
+
     tags = ["inlinestoreinstruction"]
 
     def add_other(self, argn, vtype, value):
+        """Add debug info."""
         self.xml.set("type", vtype)
         if argn == 0:
             self.xml.set("mode", "update-read")
@@ -365,36 +455,50 @@ class InlineUpdate(ListObject):
 
 
 class If(ListObject):
+    """Process If tags."""
+
     tags = ["ifstatement"]
 
 
 class Condition(ListObject):
+    """Process Condition tags."""
+
     tags = ["condition"]
 
 
 class Else(ListObject):
+    """Process Else tags."""
+
     tags = ["optelse"]
 
     def polish(self):
+        """Fix astname."""
         if len(self.subelems) == 0:
             self.astname = "empty"
         return self
 
 
 class DictObject(ListObject):
+    """Process DictObject tags."""
+
     tags = ["dictobject_value_elemlist", "dictobject_value"]
     adopt_childs_tags = ["dictobject_value_elemlist", "dictobject_value"]
 
 
 class DictElem(ListObject):
+    """Process DictElem tags."""
+
     tags = ["dictobject_value_elem"]
 
 
 class ExpressionContainer(ListObject):
+    """Process ExpressionContainer tags."""
+
     tags = ["expression"]
     # adopt_childs_tags = ['base_expression']
 
     def polish(self):
+        """Fix internal expressions."""
         if len(self.values) == 0 and len(self.subelems) == 1:
             # if isinstance(self.subelems[0], Constant):
             if self.subelems[0].xml.tag == "base_expression":
@@ -407,99 +511,143 @@ class ExpressionContainer(ListObject):
 
 
 class InstructionUpdate(ListObject):
+    """Process InstructionUpdate tags."""
+
     tags = ["updateinstruction"]
 
 
 class Switch(ListObject):
+    """Process Switch tags."""
+
     tags = ["switch"]
     adopt_childs_tags = ["case_cblock_list", "case_block_list"]
 
 
 class CaseList(ListObject):
+    """Process CaseList tags."""
+
     tags = ["case_block_list"]
     adopt_childs_tags = ["case_cblock_list", "case_block_list"]
 
 
 class Case(ListObject):
+    """Process ExtendsType tags."""
+
     tags = ["case_block"]
 
 
 class CaseDefault(ListObject):
+    """Process CaseDefault tags."""
+
     tags = ["case_default"]
 
 
 class While(ListObject):
+    """Process While tags."""
+
     tags = ["whilestatement"]
 
 
 class For(ListObject):
+    """Process For tags."""
+
     tags = ["forstatement"]
 
 
 class ForInitialize(ListObject):
+    """Process ForInitialize tags."""
+
     tags = ["for_initialize"]
 
 
 class ForCompare(ListObject):
+    """Process ExtendsType tags."""
+
     tags = ["for_compare"]
 
 
 class ForIncrement(ListObject):
+    """Process ExtendsType tags."""
+
     tags = ["for_increment"]
 
 
 class DoWhile(ListObject):
+    """Process DoWhile tags."""
+
     tags = ["dowhilestatement"]
 
 
 class ForIn(ListObject):
+    """Process ExtendsType tags."""
+
     tags = ["forinstatement"]
 
 
 class With(ListObject):
+    """Process ExtendsType tags."""
+
     tags = ["withstatement"]
 
 
 class TryCatch(ListObject):
+    """Process TryCatch tags."""
+
     tags = ["trycatch"]
 
 
 class New(ListObject):
+    """Process New tags."""
+
     tags = ["new_operator"]
 
 
 class Delete(ListObject):
+    """Process Delete tags."""
+
     tags = ["deleteinstruction"]
 
 
 class Parentheses(ListObject):
+    """Process ExtendsType tags."""
+
     tags = ["parentheses"]
     adopt_childs_tags = ["base_expression"]
 
 
 class OpUnary(TypedObject):
+    """Process OpUnary tags."""
+
     tags = ["unary_operator"]
 
 
 class OpTernary(ListObject):
+    """Process OpTernary tags."""
+
     tags = ["ternary_operator"]
 
 
 class OpUpdate(TypedObject):
+    """Process OpUpdate tags."""
+
     tags = ["updateoperator"]
 
 
 # ----- keep this one at the end.
 class Unknown(TagObject):
+    """Process Unknown tags."""
+
     promote_child_if_alone = True
     set_child_argn = False
 
     @classmethod
     def tagname(self, tagname):
+        """Just return tagname."""
         return tagname
 
     @classmethod
     def can_process_tag(self, tagname):
+        """Just return true."""
         return True
 
 
@@ -507,6 +655,7 @@ class Unknown(TagObject):
 
 
 def create_xml(tagname) -> Optional[TagObject]:
+    """Create processor for tagname by inspecting first known processor that fits."""
     classobj = None
     for cls in xml_class_types:
         if cls.can_process_tag(tagname):
@@ -521,6 +670,7 @@ def create_xml(tagname) -> Optional[TagObject]:
 
 
 def parse_unknown(tagname, treedata):
+    """Parse anything and error handling."""
     xmlelem = create_xml(tagname)
     if xmlelem is None:
         raise Exception("No class for parsing tagname %s" % tagname)
@@ -539,17 +689,22 @@ def parse_unknown(tagname, treedata):
 
 
 def post_parse(treedata):
+    """Parse a xml. Convenience function."""
     source = parse("source", treedata)
     # print UNKNOWN_PARSERS.keys()
     return source.xml
 
 
 class Module(object):
+    """Python code tester. Deprecated."""
+
     def __init__(self, name, path):
+        """Create Module."""
         self.name = name
         self.path = path
 
     def loadModule(self):
+        """Import and return Python file."""
         fp = None
         try:
             description = (".py", "U", imp.PY_SOURCE)
@@ -572,6 +727,7 @@ class Module(object):
 
 
 def parseArgs(argv):
+    """Define parsing arguments for the program."""
     parser = OptionParser()
     parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
 
@@ -600,6 +756,7 @@ def parseArgs(argv):
 
 
 def main():
+    """Run the program from command line."""
     log_format = "%(asctime)s - %(levelname)s: %(name)s: %(message)s"
     logging.basicConfig(format=log_format, level=0)
     blib_logger = logging.getLogger("blib2to3.pgen2.driver")
@@ -610,6 +767,7 @@ def main():
 
 
 def pythonify(filelist):
+    """Convert to python the files included in the list."""
     if not isinstance(filelist, list):
         raise ValueError("First argument must be a list")
     options, args = parseArgs([])
@@ -618,6 +776,7 @@ def pythonify(filelist):
 
 
 def pythonify2(filename: str, known_refs: Dict[str, Tuple[str, str]] = {}) -> str:
+    """Convert File to Python. Faster version as does not write to disk. Avoids re-parsing XML."""
     from .pytnyzer import pythonize2
 
     filecontent = open(filename, "r", encoding="latin-1").read()
@@ -634,6 +793,7 @@ def pythonify2(filename: str, known_refs: Dict[str, Tuple[str, str]] = {}) -> st
 
 
 def execute(options, args):
+    """Execute conversion orders given by options and args. Can be used to emulate program calls."""
     from pineboolib.application.parsers.qsaparser import pytnyzer
 
     pytnyzer.STRICT_MODE = options.strict

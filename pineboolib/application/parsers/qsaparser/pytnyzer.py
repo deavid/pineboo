@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
-Pythonyzer
+Pythonyzer.
 
-reads XML AST created by postparse.py and creates an equivalent Python file.
+Reads XML AST created by postparse.py and creates an equivalent Python file.
 """
 import copy
 from optparse import OptionParser
@@ -229,6 +229,7 @@ DISALLOW_CONVERSION_FOR_NONSTRICT = {"connect", "disconnect"}
 
 
 def id_translate(name: str, qsa_exclude: Set[str] = None, transform: Dict[str, str] = None) -> str:
+    """Translate identifiers to avoid "import *" issues."""
     orig_name = name
     python_keywords = [
         "and",
@@ -343,15 +344,18 @@ cont_do_while = 0
 
 
 class ASTPythonBase(object):
+    """Generate python lines. Base class."""
     elem: ElementTree.Element
 
     def __init__(self, elem) -> None:
+        """Create ASTPythonBase."""
         self.elem = elem
         self.parent: Optional["ASTPythonBase"] = None
         self.source: Optional["Source"] = None
 
     @classmethod
-    def can_process_tag(self, tagname) -> Any:
+    def can_process_tag(self, tagname) -> bool:
+        """Return if this instance can process given tagname."""
         return False
 
     def generate(self, break_mode=False, include_pass=True, **kwargs) -> Generator[Tuple[str, str], None, None]:
