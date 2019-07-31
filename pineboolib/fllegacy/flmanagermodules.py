@@ -117,7 +117,8 @@ class FLManagerModules(object):
         from pineboolib.fllegacy.flmodulesstaticloader import AQStaticBdInfo
 
         self.staticBdInfo_ = AQStaticBdInfo(self.conn_)
-
+        self.activeIdModule_ = None
+        self.activeIdArea_ = None
         self.filesCached_ = {}
 
     # """

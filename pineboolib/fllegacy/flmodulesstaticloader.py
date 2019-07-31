@@ -41,7 +41,7 @@ class AQStaticBdInfo(object):
 
     def __init__(self, database: "PNConnection") -> None:
         self.db_ = database.DBName()
-
+        self.dirs_ = []
         self.key_ = "StaticLoader/%s/" % self.db_
         self.enabled_ = config.value("%senabled" % self.key_, False)
 
@@ -56,7 +56,7 @@ class AQStaticBdInfo(object):
     def readSettings(self) -> None:
         self.enabled_ = config.value("%senabled" % self.key_, False)
         self.dirs_.clear()
-        dirs = config.value("%sdirs" % self.key_)
+        dirs = config.value("%sdirs" % self.key_, [])
         i = 0
 
         while i < len(dirs):
