@@ -345,6 +345,7 @@ cont_do_while = 0
 
 class ASTPythonBase(object):
     """Generate python lines. Base class."""
+
     elem: ElementTree.Element
 
     def __init__(self, elem) -> None:
