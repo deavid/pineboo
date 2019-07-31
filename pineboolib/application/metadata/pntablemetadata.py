@@ -1,41 +1,46 @@
 # -*- coding: utf-8 -*-
+"""
+Manage tables used by Pineboo.
+
+Maintains the definition of a table.
+
+This class maintains the definition of
+certain characteristics of a base table
+of data.
+
+Additionally it can be used for the definition of
+the metadata of a query, see FLTableMetaData :: query ().
+"""
+
 from pineboolib.core import decorators
 
 from pineboolib.interfaces.itablemetadata import ITableMetaData
 from pineboolib import logging
 import copy
 
-from typing import Any, Optional, List, Dict
-from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
-from pineboolib.application.metadata.pncompoundkeymetadata import PNCompoundKeyMetaData
+from typing import Any, Optional, List, Dict, TYPE_CHECKING
+from .pnfieldmetadata import PNFieldMetaData
+from .pncompoundkeymetadata import PNCompoundKeyMetaData
 
-"""
-Mantiene la definicion de una tabla.
-
-Esta clase mantienen la definicion de
-ciertas caracteristicas de una tabla de la base
-de datos.
-
-Adicionalmente puede ser utilizada para la definición de
-los metadatos de una consulta, ver FLTableMetaData::query().
-
-@author InfoSiAL S.L.
-"""
+if TYPE_CHECKING:
+    from .pnrelationmetadata import PNRelationMetaData  # noqa
 
 
 class PNTableMetaData(ITableMetaData):
+    """PNTableMetaData Class."""
+
     logger = logging.getLogger("CursorTableModel")
     d: "PNTableMetaDataPrivate"
 
-    """
-    constructor
-
-    @param n Nombre de la tabla a definir
-    @param a Alias de la tabla, utilizado en formularios
-    @param q (Opcional) Nombre de la consulta de la que define sus metadatos
-    """
-
     def __init__(self, n, a=None, q: str = None) -> None:
+        """
+        Collect the data to start.
+
+        @param n Name of the table to define
+        @param a Alias ​​of the table, used in forms
+        @param q (Optional) Name of the query from which you define your metadata
+        """
+
         super().__init__(n, a, q)
         # tmp = None
 
@@ -48,16 +53,32 @@ class PNTableMetaData(ITableMetaData):
         else:
             self.inicializeNewFLTableMetaData(n, a, q)
 
-    def inicializeFLTableMetaData(self, other) -> None:
+    def inicializeFLTableMetaData(self, other: "PNTableMetaData") -> None:
+        """
+        Initialize the data from another PNTableMetaData.
+        """
+
         self.d = PNTableMetaDataPrivate()
         self.d.fieldNames_ = []
         self.copy(other)
 
     def inicializeNewFLTableMetaData(self, n, a, q: str = None) -> None:
+        """
+        Initialize the data with the basic information.
+
+        @param n Name of the table to define
+        @param a Alias ​​of the table, used in forms
+        @param q (Optional) Name of the query from which you define your metadata
+
+        """
         self.d = PNTableMetaDataPrivate(n, a, q)
         self.d.fieldNames_ = []
 
-    def inicializeFLTableMetaDataP(self, name) -> None:
+    def inicializeFLTableMetaDataP(self, name: str) -> None:
+        """
+        Initialize the private part, without data. Just specify the name.
+        """
+
         self.d = PNTableMetaDataPrivate(name)
 
         self.d.compoundKey_ = PNCompoundKeyMetaData()
@@ -83,76 +104,78 @@ class PNTableMetaData(ITableMetaData):
                 self.d.fieldNamesUnlock_.append(field.name())
         """
 
-    """
-    Obtiene el nombre de la tabla
+    def name(self) -> str:
+        """
+        Get the name of the table.
 
-    @return El nombre de la tabla que se describe
-    """
+        @return The name of the table described
+        """
 
-    def name(self) -> Any:
         return self.d.name_
 
-    """
-    Establece el nombre de la tabla
+    def setName(self, n: str) -> None:
+        """
+        Set the name of the table.
 
-    @param n Nombre de la tabla
-    """
+        @param n Table name
+        """
 
-    def setName(self, n) -> None:
         # QObject::setName(n);
         self.d.name_ = n
 
-    """
-    Establece el alias
+    def setAlias(self, a: str) -> None:
+        """
+        Set the alias.
 
-    @param a Alias
-    """
+        @param a Alias
+        """
 
-    def setAlias(self, a) -> None:
         self.d.alias_ = a
 
-    """
-    Establece el nombre de la consulta
+    def setQuery(self, q: str) -> None:
+        """
+        Set the name of the query.
 
-    @param q Nombre de la consulta
-    """
+        @param q Query name
+        """
 
-    def setQuery(self, q) -> None:
         self.d.query_ = q
 
-    """
-    Obtiene el alias asociado a la tabla
-    """
+    def alias(self) -> str:
+        """
+        Get the alias associated with the table.
 
-    def alias(self) -> Any:
+        @return Alias.
+        """
+
         return self.d.alias_
 
-    """
-    Obtiene el nombre de la consulta de la que define sus metadatos.
+    def query(self) -> str:
+        """
+        Get the name of the query from which it defines its metadata.
 
-    El nombre corresponderá a la definición de una consulta mediante
-    (fichero .qry). Si el nombre de la consulta está definido entonces
-    el nombre de la tabla correponderá a la tabla principal de la consulta
-    cuando esta referencie a varias tablas.
-    """
+        The name will correspond to the definition of a query by
+        (.qry file). If the name of the query is defined then
+        the name of the table will correspond to the main table of the query
+        when referring to several tables.
+        """
 
-    def query(self) -> Any:
         return self.d.query_
 
-    """
-    Obtiene si define los metadatos de una consulta
-    """
-
     def isQuery(self) -> bool:
+        """
+        Get if you define the metadata of a query.
+        """
+
         return True if self.d.query_ else False
 
-    """
-    Añade la descripción de un campo a lista de descripciones de campos.
-
-    @param f Objeto FLFieldMetaData con la descripción del campo a añadir
-    """
-
     def addFieldMD(self, f: "PNFieldMetaData") -> None:
+        """
+        Add the description of a field to the list of field descriptions.
+
+        @param f FLFieldMetaData object with the description of the field to add
+        """
+
         # if f is None:
         #     return
         if not f.metadata():
@@ -166,13 +189,13 @@ class PNTableMetaData(ITableMetaData):
         if f.d.isPrimaryKey_:
             self.d.primaryKey_ = f.name().lower()
 
-    """
-    Elimina la descripción de un campo de la lista de descripciones de campos.
-
-    @param fN Nombre del campo a eliminar
-    """
-
     def removeFieldMD(self, fN: str) -> None:
+        """
+        Remove the description of a field from the list of field descriptions.
+
+        @param fN Name of the field to be deleted
+        """
+
         # if fN is None:
         #     return
         # FIXME: FLFieldMetaData does not have .clear()
@@ -181,22 +204,22 @@ class PNTableMetaData(ITableMetaData):
         #         key.clear()
         self.d.removeFieldName(fN)
 
-    """
-    Establece la clave compuesta de esta tabla.
-
-    @param cK Objeto FLCompoundKey con la descripción de la clave compuesta
-    """
-
     def setCompoundKey(self, cK: Optional[PNCompoundKeyMetaData]) -> None:
+        """
+        Set the composite key of this table.
+
+        @param cK FLCompoundKey object with the description of the composite key
+        """
+
         self.d.compoundKey_ = cK
 
-    """
-    Obtiene el nombre del campo que es clave primaria para esta tabla.
-
-    @param prefixTable Si es TRUE se añade un prefijo con el nombre de la tabla; nombretabla.nombrecampo
-    """
-
     def primaryKey(self, prefixTable=False) -> str:
+        """
+        Get the name of the field that is the primary key for this table.
+
+        @param prefixTable If TRUE, a prefix with the name of the table is added; tablename.fieldname
+        """
+
         if not self.d.primaryKey_:
             raise Exception("No primaryKey")
 
@@ -208,13 +231,12 @@ class PNTableMetaData(ITableMetaData):
         else:
             return str(self.d.primaryKey_)
 
-    """
-    Obtiene el alias de un campo a partir de su nombre.
-
-    @param fN Nombre del campo
-    """
-
     def fieldNameToAlias(self, fN: str) -> str:
+        """
+        Get the alias of a field from its name.
+
+        @param fN Field name
+        """
 
         if not fN:
             return fN
@@ -225,13 +247,12 @@ class PNTableMetaData(ITableMetaData):
 
         return fN
 
-    """
-    Obtiene el nombre de un campo a partir de su alias.
-
-    @param aN Nombre del alias del campo
-    """
-
     def fieldAliasToName(self, aN: str) -> Optional[str]:
+        """
+        Get the name of a field from its alias.
+
+        @param aN Field alias name
+        """
 
         if not aN:
             return aN
@@ -242,13 +263,13 @@ class PNTableMetaData(ITableMetaData):
 
         return None
 
-    """
-    Obtiene el tipo de un campo a partir de su nombre.
+    def fieldType(self, fN: str) -> Optional[int]:
+        """
+        Get the type of a field from its name.
 
-    @param fN Nombre del campo
-    """
+        @param fN Field name
+        """
 
-    def fieldType(self, fN) -> Optional[int]:
         if not fN:
             return None
         fN = str(fN)
@@ -286,13 +307,13 @@ class PNTableMetaData(ITableMetaData):
 
         return ret_
 
-    """
-    Obtiene si un campo es clave primaria partir de su nombre.
+    def fieldIsPrimaryKey(self, fN: str) -> Optional[bool]:
+        """
+        Get if a field is the primary key from its name.
 
-    @param fN Nombre del campo
-    """
+        @param fN Field name.
+        """
 
-    def fieldIsPrimaryKey(self, fN) -> Optional[bool]:
         if not fN:
             return None
         fN = str(fN)
@@ -302,13 +323,12 @@ class PNTableMetaData(ITableMetaData):
 
         return None
 
-    """
-    Obtiene si un campo es índice a partir de su nombre.
+    def fieldIsIndex(self, field_name: str) -> int:
+        """
+        Get if a field is index based on its name.
 
-    @param fN Nombre del campo
-    """
-
-    def fieldIsIndex(self, field_name=None) -> int:
+        @param fN Field name.
+        """
 
         if field_name in self.fieldNames():
             return self.fieldNames().index(field_name)
@@ -316,14 +336,14 @@ class PNTableMetaData(ITableMetaData):
         self.logger.warning("FLTableMetaData.fieldIsIndex(%s) No encontrado", field_name)
         return -1
 
-    """
-    Obtiene si un campo es contador.
-
-    @param fN Nombre del campo
-    @author Andrés Otón Urbano (baxas@eresmas.com)
-    """
-
     def fieldIsCounter(self, fN: str) -> Optional[bool]:
+        """
+        Get if a field is a counter.
+
+        @param fN Field name.
+        @author Andrés Otón Urbano (baxas@eresmas.com)
+        """
+
         if not fN:
             return False
 
@@ -339,13 +359,13 @@ class PNTableMetaData(ITableMetaData):
 
         return False
 
-    """
-    Obtiene si un campo puede ser nulo
-
-    @param fN Nombre del campo
-    """
-
     def fieldAllowNull(self, fN: str) -> Optional[bool]:
+        """
+        Get if a field can be null.
+
+        @param fN Field name
+        """
+
         if not fN:
             return False
 
@@ -355,13 +375,13 @@ class PNTableMetaData(ITableMetaData):
 
         return False
 
-    """
-    Obtiene si un campo es único a partir de su nombre.
-
-    @param fN Nombre del campo
-    """
-
     def fieldIsUnique(self, fN: str) -> Optional[bool]:
+        """
+        Get if a field is unique from its name.
+
+        @param fN Field name.
+        """
+
         if not fN:
             return False
 
@@ -371,19 +391,18 @@ class PNTableMetaData(ITableMetaData):
 
         return False
 
-    """
-    Obtiene el nombre de la tabla foránea relacionada con un campo de esta tabla mediante
-    una relacion M1 (muchos a uno).
+    def fieldTableM1(self, fN: str) -> Optional[str]:
+        """
+        Get the name of the foreign table related to a field in this table by an M1 relationship (many to one).
 
-    @param fN Campo de la relacion M1 de esta tabla, que se supone que esta relacionado
-        con otro campo de otra tabla
-    @return El nombre de la tabla relacionada M1, si hay relacion para el campo, o una cadena
-      vacia sin el campo no está relacionado
-    """
+        @param fN Field of the relation M1 of this table, which is supposed to be related
+            with another field from another table.
+        @return The name of the related table M1, if there is a relationship for the field, or a string
+            empty without the field is not related.
+        """
 
-    def fieldTableM1(self, fN: str) -> Any:
         if not fN:
-            return False
+            return None
 
         field = None
 
@@ -397,18 +416,17 @@ class PNTableMetaData(ITableMetaData):
 
         return None
 
-    """
-    Obtiene el nombre del campo de la tabla foránea relacionado con el indicado mediante
-    una relacion M1 (muchos auno).
+    def fieldForeignFieldM1(self, fN: str) -> Optional[str]:
+        """
+        Get the name of the foreign table field related to the one indicated by an M1 relationship (many still).
 
-    @param fN Campo de la relacion M1 de esta tabla, que se supone que esta relacionado
-        con otro campo de otra tabla
-    @return El nombre del campo foráneo relacionado con el indicado
-    """
+        @param fN Field of the relation M1 of this table, which is supposed to be related
+            with another field from another table.
+        @return The name of the foreign field related to the indicated.
+        """
 
-    def fieldForeignFieldM1(self, fN: str) -> Any:
         if not fN:
-            return False
+            return None
 
         field = None
 
@@ -422,19 +440,19 @@ class PNTableMetaData(ITableMetaData):
 
         return None
 
-    """
-    Obtiene el objeto relación que definen dos campos.
+    def relation(self, fN: str, fFN: str, fTN: str) -> Optional["PNRelationMetaData"]:
+        """
+        Get the relationship object that defines two fields.
 
-    @param fN Nombre del campo de esta tabla que forma parte de la relación
-    @param fFN Nombre del campo foráneo a esta tabla que forma parte de la relación
-    @param  fTN Nombre de la tabla foránea
-    @return Devuelve un objeto FLRelationMetaData con la información de la relación, siempre y
-      cuando esta exista. Si no existe devuelve False
-    """
+        @param fN Field name of this table that is part of the relationship.
+        @param fFN Name of the foreign field to this table that is part of the relationship.
+        @param fTN Name of the foreign table.
+        @return Returns a FLRelationMetaData object with the relationship information, provided
+            when it exists If it does not exist, it returns False.
+        """
 
-    def relation(self, fN: str, fFN, fTN) -> Any:
         if not fN:
-            return False
+            return None
 
         field = None
 
@@ -458,15 +476,16 @@ class PNTableMetaData(ITableMetaData):
                     if itR.foreignField() == str(fFN).lower() and itR.foreignTable() == str(fTN).lower():
                         return itR
 
-            return False
-
-    """
-    Obtiene la longitud de un campo a partir de su nombre.
-
-    @param fN Nombre del campo
-    """
+        return None
 
     def fieldLength(self, fN: str) -> Optional[int]:
+        """
+        Get the length of a field from its name.
+
+        @param fN Field name.
+        @return field length.
+        """
+
         if not fN:
             return None
 
@@ -476,13 +495,14 @@ class PNTableMetaData(ITableMetaData):
 
         return None
 
-    """
-    Obtiene el número de dígitos de la parte entera de un campo a partir de su nombre.
-
-    @param fN Nombre del campo
-    """
-
     def fieldPartInteger(self, fN: str) -> Optional[int]:
+        """
+        Get the number of digits of the entire part of a field from its name.
+
+        @param fN Field name.
+        @return integer length.
+        """
+
         if not fN:
             return None
 
@@ -492,13 +512,14 @@ class PNTableMetaData(ITableMetaData):
 
         return None
 
-    """
-    Obtiene el número de dígitos de la parte decimal de un campo a partir de su nombre.
-
-    @param fN Nombre del campo
-    """
-
     def fieldPartDecimal(self, fN: str) -> Optional[int]:
+        """
+        Get the number of digits of the decimal part of a field from its name.
+
+        @param fN Field name.
+        @return part decimal length.
+        """
+
         if not fN:
             return None
 
@@ -508,13 +529,13 @@ class PNTableMetaData(ITableMetaData):
 
         return None
 
-    """
-    Obtiene si un campo es calculado.
-
-    @param fN Nombre del campo
-    """
-
     def fieldCalculated(self, fN: str) -> Optional[int]:
+        """
+        Get if a field is calculated.
+
+        @param fN Field name.
+        """
+
         if not fN:
             return None
 
@@ -524,13 +545,12 @@ class PNTableMetaData(ITableMetaData):
 
         return None
 
-    """
-    Obtiene si un campo es visible.
-
-    @param fN Nombre del campo
-    """
-
     def fieldVisible(self, fN: str) -> None:
+        """
+        Get if a field is visible.
+
+        @param fN Field name.
+        """
 
         if not fN:
             return
@@ -541,13 +561,14 @@ class PNTableMetaData(ITableMetaData):
 
         return
 
-    """ Obtiene los metadatos de un campo.
-
-    @param fN Nombre del campo
-    @return Un objeto FLFieldMetaData con lainformación o metadatos de un campo dado
-    """
-
     def field(self, fN: str) -> Optional["PNFieldMetaData"]:
+        """
+        Get the metadata of a field.
+
+        @param fN Field name.
+        @return A FLFieldMetaData object with the information or metadata of a given field.
+        """
+
         if not fN:
             return None
 
@@ -557,23 +578,23 @@ class PNTableMetaData(ITableMetaData):
 
         return None
 
-    """
-    Para obtener la lista de definiciones de campos.
-
-    @return Objeto con la lista de deficiones de campos de la tabla
-    """
-
-    """
-    Para obtener una cadena con los nombres de los campos separados por comas.
-
-    @param prefixTable Si es TRUE se añade un prefijo a cada campo con el nombre de la tabla; nombretabla.nombrecampo
-    @return Cadena de caracteres con los nombres de los campos separados por comas
-    """
-
     def fieldList(self) -> List[Any]:
+        """
+        Return a list of field definitions.
+
+        @return Object with the table field deficits list
+        """
+
         return self.d.fieldList_
 
-    def fieldListArray(self, prefix_table=False) -> List[str]:
+    def fieldListArray(self, prefix_table: bool = False) -> List[str]:
+        """
+        To get a string with the names of the fields separated by commas.
+
+        @param prefix_table If TRUE a prefix is ​​added to each field with the name of the table; tablename.fieldname
+        @return String with the names of the fields separated by commas.
+        """
+
         listado = []
         cadena = "%s." % self.name() if prefix_table else ""
 
@@ -586,131 +607,161 @@ class PNTableMetaData(ITableMetaData):
     #    #print("FiledList count", len(self.d.fieldList_))
     #    return self.d.fieldList_
 
-    def indexPos(self, field_name=None) -> Any:
+    def indexPos(self, field_name: str) -> int:
+        """
+        Return the position of a field in the real order.
+
+        @param field_name. Field Name.
+        @return position index or None.
+        """
+
         return self.fieldIsIndex(field_name)
 
-    """
-    Obtiene la lista de campos de una clave compuesta, a partir del nombre de
-    un campo del que se quiere averiguar si está en esa clave compuesta.
+    def fieldListOfCompoundKey(self, fN: str) -> Optional[List[PNFieldMetaData]]:
+        """
+        Get the list of fields of a compound key, from the name of a field that you want to find out if it is in that compound key.
 
-    @param fN Nombre del campo del que se quiere averiguar si pertenece a una clave compuesta.
-    @return Si el campo pertenece a una clave compuesta, devuelve la lista de campos
-      que forman dicha clave compuesta, incluido el campo consultado. En el caso
-      que el campo consultado no pertenezca a ninguna clave compuesta devuelve 0
-    """
+        @param fN Name of the field you want to find out if it belongs to a compound key.
+        @return If the field belongs to a composite key, it returns the list of fields
+          that form said composite key, including the consulted field. If
+          that the consulted field does not belong to any compound key returns None
+        """
 
-    def fieldListOfCompoundKey(self, fN) -> Any:
         if self.d.compoundKey_:
             if self.d.compoundKey_.hasField(fN):
                 return self.d.compoundKey_.fieldList()
         return None
 
-    """
-    Obtiene una lista de textos que contiene los nombres de los campos separados por comas.
+    def fieldNames(self) -> List[str]:
+        """
+        Get a list of texts containing the names of fields separated by commas.
 
-    El orden de los campos de izquierda a derecha es el correspondiente al orden en que
-    se han añadido con el método addFieldMD() o addFieldName()
-    """
+        The order of the fields from left to right corresponds to the order in which
+        have been added with the addFieldMD () or addFieldName () method
 
-    def fieldNames(self) -> Any:
+        @return field name list.
+        """
+
         return self.d.fieldNames_
 
-    """
-    Lista de nombres de campos de la tabla que son del tipo FLFieldMetaData::Unlock
-    """
+    def fieldNamesUnlock(self) -> List[str]:
+        """
+        List of field names in the table that are of type PNFieldMetaData :: Unlock.
 
-    def fieldNamesUnlock(self) -> Any:
+        @return field name list.
+        """
+
         return self.d.fieldNamesUnlock_
 
-    """
-    @return El indicador FLTableMetaData::concurWarn_
-    """
+    def concurWarn(self) -> bool:
+        """
+        Return concurWarn flag.
 
-    def concurWarn(self) -> Any:
+        @return True or False
+        """
+
         return self.d.concurWarn_
 
-    """
-    Establece el indicador FLTableMetaData::concurWarn_
-    """
-
     def setConcurWarn(self, b=True) -> None:
+        """
+        Enable concurWarn flag.
+
+        @param b. True or False.
+        """
+
         self.d.concurWarn_ = b
 
-    """
-    @return El indicador FLTableMetaData::detectLocks_
-    """
-
     @decorators.BetaImplementation
-    def detectLocks(self):
+    def detectLocks(self) -> bool:
+        """
+        Return lock detection flag.
+
+        @return b. True or False.
+        """
+
         return self.d.detectLocks_
 
-    """
-    Establece el indicador FLTableMetaData::detectLocks_
-    """
-
     def setDetectLocks(self, b=True) -> None:
+        """
+        Enable lock detection flag.
+
+        @return b. True or False.
+        """
+
         self.d.detectLocks_ = b
 
-    """
-    Establece el nombre de función a llamar para Full Text Search
-    """
+    def FTSFunction(self) -> Optional[str]:
+        """
+        Return function name to call for Full Text Search.
 
-    def FTSFunction(self) -> Any:
+        @return function name or None.
+        """
+
         return self.d.ftsfun_
 
-    def setFTSFunction(self, ftsfun) -> None:
+    def setFTSFunction(self, ftsfun: str) -> None:
+        """
+        Set the function name to call for Full Text Search.
+
+        @param ftsfun. function name.
+        """
+
         self.d.ftsfun_ = ftsfun
 
-    """
-    Indica si lo metadatos están en caché (FLManager::cacheMetaData_)
-    """
+    def inCache(self) -> bool:
+        """
+        Return if the metadata is cached (FLManager :: cacheMetaData_).
 
-    def inCache(self) -> Any:
-        return self.d and self.d.inCache_
+        @return True or False.
+        """
 
-    """
-    Establece si lo metadatos están en caché (FLManager::cacheMetaData_)
-    """
+        return self.d.inCache_ if self.d else False
 
     def setInCache(self, b=True) -> None:
+        """
+        Set the metadata is cached (FLManager :: cacheMetaData_).
+
+        @return True or False.
+        """
+
         self.d.inCache_ = b
 
-    def copy(self, other) -> None:
+    def copy(self, other: "PNTableMetaData") -> None:
+        """
+        Copy the values ​​of a PNFieldMetaData from another.
+
+        @param other. PNTableMetaData.
+        """
+
         if other == self:
             return
 
         self.d = copy.copy(other.d)
 
     def indexFieldObject(self, position: int) -> "PNFieldMetaData":
+        """
+        Return the PNFieldMetaData of the given field.
+
+        @param i. Position.
+        @return PNfieldMetadata.
+        """
+
         return self.d.fieldList_[position]
-
-    def _indexFieldObject(self, position: int, show_exception: bool = True) -> Optional["PNFieldMetaData"]:
-        i = 0
-        ret = None
-        for field in self.d.fieldList_:
-            if position == i:
-                ret = field
-                break
-
-            i += 1
-
-        if ret is None and show_exception:
-            self.logger.warning("FLTableMetadata(%s).indexFieldObject() Posicion %s no encontrado", self.name(), position)
-        return ret
 
 
 class PNTableMetaDataPrivate:
+    """PNTableMetaData Class."""
 
     """
     Nombre de la tabla
     """
 
-    name_ = None
+    name_: str
 
     """
     Alias de la tabla
     """
-    alias_ = None
+    alias_: str
 
     """
     Lista de campos que tiene esta tabla
@@ -725,7 +776,7 @@ class PNTableMetaDataPrivate:
     """
     Nombre de la consulta (fichero .qry) de la que define los metadatos
     """
-    query_: Optional[str] = None
+    query_: str
 
     """
     Cadena de texto con los nombre de los campos separados por comas
@@ -746,7 +797,7 @@ class PNTableMetaDataPrivate:
     """
     Clave primaria
     """
-    primaryKey_: Optional[str] = None
+    primaryKey_: Optional[str]
 
     """
     Indica si se debe avisar de colisión de concurrencia entre sesiones.
@@ -757,7 +808,7 @@ class PNTableMetaDataPrivate:
 
     Ver también FLSqlCursor::concurrencyFields().
     """
-    concurWarn_ = None
+    concurWarn_: bool
 
     """
     Indica si se deben comprobar riesgos de bloqueos para esta tabla
@@ -767,25 +818,34 @@ class PNTableMetaDataPrivate:
 
     Ver también FLSqlDatabase::detectRisksLocks
     """
-    detectLocks_ = None
+    detectLocks_: bool
 
     """
     Indica el nombre de función a llamar para la búsqueda con Full Text Search
     """
-    ftsfun_ = None
+    ftsfun_: str
 
     """
     Indica si lo metadatos están en caché (FLManager::cacheMetaData_)
     """
-    inCache_ = None
+    inCache_: bool
 
     count_ = 0
 
     def __init__(self, n: str = None, a=None, q: str = None) -> None:
+        """
+        Initialize the class.
+
+        @param n metadata name.
+        @param a metadata alias.
+        @param q query string.
+        """
+
         self.fieldList_ = []
         self.fieldNamesUnlock_ = []
         self.aliasFieldMap_ = {}
         self.fieldAliasMap_ = {}
+        self.query_ = ""
         # print("Vaciando field list ahora",  len(self.fieldList_))
         if n is None:
             self.inicializeFLTableMetaDataPrivate()
@@ -796,49 +856,67 @@ class PNTableMetaDataPrivate:
         self.count_ = self.count_ + 1
 
     def inicializeFLTableMetaDataPrivate(self) -> None:
+        """
+        Initialize class ends with empty data.
+        """
+
         self.compoundKey_ = None
         self.inCache = False
 
     def inicializeNewFLTableMetaDataPrivate(self, n: str, a, q: str = None) -> None:
+        """
+        Initialize the class end with data.
+
+        @param n metadata name.
+        @param a metadata alias.
+        @param q query string.
+        """
+
         self.name_ = n.lower()
         self.alias_ = a
         self.compoundKey_ = None
-        self.query_ = q
+        if q is not None:
+            self.query_ = q
         self.concurWarn_ = False
         self.detectLocks_ = False
         self.inCache_ = False
 
     def inicializeFLTableMetaDataPrivateS(self, name) -> None:
+        """
+        Initialize the class end with basic data.
+
+        @param name metadata name.
+        """
+
         self.name_ = str(name)
         self.alias_ = self.name_
 
-    """
-    Añade el nombre de un campo a la cadena de nombres de campos, ver fieldNames()
-
-    @param n Nombre del campo
-    """
-
     def addFieldName(self, n: str) -> None:
+        """
+        Add the name of a field to the field name string, see fieldNames().
+
+        @param n Field Name.
+        """
+
         self.fieldNames_.append(n.lower())
 
-    """
-    Elimina el nombre de un campo a la cadena de nombres de campos, ver fieldNames()
-
-    @param n Nombre del campo
-    """
-
     def removeFieldName(self, n: str) -> None:
+        """
+        Remove the name of a field from the field name string, see fieldNames().
+
+        @param n Field Name
+        """
 
         if self.fieldNames_:
             self.fieldNames_.remove(n)
 
-    """
-    Formatea el alias del campo indicado para evitar duplicados
-
-    @param  f   Campo objeto cuyo alias se desea formatear
-    """
-
     def formatAlias(self, f=None) -> None:
+        """
+        Format the alias of the indicated field to avoid duplicates.
+
+        @param f Object field whose alias you want to format
+        """
+
         if f is None:
             return
 
@@ -855,13 +933,10 @@ class PNTableMetaDataPrivate:
         self.aliasFieldMap_[alias] = field
         self.fieldAliasMap_[field] = alias
 
-    """
-    Limpia la lista de definiciones de campos
-    """
-
     def clearFieldList(self) -> None:
+        """
+        Clear the list of field definitions.
+        """
+
         self.fieldList_ = []
         self.fieldNames_ = []
-
-
-# endif

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
+"""PNRelationMetaData list."""
+
 from .pnfieldmetadata import PNFieldMetaData
 from typing import List
-
-# Completa Si
 
 
 class PNRelationMetaDataList:
     """
-    Lista de relaciones
+    PNRelationMetaData Class.
     """
 
     PNRelationMetaDataList: List[PNFieldMetaData] = []

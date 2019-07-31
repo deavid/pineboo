@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+"""PNFieldMetaData list."""
+
 from .pnfieldmetadata import PNFieldMetaData
 from typing import List
 
@@ -6,9 +8,7 @@ from typing import List
 
 
 class PNFieldMetaDataList(object):
-    """
-    Lista de campos
-    """
+    """PNFieldMetaData Class."""
 
     # typedef QDict<FLFieldMetaData> FLFieldMetaDataList;
     PNFieldMetaDataList: List[PNFieldMetaData] = []
