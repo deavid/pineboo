@@ -91,6 +91,8 @@ function anon(%s) {
     from . import project
 
     prog = flscriptparse.parse(qs_source)
+    if prog is None:
+        raise ValueError("Failed to convert to Python")
     tree_data = flscriptparse.calctree(prog, alias_mode=0)
     ast = postparse.post_parse(tree_data)
 
