@@ -49,9 +49,9 @@ pages:
   script:
     # - pip install sphinx sphinx-rtd-theme
     - cd docs
-    - ./create_docs.sh
-    - ./update_linters.sh
-    - make html
+    - ./create_docs.sh | ts
+    - ./update_linters.sh | ts
+    - make html | ts
     - mv build/html/ ../public/
   artifacts:
     paths:
