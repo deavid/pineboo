@@ -1,5 +1,5 @@
-from typing import Callable
 import platform
+from typing import Callable, Any
 
 from PyQt5 import QtCore  # type: ignore
 
@@ -9,12 +9,12 @@ from pineboolib.core import decorators
 from pineboolib.application import project
 
 from pineboolib.core.utils import logging
-from typing import Any
+import pineboolib.fllegacy.sysqs
 
 logger = logging.getLogger("fllegacy.systype")
 
 
-class SysType(object, metaclass=Singleton):
+class SysType(pineboolib.fllegacy.sysqs.SysQs, metaclass=Singleton):
     time_user_ = QtCore.QDateTime.currentDateTime()
     sys_widget: Any = None
 
