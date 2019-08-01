@@ -534,7 +534,6 @@ class FLManager(QtCore.QObject, IManager):
 
         from pineboolib.fllegacy.flaction import FLAction
 
-        a = FLAction()
         util = FLUtil()
         doc = QDomDocument(n)
         list_modules = self.db_.managerModules().listAllIdModules()
@@ -556,7 +555,7 @@ class FLManager(QtCore.QObject, IManager):
         doc_elem = doc.documentElement()
         no = doc_elem.firstChild()
 
-        a.setName(n)
+        a = FLAction(n)
         # a.setTable(n)
         while not no.isNull():
             e = no.toElement()
