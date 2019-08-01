@@ -379,7 +379,7 @@ class FLApplication(QtCore.QObject):
         """End fastcgi call signal."""
         pass
 
-    def localeSystem(self) -> str:
+    def localeSystem(self) -> Any:
         """Return locale of the system."""
         return self.locale_system_
 
