@@ -5,8 +5,6 @@ Emulate sys.qs in a class
 """
 import traceback
 
-from pineboolib.qsa import debug, File, Function
-
 
 class SysQs(object):
     """
@@ -18,6 +16,8 @@ class SysQs(object):
         """
             Execute a QS file.
         """
+        from pineboolib.qsa import debug, File, Function
+
         file = File(fileQSA)
         try:
             file.open(File.ReadOnly)
