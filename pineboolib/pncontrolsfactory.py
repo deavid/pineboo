@@ -312,10 +312,12 @@ def reload_from_DGI() -> None:
 
 
 class System_class(object):
-    def setenv(self, name: str, val: str) -> None:
+    @staticmethod
+    def setenv(name: str, val: str) -> None:
         os.environ[name] = val
 
-    def getenv(self, name: str) -> str:
+    @staticmethod
+    def getenv(name: str) -> str:
         ret_ = ""
         if name in os.environ.keys():
             ret_ = os.environ[name]

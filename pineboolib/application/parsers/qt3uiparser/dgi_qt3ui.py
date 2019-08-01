@@ -24,6 +24,12 @@ logger = logging.getLogger("pnqt3ui")
 
 
 class Options:
+    """
+    Store module options.
+
+    ***DEPRECATED***
+    """
+
     DEBUG_LEVEL = 100
 
 
@@ -34,7 +40,12 @@ class Options:
 
 
 def loadUi(form_path: str, widget, parent=None) -> None:
+    """
+    Load Qt3 UI file from eneboo.
 
+    widget: Provide a pre-created widget and this function will store UI contents on it.
+    parent: Probably deprecated.
+    """
     global ICONS, root
     # parser = etree.XMLParser(
     #    ns_clean=True,
@@ -196,6 +207,11 @@ def loadUi(form_path: str, widget, parent=None) -> None:
 
 
 def loadToolBar(xml: ET.Element, widget) -> None:
+    """
+    Load UI Toolbar from XML and store it into widget.
+
+    widget: A pre-created widget to store the toolbar.
+    """
     name_elem = xml.find("./property[@name='name']/cstring")
     label_elem = xml.find("./property[@name='label']/string")
     if name_elem is None or label_elem is None:
@@ -221,6 +237,11 @@ def loadToolBar(xml: ET.Element, widget) -> None:
 
 
 def loadMenuBar(xml: ET.Element, widget) -> None:
+    """
+    Load a menu bar into widget.
+
+    widget: pre-created widget to store the object.
+    """
 
     if isinstance(widget, pncontrolsfactory.QMainWindow):
         mB = widget.menuBar()
@@ -262,6 +283,11 @@ def loadMenuBar(xml: ET.Element, widget) -> None:
 
 
 def process_item(xml: ET.Element, parent, widget) -> None:
+    """
+    Process random XML item.
+
+    widget: pre-created widget to store the object.
+    """
     name = xml.get("name")
     text = xml.get("text")
     # accel = xml.get("accel")
@@ -279,6 +305,11 @@ def process_item(xml: ET.Element, parent, widget) -> None:
 
 
 def load_action(action, widget) -> None:
+    """
+    Load Action into widget.
+
+    widget: pre-created widget to store the object.
+    """
     real_action = widget.findChild(QtWidgets.QAction, action.objectName())
     if real_action is not None:
         action.setText(real_action.text())
@@ -294,6 +325,12 @@ def load_action(action, widget) -> None:
 
 
 def loadAction(action, widget) -> None:
+    """
+    Load Action into widget.
+
+    widget: pre-created widget to store the object.
+    """
+    # FIXME: Why there are two loadAction??
     global ICONS
     act_ = QtWidgets.QAction(widget)
     for p in action.findall("property"):
@@ -318,6 +355,9 @@ def loadAction(action, widget) -> None:
 
 
 def createWidget(classname: str, parent=None) -> Any:
+    """
+    Create a Widget for given class name.
+    """
 
     cls = getattr(pncontrolsfactory, classname, None) or getattr(QtWidgets, classname, None)
 
@@ -331,6 +371,8 @@ def createWidget(classname: str, parent=None) -> Any:
 
 
 class loadWidget:
+    """Load a widget."""
+
     translate_properties = {
         "caption": "windowTitle",
         "name": "objectName",
@@ -350,6 +392,9 @@ class loadWidget:
         parent: Optional[QtWidgets.QWidget] = None,
         origWidget: Optional[QtWidgets.QWidget] = None,
     ) -> None:
+        """
+        Load a random widget from given XML.
+        """
         logger.trace("loadWidget: xml: %s widget: %s parent: %s origWidget: %s", xml, widget, parent, origWidget)
         if widget is None:
             raise ValueError
@@ -562,6 +607,9 @@ class loadWidget:
         #        origWidget.ui_[origWidget.objectName()] = nwidget
 
     def process_property(self, xmlprop, widget=None):
+        """
+        Process a XML property from the UI.
+        """
         if widget is None:
             widget = self.widget
         set_fn: Optional[Callable] = None
@@ -654,6 +702,9 @@ class loadWidget:
             #    print(etree.ElementTree.tostring(xmlprop))
 
     def process_action(self, xmlaction, toolBar):
+        """
+        Process a QAction.
+        """
         action = createWidget("QAction")
         for p in xmlaction:
             pname = p.get("name")
@@ -665,6 +716,7 @@ class loadWidget:
         # origWidget.ui_[action.objectName()] = action
 
     def process_layout_box(self, xmllayout, widget=None, mode="box"):
+        """Process layouts from UI."""
         if widget is None:
             widget = self.widget
         for c in xmllayout:
@@ -759,6 +811,7 @@ class loadWidget:
 
 
 def loadIcon(xml: "ET.Element") -> None:
+    """Load Icon from XML."""
     global ICONS
 
     name = xml.get("name")
@@ -785,24 +838,28 @@ def loadIcon(xml: "ET.Element") -> None:
 
 
 def loadVariant(xml: ET.Element, widget=None) -> Any:
+    """Load Variant from XML."""
     for variant in xml:
         return _loadVariant(variant, widget)
     raise ValueError("No property in provided XML")
 
 
 def loadProperty(xml: ET.Element) -> Tuple[Any, Any]:
+    """Load a Qt Property from XML."""
     for variant in xml:
         return (xml.get("name"), _loadVariant(variant))
     raise ValueError("No property in provided XML")
 
 
 def u(x: Any) -> str:
+    """Convert x to string."""
     if isinstance(x, str):
         return x
     return str(x)
 
 
 def b(x: str) -> bool:
+    """Convert x to bool."""
     x = x.lower()
     if x[0] == "t":
         return True
@@ -821,6 +878,7 @@ def b(x: str) -> bool:
 
 
 def _loadVariant(variant, widget=None) -> Any:
+    """Load a variant from XM. Internal."""
     text = variant.text or ""
     text = text.strip()
     if variant.tag == "cstring":

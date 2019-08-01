@@ -14,7 +14,7 @@ from PyQt5 import QtGui
 from pineboolib.core.utils import logging
 
 
-from typing import Type, Any, Optional, Union
+from typing import Any, Optional, Union
 
 
 logger = logging.getLogger("AQS")
@@ -26,26 +26,23 @@ class AQS(object):
     Box = None
     Plain = None
     translate = ["DockLeft", "ContextMenu"]
+    InDock: str = "InDock"
+    OutSideDock: str = "OutSideDock"
+    SmtpSslConnection: int = 1
+    SmtpTlsConnection: int = 2
+    SmtpAuthPlain: int = 1
+    SmtpAuthLogin: int = 2
+    SmtpSendOk: int = 11
+    SmtpError: int = 7
+    SmtpMxDnsError: int = 10
+    SmtpSocketError: int = 12
+    SmtpAttachError: int = 15
+    SmtpServerError: int = 16
+    SmtpClientError: int = 17
 
-    def __init__(self) -> None:
-        """Initialize the class."""
-
-        self.InDock: str = "InDock"
-        self.OutSideDock: str = "OutSideDock"
-        self.SmtpSslConnection: int = 1
-        self.SmtpTlsConnection: int = 2
-        self.SmtpAuthPlain: int = 1
-        self.SmtpAuthLogin: int = 2
-        self.SmtpSendOk: int = 11
-        self.SmtpError: int = 7
-        self.SmtpMxDnsError: int = 10
-        self.SmtpSocketError: int = 12
-        self.SmtpAttachError: int = 15
-        self.SmtpServerError: int = 16
-        self.SmtpClientError: int = 17
-
+    @staticmethod
     def ColorDialog_getColor(
-        self, color: Optional[Union[int, str, QColor]] = None, parent: Optional["QWidget"] = None, name: Optional[str] = None
+        color: Optional[Union[int, str, QColor]] = None, parent: Optional["QWidget"] = None, name: Optional[str] = None
     ) -> Any:
         """
         Display the color selection dialog.
@@ -68,7 +65,7 @@ class AQS(object):
         return cL.getColor()
 
     @classmethod
-    def toXml(cls: Type["AQS"], obj_: "QWidget", include_children: bool = True, include_complex_types: bool = False):
+    def toXml(cls, obj_: "QWidget", include_children: bool = True, include_complex_types: bool = False):
         """
         Convert an object to xml.
 
@@ -142,7 +139,7 @@ class AQS(object):
     Pixmap_fromMineSource = pixmap_fromMimeSource
 
     @classmethod
-    def sha1(self, byte_array: bytes) -> str:
+    def sha1(cls, byte_array: bytes) -> str:
         """
         Return the sha1 of a set of bytes.
 
@@ -156,7 +153,7 @@ class AQS(object):
         return ba.sha1()
 
     @classmethod
-    def Application_setOverrideCursor(self, shape: "QCursor", replace: bool = False) -> None:
+    def Application_setOverrideCursor(cls, shape: "QCursor", replace: bool = False) -> None:
         """
         Set override cursor.
 
@@ -167,7 +164,7 @@ class AQS(object):
         QApplication.setOverrideCursor(shape)
 
     @classmethod
-    def Application_restoreOverrideCursor(self) -> None:
+    def Application_restoreOverrideCursor(cls) -> None:
         """Restore override cursor."""
         QApplication.restoreOverrideCursor()
 
@@ -192,6 +189,7 @@ class AQS(object):
                     break
 
         if ret_ is not None:
+            logger.info("AQS: Looking up attr: %r -> %r  (Please set these in AQS)", name, ret_)
             return ret_
 
         logger.warning("AQS: No se encuentra el atributo %s", name)

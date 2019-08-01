@@ -15,11 +15,20 @@ logger = logging.getLogger("fllegacy.systype")
 
 
 class SysType(object, metaclass=Singleton):
-    def __init__(self) -> None:
-        self._name_user = None
-        self.sys_widget = None
-        self.time_user_ = QtCore.QDateTime.currentDateTime()
+    time_user_ = QtCore.QDateTime.currentDateTime()
+    sys_widget: Any = None
 
+    def __getattr__(self, fun_: str) -> Callable:
+        # FIXME: How is this used and how it can be avoided?
+        cls = self.__class__
+        if cls.sys_widget is None:
+            if "sys" in project.actions:
+                cls.sys_widget = project.actions["sys"].load().widget
+            else:
+                logger.warn("No action found for 'sys'")
+        return getattr(cls.sys_widget, fun_, None)
+
+    @classmethod
     def nameUser(self) -> str:
         ret_ = None
         if project.conn is None:
@@ -35,38 +44,48 @@ class SysType(object, metaclass=Singleton):
 
         return ret_
 
+    @classmethod
     def interactiveGUI(self) -> str:
         if not project._DGI:
             raise Exception("project._DGI is empty!")
         return project.DGI.interactiveGUI()
 
+    @classmethod
     def isUserBuild(self) -> bool:
         return self.version().upper().find("USER") > -1
 
+    @classmethod
     def isDeveloperBuild(self) -> bool:
         return self.version().upper().find("DEVELOPER") > -1
 
+    @classmethod
     def isNebulaBuild(self) -> bool:
         return self.version().upper().find("NEBULA") > -1
 
+    @classmethod
     def isDebuggerMode(self) -> bool:
         return bool(config.value("application/isDebuggerMode", False))
 
+    @classmethod
     @decorators.NotImplementedWarn
     def isCloudMode(self) -> bool:
         return False
 
+    @classmethod
     def isDebuggerEnabled(self) -> bool:
         return bool(config.value("application/dbadmin_enabled", False))
 
+    @classmethod
     def isQuickBuild(self) -> bool:
         return not self.isDebuggerEnabled()
 
+    @classmethod
     def isLoadedModule(self, modulename: str) -> bool:
         if project.conn is None:
             raise Exception("Project is not connected yet")
         return modulename in project.conn.managerModules().listAllIdModules()
 
+    @classmethod
     def translate(self, *args) -> str:
         from pineboolib.fllegacy.fltranslations import FLTranslate
 
@@ -80,6 +99,7 @@ class SysType(object, metaclass=Singleton):
 
         return str(FLTranslate(group, text))
 
+    @classmethod
     def osName(self) -> str:
         """
         Devuelve el sistema operativo sobre el que se ejecuta el programa
@@ -95,35 +115,33 @@ class SysType(object, metaclass=Singleton):
         else:
             return platform.system()
 
+    @classmethod
     def nameBD(self) -> Any:
         if project.conn is None:
             raise Exception("Project is not connected yet")
         return project.conn.DBName()
 
+    @classmethod
     def toUnicode(self, val: str, format: str) -> str:
         return val.encode(format).decode("utf-8", "replace")
 
+    @classmethod
     def fromUnicode(self, val, format) -> Any:
         return val.encode("utf-8").decode(format, "replace")
 
+    @classmethod
     def Mr_Proper(self) -> None:
         if project.conn is None:
             raise Exception("Project is not connected yet")
         project.conn.Mr_Proper()
 
+    @classmethod
     def installPrefix(self) -> str:
         from pineboolib.core.utils.utils_base import filedir
 
         return filedir("..")
 
-    def __getattr__(self, fun_: str) -> Callable:
-        if self.sys_widget is None:
-            if "sys" in project.actions:
-                self.sys_widget = project.actions["sys"].load().widget
-            else:
-                logger.warn("No action found for 'sys'")
-        return getattr(self.sys_widget, fun_, None)
-
+    @classmethod
     def installACL(self, idacl) -> None:
         # FIXME: Add ACL later
         # acl_ = project.acl()
@@ -132,15 +150,18 @@ class SysType(object, metaclass=Singleton):
         #     acl_.installACL(idacl)
         pass
 
+    @classmethod
     def version(self) -> str:
         return str(project.version)
 
+    @classmethod
     def processEvents(self) -> None:
         if not project._DGI:
             raise Exception("project._DGI is empty!")
 
         return project.DGI.processEvents()
 
+    @classmethod
     def write(self, encode_: str, dir_: str, contenido: str) -> None:
         import codecs
 
@@ -150,36 +171,43 @@ class SysType(object, metaclass=Singleton):
         f.seek(0)
         f.close()
 
+    @classmethod
     def cleanupMetaData(self, connName="default") -> None:
         if project.conn is None:
             raise Exception("Project is not connected yet")
         project.conn.useConn(connName).manager().cleanupMetaData()
 
+    @classmethod
     def updateAreas(self) -> None:
         from pineboolib.fllegacy.flapplication import aqApp
 
         aqApp.initToolBox()
 
+    @classmethod
     def reinit(self) -> None:
         from pineboolib.fllegacy.flapplication import aqApp
 
         aqApp.reinit()
 
+    @classmethod
     def setCaptionMainWidget(self, t) -> None:
         from pineboolib.fllegacy.flapplication import aqApp
 
         aqApp.setCaptionMainWidget(t)
 
+    @classmethod
     def nameDriver(self, connName="default") -> Any:
         if project.conn is None:
             raise Exception("Project is not connected yet")
         return project.conn.useConn(connName).driverName()
 
+    @classmethod
     def nameHost(self, connName="default") -> Any:
         if project.conn is None:
             raise Exception("Project is not connected yet")
         return project.conn.useConn(connName).host()
 
+    @classmethod
     def addDatabase(self, *args) -> bool:
         # def addDatabase(self, driver_name = None, db_name = None, db_user_name = None,
         #                 db_password = None, db_host = None, db_port = None, connName="default"):
@@ -216,11 +244,13 @@ class SysType(object, metaclass=Singleton):
 
         return True
 
+    @classmethod
     def removeDatabase(self, connName="default") -> Any:
         if project.conn is None:
             raise Exception("Project is not connected yet")
         return project.conn.useConn(connName).removeConn(connName)
 
-    def idSession(self) -> Any:
+    @classmethod
+    def idSession(self) -> str:
         # FIXME: Code copied from flapplication.aqApp
         return self.time_user_.toString(QtCore.Qt.ISODate)
