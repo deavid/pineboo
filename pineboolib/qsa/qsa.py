@@ -4,7 +4,7 @@ import os
 import re
 import math
 from os.path import expanduser
-from pineboolib import logging
+from pineboolib.core.utils import logging
 
 from PyQt5 import QtCore  # type: ignore
 from PyQt5.Qt import QIODevice  # type: ignore
@@ -20,7 +20,7 @@ from pineboolib.pncontrolsfactory import qsa_sys
 from typing import Any, Optional, Union, Match, List, Pattern, Generator
 
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)  # type: ignore
 
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
 sys = qsa_sys
