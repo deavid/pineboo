@@ -75,19 +75,19 @@ def _excepthook(type, value, tback):
 def init_cli():
     """Create CLI singletons."""
     # FIXME: Order of import is REALLY important here. FIX.
-    from pineboolib.fllegacy.aqsobjects import aqsobjectfactory
-
-    aqsobjectfactory.AQUtil = aqsobjectfactory.AQUtil_class()
-    aqsobjectfactory.AQS = aqsobjectfactory.AQS_class()
+    # from pineboolib.fllegacy.aqsobjects import aqsobjectfactory
+    #
+    # aqsobjectfactory.AQUtil = aqsobjectfactory.AQUtil_class()
+    # aqsobjectfactory.AQS = aqsobjectfactory.AQS_class()
 
     from pineboolib.fllegacy import flapplication
 
     flapplication.aqApp = flapplication.FLApplication()
 
-    from pineboolib import pncontrolsfactory
-
-    pncontrolsfactory.System = pncontrolsfactory.System_class()
-    pncontrolsfactory.qsa_sys = pncontrolsfactory.SysType()
+    # from pineboolib import pncontrolsfactory
+    #
+    # pncontrolsfactory.System = pncontrolsfactory.System_class()
+    # pncontrolsfactory.qsa_sys = pncontrolsfactory.SysType()
 
 
 def init_gui():

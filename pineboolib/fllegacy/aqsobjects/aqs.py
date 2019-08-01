@@ -40,6 +40,12 @@ class AQS(object):
     SmtpServerError: int = 16
     SmtpClientError: int = 17
 
+    WindowStateChange = QtGui.QWindowStateChangeEvent
+    ContextMenu = QtGui.QContextMenuEvent
+    Close = QtGui.QCloseEvent
+    Show = QtGui.QShowEvent
+    LeftDockWidgetArea: int = 1
+
     @staticmethod
     def ColorDialog_getColor(
         color: Optional[Union[int, str, QColor]] = None, parent: Optional["QWidget"] = None, name: Optional[str] = None

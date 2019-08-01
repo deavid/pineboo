@@ -311,7 +311,7 @@ def reload_from_DGI() -> None:
     auth = resolveObject("auth")
 
 
-class System_class(object):
+class System(object):
     @staticmethod
     def setenv(name: str, val: str) -> None:
         os.environ[name] = val
@@ -592,5 +592,4 @@ from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
 
 # System = System_class()
 # qsa_sys = SysType()
-qsa_sys: SysType
-System: System_class
+qsa_sys = SysType

@@ -8,10 +8,10 @@ This module provides the different classes and AQS functions to be used in the m
 from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqsqlquery import AQSqlQuery  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqsqlcursor import AQSqlCursor  # noqa: F401
-from pineboolib.fllegacy.aqsobjects.aqutil import AQUtil as AQUtil_class
+from pineboolib.fllegacy.aqsobjects.aqutil import AQUtil  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqsql import AQSql  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqsmtpclient import AQSmtpClient  # noqa: F401
-from pineboolib.fllegacy.aqsobjects.aqs import AQS as AQS_class
+from pineboolib.fllegacy.aqsobjects.aqs import AQS  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqods import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqods import AQOdsColor, AQOdsStyle, AQOdsImage  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqboolflagstate import AQBoolFlagState, AQBoolFlagStateList  # noqa: F401
@@ -20,11 +20,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pineboolib import pncontrolsfactory
     from PyQt5 import QtWidgets
-
-# AQUtil = AQUtil_class()
-# AQS = AQS_class()
-AQUtil: AQUtil_class
-AQS: AQS_class
 
 
 def AQFormDB(action_name: str, parent: "QtWidgets.QWidget") -> "pncontrolsfactory.FLFormDB":
