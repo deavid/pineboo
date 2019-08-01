@@ -182,6 +182,7 @@ class AQOdsRow(object):
         self.fix_precision_ = None
         self.row_color_ = None
         self.property_cell_ = []
+        self.style_cell_text_ = None
 
     def addBgColor(self, color) -> None:
         """
