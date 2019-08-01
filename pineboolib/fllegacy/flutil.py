@@ -1274,20 +1274,21 @@ class FLUtil(QtCore.QObject):
 
         return SysType().nameUser()
 
-    @classmethod
-    def userGroups(cls) -> str:
-
-        return SysType().userGroups()
-
-    @classmethod
-    def isInProd(cls) -> bool:
-
-        return SysType().isInProd()
-
-    @classmethod
-    def request(cls) -> str:
-
-        return SysType().request()
+    # FIXME: Missing in SysType:
+    # @classmethod
+    # def userGroups(cls) -> str:
+    #
+    #     return SysType().userGroups()
+    #
+    # @classmethod
+    # def isInProd(cls) -> bool:
+    #
+    #     return SysType().isInProd()
+    #
+    # @classmethod
+    # def request(cls) -> str:
+    #
+    #     return SysType().request()
 
     @classmethod
     def nameBD(cls) -> str:
