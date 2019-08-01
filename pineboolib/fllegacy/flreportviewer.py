@@ -4,7 +4,6 @@ from PyQt5.QtCore import Qt
 from pineboolib.core import decorators
 
 from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib import pncontrolsfactory
 
 # from pineboolib.fllegacy.flpicture import FLPicture
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery

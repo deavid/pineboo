@@ -8,6 +8,8 @@ from pineboolib import logging
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.core.utils.utils_base import filedir, load2xml
 from pineboolib.application.utils.path import _path
+from pineboolib import qt3_widgets
+
 
 from typing import Any
 
@@ -60,7 +62,6 @@ class dgi_qt(dgi_schema):
         self.MessageBox.warning(t, self.MessageBox.Ok, self.MessageBox.NoButton, self.MessageBox.NoButton, "Pineboo", parent)
 
     def createUI(self, n, connector=None, parent=None, name=None) -> Any:
-        import pineboolib.pncontrolsfactory
 
         if ".ui" not in n:
             n += ".ui"
@@ -89,7 +90,12 @@ class dgi_qt(dgi_schema):
             xclass = wid.get("class")
             if xclass is None:
                 raise Exception("class was expected")
-            parent = getattr(pineboolib.pncontrolsfactory, xclass)()
+            parent = None
+            if xclass == "QMainWindow":
+                parent = qt3_widgets.qmainwindow.QMainWindow()
+
+            if parent is None:
+                raise Exception("xclass not found %s" % xclass)
 
         if hasattr(parent, "widget"):
             w_ = parent.widget

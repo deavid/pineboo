@@ -7,6 +7,7 @@ from pineboolib.application import project
 from pineboolib.application.packager import aqunpacker
 from pineboolib import qt3_widgets, fllegacy
 
+
 from pineboolib.fllegacy.systype import SysType
 
 """
@@ -71,6 +72,7 @@ QPainter = QtGui.QPainter
 QBrush = QtGui.QBrush
 QProgressDialog = QtWidgets.QProgressDialog
 QFileDialog = QtWidgets.QFileDialog
+QEventLoop = qt3_widgets.qeventloop.QEventLoop
 
 # Clases FL
 FLLineEdit = fllegacy.fllineedit.FLLineEdit
@@ -120,6 +122,7 @@ DateEdit = qt3_widgets.qdateedit.QDateEdit
 TimeEdit = qt3_widgets.qtimeedit.QTimeEdit
 
 AQUnpacker = aqunpacker.AQUnpacker
+aqApp = fllegacy.flapplication.aqApp
 
 # FIXME: meter todo QSA
 # from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *
@@ -132,52 +135,6 @@ AQUnpacker = aqunpacker.AQUnpacker
 #         return conn.driver().send_to_server(create_dict("call_function", function_name, conn.driver().id_, arguments))
 #     else:
 #         return "Funcionalidad no soportada"
-
-
-def check_gc_referrers(typename: Any, w_obj: Callable, name: str) -> None:
-    import threading
-    import time
-
-    def checkfn() -> None:
-        import gc
-
-        time.sleep(2)
-        gc.collect()
-        obj = w_obj()
-        if not obj:
-            return
-        # TODO: Si ves el mensaje a continuación significa que "algo" ha dejado
-        # ..... alguna referencia a un formulario (o similar) que impide que se destruya
-        # ..... cuando se deja de usar. Causando que los connects no se destruyan tampoco
-        # ..... y que se llamen referenciando al código antiguo y fallando.
-        # print("HINT: Objetos referenciando %r::%r (%r) :" % (typename, obj, name))
-        for ref in gc.get_referrers(obj):
-            if isinstance(ref, dict):
-                x: List[str] = []
-                for k, v in ref.items():
-                    if v is obj:
-                        k = "(**)" + k
-                        x.insert(0, k)
-                # print(" - dict:", repr(x), gc.get_referrers(ref))
-            else:
-                if "<frame" in str(repr(ref)):
-                    continue
-                # print(" - obj:", repr(ref), [x for x in dir(ref) if getattr(ref, x) is obj])
-
-    threading.Thread(target=checkfn).start()
-
-
-class QEventLoop(QtCore.QEventLoop):
-    def exitLoop(self) -> None:
-        super().exit()
-
-    def enterLoop(self) -> None:
-        super().exec_()
-
-
-def print_stack(maxsize: int = 1) -> None:
-    for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
-        print(tb.rstrip())
 
 
 # from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:

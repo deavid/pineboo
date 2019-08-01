@@ -5,7 +5,6 @@ from PyQt5 import QtWidgets, Qt, QtCore  # type: ignore
 
 from pineboolib import logging
 from pineboolib.core import decorators
-from pineboolib import pncontrolsfactory
 
 from pineboolib.core.settings import config
 from pineboolib.fllegacy.flutil import FLUtil
