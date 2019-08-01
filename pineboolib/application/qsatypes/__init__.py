@@ -1,0 +1,3 @@
+"""
+Data Types for QSA.
+"""

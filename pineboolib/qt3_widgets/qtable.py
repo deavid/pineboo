@@ -1,17 +1,25 @@
 # -*- coding: utf-8 -*-
 from typing import Optional, Any, List, Union, cast
-from PyQt5 import QtWidgets, QtCore, Qt  # type: ignore
-from PyQt5.QtCore import pyqtSignal  # type: ignore
-from PyQt5.QtWidgets import QAbstractItemView  # type: ignore
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtCore import Qt
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QAbstractItemView
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import format_double
-from .qgroupbox import QGroupBox
 
 
-class QTable(QtWidgets.QTableWidget):
+class Q3TableWidget(QtWidgets.QTableWidget):
+    """
+    Remove problematic properties from PyQt5-Stubs that we need to redefine.
+    """
+
+    currentChanged: Any = None
+
+
+class QTable(Q3TableWidget):
 
     lineaActual = None
-    currentChanged = QtCore.pyqtSignal(int, int)  # need overload
+    currentChanged = QtCore.pyqtSignal(int, int)  # need overload (in Qt5, this signal is dataChanged)
     doubleClicked = QtCore.pyqtSignal(int, int)
     clicked = QtCore.pyqtSignal(int, int)  # need overload
     valueChanged = QtCore.pyqtSignal(int, int)
@@ -26,7 +34,7 @@ class QTable(QtWidgets.QTableWidget):
     AutoOneFit = 3
     sort_column_ = None
 
-    def __init__(self, parent: Optional[QGroupBox] = None, name: str = None) -> None:
+    def __init__(self, parent: Optional[QtWidgets.QGroupBox] = None, name: str = None) -> None:
         super(QTable, self).__init__(parent)
         if not parent:
             self.setParent(self.parentWidget())
@@ -45,7 +53,7 @@ class QTable(QtWidgets.QTableWidget):
         self.resize_policy = 0  # Default
         self.sort_column_ = None
 
-    def currentChanged_(self, current_row, current_column, previous_row, previous_column) -> None:
+    def currentChanged_(self, current_row: int, current_column: int, previous_row: int, previous_column: int) -> None:
         if current_row > -1 and current_column > -1:
             cast(pyqtSignal, self.currentChanged).emit(current_row, current_column)
 

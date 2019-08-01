@@ -16,14 +16,12 @@ from pineboolib.core.exceptions import CodeDoesNotBelongHereException, NotConnec
 from pineboolib.core.settings import config
 
 from pineboolib.application.module import Module
-
-
 from pineboolib.application.utils.path import _dir
 
 if TYPE_CHECKING:
     from pineboolib.interfaces.dgi_schema import dgi_schema
     from pineboolib.interfaces.iconnection import IConnection
-    from pineboolib.application.xmlaction import XMLAction
+    from pineboolib.core.utils.struct import ActionStruct  # noqa: F401
 
 
 class Project(object):
@@ -66,7 +64,7 @@ class Project(object):
         self.deleteCache = False
         self.parseProject = False
         self.translator_: List[Any] = []  # FIXME: Add proper type
-        self.actions: Dict[Any, XMLAction] = {}  # FIXME: Add proper type
+        self.actions: Dict[Any, "ActionStruct"] = {}  # FIXME: Add proper type
         self.tables: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.files: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.options = Values()
@@ -165,8 +163,6 @@ class Project(object):
 
         if not self.conn or not self.conn.conn:
             raise NotConnectedError("Cannot execute Pineboo Project without a connection in place")
-
-        from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import load_models
 
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
@@ -322,7 +318,8 @@ class Project(object):
 
         if not config.value("ebcomportamiento/orm_load_disabled", False):
             self.message_manager().send("splash", "showMessage", ["Cargando objetos ..."])
-            load_models()
+            # from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import load_models
+            # load_models()
 
         self.message_manager().send("splash", "showMessage", ["Cargando traducciones ..."])
 

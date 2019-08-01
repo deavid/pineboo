@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import traceback
-from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
-from PyQt5.Qt import QKeySequence  # type: ignore
-from PyQt5.QtWidgets import QDialog  # type: ignore
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.Qt import QKeySequence
+from PyQt5.QtWidgets import QDialog
 
 from pineboolib import logging
 from pineboolib.core import decorators
@@ -453,11 +453,11 @@ class FLFormDB(QDialog):
 
     def saveSnapShot(self, path_file=None) -> None:
         if not path_file:
-            from pineboolib import pncontrolsfactory
+            from pineboolib.fllegacy.filedialog import FileDialog
 
             tmp_file = "%s/snap_shot_%s.png" % (aqApp.tmp_dir(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
 
-            ret = pncontrolsfactory.QFileDialog.getSaveFileName(None, "Pineboo", tmp_file, "PNG(*.png)")
+            ret = FileDialog.getSaveFileName(None, "Pineboo", tmp_file, "PNG(*.png)")
             path_file = ret[0] if ret else None
 
         if path_file:
@@ -611,9 +611,9 @@ class FLFormDB(QDialog):
             QtCore.QTimer.singleShot(0, self.emitFormReady)
 
     def emitFormReady(self) -> None:
-        from pineboolib import pncontrolsfactory
+        from pineboolib.application.qsatypes.sysbasetype import SysBaseType
 
-        qsa_sys = pncontrolsfactory.SysType()
+        qsa_sys = SysBaseType()
         if qsa_sys.isLoadedModule("fltesttest"):
 
             aqApp.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)

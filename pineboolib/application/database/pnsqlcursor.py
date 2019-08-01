@@ -5,9 +5,11 @@ Module for PNSqlCursor class.
 import weakref
 import importlib
 import traceback
-from typing import Any, Optional, List, Union, TYPE_CHECKING
+from typing import Any, Optional, List, Union, cast, TYPE_CHECKING
 
-from PyQt5 import QtCore  # type: ignore
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QMessageBox, QApplication, QDialog
+
 from pineboolib.core.error_manager import error_manager
 from pineboolib.core.decorators import pyqtSlot
 from pineboolib.core.utils import logging
@@ -23,14 +25,12 @@ from pineboolib.application.utils.xpm import cacheXPM
 from .pnbuffer import PNBuffer
 
 # FIXME: Removde dependency: Should not import from fllegacy.*
-from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  # FIXME: Removde dependency
 from pineboolib.fllegacy.aqsobjects.aqboolflagstate import AQBoolFlagStateList, AQBoolFlagState  # FIXME: Should not depend on AQS
 
 if TYPE_CHECKING:
     from .pncursortablemodel import PNCursorTableModel  # noqa: F401
     from pineboolib.application.metadata.pntablemetadata import PNTableMetaData  # noqa: F401
     from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData  # noqa: F401
-    from pineboolib.fllegacy.flformdb import FLFormDB  # noqa: F401
     from pineboolib.interfaces.iconnection import IConnection  # noqa: F401
     from pineboolib.fllegacy.flaction import FLAction  # noqa: F401
     from pineboolib.application.database.pnbuffer import FieldStruct  # noqa: F401
@@ -980,25 +980,23 @@ class PNSqlCursor(QtCore.QObject):
         """
         if not self.d.metadata_:
             return
-        from pineboolib import pncontrolsfactory
+        from PyQt5.QtWidgets import QMessageBox, QApplication
 
         if (not self.isValid() or self.size() <= 0) and not m == self.Insert:
             if not self.size():
-                pncontrolsfactory.QMessageBox.warning(
-                    pncontrolsfactory.QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado")
-                )
+                QMessageBox.warning(QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"))
                 return
             self.first()
 
         if m == self.Del:
-            res = pncontrolsfactory.QMessageBox.warning(
-                pncontrolsfactory.QApplication.focusWidget(),
+            res = QMessageBox.warning(
+                QApplication.focusWidget(),
                 self.tr("Aviso"),
                 self.tr("El registro activo será borrado. ¿ Está seguro ?"),
-                pncontrolsfactory.QMessageBox.Ok,
-                pncontrolsfactory.QMessageBox.No,
+                QMessageBox.Ok,
+                QMessageBox.No,
             )
-            if res == pncontrolsfactory.QMessageBox.No:
+            if res == QMessageBox.No:
                 return
 
             self.transaction()
@@ -1029,8 +1027,8 @@ class PNSqlCursor(QtCore.QObject):
             return
 
         if not self._action.formRecord():
-            pncontrolsfactory.QMessageBox.warning(
-                pncontrolsfactory.QApplication.focusWidget(),
+            QMessageBox.warning(
+                QApplication.focusWidget(),
                 self.tr("Aviso"),
                 self.tr("No hay definido ningún formulario para manejar\nregistros de esta tabla : %s" % self.curName()),
             )
@@ -2531,14 +2529,11 @@ class PNSqlCursor(QtCore.QObject):
         if not self.d.metadata_ or not self.d.buffer_:
             return
 
-        from pineboolib import pncontrolsfactory
+        from PyQt5.QtWidgets import QMessageBox, QApplication
 
         if not self.isValid() or self.size() <= 0:
-            pncontrolsfactory.QMessageBox.warning(
-                pncontrolsfactory.QApplication.focusWidget(),
-                self.tr("Aviso"),
-                self.tr("No hay ningún registro seleccionado"),
-                pncontrolsfactory.QMessageBox.Ok,
+            QMessageBox.warning(
+                QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"), QMessageBox.Ok
             )
             return
 
@@ -2636,21 +2631,19 @@ class PNSqlCursor(QtCore.QObject):
         if not self.activatedBufferCommited():
             return True
 
-        from pineboolib import pncontrolsfactory
-
         if self.db().interactiveGUI() and self.db().canDetectLocks() and (checkLocks or self.d.metadata_.detectLocks()):
             self.checkRisksLocks()
             if self.d.inRisksLocks_:
-                ret = pncontrolsfactory.QMessageBox.warning(
-                    None,
+                ret = QMessageBox.warning(
+                    QApplication.activeWindow(),
                     "Bloqueo inminente",
                     "Los registros que va a modificar están bloqueados actualmente.\n"
                     "Si continua hay riesgo de que su conexión quede congelada hasta finalizar el bloqueo.\n"
                     "\n¿ Desa continuar aunque exista riesgo de bloqueo ?",
-                    pncontrolsfactory.QMessageBox.Ok,
-                    pncontrolsfactory.QMessageBox.No | pncontrolsfactory.QMessageBox.Default | pncontrolsfactory.QMessageBox.Escape,
+                    QMessageBox.Ok,
+                    cast(QMessageBox.StandardButton, QMessageBox.No | QMessageBox.Default | QMessageBox.Escape),
                 )
-                if ret == pncontrolsfactory.QMessageBox.No:
+                if ret == QMessageBox.No:
                     return False
 
         if not self.checkIntegrity():
@@ -2685,8 +2678,9 @@ class PNSqlCursor(QtCore.QObject):
 
         idMod = self.db().managerModules().idModuleOfFile("%s.mtd" % self.d.metadata_.name())
 
-        module_script: "FLFormDB" = project.actions[idMod].load() if idMod in project.actions.keys() else project.actions["sys"].load()
-
+        # FIXME: module_script is FLFormDB
+        module_script: QDialog = project.actions[idMod].load() if idMod in project.actions.keys() else project.actions["sys"].load()
+        module_iface: Any = getattr(module_script, "iface", None)
         if project.DGI.use_model():
             model_name = "models.%s.%s_def" % (idMod, idMod)
             try:
@@ -2700,20 +2694,20 @@ class PNSqlCursor(QtCore.QObject):
             functionAfter = "afterCommit_%s" % (self.d.metadata_.name())
 
             if model_module is not None:
-                function_model_before = getattr(model_module.iface, "beforeCommit_%s" % self.d.metadata_.name(), None)
+                function_model_before = getattr(module_iface, "beforeCommit_%s" % self.d.metadata_.name(), None)
                 if function_model_before:
                     ret = function_model_before(self)
                     if not ret:
-                        return ret
+                        return False
 
             if functionBefore:
-                fn = getattr(module_script.iface, functionBefore, None)
+                fn = getattr(module_iface, functionBefore, None)
                 v = None
                 if fn is not None:
                     try:
                         v = fn(self)
                     except Exception:
-                        pncontrolsfactory.aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
+                        QMessageBox.warning(QApplication.focusWidget(), "Error", error_manager(traceback.format_exc(limit=-6, chain=False)))
                     if v and not isinstance(v, bool) or v is False:
                         return False
 
@@ -2841,7 +2835,7 @@ class PNSqlCursor(QtCore.QObject):
                 if function_model_after:
                     ret = function_model_after(self)
                     if not ret:
-                        return ret
+                        return False
 
             if functionAfter:
                 fn = getattr(module_script.iface, functionAfter, None)
@@ -2850,7 +2844,7 @@ class PNSqlCursor(QtCore.QObject):
                     try:
                         v = fn(self)
                     except Exception:
-                        pncontrolsfactory.aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
+                        QMessageBox.warning(QApplication.focusWidget(), "Error", error_manager(traceback.format_exc(limit=-6, chain=False)))
                     if v and not isinstance(v, bool) or v is False:
                         return False
 
@@ -2878,7 +2872,7 @@ class PNSqlCursor(QtCore.QObject):
             if function_model_buffer_commited:
                 ret = function_model_buffer_commited(self)
                 if not ret:
-                    return ret
+                    return False
 
         self.bufferCommited.emit()
         return True
@@ -2899,13 +2893,12 @@ class PNSqlCursor(QtCore.QObject):
             return ok
 
         if project.DGI.localDesktop():
-            from pineboolib import pncontrolsfactory
 
-            activeWid = pncontrolsfactory.QApplication.activeModalWidget()
+            activeWid = QApplication.activeModalWidget()
             if not activeWid:
-                activeWid = pncontrolsfactory.QApplication.activePopupWidget()
+                activeWid = QApplication.activePopupWidget()
             if not activeWid:
-                activeWid = pncontrolsfactory.QApplication.activeWindow()
+                activeWid = QApplication.activeWindow()
 
             if activeWid:
                 activeWidEnabled = activeWid.isEnabled()
@@ -3678,53 +3671,54 @@ class PNCursorPrivate(QtCore.QObject):
         """
         Create restrictions according to access control list.
         """
+        # from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  # FIXME: Remove dependency
 
-        if not self.acTable_:
-            self.acTable_ = FLAccessControlFactory().create("table")
-            self.acTable_.setFromObject(self.metadata_)
-            self.acosBackupTable_ = self.acTable_.getAcos()
-            self.acPermBackupTable_ = self.acTable_.perm()
-            self.acTable_.clear()
-        cursor = self.cursor_
-        if cursor is None:
-            raise Exception("Cursor not created yet")
-        if self.modeAccess_ == PNSqlCursor.Insert or (not self.lastAt_ == -1 and self.lastAt_ == cursor.at()):
-            return
-
-        if self.acosCondName_ is not None:
-            condTrue_ = False
-
-            if self.acosCond_ == PNSqlCursor.Value:
-                condTrue_ = cursor.valueBuffer(self.acosCondName_) == self.acosCondVal_
-            elif self.acosCond_ == PNSqlCursor.RegExp:
-                from PyQt5.Qt import QRegExp  # type: ignore
-
-                # FIXME: What is happenning here? bool(str(Regexp)) ??
-                condTrue_ = bool(str(QRegExp(str(self.acosCondVal_)).exactMatch(str(cursor.value(self.acosCondName_)))))
-            elif self.acosCond_ == PNSqlCursor.Function:
-                condTrue_ = project.call(self.acosCondName_, [self.cursor_]) == self.acosCondVal_
-
-            if condTrue_:
-                if self.acTable_.name() != self.id_:
-                    self.acTable_.clear()
-                    self.acTable_.setName(self.id_)
-                    self.acTable_.setPerm(self.acPermTable_)
-                    self.acTable_.setAcos(self.acosTable_)
-                    self.acTable_.processObject(self.metadata_)
-                    self.aclDone_ = True
-
-                return
-
-        elif cursor.isLocked() or (self.cursorRelation_ and self.cursorRelation_.isLocked()):
-
-            if not self.acTable_.name() == self.id_:
-                self.acTable_.clear()
-                self.acTable_.setName(self.id_)
-                self.acTable_.setPerm("r-")
-                self.acTable_.processObject(self.metadata_)
-                self.aclDone_ = True
-
-            return
+        # if not self.acTable_:
+        #     self.acTable_ = FLAccessControlFactory().create("table")
+        #     self.acTable_.setFromObject(self.metadata_)
+        #     self.acosBackupTable_ = self.acTable_.getAcos()
+        #     self.acPermBackupTable_ = self.acTable_.perm()
+        #     self.acTable_.clear()
+        # cursor = self.cursor_
+        # if cursor is None:
+        #     raise Exception("Cursor not created yet")
+        # if self.modeAccess_ == PNSqlCursor.Insert or (not self.lastAt_ == -1 and self.lastAt_ == cursor.at()):
+        #     return
+        #
+        # if self.acosCondName_ is not None:
+        #     condTrue_ = False
+        #
+        #     if self.acosCond_ == PNSqlCursor.Value:
+        #         condTrue_ = cursor.valueBuffer(self.acosCondName_) == self.acosCondVal_
+        #     elif self.acosCond_ == PNSqlCursor.RegExp:
+        #         from PyQt5.Qt import QRegExp  # type: ignore
+        #
+        #         # FIXME: What is happenning here? bool(str(Regexp)) ??
+        #         condTrue_ = bool(str(QRegExp(str(self.acosCondVal_)).exactMatch(str(cursor.value(self.acosCondName_)))))
+        #     elif self.acosCond_ == PNSqlCursor.Function:
+        #         condTrue_ = project.call(self.acosCondName_, [self.cursor_]) == self.acosCondVal_
+        #
+        #     if condTrue_:
+        #         if self.acTable_.name() != self.id_:
+        #             self.acTable_.clear()
+        #             self.acTable_.setName(self.id_)
+        #             self.acTable_.setPerm(self.acPermTable_)
+        #             self.acTable_.setAcos(self.acosTable_)
+        #             self.acTable_.processObject(self.metadata_)
+        #             self.aclDone_ = True
+        #
+        #         return
+        #
+        # elif cursor.isLocked() or (self.cursorRelation_ and self.cursorRelation_.isLocked()):
+        #
+        #     if not self.acTable_.name() == self.id_:
+        #         self.acTable_.clear()
+        #         self.acTable_.setName(self.id_)
+        #         self.acTable_.setPerm("r-")
+        #         self.acTable_.processObject(self.metadata_)
+        #         self.aclDone_ = True
+        #
+        #     return
 
         self.undoAcl()
 
@@ -3763,6 +3757,4 @@ class PNCursorPrivate(QtCore.QObject):
         logger.warning(msg)
         if project._DGI and project.DGI.localDesktop():
             if not throwException:
-                from pineboolib import pncontrolsfactory
-
-                pncontrolsfactory.QMessageBox.warning(pncontrolsfactory.QApplication.activeWindow(), "Pineboo", msg)
+                QMessageBox.warning(QApplication.activeWindow(), "Pineboo", msg)

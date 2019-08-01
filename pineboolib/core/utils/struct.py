@@ -6,7 +6,7 @@ Contains flexible objects that can hold different properties.
 Used to avoid creating specific classes for each possible type.
 """
 
-from typing import Any, List, Optional, Dict
+from typing import Any, List, Optional, Dict, Callable
 from xml.etree.ElementTree import Element
 from .utils_base import aqtt
 
@@ -116,3 +116,7 @@ class ActionStruct(XMLStruct):
     mainscript: Optional[str] = None
     formrecord: Optional[str] = None
     scriptformrecord: Optional[str] = None
+
+    # FIXME: Those methods are here to avoid projectmodule from loading XMLAction and qsa.*
+    load: Callable
+    load_script: Callable

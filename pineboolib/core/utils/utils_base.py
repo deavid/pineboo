@@ -22,7 +22,7 @@ from . import logging
 from typing import Callable, TypeVar, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib.application.types import Date  # noqa: F401
+    from pineboolib.application.qsatypes.date import Date  # noqa: F401
 
 logger = logging.getLogger(__name__)
 T1 = TypeVar("T1")
