@@ -103,7 +103,7 @@ class dgi_qt(dgi_schema):
         else:
             from PyQt5 import uic  # type: ignore
 
-            qtWidgetPlugings = filedir("./plugins/qtwidgetsplugins")
+            qtWidgetPlugings = filedir("../qtdesigner-plugins")
             if qtWidgetPlugings not in uic.widgetPluginPath:
                 logger.info("Añadiendo path %s a uic.widgetPluginPath", qtWidgetPlugings)
                 uic.widgetPluginPath.append(qtWidgetPlugings)
