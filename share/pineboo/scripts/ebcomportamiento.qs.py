@@ -4,7 +4,7 @@ from pineboolib.qsa import *
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings
 from PyQt5 import QtCore  # type: ignore
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.formdbwidget import FormDBWidget
+from pineboolib.qt3_widgets.formdbwidget import FormDBWidget
 
 settings = AQSettings()
 
