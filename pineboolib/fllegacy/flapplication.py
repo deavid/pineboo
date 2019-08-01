@@ -20,7 +20,7 @@ from typing import Any, Optional, Union, Dict, List, TYPE_CHECKING
 if TYPE_CHECKING:
     from pineboolib import pncontrolsfactory
     from pineboolib.application.database.pnsqlcursor import PNSqlCursor
-    from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
+    from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists  # noqa: F401
 
 
 logger = logging.getLogger("FLApplication")
@@ -72,6 +72,7 @@ class FLApplication(QtCore.QObject):
     modules_menu: Any
 
     def __init__(self) -> None:
+        """Create new FLApplication."""
         super(FLApplication, self).__init__()
         self._p_work_space = None
         self.main_widget_ = None
@@ -116,6 +117,7 @@ class FLApplication(QtCore.QObject):
         self.event_loop = QtCore.QEventLoop()
 
     def __del__(self) -> None:
+        """Cleanup."""
         self._destroying = True
         self.stopTimerIdle()
         # self.checkAndFixTransactionLAvel("%s:%s" % (__name__, __class__))
@@ -165,6 +167,7 @@ class FLApplication(QtCore.QObject):
         self.aqApp = None
 
     def eventFilter(self, obj, ev) -> Any:
+        """React to user events."""
         from pineboolib import pncontrolsfactory
 
         if self._inicializing or self._destroying:
@@ -251,21 +254,25 @@ class FLApplication(QtCore.QObject):
         return super().eventFilter(obj, ev)
 
     def eventLoop(self) -> "pncontrolsfactory.QEventLoop":
+        """Create main event loop."""
         from pineboolib import pncontrolsfactory
 
         return pncontrolsfactory.QEventLoop()
 
     @decorators.NotImplementedWarn
     def checkForUpdate(self):
+        """Not used in Pineboo."""
         pass
 
     @decorators.NotImplementedWarn
     def checkForUpdateFinish(self, op):
+        """Not used in pineboo."""
         pass
 
     def init(self) -> None:
+        """Initialize FLApplication."""
         from pineboolib import pncontrolsfactory
-        from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
+        from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists  # noqa: F811
         from pineboolib.fllegacy.aqsobjects.aqs import AQS
 
         self._dict_main_widgets = {}
@@ -354,28 +361,35 @@ class FLApplication(QtCore.QObject):
 
     @decorators.NotImplementedWarn
     def initfcgi(self):
+        """Init for fast cgi."""
         pass
 
     @decorators.NotImplementedWarn
     def addObjectFactory(self, new_object_factory):
+        """Add object onctructor. unused."""
         pass
 
     @decorators.NotImplementedWarn
     def callfcgi(self, call_function, argument_list):
+        """Perform fastcgi call."""
         pass
 
     @decorators.NotImplementedWarn
     def endfcgi(self):
+        """End fastcgi call signal."""
         pass
 
-    def localeSystem(self) -> Any:
+    def localeSystem(self) -> str:
+        """Return locale of the system."""
         return self.locale_system_
 
     @decorators.NotImplementedWarn
     def openQSWorkbench(self):
+        """Open debugger. Unused."""
         pass
 
     def initMainWidget(self) -> None:
+        """Init mainwidget UI."""
         if not self.main_widget_ or not self.container_:
             return
 
@@ -392,6 +406,7 @@ class FLApplication(QtCore.QObject):
         self.readStateModule()
 
     def showMainWidget(self, w) -> None:
+        """Show UI."""
         from pineboolib import pncontrolsfactory
 
         if not self.container_:
@@ -445,6 +460,7 @@ class FLApplication(QtCore.QObject):
         self.tool_box_.setCurrentIndex(self.tool_box_.indexOf(self.tool_box_.findChild(pncontrolsfactory.QToolBar, descript_area)))
 
     def setMainWidget(self, w) -> None:
+        """Set mainWidget."""
         if not self.container_:
             return
         from pineboolib import pncontrolsfactory
@@ -477,9 +493,11 @@ class FLApplication(QtCore.QObject):
 
     @decorators.NotImplementedWarn
     def makeStyle(self, style_):
+        """Apply specified style."""
         pass
 
     def chooseFont(self) -> None:
+        """Open font selector."""
         from pineboolib import pncontrolsfactory
 
         font_ = pncontrolsfactory.QFontDialog().getFont()
@@ -494,6 +512,7 @@ class FLApplication(QtCore.QObject):
             config.set_value("application/font", save_)
 
     def showStyles(self) -> None:
+        """Open style selector."""
         if not self.style:
             self.initStyles()
         # if self.style:
@@ -501,9 +520,11 @@ class FLApplication(QtCore.QObject):
 
     @decorators.NotImplementedWarn
     def showToggleBars(self):
+        """Show toggle bars."""
         pass
 
     def initToolBox(self) -> None:
+        """Initialize toolbox."""
         from pineboolib import pncontrolsfactory
         from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQS
 
@@ -693,21 +714,25 @@ class FLApplication(QtCore.QObject):
             self.acl_.process(self.container_)
 
     def workspace(self) -> Any:
+        """Get current workspace."""
         return self._p_work_space
 
     def initActions(self) -> None:
+        """Initialize actions."""
         if self.main_widget_ is not None and self._p_work_space is not None:
             self.window_cascade_action.triggered.connect(self._p_work_space.cascadeSubWindows)
             self.window_tile_action.triggered.connect(self._p_work_space.tileSubWindows)
             self.window_close_action.triggered.connect(self._p_work_space.closeActiveSubWindow)
 
     def initMenuBar(self) -> None:
+        """Initialize menus."""
         if self.window_menu is None:
             raise Exception("initMenuBar. self.window_menu is empty!")
 
         self.window_menu.aboutToShow.connect(self.windowMenuAboutToShow)
 
     def initToolBar(self) -> None:
+        """Initialize toolbar."""
         from pineboolib import pncontrolsfactory
 
         mw = self.main_widget_
@@ -755,6 +780,7 @@ class FLApplication(QtCore.QObject):
         ac.setText(self.tr("&Módulos"))
 
     def initStatusBar(self) -> None:
+        """Initialize statusbar."""
         if not self.main_widget_:
             return
 
@@ -768,6 +794,7 @@ class FLApplication(QtCore.QObject):
         self.main_widget_.statusBar().addWidget(conexion)
 
     def initView(self) -> None:
+        """Initialize view."""
         mw = self.main_widget_
 
         if mw is None:
@@ -786,6 +813,7 @@ class FLApplication(QtCore.QObject):
             mw.setCentralWidget(view_back)
 
     def setStyle(self, style_: Optional[Union[int, str]]) -> None:
+        """Change application style."""
 
         if style_:
             config.set_value("application/style", style_)
@@ -794,6 +822,7 @@ class FLApplication(QtCore.QObject):
             pncontrolsfactory.QApplication.setStyle(style_)
 
     def initStyles(self) -> None:
+        """Initialize styles."""
         from pineboolib.core.settings import config
 
         self.style_mapper = QtCore.QSignalMapper()
@@ -822,13 +851,16 @@ class FLApplication(QtCore.QObject):
 
     @decorators.NotImplementedWarn
     def getTabWidgetPages(self, wn, n):
+        """Get tabs."""
         pass
 
     @decorators.NotImplementedWarn
     def getWidgetList(self, wn, c):
+        """Get widgets."""
         pass
 
     def toggleToolBar(self, toggle) -> None:
+        """Show or hide toolbar."""
         if not self.main_widget_:
             return
 
@@ -841,21 +873,25 @@ class FLApplication(QtCore.QObject):
         tb.show() if toggle else tb.hide()
 
     def toggleStatusBar(self, toggle) -> None:
+        """Toggle status bar."""
         if not self.main_widget_:
             return
 
         self.main_widget_.statusBar().show() if toggle else self.main_widget_.statusBar().hide()
 
     def aboutQt(self) -> None:
+        """Show About QT."""
         from pineboolib import pncontrolsfactory
 
         pncontrolsfactory.QMessageBox.aboutQt(self.mainWidget())
 
     def aboutPineboo(self) -> None:
+        """Show about Pineboo."""
         if project.DGI.localDesktop():
             project.DGI.about_pineboo()
 
     def statusHelpMsg(self, text) -> None:
+        """Show help message."""
         from pineboolib.core.settings import config
 
         if config.value("application/isDebuggerMode", False):
@@ -867,6 +903,7 @@ class FLApplication(QtCore.QObject):
         self.main_widget_.statusBar().showMessage(text, 2000)
 
     def windowMenuAboutToShow(self) -> None:
+        """Signal called before window menu is shown."""
         if not self._p_work_space:
             return
         if self.window_menu is None:
@@ -896,6 +933,7 @@ class FLApplication(QtCore.QObject):
             ac.triggered.connect(window.setFocus)
 
     def windowMenuActivated(self, id) -> None:
+        """Signal called when user clicks on menu"""
         if not self._p_work_space:
             return
 
@@ -904,6 +942,7 @@ class FLApplication(QtCore.QObject):
             w.setFocus()
 
     def existFormInMDI(self, id) -> bool:
+        """Return if named FLFormDB is open."""
         from pineboolib import pncontrolsfactory
 
         if id is None or not self._p_work_space:
@@ -919,32 +958,39 @@ class FLApplication(QtCore.QObject):
         return False
 
     def openMasterForm(self, action_name, pix) -> None:
+        """Open a tab."""
         if action_name in project.actions.keys():
             project.actions[action_name].openDefaultForm()
 
     @decorators.NotImplementedWarn
     def openDefaultForm(self):
+        """Open a default form."""
         pass
 
     def execMainScript(self, action_name) -> None:
+        """Execute main script."""
         if action_name in project.actions.keys():
             project.actions[action_name].execDefaultScript()
 
     @decorators.NotImplementedWarn
     def execDefaultScript(self):
+        """Execute default script."""
         pass
 
     def windowClose(self) -> None:
+        """Signal called on close."""
         if self._p_work_space is None:
             return
 
         self._p_work_space.closeActiveWindow()
 
     def loadScriptsFromModule(self, idm) -> None:
+        """Load scripts from named module."""
         if idm in project.modules.keys():
             project.modules[idm].load()
 
     def activateModule(self, idm=None) -> None:
+        """Initialize module."""
         if not idm:
             if self.sender():
                 idm = self.sender().objectName()
@@ -988,6 +1034,7 @@ class FLApplication(QtCore.QObject):
         self.showMainWidget(w)
 
     def reinit(self) -> None:
+        """Cleanup and restart."""
         if self._inicializing or self._destroying:
             return
 
@@ -1005,12 +1052,14 @@ class FLApplication(QtCore.QObject):
         empty_base()
 
     def clearProject(self) -> None:
+        """Cleanup."""
         project.actions = {}
         project.areas = {}
         project.modules = {}
         project.tables = {}
 
     def reinitP(self) -> None:
+        """Reinitialize project."""
         from pineboolib import qsa as qsa_dict_modules
         from pineboolib.application.proxy import DelayedObjectProxyLoader
 
@@ -1072,18 +1121,21 @@ class FLApplication(QtCore.QObject):
 
     @decorators.NotImplementedWarn
     def showDocPage(self, url):
+        """Show documentation."""
         pass
 
     def timeUser(self) -> Any:
+        """Get amount of time running."""
         from pineboolib import pncontrolsfactory
 
         return pncontrolsfactory.SysType().time_user_
 
     def call(self, function, argument_list=[], object_content=None, show_exceptions=True) -> Any:
+        """Call a QS project function."""
         return project.call(function, argument_list, object_content, show_exceptions)
 
     def setCaptionMainWidget(self, value) -> None:
-
+        """Set application title."""
         if value:
             self.last_text_caption_ = value
 
@@ -1103,28 +1155,35 @@ class FLApplication(QtCore.QObject):
 
     @decorators.NotImplementedWarn
     def setNotExit(self, b):
+        """Protect against window close."""
         self._not_exit = b
 
     @decorators.NotImplementedWarn
     def printTextEdit(self, editor_):
+        """Not implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def setPrintProgram(self, print_program_):
+        """Not implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def addSysCode(self, code, scritp_entry_function):
+        """Not implemented."""
         pass
 
     def setScriptEntryFunction(self, script_enttry_function) -> None:
+        """Set which QS function to call on startup."""
         self.script_entry_function_ = script_enttry_function
 
     @decorators.NotImplementedWarn
     def setDatabaseLockDetection(self, on, msec_lapsus, lim_checks, show_warn, msg_warn, connection_name):
+        """Not implemented."""
         pass
 
     def popupWarn(self, msg_warn, script_calls=[]) -> None:
+        """Show a warning popup."""
         mw = self.container_ or self.main_widget_
 
         from pineboolib import pncontrolsfactory
@@ -1156,23 +1215,29 @@ class FLApplication(QtCore.QObject):
 
     @decorators.NotImplementedWarn
     def checkDatabaseLocks(self, timer_):
+        """Not implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def saveGeometryForm(self, name, geo):
+        """Not implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def geometryForm(self, name):
+        """Not implemented."""
         pass
 
     def staticLoaderSetup(self) -> None:
+        """Setup static loader."""
         self.db().managerModules().staticLoaderSetup()
 
     def mrProper(self) -> None:
+        """Cleanup database."""
         self.db().conn.Mr_Proper()
 
     def showConsole(self) -> None:
+        """Show application console on GUI."""
         mw = self.mainWidget()
         if mw:
             if self._ted_output:
@@ -1186,17 +1251,21 @@ class FLApplication(QtCore.QObject):
             dw.setWindowTitle(self.tr("Mensajes de Eneboo"))
             mw.addDockWidget(QtCore.Qt.BottomDockWidgetArea, dw)
 
-    def consoleShown(self) -> Any:
+    def consoleShown(self) -> bool:
+        """Return if console is shown."""
         return self._ted_output and not self._ted_output.isHidden()
 
     @decorators.NotImplementedWarn
     def modMainWidget(self, id_modulo):
+        """Not implemented."""
         pass
 
     def evaluateProject(self) -> None:
+        """Execute QS entry function."""
         QtCore.QTimer.singleShot(0, self.callScriptEntryFunction)
 
     def callScriptEntryFunction(self) -> None:
+        """Execute QS entry function."""
         if self.script_entry_function_:
             self.call(self.script_entry_function_, [], self)
             self.script_entry_function_ = None
