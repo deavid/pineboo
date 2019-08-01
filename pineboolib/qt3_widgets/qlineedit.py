@@ -6,9 +6,9 @@ from pineboolib.core import decorators
 from typing import Union, Optional, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qframe import QFrame  # noqa: F401
-    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox  # noqa: F401
-    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget import QWidget  # noqa: F401
+    from .qframe import QFrame  # noqa: F401
+    from .qgroupbox import QGroupBox  # noqa: F401
+    from .qwidget import QWidget  # noqa: F401
 
 
 class QLineEdit(QtWidgets.QLineEdit):

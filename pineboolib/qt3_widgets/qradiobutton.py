@@ -4,7 +4,7 @@ from PyQt5 import QtWidgets  # type: ignore
 from pineboolib import logging
 from PyQt5.QtCore import pyqtProperty  # type: ignore
 
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qbuttongroup import QButtonGroup
+from .qbuttongroup import QButtonGroup
 from typing import Optional
 from typing import Any
 

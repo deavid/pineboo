@@ -13,12 +13,12 @@ from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
 from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData
 
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformsearchdb import FLFormSearchDB
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fluintvalidator import FLUIntValidator
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flintvalidator import FLIntValidator
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldoublevalidator import FLDoubleValidator
+from .flsqlquery import FLSqlQuery
+from .flformsearchdb import FLFormSearchDB
+from .flformdb import FLFormDB
+from .fluintvalidator import FLUIntValidator
+from .flintvalidator import FLIntValidator
+from .fldoublevalidator import FLDoubleValidator
 from pineboolib import logging
 from pineboolib import pncontrolsfactory
 from pineboolib.application import project

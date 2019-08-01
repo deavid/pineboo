@@ -5,8 +5,8 @@ from PyQt5 import QtWidgets  # type: ignore
 from typing import Optional, Union, Any, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qframe import QFrame  # noqa: F401
-    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox  # noqa: F401
+    from .qframe import QFrame  # noqa: F401
+    from .qgroupbox import QGroupBox  # noqa: F401
 
 
 class QComboBox(QtWidgets.QComboBox):

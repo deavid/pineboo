@@ -6,16 +6,16 @@ from PyQt5.QtGui import QPixmap  # type: ignore
 
 from pineboolib import logging
 from pineboolib.core import decorators
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldatatable import FLDataTable
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformsearchdb import FLFormSearchDB
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from .fldatatable import FLDataTable
+from .flformsearchdb import FLFormSearchDB
+from .flsqlcursor import FLSqlCursor
 
 from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData
 from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
 
-from pineboolib.fllegacy.flutil import FLUtil
+from .flutil import FLUtil
 from pineboolib.core.settings import config
-from pineboolib.fllegacy.flapplication import aqApp
+from .flapplication import aqApp
 
 
 from typing import Any, Optional, List, Union
@@ -366,7 +366,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.tabData = QtWidgets.QFrame()  # contiene data
         self.functionGetColor_ = None
 
-        from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
+        from .flformdb import FLFormDB
 
         while not isinstance(self.topWidget, FLFormDB):
             self.topWidget = self.topWidget.parentWidget()
@@ -1058,7 +1058,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.tableRecords()
 
-        from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformrecorddb import FLFormRecordDB
+        from .flformrecorddb import FLFormRecordDB
 
         if not self.cursorAux:
             if not self.initSearch_:
@@ -1446,18 +1446,18 @@ class FLTableDB(QtWidgets.QWidget):
                             editor_ = pncontrolsfactory.FLLineEdit(self)
 
                             if type_ == "double":
-                                from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldoublevalidator import FLDoubleValidator
+                                from .fldoublevalidator import FLDoubleValidator
 
                                 editor_.setValidator(FLDoubleValidator(0, pow(10, partInteger) - 1, partDecimal, editor_))
                                 editor_.setAlignment(Qt.AlignRight)
                             else:
                                 if type_ in ("uint", "int"):
                                     if type_ == "uint":
-                                        from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fluintvalidator import FLUIntValidator
+                                        from .fluintvalidator import FLUIntValidator
 
                                         editor_.setValidator(FLUIntValidator(0, pow(10, partInteger) - 1, editor_))
                                     else:
-                                        from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flintvalidator import FLIntValidator
+                                        from .flintvalidator import FLIntValidator
 
                                         editor_.setValidator(
                                             FLIntValidator(pow(10, partInteger) - 1 * (-1), pow(10, partInteger) - 1, editor_)

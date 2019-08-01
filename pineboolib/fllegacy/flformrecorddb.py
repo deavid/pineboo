@@ -8,7 +8,7 @@ from pineboolib import logging
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.settings import config
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
+from pineboolib.fllegacy.flformdb import FLFormDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flapplication import aqApp

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets  # type: ignore
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget import QWidget
+from .qwidget import QWidget
 from typing import Any
 
 

@@ -6,11 +6,11 @@ from PyQt5 import QtCore, QtWidgets  # type: ignore
 from PyQt5.QtWidgets import QToolButton  # type: ignore
 from PyQt5.Qt import QKeySequence  # type: ignore
 
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from .flformdb import FLFormDB
+from .flsqlcursor import FLSqlCursor
 from pineboolib.core.settings import config
 from pineboolib.core.utils.utils_base import filedir
-from pineboolib.fllegacy.flapplication import aqApp
+from .flapplication import aqApp
 from typing import Any
 
 

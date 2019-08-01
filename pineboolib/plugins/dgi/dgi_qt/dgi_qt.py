@@ -25,7 +25,7 @@ class dgi_qt(dgi_schema):
         self._name = "qt"
         self._alias = "Qt5"
 
-        from pineboolib.plugins.dgi.dgi_qt import dgi_qt3ui
+        from pineboolib.application.parsers.qt3uiparser import dgi_qt3ui
         from .dgi_objects.splash_screen import splashscreen
         from .dgi_objects.progress_dialog_manager import ProgressDialogManager
         from .dgi_objects.status_help_msg import StatusHelpMsg

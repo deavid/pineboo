@@ -3,11 +3,10 @@ from PyQt5 import QtWidgets  # type: ignore
 from pineboolib.core import decorators
 
 
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qframe import QFrame
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget import QWidget
-from typing import Union
-from typing import Any
+from .qframe import QFrame
+from .qgroupbox import QGroupBox
+from .qwidget import QWidget
+from typing import Union, Any
 
 
 class QToolButton(QtWidgets.QToolButton):

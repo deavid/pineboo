@@ -11,8 +11,8 @@ from typing import Optional, Any, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.fllegacy.flaction import FLAction  # noqa: F401
-    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
-    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformrecorddb import FLFormRecordDB
+    from pineboolib.fllegacy.flformdb import FLFormDB
+    from pineboolib.fllegacy.flformrecorddb import FLFormRecordDB
     from .moduleactions import ModuleActions  # noqa: F401
     from .database.pnsqlcursor import PNSqlCursor  # noqa: F401
 

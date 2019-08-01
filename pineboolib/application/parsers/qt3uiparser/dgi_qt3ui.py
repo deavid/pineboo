@@ -679,7 +679,7 @@ class loadWidget:
             elif c.tag == "widget":
                 new_widget = createWidget(c.get("class"), parent=widget)
                 # FIXME: Should check interfaces.
-                from pineboolib.plugins.dgi.dgi_qt.dgi_objects import qbuttongroup, qtoolbutton
+                from pineboolib.qt3_widgets import qbuttongroup, qtoolbutton
 
                 if isinstance(widget, qbuttongroup.QButtonGroup):
                     if isinstance(new_widget, qtoolbutton.QToolButton):

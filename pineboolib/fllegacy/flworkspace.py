@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flwidget import FLWidget
+from pineboolib.fllegacy.flwidget import FLWidget
 from typing import Any
 
 

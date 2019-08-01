@@ -5,7 +5,7 @@ from PyQt5.QtCore import pyqtSignal  # type: ignore
 from PyQt5.QtWidgets import QAbstractItemView  # type: ignore
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import format_double
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
+from .qgroupbox import QGroupBox
 
 
 class QTable(QtWidgets.QTableWidget):

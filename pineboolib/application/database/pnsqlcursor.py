@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from .pncursortablemodel import PNCursorTableModel  # noqa: F401
     from pineboolib.application.metadata.pntablemetadata import PNTableMetaData  # noqa: F401
     from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData  # noqa: F401
-    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB  # noqa: F401
+    from pineboolib.fllegacy.flformdb import FLFormDB  # noqa: F401
     from pineboolib.interfaces.iconnection import IConnection  # noqa: F401
     from pineboolib.fllegacy.flaction import FLAction  # noqa: F401
     from pineboolib.application.database.pnbuffer import FieldStruct  # noqa: F401
