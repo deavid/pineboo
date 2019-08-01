@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
+"""FLAction Module."""
+
 from pineboolib.application.xmlaction import XMLAction
 from typing import Union
 
 
 class FLAction(object):
-
     """
-    Esta clase contiene información de acciones para abrir formularios.
+    FLAction Class.
 
-    Se utiliza para enlazar automáticamente formularios con su script,
-    interfaz y tabla de origen.
+    This class contains information on actions to open forms.
+
+    It is used to automatically link forms with your script,
+    interface and source table.
 
     @author InfoSiAL S.L.
     """
@@ -17,53 +20,58 @@ class FLAction(object):
     """
     Nombre de la accion
     """
-    name_: str = ""
+    _name: str
 
     """
     Nombre del script asociado al formulario de edición de registros
     """
-    scriptFormRecord_: str = ""
+    _script_form_record: str
 
     """
     Nombre del script asociado al formulario maestro
     """
-    scriptForm_: str = ""
+    _script_form: str
 
     """
     Nombre de la tabla origen para el formulario maestro
     """
-    table_: str = ""
+    _table: str
 
     """
     Nombre del formulario maestro
     """
-    form_: str = ""
+    _form: str
 
     """
     Nombre del formulario de edición de registros
     """
-    formRecord_: str = ""
+    _form_record: str
 
     """
     Texto para la barra de título del formulario maestro
     """
-    caption_: str = ""
+    _caption: str
 
     """
     Descripción
     """
-    description_: str = ""
+    _description: str
 
-    """
-    constructor.
-    """
+    def __init__(self, action: Union[str, XMLAction]) -> None:
+        """Initialize."""
 
-    def __init__(self, action: Union[str, XMLAction] = None) -> None:
-        super(FLAction, self).__init__()
-        if action is None:
-            return
+        self._name = ""
+        self._caption = ""
+        self._description = ""
+        self._form = ""
+        self._form_record = ""
+        self._script_form = ""
+        self._script_form_record = ""
+        self._table = ""
+
         if isinstance(action, str):
             self.setName(action)
+
         elif isinstance(action, XMLAction):
             self.setName(action.name)
             if action.mainscript is not None:
@@ -80,123 +88,93 @@ class FLAction(object):
             raise Exception("Unsupported action %r" % action)
 
     def __repr__(self):
+        """Return the values ​​in a text string."""
+
         return "<FLAction name=%r scriptForm=%r scriptFormRecord=%r form=%r formRecord=%r caption=%r>" % (
-            self.name_,
-            self.scriptForm_,
-            self.scriptFormRecord_,
-            self.form_,
-            self.formRecord_,
-            self.caption_,
+            self._name,
+            self._script_form,
+            self._script_form_record,
+            self._form,
+            self._form_record,
+            self._caption,
         )
 
-    """
-    Establece el nombre de la accion
-    """
-
     def setName(self, n: str) -> None:
-        self.name_ = n
+        """Set the name of the action."""
 
-    """
-    Establece el nombre del script asociado al formulario de edición de registros
-    """
+        self._name = n
 
     def setScriptFormRecord(self, s: str) -> None:
-        self.scriptFormRecord_ = "%s.qs" % s
+        """Set the name of the script associated with the record editing form."""
 
-    """
-    Establece el nombre del script asociado al formulario maestro
-    """
+        self._script_form_record = "%s.qs" % s
 
     def setScriptForm(self, s: str) -> None:
-        self.scriptForm_ = "%s.qs" % s
+        """Set the name of the script associated with the master form."""
 
-    """
-    Establece el nombre de la tabla origen del formulario maestro
-    """
+        self._script_form = "%s.qs" % s
 
     def setTable(self, t: str) -> None:
-        self.table_ = t
+        """Set the name of the source table of the master form."""
 
-    """
-    Establece el nombre del formulario maestro
-    """
+        self._table = t
 
     def setForm(self, f: str) -> None:
-        self.form_ = "%s.ui" % f
+        """Set the name of the master form."""
 
-    """
-    Establece el nombre del formulario de edición de registros
-    """
+        self._form = "%s.ui" % f
 
     def setFormRecord(self, f: str) -> None:
-        self.formRecord_ = "%s.ui" % f
+        """Set the name of the record editing form."""
 
-    """
-    Establece el texto de la barra de título del formulario maestro
-    """
+        self._form_record = "%s.ui" % f
 
     def setCaption(self, c: str) -> None:
-        self.caption_ = c
+        """Set the text of the title bar of the master form."""
 
-    """
-    Establece la descripción
-    """
+        self._caption = c
 
-    def setDescription(self, d) -> None:
-        self.description_ = d
+    def setDescription(self, d: str) -> None:
+        """Set description."""
 
-    """
-    Obtiene el nombre de la accion
-    """
+        self._description = d
 
     def name(self) -> str:
-        return self.name_
+        """Get the name of the action."""
 
-    """
-    Obtiene el nombre del script asociado al formulario de edición de registros
-    """
+        return self._name
 
     def scriptFormRecord(self) -> str:
-        return self.scriptFormRecord_
+        """Get the name of the script associated with the record editing form."""
 
-    """
-    Obtiene el nombre del script asociado al formulario maestro
-    """
+        return self._script_form_record
 
     def scriptForm(self) -> str:
-        return self.scriptForm_
+        """Get the name of the script associated with the master form."""
 
-    """
-    Obtiene  la tabla asociada a la accion
-    """
+        return self._script_form
 
     def table(self) -> str:
-        return self.table_
+        """Get the table associated with the action."""
 
-    """
-    Obtiene el texto de la barra de título del formulario
-    """
+        return self._table
 
     def caption(self) -> str:
-        return self.caption_
+        """Get the text from the form's title bar."""
 
-    """
-    Obtiene la descripcion
-    """
+        return self._caption
 
     def description(self) -> str:
-        return self.description_
+        """Get the description."""
 
-    """
-    Obtiene el nombre del formulario mestro
-    """
+        return self._description
 
     def form(self) -> str:
-        return self.form_
+        """Get the name of the mestro form."""
 
-    """
-    Obtiene el nombre del formulario de edición de registros
-    """
+        return self._form
 
     def formRecord(self) -> str:
-        return self.formRecord_
+        """Get the name of the record editing form."""
+
+        return self._form_record
