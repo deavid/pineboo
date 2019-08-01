@@ -2466,7 +2466,11 @@ class FLTableDB(QtWidgets.QWidget):
         file_name = "%s/%s%s.ods" % (aqApp.tmp_dir(), mtd.name(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
         ods_gen.generateOds(file_name)
 
-        aqApp.call("sys.openUrl", [file_name], None)
+        from .systype import SysType
+
+        qsa_sys = SysType()
+
+        qsa_sys.openUrl(file_name)
 
         pncontrolsfactory.QApplication.restoreOverrideCursor()
         util.destroyProgressDialog()

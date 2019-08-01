@@ -203,9 +203,9 @@ class FLReportViewer(QtWidgets.QWidget):
         #    return
         if self.rptViewer_.rptEngine_ and hasattr(self.rptViewer_.rptEngine_, "parser_"):
             pdf_file = self.rptViewer_.rptEngine_.parser_.get_file_name()
-            from pineboolib.application import project
+            from pineboolib.pncontrolsfactory import qsa_sys
 
-            project.call("sys.openUrl", [pdf_file], None, True)
+            qsa_sys.openUrl(pdf_file)
         # self.eventloop.exec_()
 
         # if self.embedInParent_:
