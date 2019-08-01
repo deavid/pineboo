@@ -11,6 +11,7 @@ import io
 import os.path
 import shutil
 import hashlib
+import traceback
 from PyQt5.QtGui import QPixmap  # type: ignore
 from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir, pyqtSignal  # type: ignore
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest  # type: ignore
@@ -654,3 +655,8 @@ def pixmap_fromMimeSource(name: str) -> Any:
 
 def sha1(x: str) -> str:
     return hashlib.sha1(str(x).encode("UTF-8")).hexdigest()
+
+
+def print_stack(maxsize: int = 1) -> None:
+    for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
+        print(tb.rstrip())
