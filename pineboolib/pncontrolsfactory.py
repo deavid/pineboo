@@ -4,6 +4,7 @@ import weakref
 import re
 import os
 import traceback
+from importlib import import_module
 
 from PyQt5 import QtCore  # type: ignore
 from pineboolib.core.utils import logging
@@ -147,8 +148,30 @@ auth: Any = ObjectNotFoundDGINotLoaded
 def resolveObject(name: str) -> Any:
     if not project._DGI:
         return ObjectNotFoundDGINotLoaded
-    obj_ = getattr(project._DGI, name, None)
-    if obj_:
+    obj_ = None
+    mod_name_full = "pineboolib.qt3_widgets.%s" % name.lower()
+    try:
+        mod_ = import_module(mod_name_full)
+        obj_ = getattr(mod_, name, None)
+    except ModuleNotFoundError:
+        logger.trace("resolveObject: Module not found %s", mod_name_full)
+    except Exception:
+        logger.exception("resolveObject: Unable to load module %s", mod_name_full)
+
+    if obj_ is None:
+        mod_name_full = "pineboolib.fllegacy.%s" % name.lower()
+        try:
+            mod_ = import_module(mod_name_full)
+            obj_ = getattr(mod_, name, None)
+        except ModuleNotFoundError:
+            logger.trace("resolveObject: Module not found %s", mod_name_full)
+        except Exception:
+            logger.exception("resolveObject: Unable to load module %s", mod_name_full)
+
+    if obj_ is None:
+        obj_ = getattr(project._DGI, name, None)
+
+    if obj_ is not None:
         return obj_
 
     logger.warning("resolveObject: class <%s> not found in dgi <%s>", name, project.DGI.alias().lower())
