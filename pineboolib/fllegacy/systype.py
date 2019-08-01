@@ -1,9 +1,12 @@
 import traceback
 import os
+from typing import cast
 
 from PyQt5 import QtCore
 from PyQt5.QtXml import QDomDocument
 from PyQt5.QtCore import QProcess
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QFileDialog, QApplication
 
 from pineboolib.core.settings import settings
 from pineboolib.core import decorators
@@ -24,7 +27,7 @@ from pineboolib.application.database.utils import sqlSelect
 from pineboolib.fllegacy.aqsobjects.aqs import AQS
 from pineboolib.fllegacy.aqsobjects.aqsql import AQSql
 from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings
-
+from pineboolib.fllegacy.flvar import FLVar
 
 from pineboolib.qt3_widgets.dialog import Dialog
 from pineboolib.qt3_widgets.qbytearray import QByteArray
@@ -116,7 +119,7 @@ class SysType(SysBaseType):
         diag = Dialog()
         txtEdit = QTextEdit()
         diag.caption = self.translate(u"scripts", u"Bloqueos de la base de datos")
-        diag.width = 500
+        diag.setWidth(500)
         html = u'<html><table border="1">'
         if locks is not None and len(locks):
             j = 0
@@ -351,7 +354,7 @@ class SysType(SysBaseType):
     @classmethod
     def warnLocalChanges(self, changes=None):
         if changes is None:
-            changes = localChanges()
+            changes = self.localChanges()
         if changes["size"] == 0:
             return True
         diag = QDialog()
@@ -366,29 +369,29 @@ class SysType(SysBaseType):
         txt += u"\n\n"
         txt += self.translate(u"Registro de cambios")
         lay = QVBoxLayout(diag)
-        lay.margin = 6
-        lay.spacing = 6
+        lay.setMargin(6)
+        lay.setSpacing(6)
         lbl = QLabel(diag)
-        lbl.text = txt
-        lbl.alignment = AQS.AlignTop or AQS.WordBreak
+        lbl.setText(txt)
+        lbl.setAlignment(cast(Qt.Alignment, Qt.AlignTop | Qt.WordBreak))
         lay.addWidget(lbl)
         ted = QTextEdit(diag)
-        ted.textFormat = TextEdit.LogText
-        ted.alignment = AQS.AlignHCenter or AQS.AlignVCenter
-        ted.append(reportChanges(changes))
+        ted.setTextFormat(QTextEdit.LogText)
+        ted.setAlignment(cast(Qt.Alignment, Qt.AlignHCenter | Qt.AlignVCenter))
+        ted.append(self.reportChanges(changes))
         lay.addWidget(ted)
         lbl2 = QLabel(diag)
-        lbl2.text = self.translate("¿Que desea hacer?")
-        lbl2.alignment = AQS.AlignTop or AQS.WordBreak
+        lbl2.setText(self.translate("¿Que desea hacer?"))
+        lbl2.setAlignment(cast(Qt.Alignment, Qt.AlignTop | Qt.WordBreak))
         lay.addWidget(lbl2)
         lay2 = QHBoxLayout()
-        lay2.margin = 6
-        lay2.spacing = 6
+        lay2.setMargin(6)
+        lay2.setSpacing(6)
         lay.addLayout(lay2)
         pbCancel = QPushButton(diag)
-        pbCancel.text = self.translate(u"Cancelar")
+        pbCancel.setText(self.translate(u"Cancelar"))
         pbAccept = QPushButton(diag)
-        pbAccept.text = self.translate(u"continue")
+        pbAccept.setText(self.translate(u"continue"))
         lay2.addWidget(pbCancel)
         lay2.addWidget(pbAccept)
         connections.connect(pbAccept, "clicked()", diag, "accept()")
@@ -426,7 +429,7 @@ class SysType(SysBaseType):
             nf.appendChild(ne)
             nt = doc.createTextNode(fName)
             ne.appendChild(nt)
-            if textPacking(fName):
+            if self.textPacking(fName):
                 ne = doc.createElement(u"text")
                 nf.appendChild(ne)
                 nt = doc.createTextNode(fName)
@@ -443,7 +446,7 @@ class SysType(SysBaseType):
                 shaSumTxt = ba.sha1()
 
             try:
-                if binaryPacking(fName):
+                if self.binaryPacking(fName):
                     ne = doc.createElement(u"binary")
                     nf.appendChild(ne)
                     nt = doc.createTextNode(ustr(fName, u".qso"))
@@ -486,7 +489,7 @@ class SysType(SysBaseType):
                 nf.appendChild(ne)
                 nt = doc.createTextNode(fName)
                 ne.appendChild(nt)
-                if textPacking(fName):
+                if self.textPacking(fName):
                     ne = doc.createElement(u"text")
                     nf.appendChild(ne)
                     nt = doc.createTextNode(fName)
@@ -516,16 +519,16 @@ class SysType(SysBaseType):
     @classmethod
     def loadModules(self, input_=None, warnBackup=None):
         if input_ is None:
-            dir_ = Dir(ustr(installPrefix(), u"/share/eneboo/packages"))
+            dir_ = Dir(ustr(self.installPrefix(), u"/share/eneboo/packages"))
             dir_.setCurrent()
-            input_ = FileDialog.getOpenFileName(
-                u"Eneboo/AbanQ Packages", AQUtil.translate(u"scripts", u"Seleccionar Fichero"), "*.eneboopkg"
+            input_ = QFileDialog.getOpenFileName(
+                u"Eneboo/AbanQ Packages", self.translate(u"scripts", u"Seleccionar Fichero"), "*.eneboopkg"
             )
         if warnBackup is None:
             warnBackup = True
         if input_:
             try:
-                loadAbanQPackage(input_, warnBackup)
+                self.loadAbanQPackage(input_, warnBackup)
             except Exception:
                 logger.warn("*******", traceback.format_exc())
 
@@ -543,9 +546,9 @@ class SysType(SysBaseType):
 
         if input_:
             ok = True
-            changes = localChanges()
+            changes = self.localChanges()
             if changes["size"] != 0:
-                if not warnLocalChanges(changes):
+                if not self.warnLocalChanges(changes):
                     return
             if ok:
                 unpacker = AQUnpacker(input_)
@@ -576,16 +579,16 @@ class SysType(SysBaseType):
                 unpacker.jump()
                 unpacker.jump()
                 if ok:
-                    ok = loadModulesDef(unpacker)
+                    ok = self.loadModulesDef(unpacker)
                 if ok:
-                    ok = loadFilesDef(unpacker)
+                    ok = self.loadFilesDef(unpacker)
 
             if not ok:
                 self.errorMsgBox(self.translate(u"No se ha podido realizar la carga de los módulos."))
             else:
-                registerUpdate(input_)
+                self.registerUpdate(input_)
                 self.infoMsgBox(self.translate(u"La carga de módulos se ha realizado con éxito."))
-                AQTimer.singleShot(0, reinit)
+                AQTimer.singleShot(0, self.reinit)
                 tmpVar = FLVar()
                 tmpVar.set(u"mrproper", u"dirty")
 
@@ -639,7 +642,7 @@ class SysType(SysBaseType):
     @classmethod
     def registerFile(self, fil=None, un=None):
         if fil["id"].endswith(u".xpm"):
-            cur = AQSqlCursor(u"flmodules")
+            cur = PNSqlCursor(u"flmodules")
             if not cur.select(ustr(u"idmodulo='", fil["module"], u"'")):
                 return False
             if not cur.first():
@@ -649,7 +652,7 @@ class SysType(SysBaseType):
             cur.setValueBuffer(u"icono", un.getText())
             return cur.commitBuffer()
 
-        cur = AQSqlCursor(u"flfiles")
+        cur = PNSqlCursor(u"flfiles")
         if not cur.select(ustr(u"nombre='", fil["id"], u"'")):
             return False
         cur.setModeAccess((AQSql.Edit if cur.first() else AQSql.Insert))
@@ -702,7 +705,7 @@ class SysType(SysBaseType):
             self.errorMsgBox(self.translate(u"Error XML al intentar cargar la definición de los módulos."))
             return False
         root = doc.firstChild()
-        if not checkProjectName(root.toElement().attribute(u"projectname", u"")):
+        if not self.checkProjectName(root.toElement().attribute(u"projectname", u"")):
             return False
         ok = True
         modules = root.childNodes()
@@ -741,7 +744,7 @@ class SysType(SysBaseType):
 
     @classmethod
     def registerArea(self, mod=None):
-        cur = AQSqlCursor(u"flareas")
+        cur = PNSqlCursor(u"flareas")
         if not cur.select(ustr(u"idarea='", mod["area"], u"'")):
             return False
         cur.setModeAccess((AQSql.Edit if cur.first() else AQSql.Insert))
@@ -752,7 +755,7 @@ class SysType(SysBaseType):
 
     @classmethod
     def registerModule(self, mod=None):
-        cur = AQSqlCursor(u"flmodules")
+        cur = PNSqlCursor(u"flmodules")
         if not cur.select(ustr(u"idmodulo='", mod["id"], u"'")):
             return False
         cur.setModeAccess((AQSql.Edit if cur.first() else AQSql.Insert))
@@ -1229,7 +1232,7 @@ class SysType(SysBaseType):
             not AQUtil.isFLDefFile(content) and not name.endswith(u".qs") and not name.endswith(u".ar") and not name.endswith(u".svg")
         ) or name.endswith(u"untranslated.ts"):
             return ok
-        cur = AQSqlCursor(u"flfiles")
+        cur = PNSqlCursor(u"flfiles")
         cur.select(ustr(u"nombre = '", name, u"'"))
         if not cur.first():
             if name.endswith(u".ar"):
