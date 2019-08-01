@@ -38,9 +38,9 @@ class FormDBWidget(QtWidgets.QWidget):
 
     def _connect(self, sender, signal, receiver, slot):
         # print(" > > > connect:", sender, " signal ", str(signal))
-        from pineboolib import pncontrolsfactory
+        from pineboolib.application import connections
 
-        signal_slot = pncontrolsfactory.connect(sender, signal, receiver, slot, caller=self)
+        signal_slot = connections.connect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
 
@@ -48,9 +48,9 @@ class FormDBWidget(QtWidgets.QWidget):
 
     def _disconnect(self, sender, signal, receiver, slot):
         # print(" > > > disconnect:", self)
-        from pineboolib import pncontrolsfactory
+        from pineboolib.application import connections
 
-        signal_slot = pncontrolsfactory.disconnect(sender, signal, receiver, slot, caller=self)
+        signal_slot = connections.disconnect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
 

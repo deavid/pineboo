@@ -11,9 +11,9 @@ from .qgroupbox import QGroupBox
 class QTable(QtWidgets.QTableWidget):
 
     lineaActual = None
-    # currentChanged = QtCore.pyqtSignal(int, int) # defined in base class
+    currentChanged = QtCore.pyqtSignal(int, int)  # need overload
     doubleClicked = QtCore.pyqtSignal(int, int)
-    # clicked = QtCore.pyqtSignal(int, int)  # defined in base class
+    clicked = QtCore.pyqtSignal(int, int)  # need overload
     valueChanged = QtCore.pyqtSignal(int, int)
     read_only_cols: List[str]
     read_only_rows: List[str]
