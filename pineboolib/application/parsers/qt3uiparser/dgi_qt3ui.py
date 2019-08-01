@@ -4,7 +4,10 @@ Module dgi_qt3ui.
 
 Loads old Qt3 UI files and creates a Qt5 UI.
 """
+from importlib import import_module
+
 from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
+
 from xml.etree import ElementTree as ET
 from binascii import unhexlify
 from pineboolib import logging
@@ -12,11 +15,15 @@ import zlib
 from PyQt5.QtCore import QObject  # type: ignore
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application import project
+from pineboolib.application import connections
+
+from pineboolib import qt3_widgets
+
 from pineboolib.core.settings import config
 
-from pineboolib import pncontrolsfactory
 
 from typing import Optional, Tuple, Callable, List, Dict, Any, cast
+
 
 ICONS: Dict[str, Any] = {}
 root = None
@@ -110,7 +117,7 @@ def loadUi(form_path: str, widget, parent=None) -> None:
             raise ValueError("no se encuentra slot_name")
 
         receiver = None
-        if isinstance(widget, pncontrolsfactory.QMainWindow):
+        if isinstance(widget, qt3_widgets.qmainwindow.QMainWindow):
             if signal_name == "activated()":
                 signal_name = "triggered()"
 
@@ -138,7 +145,7 @@ def loadUi(form_path: str, widget, parent=None) -> None:
         if receiv_name == formname:
             receiver = (
                 widget
-                if not isinstance(widget, pncontrolsfactory.QMainWindow)
+                if not isinstance(widget, qt3_widgets.qmainwindow.QMainWindow)
                 else project.actions[sender_name]
                 if sender_name in project.actions.keys()
                 else None
@@ -154,7 +161,7 @@ def loadUi(form_path: str, widget, parent=None) -> None:
 
                     # getattr(sender, sg_name).connect(
                     #    getattr(ifx, fn_name))
-                    pncontrolsfactory.connect(sender, signal_name, ifx, fn_name)
+                    connections.connect(sender, signal_name, ifx, fn_name)
                 except Exception:
                     logger.exception("Error connecting: %s %s %s %s %s", sender, signal_name, receiver, slot_name, getattr(ifx, fn_name))
                 continue
@@ -220,7 +227,7 @@ def loadToolBar(xml: ET.Element, widget) -> None:
     name = name_elem.text
     label = label_elem.text
 
-    tb = pncontrolsfactory.QToolBar(name)
+    tb = qt3_widgets.qtoolbar.QToolBar(name)
     tb.label = label
     for a in xml:
         if a.tag == "action":
@@ -243,7 +250,7 @@ def loadMenuBar(xml: ET.Element, widget) -> None:
     widget: pre-created widget to store the object.
     """
 
-    if isinstance(widget, pncontrolsfactory.QMainWindow):
+    if isinstance(widget, qt3_widgets.qmainwindow.QMainWindow):
         mB = widget.menuBar()
     else:
         mB = QtWidgets.QMenuBar(widget)
@@ -358,8 +365,28 @@ def createWidget(classname: str, parent=None) -> Any:
     """
     Create a Widget for given class name.
     """
+    cls = None
+    mod_name_full = "pineboolib.qt3_widgets.%s" % classname.lower()
+    try:
+        mod_ = import_module(mod_name_full)
+        cls = getattr(mod_, classname, None)
+    except ModuleNotFoundError:
+        logger.trace("resolveObject: Module not found %s", mod_name_full)
+    except Exception:
+        logger.exception("resolveObject: Unable to load module %s", mod_name_full)
 
-    cls = getattr(pncontrolsfactory, classname, None) or getattr(QtWidgets, classname, None)
+    if cls is None:
+        mod_name_full = "pineboolib.fllegacy.%s" % classname.lower()
+        try:
+            mod_ = import_module(mod_name_full)
+            cls = getattr(mod_, classname, None)
+        except ModuleNotFoundError:
+            logger.trace("resolveObject: Module not found %s", mod_name_full)
+        except Exception:
+            logger.exception("resolveObject: Unable to load module %s", mod_name_full)
+
+    if cls is None:
+        cls = getattr(QtWidgets, classname, None)
 
     if cls is None:
         logger.warning("WARN: Class name not found in QtWidgets:", classname)
@@ -498,7 +525,7 @@ class loadWidget:
                 continue
 
             if c.tag == "item":
-                if isinstance(self.widget, pncontrolsfactory.QMenu):
+                if isinstance(self.widget, qt3_widgets.qmenu.QMenu):
                     continue
                 else:
                     prop1: Dict[str, Any] = {}
@@ -544,11 +571,11 @@ class loadWidget:
                     self.widget.addTab(new_widget, title)
                 elif gb or wd:
                     lay = getattr(self.widget, "layout")()
-                    if not lay and not isinstance(self.widget, pncontrolsfactory.QToolBar):
+                    if not lay and not isinstance(self.widget, qt3_widgets.qtoolbar.QToolBar):
                         lay = QtWidgets.QVBoxLayout()
                         self.widget.setLayout(lay)
 
-                    if isinstance(self.widget, pncontrolsfactory.QToolBar):
+                    if isinstance(self.widget, qt3_widgets.qtoolbar.QToolBar):
                         if isinstance(new_widget, QtWidgets.QAction):
                             self.widget.addAction(new_widget)
                         else:
@@ -623,7 +650,7 @@ class loadWidget:
         elif pname in ("paletteBackgroundColor", "paletteForegroundColor"):
             set_fn = widget.setStyleSheet
         elif pname == "menuText":
-            if not isinstance(widget, pncontrolsfactory.QAction):
+            if not isinstance(widget, qt3_widgets.qaction.QAction):
                 set_fn = widget.menuText
             else:
                 return
@@ -631,13 +658,13 @@ class loadWidget:
             set_fn = widget.setMovable
         elif pname == "toggleAction":
             set_fn = widget.setChecked
-        elif pname == "label" and isinstance(widget, pncontrolsfactory.QToolBar):
+        elif pname == "label" and isinstance(widget, qt3_widgets.qtoolbar.QToolBar):
             return
-        elif pname == "maxValue" and isinstance(widget, pncontrolsfactory.QSpinBox):
+        elif pname == "maxValue" and isinstance(widget, qt3_widgets.qspinbox.QSpinBox):
             set_fn = widget.setMaximum
-        elif pname == "minValue" and isinstance(widget, pncontrolsfactory.QSpinBox):
+        elif pname == "minValue" and isinstance(widget, qt3_widgets.qspinbox.QSpinBox):
             set_fn = widget.setMinimum
-        elif pname == "lineStep" and isinstance(widget, pncontrolsfactory.QSpinBox):
+        elif pname == "lineStep" and isinstance(widget, qt3_widgets.qspinbox.QSpinBox):
             set_fn = widget.setSingleStep
         elif pname == "newLine":
             set_fn = self.origWidget.addToolBarBreak
