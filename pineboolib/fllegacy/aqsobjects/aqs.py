@@ -39,6 +39,7 @@ class AQS(object):
     SmtpAttachError: int = 15
     SmtpServerError: int = 16
     SmtpClientError: int = 17
+    StFailed = None
 
     WindowStateChange = QtGui.QWindowStateChangeEvent
     ContextMenu = QtGui.QContextMenuEvent
