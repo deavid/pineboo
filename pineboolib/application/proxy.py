@@ -3,7 +3,7 @@ Proxy Module.
 """
 from typing import Callable
 from pineboolib import logging
-from typing import Any
+from typing import Any, Optional
 
 
 class DelayedObjectProxyLoader(object):
@@ -13,25 +13,27 @@ class DelayedObjectProxyLoader(object):
 
     logger = logging.getLogger("application.DelayedObjectProxyLoader")
 
-    def __init__(self, obj: Callable, *args, **kwargs) -> None:
+    def __init__(self, obj: Callable, *args: Any, **kwargs: Any) -> None:
         """
         Constructor.
         """
-        self._name = "unnamed-loader"
+        self._name: str = "unnamed-loader"
         if "name" in kwargs:
-            self._name = kwargs["name"]
+            self._name = str(kwargs["name"])
             del kwargs["name"]
         self._obj = obj
         self._args = args
         self._kwargs = kwargs
-        self.loaded_obj = None
+        self.loaded_obj: Optional[Any] = None
 
-    def __load(self):
+    def __load(self) -> Any:
         """
         Load a new object.
 
         @return objeto nuevo o si ya existe , cacheado
         """
+        if self.loaded_obj is not None:
+            return self.loaded_obj
         self.logger.debug("DelayedObjectProxyLoader: loading %s %s( *%s **%s)", self._name, self._obj, self._args, self._kwargs)
 
         self.loaded_obj = self._obj(*self._args, **self._kwargs)
