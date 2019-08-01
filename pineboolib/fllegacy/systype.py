@@ -1465,7 +1465,7 @@ class AbanQDbDumper(object):
 
     def buildGui(self):
         self.w_ = QDialog()
-        self.w_.caption = qsa_sys.translate(u"Copias de seguridad")
+        self.w_.caption = SysType.translate(u"Copias de seguridad")
         self.w_.modal = True
         self.w_.resize(800, 600)
         # lay = QVBoxLayout(self.w_, 6, 6)
@@ -1477,37 +1477,37 @@ class AbanQDbDumper(object):
         # layFrm = QVBoxLayout(frm, 6, 6)
         layFrm = QVBoxLayout(frm)
         lbl = QLabel(frm)
-        lbl.text = qsa_sys.translate(u"Driver: %s") % (str(self.db_.driverNameToDriverAlias(self.db_.driverName())))
+        lbl.text = SysType.translate(u"Driver: %s") % (str(self.db_.driverNameToDriverAlias(self.db_.driverName())))
         lbl.alignment = AQS.AlignTop
         layFrm.addWidget(lbl)
         lbl = QLabel(frm)
-        lbl.text = qsa_sys.translate(u"Base de datos: %s") % (str(self.db_.database()))
+        lbl.text = SysType.translate(u"Base de datos: %s") % (str(self.db_.database()))
         lbl.alignment = AQS.AlignTop
         layFrm.addWidget(lbl)
         lbl = QLabel(frm)
-        lbl.text = qsa_sys.translate(u"Host: %s") % (str(self.db_.host()))
+        lbl.text = SysType.translate(u"Host: %s") % (str(self.db_.host()))
         lbl.alignment = AQS.AlignTop
         layFrm.addWidget(lbl)
         lbl = QLabel(frm)
-        lbl.text = qsa_sys.translate(u"Puerto: %s") % (str(self.db_.port()))
+        lbl.text = SysType.translate(u"Puerto: %s") % (str(self.db_.port()))
         lbl.alignment = AQS.AlignTop
         layFrm.addWidget(lbl)
         lbl = QLabel(frm)
-        lbl.text = qsa_sys.translate(u"Usuario: %s") % (str(self.db_.user()))
+        lbl.text = SysType.translate(u"Usuario: %s") % (str(self.db_.user()))
         lbl.alignment = AQS.AlignTop
         layFrm.addWidget(lbl)
         layAux = QHBoxLayout()
         layFrm.addLayout(layAux)
         self.lblDirBase_ = QLabel(frm)
-        self.lblDirBase_.text = qsa_sys.translate(u"Directorio Destino: %s") % (str(self.dirBase_))
+        self.lblDirBase_.text = SysType.translate(u"Directorio Destino: %s") % (str(self.dirBase_))
         self.lblDirBase_.alignment = AQS.AlignVCenter
         layAux.addWidget(self.lblDirBase_)
-        self.pbChangeDir_ = QPushButton(qsa_sys.translate(u"Cambiar"), frm)
+        self.pbChangeDir_ = QPushButton(SysType.translate(u"Cambiar"), frm)
         self.pbChangeDir_.setSizePolicy(AQS.Maximum, AQS.Preferred)
         connections.connect(self.pbChangeDir_, u"clicked()", self, u"changeDirBase()")
         layAux.addWidget(self.pbChangeDir_)
         lay.addWidget(frm)
-        self.pbInitDump_ = QPushButton(qsa_sys.translate(u"INICIAR COPIA"), self.w_)
+        self.pbInitDump_ = QPushButton(SysType.translate(u"INICIAR COPIA"), self.w_)
         connections.connect(self.pbInitDump_, u"clicked()", self, u"initDump()")
         lay.addWidget(self.pbInitDump_)
         lbl = QLabel(self.w_)
@@ -1527,11 +1527,11 @@ class AbanQDbDumper(object):
             self.w_.enabled = True
         if self.state_.ok:
             if gui:
-                qsa_sys.infoMsgBox(self.state_.msg)
+                SysType.infoMsgBox(self.state_.msg)
             self.w_.close()
         else:
             if gui:
-                qsa_sys.self.errorMsgBox(self.state_.msg)
+                SysType.errorMsgBox(self.state_.msg)
 
     def genFileName(self):
         now = Date()
@@ -1554,7 +1554,7 @@ class AbanQDbDumper(object):
                 return
         self.dirBase_ = dirBasePath
         if self.showGui_ and self.lblDirBase_ is not None:
-            self.lblDirBase_.text = qsa_sys.translate(u"Directorio Destino: %s") % (str(self.dirBase_))
+            self.lblDirBase_.text = SysType.translate(u"Directorio Destino: %s") % (str(self.dirBase_))
         self.fileName_ = self.genFileName()
 
     def addLog(self, msg=None):
@@ -1580,7 +1580,7 @@ class AbanQDbDumper(object):
         self.proc_.start()
 
         while self.proc_.running:
-            qsa_sys.processEvents()
+            SysType.processEvents()
 
         return self.proc_.exitcode() == self.proc_.normalExit
 
@@ -1604,7 +1604,7 @@ class AbanQDbDumper(object):
                 typeBd = 2
 
         if typeBd == 0:
-            self.setState(False, qsa_sys.translate(u"Este tipo de base de datos no soporta el volcado a disco."))
+            self.setState(False, SysType.translate(u"Este tipo de base de datos no soporta el volcado a disco."))
             self.funLog_(self.state_.msg)
             self.dumpAllTablesToCsv()
             return False
@@ -1629,10 +1629,10 @@ class AbanQDbDumper(object):
         if not ok:
             self.dumpAllTablesToCsv()
         if not ok:
-            self.setState(False, qsa_sys.translate(u"No se ha podido realizar la copia de seguridad."))
+            self.setState(False, SysType.translate(u"No se ha podido realizar la copia de seguridad."))
             self.funLog_(self.state_.msg)
         else:
-            self.setState(True, qsa_sys.translate(u"Copia de seguridad realizada con éxito en:\n%s") % (str(self.fileName_)))
+            self.setState(True, SysType.translate(u"Copia de seguridad realizada con éxito en:\n%s") % (str(self.fileName_)))
             self.funLog_(self.state_.msg)
 
         return ok
@@ -1642,7 +1642,7 @@ class AbanQDbDumper(object):
         command = None
         fileName = ustr(self.fileName_, u".sql")
         db = self.db_
-        if qsa_sys.osName() == u"WIN32":
+        if SysType.osName() == u"WIN32":
             pgDump += u".exe"
             System.setenv(u"PGPASSWORD", db.password())
             command = [pgDump, u"-f", fileName, u"-h", db.host(), u"-p", db.port(), u"-U", db.user(), db.database()]
@@ -1653,8 +1653,8 @@ class AbanQDbDumper(object):
         if not self.launchProc(command):
             self.setState(
                 False,
-                qsa_sys.translate(u"No se ha podido volcar la base de datos a disco.\n")
-                + qsa_sys.translate(u"Es posible que no tenga instalada la herramienta ")
+                SysType.translate(u"No se ha podido volcar la base de datos a disco.\n")
+                + SysType.translate(u"Es posible que no tenga instalada la herramienta ")
                 + pgDump,
             )
             self.funLog_(self.state_["msg"])
@@ -1667,7 +1667,7 @@ class AbanQDbDumper(object):
         command = None
         fileName = ustr(self.fileName_, u".sql")
         db = self.db_
-        if qsa_sys.osName() == u"WIN32":
+        if SysType.osName() == u"WIN32":
             myDump += u".exe"
             command = [
                 myDump,
@@ -1694,8 +1694,8 @@ class AbanQDbDumper(object):
         if not self.launchProc(command):
             self.setState(
                 False,
-                qsa_sys.translate(u"No se ha podido volcar la base de datos a disco.\n")
-                + qsa_sys.translate(u"Es posible que no tenga instalada la herramienta ")
+                SysType.translate(u"No se ha podido volcar la base de datos a disco.\n")
+                + SysType.translate(u"Es posible que no tenga instalada la herramienta ")
                 + myDump,
             )
             self.funLog_(self.state_.msg)
@@ -1736,7 +1736,7 @@ class AbanQDbDumper(object):
                 break
 
         ts.opIn(ustr(rec, u"\n"))
-        AQUtil.createProgressDialog(qsa_sys.translate(u"Haciendo copia en CSV de ") + table, qry.size())
+        AQUtil.createProgressDialog(SysType.translate(u"Haciendo copia en CSV de ") + table, qry.size())
         p = 0
         while qry.next():
             rec = u""
@@ -1808,6 +1808,6 @@ class AQGlobalFunctions(object):
         def _():
             self.mappers_[c] = None
 
-        connections.connect(sigMap, u"mapped(QString)", qsa_sys.AQGlobalFunctions, u"exec()")
+        connections.connect(sigMap, u"mapped(QString)", SysType.AQGlobalFunctions, u"exec()")
         sigMap.setMapping(obj, functionName)
         connections.connect(obj, signal, sigMap, u"map()")
