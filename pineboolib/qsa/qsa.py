@@ -22,7 +22,7 @@ from typing import Any, Optional, Union, Match, List, Pattern, Generator
 
 logger = logging.getLogger("qsa")
 
-util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
+util = FLUtil
 sys = qsa_sys
 print_ = print
 

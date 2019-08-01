@@ -12,4 +12,3 @@ Package dgi_qt
 
    dgi_objects/index
    dgi_qt
-   dgi_qt3ui
