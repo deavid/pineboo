@@ -9,12 +9,12 @@ from pineboolib.core import decorators
 from pineboolib.application import project
 
 from pineboolib.core.utils import logging
-from pineboolib.fllegacy.sysqs import SysQs
+import pineboolib.fllegacy.sysqs
 
 logger = logging.getLogger("fllegacy.systype")
 
 
-class SysType(SysQs, metaclass=Singleton):
+class SysType(pineboolib.fllegacy.sysqs.SysQs, metaclass=Singleton):
     time_user_ = QtCore.QDateTime.currentDateTime()
     sys_widget: Any = None
 
