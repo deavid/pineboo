@@ -1253,7 +1253,7 @@ class FLApplication(QtCore.QObject):
 
     def consoleShown(self) -> bool:
         """Return if console is shown."""
-        return self._ted_output and not self._ted_output.isHidden()
+        return bool(self._ted_output and not self._ted_output.isHidden())
 
     @decorators.NotImplementedWarn
     def modMainWidget(self, id_modulo):
