@@ -932,8 +932,8 @@ class FLFormDB(QDialog):
         module_name = getattr(project.actions[self._action.name()].mod, "module_name", None)
         if module_name:
 
-            if module_name in aqApp.dict_main_widgets_.keys():
-                module_window = aqApp.dict_main_widgets_[module_name]
+            if module_name in aqApp._dict_main_widgets.keys():
+                module_window = aqApp._dict_main_widgets[module_name]
                 mdi_area = module_window.centralWidget()
 
                 if isinstance(mdi_area, pncontrolsfactory.QMdiArea) and type(self).__name__ == "FLFormDB":
