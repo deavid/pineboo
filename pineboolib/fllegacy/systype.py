@@ -406,7 +406,6 @@ class SysType(SysBaseType):
         connections.connect(pbCancel, "clicked()", diag, "reject()")
         return False if (diag.exec_() == 0) else True
 
-
     @classmethod
     def xmlFilesDefBd(self):
         doc = QDomDocument(u"files_def")
@@ -829,7 +828,6 @@ class SysType(SysBaseType):
         ba = QByteArray()
         ba.string = str_
         return parseString(AQS.decryptInternal(AQS.fromBase64(ba)))
-
 
     @classmethod
     def exportModules(self):
@@ -1311,7 +1309,6 @@ class SysType(SysBaseType):
             return self.importFile(filePath, idMod)
 
         return False
-
 
     @decorators.WorkingOnThis
     @classmethod

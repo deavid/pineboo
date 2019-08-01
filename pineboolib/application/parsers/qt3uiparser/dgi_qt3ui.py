@@ -18,6 +18,11 @@ from pineboolib.application import project
 from pineboolib.application import connections
 
 from pineboolib import qt3_widgets
+from pineboolib.qt3_widgets import qmainwindow
+from pineboolib.qt3_widgets import qtoolbar
+from pineboolib.qt3_widgets import qmenu
+from pineboolib.qt3_widgets import qaction
+from pineboolib.qt3_widgets import qspinbox
 
 from pineboolib.core.settings import config
 
@@ -117,7 +122,7 @@ def loadUi(form_path: str, widget, parent=None) -> None:
             raise ValueError("no se encuentra slot_name")
 
         receiver = None
-        if isinstance(widget, qt3_widgets.qmainwindow.QMainWindow):
+        if isinstance(widget, qmainwindow.QMainWindow):
             if signal_name == "activated()":
                 signal_name = "triggered()"
 
@@ -145,7 +150,7 @@ def loadUi(form_path: str, widget, parent=None) -> None:
         if receiv_name == formname:
             receiver = (
                 widget
-                if not isinstance(widget, qt3_widgets.qmainwindow.QMainWindow)
+                if not isinstance(widget, qmainwindow.QMainWindow)
                 else project.actions[sender_name]
                 if sender_name in project.actions.keys()
                 else None
@@ -227,11 +232,11 @@ def loadToolBar(xml: ET.Element, widget) -> None:
     name = name_elem.text
     label = label_elem.text
 
-    tb = qt3_widgets.qtoolbar.QToolBar(name)
+    tb = qtoolbar.QToolBar(name)
     tb.label = label
     for a in xml:
         if a.tag == "action":
-            name = a.get("name")
+            name = a.get("name") or "action"
             ac_ = tb.addAction(name)
             ac_.setObjectName(name)
             load_action(ac_, widget)
@@ -250,7 +255,7 @@ def loadMenuBar(xml: ET.Element, widget) -> None:
     widget: pre-created widget to store the object.
     """
 
-    if isinstance(widget, qt3_widgets.qmainwindow.QMainWindow):
+    if isinstance(widget, qmainwindow.QMainWindow):
         mB = widget.menuBar()
     else:
         mB = QtWidgets.QMenuBar(widget)
@@ -260,7 +265,7 @@ def loadMenuBar(xml: ET.Element, widget) -> None:
             name = x.get("name")
             if name == "name":
                 cstring = x.find("cstring")
-                if cstring is not None:
+                if cstring is not None and cstring.text is not None:
                     mB.setObjectName(cstring.text)
             elif name == "geometry":
                 geo_ = x.find("rect")
@@ -365,6 +370,7 @@ def createWidget(classname: str, parent=None) -> Any:
     """
     Create a Widget for given class name.
     """
+    # FIXME: Avoid dynamic imports. Also, this is slow.
     cls = None
     mod_name_full = "pineboolib.qt3_widgets.%s" % classname.lower()
     try:
@@ -525,7 +531,7 @@ class loadWidget:
                 continue
 
             if c.tag == "item":
-                if isinstance(self.widget, qt3_widgets.qmenu.QMenu):
+                if isinstance(self.widget, qmenu.QMenu):
                     continue
                 else:
                     prop1: Dict[str, Any] = {}
@@ -571,11 +577,11 @@ class loadWidget:
                     self.widget.addTab(new_widget, title)
                 elif gb or wd:
                     lay = getattr(self.widget, "layout")()
-                    if not lay and not isinstance(self.widget, qt3_widgets.qtoolbar.QToolBar):
+                    if not lay and not isinstance(self.widget, qtoolbar.QToolBar):
                         lay = QtWidgets.QVBoxLayout()
                         self.widget.setLayout(lay)
 
-                    if isinstance(self.widget, qt3_widgets.qtoolbar.QToolBar):
+                    if isinstance(self.widget, qtoolbar.QToolBar):
                         if isinstance(new_widget, QtWidgets.QAction):
                             self.widget.addAction(new_widget)
                         else:
@@ -650,7 +656,7 @@ class loadWidget:
         elif pname in ("paletteBackgroundColor", "paletteForegroundColor"):
             set_fn = widget.setStyleSheet
         elif pname == "menuText":
-            if not isinstance(widget, qt3_widgets.qaction.QAction):
+            if not isinstance(widget, qaction.QAction):
                 set_fn = widget.menuText
             else:
                 return
@@ -658,13 +664,13 @@ class loadWidget:
             set_fn = widget.setMovable
         elif pname == "toggleAction":
             set_fn = widget.setChecked
-        elif pname == "label" and isinstance(widget, qt3_widgets.qtoolbar.QToolBar):
+        elif pname == "label" and isinstance(widget, qtoolbar.QToolBar):
             return
-        elif pname == "maxValue" and isinstance(widget, qt3_widgets.qspinbox.QSpinBox):
+        elif pname == "maxValue" and isinstance(widget, qspinbox.QSpinBox):
             set_fn = widget.setMaximum
-        elif pname == "minValue" and isinstance(widget, qt3_widgets.qspinbox.QSpinBox):
+        elif pname == "minValue" and isinstance(widget, qspinbox.QSpinBox):
             set_fn = widget.setMinimum
-        elif pname == "lineStep" and isinstance(widget, qt3_widgets.qspinbox.QSpinBox):
+        elif pname == "lineStep" and isinstance(widget, qspinbox.QSpinBox):
             set_fn = widget.setSingleStep
         elif pname == "newLine":
             set_fn = self.origWidget.addToolBarBreak

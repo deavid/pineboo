@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import traceback
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import QKeySequence
-from PyQt5.QtWidgets import QDialog
+from PyQt5.QtGui import QKeySequence
+from PyQt5.QtWidgets import QDialog, QFileDialog, QApplication
 
 from pineboolib import logging
 from pineboolib.core import decorators
@@ -453,11 +453,10 @@ class FLFormDB(QDialog):
 
     def saveSnapShot(self, path_file=None) -> None:
         if not path_file:
-            from pineboolib.fllegacy.filedialog import FileDialog
 
             tmp_file = "%s/snap_shot_%s.png" % (aqApp.tmp_dir(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
 
-            ret = FileDialog.getSaveFileName(None, "Pineboo", tmp_file, "PNG(*.png)")
+            ret = QFileDialog.getSaveFileName(QApplication.activeWindow(), "Pineboo", tmp_file, "PNG(*.png)")
             path_file = ret[0] if ret else None
 
         if path_file:

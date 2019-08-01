@@ -940,8 +940,9 @@ class MainForm(QtWidgets.QMainWindow):
         elif fn_ == "updatePineboo()":
             self.qsa_sys.updatePineboo()
 
-        elif fn_ == "dumpDatabase()":
-            self.qsa_sys.dumpDatabase()
+        # FIXME: dumpDatabase does not exist
+        # elif fn_ == "dumpDatabase()":
+        #     self.qsa_sys.dumpDatabase()
 
         elif fn_ == "staticLoaderSetup()":
             pncontrolsfactory.aqApp.staticLoaderSetup()
