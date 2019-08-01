@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets  # type: ignore
+from PyQt5.QtWidgets import qApp
 from pineboolib import logging
-from pineboolib.fllegacy.flapplication import aqApp
 from typing import Any
 
 
@@ -60,24 +60,24 @@ class FLLineEdit(QtWidgets.QLineEdit):
             if s[0] == "-":
                 minus = True
                 s = s[1:]
-            if aqApp.commaSeparator() == ",":
+            if qApp.localeSystem().toString(1.1, "f", 1)[1] == ",":
                 s = s.replace(".", ",")
 
-            val, ok = aqApp.localeSystem().toDouble(s)
+            val, ok = qApp.localeSystem().toDouble(s)
             if ok:
-                s = aqApp.localeSystem().toString(val, "f", self.partDecimal)
+                s = qApp.localeSystem().toString(1.1, "f", self.partDecimal)
             if minus:
                 s = "-%s" % s
 
         elif self._tipo in ("int"):
-            val, ok = aqApp.localeSystem().toInt(s)
+            val, ok = qApp.localeSystem().toInt(s)
             if ok:
-                s = aqApp.localeSystem().toString(val)
+                s = qApp.localeSystem().toString(val)
 
         elif self._tipo in ("uint"):
-            val, ok = aqApp.localeSystem().toUInt(s)
+            val, ok = qApp.localeSystem().toUInt(s)
             if ok:
-                s = aqApp.localeSystem().toString(val)
+                s = qApp.localeSystem().toString(val)
 
         super().setText(s)
 
@@ -94,7 +94,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
                 minus = True
                 text_ = text_[1:]
 
-            val, ok = aqApp.localeSystem().toDouble(text_)
+            val, ok = qApp.localeSystem().toDouble(text_)
             if ok:
                 text_ = str(val)
 
@@ -102,12 +102,12 @@ class FLLineEdit(QtWidgets.QLineEdit):
                 text_ = "-%s" % text_
 
         elif self._tipo == "uint":
-            val, ok = aqApp.localeSystem().toUInt(text_)
+            val, ok = qApp.localeSystem().toUInt(text_)
             if ok:
                 text_ = str(val)
 
         elif self._tipo == "int":
-            val, ok = aqApp.localeSystem().toInt(text_)
+            val, ok = qApp.localeSystem().toInt(text_)
 
             if ok:
                 text_ = str(val)
@@ -123,10 +123,10 @@ class FLLineEdit(QtWidgets.QLineEdit):
 
             if self._tipo == "double":
 
-                val, ok = aqApp.localeSystem().toDouble(text_)
+                val, ok = qApp.localeSystem().toDouble(text_)
 
                 if ok:
-                    text_ = aqApp.localeSystem().toString(val, "f", self.partDecimal)
+                    text_ = qApp.localeSystem().toString(val, "f", self.partDecimal)
                 super().setText(text_)
             else:
 
@@ -142,8 +142,8 @@ class FLLineEdit(QtWidgets.QLineEdit):
             s = self.text()
             if self._tipo == "double":
                 if s != "":
-                    s = aqApp.localeSystem().toString(float(s), "f", self.partDecimal)
-                if aqApp.commaSeparator() == ",":
+                    s = qApp.localeSystem().toString(float(s), "f", self.partDecimal)
+                if qApp.localeSystem().toString(1.1, "f", 1)[1] == ",":
                     s = s.replace(".", "")
                 else:
                     s = s.replace(",", "")

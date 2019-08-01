@@ -4,8 +4,6 @@ from typing import Tuple
 from PyQt5 import QtGui  # type: ignore
 from PyQt5.QtGui import QValidator  # type: ignore
 
-from pineboolib.fllegacy.flapplication import aqApp
-
 
 class FLDoubleValidator(QtGui.QDoubleValidator):
     _formatting = None
@@ -44,7 +42,7 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
 
         ret_1 = state[1]
 
-        if aqApp.commaSeparator() == "," and ret_1.endswith("."):
+        if qApp.localeSystem().toString(1.1, "f", self.partDecimal) == "," and ret_1.endswith("."):
             ret_1 = ret_1[0 : len(ret_1) - 1] + ","
 
         if len(ret_1) == 1 and ret_1 not in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "."):

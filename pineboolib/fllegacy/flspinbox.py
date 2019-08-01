@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from typing import Any
-from pineboolib.qt3_widgets import qspinbox
+from pineboolib.qt3_widgets.qspinbox import QSpinBox
 
 
-class FLSpinBox(qspinbox.QSpinBox):
+class FLSpinBox(QSpinBox):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         # editor()setAlignment(Qt::AlignRight);
