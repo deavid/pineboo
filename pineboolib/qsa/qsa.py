@@ -16,14 +16,13 @@ from pineboolib.core.utils import logging
 
 # from pineboolib.pnobjectsfactory import load_model, Calculated
 from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.pncontrolsfactory import qsa_sys
 from typing import Any, Optional, Union, Match, List, Pattern, Generator
-
+from pineboolib.fllegacy import systype
 
 logger = logging.getLogger("qsa")
 
 util = FLUtil
-sys = qsa_sys
+sys = systype.SysType()
 print_ = print
 
 undefined = None
@@ -318,7 +317,7 @@ from pineboolib.fllegacy.flvar import FLVar  # noqa: F401
 # from pineboolib.core.utils.utils_base import ustr, filedir  # noqa: F401
 from pineboolib.application.types import Boolean, QString, String, Function, Object, Array, Date, AttributeDict, File, Dir  # noqa: F401
 from .input import Input  # noqa: F401
-from pineboolib.pncontrolsfactory import *  # noqa: F401
+from .pncontrolsfactory import *  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQS  # noqa: F401
 
 
