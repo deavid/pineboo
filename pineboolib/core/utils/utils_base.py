@@ -10,6 +10,7 @@ import sys
 import io
 import os.path
 import shutil
+import hashlib
 from PyQt5.QtGui import QPixmap  # type: ignore
 from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir, pyqtSignal  # type: ignore
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest  # type: ignore
@@ -649,3 +650,7 @@ def pixmap_fromMimeSource(name: str) -> Any:
     """Convert mime source into a pixmap."""
     file_name = filedir("../share/icons", name)
     return QPixmap(file_name) if os.path.exists(file_name) else None
+
+
+def sha1(x: str) -> str:
+    return hashlib.sha1(str(x).encode("UTF-8")).hexdigest()

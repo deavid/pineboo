@@ -939,14 +939,14 @@ class FLUtil(QtCore.QObject):
 
     @classmethod
     def sha1(cls, str_: Optional[str]) -> str:
-        if str_ is None:
-            str_ = ""
         """
         Obtiene la clave SHA1 de una cadena de texto.
 
         @param str Cadena de la que obtener la clave SHA1
         @return Clave correspondiente en digitos hexadecimales
         """
+        if str_ is None:
+            str_ = ""
         sha_ = hashlib.new("sha1", str_.encode())
         st = "%s" % sha_.hexdigest()
         st = st.upper()
