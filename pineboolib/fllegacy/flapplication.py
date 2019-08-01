@@ -933,7 +933,7 @@ class FLApplication(QtCore.QObject):
             ac.triggered.connect(window.setFocus)
 
     def windowMenuActivated(self, id) -> None:
-        """Signal called when user clicks on menu"""
+        """Signal called when user clicks on menu."""
         if not self._p_work_space:
             return
 
@@ -1229,7 +1229,7 @@ class FLApplication(QtCore.QObject):
         pass
 
     def staticLoaderSetup(self) -> None:
-        """Setup static loader."""
+        """Initialize static loader."""
         self.db().managerModules().staticLoaderSetup()
 
     def mrProper(self) -> None:
@@ -1271,23 +1271,29 @@ class FLApplication(QtCore.QObject):
             self.script_entry_function_ = None
 
     def emitTransactionBegin(self, o: "PNSqlCursor") -> None:
+        """Emit signal."""
         db_signals.emitTransactionBegin(o)
 
     def emitTransactionEnd(self, o: "PNSqlCursor") -> None:
+        """Emit signal."""
         db_signals.emitTransactionEnd(o)
 
     def emitTransactionRollback(self, o: "PNSqlCursor") -> None:
+        """Emit signal."""
         db_signals.emitTransactionRollback(o)
 
     @decorators.NotImplementedWarn
     def gsExecutable(self):
+        """Not implemented."""
         pass
 
     @decorators.NotImplementedWarn
     def evalueateProject(self):
+        """Not implemented."""
         pass
 
     def aqAppIdle(self) -> None:
+        """Check and fix transaction level."""
         if project.DGI.localDesktop():
             from pineboolib import pncontrolsfactory
 
@@ -1301,9 +1307,11 @@ class FLApplication(QtCore.QObject):
             self.checkAndFixTransactionLevel("Application::aqAppIdle()")
 
     def DGI(self) -> Any:
+        """Return current DGI."""
         return project._DGI
 
     def startTimerIdle(self) -> None:
+        """Start timer."""
         if not self.timer_idle_:
             self.timer_idle_ = QTimer()
             self.timer_idle_.timeout.connect(self.aqAppIdle)
@@ -1313,15 +1321,16 @@ class FLApplication(QtCore.QObject):
         self.timer_idle_.start(1000)
 
     def stopTimerIdle(self) -> None:
+        """Stop timer."""
         if self.timer_idle_ and self.timer_idle_.isActive():
             self.timer_idle_.stop()
 
-    """
-    Para especificar si usa fllarge unificado o multiple (Eneboo/Abanq)
-    @return True (Tabla única), False (Múltiples tablas)
-    """
-
     def singleFLLarge(self) -> bool:
+        """
+        Para especificar si usa fllarge unificado o multiple (Eneboo/Abanq).
+
+        @return True (Tabla única), False (Múltiples tablas)
+        """
         from pineboolib.fllegacy.flutil import FLUtil
 
         ret = FLUtil().sqlSelect("flsettings", "valor", "flkey='FLLargeMode'")
@@ -1331,9 +1340,11 @@ class FLApplication(QtCore.QObject):
         return True
 
     def msgBoxWarning(self, t, _gui) -> None:
+        """Display warning."""
         _gui.msgBoxWarning(t)
 
     def checkAndFixTransactionLevel(self, ctx=None) -> None:
+        """Fix transaction."""
         dict_db = self.db().dictDatabases()
         if not dict_db:
             return
@@ -1372,13 +1383,16 @@ class FLApplication(QtCore.QObject):
 
     @decorators.NotImplementedWarn
     def showDebug(self):
+        """Return if debug is shown."""
         return self.show_debug_
 
     def db(self) -> Any:
+        """Return current connection."""
         return project._conn
 
     @decorators.NotImplementedWarn
     def classType(self, n):
+        """Return class for object."""
         from pineboolib import pncontrolsfactory
 
         return type(pncontrolsfactory.resolveObject(n)())
@@ -1387,12 +1401,14 @@ class FLApplication(QtCore.QObject):
     #    return getattr(project, name, None)
 
     def mainWidget(self) -> Any:
+        """Return current mainWidget."""
         ret_ = self.main_widget_
         if ret_ is None:
             ret_ = self.container_
         return ret_
 
     def generalExit(self, ask_exit=True) -> bool:
+        """Perform before close checks."""
         do_exit = True
         if ask_exit:
             do_exit = self.queryExit()
@@ -1419,10 +1435,12 @@ class FLApplication(QtCore.QObject):
             return False
 
     def quit(self) -> None:
+        """Handle quit/close signal."""
         if self.main_widget_ is not None:
             self.main_widget_.close()
 
     def queryExit(self) -> Any:
+        """Ask user if really wants to quit."""
         if self.not_exit_:
             return False
 
@@ -1441,6 +1459,7 @@ class FLApplication(QtCore.QObject):
         return ret == pncontrolsfactory.QMessageBox.Yes
 
     def writeState(self) -> None:
+        """Write settings back to disk."""
         from pineboolib import pncontrolsfactory
 
         settings.set_value("MultiLang/Enabled", self._multi_lang_enabled)
@@ -1481,6 +1500,7 @@ class FLApplication(QtCore.QObject):
             settings.set_value("%s/Height" % k, map.height())
 
     def writeStateModule(self) -> None:
+        """Write settings for modules."""
         from pineboolib import pncontrolsfactory
 
         idm = self.db().managerModules().activeIdModule()
@@ -1506,6 +1526,7 @@ class FLApplication(QtCore.QObject):
         settings.set_value("%s/Height" % k, self.main_widget_.height())
 
     def readState(self) -> None:
+        """Read settings."""
         self._inicializing = False
         self._dict_main_widgets = {}
 
@@ -1578,6 +1599,7 @@ class FLApplication(QtCore.QObject):
             self.activateModule(active_id_module)
 
     def readStateModule(self) -> None:
+        """Read settings for module."""
         from pineboolib import pncontrolsfactory
 
         idm = self.db().managerModules().activeIdModule()
@@ -1610,6 +1632,7 @@ class FLApplication(QtCore.QObject):
                 self.main_widget_.resize(pncontrolsfactory.QApplication.desktop().availableGeometry(self.main_widget_).size())
 
     def loadScripts(self) -> None:
+        """Load scripts for all modules."""
         from pineboolib import pncontrolsfactory
 
         pncontrolsfactory.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
@@ -1620,19 +1643,22 @@ class FLApplication(QtCore.QObject):
         pncontrolsfactory.QApplication.restoreOverrideCursor()
 
     def urlPineboo(self) -> None:
+        """Open Eneboo URI."""
         self.call("sys.openUrl", ["http://eneboo.org/"])
 
     def helpIndex(self) -> None:
+        """Open help."""
         self.call("sys.openUrl", ["http://manuales-eneboo-pineboo.org/"])
 
     def tr(self, sourceText: str, disambiguation: Optional[str] = None, n: int = 0) -> Any:
+        """Open translations."""
         from pineboolib import pncontrolsfactory
 
         return pncontrolsfactory.QApplication.translate("system", sourceText)
 
     def loadTranslations(self) -> None:
         """
-        Instala las traducciones cargadas
+        Install loaded translations.
         """
         translatorsCopy = []
         if self._translator:
@@ -1655,15 +1681,15 @@ class FLApplication(QtCore.QObject):
             else:
                 del it
 
-    """
-    Busca la traducción de un texto a un Idioma dado
-    @param s, Cadena de texto
-    @param l, Idioma.
-    @return Cadena de texto traducida.
-    """
-
     @decorators.BetaImplementation
     def trMulti(self, s, l):
+        """
+        Lookup translation for certain language.
+
+        @param s, Cadena de texto
+        @param l, Idioma.
+        @return Cadena de texto traducida.
+        """
         return s
         # FIXME: self.tr does not support two arguments.
         # backMultiEnabled = self._multi_lang_enabled
@@ -1671,34 +1697,34 @@ class FLApplication(QtCore.QObject):
         # self._multi_lang_enabled = backMultiEnabled
         # return ret
 
-    """
-    Cambia el estado de la opción MultiLang
-    @param enable, Boolean con el nuevo estado
-    @param langid, Identificador del leguaje a activar
-    """
-
     @decorators.BetaImplementation
     def setMultiLang(self, enable, langid):
+        """
+        Change multilang status.
+
+        @param enable, Boolean con el nuevo estado
+        @param langid, Identificador del leguaje a activar
+        """
         self._multi_lang_enabled = enable
         if enable and langid:
             self._multi_lang_id = langid.upper()
 
-    """
-    Carga una traducción desde un módulo dado
-    @param idM, Identificador del módulo donde buscar
-    @param lang, Lenguaje a buscar
-    """
-
     def loadTranslationFromModule(self, idM, lang) -> None:
+        """
+        Load translation from module.
+
+        @param idM, Identificador del módulo donde buscar
+        @param lang, Lenguaje a buscar
+        """
         self.installTranslator(self.createModTranslator(idM, lang, True))
         # self.installTranslator(self.createModTranslator(idM, "mutliLang"))
 
-    """
-    Instala una traducción para la aplicación
-    @param tor, Objeto con la traducción a cargar
-    """
-
     def installTranslator(self, tor) -> None:
+        """
+        Install translation for app.
+
+        @param tor, Objeto con la traducción a cargar
+        """
 
         if tor is None:
             return
@@ -1708,12 +1734,12 @@ class FLApplication(QtCore.QObject):
             pncontrolsfactory.qApp.installTranslator(tor)
             self._translator.append(tor)
 
-    """
-    Elimina una traducción para la aplicación
-    @param tor, Objeto con la traducción a cargar
-    """
-
     def removeTranslator(self, tor) -> None:
+        """
+        Delete translation on app.
+
+        @param tor, Objeto con la traducción a cargar
+        """
         if tor is None:
             return
         else:
@@ -1725,26 +1751,26 @@ class FLApplication(QtCore.QObject):
                     del t
                     break
 
-    """
-    Crea una traducción para sys
-    @param lang, Idioma a usar
-    @param loadDefault, Boolean para cargar los datos por defecto
-    @return objeto traducción
-    """
-
     @decorators.NotImplementedWarn
     def createSysTranslator(self, lang, loadDefault):
+        """
+        Create SYS Module translation.
+
+        @param lang, Idioma a usar
+        @param loadDefault, Boolean para cargar los datos por defecto
+        @return objeto traducción
+        """
         pass
 
-    """
-    Crea una traducción para un módulo especificado
-    @param idM, Identificador del módulo
-    @param lang, Idioma a usar
-    @param loadDefault, Boolean para cargar los datos por defecto
-    @return objeto traducción
-    """
-
     def createModTranslator(self, idM, lang, loadDefault=False) -> Optional["FLTranslator"]:
+        """
+        Create new translation for module.
+
+        @param idM, Identificador del módulo
+        @param lang, Idioma a usar
+        @param loadDefault, Boolean para cargar los datos por defecto
+        @return objeto traducción
+        """
 
         fileTs = "%s.%s.ts" % (idM, lang)
         key = self.db().managerModules().shaOfFile(fileTs)
@@ -1758,18 +1784,23 @@ class FLApplication(QtCore.QObject):
         return self.createModTranslator(idM, "es") if loadDefault else None
 
     def modules(self) -> Any:
+        """Return loaded modules."""
         return project.modules
 
     def commaSeparator(self) -> Any:
+        """Return comma separator for floating points on current language."""
         return self.comma_separator
 
     def tmp_dir(self) -> Any:
+        """Return temporary folder."""
         return project.tmpdir
 
     def transactionLevel(self):
+        """Return number of concurrent transactions."""
         return project.conn.transactionLevel()
 
     def version(self):
+        """Return app version."""
         return project.version
 
 
