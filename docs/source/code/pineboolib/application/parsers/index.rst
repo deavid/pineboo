@@ -13,3 +13,4 @@ Package parsers
    kugarparser/index
    mtdparser/index
    qsaparser/index
+   qt3uiparser/index

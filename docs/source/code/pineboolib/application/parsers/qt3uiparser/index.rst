@@ -1,7 +1,7 @@
-Package dgi_objects
+Package qt3uiparser
 ===============================================================
 
-.. automodule:: pineboolib.plugins.dgi.dgi_qt.dgi_objects
+.. automodule:: pineboolib.application.parsers.qt3uiparser
     :members:
     :undoc-members:
     :inherited-members:
@@ -10,7 +10,4 @@ Package dgi_objects
    :maxdepth: 2
    :caption: Contents:
 
-   dlg_about/index
-   progress_dialog_manager
-   splash_screen
-   status_help_msg
+   dgi_qt3ui

@@ -17,4 +17,5 @@ Package pineboolib
    loader/index
    plugins/index
    qsa/index
+   qt3_widgets/index
    pncontrolsfactory

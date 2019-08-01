@@ -36,6 +36,8 @@
    code/pineboolib/application/parsers/qsaparser/postparse
    code/pineboolib/application/parsers/qsaparser/pyconvert
    code/pineboolib/application/parsers/qsaparser/pytnyzer
+   code/pineboolib/application/parsers/qt3uiparser/dgi_qt3ui
+   code/pineboolib/application/parsers/qt3uiparser/index
    code/pineboolib/application/projectmodule
    code/pineboolib/application/proxy
    code/pineboolib/application/tests/index
@@ -75,33 +77,56 @@
    code/pineboolib/fllegacy/aqsobjects/aqsqlquery
    code/pineboolib/fllegacy/aqsobjects/aqutil
    code/pineboolib/fllegacy/aqsobjects/index
+   code/pineboolib/fllegacy/filedialog
    code/pineboolib/fllegacy/flaccesscontrol
    code/pineboolib/fllegacy/flaccesscontrolfactory
    code/pineboolib/fllegacy/flaccesscontrollists
    code/pineboolib/fllegacy/flaction
    code/pineboolib/fllegacy/flapplication
+   code/pineboolib/fllegacy/flcheckbox
+   code/pineboolib/fllegacy/flcodbar
+   code/pineboolib/fllegacy/fldatatable
+   code/pineboolib/fllegacy/fldateedit
+   code/pineboolib/fllegacy/fldoublevalidator
+   code/pineboolib/fllegacy/flfielddb
+   code/pineboolib/fllegacy/flformdb
+   code/pineboolib/fllegacy/flformrecorddb
+   code/pineboolib/fllegacy/flformsearchdb
    code/pineboolib/fllegacy/flgroupbyquery
+   code/pineboolib/fllegacy/flintvalidator
+   code/pineboolib/fllegacy/fllineedit
+   code/pineboolib/fllegacy/fllistviewitem
    code/pineboolib/fllegacy/flmanager
    code/pineboolib/fllegacy/flmanagermodules
    code/pineboolib/fllegacy/flmodulesstaticloader
    code/pineboolib/fllegacy/flnetwork
    code/pineboolib/fllegacy/flparameterquery
    code/pineboolib/fllegacy/flpicture
+   code/pineboolib/fllegacy/flpixmapview
    code/pineboolib/fllegacy/flposprinter
    code/pineboolib/fllegacy/flreportengine
    code/pineboolib/fllegacy/flreportpages
    code/pineboolib/fllegacy/flreportviewer
    code/pineboolib/fllegacy/flsettings
    code/pineboolib/fllegacy/flsmtpclient
+   code/pineboolib/fllegacy/flspinbox
    code/pineboolib/fllegacy/flsqlconnections
    code/pineboolib/fllegacy/flsqlcursor
    code/pineboolib/fllegacy/flsqlquery
    code/pineboolib/fllegacy/flstylepainter
+   code/pineboolib/fllegacy/fltable
+   code/pineboolib/fllegacy/fltabledb
+   code/pineboolib/fllegacy/fltexteditoutput
+   code/pineboolib/fllegacy/fltimeedit
    code/pineboolib/fllegacy/fltranslations
    code/pineboolib/fllegacy/fltranslator
+   code/pineboolib/fllegacy/fluintvalidator
    code/pineboolib/fllegacy/flutil
    code/pineboolib/fllegacy/flvar
+   code/pineboolib/fllegacy/flwidget
+   code/pineboolib/fllegacy/flworkspace
    code/pineboolib/fllegacy/index
+   code/pineboolib/fllegacy/sysqs
    code/pineboolib/fllegacy/systype
    code/pineboolib/index
    code/pineboolib/interfaces/cursoraccessmode
@@ -137,71 +162,13 @@
    code/pineboolib/plugins/dgi/dgi_fcgi/index
    code/pineboolib/plugins/dgi/dgi_jsonrpc/dgi_jsonrpc
    code/pineboolib/plugins/dgi/dgi_jsonrpc/index
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/checkbox
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/dialog
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/dlg_about/about_pineboo
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/dlg_about/index
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/filedialog
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/flcheckbox
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/flcodbar
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/fldatatable
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/fldateedit
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/fldoublevalidator
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/flfielddb
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformdb
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformrecorddb
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/flformsearchdb
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/flintvalidator
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/fllineedit
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/fllistviewitem
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/flpixmapview
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/flspinbox
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltable
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltabledb
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltexteditoutput
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/fltimeedit
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/fluintvalidator
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/flwidget
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/flworkspace
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/formdbwidget
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/groupbox
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/index
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/lineedit
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/messagebox
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/numberedit
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/process
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/progress_dialog_manager
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qaction
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qbuttongroup
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qbytearray
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qcheckbox
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qcombobox
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qdateedit
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qdialog
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qframe
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qgroupbox
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qhboxlayout
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qlabel
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qline
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qlineedit
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qlistview
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qmainwindow
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qmdiarea
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qpushbutton
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qradiobutton
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qtable
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qtabwidget
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qtextedit
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qtimeedit
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qtoolbar
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qtoolbutton
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qvboxlayout
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/qwidget
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/radiobutton
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/splash_screen
    code/pineboolib/plugins/dgi/dgi_qt/dgi_objects/status_help_msg
    code/pineboolib/plugins/dgi/dgi_qt/dgi_qt
-   code/pineboolib/plugins/dgi/dgi_qt/dgi_qt3ui
    code/pineboolib/plugins/dgi/dgi_qt/index
    code/pineboolib/plugins/dgi/dgi_schema
    code/pineboolib/plugins/dgi/dgi_server/dgi_objects/formdbwidget
@@ -217,9 +184,6 @@
    code/pineboolib/plugins/mainform/eneboo_mdi/eneboo_mdi
    code/pineboolib/plugins/mainform/eneboo_mdi/index
    code/pineboolib/plugins/mainform/index
-   code/pineboolib/plugins/qtwidgetsplugins/FLFieldDB
-   code/pineboolib/plugins/qtwidgetsplugins/FLTable
-   code/pineboolib/plugins/qtwidgetsplugins/FLTableDB
    code/pineboolib/plugins/sql/flmysql_innodb
    code/pineboolib/plugins/sql/flmysql_innodb2
    code/pineboolib/plugins/sql/flmysql_myisam
@@ -236,3 +200,39 @@
    code/pineboolib/qsa/index
    code/pineboolib/qsa/input
    code/pineboolib/qsa/qsa
+   code/pineboolib/qt3_widgets/checkbox
+   code/pineboolib/qt3_widgets/dialog
+   code/pineboolib/qt3_widgets/formdbwidget
+   code/pineboolib/qt3_widgets/groupbox
+   code/pineboolib/qt3_widgets/index
+   code/pineboolib/qt3_widgets/lineedit
+   code/pineboolib/qt3_widgets/messagebox
+   code/pineboolib/qt3_widgets/numberedit
+   code/pineboolib/qt3_widgets/process
+   code/pineboolib/qt3_widgets/qaction
+   code/pineboolib/qt3_widgets/qbuttongroup
+   code/pineboolib/qt3_widgets/qbytearray
+   code/pineboolib/qt3_widgets/qcheckbox
+   code/pineboolib/qt3_widgets/qcombobox
+   code/pineboolib/qt3_widgets/qdateedit
+   code/pineboolib/qt3_widgets/qdialog
+   code/pineboolib/qt3_widgets/qframe
+   code/pineboolib/qt3_widgets/qgroupbox
+   code/pineboolib/qt3_widgets/qhboxlayout
+   code/pineboolib/qt3_widgets/qlabel
+   code/pineboolib/qt3_widgets/qline
+   code/pineboolib/qt3_widgets/qlineedit
+   code/pineboolib/qt3_widgets/qlistview
+   code/pineboolib/qt3_widgets/qmainwindow
+   code/pineboolib/qt3_widgets/qmdiarea
+   code/pineboolib/qt3_widgets/qpushbutton
+   code/pineboolib/qt3_widgets/qradiobutton
+   code/pineboolib/qt3_widgets/qtable
+   code/pineboolib/qt3_widgets/qtabwidget
+   code/pineboolib/qt3_widgets/qtextedit
+   code/pineboolib/qt3_widgets/qtimeedit
+   code/pineboolib/qt3_widgets/qtoolbar
+   code/pineboolib/qt3_widgets/qtoolbutton
+   code/pineboolib/qt3_widgets/qvboxlayout
+   code/pineboolib/qt3_widgets/qwidget
+   code/pineboolib/qt3_widgets/radiobutton
