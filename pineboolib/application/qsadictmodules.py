@@ -67,7 +67,7 @@ class QSADictModules:
         if cls.action_exists(action.name):
             if action.name != "sys":
                 logger.warning("Module found twice, will not be overriden: %s", action.name)
-                return False
+            return False
 
         # Se crea la action del módulo
         proxy = DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % action.name)
