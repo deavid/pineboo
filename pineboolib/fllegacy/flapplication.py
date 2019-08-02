@@ -48,7 +48,7 @@ class FLApplication(QtCore.QObject):
     _multi_lang_enabled: bool
     _multi_lang_id: str
     _translator: List[FLTranslator]
-    _dict_main_widgets: Dict[str, Any]
+    _dict_main_widgets: Dict[str, QtWidgets.QWidget]
     container_: Optional[QtWidgets.QWidget]  # Contenedor actual??
     _map_geometry_form: List[Any]
     main_widget_: Optional[QtWidgets.QWidget]
