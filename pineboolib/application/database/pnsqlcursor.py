@@ -500,9 +500,9 @@ class PNSqlCursor(QtCore.QObject):
                 if bch_model and bch_model(fN, self) is False:
                     return
 
-                from pineboolib.application.qsadictmodules import QSADictModules  # FIXME: Should not import QSA at all
+                from pineboolib.application.safeqsa import SafeQSA
 
-                script = QSADictModules.from_project("formRecord%s" % self.action())
+                script = SafeQSA.get_formrecord("formRecord%s" % self.action())
                 if script is not None:
                     bChCursor = getattr(script.iface, "bChCursor", None)
                     if bChCursor:
@@ -597,9 +597,9 @@ class PNSqlCursor(QtCore.QObject):
                 if bch_model and bch_model(fN, self) is False:
                     return
 
-                from pineboolib.application.qsadictmodules import QSADictModules  # FIXME: Should not import QSA at all
+                from pineboolib.application.safeqsa import SafeQSA
 
-                script = QSADictModules.from_project("formRecord%s" % self.action())
+                script = SafeQSA.get_formrecord("formRecord%s" % self.action())
                 if script is not None:
                     bChCursor = getattr(script.iface, "bChCursor", None)
                     if bChCursor:
@@ -1988,7 +1988,7 @@ class PNSqlCursor(QtCore.QObject):
 
         @return TRUE if the refreshment could be performed, FALSE otherwise
         """
-        from pineboolib.application.qsadictmodules import QSADictModules
+        from pineboolib.application.safeqsa import SafeQSA
 
         if not self.d.metadata_:
             raise Exception("Not initialized")
@@ -2040,7 +2040,7 @@ class PNSqlCursor(QtCore.QObject):
 
                         siguiente = None
                         if self._action.scriptFormRecord():
-                            context_ = QSADictModules.from_project("formRecord%s" % self._action.scriptFormRecord()[:-3]).iface
+                            context_ = SafeQSA.formrecord("formRecord%s" % self._action.scriptFormRecord()[:-3]).iface
                             function_counter = getattr(context_, "calculateCounter", None)
                             if function_counter is None:
                                 siguiente = nextCounter(field_name, self)

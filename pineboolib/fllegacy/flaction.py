@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """FLAction Module."""
 
-from pineboolib.application.xmlaction import XMLAction
+
+from pineboolib.core.utils.struct import ActionStruct
+
 from typing import Union
 
 
@@ -57,7 +59,7 @@ class FLAction(object):
     """
     _description: str
 
-    def __init__(self, action: Union[str, XMLAction]) -> None:
+    def __init__(self, action: Union[str, ActionStruct]) -> None:
         """Initialize."""
 
         self._name = ""
@@ -72,7 +74,7 @@ class FLAction(object):
         if isinstance(action, str):
             self.setName(action)
 
-        elif isinstance(action, XMLAction):
+        elif isinstance(action, ActionStruct):
             self.setName(action.name)
             if action.mainscript is not None:
                 self.setScriptForm(action.mainscript)

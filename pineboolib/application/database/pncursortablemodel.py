@@ -255,9 +255,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 fun_name_ = None
                 if fun_get_color.find(".") > -1:
                     list_ = fun_get_color.split(".")
-                    from pineboolib.application.qsadictmodules import QSADictModules
+                    from pineboolib.application.safeqsa import SafeQSA
 
-                    qsa_widget = QSADictModules.from_project(list_[0])
+                    qsa_widget = SafeQSA.get_any(list_[0])
                     fun_name_ = list_[1]
                     if qsa_widget:
                         context_ = qsa_widget.iface

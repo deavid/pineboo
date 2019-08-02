@@ -6,7 +6,7 @@ from pineboolib.fllegacy.systype import SysType
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings
 from pineboolib.fllegacy.aqsobjects.aqutil import AQUtil
-from pineboolib.application.qsadictmodules import QSADictModules
+from pineboolib.application.safeqsa import SafeQSA
 
 logger = logging.getLogger("sys.qs")
 
@@ -20,7 +20,7 @@ class FormInternalObj(FormDBWidget):
         from pineboolib.fllegacy.flapplication import aqApp
 
         settings = AQSettings()
-        flfactppal = QSADictModules.from_project("flfactppal")
+        flfactppal = SafeQSA.get_root_module("flfactppal")
         if flfactppal is not None:
             try:
                 codEjercicio = flfactppal.iface.pub_ejercicioActual()

@@ -175,9 +175,9 @@ def loadUi(form_path: str, widget, parent=None) -> None:
             receiver = widget.findChild(QObject, receiv_name, QtCore.Qt.FindChildrenRecursively)
 
         if receiver is None:
-            from pineboolib.application.qsadictmodules import QSADictModules
+            from pineboolib.application.safeqsa import SafeQSA
 
-            receiver = QSADictModules.from_project(receiv_name)
+            receiver = SafeQSA.get_any(receiv_name)
 
         if receiver is None and receiv_name == "FLWidgetApplication":
             if sender_name in project.actions.keys():
