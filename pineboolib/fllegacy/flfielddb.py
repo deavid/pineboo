@@ -42,7 +42,8 @@ from typing import Any, Optional, TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from PyQt5.QtGui import QPixmap
-    from pineboolib.fllegacy.flpixmapview import FLPixmapView
+
+    # from pineboolib.fllegacy.flpixmapview import FLPixmapView
 
 logger = logging.getLogger(__name__)
 

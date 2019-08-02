@@ -77,6 +77,7 @@ class QSADictModules:
 
     @classmethod
     def save_action_for_mainform(cls, action: XMLAction):
+        """Save a new mainform."""
         name = action.name
         module = action.mod
         if module is None:
@@ -98,6 +99,7 @@ class QSADictModules:
 
     @classmethod
     def save_action_for_formrecord(cls, action: XMLAction):
+        """Save a new formrecord."""
         name = action.name
         module = action.mod
         if module is None:
@@ -117,6 +119,7 @@ class QSADictModules:
 
     @classmethod
     def clean_all(cls):
+        """Clean all saved data."""
         qsa_dict_modules = cls.qsa_dict_modules()
 
         SafeQSA.clean_all()

@@ -310,7 +310,9 @@ AttributeDict = StructMyDict
 
 class Dir(object):
     """
-    Gestiona un directorio
+    Manage folder.
+
+    Emulates QtCore.QDir for QSA.
     """
 
     # Filters :
@@ -326,11 +328,13 @@ class Dir(object):
     home = expanduser("~")
 
     def __init__(self, path: Optional[str] = None):
+        """Create a new Dir."""
         self.path_: Optional[str] = path
 
     def entryList(self, patron: str, type_: int = NoFilter, sort: int = NoSort) -> list:
         """
-        Lista de ficheros que coinciden con un patron dado
+        Create listing for files inside given folder.
+
         @param patron. Patron a usa para identificar los ficheros
         @return lista con los ficheros que coinciden con el patrón
         """
@@ -353,7 +357,8 @@ class Dir(object):
 
     def fileExists(self, file_name: str) -> bool:
         """
-        Retorna si existe el fichero dado o no
+        Check if a file does exist.
+
         @param file_name. Nombre del fichero
         @return Boolean. Si existe el ficehro o no.
         """
@@ -362,30 +367,35 @@ class Dir(object):
     @staticmethod
     def cleanDirPath(name: str) -> str:
         """
-        Devuelve la ruta del ficehro limpia
+        Clean path from unnecesary folders.
+
         @param name. Rtua del ficehro a limpiar
         @return ruta limpia
         """
-        return str(name)
+        return os.path.normpath(name)
 
     @staticmethod
     @decorators.Deprecated
     def convertSeparators(filename: str) -> str:
         """
-        Retona el mismo valor
+        Convert path from backslash to slashes or viceversa.
+
+        ***DEPRECATED***
         """
         return filename
 
     def setCurrent(self, val: Optional[str] = None) -> None:
         """
-        Especifica la ruta como path actual
+        Change current working folder.
+
         @param val. Ruta especificada
         """
         os.chdir(val or filedir("."))
 
     def mkdir(self, name: Optional[str] = None) -> None:
         """
-        Crea un directorio
+        Create a new folder.
+
         @param name. Nombre de la ruta a crear
         """
         if name is None:
@@ -401,7 +411,7 @@ class Dir(object):
 
 class File(object):  # FIXME : Rehacer!!
     """
-    Para gestionar un fichero
+    Manage a file.
     """
 
     ReadOnly = QIODevice.ReadOnly
@@ -420,6 +430,7 @@ class File(object):  # FIXME : Rehacer!!
     eof = False
 
     def __init__(self, rutaFichero: Optional[str] = None, encode: Optional[str] = None):
+        """Create a new File Object. This does not create a file on disk."""
         self.encode_ = "iso-8859-15"
         if rutaFichero:
             # if isinstance(rutaFichero, tuple):
@@ -437,16 +448,19 @@ class File(object):  # FIXME : Rehacer!!
         self.mode_ = self.ReadWrite
 
     def open(self, m: QIODevice) -> bool:
+        """Open file."""
         self.mode_ = m
         self.eof = False
         return True
 
     def close(self) -> None:
+        """Close file."""
         pass
 
     def read(self: Union["File", str], bytes: bool = False) -> Union[str, bytes]:
         """
-        Lee el fichero al completo
+        Read file completely.
+
         @param bytes. Especifica si se lee en modo texto o en bytess
         @retunr contenido del fichero
         """
@@ -479,7 +493,8 @@ class File(object):  # FIXME : Rehacer!!
 
     def write(self: Union["File", str], data: Union[str, bytes], length: int = -1) -> None:
         """
-        Escribe datos en el fichero
+        Write data back to the file.
+
         @param data. Valores a guardar en el fichero
         @param length. Tamaño de data. (No se usa)
         """
@@ -512,6 +527,7 @@ class File(object):  # FIXME : Rehacer!!
         file.close()
 
     def writeBlock(self, bytes_array: bytes) -> None:
+        """Write a block of data to the file."""
         if self.fichero is None:
             raise ValueError("self.fichero is empty!")
 
@@ -523,7 +539,8 @@ class File(object):  # FIXME : Rehacer!!
     @staticmethod
     def exists(name: str) -> bool:
         """
-        Comprueba si un fichero exite
+        Check if a file does exist.
+
         @param name. Nombre del fichero.
         @return boolean informando si existe o no el fichero.
         """
@@ -532,7 +549,8 @@ class File(object):  # FIXME : Rehacer!!
     @staticmethod
     def isDir(dir_name: str) -> bool:
         """
-        Indica si la ruta data es un directorio
+        Check if given path is a folder.
+
         @param. Nombre del directorio
         @return. boolean informando si la ruta dada es un directorio o no.
         """
@@ -541,7 +559,8 @@ class File(object):  # FIXME : Rehacer!!
     @staticmethod
     def isFile(file_name: str) -> bool:
         """
-        Indica si la ruta data es un fichero
+        Check if given path is a file.
+
         @param. Nombre del fichero
         @return. boolean informando si la ruta dada es un fichero o no.
         """
@@ -549,7 +568,8 @@ class File(object):  # FIXME : Rehacer!!
 
     def getName(self) -> str:
         """
-        Retorna el nombre del fichero
+        Get file name.
+
         @return Nombre del fichero
         """
         if self.fichero is None:
@@ -560,7 +580,8 @@ class File(object):  # FIXME : Rehacer!!
 
     def writeLine(self, data: str) -> None:
         """
-        Escribe un nueva linea en un fichero
+        Write a new line with "data" contents into the file.
+
         @param data. Datos a añadir en el fichero
         """
         import codecs
@@ -574,7 +595,8 @@ class File(object):  # FIXME : Rehacer!!
 
     def readLine(self) -> str:
         """
-        Lee una linea de un fichero dado
+        Read a line from file.
+
         @return cadena de texto con los datos de la linea actual
         """
         if self.last_seek is None:
@@ -593,7 +615,8 @@ class File(object):  # FIXME : Rehacer!!
 
     def readLines(self) -> List[str]:
         """
-        Lee todas las lineas de un fichero y devuelve un array
+        Read all lines from a file and return it as array.
+
         @return array con las lineas del fichero.
         """
         ret: List[str]
@@ -608,7 +631,8 @@ class File(object):  # FIXME : Rehacer!!
 
     def readbytes(self) -> bytes:
         """
-        Lee una linea (bytess) de un fichero dado
+        Read the whole file as binary.
+
         @return bytess con los datos de la linea actual
         """
         ret_ = self.read(True)
@@ -617,21 +641,21 @@ class File(object):  # FIXME : Rehacer!!
 
         return ret_
 
-    def writebytes(self, data_b: str) -> None:
+    def writebytes(self, data_b: bytes) -> None:
         """
-        Escribe un nueva linea en un fichero
+        Write file as binary.
+
         @param data_b. Datos a añadir en el fichero
         """
 
-        import codecs
-
-        f = codecs.open(self.fichero, encoding=self.encode_, mode="wb+")
+        f = open(self.fichero, "wb")
         f.write(data_b)
         f.close()
 
     def remove(self: Union["File", str]) -> bool:
         """
-        Borra el fichero dado
+        Delete file from filesystem.
+
         @return Boolean . True si se ha borrado el fichero, si no False.
         """
         if isinstance(self, str):

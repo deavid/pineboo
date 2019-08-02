@@ -1,3 +1,6 @@
+"""
+Manage Qt Signal-Slot connections.
+"""
 import inspect
 import weakref
 import re
@@ -12,13 +15,18 @@ from PyQt5 import QtCore
 
 from typing import Callable, Any, List, Dict, Tuple, Optional
 
-logger = logging.getLogger("Application.connections")
+logger = logging.getLogger("application.connections")
 
 
 class ProxySlot:
+    """
+    Proxies a method so it doesn't need to be resolved on connect.
+    """
+
     PROXY_FUNCTIONS: Dict[str, Callable] = {}
 
     def __init__(self, remote_fn: types.MethodType, receiver: Any, slot: Any) -> None:
+        """Create a proxy for a method."""
         self.key = "%r.%r->%r" % (remote_fn, receiver, slot)
         if self.key not in self.PROXY_FUNCTIONS:
             weak_fn = weakref.WeakMethod(remote_fn)
@@ -27,10 +35,12 @@ class ProxySlot:
         self.proxy_function = self.PROXY_FUNCTIONS[self.key]
 
     def getProxyFn(self) -> Callable:
+        """Retrieve internal proxy function."""
         return self.proxy_function
 
 
 def get_expected_args_num(inspected_function: Callable) -> int:
+    """Inspect function to get how many arguments expects."""
     expected_args = inspect.getargspec(inspected_function)[0]
     args_num = len(expected_args)
 
@@ -41,11 +51,14 @@ def get_expected_args_num(inspected_function: Callable) -> int:
 
 
 def get_expected_kwargs(inspected_function: Callable) -> bool:
+    """Inspect a function to get if expects keyword args."""
     expected_kwargs = inspect.getfullargspec(inspected_function)[2]
     return True if expected_kwargs else False
 
 
 def proxy_fn(wf: weakref.WeakMethod, wr: weakref.ref, slot: Any) -> Callable:
+    """Create a proxied function, so it does not hold the garbage collector."""
+
     def fn(*args: List[Any], **kwargs: Dict[str, Any]) -> Optional[Any]:
         f = wf()
         if not f:
@@ -65,6 +78,8 @@ def proxy_fn(wf: weakref.WeakMethod, wr: weakref.ref, slot: Any) -> Callable:
 
 
 def slot_done(fn: Callable, signal: Any, sender: Any, caller: Any) -> Callable:
+    """Create a fake slot for QS connects."""
+
     def new_fn(*args: List[Any], **kwargs: Dict[str, Any]) -> Any:
 
         res = False
@@ -100,6 +115,7 @@ def slot_done(fn: Callable, signal: Any, sender: Any, caller: Any) -> Callable:
 
 
 def connect(sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = None) -> Optional[Tuple[Any, Any]]:
+    """Connect signal to slot for QSA."""
     if caller is not None:
         logger.trace("* * * Connect:: %s %s %s %s %s", caller, sender, signal, receiver, slot)
     else:
@@ -131,6 +147,7 @@ def connect(sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = No
 
 
 def disconnect(sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = None) -> Optional[Tuple[Any, Any]]:
+    """Disconnect signal from slot for QSA."""
     signal_slot = solve_connection(sender, signal, receiver, slot)
     if not signal_slot:
         return None
@@ -144,6 +161,7 @@ def disconnect(sender: Any, signal: Any, receiver: Any, slot: str, caller: Any =
 
 
 def solve_connection(sender: Any, signal: str, receiver: Any, slot: str) -> Optional[Tuple[Any, Any]]:
+    """Try hard to guess which is the correct way of connecting signal to slot. For QSA."""
     if sender is None:
         logger.error("Connect Error:: %s %s %s %s", sender, signal, receiver, slot)
         return None

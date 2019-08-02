@@ -1,7 +1,15 @@
+"""
+Module for garbage collector checks.
+"""
 from typing import Any, Callable, List
 
 
 def check_gc_referrers(typename: Any, w_obj: Callable, name: str) -> None:
+    """
+    Check if any variable is getting out of control.
+
+    Great for checking and tracing memory leaks.
+    """
     import threading
     import time
 

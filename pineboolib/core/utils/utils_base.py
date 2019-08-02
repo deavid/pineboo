@@ -654,9 +654,11 @@ def pixmap_fromMimeSource(name: str) -> Any:
 
 
 def sha1(x: str) -> str:
+    """Get SHA1 hash from string in hex form."""
     return hashlib.sha1(str(x).encode("UTF-8")).hexdigest()
 
 
 def print_stack(maxsize: int = 1) -> None:
+    """Print Python stack, like a traceback."""
     for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
         print(tb.rstrip())

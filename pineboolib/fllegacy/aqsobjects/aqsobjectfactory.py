@@ -15,4 +15,4 @@ from .aqs import AQS  # noqa: F401
 from .aqods import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow  # noqa: F401
 from .aqods import AQOdsColor, AQOdsStyle, AQOdsImage  # noqa: F401
 from .aqboolflagstate import AQBoolFlagState, AQBoolFlagStateList  # noqa: F401
-from .aqformdb import AQFormDB
+from .aqformdb import AQFormDB  # noqa: F401

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtWidgets, QtCore, QtGui  # type: ignore
+from PyQt5 import QtWidgets, QtGui
 from typing import Any, Union
 
 from pineboolib.core import decorators

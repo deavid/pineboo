@@ -17,7 +17,6 @@ from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application import project
 from pineboolib.application import connections
 
-from pineboolib import qt3_widgets
 from pineboolib.qt3_widgets import qmainwindow
 from pineboolib.qt3_widgets import qtoolbar
 from pineboolib.qt3_widgets import qmenu
