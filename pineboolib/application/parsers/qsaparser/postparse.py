@@ -6,7 +6,6 @@ from optparse import OptionParser
 import os
 import os.path
 import sys
-import imp
 from xml.etree import ElementTree
 from xml.dom import minidom  # type: ignore
 import logging
@@ -698,7 +697,7 @@ def post_parse(treedata: TreeData):
 
 
 class Module(object):
-    """Python code tester. Deprecated."""
+    """Python code tester for pineboo-parse."""
 
     def __init__(self, name: str, path: str) -> None:
         """Create Module."""
@@ -709,6 +708,8 @@ class Module(object):
         """Import and return Python file."""
         fp = None
         try:
+            import imp  # FIXME: imp module is deprecated in favor of importlib
+
             description = (".py", "U", imp.PY_SOURCE)
             # description = ('.pyc', 'U', PY_COMPILED)
             pathname = os.path.join(self.path, self.name)

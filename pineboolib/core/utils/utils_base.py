@@ -407,11 +407,11 @@ def load2xml(form_path_or_str: str) -> ElementTree:
         raise Exception("File %s not found" % form_path_or_str[:200])
 
     try:
-        parser = ET.XMLParser(html=0)
+        parser = ET.XMLParser()
         return ET.parse(file_ptr or form_path_or_str, parser)
     except Exception:
         try:
-            parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
+            parser = ET.XMLParser(encoding="ISO-8859-15")
             return ET.parse(file_ptr or form_path_or_str, parser)
         except Exception:
             logger.exception("Error cargando UI después de intentar con UTF8 e ISO \n%s", form_path_or_str)
