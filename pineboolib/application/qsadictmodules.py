@@ -17,7 +17,7 @@ class QSADictModules:
     """
 
     @classmethod
-    def from_project(cls, scriptname: str) -> Any:
+    def QSADictModules.from_project(cls, scriptname: str) -> Any:
         """
         Return project object for given name.
         """

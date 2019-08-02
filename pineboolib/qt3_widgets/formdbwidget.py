@@ -1,6 +1,6 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore
-from typing import Set, Tuple
+from typing import Set, Tuple, TYPE_CHECKING
 from pineboolib import logging
 import weakref
 import sys
@@ -27,10 +27,12 @@ class FormDBWidget(QtWidgets.QWidget):
             self.cursor_ = None
             self.parent_ = parent or parent.parentWidget() if parent and hasattr(parent, "parentWidget") else parent
 
-            from pineboolib.fllegacy.flformdb import FLFormDB
+            if not TYPE_CHECKING:
+                # FIXME: qt3_widgets should not interact with fllegacy
+                from pineboolib.fllegacy.flformdb import FLFormDB
 
-            if isinstance(self.parent(), FLFormDB):
-                self.form = self.parent()
+                if isinstance(self.parent(), FLFormDB):
+                    self.form = self.parent()
 
             self._formconnections: Set[Tuple] = set([])
 
@@ -114,14 +116,17 @@ class FormDBWidget(QtWidgets.QWidget):
                     ret = self.form
 
             if ret is not None:
-                from pineboolib.fllegacy.flfielddb import FLFieldDB
-                from pineboolib.fllegacy.fltabledb import FLTableDB
+                if not TYPE_CHECKING:
+                    # FIXME: qt3_widgets should not interact with fllegacy
+                    from pineboolib.fllegacy.flfielddb import FLFieldDB
+                    from pineboolib.fllegacy.fltabledb import FLTableDB
 
-                if isinstance(ret, (FLFieldDB, FLTableDB)) and hasattr(ret, "_loaded"):
-                    if ret._loaded is False:
-                        ret.load()
-            else:
+                    if isinstance(ret, (FLFieldDB, FLTableDB)) and hasattr(ret, "_loaded"):
+                        if ret._loaded is False:
+                            ret.load()
+            if ret is None:
                 self.logger.warning("WARN: No se encontro el control %s", child_name)
+                return None
             return ret
         except Exception:
             self.logger.exception("child: Error trying to get child of <%s>", child_name)
@@ -142,24 +147,29 @@ class FormDBWidget(QtWidgets.QWidget):
         else:
             if not self.cursor_:
                 from pineboolib.application import project
-                from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+                from pineboolib.application.database.pnsqlcursor import PNSqlCursor
 
                 action = project.conn.manager().action(self._action.name)
-                self.cursor_ = FLSqlCursor(action.name())
+                self.cursor_ = PNSqlCursor(action.name())
 
         return self.cursor_
 
     def __getattr__(self, name):
-        from pineboolib.fllegacy.flapplication import aqApp
 
-        ret_ = (
-            getattr(self.cursor_, name, None)
-            or getattr(aqApp, name, None)
-            or getattr(self.parent(), name, None)
-            or getattr(self.parent().script, name, None)
-        )
+        ret_ = getattr(self.cursor_, name, None) or getattr(self.parent(), name, None) or getattr(self.parent().script, name, None)
         if ret_:
             return ret_
+
+        if not TYPE_CHECKING:
+            # FIXME: qt3_widgets should not interact with fllegacy
+            from pineboolib.fllegacy.flapplication import aqApp
+
+            ret_ = getattr(aqApp, name, None)
+            if ret_:
+                self.logger.info("FormDBWidget: Coearcing attribute %r from aqApp (should be avoided)" % name)
+                return ret_
+
+        raise AttributeError("FormDBWidget: Attribute does not exist: %r" % name)
 
     def __iter__(self):
         self._iter_current = None
