@@ -126,7 +126,7 @@ class parser(object):
     @dispatcher.add_method
     def action(*args):
         from pineboolib.application import project
-        from pineboolib.fllegacy.flfielddb import FLfieldDB
+        from pineboolib.fllegacy.flfielddb import FLFieldDB
         from pineboolib.fllegacy.fltabledb import FLTableDB
 
         if project.DGI._par._queqe:
