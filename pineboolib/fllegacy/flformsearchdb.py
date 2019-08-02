@@ -98,7 +98,8 @@ class FLFormSearchDB(FLFormDB):
     """
 
     def loadControls(self):
-        from pineboolib import pncontrolsfactory
+        from pineboolib.qt3_widgets.qtoolbutton import QToolButton
+        from PyQt5.QtGui import QIcon
 
         self.bottomToolbar = QtWidgets.QFrame()
         self.bottomToolbar.setMaximumHeight(64)
@@ -117,12 +118,12 @@ class FLFormSearchDB(FLFormDB):
         pbSize = self.iconSize
         if config.value("application/isDebuggerMode", False):
 
-            pushButtonExport = pncontrolsfactory.QToolButton(self)
+            pushButtonExport = QToolButton(self)
             pushButtonExport.setObjectName("pushButtonExport")
             pushButtonExport.setSizePolicy(sizePolicy)
             pushButtonExport.setMinimumSize(pbSize)
             pushButtonExport.setMaximumSize(pbSize)
-            pushButtonExport.setIcon(pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-properties.png")))
+            pushButtonExport.setIcon(QIcon(filedir("../share/icons", "gtk-properties.png")))
             pushButtonExport.setShortcut(QKeySequence(self.tr("F3")))
             pushButtonExport.setWhatsThis("Exportar a XML(F3)")
             pushButtonExport.setToolTip("Exportar a XML(F3)")
@@ -136,7 +137,7 @@ class FLFormSearchDB(FLFormDB):
                 push_button_snapshot.setSizePolicy(sizePolicy)
                 push_button_snapshot.setMinimumSize(pbSize)
                 push_button_snapshot.setMaximumSize(pbSize)
-                push_button_snapshot.setIcon(pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-paste.png")))
+                push_button_snapshot.setIcon(QIcon(filedir("../share/icons", "gtk-paste.png")))
                 push_button_snapshot.setShortcut(QKeySequence(self.tr("F8")))
                 push_button_snapshot.setWhatsThis("Capturar pantalla(F8)")
                 push_button_snapshot.setToolTip("Capturar pantalla(F8)")
@@ -148,14 +149,14 @@ class FLFormSearchDB(FLFormDB):
             self.bottomToolbar.widget_hlayout.addItem(spacer)
 
         if not self.pushButtonAccept:
-            self.pushButtonAccept = pncontrolsfactory.QToolButton(self)
+            self.pushButtonAccept = QToolButton(self)
             self.pushButtonAccept.setObjectName("pushButtonAccept")
             self.pushButtonAccept.clicked.connect(self.accept)
 
         self.pushButtonAccept.setSizePolicy(sizePolicy)
         self.pushButtonAccept.setMaximumSize(pbSize)
         self.pushButtonAccept.setMinimumSize(pbSize)
-        self.pushButtonAccept.setIcon(pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-save.png")))
+        self.pushButtonAccept.setIcon(QIcon(filedir("../share/icons", "gtk-save.png")))
         # pushButtonAccept->setAccel(QKeySequence(Qt::Key_F10)); FIXME
         self.pushButtonAccept.setFocus()
         self.pushButtonAccept.setWhatsThis("Seleccionar registro actual y cerrar formulario (F10)")
@@ -165,14 +166,14 @@ class FLFormSearchDB(FLFormDB):
         self.pushButtonAccept.show()
 
         if not self.pushButtonCancel:
-            self.pushButtonCancel = pncontrolsfactory.QToolButton(self)
+            self.pushButtonCancel = QToolButton(self)
             self.pushButtonCancel.setObjectName("pushButtonCancel")
             self.pushButtonCancel.clicked.connect(self.reject)
 
         self.pushButtonCancel.setSizePolicy(sizePolicy)
         self.pushButtonCancel.setMaximumSize(pbSize)
         self.pushButtonCancel.setMinimumSize(pbSize)
-        self.pushButtonCancel.setIcon(pncontrolsfactory.QIcon(filedir("../share/icons", "gtk-stop.png")))
+        self.pushButtonCancel.setIcon(QIcon(filedir("../share/icons", "gtk-stop.png")))
         self.pushButtonCancel.setFocusPolicy(QtCore.Qt.NoFocus)
         # pushButtonCancel->setAccel(Esc); FIXME
         self.pushButtonCancel.setWhatsThis("Cerrar formulario sin seleccionar registro (Esc)")
@@ -346,9 +347,9 @@ class FLFormSearchDB(FLFormDB):
         self.saveGeometry()
         self.hide()
 
-        from pineboolib import pncontrolsfactory
+        from PyQt5.QtWidgets import QMdiSubWindow
 
-        if isinstance(self.parent(), pncontrolsfactory.QMdiSubWindow):
+        if isinstance(self.parent(), QMdiSubWindow):
             self.parent().hide()
 
     """

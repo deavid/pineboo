@@ -87,11 +87,9 @@ class FormDBWidget(QtCore.QObject):
     def doCleanUp(self):
         self.clear_connections()
         if getattr(self, "iface", None) is not None:
-            from pineboolib import pncontrolsfactory
+            from pineboolib.core.garbage_collector import check_gc_referrers
 
-            pncontrolsfactory.check_gc_referrers(
-                "FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name
-            )
+            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)
             del self.iface.ctx
             del self.iface
             self._action.formrecord_widget = None

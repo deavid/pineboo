@@ -7,9 +7,14 @@ Manage ACLs between different application objects.
 from PyQt5 import QtWidgets  # type: ignore
 
 from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
-from pineboolib.fllegacy.flaccesscontrol import FLAccessControl
-
 from pineboolib.application import project
+
+from pineboolib.fllegacy.flaccesscontrol import FLAccessControl
+from pineboolib.fllegacy.flformdb import FLFormDB
+
+from pineboolib.qt3_widgets.qmainwindow import QMainWindow
+
+
 from typing import Dict, Any
 
 import logging
@@ -33,9 +38,7 @@ class FLAccessControlMainWindow(FLAccessControl):
     def processObject(self, obj: QtWidgets.QWidget) -> None:
         """Process the object."""
 
-        from pineboolib import pncontrolsfactory
-
-        mw = pncontrolsfactory.QMainWindow(obj)
+        mw = QMainWindow(obj)
         if not mw or not self._acos_perms:
             return
 
@@ -122,9 +125,9 @@ class FLAccessControlForm(FLAccessControl):
                     w.setDisabled(True)
 
         for it in self._acos_perms.keys():
-            from pineboolib import pncontrolsfactory
+            from pineboolib.qt3_widgets.qwidget import QWidget
 
-            w = fm.findChild(pncontrolsfactory.QWidget, it)
+            w = fm.findChild(QWidget, it)
             if w:
                 perm = self._acos_perms[it]
                 if perm in ("-w", "--"):
@@ -267,13 +270,12 @@ class FLAccessControlFactory(object):
             logger.warning("NO OBJ")
 
         ret_ = ""
-        from pineboolib import pncontrolsfactory
 
-        if isinstance(obj, pncontrolsfactory.QMainWindow):
+        if isinstance(obj, QMainWindow):
             ret_ = "mainwindow"
         elif isinstance(obj, PNTableMetaData):
             ret_ = "table"
-        elif isinstance(obj, pncontrolsfactory.FLFormDB):
+        elif isinstance(obj, FLFormDB):
             ret_ = "form"
 
         return ret_

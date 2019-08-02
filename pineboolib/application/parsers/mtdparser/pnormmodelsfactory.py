@@ -50,7 +50,7 @@ from pineboolib import logging
 
 from typing import Any
 
-logger = logging.getLogger("PNControlsFactory")
+logger = logging.getLogger("PNORMModelsFactory")
 
 # processed_: List[str] = []
 

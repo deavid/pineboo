@@ -13,6 +13,8 @@ from pineboolib.core.settings import config, settings
 from pineboolib.application import project
 from pineboolib.application.database import db_signals
 from pineboolib.application.qsatypes.sysbasetype import SysBaseType
+from pineboolib.qt3_widgets.qmessagebox import QMessageBox
+
 from pineboolib.fllegacy.fltranslator import FLTranslator
 
 
@@ -254,6 +256,7 @@ class FLApplication(QtCore.QObject):
 
     def eventLoop(self) -> "QEventLoop":
         """Create main event loop."""
+        from pineboolib.qt3_widgets.qeventloop import QEventLoop
 
         return QEventLoop()
 
@@ -1414,6 +1417,7 @@ class FLApplication(QtCore.QObject):
 
     def writeState(self) -> None:
         """Write settings back to disk."""
+
         settings.set_value("MultiLang/Enabled", self._multi_lang_enabled)
         settings.set_value("MultiLang/LangId", self._multi_lang_id)
 
@@ -1453,6 +1457,7 @@ class FLApplication(QtCore.QObject):
 
     def writeStateModule(self) -> None:
         """Write settings for modules."""
+
         idm = self.db().managerModules().activeIdModule()
         if not idm:
             return

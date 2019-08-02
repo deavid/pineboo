@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from pineboolib import pncontrolsfactory
+from pineboolib.qt3_widgets.qtable import QTable
 from pineboolib.core import decorators
 
 
-class FLTable(pncontrolsfactory.QTable):
+class FLTable(QTable):
     AlwaysOff = None
 
     @decorators.NotImplementedWarn

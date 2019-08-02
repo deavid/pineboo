@@ -501,13 +501,17 @@ class FLDataTable(QtWidgets.QTableView):
         db = self.cursor_.db()
         pri_key_val = self.cursor_.valueBuffer(pri_key)
 
-        from pineboolib import pncontrolsfactory
+        from pineboolib.qt3_widgets.qmenu import QMenu
+        from pineboolib.qt3_widgets.qwidget import QWidget
+        from pineboolib.qt3_widgets.qvboxlayout import QVBoxLayout
 
-        popup = pncontrolsfactory.QMenu(self)
+        from .fldatatable import FLDataTable
 
-        menu_frame = pncontrolsfactory.QWidget(self, QtCore.Qt.Popup)
+        popup = QMenu(self)
 
-        lay = pncontrolsfactory.QVBoxLayout()
+        menu_frame = QWidget(self, QtCore.Qt.Popup)
+
+        lay = QVBoxLayout()
         menu_frame.setLayout(lay)
 
         tmp_pos = e.globalPos()
@@ -521,13 +525,13 @@ class FLDataTable(QtWidgets.QTableView):
                 if field is None:
                     continue
 
-                sub_popup = pncontrolsfactory.QMenu(self)
+                sub_popup = QMenu(self)
                 sub_popup.setTitle(mtd.alias())
-                sub_popup_frame = pncontrolsfactory.QWidget(sub_popup, QtCore.Qt.Popup)
-                lay_popup = pncontrolsfactory.QVBoxLayout(sub_popup)
+                sub_popup_frame = QWidget(sub_popup, QtCore.Qt.Popup)
+                lay_popup = QVBoxLayout(sub_popup)
                 sub_popup_frame.setLayout(lay_popup)
 
-                dt = pncontrolsfactory.FLDataTable(None, "FLDataTable", True)
+                dt = FLDataTable(None, "FLDataTable", True)
                 lay_popup.addWidget(dt)
 
                 dt.setFLSqlCursor(cur)

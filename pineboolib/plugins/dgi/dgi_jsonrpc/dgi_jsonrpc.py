@@ -126,7 +126,8 @@ class parser(object):
     @dispatcher.add_method
     def action(*args):
         from pineboolib.application import project
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flfielddb import FLfieldDB
+        from pineboolib.fllegacy.fltabledb import FLTableDB
 
         if project.DGI._par._queqe:
             return "queqePending"
@@ -140,7 +141,7 @@ class parser(object):
             cr = ac.child(control)
             if cr:
                 em = getattr(cr, emite, None)
-                if isinstance(cr, pncontrolsfactory.FLFieldDB):
+                if isinstance(cr, FLFieldDB):
                     if emite == "setText":
                         cr.editor_.setText(arguments[3])
                         return True
@@ -148,7 +149,7 @@ class parser(object):
                         print("Función desconocida", emite)
                         return False
 
-                elif isinstance(cr, pncontrolsfactory.FLTableDB):
+                elif isinstance(cr, FLTableDB):
                     if emite == "data":
                         print("Recoge data!!!")
 

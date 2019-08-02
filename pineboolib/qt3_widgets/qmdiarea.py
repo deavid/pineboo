@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtWidgets import QMdiArea as QMA  # type: ignore
 from PyQt5 import QtCore  # type: ignore
+from PyQt5.QtGui import QBrush, QColor
+from pineboolib.fllegacy.aqsobjects.aqs import AQS
 
 
 class QMdiArea(QMA):
@@ -9,10 +11,9 @@ class QMdiArea(QMA):
 
     def __init__(self, *args) -> None:
         super().__init__(*args)
-        from pineboolib import pncontrolsfactory
 
-        self.setBackground(pncontrolsfactory.QBrush(pncontrolsfactory.QColor(255, 255, 255)))
-        self.logo = pncontrolsfactory.AQS.pixmap_fromMimeSource("pineboo-logo.png")
+        self.setBackground(QBrush(QColor(255, 255, 255)))
+        self.logo = AQS.pixmap_fromMimeSource("pineboo-logo.png")
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.logo = self.logo.scaled(self.size(), QtCore.Qt.IgnoreAspectRatio)
