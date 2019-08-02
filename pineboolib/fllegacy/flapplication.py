@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """FLApplication Module."""
 
-from PyQt5 import QtCore, QtWidgets  # type: ignore
-from PyQt5.QtCore import QTimer, QEvent, QRect, QObject  # type: ignore
-from PyQt5.QtGui import QCursor  # type: ignore
-from PyQt5.QtWidgets import QMenu, QActionGroup, QAction, QStyleFactory, QApplication
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import QTimer, QEvent, QRect, QObject, pyqtSignal
+from PyQt5.QtGui import QCursor, QIcon, QKeySequence
+from PyQt5.QtWidgets import QWidget, QMenu, QActionGroup, QAction, QStyleFactory, QApplication
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QSizePolicy, QToolBox, QMainWindow
+from PyQt5.QtWidgets import QToolBar, QFontDialog, QLabel, QMdiArea, QDockWidget
 
 from pineboolib import logging
 from pineboolib.core import decorators
@@ -14,11 +16,11 @@ from pineboolib.application import project
 from pineboolib.application.database import db_signals
 from pineboolib.application.qsatypes.sysbasetype import SysBaseType
 from pineboolib.qt3_widgets.qmessagebox import QMessageBox
-
 from pineboolib.fllegacy.fltranslator import FLTranslator
+from pineboolib.fllegacy.flworkspace import FLWorkSpace
+from pineboolib.fllegacy.fltexteditoutput import FLTextEditOutput
 
-
-from typing import Any, Optional, Union, Dict, List, TYPE_CHECKING
+from typing import cast, Any, Optional, Union, Dict, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.application.database.pnsqlcursor import PNSqlCursor
@@ -69,7 +71,7 @@ class FLApplication(QtCore.QObject):
     time_user_: QtCore.QTimer
     script_entry_function_: Optional[str]
     event_loop = None
-    window_menu = None
+    window_menu: Optional[QMenu] = None
     last_text_caption_: Optional[str]
     modules_menu: Any
 
@@ -178,7 +180,7 @@ class FLApplication(QtCore.QObject):
             return super().eventFilter(obj, ev)
 
         evt = ev.type()
-        if obj != self.main_widget_ and not isinstance(obj, QMainWindow):
+        if obj != self.main_widget_ and not isinstance(obj, QtWidgets.QMainWindow):
             return super().eventFilter(obj, ev)
 
         # aw = None
@@ -254,7 +256,7 @@ class FLApplication(QtCore.QObject):
 
         return super().eventFilter(obj, ev)
 
-    def eventLoop(self) -> "QEventLoop":
+    def eventLoop(self) -> "QtCore.QEventLoop":
         """Create main event loop."""
         from pineboolib.qt3_widgets.qeventloop import QEventLoop
 
@@ -269,6 +271,11 @@ class FLApplication(QtCore.QObject):
     def checkForUpdateFinish(self, op):
         """Not used in pineboo."""
         pass
+
+    def exit_button_clicked(self):
+        """Event when exit button is clicked. Closes the container."""
+        if self.container_ is not None:
+            self.container_.close()
 
     def init(self) -> None:
         """Initialize FLApplication."""
@@ -316,7 +323,7 @@ class FLApplication(QtCore.QObject):
         self.exit_button.setFocusPolicy(QtCore.Qt.NoFocus)
         self.exit_button.setToolTip(self.tr("Salir de la aplicación (Ctrl+Q)"))
         self.exit_button.setWhatsThis(self.tr("Salir de la aplicación (Ctrl+Q)"))
-        self.exit_button.clicked.connect(self.container_.close)
+        self.exit_button.clicked.connect(self.exit_button_clicked)
 
         self.tool_box_ = QToolBox(w)
         self.tool_box_.setObjectName("toolBox")
@@ -490,11 +497,7 @@ class FLApplication(QtCore.QObject):
         font_ = QFontDialog().getFont()
         if font_:
             QApplication.setFont(font_[0])
-            save_ = []
-            save_.append(font_[0].family())
-            save_.append(font_[0].pointSize())
-            save_.append(font_[0].weight())
-            save_.append(font_[0].italic())
+            save_ = [font_[0].family(), font_[0].pointSize(), font_[0].weight(), font_[0].italic()]
 
             config.set_value("application/font", save_)
 
@@ -715,7 +718,7 @@ class FLApplication(QtCore.QObject):
         if self.window_menu is None:
             raise Exception("initMenuBar. self.window_menu is empty!")
 
-        self.window_menu.aboutToShow.connect(self.windowMenuAboutToShow)
+        cast(pyqtSignal, self.window_menu.aboutToShow).connect(self.windowMenuAboutToShow)
 
     def initToolBar(self) -> None:
         """Initialize toolbar."""
@@ -798,9 +801,11 @@ class FLApplication(QtCore.QObject):
         """Change application style."""
 
         if style_:
-            config.set_value("application/style", style_)
+            # FIXME: style can be Int, referring to a enum style. We should work with strings only.
+            style: Any = style_
+            config.set_value("application/style", style)
 
-            QApplication.setStyle(style_)
+            QApplication.setStyle(style)
 
     def initStyles(self) -> None:
         """Initialize styles."""
@@ -919,6 +924,7 @@ class FLApplication(QtCore.QObject):
 
     def existFormInMDI(self, id) -> bool:
         """Return if named FLFormDB is open."""
+        from pineboolib.fllegacy.flformdb import FLFormDB
 
         if id is None or not self._p_work_space:
             return False
@@ -1097,7 +1103,7 @@ class FLApplication(QtCore.QObject):
     def timeUser(self) -> Any:
         """Get amount of time running."""
 
-        return SysType().time_user_
+        return SysBaseType.time_user_
 
     def call(self, function, argument_list=[], object_content=None, show_exceptions=True) -> Any:
         """Call a QS project function."""
@@ -1358,7 +1364,8 @@ class FLApplication(QtCore.QObject):
     def classType(self, n):
         """Return class for object."""
 
-        return type(resolveObject(n)())
+        # return type(self.resolveObject(n)())
+        return type(n)
 
     # def __getattr__(self, name):
     #    return getattr(project, name, None)
@@ -1407,7 +1414,7 @@ class FLApplication(QtCore.QObject):
         if self.not_exit_:
             return False
 
-        if not SysType().interactiveGUI():
+        if not SysBaseType.interactiveGUI():
             return True
 
         ret = QMessageBox.information(
@@ -1457,6 +1464,8 @@ class FLApplication(QtCore.QObject):
 
     def writeStateModule(self) -> None:
         """Write settings for modules."""
+
+        from pineboolib.fllegacy.flformdb import FLFormDB
 
         idm = self.db().managerModules().activeIdModule()
         if not idm:

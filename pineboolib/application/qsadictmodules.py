@@ -91,7 +91,7 @@ class QSADictModules:
             )
             return False
         # Se crea la action del form
-        delayed_action = DelayedObjectProxyLoader(action.load, name="QSA.Module.%s.Action.form%s" % (module.module.name, name))
+        delayed_action = DelayedObjectProxyLoader(action.load, name="QSA.Module.%s.Action.form%s" % (module.mod.name, name))
         cls.save_action(actionname, delayed_action)
         SafeQSA.save_mainform(actionname, delayed_action)
         return True
