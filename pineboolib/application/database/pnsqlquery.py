@@ -206,7 +206,7 @@ class PNSqlQuery(object):
             logger.trace("Detalle:", stack_info=True)
             return False
         # conn.commit()
-        logger.info("_exec: Rows: %s SQL: <%s>", len(self._datos), sql)
+        logger.trace("_exec: Rows: %s SQL: <%s>", len(self._datos), sql)
 
         return True
 
