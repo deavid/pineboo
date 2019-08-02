@@ -12,7 +12,7 @@ from pineboolib.application.types import Boolean, QString, String, Function, Obj
 
 from .input import Input  # noqa: F401
 from .utils import switch, qsaRegExp, RegExp, Math, Application, parseFloat, parseString, parseInt, isNaN, length, text  # noqa: F401
-from .utils import startTimer, killTimer, debug, from_project, format_exc, isnan, replace  # noqa: F401
+from .utils import startTimer, killTimer, debug, format_exc, isnan, replace  # noqa: F401
 
 # QT
 from .pncontrolsfactory import QComboBox, QTable, QLayoutWidget, QToolButton, QTabWidget, QLabel, QGroupBox, QListView, QImage  # noqa: F401
