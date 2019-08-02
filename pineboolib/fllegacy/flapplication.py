@@ -512,7 +512,7 @@ class FLApplication(QtCore.QObject):
 
     def initToolBox(self) -> None:
         """Initialize toolbox."""
-        from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQS
+        from pineboolib.fllegacy.aqsobjects.aqs import AQS
 
         if self.main_widget_ is None:
             raise Exception("self.main_widget_ is empty!")
