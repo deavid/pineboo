@@ -408,6 +408,7 @@ class File(object):  # FIXME : Rehacer!!
     WriteOnly = QIODevice.WriteOnly
     ReadWrite = QIODevice.ReadWrite
     Append = QIODevice.Append
+    ioDevice = QIODevice
 
     fichero: str
     mode_: QIODevice
@@ -435,9 +436,10 @@ class File(object):  # FIXME : Rehacer!!
 
         self.mode_ = self.ReadWrite
 
-    def open(self, m: QIODevice) -> None:
+    def open(self, m: QIODevice) -> bool:
         self.mode_ = m
         self.eof = False
+        return True
 
     def close(self) -> None:
         pass

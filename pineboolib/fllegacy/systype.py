@@ -783,33 +783,37 @@ class SysType(SysBaseType):
         diag.modal = True
         lay = QVBoxLayout(diag)
         lay.setMargin(6)
-        lay.spacing = 6
+        lay.setSpacing(6)
         lay2 = QHBoxLayout(lay)
-        lay2.margin = 6
-        lay2.spacing = 6
+        lay2.setMargin(6)
+        lay2.setSpacing(6)
         lblPix = QLabel(diag)
-        lblPix.pixmap = AQS.Pixmap_fromMimeSource(u"help_index.png")
-        lblPix.alignment = AQS.AlignTop
+        pixmap = AQS.pixmap_fromMimeSource(u"help_index.png")
+        if pixmap:
+            lblPix.setPixmap(pixmap)
+            lblPix.setAlignment(AQS.AlignTop)
         lay2.addWidget(lblPix)
         lbl = QLabel(diag)
-        lbl.text = msg
-        lbl.alignment = AQS.AlignTop or AQS.WordBreak
+        lbl.setText(msg)
+        lbl.setAlignment(AQS.AlignTop | AQS.WordBreak)
         lay2.addWidget(lbl)
         lay3 = QHBoxLayout(lay)
-        lay3.margin = 6
-        lay3.spacing = 6
+        lay3.setMargin(6)
+        lay3.setSpacing(6)
         pbYes = QPushButton(diag)
-        pbYes.text = txtYes if txtYes else self.translate(u"Sí")
+        pbYes.setText(txtYes if txtYes else self.translate(u"Sí"))
         pbNo = QPushButton(diag)
-        pbNo.text = txtNo if txtNo else self.translate(u"No")
+        pbNo.setText(txtNo if txtNo else self.translate(u"No"))
         lay3.addWidget(pbYes)
         lay3.addWidget(pbNo)
         connections.connect(pbYes, u"clicked()", diag, u"accept()")
         connections.connect(pbNo, u"clicked()", diag, u"reject()")
         chkRemember = None
         if keyRemember and txtRemember:
+            from pineboolib.qt3_widgets.qcheckbox import QCheckBox
+
             chkRemember = QCheckBox(txtRemember, diag)
-            chkRemember.checked = valRemember
+            chkRemember.setChecked(valRemember)
             lay.addWidget(chkRemember)
         ret = MessageBox.No if (diag.exec_() == 0) else MessageBox.Yes
         if chkRemember is not None:
@@ -817,18 +821,15 @@ class SysType(SysBaseType):
         return ret
 
     @classmethod
-    def decryptFromBase64(self, str_=None):
-        ba = QByteArray()
-        ba.string = str_
-        return str(AQS.decryptInternal(AQS.fromBase64(ba)))
-
-    @classmethod
     def exportModules(self):
+        from pineboolib.qt3_widgets.filedialog import FileDialog
+        from pineboolib.application import project
+
         dirBasePath = FileDialog.getExistingDirectory(Dir.home)
         if not dirBasePath:
             return
-        dataBaseName = aqApp.db().database()
-        dirBasePath = Dir.cleanDirPath(ustr(dirBasePath, u"/modulos_exportados_", QString(dataBaseName).mid(dataBaseName.rfind(u"/") + 1)))
+        dataBaseName = project.conn.db().database()
+        dirBasePath = Dir.cleanDirPath(ustr(dirBasePath, u"/modulos_exportados_", dataBaseName.mid(dataBaseName.rfind(u"/") + 1)))
         dir = Dir()
         if not dir.fileExists(dirBasePath):
             try:
@@ -853,11 +854,11 @@ class SysType(SysBaseType):
             idMod = qry.value(0)
             if idMod == u"sys":
                 continue
-            FLUtil.setLabelText(String(u"%s") % (str(idMod)))
+            FLUtil.setLabelText(idMod)
             p += 1
             FLUtil.setProgress(p)
             try:
-                exportModule(idMod, dirBasePath)
+                self.exportModule(idMod, dirBasePath)
             except Exception:
                 e = traceback.format_exc()
                 FLUtil.destroyProgressDialog()
@@ -922,7 +923,10 @@ class SysType(SysBaseType):
 
     @classmethod
     def fileWriteIso(self, fileName=None, content=None):
-        fileISO = QFile(fileName)
+        from pineboolib.application.types import File
+        from PyQt5.QtCore import QTextStream
+
+        fileISO = File(fileName)
         if not fileISO.open(File.WriteOnly):
             logger.warning(ustr(u"Error abriendo fichero ", fileName, u" para escritura"))
             return False
@@ -933,7 +937,10 @@ class SysType(SysBaseType):
 
     @classmethod
     def fileWriteUtf8(self, fileName=None, content=None):
-        fileUTF = QFile(fileName)
+        from pineboolib.application.types import File
+        from PyQt5.QtCore import QTextStream
+
+        fileUTF = File(fileName)
         if not fileUTF.open(File.WriteOnly):
             logger.warning(ustr(u"Error abriendo fichero ", fileName, u" para escritura"))
             return False
@@ -960,7 +967,7 @@ class SysType(SysBaseType):
             dir.mkdir(ustr(dirPath, u"/reports"))
         if not dir.fileExists(ustr(dirPath, u"/translations")):
             dir.mkdir(ustr(dirPath, u"/translations"))
-        xmlMod = xmlModule(idMod)
+        xmlMod = self.xmlModule(idMod)
         self.fileWriteIso(ustr(dirPath, u"/", idMod, u".mod"), xmlMod.toString(2))
         xpmMod = sqlSelect(u"flmodules", u"icono", ustr(u"idmodulo='", idMod, u"'"))
         self.fileWriteIso(ustr(dirPath, u"/", idMod, u".xpm"), xpmMod)
@@ -1042,15 +1049,17 @@ class SysType(SysBaseType):
             if MessageBox.Yes != MessageBox.warning(txt, MessageBox.No, MessageBox.Yes):
                 return
 
-        key = ustr(u"scripts/sys/modLastDirModules_", nameBD())
+        key = ustr(u"scripts/sys/modLastDirModules_", SysBaseType.nameBD())
         dirAnt = settings.value(key)
+        from pineboolib.qt3_widgets.filedialog import FileDialog
+
         dirMods = FileDialog.getExistingDirectory((dirAnt if dirAnt else False), self.translate(u"Directorio de Módulos"))
         if not dirMods:
             return
         dirMods = Dir.cleanDirPath(dirMods)
         dirMods = Dir.convertSeparators(dirMods)
         Dir.current = dirMods
-        listFilesMod = selectModsDialog(FLUtil.findFiles(Array([dirMods]), u"*.mod", False))
+        listFilesMod = self.selectModsDialog(FLUtil.findFiles(Array([dirMods]), u"*.mod", False))
         FLUtil.createProgressDialog(self.translate(u"Importando"), len(listFilesMod))
         FLUtil.setProgress(1)
         i = 0

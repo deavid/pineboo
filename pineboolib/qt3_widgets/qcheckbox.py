@@ -6,8 +6,13 @@ class QCheckBox(QtWidgets.QCheckBox):
 
     _parent = None
 
-    def __init__(self, parent) -> None:
-        self._parent = parent
+    def __init__(self, *args) -> None:
+        if len(args) == 1:
+            parent = args[0]
+        else:
+            self.setObjectName(args[0])
+            parent = args[1]
+
         super().__init__(parent)
 
     def get_checked(self):

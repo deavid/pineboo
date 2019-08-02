@@ -40,6 +40,8 @@ class AQS(object):
     SmtpServerError: int = 16
     SmtpClientError: int = 17
     StFailed = None
+    AlignTop = QtCore.Qt.AlignTop
+    WordBreak = QtCore.Qt.TextWordWrap
 
     WindowStateChange = QtGui.QWindowStateChangeEvent
     ContextMenu = QtGui.QContextMenuEvent
@@ -200,3 +202,7 @@ class AQS(object):
             return ret_
 
         logger.warning("AQS: No se encuentra el atributo %s", name)
+
+    @classmethod
+    def TextCodec_codecForName(cls, codec_name):
+        return codec_name
