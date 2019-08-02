@@ -28,6 +28,7 @@ from pineboolib.fllegacy.aqsobjects.aqs import AQS
 from pineboolib.fllegacy.aqsobjects.aqsql import AQSql
 from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings
 from pineboolib.fllegacy.flvar import FLVar
+from pineboolib.fllegacy.flutil import FLUtil
 
 from pineboolib.qt3_widgets.dialog import Dialog
 from pineboolib.qt3_widgets.qbytearray import QByteArray
@@ -522,7 +523,7 @@ class SysType(SysBaseType):
             dir_ = Dir(ustr(self.installPrefix(), u"/share/eneboo/packages"))
             dir_.setCurrent()
             input_ = QFileDialog.getOpenFileName(
-                u"Eneboo/AbanQ Packages", self.translate(u"scripts", u"Seleccionar Fichero"), "*.eneboopkg"
+                QApplication.focusWidget(), u"Eneboo/AbanQ Packages", self.translate(u"scripts", u"Seleccionar Fichero"), "*.eneboopkg"
             )
         if warnBackup is None:
             warnBackup = True
@@ -602,7 +603,7 @@ class SysType(SysBaseType):
         ok = True
         root = doc.firstChild()
         files = root.childNodes()
-        AQUtil.createProgressDialog(self.translate(u"Registrando ficheros"), len(files))
+        FLUtil.createProgressDialog(self.translate(u"Registrando ficheros"), len(files))
         i = 0
         while_pass = True
         while i < len(files):
@@ -621,11 +622,11 @@ class SysType(SysBaseType):
                 "binary": it.namedItem(u"binary").toElement().text(),
                 "shabinary": it.namedItem(u"shabinary").toElement().text(),
             }
-            AQUtil.setProgress(i)
-            AQUtil.setLabelText(ustr(self.translate(u"Registrando fichero"), u" ", fil["id"]))
+            FLUtil.setProgress(i)
+            FLUtil.setLabelText(ustr(self.translate(u"Registrando fichero"), u" ", fil["id"]))
             if len(fil["id"]) == 0 or fil["skip"] == u"true":
                 continue
-            if not registerFile(fil, un):
+            if not self.registerFile(fil, un):
                 self.errorMsgBox(ustr(self.translate(u"Error registrando el fichero"), u" ", fil["id"]))
                 ok = False
                 break
@@ -636,7 +637,7 @@ class SysType(SysBaseType):
             except Exception:
                 break
 
-        AQUtil.destroyProgressDialog()
+        FLUtil.destroyProgressDialog()
         return ok
 
     @classmethod
@@ -674,13 +675,13 @@ class SysType(SysBaseType):
     def checkProjectName(self, proName=None):
         if not proName or proName is None:
             proName = u""
-        dbProName = AQUtil.readDBSettingEntry(u"projectname")
+        dbProName = FLUtil.readDBSettingEntry(u"projectname")
         if not dbProName:
             dbProName = u""
         if proName == dbProName:
             return True
         if not proName == "" and dbProName == "":
-            return AQUtil.writeDBSettingEntry(u"projectname", proName)
+            return FLUtil.writeDBSettingEntry(u"projectname", proName)
         txt = u""
         txt += self.translate(u"¡¡ CUIDADO !! POSIBLE INCOHERENCIA EN LOS MÓDULOS\n\n")
         txt += self.translate(u"Está intentando cargar un proyecto o rama de módulos cuyo\n")
@@ -709,7 +710,7 @@ class SysType(SysBaseType):
             return False
         ok = True
         modules = root.childNodes()
-        AQUtil.createProgressDialog(self.translate(u"Registrando módulos"), len(modules))
+        FLUtil.createProgressDialog(self.translate(u"Registrando módulos"), len(modules))
         i = 0
         while_pass = True
         while i < len(modules):
@@ -726,9 +727,9 @@ class SysType(SysBaseType):
                 "areaname": self.trTagText(it.namedItem(u"areaname").toElement().text()),
                 "version": it.namedItem(u"version").toElement().text(),
             }
-            AQUtil.setProgress(i)
-            AQUtil.setLabelText(ustr(self.translate(u"Registrando módulo"), u" ", mod["id"]))
-            if not registerArea(mod) or not registerModule(mod):
+            FLUtil.setProgress(i)
+            FLUtil.setLabelText(ustr(self.translate(u"Registrando módulo"), u" ", mod["id"]))
+            if not self.registerArea(mod) or not self.registerModule(mod):
                 self.errorMsgBox(ustr(self.translate(u"Error registrando el módulo"), u" ", mod["id"]))
                 ok = False
                 break
@@ -739,7 +740,7 @@ class SysType(SysBaseType):
             except Exception:
                 break
 
-        AQUtil.destroyProgressDialog()
+        FLUtil.destroyProgressDialog()
         return ok
 
     @classmethod
@@ -781,7 +782,7 @@ class SysType(SysBaseType):
         diag.caption = txtCaption if txtCaption else u"Eneboo"
         diag.modal = True
         lay = QVBoxLayout(diag)
-        lay.margin = 6
+        lay.setMargin(6)
         lay.spacing = 6
         lay2 = QHBoxLayout(lay)
         lay2.margin = 6
@@ -847,23 +848,23 @@ class SysType(SysBaseType):
         if not qry.exec_() or qry.size() == 0:
             return
         p = 0
-        AQUtil.createProgressDialog(self.translate(u"Exportando módulos"), qry.size() - 1)
+        FLUtil.createProgressDialog(self.translate(u"Exportando módulos"), qry.size() - 1)
         while qry.next():
             idMod = qry.value(0)
             if idMod == u"sys":
                 continue
-            AQUtil.setLabelText(String(u"%s") % (str(idMod)))
+            FLUtil.setLabelText(String(u"%s") % (str(idMod)))
             p += 1
-            AQUtil.setProgress(p)
+            FLUtil.setProgress(p)
             try:
                 exportModule(idMod, dirBasePath)
             except Exception:
                 e = traceback.format_exc()
-                AQUtil.destroyProgressDialog()
+                FLUtil.destroyProgressDialog()
                 self.errorMsgBox(ustr(u"", e))
                 return
 
-        dbProName = AQUtil.readDBSettingEntry(u"projectname")
+        dbProName = FLUtil.readDBSettingEntry(u"projectname")
         if not dbProName:
             dbProName = u""
         if not dbProName == "":
@@ -875,11 +876,11 @@ class SysType(SysBaseType):
                 File.write(ustr(dirBasePath, u"/mvproject.xml"), doc.toString(2))
             except Exception:
                 e = traceback.format_exc()
-                AQUtil.destroyProgressDialog()
+                FLUtil.destroyProgressDialog()
                 self.errorMsgBox(ustr(u"", e))
                 return
 
-        AQUtil.destroyProgressDialog()
+        FLUtil.destroyProgressDialog()
         self.infoMsgBox(self.translate(u"Módulos exportados en:\n") + dirBasePath)
 
     @classmethod
@@ -1049,9 +1050,9 @@ class SysType(SysBaseType):
         dirMods = Dir.cleanDirPath(dirMods)
         dirMods = Dir.convertSeparators(dirMods)
         Dir.current = dirMods
-        listFilesMod = selectModsDialog(AQUtil.findFiles(Array([dirMods]), u"*.mod", False))
-        AQUtil.createProgressDialog(self.translate(u"Importando"), len(listFilesMod))
-        AQUtil.setProgress(1)
+        listFilesMod = selectModsDialog(FLUtil.findFiles(Array([dirMods]), u"*.mod", False))
+        FLUtil.createProgressDialog(self.translate(u"Importando"), len(listFilesMod))
+        FLUtil.setProgress(1)
         i = 0
         while_pass = True
         while i < len(listFilesMod):
@@ -1060,8 +1061,8 @@ class SysType(SysBaseType):
                 while_pass = True
                 continue
             while_pass = False
-            AQUtil.setLabelText(listFilesMod[i])
-            AQUtil.setProgress(i)
+            FLUtil.setLabelText(listFilesMod[i])
+            FLUtil.setProgress(i)
             if not importModule(listFilesMod[i]):
                 self.errorMsgBox(self.translate(u"Error al cargar el módulo:\n") + listFilesMod[i])
                 break
@@ -1072,8 +1073,8 @@ class SysType(SysBaseType):
             except Exception:
                 break
 
-        AQUtil.destroyProgressDialog()
-        AQUtil.writeSettingEntry(key, dirMods)
+        FLUtil.destroyProgressDialog()
+        FLUtil.writeSettingEntry(key, dirMods)
         self.infoMsgBox(self.translate(u"Importación de módulos finalizada."))
         AQTimer.singleShot(0, reinit)
 
@@ -1187,9 +1188,9 @@ class SysType(SysBaseType):
     @classmethod
     def importFiles(self, dirPath=None, ext=None, idMod=None):
         ok = True
-        listFiles = AQUtil.findFiles(Array([dirPath]), ext, False)
-        AQUtil.createProgressDialog(self.translate(u"Importando"), len(listFiles))
-        AQUtil.setProgress(1)
+        listFiles = FLUtil.findFiles(Array([dirPath]), ext, False)
+        FLUtil.createProgressDialog(self.translate(u"Importando"), len(listFiles))
+        FLUtil.setProgress(1)
         i = 0
         while_pass = True
         while i < len(listFiles):
@@ -1198,8 +1199,8 @@ class SysType(SysBaseType):
                 while_pass = True
                 continue
             while_pass = False
-            AQUtil.setLabelText(listFiles[i])
-            AQUtil.setProgress(i)
+            FLUtil.setLabelText(listFiles[i])
+            FLUtil.setProgress(i)
             if not self.importFile(listFiles[i], idMod):
                 self.errorMsgBox(self.translate(u"Error al cargar :\n") + listFiles[i])
                 ok = False
@@ -1211,7 +1212,7 @@ class SysType(SysBaseType):
             except Exception:
                 break
 
-        AQUtil.destroyProgressDialog()
+        FLUtil.destroyProgressDialog()
         return ok
 
     @classmethod
@@ -1229,7 +1230,7 @@ class SysType(SysBaseType):
         ok = True
         name = file.name
         if (
-            not AQUtil.isFLDefFile(content) and not name.endswith(u".qs") and not name.endswith(u".ar") and not name.endswith(u".svg")
+            not FLUtil.isFLDefFile(content) and not name.endswith(u".qs") and not name.endswith(u".ar") and not name.endswith(u".svg")
         ) or name.endswith(u"untranslated.ts"):
             return ok
         cur = PNSqlCursor(u"flfiles")
@@ -1728,7 +1729,7 @@ class AbanQDbDumper(object):
                 break
 
         ts.opIn(ustr(rec, u"\n"))
-        AQUtil.createProgressDialog(SysType.translate(u"Haciendo copia en CSV de ") + table, qry.size())
+        FLUtil.createProgressDialog(SysType.translate(u"Haciendo copia en CSV de ") + table, qry.size())
         p = 0
         while qry.next():
             rec = u""
@@ -1752,10 +1753,10 @@ class AbanQDbDumper(object):
 
             ts.opIn(ustr(rec, u"\n"))
             p += 1
-            AQUtil.setProgress(p)
+            FLUtil.setProgress(p)
 
         file.close()
-        AQUtil.destroyProgressDialog()
+        FLUtil.destroyProgressDialog()
         return True
 
     def dumpAllTablesToCsv(self):
