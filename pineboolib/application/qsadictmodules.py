@@ -7,6 +7,7 @@ from typing import Any
 from pineboolib.core.utils import logging
 from pineboolib.application.xmlaction import XMLAction
 from pineboolib.application.proxy import DelayedObjectProxyLoader
+from pineboolib.application.safeqsa import SafeQSA
 
 logger = logging.getLogger("qsadictmodules")
 
@@ -67,6 +68,7 @@ class QSADictModules:
         # Se crea la action del módulo
         proxy = DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % action.name)
         cls.save_action(action.name, proxy)
+        SafeQSA.save_root_module(action.name, proxy)
         return True
 
     @classmethod
@@ -78,7 +80,8 @@ class QSADictModules:
         if module is None:
             raise ValueError("Action.module must be set before calling")
 
-        if hasattr(qsa_dict_modules, "form%s" % name):
+        actionname = "form%s" % name
+        if hasattr(qsa_dict_modules, actionname):
             logger.debug(
                 "No se sobreescribe variable de entorno %s. Hay una definición previa en %s",
                 "%s.form%s" % (module.module_name, name),
@@ -87,7 +90,8 @@ class QSADictModules:
             return False
         # Se crea la action del form
         delayed_action = DelayedObjectProxyLoader(action.load, name="QSA.Module.%s.Action.form%s" % (module.module.name, name))
-        setattr(qsa_dict_modules, "form" + name, delayed_action)
+        cls.save_action(actionname, delayed_action)
+        SafeQSA.save_mainform(actionname, delayed_action)
         return True
 
     @classmethod
@@ -98,8 +102,8 @@ class QSADictModules:
         module = action.mod
         if module is None:
             raise ValueError("Action.module must be set before calling")
-
-        if hasattr(qsa_dict_modules, "formRecord" + name):
+        actionname = "formRecord" + name
+        if hasattr(qsa_dict_modules, actionname):
             logger.debug("No se sobreescribe variable de entorno %s", "formRecord" + name)
             return False
         # Se crea la action del formRecord
@@ -107,13 +111,15 @@ class QSADictModules:
             action.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (module.mod.name, name)
         )
 
-        setattr(qsa_dict_modules, "formRecord" + name, delayed_action)
+        cls.save_action(actionname, delayed_action)
+        SafeQSA.save_formrecord(actionname, delayed_action)
         return True
 
     @classmethod
     def clean_all(cls):
         from pineboolib.qsa import qsa as qsa_dict_modules
 
+        SafeQSA.clean_all()
         list_ = [attr for attr in dir(qsa_dict_modules) if not attr[0] == "_"]
         for name in list_:
             att = getattr(qsa_dict_modules, name)

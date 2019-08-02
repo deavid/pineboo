@@ -142,18 +142,6 @@ class Math(object):
         return round(float(x), y)
 
 
-class Application:
-    """
-    Emulate QS Application class.
-
-    El modulo "Datos" usa "Application.formRecorddat_procesos" para leer el módulo.
-    """
-
-    def __getattr__(self, name: str) -> Any:
-        """Emulate any method and retrieve application action module specified."""
-        return QSADictModules.from_project(name)
-
-
 def parseFloat(x: Any) -> float:
     """
     Convert to float from almost any value.

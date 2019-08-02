@@ -7,7 +7,6 @@ This file should be imported at top of QS converted files.
 from pineboolib.fllegacy.flutil import FLUtil  # noqa: F401
 from pineboolib.fllegacy.systype import SysType as sys  # noqa: F401
 
-# Usadas solo por import *
 from pineboolib.fllegacy.flposprinter import FLPosPrinter  # noqa: F401
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery  # noqa: F401
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor  # noqa: F401
@@ -21,15 +20,9 @@ from pineboolib.application.types import Boolean, QString, String, Function, Obj
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQS  # noqa: F401
 from .input import Input  # noqa: F401
 from .utils import switch, qsaRegExp, RegExp, Math, Application, parseFloat, parseString, parseInt, isNaN, length, text  # noqa: F401
-from .utils import startTimer, killTimer, debug, from_project, format_exc, isnan, replace  # noqa: F401
+from .utils import startTimer, killTimer, debug, format_exc, isnan, replace  # noqa: F401
+from .dictmodules import Application, from_project  # noqa: F401
 from .pncontrolsfactory import *  # noqa: F401
-
-
-def from_project(scriptname: str):
-    """Get script from project."""
-    from pineboolib.application.qsadictmodules import QSADictModules
-
-    return QSADictModules.from_project(scriptname)
 
 
 QFile = File
