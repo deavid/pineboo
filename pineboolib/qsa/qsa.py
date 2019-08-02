@@ -4,11 +4,10 @@ QSA Emulation module.
 
 This file should be imported at top of QS converted files.
 """
-from pineboolib.fllegacy.flutil import FLUtil  # noqa: F401
-from pineboolib.fllegacy.systype import SysType as sys  # noqa: F401
 
 from pineboolib.core.utils.utils_base import ustr, filedir  # noqa: F401
-from pineboolib.application.types import Boolean, QString, String, Function, Object, Array, Date, AttributeDict, File, Dir  # noqa: F401
+from pineboolib.application.types import Boolean, QString, String, Function, Object, Array, Date, AttributeDict  # noqa: F401
+from pineboolib.application.types import File, Dir  # noqa: F401
 
 from .input import Input  # noqa: F401
 from .utils import switch, qsaRegExp, RegExp, Math, Application, parseFloat, parseString, parseInt, isNaN, length, text  # noqa: F401
@@ -30,7 +29,7 @@ from .pncontrolsfactory import FLDomDocument, FLDomElement, FLDomNode, FLDomNode
 from .pncontrolsfactory import FLPixmapView, FLDataTable, FLCheckBox, FLTextEditOutput, FLSpinBox, FLTableDB, FLFieldDB  # noqa: F401
 from .pncontrolsfactory import FLFormDB, FLFormRecordDB, FLFormSearchDB, FLDoubleValidator, FLIntValidator, FLUIntValidator  # noqa: F401
 from .pncontrolsfactory import FLCodBar, FLWidget, FLWorkSpace, FLPosPrinter, FLSqlQuery, FLSqlCursor, FLNetwork  # noqa: F401
-from .pncontrolsfactory import FLApplication, FLVar, FLSmtpClient, FLTable, FLListViewItem, FLReportViewer
+from .pncontrolsfactory import FLApplication, FLVar, FLSmtpClient, FLTable, FLListViewItem, FLReportViewer, FLUtil
 
 
 # QSA
@@ -47,6 +46,7 @@ from .pncontrolsfactory import AQBoolFlagState, AQBoolFlagStateList  # noqa: F40
 from .pncontrolsfactory import aqApp
 from .pncontrolsfactory import FormDBWidget
 from .pncontrolsfactory import Process
+from .pncontrolsfactory import sys
 
 
 def from_project(scriptname: str):
@@ -57,7 +57,6 @@ def from_project(scriptname: str):
 
 
 QFile = File
-
 util = FLUtil
 print_ = print
 

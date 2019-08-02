@@ -102,6 +102,7 @@ from pineboolib.fllegacy.fluintvalidator import FLUIntValidator  # noqa: F401
 from pineboolib.fllegacy.flcodbar import FLCodBar  # noqa: F401
 from pineboolib.fllegacy.flwidget import FLWidget  # noqa: F401
 from pineboolib.fllegacy.flworkspace import FLWorkSpace  # noqa: F401
+from pineboolib.fllegacy.flutil import FLUtil
 
 from pineboolib.fllegacy.flposprinter import FLPosPrinter  # noqa: F401
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery  # noqa: F401
@@ -146,6 +147,9 @@ from pineboolib.fllegacy.aqsobjects.aqods import AQOdsGenerator, AQOdsSpreadShee
 from pineboolib.fllegacy.aqsobjects.aqods import AQOdsColor, AQOdsStyle, AQOdsImage  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqboolflagstate import AQBoolFlagState, AQBoolFlagStateList  # noqa: F401
 
+from pineboolib.fllegacy.systype import SysType
+
+sys = SysType()
 # FIXME: meter todo QSA
 # from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *
 
