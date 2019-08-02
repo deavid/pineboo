@@ -5,6 +5,7 @@ from typing import Optional
 from pineboolib.application.database.pnconnection import PNConnection
 
 DEFAULT_SQLITE_CONN = ProjectConfig(database="pineboo.sqlite3", type="SQLite3 (SQLITE3)")
+IN_MEMORY_SQLITE_CONN = ProjectConfig(database=":memory:", type="SQLite3 (SQLITE3)")
 
 
 def config_dbconn(options) -> Optional[ProjectConfig]:

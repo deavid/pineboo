@@ -14,12 +14,6 @@ def init_project(DGI, options, project, mainForm, app) -> Any:
 
     logger.info("Iniciando proyecto ...")
 
-    # Necesario para que funcione isLoadedModule ¿es este el mejor sitio?
-    project.conn.managerModules().loadIdAreas()
-    project.conn.managerModules().loadAllIdModules()
-
-    project.load_modules()
-
     if options.preload:
         from .preload import preload_actions
 

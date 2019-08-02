@@ -118,7 +118,7 @@ function anon(%s) {
     else:
         mod = importlib.import_module(module_path)
     forminternalobj = getattr(mod, "FormInternalObj", None)
-    os.remove(dest_filename)
+    # os.remove(dest_filename)
     return getattr(forminternalobj(), "anon", None)
 
 

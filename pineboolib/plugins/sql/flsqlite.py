@@ -118,14 +118,17 @@ class FLSQLITE(object):
 
         import sqlite3
 
-        if project.conn is not None and self.db_filename == getattr(project.conn, "db_name", None):
+        if project._conn is not None and self.db_filename == getattr(project._conn, "db_name", None):
             self.conn_ = project.conn.conn
         else:
             self.conn_ = sqlite3.connect("%s" % self.db_filename)
-            self.engine_ = create_engine("sqlite:///%s" % self.db_filename)
+            sqlalchemy_uri = "sqlite:///%s" % self.db_filename
+            if self.db_filename == ":memory:":
+                sqlalchemy_uri = "sqlite://"
+            self.engine_ = create_engine(sqlalchemy_uri)
             self.conn_.isolation_level = None
 
-            if db_is_new:
+            if db_is_new and self.db_filename != ":memory:":
                 self.logger.warning("La base de datos %s no existe", self.db_filename)
 
         if self.conn_:
