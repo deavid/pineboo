@@ -2298,8 +2298,8 @@ def file_template(ast: Any, import_refs: Dict[str, Tuple[str, str]] = {}) -> Gen
     yield "line", "# -*- coding: utf-8 -*-"
     yield "line", "from typing import TYPE_CHECKING"
     if not STRICT_MODE:
-        yield "line", "from pineboolib.qsa import *  # noqa: F403"
-    yield "line", "from pineboolib import qsa"
+        yield "line", "from pineboolib.qsa.qsa import *  # noqa: F403"
+    yield "line", "from pineboolib.qsa import qsa"
     # yield "line", "from pineboolib.qsaglobals import *"
     for alias, (path, name) in import_refs.items():
         yield "line", "from %s import %s as %s" % (path, name, alias)

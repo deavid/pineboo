@@ -19,7 +19,6 @@ from pineboolib.fllegacy.fltranslator import FLTranslator
 from typing import Any, Optional, Union, Dict, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib import pncontrolsfactory
     from pineboolib.application.database.pnsqlcursor import PNSqlCursor
     from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists  # noqa: F401
 
@@ -169,7 +168,6 @@ class FLApplication(QtCore.QObject):
 
     def eventFilter(self, obj, ev) -> Any:
         """React to user events."""
-        from pineboolib import pncontrolsfactory
 
         if self._inicializing or self._destroying:
             return super().eventFilter(obj, ev)
@@ -256,7 +254,6 @@ class FLApplication(QtCore.QObject):
 
     def eventLoop(self) -> "QEventLoop":
         """Create main event loop."""
-        from pineboolib import pncontrolsfactory
 
         return QEventLoop()
 
@@ -272,7 +269,6 @@ class FLApplication(QtCore.QObject):
 
     def init(self) -> None:
         """Initialize FLApplication."""
-        from pineboolib import pncontrolsfactory
         from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists  # noqa: F811
         from pineboolib.fllegacy.aqsobjects.aqs import AQS
 
@@ -398,7 +394,6 @@ class FLApplication(QtCore.QObject):
 
     def showMainWidget(self, w) -> None:
         """Show UI."""
-        from pineboolib import pncontrolsfactory
 
         if not self.container_:
             if w:
@@ -454,7 +449,6 @@ class FLApplication(QtCore.QObject):
         """Set mainWidget."""
         if not self.container_:
             return
-        from pineboolib import pncontrolsfactory
 
         if w == self.container_ or w is None:
             QApplication.setActiveWindow(self.container_)
@@ -489,7 +483,6 @@ class FLApplication(QtCore.QObject):
 
     def chooseFont(self) -> None:
         """Open font selector."""
-        from pineboolib import pncontrolsfactory
 
         font_ = QFontDialog().getFont()
         if font_:
@@ -516,7 +509,6 @@ class FLApplication(QtCore.QObject):
 
     def initToolBox(self) -> None:
         """Initialize toolbox."""
-        from pineboolib import pncontrolsfactory
         from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQS
 
         if self.main_widget_ is None:
@@ -724,7 +716,6 @@ class FLApplication(QtCore.QObject):
 
     def initToolBar(self) -> None:
         """Initialize toolbar."""
-        from pineboolib import pncontrolsfactory
 
         mw = self.main_widget_
         if mw is None:
@@ -775,8 +766,6 @@ class FLApplication(QtCore.QObject):
         if not self.main_widget_:
             return
 
-        from pineboolib import pncontrolsfactory
-
         self.statusHelpMsg(self.tr("Listo."))
         self.main_widget_.statusBar().setSizeGripEnabled(False)
 
@@ -793,7 +782,6 @@ class FLApplication(QtCore.QObject):
 
         view_back = mw.centralWidget()
         if view_back is None:
-            from pineboolib import pncontrolsfactory
 
             view_back = QMdiArea()
             view_back.setObjectName("mdi_area")
@@ -808,7 +796,6 @@ class FLApplication(QtCore.QObject):
 
         if style_:
             config.set_value("application/style", style_)
-            from pineboolib import pncontrolsfactory
 
             QApplication.setStyle(style_)
 
@@ -853,8 +840,6 @@ class FLApplication(QtCore.QObject):
         if not self.main_widget_:
             return
 
-        from pineboolib import pncontrolsfactory
-
         tb = self.main_widget_.findChild(QToolBar)
         if not tb:
             return
@@ -870,7 +855,6 @@ class FLApplication(QtCore.QObject):
 
     def aboutQt(self) -> None:
         """Show About QT."""
-        from pineboolib import pncontrolsfactory
 
         QMessageBox.aboutQt(self.mainWidget())
 
@@ -932,7 +916,6 @@ class FLApplication(QtCore.QObject):
 
     def existFormInMDI(self, id) -> bool:
         """Return if named FLFormDB is open."""
-        from pineboolib import pncontrolsfactory
 
         if id is None or not self._p_work_space:
             return False
@@ -1115,7 +1098,6 @@ class FLApplication(QtCore.QObject):
 
     def timeUser(self) -> Any:
         """Get amount of time running."""
-        from pineboolib import pncontrolsfactory
 
         return SysType().time_user_
 
@@ -1175,8 +1157,6 @@ class FLApplication(QtCore.QObject):
         """Show a warning popup."""
         mw = self.container_ or self.main_widget_
 
-        from pineboolib import pncontrolsfactory
-
         wi = QtWidgets.QWhatsThis
 
         if script_calls:
@@ -1232,8 +1212,6 @@ class FLApplication(QtCore.QObject):
             if self._ted_output:
                 self._ted_output.parentWidget().close()
 
-            from pineboolib import pncontrolsfactory
-
             dw = QDockWidget("tedOutputDock", mw)
             self._ted_output = FLTextEditOutput(dw)
             dw.setWidget(self._ted_output)
@@ -1284,7 +1262,6 @@ class FLApplication(QtCore.QObject):
     def aqAppIdle(self) -> None:
         """Check and fix transaction level."""
         if project.DGI.localDesktop():
-            from pineboolib import pncontrolsfactory
 
             if (
                 # not self.project_ or
@@ -1382,7 +1359,6 @@ class FLApplication(QtCore.QObject):
     @decorators.NotImplementedWarn
     def classType(self, n):
         """Return class for object."""
-        from pineboolib import pncontrolsfactory
 
         return type(resolveObject(n)())
 
@@ -1433,8 +1409,6 @@ class FLApplication(QtCore.QObject):
         if self.not_exit_:
             return False
 
-        from pineboolib import pncontrolsfactory
-
         if not SysType().interactiveGUI():
             return True
 
@@ -1445,8 +1419,6 @@ class FLApplication(QtCore.QObject):
 
     def writeState(self) -> None:
         """Write settings back to disk."""
-        from pineboolib import pncontrolsfactory
-
         settings.set_value("MultiLang/Enabled", self._multi_lang_enabled)
         settings.set_value("MultiLang/LangId", self._multi_lang_id)
 
@@ -1486,8 +1458,6 @@ class FLApplication(QtCore.QObject):
 
     def writeStateModule(self) -> None:
         """Write settings for modules."""
-        from pineboolib import pncontrolsfactory
-
         idm = self.db().managerModules().activeIdModule()
         if not idm:
             return
@@ -1514,8 +1484,6 @@ class FLApplication(QtCore.QObject):
         """Read settings."""
         self._inicializing = False
         self._dict_main_widgets = {}
-
-        from pineboolib import pncontrolsfactory
 
         if self.container_:
             r = QtCore.QRect(self.container_.pos(), self.container_.size())
@@ -1585,7 +1553,6 @@ class FLApplication(QtCore.QObject):
 
     def readStateModule(self) -> None:
         """Read settings for module."""
-        from pineboolib import pncontrolsfactory
 
         idm = self.db().managerModules().activeIdModule()
         if not idm:
@@ -1618,7 +1585,6 @@ class FLApplication(QtCore.QObject):
 
     def loadScripts(self) -> None:
         """Load scripts for all modules."""
-        from pineboolib import pncontrolsfactory
 
         QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         list_modules = self.db().managerModules().listAllIdModules()
@@ -1637,7 +1603,6 @@ class FLApplication(QtCore.QObject):
 
     def tr(self, sourceText: str, disambiguation: Optional[str] = None, n: int = 0) -> Any:
         """Open translations."""
-        from pineboolib import pncontrolsfactory
 
         return QApplication.translate("system", sourceText)
 
@@ -1796,8 +1761,6 @@ class FLPopuWarn(QtWidgets.QWhatsThis):
 
     def clicked(self, href):
         if href:
-
-            from pineboolib import pncontrolsfactory
 
             if href.find(":") > -1:
                 h = href.split(":")[1]
