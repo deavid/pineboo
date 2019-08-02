@@ -6,18 +6,12 @@ import re
 import math
 
 from PyQt5 import QtCore
-from pineboolib.application.qsadictmodules import QSADictModules
 from pineboolib.core.utils.utils_base import ustr
 from pineboolib.core.utils import logging
 
 from typing import Any, Optional, Union, Match, List, Pattern, Generator, Callable
 
 logger = logging.getLogger("qsa.utils")
-
-
-def from_project(scriptname: str):
-    """Get script from project."""
-    return QSADictModules.from_project(scriptname)
 
 
 class switch(object):
@@ -157,7 +151,7 @@ class Application:
 
     def __getattr__(self, name: str) -> Any:
         """Emulate any method and retrieve application action module specified."""
-        return from_project(name)
+        return QSADictModules.from_project(name)
 
 
 def parseFloat(x: Any) -> float:

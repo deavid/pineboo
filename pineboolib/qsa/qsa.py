@@ -14,7 +14,6 @@ from .input import Input  # noqa: F401
 from .utils import switch, qsaRegExp, RegExp, Math, Application, parseFloat, parseString, parseInt, isNaN, length, text  # noqa: F401
 from .utils import startTimer, killTimer, debug, from_project, format_exc, isnan, replace  # noqa: F401
 
-
 # QT
 from .pncontrolsfactory import QComboBox, QTable, QLayoutWidget, QToolButton, QTabWidget, QLabel, QGroupBox, QListView, QImage  # noqa: F401
 from .pncontrolsfactory import QTextEdit, QLineEdit, QDateEdit, QTimeEdit, QCheckBox, QWidget, QMessageBox, QDialog  # noqa: F401
@@ -48,6 +47,14 @@ from .pncontrolsfactory import AQBoolFlagState, AQBoolFlagStateList  # noqa: F40
 from .pncontrolsfactory import aqApp
 from .pncontrolsfactory import FormDBWidget
 from .pncontrolsfactory import Process
+
+
+def from_project(scriptname: str):
+    """Get script from project."""
+    from pineboolib.application.qsadictmodules import QSADictModules
+
+    return QSADictModules.from_project(scriptname)
+
 
 QFile = File
 

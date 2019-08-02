@@ -327,7 +327,7 @@ def id_translate(name: str, qsa_exclude: Set[str] = None, transform: Dict[str, s
             return transform[name]
 
         if STRICT_MODE and name.startswith("formRecord"):
-            return 'qsa.from_project("%s")' % name
+            return 'qsa.QSADictModules.from_project("%s")' % name
         if STRICT_MODE:
             return "__undef__" + name
         else:
@@ -1485,7 +1485,7 @@ class Member(ASTPython):
             and arguments[0] != "self"
             and arguments[0].startswith("__undef__")
         ):
-            arguments[0] = 'qsa.from_project("%s")' % arguments[0].replace("__undef__", "")
+            arguments[0] = 'qsa.QSADictModules.from_project("%s")' % arguments[0].replace("__undef__", "")
         # Lectura del self.iface.__init
         if (
             len(arguments) >= 3
