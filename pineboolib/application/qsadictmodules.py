@@ -17,7 +17,7 @@ class QSADictModules:
     Manage read and write dynamic properties for QSA.
     """
 
-    _qsa_dict_modules: Any
+    _qsa_dict_modules: Any = None
 
     @classmethod
     def qsa_dict_modules(cls) -> Any:
