@@ -4,6 +4,7 @@ Main Eneboo-alike UI.
 """
 from PyQt5 import QtWidgets, QtCore, QtGui  # type: ignore
 from PyQt5.QtWidgets import QTreeWidgetItem, QTreeWidget, QActionGroup, QDockWidget  # type: ignore
+from PyQt5.QtCore import QSignalMapper  # type: ignore
 from PyQt5.QtXml import QDomDocument  # type: ignore
 from PyQt5.QtGui import QIcon
 
@@ -11,6 +12,7 @@ from pineboolib.qt3_widgets.qaction import QAction
 from pineboolib.qt3_widgets.qmessagebox import QMessageBox
 from pineboolib.qt3_widgets.qmenu import QMenu
 from pineboolib.qt3_widgets.qmainwindow import QMainWindow
+
 
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQFormDB
 from pineboolib.fllegacy.flformdb import FLFormDB
@@ -42,12 +44,12 @@ class MainForm(QtWidgets.QMainWindow):
     ag_menu_: QActionGroup
     ag_rec_: QActionGroup
     ag_mar_: QActionGroup
-    dck_mod_ = None
-    dck_rec_ = None
-    dck_mar_ = None
-    tw_ = None
+    dck_mod_: DockListView
+    dck_rec_: DockListView
+    dck_mar_: DockListView
+    tw_: QtWidgets.QTabWidget
     # tw_corner = None  # deprecated
-    act_sig_map_ = None
+    act_sig_map_: QSignalMapper
     initialized_mods_: List[str]
     main_widgets_: Dict[str, QtWidgets.QWidget] = {}
     # lista_tabs_ = []
@@ -61,8 +63,7 @@ class MainForm(QtWidgets.QMainWindow):
 
     def eventFilter(self, o: QtWidgets.QWidget, e: QtGui.QInputEvent) -> bool:
         """Process GUI events."""
-        if self.dck_mod_ is None or self.dck_rec_ is None or self.dck_mar_ is None:
-            return False
+
         if isinstance(e, self.AQS.ContextMenu):
             if o == getattr(self.dck_mod_, "w_", None):
                 return self.addMarkFromItem(self.dck_mod_.lw_.currentItem(), e.globalPos())
@@ -225,6 +226,10 @@ class MainForm(QtWidgets.QMainWindow):
 
             open_actions = settings.readListEntry("%sopenActions" % key)
             i = 0
+
+            if self.tw_ is None:
+                raise Exception("tw_ is empty!")
+
             for i in range(self.tw_.count()):
                 self.tw_.widget(i).close()
 
@@ -523,6 +528,15 @@ class MainForm(QtWidgets.QMainWindow):
         if not self.ag_mar_:
             self.ag_mar_ = QActionGroup(self.w_)
 
+        if self.dck_rec_ is None:
+            raise Exception("Recent dockListView is missing!")
+
+        if self.dck_mod_ is None:
+            raise Exception("Modules dockListView is missing!")
+
+        if self.dck_mar_ is None:
+            raise Exception("BookMarks dockListView is missing!")
+
         self.dck_mod_.update(self.ag_menu_)
         self.dck_rec_.update(self.ag_rec_)
         self.dck_mar_.update(self.ag_mar_)
@@ -544,7 +558,7 @@ class MainForm(QtWidgets.QMainWindow):
                     del obj
 
             self.ag_menu_.deleteLater()
-            self.ag_menu_ = None
+            del self.ag_menu_
 
         self.ag_menu_ = QActionGroup(self.w_)
         self.ag_menu_.setObjectName("pinebooActionGroup")
@@ -580,10 +594,11 @@ class MainForm(QtWidgets.QMainWindow):
                 actions = self.widgetActions("%s.ui" % ac.objectName(), ac)
 
                 if not actions:
-                    ac.setObjectName(None)
+                    # ac.setObjectName("")
                     ac.deleteLater()
                     ac = QAction(ag)
-                    ac.setObjectName(module)
+                    if ac:
+                        ac.setObjectName(module)
 
                 ac_action = QAction(ac)
                 ac_action.setObjectName("%s_actiongroup_name" % ac.objectName())
@@ -628,7 +643,7 @@ class MainForm(QtWidgets.QMainWindow):
         if self.tw_ is None:
             raise Exception("no tabWidget found")
         self.tw_.setTabsClosable(True)
-        self.tw_.tabCloseRequested[int].connect(self.removeCurrentPage)
+        self.tw_.tabCloseRequested[int].connect(self.removeCurrentPage)  # type: ignore
         self.tw_.removeTab(0)
         """
         tb = self.tw_corner = QToolButton(tw, "tabWidgetCorner")
@@ -991,9 +1006,9 @@ class MainForm(QtWidgets.QMainWindow):
 class DockListView(QtCore.QObject):
     """DockListWiew class."""
 
-    w_ = None
-    lw_ = None
-    ag_ = None
+    w_: QtWidgets.QDockWidget
+    lw_: QTreeWidget
+    ag_: QActionGroup
     _name: str
     set_visible = QtCore.pyqtSignal(bool)
     Close = QtCore.pyqtSignal(bool)
