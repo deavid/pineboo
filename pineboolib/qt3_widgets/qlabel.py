@@ -3,6 +3,8 @@
 from PyQt5 import QtWidgets, QtCore, QtGui  # type: ignore
 from typing import Any, Union
 
+from pineboolib.core import decorators
+
 
 class QLabel(QtWidgets.QLabel):
     def get_text(self):
@@ -19,7 +21,7 @@ class QLabel(QtWidgets.QLabel):
             pix = pix.pixmap(32, 32)
         super(QLabel, self).setPixmap(pix)
 
-    @QtCore.pyqtSlot(bool)
+    @decorators.pyqtSlot(bool)
     def setShown(self, b):
         self.setVisible(b)
 

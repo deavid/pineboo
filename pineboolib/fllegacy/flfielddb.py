@@ -56,7 +56,7 @@ class FLFieldDB(QtWidgets.QWidget):
     _partDecimal: int
     autoSelect: bool
 
-    editor_: Any  # Editor para el contenido del campo que representa el componente
+    editor_: QtWidgets.QWidget  # Editor para el contenido del campo que representa el componente
     fieldName_: str  # Nombre del campo de la tabla al que esta asociado este componente
     tableName_: Optional[str]  # Nombre de la tabla fóranea
     actionName_: Optional[str]  # Nombre de la accion
@@ -117,7 +117,7 @@ class FLFieldDB(QtWidgets.QWidget):
         super(FLFieldDB, self).__init__(parent)
         self._loaded = False
         self.DEBUG = False  # FIXME: debe recoger DEBUG de pineboolib.project
-        self.editor_ = None
+        self.editor_ = QtWidgets.QWidget(parent)
         self.cursor_ = None
         self.cursorBackup_ = None
         self.cursorInit_ = False
@@ -3085,7 +3085,7 @@ class FLFieldDB(QtWidgets.QWidget):
                             self.editor_.setStyleSheet(
                                 "background-color:%s; color:%s" % (self.notNullColor(), QtGui.QColor(Qt.black).name())
                             )
-                        else:
+                        elif self.default_style:
                             self.editor_.setStyleSheet(self.default_style)
 
                 else:

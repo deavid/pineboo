@@ -988,13 +988,13 @@ class Kut2FPDF(object):
 
         file_name = project.tmpdir
         file_name += "/%s.png" % (text)
-        type = xml.get("CodBarType")
+        codbartype = xml.get("CodBarType")
 
         if not os.path.exists(file_name):
 
             bar_code = FLCodBar(text)  # Code128
-            if type is not None:
-                type = bar_code.nameToType(type.lower())
+            if codbartype is not None:
+                type: int = bar_code.nameToType(codbartype.lower())
                 bar_code.setType(type)
 
             bar_code.setText(text)

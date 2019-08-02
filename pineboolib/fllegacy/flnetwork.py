@@ -70,7 +70,7 @@ class FLNetwork(QtCore.QObject):
     def _slotNetworkFinished(self, reply=None):
         self.finished.emit()
 
-    # @QtCore.pyqtSlot(QtCore.QByteArray)
+    # @decorators.pyqtSlot(QtCore.QByteArray)
     # def _slotNetWorkData(self, b):
     #    buffer = b
     #    self.data.emit(b)

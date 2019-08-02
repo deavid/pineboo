@@ -72,7 +72,7 @@ class KParserTools(object):
         ele = doc.createElement("element")
         for k in data.keys():
             attr_node = doc.createAttribute(k)
-            attr_node.setValue(data.get(k))
+            attr_node.setValue(data.get(k) or "")
             ele.setAttributeNode(attr_node)
 
         return ele

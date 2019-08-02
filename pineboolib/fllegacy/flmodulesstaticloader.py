@@ -202,7 +202,7 @@ class FLStaticLoader(QtCore.QObject):
 
             self.tblDirs.setCurrentCell(n_rows, 0)
 
-    @QtCore.pyqtSlot(bool)
+    @decorators.pyqtSlot(bool)
     def addDir(self) -> None:
 
         cur_row = self.tblDirs.currentRow()
@@ -264,11 +264,11 @@ class FLStaticLoader(QtCore.QObject):
 
         self.tblDirs.removeRow(cur_row)
 
-    @QtCore.pyqtSlot(bool)
+    @decorators.pyqtSlot(bool)
     def setEnabled(self, on: bool) -> None:
         self.b_.enabled_ = on
 
-    @QtCore.pyqtSlot(bool)
+    @decorators.pyqtSlot(bool)
     def setChecked(self, on: bool) -> None:
 
         chk = self.sender()
