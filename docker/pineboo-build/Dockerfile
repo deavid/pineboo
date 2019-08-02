@@ -2,9 +2,9 @@ FROM ubuntu:19.04
 
 RUN apt-get update && \
     apt-get install -y \
-    git ubuntu-dev-tools build-essential moreutils \
+    git ubuntu-dev-tools build-essential moreutils aptitude nano \
     python3-dev python3-pip python3-kerberos python3-psycopg2 python3-mysqldb python3-pymysql \
-    xvfb && \
+    xvfb libfontconfig1 && \
     rm -rf /var/lib/apt/lists/*
 
 COPY pip-requirements.txt /
