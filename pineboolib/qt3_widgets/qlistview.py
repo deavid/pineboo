@@ -51,9 +51,10 @@ class QListView(QtWidgets.QWidget):
         self.doubleClicked.emit(item)
 
     def addItem(self, t) -> None:
+        from pineboolib.fllegacy.fllistviewitem import FLListViewItem
 
         self._current_row = self._current_row + 1
-        item = QtWidgets.QListWidgetItem()
+        item = FLListViewItem()
         item.setEditable(False)
         item.setText(t)
         if self._tree is not None:

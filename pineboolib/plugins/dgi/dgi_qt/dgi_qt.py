@@ -57,9 +57,10 @@ class dgi_qt(dgi_schema):
 
     def msgBoxWarning(self, t):
         from PyQt5.QtWidgets import qApp  # type: ignore
+        from pineboolib.qt3_widgets.messagebox import MessageBox
 
         parent = qApp.focusWidget().parent() if hasattr(qApp.focusWidget(), "parent") else qApp.focusWidget()
-        self.MessageBox.warning(t, self.MessageBox.Ok, self.MessageBox.NoButton, self.MessageBox.NoButton, "Pineboo", parent)
+        MessageBox.warning(t, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo", parent)
 
     def createUI(self, n, connector=None, parent=None, name=None) -> Any:
 

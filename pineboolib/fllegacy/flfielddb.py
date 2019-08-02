@@ -79,11 +79,11 @@ class FLFieldDB(QtWidgets.QWidget):
     autoComFieldName_ = None
     accel_ = None
     keepDisabled_: bool
-    editorImg_: "FLPixmapView"
-    pbAux_: QPushButton
-    pbAux2_: QPushButton
-    pbAux3_: QPushButton
-    pbAux4_: QPushButton
+    editorImg_: Optional["FLPixmapView"]
+    pbAux_: Optional[QPushButton]
+    pbAux2_: Optional[QPushButton]
+    pbAux3_: Optional[QPushButton]
+    pbAux4_: Optional[QPushButton]
     fieldAlias_: Optional[str]
     showEditor_: bool
     fieldMapValue_ = None
@@ -111,7 +111,7 @@ class FLFieldDB(QtWidgets.QWidget):
     """
     Tamaño de icono por defecto
     """
-    iconSize: Optional[QtCore.QSize] = None
+    iconSize: QtCore.QSize
 
     def __init__(self, parent: "QtWidgets.QWidget", *args) -> None:
         super(FLFieldDB, self).__init__(parent)
@@ -147,8 +147,7 @@ class FLFieldDB(QtWidgets.QWidget):
         from pineboolib.qt3_widgets.qpushbutton import QPushButton
         from pineboolib.application import project
 
-        if project._DGI:
-            self.iconSize = project.DGI.iconSize()
+        self.iconSize = project.DGI.iconSize()
 
         self.FLLayoutH = QtWidgets.QVBoxLayout(self)
         self.FLLayoutH.setContentsMargins(0, 0, 0, 0)
@@ -386,7 +385,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return ted.textFormat()
         return self.textFormat_
 
-    def setEchoMode(self, m: int) -> None:
+    def setEchoMode(self, m: QLineEdit.EchoMode) -> None:
         """Establece el modo de "echo".
 
         @param m Modo (Normal, NoEcho, Password)
@@ -554,7 +553,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         """
         if isinstance(self.editor_, FLDateEdit):
-            data = self.editor_.date
+            data = str(self.editor_.getDate())
             if not data:
                 isNull = True
 
@@ -613,7 +612,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.cursor_.setValueBuffer(self.fieldName_, data)
 
         elif isinstance(self.editor_, QComboBox):
-            data = str(self.editor_.currentText)
+            data = str(self.editor_.getCurrentText())
 
             if not self.cursor_.bufferIsNull(self.fieldName_):
                 if data == self.cursor_.valueBuffer(self.fieldName_):
@@ -2030,7 +2029,10 @@ class FLFieldDB(QtWidgets.QWidget):
                         triggered.connect(self.savePixmap)
 
                     if self.pushButtonDB:
-                        self.pushButtonDB.installEventFilter(self) if hasPushButtonDB else self.pushButtonDB.setDisabled(True)
+                        if hasPushButtonDB:
+                            self.pushButtonDB.installEventFilter(self)
+                        else:
+                            self.pushButtonDB.setDisabled(True)
 
         elif type_ == "date":
             self.editor_ = FLDateEdit(self, "editor")
@@ -2073,11 +2075,11 @@ class FLFieldDB(QtWidgets.QWidget):
 
             if self.showed:
                 try:
-                    self.editor_.dateChanged.disconnect(self.updateValue)
+                    cast(pyqtSignal, self.editor_.dateChanged).disconnect(self.updateValue)
                 except Exception:
                     self.logger.exception("Error al desconectar señal")
 
-            self.editor_.dateChanged.connect(self.updateValue)
+            cast(pyqtSignal, self.editor_.dateChanged).connect(self.updateValue)
             if self.cursor_.modeAccess() == FLSqlCursor.Insert and not field.allowNull():
                 defVal = field.defaultValue()
                 # if not defVal.isValid() or defVal.isNull():
@@ -2100,11 +2102,11 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.pushButtonDB.hide()
             if self.showed:
                 try:
-                    self.editor_.timeChanged.disconnect(self.updateValue)
+                    cast(pyqtSignal, self.editor_.timeChanged).disconnect(self.updateValue)
                 except Exception:
                     self.logger.exception("Error al desconectar señal")
 
-            self.editor_.timeChanged.connect(self.updateValue)
+            cast(pyqtSignal, self.editor_.timeChanged).connect(self.updateValue)
             if self.cursor_.modeAccess() == FLSqlCursor.Insert and not field.allowNull():
                 defVal = field.defaultValue()
                 # if not defVal.isValid() or defVal.isNull():
@@ -2139,11 +2141,11 @@ class FLFieldDB(QtWidgets.QWidget):
 
             if self.showed:
                 try:
-                    self.editor_.textChanged.disconnect(self.updateValue)
+                    cast(pyqtSignal, self.editor_.textChanged).disconnect(self.updateValue)
                 except Exception:
                     self.logger.exception("Error al desconectar señal")
 
-            self.editor_.textChanged.connect(self.updateValue)
+            cast(pyqtSignal, self.editor_.textChanged).connect(self.updateValue)
 
             self.keyF4Pressed.connect(self.toggleAutoCompletion)
             if self.autoCompMode_ == "OnDemandF4":
@@ -2242,10 +2244,10 @@ class FLFieldDB(QtWidgets.QWidget):
             self.editor_.installEventFilter(self)
             if self.showed:
                 try:
-                    self.editor_.activated.disconnect(self.updateValue)
+                    cast(pyqtSignal, self.editor_.activated).disconnect(self.updateValue)
                 except Exception:
                     self.logger.exception("Error al desconectar señal")
-            self.editor_.activated.connect(self.updateValue)
+            cast(pyqtSignal, self.editor_.activated).connect(self.updateValue)
 
         else:
             from pineboolib.fllegacy.fllineedit import FLLineEdit
@@ -2312,7 +2314,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     project.DGI._par.addQueque("%s_setHasPushButton" % self.objectName(), True)
                 if self.showed:
                     try:
-                        self.KeyF2Pressed.disconnect(self.pushButtonDB.animateClick())
+                        self.KeyF2Pressed.disconnect(self.pushButtonDB.animateClick)
                         self.labelClicked.disconnect(self.openFormRecordRelation)
                     except Exception:
                         self.logger.exception("Error al desconectar señal")
@@ -2797,6 +2799,9 @@ class FLFieldDB(QtWidgets.QWidget):
         if not pix:
             return
 
+        if self.editorImg_ is None:
+            raise Exception("editorImg_ is empty!")
+
         self.editorImg_.setPixmap(pix)
         QtWidgets.QApplication.setOverrideCursor(Qt.WaitCursor)
         buffer.open(QtCore.QBuffer.ReadWrite)
@@ -2842,6 +2847,9 @@ class FLFieldDB(QtWidgets.QWidget):
         QtWidgets.QApplication.restoreOverrideCursor()
         if not pix:
             return
+
+        if self.editorImg_ is None:
+            raise Exception("editorImg_ is empty!")
 
         self.editorImg_.setPixmap(pix)
         QtWidgets.QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -2894,6 +2902,9 @@ class FLFieldDB(QtWidgets.QWidget):
 
         if not pix:
             return
+
+        if self.editorImg_ is None:
+            raise Exception("editorImg_ is empty!")
 
         self.editorImg_.setPixmap(pix)
         QtWidgets.QApplication.setOverrideCursor(Qt.WaitCursor)

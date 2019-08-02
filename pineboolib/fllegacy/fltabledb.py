@@ -1410,6 +1410,9 @@ class FLTableDB(QtWidgets.QWidget):
 
                             editor_ = FLLineEdit(self)
 
+                            if editor_ is None:
+                                raise Exception("editor_ is Empty!")
+
                             if type_ == "double":
                                 from .fldoublevalidator import FLDoubleValidator
 
@@ -1441,18 +1444,30 @@ class FLTableDB(QtWidgets.QWidget):
                         from pineboolib.fllegacy.flspinbox import FLSpinBox
 
                         editor_ = FLSpinBox()
+                        if editor_ is None:
+                            raise Exception("editor_ is Empty!")
+
                         editor_.setMaxValue(pow(10, partInteger) - 1)
 
                     if type_ == "pixmap":
                         from pineboolib.fllegacy.fllineedit import FLLineEdit
 
                         editor_ = FLLineEdit(self)
+                        if editor_ is None:
+                            raise Exception("editor_ is Empty!")
+
                         self.tdbFilter.setRowReadOnly(i, True)
 
                     if type_ == "date":
                         from pineboolib.fllegacy.fldateedit import FLDateEdit
 
+                        if editor_ is None:
+                            raise Exception("editor_ is Empty!")
+
                         editor_ = FLDateEdit(self, _label)
+                        if editor_ is None:
+                            raise Exception("editor_ is Empty!")
+
                         editor_.setOrder(FLDateEdit.DMY)
                         editor_.setAutoAdvance(True)
                         editor_.setCalendarPopup(True)
@@ -1464,6 +1479,9 @@ class FLTableDB(QtWidgets.QWidget):
                         from pineboolib.fllegacy.fltimeedit import FLTimeEdit
 
                         editor_ = FLTimeEdit(self)
+                        if editor_ is None:
+                            raise Exception("editor_ is Empty!")
+
                         timeNow = QtCore.QTime.currentTime()
                         editor_.setTime(timeNow)
 

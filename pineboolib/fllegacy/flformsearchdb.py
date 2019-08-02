@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 from pineboolib import logging
-from pineboolib.core import decorators
 
 from PyQt5 import QtCore, QtWidgets  # type: ignore
-from PyQt5.QtWidgets import QToolButton  # type: ignore
 from PyQt5.Qt import QKeySequence  # type: ignore
+
+from pineboolib.core import decorators
+from pineboolib.core.settings import config
+from pineboolib.core.utils.utils_base import filedir
+
+from pineboolib.qt3_widgets.qtoolbutton import QToolButton  # type: ignore
 
 from .flformdb import FLFormDB
 from .flsqlcursor import FLSqlCursor
-from pineboolib.core.settings import config
-from pineboolib.core.utils.utils_base import filedir
 from .flapplication import aqApp
+
 from typing import Any
 
 
@@ -98,7 +101,6 @@ class FLFormSearchDB(FLFormDB):
     """
 
     def loadControls(self):
-        from pineboolib.qt3_widgets.qtoolbutton import QToolButton
         from PyQt5.QtGui import QIcon
 
         self.bottomToolbar = QtWidgets.QFrame()
