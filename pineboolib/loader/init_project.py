@@ -1,3 +1,6 @@
+"""
+Finalize pineboo setup and load.
+"""
 from pineboolib import logging
 from typing import Any
 

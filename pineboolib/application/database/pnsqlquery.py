@@ -144,15 +144,10 @@ class PNSqlQuery(object):
         """
 
         try:
-            del self.d
-            del self._datos
             if self._cursor is not None:
                 self._cursor.close()
-                del self._cursor
         except Exception:
             pass
-
-        self.countRefQuery = self.countRefQuery - 1
 
     @property
     def sql_inspector(self) -> sql_tools.SqlInspector:
@@ -179,11 +174,13 @@ class PNSqlQuery(object):
         """
 
         if self.invalidTablesList:
+            logger.error("exec_: invalid tables list found")
             return False
 
         if not sql:
             sql = self.sql()
         if not sql:
+            logger.warning("exec_: no sql provided and PNSqlQuery.sql() also returned empty")
             return False
 
         self._sql_inspector = sql_tools.SqlInspector(sql.lower())
@@ -209,6 +206,7 @@ class PNSqlQuery(object):
             logger.trace("Detalle:", stack_info=True)
             return False
         # conn.commit()
+        logger.info("_exec: Rows: %s SQL: <%s>", len(self._datos), sql)
 
         return True
 
@@ -709,6 +707,7 @@ class PNSqlQuery(object):
         for tabla in table_list.split(","):
             if not self.db().manager().existsTable(tabla) and len(table_list.split(",")) >= 1:
                 self.invalidTablesList = True
+                logger.warning("setTablesList: table not found %r. Query will not execute.", tabla)
 
             self.d.tablesList_.append(tabla)
 

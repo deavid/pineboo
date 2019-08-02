@@ -776,6 +776,7 @@ class FLManager(QtCore.QObject, IManager):
 
         util = FLUtil()
         if n_or_tmd is None:
+            logger.debug("createTable: Called with no table.")
             return False
 
         if isinstance(n_or_tmd, str):
@@ -796,8 +797,10 @@ class FLManager(QtCore.QObject, IManager):
                 return n_or_tmd
 
             if not self.db_.createTable(n_or_tmd):
-                logger.warning("FLManager : %s", util.tr("No se ha podido crear la tabla ") + n_or_tmd.name())
+                logger.warning("createTable: %s", util.tr("No se ha podido crear la tabla ") + n_or_tmd.name())
                 return False
+            else:
+                logger.info("createTable: Created new table %r", n_or_tmd.name())
 
             return n_or_tmd
 

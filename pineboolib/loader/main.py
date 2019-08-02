@@ -53,7 +53,7 @@ def startup(enable_gui: bool = None) -> None:
 
 
 def init_logging(loglevel: int = logging.INFO, logtime: bool = False):
-    """Setup logging."""
+    """Initialize pineboo logging."""
     # ---- LOGGING -----
     log_format = "%(levelname)s: %(name)s: %(message)s"
 
@@ -61,7 +61,7 @@ def init_logging(loglevel: int = logging.INFO, logtime: bool = False):
         log_format = "%(asctime)s - %(levelname)s: %(name)s: %(message)s"
 
     logging.basicConfig(format=log_format, level=loglevel)
-    # logger.debug("LOG LEVEL: %s  DEBUG LEVEL: %s", options.loglevel, options.debug_level)
+    # logger.info("LOG LEVEL: %s", loglevel)
     disable_loggers = ["PyQt5.uic.uiparser", "PyQt5.uic.properties", "blib2to3.pgen2.driver"]
     for loggername in disable_loggers:
         modlogger = logging.getLogger(loggername)
@@ -158,11 +158,11 @@ def init_testing():
         # Tests may call this several times, so we have to take it into account.
         return
     qapp = QtWidgets.QApplication(sys.argv + ["-platform", "offscreen"])
-    from pineboolib.application.parsers.qsaparser import pytnyzer
     from .connection import connect_to_db, IN_MEMORY_SQLITE_CONN
+    from pineboolib.application.parsers.qsaparser import pytnyzer
 
     sys.excepthook = _excepthook
-    init_logging(loglevel=logging.NOTSET)
+    init_logging()  # NOTE: Use pytest --log-level=0 for debug
     init_cli()
 
     pytnyzer.STRICT_MODE = False
@@ -174,6 +174,8 @@ def init_testing():
     conn = connect_to_db(IN_MEMORY_SQLITE_CONN)
     project.init_conn(connection=conn)
     project.no_python_cache = True
+    project.run()
+
     # Necesario para que funcione isLoadedModule ¿es este el mejor sitio?
     project.conn.managerModules().loadIdAreas()
     project.conn.managerModules().loadAllIdModules()
