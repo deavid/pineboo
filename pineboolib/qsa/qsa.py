@@ -25,7 +25,7 @@ from .utils import startTimer, killTimer, debug, from_project, format_exc, isnan
 from .pncontrolsfactory import *  # noqa: F401
 
 
-def QSADictModules.from_project(scriptname: str):
+def from_project(scriptname: str):
     """Get script from project."""
     from pineboolib.application.qsadictmodules import QSADictModules
 
