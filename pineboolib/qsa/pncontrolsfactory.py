@@ -7,7 +7,6 @@ Those are loaded from selected DGI.
 from PyQt5 import QtCore, QtWidgets, QtGui, QtXml  # noqa: F401
 
 from pineboolib.application.packager.aqunpacker import AQUnpacker  # noqa: F401
-from pineboolib.fllegacy.systype import SysType  # noqa: F401
 
 from pineboolib.qt3_widgets.qcombobox import QComboBox  # noqa: F401
 from pineboolib.qt3_widgets.qtable import QTable  # noqa: F401
@@ -103,6 +102,15 @@ from pineboolib.fllegacy.fluintvalidator import FLUIntValidator  # noqa: F401
 from pineboolib.fllegacy.flcodbar import FLCodBar  # noqa: F401
 from pineboolib.fllegacy.flwidget import FLWidget  # noqa: F401
 from pineboolib.fllegacy.flworkspace import FLWorkSpace  # noqa: F401
+
+from pineboolib.fllegacy.flposprinter import FLPosPrinter  # noqa: F401
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery  # noqa: F401
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor  # noqa: F401
+from pineboolib.fllegacy.flnetwork import FLNetwork  # noqa: F401
+from pineboolib.fllegacy.flreportviewer import FLReportViewer  # noqa: F401
+from pineboolib.fllegacy.flapplication import FLApplication  # noqa: F401
+from pineboolib.fllegacy.flvar import FLVar  # noqa: F401
+from pineboolib.fllegacy.flsmtpclient import FLSmtpClient  # noqa: F401
 
 
 # Clases QSA
