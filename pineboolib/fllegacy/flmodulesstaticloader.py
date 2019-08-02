@@ -6,9 +6,12 @@ from PyQt5 import QtWidgets, Qt, QtCore  # type: ignore
 from pineboolib import logging
 from pineboolib.core import decorators
 
+
 from pineboolib.core.settings import config
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flapplication import aqApp
+from pineboolib.fllegacy.flcheckbox import FLCheckBox
+
 from typing import Any, List, Optional, cast, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -191,7 +194,7 @@ class FLStaticLoader(QtCore.QObject):
             for info in self.b_.dirs_:
                 self.tblDirs.setText(row, 0, info.path_)
 
-                chk = pncontrolsfactory.FLCheckBox(self.tblDirs, row)
+                chk = FLCheckBox(self.tblDirs, row)
                 chk.setChecked(info.active_ == "True")
                 chk.toggled.connect(self.setChecked)
                 self.tblDirs.setCellWidget(row, 1, chk)
@@ -213,7 +216,7 @@ class FLStaticLoader(QtCore.QObject):
             self.tblDirs.setNumRows(n_rows + 1)
             self.tblDirs.setText(n_rows, 0, dir)
 
-            chk = pncontrolsfactory.FLCheckBox(self.tblDirs, n_rows)
+            chk = FLCheckBox(self.tblDirs, n_rows)
             chk.setChecked(True)
             chk.toggled.connect(self.setChecked)
 

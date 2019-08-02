@@ -154,7 +154,7 @@ class AQS(object):
         @return sha1 string
         """
 
-        from pineboolib.pncontrolsfactory import QByteArray
+        from pineboolib.qt3_widgets.qbytearray import QByteArray
 
         ba = QByteArray(byte_array)
         return ba.sha1()

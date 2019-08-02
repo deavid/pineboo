@@ -64,12 +64,14 @@ class parser(object):
         try:
             retorno_: Any = project.call(self._callScript, aList)
         except Exception:
-            from pineboolib import pncontrolsfactory
+            from pineboolib.fllegacy.systype import SysType
+
+            qsa_sys = SysType()
 
             logger.info(self._callScript, environ["QUERY_STRING"])
             retorno_ = (
                 """<html><head><title>Pineboo %s - FastCGI - </title></head><body><h1>Function %s not found!</h1></body></html>"""
-                % (pncontrolsfactory.SysType().version(), self._callScript)
+                % (qsa_sys.version(), self._callScript)
             )
             pass
         logger.info("FCGI:INFO: Processing '%s' ...", environ["QUERY_STRING"])

@@ -814,9 +814,9 @@ class FLFormDB(QDialog):
         # self._action.mainform_widget = None
         self.deleteLater()
         self._loaded = False
-        from pineboolib import pncontrolsfactory
+        from PyQt5.QtWidgets import qApp
 
-        pncontrolsfactory.SysType().processEvents()
+        qApp.processEvents()
 
         # self.hide()
         try:
@@ -844,8 +844,9 @@ class FLFormDB(QDialog):
         except Exception:
 
             self.logger.error("El FLFormDB %s no se cerró correctamente:\n%s", self.formName(), traceback.format_exc())
+        from PyQt5.QtWidgets import QMdiSubWindow
 
-        if isinstance(self.parent(), pncontrolsfactory.QMdiSubWindow):
+        if isinstance(self.parent(), QMdiSubWindow):
             self.parent().close()
 
     """

@@ -3,13 +3,17 @@
 Main Eneboo-alike UI.
 """
 from PyQt5 import QtWidgets, QtCore, QtGui  # type: ignore
-from PyQt5.QtWidgets import QTreeWidgetItem, QTreeWidget, QMainWindow, QActionGroup, QMenu  # type: ignore
+from PyQt5.QtWidgets import QTreeWidgetItem, QTreeWidget, QActionGroup, QDockWidget  # type: ignore
 from PyQt5.QtXml import QDomDocument  # type: ignore
 from PyQt5.QtGui import QIcon
 
 from pineboolib.qt3_widgets.qaction import QAction
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQFormDB
 from pineboolib.fllegacy.flformdb import FLFormDB
+
+from pineboolib.qt3_widgets.qmenu import QMenu
+from pineboolib.qt3_widgets.qmainwindow import QMainWindow
+
 
 # from pineboolib.core.settings import settings
 from pineboolib.fllegacy.aqsobjects import aqsobjectfactory as aqsfac

@@ -66,9 +66,9 @@ class KParserTools(object):
         """
 
         # node = Node()
-        from pineboolib import pncontrolsfactory
+        from PyQt5.QtXml import QDomDocument
 
-        doc = pncontrolsfactory.FLDomDocument()
+        doc = QDomDocument()
         ele = doc.createElement("element")
         for k in data.keys():
             attr_node = doc.createAttribute(k)
@@ -155,7 +155,7 @@ class KParserTools(object):
         ret = None
         table_name = "fllarge"
         if ref_key is not None:
-            from pineboolib import pncontrolsfactory
+            from PyQt5.QtGui import QPixmap
 
             value = None
             tmp_dir = project.tmpdir
@@ -182,14 +182,14 @@ class KParserTools(object):
 
                 if value:
                     ret = img_file
-                    pix = pncontrolsfactory.QPixmap(value)
+                    pix = QPixmap(value)
                     if not pix.save(img_file):
                         self.logger.warning("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
                         ret = None
                     else:
                         ret = img_file
             elif ref_key.endswith(".xpm"):
-                pix = pncontrolsfactory.QPixmap(ref_key)
+                pix = QPixmap(ref_key)
                 img_file = ref_key.replace(".xpm", ".png")
                 if not pix.save(img_file):
                     self.logger.warning("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))

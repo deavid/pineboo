@@ -984,7 +984,7 @@ class Kut2FPDF(object):
         """
         if text == "None":
             return
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flcodbar import FLCodBar
 
         file_name = project.tmpdir
         file_name += "/%s.png" % (text)
@@ -992,7 +992,7 @@ class Kut2FPDF(object):
 
         if not os.path.exists(file_name):
 
-            bar_code = pncontrolsfactory.FLCodBar(text)  # Code128
+            bar_code = FLCodBar(text)  # Code128
             if type is not None:
                 type = bar_code.nameToType(type.lower())
                 bar_code.setType(type)

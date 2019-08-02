@@ -13,7 +13,6 @@ from typing import Any, Dict, Optional, List
 
 from PyQt5 import QtCore
 
-from PyQt5.QtCore import QProcess
 from PyQt5.QtWidgets import QMessageBox, QApplication
 
 from pineboolib.core.settings import config
@@ -24,6 +23,7 @@ from pineboolib.core.utils import logging
 from pineboolib.application import project
 from pineboolib.application import connections
 
+from pineboolib.qt3_widgets.process import Process
 
 logger = logging.getLogger("fllegacy.systype")
 
@@ -524,7 +524,7 @@ class SysBaseType(object):
     @classmethod
     def launchCommand(self, comando):
         try:
-            QProcess.execute(comando)
+            Process.execute(comando)
             return True
         except Exception:
             e = traceback.format_exc()

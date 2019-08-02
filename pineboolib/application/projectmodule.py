@@ -431,15 +431,6 @@ class Project(object):
             msg = "Convirtiendo a Python . . . %s.qs %s" % (file_name, txt_)
             self.logger.info(msg)
 
-            # if self._splash:
-            #     self._splash.showMessage(msg, QtCore.Qt.AlignLeft, QtCore.Qt.white)
-            #
-            # else:
-            #     if settings.readBoolEntry("ebcomportamiento/SLInterface", False):
-            #         from pineboolib.pncontrolsfactory import aqApp
-            #
-            #         aqApp.popupWarn(msg)
-
             # clean_no_python = self._DGI.clean_no_python() # FIXME: No longer needed. Applied on the go.
 
             from pineboolib.application.parsers.qsaparser import postparse
