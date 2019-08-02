@@ -20,8 +20,9 @@ from .fluintvalidator import FLUIntValidator
 from .flintvalidator import FLIntValidator
 from .fldoublevalidator import FLDoubleValidator
 from pineboolib import logging
-from pineboolib import pncontrolsfactory
 from pineboolib.application import project
+
+from pineboolib.qt3_widgets.qpushbutton import QPushButton
 
 from typing import Any, Optional, TYPE_CHECKING, cast
 
@@ -64,10 +65,10 @@ class FLFieldDB(QtWidgets.QWidget):
     accel_ = None
     keepDisabled_: bool
     editorImg_: "pncontrolsfactory.FLPixmapView"
-    pbAux_: pncontrolsfactory.QPushButton
-    pbAux2_: pncontrolsfactory.QPushButton
-    pbAux3_: pncontrolsfactory.QPushButton
-    pbAux4_: pncontrolsfactory.QPushButton
+    pbAux_: QPushButton
+    pbAux2_: QPushButton
+    pbAux3_: QPushButton
+    pbAux4_: QPushButton
     fieldAlias_: Optional[str]
     showEditor_: bool
     fieldMapValue_ = None
@@ -81,7 +82,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
     _refreshLaterEditor: Optional[str]
 
-    pushButtonDB: pncontrolsfactory.QPushButton
+    pushButtonDB: QPushButton
     keyF4Pressed = QtCore.pyqtSignal()
     labelClicked = QtCore.pyqtSignal()
     keyReturnPressed = QtCore.pyqtSignal()
@@ -128,7 +129,7 @@ class FLFieldDB(QtWidgets.QWidget):
         self.editorImg_ = None
         self.topWidget_ = parent
         # self._parent = parent
-        from pineboolib import pncontrolsfactory
+        from pineboolib.qt3_widgets.qpushbutton import QPushButton
         from pineboolib.application import project
 
         if project._DGI:
@@ -171,7 +172,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         self.FLWidgetFieldDBLayout.addWidget(self.textLabelDB)
 
-        self.pushButtonDB = pncontrolsfactory.QPushButton()
+        self.pushButtonDB = QPushButton()
         if project.DGI.localDesktop():
             self.setFocusProxy(self.pushButtonDB)
         # self.pushButtonDB.setFlat(True)
@@ -1309,9 +1310,9 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "pixmap":
             if not self.editorImg_:
-                from pineboolib import pncontrolsfactory
+                from pineboolib.fllegacy.flpixmapview import FLPixmapView
 
-                self.editorImg_ = pncontrolsfactory.FLPixmapView(self)
+                self.editorImg_ = FLPixmapView(self)
                 self.editorImg_.setFocusPolicy(Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
                 self.editorImg_.setMaximumSize(147, 24)
@@ -1854,7 +1855,13 @@ class FLFieldDB(QtWidgets.QWidget):
         self.initMaxSize_ = self.maximumSize()
         self.initMinSize_ = self.minimumSize()
         from pineboolib.application import project
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.fllineedit import FLLineEdit
+        from pineboolib.fllegacy.fldateedit import FLDateEdit
+        from pineboolib.fllegacy.fltimeedit import FLTimeEdit
+        from pineboolib.fllegacy.flpixmapview import FLPixmapView
+
+        from pineboolib.qt3_widgets.qpushbutton import QPushButton
+        from pineboolib.qt3_widgets.qtextedit import QTextEdit
 
         if project._DGI and not project.DGI.localDesktop():
             project.DGI._par.addQueque("%s_setType" % self.objectName(), type_)
@@ -1873,7 +1880,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 hasPushButtonDB=hasPushButtonDB,
             )
         elif type_ == "serial":
-            self.editor_ = pncontrolsfactory.FLLineEdit(self, "editor")
+            self.editor_ = FLLineEdit(self, "editor")
             self.editor_.setFont(self.font())
             self.editor_.setMaxValue(pow(10, field.partInteger()) - 1)
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(7), QtWidgets.QSizePolicy.Policy(0))
@@ -1899,7 +1906,7 @@ class FLFieldDB(QtWidgets.QWidget):
             if not self.tableName():
                 if not self.editorImg_ and self.FLWidgetFieldDBLayout:
                     self.FLWidgetFieldDBLayout.setDirection(QtWidgets.QBoxLayout.Down)
-                    self.editorImg_ = pncontrolsfactory.FLPixmapView(self)
+                    self.editorImg_ = FLPixmapView(self)
                     self.editorImg_.setFocusPolicy(Qt.NoFocus)
                     self.editorImg_.setSizePolicy(self.sizePolicy())
                     self.editorImg_.setMaximumSize(self.maximumSize())
@@ -1920,7 +1927,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 if not self.pbAux3_:
                     spcBut = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
                     self.lytButtons.addItem(spcBut)
-                    self.pbAux3_ = pncontrolsfactory.QPushButton(self)
+                    self.pbAux3_ = QPushButton(self)
                     if self.pbAux3_:
                         self.pbAux3_.setSizePolicy(sizePolicy)
                         self.pbAux3_.setMinimumSize(self.iconSize)
@@ -1951,7 +1958,7 @@ class FLFieldDB(QtWidgets.QWidget):
                         self.pbAux3_.installEventFilter(self)
 
                 if not self.pbAux4_:
-                    self.pbAux4_ = pncontrolsfactory.QPushButton(self)
+                    self.pbAux4_ = QPushButton(self)
                     if self.pbAux4_:
                         self.pbAux4_.setSizePolicy(sizePolicy)
                         self.pbAux4_.setMinimumSize(self.iconSize)
@@ -1969,7 +1976,7 @@ class FLFieldDB(QtWidgets.QWidget):
                         self.pbAux4_.clicked.connect(self.setPixmapFromClipboard)
 
                 if not self.pbAux_:
-                    self.pbAux_ = pncontrolsfactory.QPushButton(self)
+                    self.pbAux_ = QPushButton(self)
                     if self.pbAux_:
                         self.pbAux_.setSizePolicy(sizePolicy)
                         self.pbAux_.setMinimumSize(self.iconSize)
@@ -1987,7 +1994,7 @@ class FLFieldDB(QtWidgets.QWidget):
                         self.pbAux_.clicked.connect(self.clearPixmap)
 
                 if not self.pbAux2_:
-                    self.pbAux2_ = pncontrolsfactory.QPushButton(self)
+                    self.pbAux2_ = QPushButton(self)
                     if self.pbAux2_:
                         savepixmap_ = QtWidgets.QMenu(self.pbAux2_)
                         savepixmap_.addAction("JPG")
@@ -2016,7 +2023,7 @@ class FLFieldDB(QtWidgets.QWidget):
                         self.pushButtonDB.installEventFilter(self) if hasPushButtonDB else self.pushButtonDB.setDisabled(True)
 
         elif type_ == "date":
-            self.editor_ = pncontrolsfactory.FLDateEdit(self, "editor")
+            self.editor_ = FLDateEdit(self, "editor")
             self.editor_.setFont(self.font())
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
             sizePolicy.setHeightForWidth(True)
@@ -2070,7 +2077,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.editor_.setDate(defVal.toDate())
 
         elif type_ == "time":
-            self.editor_ = pncontrolsfactory.FLTimeEdit(self)
+            self.editor_ = FLTimeEdit(self)
             self.editor_.setFont(self.font())
             # self.editor_.setAutoAdvance(True)
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
@@ -2098,7 +2105,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "stringlist":
 
-            self.editor_ = pncontrolsfactory.QTextEdit(self)
+            self.editor_ = QTextEdit(self)
             self.editor_.setFont(self.font())
             self.editor_.setTabChangesFocus(True)
             self.editor_.setMinimumHeight(100)
@@ -2229,7 +2236,9 @@ class FLFieldDB(QtWidgets.QWidget):
             self.editor_.activated.connect(self.updateValue)
 
         else:
-            self.editor_ = pncontrolsfactory.FLLineEdit(self, "editor")
+            from pineboolib.fllegacy.fllineedit import FLLineEdit
+
+            self.editor_ = FLLineEdit(self, "editor")
             self.editor_.setFont(self.font())
             if self.iconSize:
                 self.editor_.setMinimumSize(self.iconSize)

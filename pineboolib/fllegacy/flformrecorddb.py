@@ -849,10 +849,10 @@ class FLFormRecordDB(FLFormDB):
         super(FLFormRecordDB, self).show()
 
     def inicializeControls(self) -> None:
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flfielddb import FLFieldDB
 
         for child_ in self.findChildren(QtWidgets.QWidget):
-            if isinstance(child_, pncontrolsfactory.FLFieldDB):
+            if isinstance(child_, FLFieldDB):
                 loaded = getattr(child_, "_loaded", None)
                 if loaded is False:
                     QtCore.QTimer.singleShot(0, child_.load)

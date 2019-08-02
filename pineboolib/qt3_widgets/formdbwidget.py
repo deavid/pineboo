@@ -27,9 +27,9 @@ class FormDBWidget(QtWidgets.QWidget):
             self.cursor_ = None
             self.parent_ = parent or parent.parentWidget() if parent and hasattr(parent, "parentWidget") else parent
 
-            from pineboolib import pncontrolsfactory
+            from pineboolib.fllegacy.flformdb import FLFormDB
 
-            if isinstance(self.parent(), pncontrolsfactory.FLFormDB):
+            if isinstance(self.parent(), FLFormDB):
                 self.form = self.parent()
 
             self._formconnections: Set[Tuple] = set([])
@@ -116,9 +116,10 @@ class FormDBWidget(QtWidgets.QWidget):
                     ret = self.form
 
             if ret is not None:
-                from pineboolib import pncontrolsfactory
+                from pineboolib.fllegacy.flfielddb import FLFieldDB
+                from pineboolib.fllegacy.fltabledb import FLTableDB
 
-                if isinstance(ret, (pncontrolsfactory.FLFieldDB, pncontrolsfactory.FLTableDB)) and hasattr(ret, "_loaded"):
+                if isinstance(ret, (FLFieldDB, FLTableDB)) and hasattr(ret, "_loaded"):
                     if ret._loaded is False:
                         ret.load()
             else:

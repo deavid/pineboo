@@ -10,6 +10,7 @@ from .fldatatable import FLDataTable
 from .flformsearchdb import FLFormSearchDB
 from .flsqlcursor import FLSqlCursor
 
+
 from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData
 from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
 
@@ -1189,10 +1190,11 @@ class FLTableDB(QtWidgets.QWidget):
         spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.buttonsLayout.addItem(spacer)
 
-        from pineboolib import pncontrolsfactory
+        from pineboolib.qt3_widgets.qcombobox import QComboBox
+        from pineboolib.qt3_widgets.qtable import QTable
 
-        self.comboBoxFieldToSearch = pncontrolsfactory.QComboBox()
-        self.comboBoxFieldToSearch2 = pncontrolsfactory.QComboBox()
+        self.comboBoxFieldToSearch = QComboBox()
+        self.comboBoxFieldToSearch2 = QComboBox()
         # self.comboBoxFieldToSearch.addItem("*")
         # self.comboBoxFieldToSearch2.addItem("*")
         self.lineEditSearch = QtWidgets.QLineEdit()
@@ -1225,7 +1227,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
         self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
 
-        self.tdbFilter = pncontrolsfactory.QTable()
+        self.tdbFilter = QTable()
         filterL.addWidget(self.tdbFilter)
 
     """

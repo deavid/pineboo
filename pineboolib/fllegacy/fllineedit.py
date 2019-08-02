@@ -56,28 +56,30 @@ class FLLineEdit(QtWidgets.QLineEdit):
         s = text_
         minus = False
 
+        from pineboolib.fllegacy.flapplication import aqApp
+
         if self._tipo == "double":
             if s[0] == "-":
                 minus = True
                 s = s[1:]
-            if qApp.localeSystem().toString(1.1, "f", 1)[1] == ",":
+            if QtCore.QLocale.system().toString(1.1, "f", 1)[1] == ",":
                 s = s.replace(".", ",")
 
-            val, ok = qApp.localeSystem().toDouble(s)
+            val, ok = aqApp.localeSystem().toDouble(s)
             if ok:
-                s = qApp.localeSystem().toString(1.1, "f", self.partDecimal)
+                s = aqApp.localeSystem().toString(1.1, "f", self.partDecimal)
             if minus:
                 s = "-%s" % s
 
         elif self._tipo in ("int"):
             val, ok = qApp.localeSystem().toInt(s)
             if ok:
-                s = qApp.localeSystem().toString(val)
+                s = aqApp.localeSystem().toString(val)
 
         elif self._tipo in ("uint"):
-            val, ok = qApp.localeSystem().toUInt(s)
+            val, ok = aqApp.localeSystem().toUInt(s)
             if ok:
-                s = qApp.localeSystem().toString(val)
+                s = aqApp.localeSystem().toString(val)
 
         super().setText(s)
 

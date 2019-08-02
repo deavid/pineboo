@@ -854,9 +854,11 @@ class FLFormDB(QDialog):
 
     def showEvent(self, e) -> None:
         # --> Para mostrar form sin negro previo
-        from pineboolib import pncontrolsfactory
+        from PyQt5.QtWidgets import QMdiSubWindow
+        from pineboolib.fllegacy.systype import SysType
 
-        qsa_sys = pncontrolsfactory.SysType()
+        qsa_sys = SysType()
+
         qsa_sys.processEvents()
         # <--
         if not self.loaded():
@@ -878,7 +880,7 @@ class FLFormDB(QDialog):
         if size:
             self.resize(size)
 
-            if self.parent() and isinstance(self.parent(), pncontrolsfactory.QMdiSubWindow):
+            if self.parent() and isinstance(self.parent(), QMdiSubWindow):
                 self.parent().resize(size)
                 self.parent().repaint()
 
@@ -925,7 +927,8 @@ class FLFormDB(QDialog):
     """
 
     def show(self):
-        from pineboolib import pncontrolsfactory
+        from pineboolib.qt3_widgets.qmdiarea import QMdiArea
+        from PyQt5.QtWidgets import QMdiSubWindow
         from pineboolib.application import project
 
         module_name = getattr(project.actions[self._action.name()].mod, "module_name", None)
@@ -935,8 +938,8 @@ class FLFormDB(QDialog):
                 module_window = aqApp._dict_main_widgets[module_name]
                 mdi_area = module_window.centralWidget()
 
-                if isinstance(mdi_area, pncontrolsfactory.QMdiArea) and type(self).__name__ == "FLFormDB":
-                    if not isinstance(self.parent(), pncontrolsfactory.QMdiSubWindow):
+                if isinstance(mdi_area, QMdiArea) and type(self).__name__ == "FLFormDB":
+                    if not isinstance(self.parent(), QMdiSubWindow):
                         # size = self.size()
                         mdi_area.addSubWindow(self)
 

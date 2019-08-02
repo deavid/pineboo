@@ -18,11 +18,11 @@ from pineboolib.fllegacy.aqsobjects.aqboolflagstate import AQBoolFlagState, AQBo
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pineboolib import pncontrolsfactory
+    from pineboolib.fllegacy.flformdb import FLFormDB
     from PyQt5 import QtWidgets
 
 
-def AQFormDB(action_name: str, parent: "QtWidgets.QWidget") -> "pncontrolsfactory.FLFormDB":
+def AQFormDB(action_name: str, parent: "QtWidgets.QWidget") -> "FLFormDB":
     """Return a FLFormDB instance."""
 
     from pineboolib.application.utils.convert_flaction import convertFLAction

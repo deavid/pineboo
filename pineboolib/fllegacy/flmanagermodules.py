@@ -354,7 +354,7 @@ class FLManagerModules(object):
     """
 
     def createForm(self, action: Union["flaction.FLAction", "XMLAction"], connector=None, parent=None, name=None):
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flformdb import FLFormDB
         from pineboolib.fllegacy.flaction import FLAction
 
         if not isinstance(action, FLAction):
@@ -364,7 +364,7 @@ class FLManagerModules(object):
 
         if not action:
             raise Exception
-        return pncontrolsfactory.FLFormDB(parent, action, load=True)
+        return FLFormDB(parent, action, load=True)
 
     """
     Esta función es igual a la anterior, sólo se diferencia en que carga
@@ -377,7 +377,7 @@ class FLManagerModules(object):
 
     def createFormRecord(self, a: Union["flaction.FLAction", "XMLAction"], connector=None, parent_or_cursor=None, name=None) -> Any:
         logger.trace("createFormRecord: init")
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flformrecorddb import FLFormRecordDB
         from pineboolib.fllegacy.flaction import FLAction
 
         # Falta implementar conector y name
@@ -393,7 +393,7 @@ class FLManagerModules(object):
             return None
 
         logger.trace("createFormRecord: load FormRecordDB")
-        return pncontrolsfactory.FLFormRecordDB(parent_or_cursor, action, load=False)
+        return FLFormRecordDB(parent_or_cursor, action, load=False)
 
     """
     Para establecer el módulo activo.
@@ -534,7 +534,7 @@ class FLManagerModules(object):
     """
 
     def iconModule(self, idM: str) -> Any:
-        from pineboolib import pncontrolsfactory
+        from PyQt5.QtGui import QPixmap
 
         pix = None
         modObj = self.dictInfoMods.get(idM.upper(), None)
@@ -542,9 +542,9 @@ class FLManagerModules(object):
             from pineboolib.application.utils.xpm import cacheXPM
 
             icono = cacheXPM(modObj.icono)
-            pix = pncontrolsfactory.QPixmap(icono)
+            pix = QPixmap(icono)
 
-        return pix or pncontrolsfactory.QPixmap()
+        return pix or QPixmap()
 
     """
     Para obtener la versión de un módulo.

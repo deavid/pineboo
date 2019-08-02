@@ -24,6 +24,8 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
         if value_in is None or self._formatting:
             return (self.Acceptable, value_in, pos_cursor)
 
+        from pineboolib.fllegacy.flapplication import aqApp
+
         # pos_cursor= len(value_in)
         state = super().validate(value_in, pos_cursor)
         # 0 Invalid
@@ -42,7 +44,7 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
 
         ret_1 = state[1]
 
-        if qApp.localeSystem().toString(1.1, "f", self.partDecimal) == "," and ret_1.endswith("."):
+        if aqApp.commaSeparator() == "," and ret_1.endswith("."):
             ret_1 = ret_1[0 : len(ret_1) - 1] + ","
 
         if len(ret_1) == 1 and ret_1 not in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "."):
