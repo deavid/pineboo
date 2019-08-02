@@ -34,6 +34,221 @@ qsa_sys = SysType()
 logger = logging.getLogger("mainForm_%s" % __name__)
 
 
+class DockListView(QtCore.QObject):
+    """DockListWiew class."""
+
+    w_: QtWidgets.QDockWidget
+    lw_: QTreeWidget
+    ag_: QActionGroup
+    _name: str
+    set_visible = QtCore.pyqtSignal(bool)
+    Close = QtCore.pyqtSignal(bool)
+
+    def __init__(self, parent=None, name: str = "dockListView", title: str = "") -> None:
+        """Initialize the DockListView instance."""
+
+        super(DockListView, self).__init__(parent)
+        if parent is None:
+            return
+        self.AQS = aqsfac.AQS()
+        self._name = name
+        self.w_ = QtWidgets.QDockWidget(name, parent)
+        self.w_.setObjectName("%sListView" % name)
+        self.lw_ = QTreeWidget(self.w_)
+        self.lw_.setObjectName(self._name)
+        # this.lw_.addColumn("");
+        # this.lw_.addColumn("");
+        self.lw_.setColumnCount(2)
+        self.lw_.setHeaderLabels(["", ""])
+        self.lw_.headerItem().setHidden(True)
+        # this.lw_.setSorting(-1);
+        # this.lw_.rootIsDecorated = true;
+        # this.lw_.setColumnWidthMode(1, 0);
+        self.lw_.hideColumn(1)
+        # self.lw_.headerItem().hide()
+        # self.lw_.headerItem().setResizeEnabled(false, 1)
+
+        self.w_.setWidget(self.lw_)
+        self.w_.setWindowTitle(title)
+
+        """
+        w.resizeEnabled = true;
+        w.closeMode = true;
+        w.setFixedExtentWidth(300);
+        """
+
+        self.lw_.doubleClicked.connect(self.activateAction)
+
+    def writeState(self) -> None:
+        """Save the state and geometry."""
+
+        if self.w_ is None:
+            raise Exception("self.w_ is empty!")
+
+        settings = AQSettings()
+        key = "MainWindow/%s/" % self.w_.objectName()
+        # FIXME
+        # settings.writeEntry("%splace" % key, self.w_.place())  # Donde está emplazado
+
+        settings.writeEntry("%svisible" % key, self.w_.isVisible())
+        settings.writeEntry("%sx" % key, self.w_.x())
+        settings.writeEntry("%sy" % key, self.w_.y())
+        settings.writeEntry("%swidth" % key, self.w_.width())
+        settings.writeEntry("%sheight" % key, self.w_.height())
+        # FIXME
+        # settings.writeEntry("%soffset", key, self.offset())
+        # area = self.area()
+        # settings.writeEntry("%sindex" % key, area.findDockWindow(self.w_) if area else None)
+
+    def readState(self) -> None:
+        """Read the state and geometry."""
+
+        if self.w_ is None:
+            raise Exception("self.w_ is empty!")
+
+        if self.lw_ is None:
+            raise Exception("self.lw_ is empty!")
+
+        settings = AQSettings()
+        key = "MainWindow/%s/" % self.w_.objectName()
+        # FIXME
+        # place = settings.readNumEntry("%splace" % key, self.AQS.InDock)
+        # if place == self.AQS.OutSideDock:
+        #    self.w_.setFloating(True)
+        #    self.w_.move(settings.readNumEntry("%sx" % key, self.w_.x()),
+        #                 settings.readNumEntry("%sy" % key, self.w_.y()))
+
+        # self.w_.offset = settings.readNumEntry("%soffset" % key, self.offset)
+        # index = settings.readNumEntry("%sindex" % key, None)
+        # FIXME
+        # if index is not None:
+        #    area = w.area()
+        #    if area:
+        #        area.moveDockWindow(w, index)
+
+        width = settings.readNumEntry("%swidth" % key, self.w_.width())
+        height = settings.readNumEntry("%sheight" % key, self.w_.height())
+        self.lw_.resize(width, height)
+        # self.w_.resize(width, height)
+        from pineboolib.application import project
+
+        if not project.DGI.mobilePlatform():
+            visible = settings.readBoolEntry("%svisible" % key, True)
+            if visible:
+                self.w_.show()
+
+            else:
+                self.w_.hide()
+
+            self.set_visible.emit(not self.w_.isHidden())
+        else:
+            self.w_.hide()
+            self.set_visible.emit(False)
+            self.w_.close()
+
+    def initFromWidget(self, w) -> None:
+        """Initialize the internal widget."""
+
+        self.w_ = w
+        self.lw_ = w.widget()
+        if self.lw_ and self.lw_.doubleClicked:
+            self.lw_.doubleClicked.connect(self.activateAction)
+
+    def change_state(self, s: bool) -> None:
+        """Change the display status."""
+        if self.w_ is None:
+            raise Exception("not initialized")
+        if s:
+            self.w_.show()
+        else:
+            self.w_.close()
+
+    def activateAction(self, item) -> None:
+        """Activate the action associated with the active item."""
+
+        if item is None or not self.ag_:
+            return
+
+        action_name = item.sibling(item.row(), 1).data()
+        if action_name == "":
+            return
+
+        ac = self.ag_.findChild(QAction, action_name)
+        if ac:
+            ac.triggered.emit()
+
+    def update(self, action_group=None, reverse: bool = False) -> None:
+        """Update available items."""
+
+        self.ag_ = action_group
+
+        if not self.ag_:
+            return
+        if not self.lw_:
+            return
+
+        self.lw_.clear()
+
+        self.buildListView(self.lw_, self.AQS.toXml(self.ag_), self.ag_, reverse)
+
+    def buildListView(self, parent_item, parent_element, ag, reverse: bool) -> None:
+        """Build the tree of available options."""
+
+        this_item = None
+        node = parent_element.lastChild().toElement() if reverse else parent_element.firstChild().toElement()
+        while not node.isNull():
+            if node.attribute("objectName") in ("", "separator"):  # Pasamos de este
+                node = node.previousSibling().toElement() if reverse else node.nextSibling().toElement()
+                continue
+            class_name = node.attribute("class")
+            if class_name.startswith("QAction"):
+                if node.attribute("visible") == "false":
+                    node = node.previousSibling().toElement() if reverse else node.nextSibling().toElement()
+                    continue
+
+                if class_name == "QActionGroup":
+                    group_name = node.attribute("objectName")
+                    if (
+                        group_name not in ("pinebooActionGroup")
+                        and not group_name.endswith("Actions")
+                        and not group_name.startswith(("pinebooAg"))
+                    ) or group_name.endswith("MoreActions"):
+
+                        this_item = QTreeWidgetItem(parent_item)
+                        this_item.setText(0, group_name)
+
+                    else:
+                        this_item = parent_item
+
+                    self.buildListView(this_item, node, ag, reverse)
+                    node = node.previousSibling().toElement() if reverse else node.nextSibling().toElement()
+                    continue
+
+                if node.attribute("objectName") not in ("pinebooActionGroup", "pinebooActionGroup_actiongroup_name"):
+
+                    action_name = node.attribute("objectName")
+
+                    ac = ag.findChild(QtWidgets.QAction, action_name)
+                    if ac is not None:
+
+                        if action_name.endswith("actiongroup_name"):
+                            # action_name = action_name.replace("_actiongroup_name", "")
+                            this_item = parent_item
+                        else:
+                            this_item = QTreeWidgetItem(parent_item)
+                        if this_item is not None:
+                            this_item.setIcon(0, ac.icon())  # Code el icono mal!!
+                            if class_name == "QAction":
+                                this_item.setText(1, action_name)
+                            this_item.setText(0, node.attribute("text").replace("&", ""))
+                    if this_item is not None and node.attribute("enabled") == "false":
+                        this_item.setEnabled(False)
+
+                self.buildListView(this_item, node, ag, reverse)
+
+            node = node.previousSibling().toElement() if reverse else node.nextSibling().toElement()
+
+
 class MainForm(QtWidgets.QMainWindow):
     """
     Create Eneboo-alike UI.
@@ -41,9 +256,9 @@ class MainForm(QtWidgets.QMainWindow):
 
     MAX_RECENT = 10
     app_ = None
-    ag_menu_: QActionGroup
-    ag_rec_: QActionGroup
-    ag_mar_: QActionGroup
+    ag_menu_: Optional[QActionGroup]
+    ag_rec_: Optional[QActionGroup]
+    ag_mar_: Optional[QActionGroup]
     dck_mod_: DockListView
     dck_rec_: DockListView
     dck_mar_: DockListView
@@ -60,6 +275,9 @@ class MainForm(QtWidgets.QMainWindow):
 
         self.qsa_sys = systype.SysType()
         self.AQS = aqsfac.AQS()
+        self.ag_menu_ = None
+        self.ag_rec_ = None
+        self.ag_mar_ = None
 
     def eventFilter(self, o: QtWidgets.QWidget, e: QtGui.QInputEvent) -> bool:
         """Process GUI events."""
@@ -515,6 +733,10 @@ class MainForm(QtWidgets.QMainWindow):
         self.updateActionGroup()
         pinebooMenu = self.w_.findChild(QtWidgets.QMenu, "menuPineboo")
         pinebooMenu.clear()
+
+        if self.ag_menu_ is None:
+            raise Exception("ag_menu_ is empty!")
+
         self.updateMenu(self.ag_menu_, pinebooMenu)
 
         aqApp.setMainWidget(self.w_)
@@ -1001,221 +1223,6 @@ class MainForm(QtWidgets.QMainWindow):
         """Find a child widget."""
 
         return self.w_.findChild(QtWidgets.QWidget, name)
-
-
-class DockListView(QtCore.QObject):
-    """DockListWiew class."""
-
-    w_: QtWidgets.QDockWidget
-    lw_: QTreeWidget
-    ag_: QActionGroup
-    _name: str
-    set_visible = QtCore.pyqtSignal(bool)
-    Close = QtCore.pyqtSignal(bool)
-
-    def __init__(self, parent=None, name: str = "dockListView", title: str = "") -> None:
-        """Initialize the DockListView instance."""
-
-        super(DockListView, self).__init__(parent)
-        if parent is None:
-            return
-        self.AQS = aqsfac.AQS()
-        self._name = name
-        self.w_ = QtWidgets.QDockWidget(name, parent)
-        self.w_.setObjectName("%sListView" % name)
-        self.lw_ = QTreeWidget(self.w_)
-        self.lw_.setObjectName(self._name)
-        # this.lw_.addColumn("");
-        # this.lw_.addColumn("");
-        self.lw_.setColumnCount(2)
-        self.lw_.setHeaderLabels(["", ""])
-        self.lw_.headerItem().setHidden(True)
-        # this.lw_.setSorting(-1);
-        # this.lw_.rootIsDecorated = true;
-        # this.lw_.setColumnWidthMode(1, 0);
-        self.lw_.hideColumn(1)
-        # self.lw_.headerItem().hide()
-        # self.lw_.headerItem().setResizeEnabled(false, 1)
-
-        self.w_.setWidget(self.lw_)
-        self.w_.setWindowTitle(title)
-
-        """
-        w.resizeEnabled = true;
-        w.closeMode = true;
-        w.setFixedExtentWidth(300);
-        """
-
-        self.lw_.doubleClicked.connect(self.activateAction)
-
-    def writeState(self) -> None:
-        """Save the state and geometry."""
-
-        if self.w_ is None:
-            raise Exception("self.w_ is empty!")
-
-        settings = AQSettings()
-        key = "MainWindow/%s/" % self.w_.objectName()
-        # FIXME
-        # settings.writeEntry("%splace" % key, self.w_.place())  # Donde está emplazado
-
-        settings.writeEntry("%svisible" % key, self.w_.isVisible())
-        settings.writeEntry("%sx" % key, self.w_.x())
-        settings.writeEntry("%sy" % key, self.w_.y())
-        settings.writeEntry("%swidth" % key, self.w_.width())
-        settings.writeEntry("%sheight" % key, self.w_.height())
-        # FIXME
-        # settings.writeEntry("%soffset", key, self.offset())
-        # area = self.area()
-        # settings.writeEntry("%sindex" % key, area.findDockWindow(self.w_) if area else None)
-
-    def readState(self) -> None:
-        """Read the state and geometry."""
-
-        if self.w_ is None:
-            raise Exception("self.w_ is empty!")
-
-        if self.lw_ is None:
-            raise Exception("self.lw_ is empty!")
-
-        settings = AQSettings()
-        key = "MainWindow/%s/" % self.w_.objectName()
-        # FIXME
-        # place = settings.readNumEntry("%splace" % key, self.AQS.InDock)
-        # if place == self.AQS.OutSideDock:
-        #    self.w_.setFloating(True)
-        #    self.w_.move(settings.readNumEntry("%sx" % key, self.w_.x()),
-        #                 settings.readNumEntry("%sy" % key, self.w_.y()))
-
-        # self.w_.offset = settings.readNumEntry("%soffset" % key, self.offset)
-        # index = settings.readNumEntry("%sindex" % key, None)
-        # FIXME
-        # if index is not None:
-        #    area = w.area()
-        #    if area:
-        #        area.moveDockWindow(w, index)
-
-        width = settings.readNumEntry("%swidth" % key, self.w_.width())
-        height = settings.readNumEntry("%sheight" % key, self.w_.height())
-        self.lw_.resize(width, height)
-        # self.w_.resize(width, height)
-        from pineboolib.application import project
-
-        if not project.DGI.mobilePlatform():
-            visible = settings.readBoolEntry("%svisible" % key, True)
-            if visible:
-                self.w_.show()
-
-            else:
-                self.w_.hide()
-
-            self.set_visible.emit(not self.w_.isHidden())
-        else:
-            self.w_.hide()
-            self.set_visible.emit(False)
-            self.w_.close()
-
-    def initFromWidget(self, w) -> None:
-        """Initialize the internal widget."""
-
-        self.w_ = w
-        self.lw_ = w.widget()
-        if self.lw_ and self.lw_.doubleClicked:
-            self.lw_.doubleClicked.connect(self.activateAction)
-
-    def change_state(self, s: bool) -> None:
-        """Change the display status."""
-        if self.w_ is None:
-            raise Exception("not initialized")
-        if s:
-            self.w_.show()
-        else:
-            self.w_.close()
-
-    def activateAction(self, item) -> None:
-        """Activate the action associated with the active item."""
-
-        if item is None or not self.ag_:
-            return
-
-        action_name = item.sibling(item.row(), 1).data()
-        if action_name == "":
-            return
-
-        ac = self.ag_.findChild(QAction, action_name)
-        if ac:
-            ac.triggered.emit()
-
-    def update(self, action_group=None, reverse: bool = False) -> None:
-        """Update available items."""
-
-        self.ag_ = action_group
-
-        if not self.ag_:
-            return
-        if not self.lw_:
-            return
-
-        self.lw_.clear()
-
-        self.buildListView(self.lw_, self.AQS.toXml(self.ag_), self.ag_, reverse)
-
-    def buildListView(self, parent_item, parent_element, ag, reverse: bool) -> None:
-        """Build the tree of available options."""
-
-        this_item = None
-        node = parent_element.lastChild().toElement() if reverse else parent_element.firstChild().toElement()
-        while not node.isNull():
-            if node.attribute("objectName") in ("", "separator"):  # Pasamos de este
-                node = node.previousSibling().toElement() if reverse else node.nextSibling().toElement()
-                continue
-            class_name = node.attribute("class")
-            if class_name.startswith("QAction"):
-                if node.attribute("visible") == "false":
-                    node = node.previousSibling().toElement() if reverse else node.nextSibling().toElement()
-                    continue
-
-                if class_name == "QActionGroup":
-                    group_name = node.attribute("objectName")
-                    if (
-                        group_name not in ("pinebooActionGroup")
-                        and not group_name.endswith("Actions")
-                        and not group_name.startswith(("pinebooAg"))
-                    ) or group_name.endswith("MoreActions"):
-
-                        this_item = QTreeWidgetItem(parent_item)
-                        this_item.setText(0, group_name)
-
-                    else:
-                        this_item = parent_item
-
-                    self.buildListView(this_item, node, ag, reverse)
-                    node = node.previousSibling().toElement() if reverse else node.nextSibling().toElement()
-                    continue
-
-                if node.attribute("objectName") not in ("pinebooActionGroup", "pinebooActionGroup_actiongroup_name"):
-
-                    action_name = node.attribute("objectName")
-
-                    ac = ag.findChild(QtWidgets.QAction, action_name)
-                    if ac is not None:
-
-                        if action_name.endswith("actiongroup_name"):
-                            # action_name = action_name.replace("_actiongroup_name", "")
-                            this_item = parent_item
-                        else:
-                            this_item = QTreeWidgetItem(parent_item)
-                        if this_item is not None:
-                            this_item.setIcon(0, ac.icon())  # Code el icono mal!!
-                            if class_name == "QAction":
-                                this_item.setText(1, action_name)
-                            this_item.setText(0, node.attribute("text").replace("&", ""))
-                    if this_item is not None and node.attribute("enabled") == "false":
-                        this_item.setEnabled(False)
-
-                self.buildListView(this_item, node, ag, reverse)
-
-            node = node.previousSibling().toElement() if reverse else node.nextSibling().toElement()
 
 
 mainWindow: MainForm

@@ -17,4 +17,7 @@ def AQFormDB(action_name: str, parent: "QtWidgets.QWidget") -> "FLFormDB":
     ac_flaction = project.conn.manager().action(action_name)
     ac_xml = convertFLAction(ac_flaction)
     ac_xml.load()
-    return ac_xml.mainform_widget
+    ret_ = ac_xml.mainform_widget
+    if ret_ is None:
+        raise Exception("mainform_widget is emtpy!")
+    return ret_
