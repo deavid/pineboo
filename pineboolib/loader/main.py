@@ -9,7 +9,7 @@ from PyQt5 import QtCore, QtWidgets
 from pineboolib import logging
 from pineboolib.core.utils.utils_base import is_deployed
 from pineboolib.core.settings import config, settings
-
+from .options import parse_options
 from .dgi import load_dgi
 
 logger = logging.getLogger(__name__)
@@ -29,8 +29,6 @@ def startup(enable_gui: bool = None) -> None:
     MIN_PYTHON = (3, 6)
     if sys.version_info < MIN_PYTHON:
         sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
-
-    from .options import parse_options
 
     options = parse_options()
     if enable_gui is not None:

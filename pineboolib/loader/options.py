@@ -1,11 +1,9 @@
-import logging
 from optparse import OptionParser
-
-
 from optparse import Values
+from typing import Optional, List
 
 
-def parse_options() -> Values:
+def parse_options(custom_argv: Optional[List] = None) -> Values:
     """Load and parse options."""
 
     parser = OptionParser()
@@ -58,7 +56,10 @@ def parse_options() -> Values:
     parser.add_option("--quick", action="store_true", dest="enable_quick", default=False, help="Enables Quick mode")
     parser.add_option("--no-x", action="store_false", dest="enable_gui", default=True, help="Disables graphical interface")
 
-    (options, args) = parser.parse_args()
+    if custom_argv is None:
+        (options, args) = parser.parse_args()
+    else:
+        (options, args) = parser.parse_args(custom_argv)
 
     # ---- OPTIONS POST PROCESSING -----
     if options.forceload:
