@@ -6,7 +6,7 @@ from pineboolib.core.utils import logging
 from pineboolib.core.exceptions import ForbiddenError
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.xmlaction import XMLAction
-from .proxy import DelayedObjectProxyLoader
+from pineboolib.application.qsadictmodules import QSADictModules
 
 from typing import Any, TYPE_CHECKING, NoReturn
 
@@ -42,10 +42,6 @@ class ModuleActions(object):
     def load(self) -> None:
         """Load module actions into project."""
         # Ojo: Almacena un arbol con los módulos cargados
-        if TYPE_CHECKING:
-            qsa_dict_modules = self.mod
-        else:
-            from pineboolib import qsa as qsa_dict_modules
 
         self.tree = load2xml(self.path)
         self.root = self.tree.getroot()
@@ -61,36 +57,19 @@ class ModuleActions(object):
         action.table = None
         action.scriptform = self.mod.name
         self.project.actions[action.name] = action  # FIXME: Actions should be loaded to their parent, not the singleton
-        if hasattr(qsa_dict_modules, action.name):
-            if action.name != "sys":
-                self.logger.warning("No se sobreescribe variable de entorno %s", action.name)
-        else:  # Se crea la action del módulo
-            setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % action.name))
+        QSADictModules.save_action_for_root_module(action)
 
         for xmlaction in self.root:
             action_xml = XMLAction(xmlaction, project=self.project)
             action_xml.mod = self
             name = action_xml.name
-            if name != "unnamed":
-                if hasattr(qsa_dict_modules, "form%s" % name):
-                    self.logger.debug(
-                        "No se sobreescribe variable de entorno %s. Hay una definición previa en %s",
-                        "%s.form%s" % (self.module_name, name),
-                        self.module_name,
-                    )
-                else:  # Se crea la action del form
-                    self.project.actions[name] = action_xml  # FIXME: Actions should be loaded to their parent, not the singleton
-                    delayed_action = DelayedObjectProxyLoader(action_xml.load, name="QSA.Module.%s.Action.form%s" % (self.mod.name, name))
-                    setattr(qsa_dict_modules, "form" + name, delayed_action)
+            if not name or name == "unnamed":
+                continue
 
-                if hasattr(qsa_dict_modules, "formRecord" + name):
-                    self.logger.debug("No se sobreescribe variable de entorno %s", "formRecord" + name)
-                else:  # Se crea la action del formRecord
-                    delayed_action = DelayedObjectProxyLoader(
-                        action_xml.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)
-                    )
+            if QSADictModules.save_action_for_mainform(action_xml):
+                self.project.actions[name] = action_xml  # FIXME: Actions should be loaded to their parent, not the singleton
 
-                    setattr(qsa_dict_modules, "formRecord" + name, delayed_action)
+            QSADictModules.save_action_for_formrecord(action_xml)
 
     def __contains__(self, k) -> bool:
         """Determine if it is the owner of an action."""

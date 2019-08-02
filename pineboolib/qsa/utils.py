@@ -6,13 +6,18 @@ import re
 import math
 
 from PyQt5 import QtCore
-
+from pineboolib.application.qsadictmodules import QSADictModules
 from pineboolib.core.utils.utils_base import ustr
 from pineboolib.core.utils import logging
 
-from typing import Any, Optional, Union, Match, List, Pattern, Generator
+from typing import Any, Optional, Union, Match, List, Pattern, Generator, Callable
 
 logger = logging.getLogger("qsa.utils")
+
+
+def from_project(scriptname: str):
+    """Get script from project."""
+    return QSADictModules.from_project(scriptname)
 
 
 class switch(object):
@@ -46,26 +51,34 @@ class switch(object):
 
 
 class qsaRegExp(object):
+    """
+    Regexp emulation class.
+    """
+
     logger = logging.getLogger("qsaRegExp")
     result_: Optional[Match[str]]
 
     def __init__(self, strRE: str, is_global: bool = False):
+        """Create new regexp."""
         self.strRE_ = strRE
         self.pattern = re.compile(self.strRE_)
         self.is_global = is_global
         self.result_ = None
 
     def search(self, text: str) -> Optional[Match[str]]:
+        """Return Match from search."""
         self.result_ = None
         if self.pattern is not None:
             self.result_ = self.pattern.search(text)
         return self.result_
 
     def replace(self, target: str, new_value: str) -> str:
+        """Replace string using regex."""
         count = 1 if not self.is_global else 0
         return self.pattern.sub(new_value, target, count)
 
     def cap(self, i: int) -> Optional[str]:
+        """Return regex group number "i"."""
         if self.result_ is None:
             return None
 
@@ -76,9 +89,11 @@ class qsaRegExp(object):
             return None
 
     def get_global(self) -> bool:
+        """Return if regex is global."""
         return self.is_global
 
     def set_global(self, b: bool) -> None:
+        """Set regex global flag."""
         self.is_global = b
 
     global_ = property(get_global, set_global)
@@ -86,7 +101,8 @@ class qsaRegExp(object):
 
 def RegExp(strRE: str) -> qsaRegExp:
     """
-    Regexp
+    Return qsaRegexp object from search.
+
     @param strRE. Cadena de texto
     @return valor procesado
     """
@@ -104,41 +120,53 @@ def RegExp(strRE: str) -> qsaRegExp:
 
 
 class Math(object):
+    """QSA Math emulation class."""
+
     @staticmethod
     def abs(x: Union[int, float]) -> Union[int, float]:
+        """Get absolute value."""
         return math.fabs(x)
 
     @staticmethod
     def ceil(x: float) -> int:
+        """Round number to its ceiling."""
         return math.ceil(x)
 
     @staticmethod
     def floor(x: float) -> int:
+        """Round number to its floor."""
         return math.floor(x)
 
     @staticmethod
-    def pow(x: Union[int, float], y: Union[int, float]) -> Union[int, float]:
+    def pow(x: float, y: float) -> float:
+        """Raise x to the power of y."""
         return math.pow(x, y)
 
     @staticmethod
-    def round(x: Union[int, float]) -> float:
-        return round(float(x), 2)
+    def round(x: float, y: int = 2) -> float:
+        """Round a number x to y decimal places."""
+        return round(float(x), y)
 
 
 class Application:
-    """El modulo "Datos" usa Application.formRecorddat_procesos para leer el módulo"""
+    """
+    Emulate QS Application class.
+
+    El modulo "Datos" usa "Application.formRecorddat_procesos" para leer el módulo.
+    """
 
     def __getattr__(self, name: str) -> Any:
+        """Emulate any method and retrieve application action module specified."""
         return from_project(name)
 
 
-def parseFloat(x: Any) -> Any:
+def parseFloat(x: Any) -> float:
     """
-    Convierte a float un valor dado
+    Convert to float from almost any value.
+
     @param x. valor a convertir
     @return Valor tipo float, o parametro x , si no es convertible
     """
-    orig_ = x
     ret = 0.00
     try:
         if isinstance(x, str) and x.find(":") > -1:
@@ -150,30 +178,31 @@ def parseFloat(x: Any) -> Any:
 
         if isinstance(x, str):
             try:
-                ret = float(x)
+                return float(x)
             except Exception:
                 x = x.replace(".", "")
                 x = x.replace(",", ".")
                 try:
-                    ret = float(x)
+                    return float(x)
                 except Exception:
-                    return orig_
+                    return float("nan")
 
         else:
-            ret = 0 if x in (None, "") else float(x)
+            ret = 0.0 if x in (None, "") else float(x)
 
         if ret == int(ret):
-            ret = int(ret)
+            return int(ret)
 
         return ret
     except Exception:
         logger.exception("parseFloat: Error converting %s to float", x)
-        return x
+        return float("nan")
 
 
 def parseString(obj: Any) -> str:
     """
-    Convierte a str un objeto dado
+    Convert to string almost any value.
+
     @param obj. valor a convertir
     @return str del objeto dado
     """
@@ -182,7 +211,8 @@ def parseString(obj: Any) -> str:
 
 def parseInt(x: Union[float, int, str]) -> int:
     """
-    Convierte en int un valor dado
+    Convert to int almost any value.
+
     @param x. Valor a convertir
     @return Valor convertido
     """
@@ -197,28 +227,10 @@ def parseInt(x: Union[float, int, str]) -> int:
     return ret_
 
 
-def isNaN(x: Any) -> bool:
-    """
-    Comprueba si un valor dado en numerico
-    @param x. Valor numérico
-    @return True o False
-    """
-
-    if x is None:
-        return True
-
-    if isinstance(x, str) and x.find(":"):
-        x = x.replace(":", "")
-    try:
-        float(x)
-        return False
-    except ValueError:
-        return True
-
-
 def length(obj: Any) -> int:
     """
-    Parser para recoger el length de un campo
+    Get length of any object.
+
     @param obj, objeto a obtener longitud
     @return longitud del objeto
     """
@@ -237,7 +249,8 @@ def length(obj: Any) -> int:
 
 def text(obj: Any) -> str:
     """
-    Parser para recoger valor text de un objeto dado
+    Get text property from object.
+
     @param obj. Objeto a procesar
     @return Valor de text o text()
     """
@@ -247,7 +260,8 @@ def text(obj: Any) -> str:
         return obj.text
 
 
-def startTimer(time: int, fun: Any) -> "QtCore.QTimer":
+def startTimer(time: int, fun: Callable) -> "QtCore.QTimer":
+    """Create new timer that calls a function."""
     timer = QtCore.QTimer()
     timer.timeout.connect(fun)
     timer.start(time)
@@ -255,14 +269,15 @@ def startTimer(time: int, fun: Any) -> "QtCore.QTimer":
 
 
 def killTimer(t: Optional["QtCore.QTimer"] = None) -> None:
+    """Stop a given timer."""
     if t is not None:
         t.stop()
-        t = None
 
 
 def debug(txt: str) -> None:
     """
-    Mensajes debug en qsa
+    Debug for QSA messages.
+
     @param txt. Mensaje.
     """
     from pineboolib.application import project
@@ -270,26 +285,38 @@ def debug(txt: str) -> None:
     project.message_manager().send("debug", None, [ustr(txt)])
 
 
-def from_project(scriptname: str) -> Any:
-    """
-    Devuelve el objeto de proyecto que coincide con el nombre dado
-    """
-    from pineboolib import qsa as qsa_dict_modules
-
-    # FIXME: Esto debería estar guardado en Project.
-    return getattr(qsa_dict_modules, scriptname, None)
-
-
 def format_exc(exc: Optional[int] = None) -> str:
+    """Format a traceback."""
     return traceback.format_exc(exc)
 
 
+def isNaN(x: Any) -> bool:
+    """
+    Check if value is NaN.
+
+    @param x. Valor numérico
+    @return True o False
+    """
+
+    if x is None or math.isnan(x):
+        return True
+
+    if isinstance(x, str) and x.find(":"):
+        x = x.replace(":", "")
+    try:
+        float(x)
+        return False
+    except ValueError:
+        return True
+
+
 def isnan(n: Any) -> bool:
-    return math.isnan(n)
+    """Return if a number is NaN."""
+    return isNaN(n)
 
 
 def replace(source: str, search: Any, replace: str) -> Union[str, Pattern]:
-    """Replace for QSA where detects if "search" is a Regexp"""
+    """Replace for QSA where detects if "search" is a Regexp."""
     if hasattr(search, "match"):
         return search.replace(source, replace)
     else:

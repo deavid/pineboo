@@ -4,7 +4,6 @@ QSA Emulation module.
 
 This file should be imported at top of QS converted files.
 """
-
 from pineboolib.fllegacy.flutil import FLUtil  # noqa: F401
 from pineboolib.fllegacy.systype import SysType as sys  # noqa: F401
 

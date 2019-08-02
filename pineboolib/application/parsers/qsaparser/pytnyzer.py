@@ -27,7 +27,7 @@ else:
 STRICT_MODE = True
 
 # To get the following list updated, do:
-# In [1]: from pineboolib import qsa
+# In [1]: from pineboolib.qsa import qsa
 # In [2]: dir(qsa)
 
 QSA_KNOWN_ATTRS = {

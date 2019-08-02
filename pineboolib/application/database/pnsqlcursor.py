@@ -500,9 +500,9 @@ class PNSqlCursor(QtCore.QObject):
                 if bch_model and bch_model(fN, self) is False:
                     return
 
-                from pineboolib import qsa  # FIXME: Should not import QSA at all
+                from pineboolib.qsa.utils import from_project  # FIXME: Should not import QSA at all
 
-                script = getattr(qsa, "formRecord%s" % self.action(), None)
+                script = from_project("formRecord%s" % self.action())
                 if script is not None:
                     bChCursor = getattr(script.iface, "bChCursor", None)
                     if bChCursor:
@@ -597,9 +597,9 @@ class PNSqlCursor(QtCore.QObject):
                 if bch_model and bch_model(fN, self) is False:
                     return
 
-                from pineboolib import qsa  # FIXME: Should not import QSA at all
+                from pineboolib.qsa.utils import from_project  # FIXME: Should not import QSA at all
 
-                script = getattr(qsa, "formRecord%s" % self.action(), None)
+                script = from_project("formRecord%s" % self.action())
                 if script is not None:
                     bChCursor = getattr(script.iface, "bChCursor", None)
                     if bChCursor:
@@ -1988,7 +1988,7 @@ class PNSqlCursor(QtCore.QObject):
 
         @return TRUE if the refreshment could be performed, FALSE otherwise
         """
-        from pineboolib import qsa as qsa_tree
+        from pineboolib.qsa.utils import from_project
 
         if not self.d.metadata_:
             raise Exception("Not initialized")
@@ -2040,7 +2040,7 @@ class PNSqlCursor(QtCore.QObject):
 
                         siguiente = None
                         if self._action.scriptFormRecord():
-                            context_ = getattr(qsa_tree, "formRecord%s" % self._action.scriptFormRecord()[:-3]).iface
+                            context_ = from_project("formRecord%s" % self._action.scriptFormRecord()[:-3]).iface
                             function_counter = getattr(context_, "calculateCounter", None)
                             if function_counter is None:
                                 siguiente = nextCounter(field_name, self)

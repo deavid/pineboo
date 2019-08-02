@@ -1,5 +1,5 @@
 # # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets, QtCore  # type: ignore
+from PyQt5 import QtWidgets, QtCore
 from typing import Set, Tuple
 from pineboolib import logging
 import weakref
@@ -10,7 +10,7 @@ class FormDBWidget(QtWidgets.QWidget):
     closed = QtCore.pyqtSignal()
     cursor_ = None
     parent_ = None
-    iface = None
+    iface: object
     signal_test = QtCore.pyqtSignal(str, QtCore.QObject)
 
     logger = logging.getLogger("pnControlsFactory.FormDBWidget")

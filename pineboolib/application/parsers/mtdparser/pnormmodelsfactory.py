@@ -101,7 +101,7 @@ def load_model(nombre):
     # if mod is None:
     #    mod = base_model(nombre)
     #    if mod:
-    #        setattr(qsa_dict_modules, model_name, mod)
+    #        setattr(qsa_dict_modules, model_name, mod)  # NOTE: Use application.qsadictmodules
     from pineboolib.application import project
 
     db_name = project.conn.DBName()
@@ -152,7 +152,7 @@ def empty_base():
 def load_models() -> None:
     """Load all sqlAlchemy models."""
 
-    from pineboolib import qsa as qsa_dict_modules
+    from pineboolib.application.qsadictmodules import QSADictModules
     from pineboolib.application import project
 
     if project.conn is None:
@@ -161,9 +161,9 @@ def load_models() -> None:
     db_name = project.conn.DBName()
     tables = project.conn.tables()
 
-    setattr(qsa_dict_modules, "Base", project.conn.declarative_base())
-    setattr(qsa_dict_modules, "session", project.conn.session())
-    setattr(qsa_dict_modules, "engine", project.conn.engine())
+    QSADictModules.save_other("Base", project.conn.declarative_base())
+    QSADictModules.save_other("session", project.conn.session())
+    QSADictModules.save_other("engine", project.conn.engine())
 
     for t in tables:
         try:
@@ -175,7 +175,7 @@ def load_models() -> None:
             model_name = "%s%s" % (t[0].upper(), t[1:])
             class_ = getattr(mod, model_name, None)
             if class_ is not None:
-                setattr(qsa_dict_modules, model_name, class_)
+                QSADictModules.save_other(model_name, class_)
 
     for root, dirs, files in os.walk(filedir("..", "tempdata", "cache", db_name, "models")):
         for nombre in files:  # Buscamos los presonalizados
@@ -188,7 +188,7 @@ def load_models() -> None:
 
                 class_ = getattr(mod, model_name, None)
                 if class_ is not None:
-                    setattr(qsa_dict_modules, model_name, class_)
+                    QSADictModules.save_other(model_name, class_)
 
 
 Calculated = String

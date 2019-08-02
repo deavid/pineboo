@@ -205,8 +205,8 @@ class FormDBWidget(QtCore.QObject):
         return list_[self._iter_current]
 
     def legacy(self):
-        from pineboolib import qsa as qsa_dict_modules
+        from pineboolib.application.qsadictmodules import QSADictModules
 
-        ret_ = getattr(qsa_dict_modules, "%s_legacy" % self._action.name, None)
+        ret_ = QSADictModules.from_project("%s_legacy" % self._action.name)
         if ret_ is None:
             return

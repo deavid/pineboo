@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets, QtCore, QtXml
 from PyQt5.QtCore import Qt
 
 from pineboolib.core import decorators
-
+from pineboolib.application.qsatypes.sysbasetype import SysBaseType
 from pineboolib.fllegacy.flutil import FLUtil
 
 # from pineboolib.fllegacy.flpicture import FLPicture
@@ -202,9 +202,8 @@ class FLReportViewer(QtWidgets.QWidget):
         #    return
         if self.rptViewer_.rptEngine_ and hasattr(self.rptViewer_.rptEngine_, "parser_"):
             pdf_file = self.rptViewer_.rptEngine_.parser_.get_file_name()
-            from pineboolib.pncontrolsfactory import qsa_sys
 
-            qsa_sys.openUrl(pdf_file)
+            SysBaseType.openUrl(pdf_file)
         # self.eventloop.exec_()
 
         # if self.embedInParent_:

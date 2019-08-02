@@ -146,7 +146,7 @@ class dgi_aqnext(dgi_schema):
         if ret_ is None:
             raise ImportError
 
-        from pineboolib import qsa as qsa_dict_modules
+        from pineboolib.qsa import qsa as qsa_dict_modules  # FIXME: Use application.qsadictmodules instead
         from pineboolib.application.xmlaction import XMLAction
         from pineboolib.application.proxy import DelayedObjectProxyLoader
 

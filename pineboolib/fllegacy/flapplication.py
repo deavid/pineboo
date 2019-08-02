@@ -12,7 +12,7 @@ from pineboolib.core.settings import config, settings
 
 from pineboolib.application import project
 from pineboolib.application.database import db_signals
-
+from pineboolib.application.qsatypes.sysbasetype import SysBaseType
 from pineboolib.fllegacy.fltranslator import FLTranslator
 
 
@@ -1032,8 +1032,7 @@ class FLApplication(QtCore.QObject):
 
     def reinitP(self) -> None:
         """Reinitialize project."""
-        from pineboolib import qsa as qsa_dict_modules
-        from pineboolib.application.proxy import DelayedObjectProxyLoader
+        from pineboolib.application.qsadictmodules import QSADictModules
 
         self.db().managerModules().finish()
         self.db().manager().finish()
@@ -1053,11 +1052,7 @@ class FLApplication(QtCore.QObject):
 
         project.main_window.initialized_mods_ = []
 
-        list_ = [attr for attr in dir(qsa_dict_modules) if not attr[0] == "_"]
-        for name in list_:
-            att = getattr(qsa_dict_modules, name)
-            if isinstance(att, DelayedObjectProxyLoader):
-                delattr(qsa_dict_modules, name)
+        QSADictModules.clean_all()
 
         project.run()
         self.db().managerModules().loadIdAreas()
@@ -1595,11 +1590,11 @@ class FLApplication(QtCore.QObject):
 
     def urlPineboo(self) -> None:
         """Open Eneboo URI."""
-        self.call("sys.openUrl", ["http://eneboo.org/"])
+        SysBaseType.openUrl(["http://eneboo.org/"])
 
     def helpIndex(self) -> None:
         """Open help."""
-        self.call("sys.openUrl", ["http://manuales-eneboo-pineboo.org/"])
+        SysBaseType.openUrl(["http://manuales-eneboo-pineboo.org/"])
 
     def tr(self, sourceText: str, disambiguation: Optional[str] = None, n: int = 0) -> Any:
         """Open translations."""
