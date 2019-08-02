@@ -4,7 +4,7 @@ AQSql Module.
 
 Provide queries to DB.
 """
-
+from enum import IntEnum, unique
 from pineboolib.application import project
 from pineboolib import logging
 
@@ -24,6 +24,13 @@ class AQSql(object):
     Edit: int = 1
     Del: int = 2
     Browse: int = 3
+
+    @unique
+    class TableType(IntEnum):
+        Tables = 0x01
+        SystemTables = 0x02
+        Views = 0x04
+        AllTables = 0xFF
 
     @classmethod
     def database(self, connection_name: str = "default") -> "IConnection":

@@ -1,18 +1,22 @@
 import traceback
 import os
+import os.path
+import sys
 from typing import cast
 
 from PyQt5 import QtCore
 from PyQt5.QtXml import QDomDocument
-from PyQt5.QtCore import QProcess
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QFileDialog, QApplication
+from PyQt5.QtCore import QProcess, QFile, QTextStream
+from PyQt5.QtCore import Qt, QDir, pyqtSignal
+from PyQt5.QtWidgets import QFileDialog, QApplication, QGroupBox, QCheckBox
+from PyQt5.QtWidgets import QFrame
 
 from pineboolib.core.settings import settings
 from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import ustr, filedir, sha1
 from pineboolib.core.system import System
 from pineboolib.core.utils import logging
+from pineboolib.core.error_manager import error_manager
 
 from pineboolib.application import project
 from pineboolib.application.types import Array, Date, File, Dir, Object
@@ -795,7 +799,7 @@ class SysType(SysBaseType):
         lay2.addWidget(lblPix)
         lbl = QLabel(diag)
         lbl.setText(msg)
-        lbl.setAlignment(AQS.AlignTop | AQS.WordBreak)
+        lbl.setAlignment(cast(Qt.Alignment, AQS.AlignTop | AQS.WordBreak))
         lay2.addWidget(lbl)
         lay3 = QHBoxLayout(lay)
         lay3.setMargin(6)
@@ -810,7 +814,7 @@ class SysType(SysBaseType):
         connections.connect(pbNo, u"clicked()", diag, u"reject()")
         chkRemember = None
         if keyRemember and txtRemember:
-            from pineboolib.qt3_widgets.qcheckbox import QCheckBox
+            # from pineboolib.qt3_widgets.qcheckbox import QCheckBox
 
             chkRemember = QCheckBox(txtRemember, diag)
             chkRemember.setChecked(valRemember)
@@ -823,7 +827,6 @@ class SysType(SysBaseType):
     @classmethod
     def exportModules(self):
         from pineboolib.qt3_widgets.filedialog import FileDialog
-        from pineboolib.application import project
 
         dirBasePath = FileDialog.getExistingDirectory(Dir.home)
         if not dirBasePath:
@@ -1053,13 +1056,13 @@ class SysType(SysBaseType):
         dirAnt = settings.value(key)
         from pineboolib.qt3_widgets.filedialog import FileDialog
 
-        dirMods = FileDialog.getExistingDirectory((dirAnt if dirAnt else False), self.translate(u"Directorio de Módulos"))
+        dirMods = FileDialog.getExistingDirectory(str(dirAnt) if dirAnt else None, self.translate(u"Directorio de Módulos"))
         if not dirMods:
             return
         dirMods = Dir.cleanDirPath(dirMods)
         dirMods = Dir.convertSeparators(dirMods)
-        Dir.current = dirMods
-        listFilesMod = self.selectModsDialog(FLUtil.findFiles(Array([dirMods]), u"*.mod", False))
+        QDir.setCurrent(dirMods)  # change current directory
+        listFilesMod = self.selectModsDialog(FLUtil.findFiles(dirMods, u"*.mod", False))
         FLUtil.createProgressDialog(self.translate(u"Importando"), len(listFilesMod))
         FLUtil.setProgress(1)
         i = 0
@@ -1072,7 +1075,7 @@ class SysType(SysBaseType):
             while_pass = False
             FLUtil.setLabelText(listFilesMod[i])
             FLUtil.setProgress(i)
-            if not importModule(listFilesMod[i]):
+            if not self.importModule(listFilesMod[i]):
                 self.errorMsgBox(self.translate(u"Error al cargar el módulo:\n") + listFilesMod[i])
                 break
             i += 1
@@ -1085,15 +1088,15 @@ class SysType(SysBaseType):
         FLUtil.destroyProgressDialog()
         FLUtil.writeSettingEntry(key, dirMods)
         self.infoMsgBox(self.translate(u"Importación de módulos finalizada."))
-        AQTimer.singleShot(0, reinit)
+        AQTimer.singleShot(0, self.reinit)
 
     @classmethod
     def selectModsDialog(self, listFilesMod=None):
         dialog = Dialog()
         dialog.okButtonText = self.translate(u"Aceptar")
         dialog.cancelButtonText = self.translate(u"Cancelar")
-        bgroup = GroupBox()
-        bgroup.title = self.translate(u"Seleccione módulos a importar")
+        bgroup = QGroupBox()
+        bgroup.setTitle(self.translate(u"Seleccione módulos a importar"))
         dialog.add(bgroup)
         res = Array()
         cB = Array()
@@ -1105,7 +1108,7 @@ class SysType(SysBaseType):
                 while_pass = True
                 continue
             while_pass = False
-            cB[i] = CheckBox()
+            cB[i] = QCheckBox()
             bgroup.add(cB[i])
             cB[i].text = listFilesMod[i]
             cB[i].checked = True
@@ -1140,16 +1143,14 @@ class SysType(SysBaseType):
 
     @classmethod
     def importModule(self, modPath=None):
-        fileMod = File(modPath)
-        contentMod = u""
         try:
-            fileMod.open(File.ReadOnly)
-            contentMod = fileMod.read()
+            with open(modPath, "r") as fileMod:
+                contentMod = fileMod.read()
         except Exception:
             e = traceback.format_exc()
             self.errorMsgBox(ustr(self.translate(u"Error leyendo fichero."), u"\n", e))
             return False
-
+        mod_folder = os.path.dirname(modPath)
         mod = None
         xmlMod = QDomDocument()
         if xmlMod.setContent(contentMod):
@@ -1164,28 +1165,28 @@ class SysType(SysBaseType):
                 "areaname": (self.trTagText(nodeMod.namedItem(u"areaname").toElement().text())),
                 "version": (nodeMod.namedItem(u"version").toElement().text()),
             }
-            if not registerArea(mod) or not registerModule(mod):
+            if not self.registerArea(mod) or not self.registerModule(mod):
                 self.errorMsgBox(ustr(self.translate(u"Error registrando el módulo"), u" ", mod["id"]))
                 return False
-            if not self.importFiles(fileMod.path, u"*.xml", mod["id"]):
+            if not self.importFiles(mod_folder, u"*.xml", mod["id"]):
                 return False
-            if not self.importFiles(fileMod.path, u"*.ui", mod["id"]):
+            if not self.importFiles(mod_folder, u"*.ui", mod["id"]):
                 return False
-            if not self.importFiles(fileMod.path, u"*.qs", mod["id"]):
+            if not self.importFiles(mod_folder, u"*.qs", mod["id"]):
                 return False
-            if not self.importFiles(fileMod.path, u"*.qry", mod["id"]):
+            if not self.importFiles(mod_folder, u"*.qry", mod["id"]):
                 return False
-            if not self.importFiles(fileMod.path, u"*.mtd", mod["id"]):
+            if not self.importFiles(mod_folder, u"*.mtd", mod["id"]):
                 return False
-            if not self.importFiles(fileMod.path, u"*.kut", mod["id"]):
+            if not self.importFiles(mod_folder, u"*.kut", mod["id"]):
                 return False
-            if not self.importFiles(fileMod.path, u"*.ar", mod["id"]):
+            if not self.importFiles(mod_folder, u"*.ar", mod["id"]):
                 return False
-            if not self.importFiles(fileMod.path, u"*.jrxml", mod["id"]):
+            if not self.importFiles(mod_folder, u"*.jrxml", mod["id"]):
                 return False
-            if not self.importFiles(fileMod.path, u"*.svg", mod["id"]):
+            if not self.importFiles(mod_folder, u"*.svg", mod["id"]):
                 return False
-            if not self.importFiles(fileMod.path, u"*.ts", mod["id"]):
+            if not self.importFiles(mod_folder, u"*.ts", mod["id"]):
                 return False
 
         else:
@@ -1197,7 +1198,7 @@ class SysType(SysBaseType):
     @classmethod
     def importFiles(self, dirPath=None, ext=None, idMod=None):
         ok = True
-        listFiles = FLUtil.findFiles(Array([dirPath]), ext, False)
+        listFiles = FLUtil.findFiles(dirPath, ext, False)
         FLUtil.createProgressDialog(self.translate(u"Importando"), len(listFiles))
         FLUtil.setProgress(1)
         i = 0
@@ -1230,7 +1231,7 @@ class SysType(SysBaseType):
         content = u""
         try:
             file.open(File.ReadOnly)
-            content = file.read()
+            content = str(file.read())
         except Exception:
             e = traceback.format_exc()
             self.errorMsgBox(ustr(self.translate(u"Error leyendo fichero."), u"\n", e))
@@ -1246,7 +1247,7 @@ class SysType(SysBaseType):
         cur.select(ustr(u"nombre = '", name, u"'"))
         if not cur.first():
             if name.endswith(u".ar"):
-                if not importReportAr(filePath, idMod, content):
+                if not self.importReportAr(filePath, idMod, content):
                     return True
             cur.setModeAccess(AQSql.Insert)
             cur.refreshBuffer()
@@ -1289,12 +1290,14 @@ class SysType(SysBaseType):
 
     @classmethod
     def importReportAr(self, filePath=None, idMod=None, content=None):
+        from pineboolib.application.safeqsa import SafeQSA
+
         if not self.isLoadedModule(u"flar2kut"):
             return False
         if settings.value(u"scripts/sys/conversionAr") != u"true":
             return False
         content = self.toUnicode(content, u"UTF-8")
-        content = qsa.flar2kut.iface.pub_ar2kut(content)
+        content = SafeQSA.root_module("flar2kut").iface.pub_ar2kut(content)
         filePath = ustr(filePath[0 : len(filePath) - 3], u".kut")
         if content:
             localEnc = settings.value(u"scripts/sys/conversionArENC")
@@ -1320,11 +1323,12 @@ class SysType(SysBaseType):
         valor = None
         errorMsg = None
         gui = self.interactiveGUI()
-        if gui:
-            try:
-                AQS.Application_setOverrideCursor(AQS.WaitCursor)
-            except Exception:
-                e = traceback.format_exc()
+        # FIXME: setOverrideCursor expects a QCursor, not a flag.
+        # if gui:
+        #     try:
+        #         AQS.Application_setOverrideCursor(Qt.WaitCursor)
+        #     except Exception:
+        #         e = traceback.format_exc()
 
         try:
             valor = f(oParam)
@@ -1387,7 +1391,8 @@ class SysType(SysBaseType):
 
         pro = Process
         pro.execute(command)
-
+        if pro.stdout is None:
+            return
         # print("***", pro.stdout)
 
         if pro.stdout.find("git pull") > -1:
@@ -1403,6 +1408,8 @@ class SysType(SysBaseType):
 
     @classmethod
     def qsaExceptions(self):
+        from pineboolib.fllegacy.flapplication import aqApp
+
         return aqApp.db().qsaExceptions()
 
     @classmethod
@@ -1434,7 +1441,9 @@ class SysType(SysBaseType):
 
     @classmethod
     def interactiveGUI(self):
-        return aqApp.db().self.interactiveGUI()
+        from pineboolib.fllegacy.flapplication import aqApp
+
+        return aqApp.db().interactiveGUI()
 
 
 class AbanQDbDumper(object):
@@ -1453,12 +1462,14 @@ class AbanQDbDumper(object):
     proc_ = None
 
     def __init__(self, db=None, dirBase=None, showGui=None, funLog=None):
+        from pineboolib.fllegacy.flapplication import aqApp
+
         self.db_ = aqApp.db() if db is None else db
         self.showGui_ = True if showGui is None else showGui
         self.dirBase_ = Dir.home if dirBase is None else dirBase
         self.funLog_ = self.addLog if funLog is None else funLog
         self.fileName_ = self.genFileName()
-        self.encoding = SysType.getfilesystemencoding()
+        self.encoding = sys.getdefaultencoding()
 
     def init(self):
         if self.showGui_:
@@ -1473,39 +1484,40 @@ class AbanQDbDumper(object):
         # lay = QVBoxLayout(self.w_, 6, 6)
         lay = QVBoxLayout(self.w_)
         frm = QFrame(self.w_)
-        frm.frameShape = AQS.Box
-        frm.lineWidth = 1
-        frm.frameShadow = AQS.Plain
+        frm.setFrameShape(Qt.Box)
+        frm.setLineWidth(1)
+        frm.setFrameShadow(Qt.Plain)
+
         # layFrm = QVBoxLayout(frm, 6, 6)
         layFrm = QVBoxLayout(frm)
         lbl = QLabel(frm)
-        lbl.text = SysType.translate(u"Driver: %s") % (str(self.db_.driverNameToDriverAlias(self.db_.driverName())))
-        lbl.alignment = AQS.AlignTop
+        lbl.setText(SysType.translate(u"Driver: %s") % (str(self.db_.driverNameToDriverAlias(self.db_.driverName()))))
+        lbl.setAlignment(Qt.AlignTop)
         layFrm.addWidget(lbl)
         lbl = QLabel(frm)
-        lbl.text = SysType.translate(u"Base de datos: %s") % (str(self.db_.database()))
-        lbl.alignment = AQS.AlignTop
+        lbl.setText(SysType.translate(u"Base de datos: %s") % (str(self.db_.database())))
+        lbl.setAlignment(Qt.AlignTop)
         layFrm.addWidget(lbl)
         lbl = QLabel(frm)
-        lbl.text = SysType.translate(u"Host: %s") % (str(self.db_.host()))
-        lbl.alignment = AQS.AlignTop
+        lbl.setText(SysType.translate(u"Host: %s") % (str(self.db_.host())))
+        lbl.setAlignment(Qt.AlignTop)
         layFrm.addWidget(lbl)
         lbl = QLabel(frm)
-        lbl.text = SysType.translate(u"Puerto: %s") % (str(self.db_.port()))
-        lbl.alignment = AQS.AlignTop
+        lbl.setText(SysType.translate(u"Puerto: %s") % (str(self.db_.port())))
+        lbl.setAlignment(Qt.AlignTop)
         layFrm.addWidget(lbl)
         lbl = QLabel(frm)
-        lbl.text = SysType.translate(u"Usuario: %s") % (str(self.db_.user()))
-        lbl.alignment = AQS.AlignTop
+        lbl.setText(SysType.translate(u"Usuario: %s") % (str(self.db_.user())))
+        lbl.setAlignment(Qt.AlignTop)
         layFrm.addWidget(lbl)
         layAux = QHBoxLayout()
         layFrm.addLayout(layAux)
         self.lblDirBase_ = QLabel(frm)
-        self.lblDirBase_.text = SysType.translate(u"Directorio Destino: %s") % (str(self.dirBase_))
-        self.lblDirBase_.alignment = AQS.AlignVCenter
+        self.lblDirBase_.setText(SysType.translate(u"Directorio Destino: %s") % (str(self.dirBase_)))
+        self.lblDirBase_.setAlignment(Qt.AlignVCenter)
         layAux.addWidget(self.lblDirBase_)
         self.pbChangeDir_ = QPushButton(SysType.translate(u"Cambiar"), frm)
-        self.pbChangeDir_.setSizePolicy(AQS.Maximum, AQS.Preferred)
+        self.pbChangeDir_.setSizePolicy(Qt.Maximum, Qt.Preferred)
         connections.connect(self.pbChangeDir_, u"clicked()", self, u"changeDirBase()")
         layAux.addWidget(self.pbChangeDir_)
         lay.addWidget(frm)
@@ -1513,11 +1525,11 @@ class AbanQDbDumper(object):
         connections.connect(self.pbInitDump_, u"clicked()", self, u"initDump()")
         lay.addWidget(self.pbInitDump_)
         lbl = QLabel(self.w_)
-        lbl.text = u"Log:"
+        lbl.setText("Log:")
         lay.addWidget(lbl)
         self.tedLog_ = QTextEdit(self.w_)
-        self.tedLog_.textFormat = TextEdit.LogText
-        self.tedLog_.alignment = AQS.AlignHCenter or AQS.AlignVCenter
+        self.tedLog_.setTextFormat(QTextEdit.LogText)
+        self.tedLog_.setAlignment(cast(Qt.Alignment, Qt.AlignHCenter | Qt.AlignVCenter))
         lay.addWidget(self.tedLog_)
 
     def initDump(self):
@@ -1551,7 +1563,7 @@ class AbanQDbDumper(object):
     def changeDirBase(self, dir_=None):
         dirBasePath = dir_
         if not dirBasePath:
-            dirBasePath = FileDialog.getExistingDirectory(self.dirBase_)
+            dirBasePath = QFileDialog.getExistingDirectory(self.dirBase_)
             if not dirBasePath:
                 return
         self.dirBase_ = dirBasePath
@@ -1577,8 +1589,8 @@ class AbanQDbDumper(object):
         self.proc_.setProgram(command[0])
         self.proc_.setArguments(command[1:])
         # FIXME: Mejorar lectura linea a linea
-        self.proc_.readyReadStandardOutput.connect(self.readFromStdout)
-        self.proc_.readyReadStandardError.connect(self.readFromStderr)
+        cast(pyqtSignal, self.proc_.readyReadStandardOutput).connect(self.readFromStdout)
+        cast(pyqtSignal, self.proc_.readyReadStandardError).connect(self.readFromStderr)
         self.proc_.start()
 
         while self.proc_.running:
@@ -1771,7 +1783,7 @@ class AbanQDbDumper(object):
     def dumpAllTablesToCsv(self):
         fileName = self.fileName_
         db = self.db_
-        tables = db.tables(AQSql.Tables)
+        tables = db.tables(AQSql.TableType.Tables)
         dir_ = Dir(fileName)
         dir_.mkdir()
         dirBase = Dir.convertSeparators(ustr(fileName, u"/"))
@@ -1810,6 +1822,6 @@ class AQGlobalFunctions(object):
         def _():
             self.mappers_[c] = None
 
-        connections.connect(sigMap, u"mapped(QString)", SysType.AQGlobalFunctions, u"exec()")
+        connections.connect(sigMap, u"mapped(QString)", self, u"exec()")
         sigMap.setMapping(obj, functionName)
         connections.connect(obj, signal, sigMap, u"map()")
