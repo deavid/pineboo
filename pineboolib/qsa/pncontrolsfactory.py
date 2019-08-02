@@ -102,7 +102,7 @@ from pineboolib.fllegacy.fluintvalidator import FLUIntValidator  # noqa: F401
 from pineboolib.fllegacy.flcodbar import FLCodBar  # noqa: F401
 from pineboolib.fllegacy.flwidget import FLWidget  # noqa: F401
 from pineboolib.fllegacy.flworkspace import FLWorkSpace  # noqa: F401
-from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.fllegacy.flutil import FLUtil  # noqa: F401
 
 from pineboolib.fllegacy.flposprinter import FLPosPrinter  # noqa: F401
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery  # noqa: F401
