@@ -155,7 +155,7 @@ class FormDBWidget(QtWidgets.QWidget):
         return self.cursor_
 
     def __getattr__(self, name):
-
+        """Guess if attribute can be found in other related objects."""
         ret_ = getattr(self.cursor_, name, None) or getattr(self.parent(), name, None) or getattr(self.parent().script, name, None)
         if ret_:
             return ret_
@@ -170,6 +170,11 @@ class FormDBWidget(QtWidgets.QWidget):
                 return ret_
 
         raise AttributeError("FormDBWidget: Attribute does not exist: %r" % name)
+
+    def __hasattr__(self, name):
+        """Guess if attribute can be found in other related objects."""
+        ret_ = hasattr(self.cursor_, name) or hasattr(self.parent(), name) or hasattr(self.parent().script, name)
+        return ret_
 
     def __iter__(self):
         self._iter_current = None

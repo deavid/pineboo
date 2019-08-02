@@ -189,10 +189,22 @@ def loadUi(form_path: str, widget, parent=None) -> None:
             logger.warning("Connection receiver not found:%s", receiv_name)
         if sender is None or receiver is None:
             continue
-        try:
-            getattr(sender, sg_name).connect(getattr(receiver, sl_name))
-        except Exception:
-            logger.exception("Error connecting: %s:%s %s:%s", sender, signal_name, receiver, slot_name)
+
+        if hasattr(receiver, "iface"):
+            iface = getattr(receiver, "iface")
+            if hasattr(iface, sl_name):
+                try:
+                    getattr(sender, sg_name).connect(getattr(iface, sl_name))
+                except Exception:
+                    logger.exception("Error connecting: %s:%s %s.iface:%s", sender, signal_name, receiver, slot_name)
+                continue
+        if hasattr(receiver, sl_name):
+            try:
+                getattr(sender, sg_name).connect(getattr(receiver, sl_name))
+            except Exception:
+                logger.exception("Error connecting: %s:%s %s:%s", sender, signal_name, receiver, slot_name)
+        else:
+            logger.error("Error connecting: %s:%s %s:%s (no candidate found)", sender, signal_name, receiver, slot_name)
 
     # Cargamos menubar ...
     xmlmenubar = root.find("menubar")
