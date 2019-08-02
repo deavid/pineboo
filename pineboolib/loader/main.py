@@ -34,7 +34,7 @@ def startup(enable_gui: bool = None) -> None:
     if enable_gui is not None:
         options.enable_gui = enable_gui
 
-    init_logging(logtime=options.logtime, loglevel=options.loglevel)
+    init_logging(logtime=options.log_time, loglevel=options.loglevel)
 
     if options.enable_profiler:
         ret = exec_main_with_profiler(options)
