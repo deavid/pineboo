@@ -1,138 +1,131 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, QtWidgets, QtGui, QtXml  # type: ignore
-
-from pineboolib.application.connections import proxy_fn
-
-from pineboolib.application import project
-from pineboolib.application.packager import aqunpacker
-
-# from pineboolib import qt3_widgets, fllegacy
-
-
-from pineboolib.fllegacy.systype import SysType
-
 """
-Conjunto de controles usados en Pineboo. Estos son cargados desde el DGI seleccionado en el proyecto
+Collection of controls used on Pineboo.
+
+Those are loaded from selected DGI.
 """
-from pineboolib.qt3_widgets.qcombobox import QComboBox
-from pineboolib.qt3_widgets.qtable import QTable
-from pineboolib.qt3_widgets.qwidget import QWidget as QLayoutWidget
-from pineboolib.qt3_widgets.qtoolbutton import QToolButton
-from pineboolib.qt3_widgets.qtabwidget import QTabWidget
-from pineboolib.qt3_widgets.qlabel import QLabel
-from pineboolib.qt3_widgets.qgroupbox import QGroupBox
-from pineboolib.qt3_widgets.qlistview import QListView
-from pineboolib.qt3_widgets.qpushbutton import QPushButton
-from pineboolib.qt3_widgets.qtextedit import QTextEdit
-from pineboolib.qt3_widgets.qlineedit import QLineEdit
-from pineboolib.qt3_widgets.qdateedit import QDateEdit
-from pineboolib.qt3_widgets.qtimeedit import QTimeEdit
-from pineboolib.qt3_widgets.qcheckbox import QCheckBox
-from pineboolib.qt3_widgets.qwidget import QWidget
-from pineboolib.qt3_widgets.messagebox import QMessageBox
-from pineboolib.qt3_widgets.qbuttongroup import QButtonGroup
-from pineboolib.qt3_widgets.qdialog import QDialog
-from pineboolib.qt3_widgets.qvboxlayout import QVBoxLayout
-from pineboolib.qt3_widgets.qhboxlayout import QHBoxLayout
-from pineboolib.qt3_widgets.qframe import QFrame
-from pineboolib.qt3_widgets.qmainwindow import QMainWindow
-from pineboolib.qt3_widgets.qmenu import QMenu
-from pineboolib.qt3_widgets.qtoolbar import QToolBar
-from pineboolib.qt3_widgets.qaction import QAction
-from pineboolib.qt3_widgets.qwidget import QWidget as QDataView
-from pineboolib.qt3_widgets.process import Process
-from pineboolib.qt3_widgets.qbytearray import QByteArray
-from pineboolib.qt3_widgets.qradiobutton import QRadioButton
-from pineboolib.qt3_widgets.qspinbox import QSpinBox
-from pineboolib.qt3_widgets.qmdiarea import QMdiArea
-from pineboolib.qt3_widgets.qeventloop import QEventLoop
+from PyQt5 import QtCore, QtWidgets, QtGui, QtXml  # noqa: F401
 
-from PyQt5.QtWidgets import QActionGroup
-from PyQt5.QtWidgets import QInputDialog
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtWidgets import qApp
-from PyQt5.QtWidgets import QStyleFactory
-from PyQt5.QtWidgets import QFontDialog
-from PyQt5.QtWidgets import QDockWidget
-from PyQt5.QtWidgets import QMdiSubWindow
-from PyQt5.QtWidgets import QSizePolicy
-from PyQt5.QtWidgets import QToolBox
-from PyQt5.QtWidgets import QProgressDialog
-from PyQt5.QtWidgets import QFileDialog
-from PyQt5.QtWidgets import QTreeWidget
-from PyQt5.QtWidgets import QTreeWidgetItem
-from PyQt5.QtWidgets import QTreeWidgetItemIterator
-from PyQt5.QtWidgets import QListWidgetItem
-from PyQt5.QtWidgets import QListWidget as QListViewWidget
+from pineboolib.application.packager.aqunpacker import AQUnpacker  # noqa: F401
+from pineboolib.fllegacy.systype import SysType  # noqa: F401
 
-from PyQt5.QtCore import QSignalMapper
-from PyQt5.QtCore import QSize
+from pineboolib.qt3_widgets.qcombobox import QComboBox  # noqa: F401
+from pineboolib.qt3_widgets.qtable import QTable  # noqa: F401
+from pineboolib.qt3_widgets.qwidget import QWidget as QLayoutWidget  # noqa: F401
+from pineboolib.qt3_widgets.qtoolbutton import QToolButton  # noqa: F401
+from pineboolib.qt3_widgets.qtabwidget import QTabWidget  # noqa: F401
+from pineboolib.qt3_widgets.qlabel import QLabel  # noqa: F401
+from pineboolib.qt3_widgets.qgroupbox import QGroupBox  # noqa: F401
+from pineboolib.qt3_widgets.qlistview import QListView  # noqa: F401
+from pineboolib.qt3_widgets.qpushbutton import QPushButton  # noqa: F401
+from pineboolib.qt3_widgets.qtextedit import QTextEdit  # noqa: F401
+from pineboolib.qt3_widgets.qlineedit import QLineEdit  # noqa: F401
+from pineboolib.qt3_widgets.qdateedit import QDateEdit  # noqa: F401
+from pineboolib.qt3_widgets.qtimeedit import QTimeEdit  # noqa: F401
+from pineboolib.qt3_widgets.qcheckbox import QCheckBox  # noqa: F401
+from pineboolib.qt3_widgets.qwidget import QWidget  # noqa: F401
+from pineboolib.qt3_widgets.messagebox import QMessageBox  # noqa: F401
+from pineboolib.qt3_widgets.qbuttongroup import QButtonGroup  # noqa: F401
+from pineboolib.qt3_widgets.qdialog import QDialog  # noqa: F401
+from pineboolib.qt3_widgets.qvboxlayout import QVBoxLayout  # noqa: F401
+from pineboolib.qt3_widgets.qhboxlayout import QHBoxLayout  # noqa: F401
+from pineboolib.qt3_widgets.qframe import QFrame  # noqa: F401
+from pineboolib.qt3_widgets.qmainwindow import QMainWindow  # noqa: F401
+from pineboolib.qt3_widgets.qmenu import QMenu  # noqa: F401
+from pineboolib.qt3_widgets.qtoolbar import QToolBar  # noqa: F401
+from pineboolib.qt3_widgets.qaction import QAction  # noqa: F401
+from pineboolib.qt3_widgets.qwidget import QWidget as QDataView  # noqa: F401
+from pineboolib.qt3_widgets.process import Process  # noqa: F401
+from pineboolib.qt3_widgets.qbytearray import QByteArray  # noqa: F401
+from pineboolib.qt3_widgets.qradiobutton import QRadioButton  # noqa: F401
+from pineboolib.qt3_widgets.qspinbox import QSpinBox  # noqa: F401
+from pineboolib.qt3_widgets.qmdiarea import QMdiArea  # noqa: F401
+from pineboolib.qt3_widgets.qeventloop import QEventLoop  # noqa: F401
 
-from PyQt5.QtGui import QPainter
-from PyQt5.QtGui import QBrush
-from PyQt5.QtGui import QKeySequence
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtGui import QImage
-from PyQt5.QtGui import QIcon
-from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QActionGroup  # noqa: F401
+from PyQt5.QtWidgets import QInputDialog  # noqa: F401
+from PyQt5.QtWidgets import QApplication  # noqa: F401
+from PyQt5.QtWidgets import qApp  # noqa: F401
+from PyQt5.QtWidgets import QStyleFactory  # noqa: F401
+from PyQt5.QtWidgets import QFontDialog  # noqa: F401
+from PyQt5.QtWidgets import QDockWidget  # noqa: F401
+from PyQt5.QtWidgets import QMdiSubWindow  # noqa: F401
+from PyQt5.QtWidgets import QSizePolicy  # noqa: F401
+from PyQt5.QtWidgets import QToolBox  # noqa: F401
+from PyQt5.QtWidgets import QProgressDialog  # noqa: F401
+from PyQt5.QtWidgets import QFileDialog  # noqa: F401
+from PyQt5.QtWidgets import QTreeWidget  # noqa: F401
+from PyQt5.QtWidgets import QTreeWidgetItem  # noqa: F401
+from PyQt5.QtWidgets import QTreeWidgetItemIterator  # noqa: F401
+from PyQt5.QtWidgets import QListWidgetItem  # noqa: F401
+from PyQt5.QtWidgets import QListWidget as QListViewWidget  # noqa: F401
+
+from PyQt5.QtCore import QSignalMapper  # noqa: F401
+from PyQt5.QtCore import QSize  # noqa: F401
+
+from PyQt5.QtGui import QPainter  # noqa: F401
+from PyQt5.QtGui import QBrush  # noqa: F401
+from PyQt5.QtGui import QKeySequence  # noqa: F401
+from PyQt5.QtGui import QPixmap  # noqa: F401
+from PyQt5.QtGui import QImage  # noqa: F401
+from PyQt5.QtGui import QIcon  # noqa: F401
+from PyQt5.QtGui import QColor  # noqa: F401
 
 
-from PyQt5.QtXml import QDomDocument
+from PyQt5.QtXml import QDomDocument  # noqa: F401
 
 # Clases FL
-from PyQt5.QtXml import QDomDocument as FLDomDocument
-from PyQt5.QtXml import QDomElement as FLDomElement
-from PyQt5.QtXml import QDomNode as FLDomNode
-from PyQt5.QtXml import QDomNodeList as FLDomNodeList
+from PyQt5.QtXml import QDomDocument as FLDomDocument  # noqa: F401
+from PyQt5.QtXml import QDomElement as FLDomElement  # noqa: F401
+from PyQt5.QtXml import QDomNode as FLDomNode  # noqa: F401
+from PyQt5.QtXml import QDomNodeList as FLDomNodeList  # noqa: F401
 
-from pineboolib.qt3_widgets.formdbwidget import FormDBWidget
-from pineboolib.qt3_widgets.qtable import QTable as FLTable
+from pineboolib.qt3_widgets.formdbwidget import FormDBWidget  # noqa: F401
+from pineboolib.qt3_widgets.qtable import QTable as FLTable  # noqa: F401
 
-from pineboolib.fllegacy.fllineedit import FLLineEdit
-from pineboolib.fllegacy.fltimeedit import FLTimeEdit
-from pineboolib.fllegacy.fldateedit import FLDateEdit
-from pineboolib.fllegacy.flpixmapview import FLPixmapView
-from pineboolib.fllegacy.fllistviewitem import FLListViewItem
-from pineboolib.fllegacy.fldatatable import FLDataTable
-from pineboolib.fllegacy.flcheckbox import FLCheckBox
-from pineboolib.fllegacy.fltexteditoutput import FLTextEditOutput
-from pineboolib.fllegacy.flspinbox import FLSpinBox
-from pineboolib.fllegacy.fltabledb import FLTableDB
-from pineboolib.fllegacy.flfielddb import FLFieldDB
-from pineboolib.fllegacy.flformdb import FLFormDB
-from pineboolib.fllegacy.flformrecorddb import FLFormRecordDB
-from pineboolib.fllegacy.flformsearchdb import FLFormSearchDB
-from pineboolib.fllegacy.fldoublevalidator import FLDoubleValidator
-from pineboolib.fllegacy.flintvalidator import FLIntValidator
-from pineboolib.fllegacy.fluintvalidator import FLUIntValidator
-from pineboolib.fllegacy.flcodbar import FLCodBar
-from pineboolib.fllegacy.flwidget import FLWidget
-from pineboolib.fllegacy.flworkspace import FLWorkSpace
+from pineboolib.fllegacy.fllineedit import FLLineEdit  # noqa: F401
+from pineboolib.fllegacy.fltimeedit import FLTimeEdit  # noqa: F401
+from pineboolib.fllegacy.fldateedit import FLDateEdit  # noqa: F401
+from pineboolib.fllegacy.flpixmapview import FLPixmapView  # noqa: F401
+from pineboolib.fllegacy.fllistviewitem import FLListViewItem  # noqa: F401
+from pineboolib.fllegacy.fldatatable import FLDataTable  # noqa: F401
+from pineboolib.fllegacy.flcheckbox import FLCheckBox  # noqa: F401
+from pineboolib.fllegacy.fltexteditoutput import FLTextEditOutput  # noqa: F401
+from pineboolib.fllegacy.flspinbox import FLSpinBox  # noqa: F401
+from pineboolib.fllegacy.fltabledb import FLTableDB  # noqa: F401
+from pineboolib.fllegacy.flfielddb import FLFieldDB  # noqa: F401
+from pineboolib.fllegacy.flformdb import FLFormDB  # noqa: F401
+from pineboolib.fllegacy.flformrecorddb import FLFormRecordDB  # noqa: F401
+from pineboolib.fllegacy.flformsearchdb import FLFormSearchDB  # noqa: F401
+from pineboolib.fllegacy.fldoublevalidator import FLDoubleValidator  # noqa: F401
+from pineboolib.fllegacy.flintvalidator import FLIntValidator  # noqa: F401
+from pineboolib.fllegacy.fluintvalidator import FLUIntValidator  # noqa: F401
+from pineboolib.fllegacy.flcodbar import FLCodBar  # noqa: F401
+from pineboolib.fllegacy.flwidget import FLWidget  # noqa: F401
+from pineboolib.fllegacy.flworkspace import FLWorkSpace  # noqa: F401
 
 
 # Clases QSA
-from pineboolib.qt3_widgets.checkbox import CheckBox
-from pineboolib.qt3_widgets.qcombobox import QComboBox as ComboBox
-from pineboolib.qt3_widgets.qtextedit import QTextEdit as TextEdit
-from pineboolib.qt3_widgets.qlineedit import QLineEdit as LineEdit
-from PyQt5.QtWidgets import QFileDialog as FileDialog
-from pineboolib.qt3_widgets.messagebox import MessageBox
-from pineboolib.qt3_widgets.radiobutton import RadioButton
+from PyQt5.QtWidgets import QFileDialog as FileDialog  # noqa: F401
+from PyQt5.QtGui import QColor as Color  # noqa: F401
+from PyQt5.QtWidgets import QLabel as Label  # noqa: F401
+from PyQt5.QtCore import QLine as Line  # noqa: F401
 
-from PyQt5.QtGui import QColor as Color
-from pineboolib.qt3_widgets.dialog import Dialog
-from PyQt5.QtWidgets import QLabel as Label
-from pineboolib.qt3_widgets.groupbox import GroupBox
-from pineboolib.qt3_widgets.process import Process
-from pineboolib.qt3_widgets.qspinbox import QSpinBox as SpinBox
-from PyQt5.QtCore import QLine as Line
-from pineboolib.qt3_widgets.numberedit import NumberEdit
-from pineboolib.qt3_widgets.qdateedit import QDateEdit as DateEdit
-from pineboolib.qt3_widgets.qtimeedit import QTimeEdit as TimeEdit
-from pineboolib.fllegacy.flapplication import aqApp
+from pineboolib.qt3_widgets.checkbox import CheckBox  # noqa: F401
+from pineboolib.qt3_widgets.qcombobox import QComboBox as ComboBox  # noqa: F401
+from pineboolib.qt3_widgets.qtextedit import QTextEdit as TextEdit  # noqa: F401
+from pineboolib.qt3_widgets.qlineedit import QLineEdit as LineEdit  # noqa: F401
+from pineboolib.qt3_widgets.messagebox import MessageBox  # noqa: F401
+from pineboolib.qt3_widgets.radiobutton import RadioButton  # noqa: F401
 
+from pineboolib.qt3_widgets.dialog import Dialog  # noqa: F401
+from pineboolib.qt3_widgets.groupbox import GroupBox  # noqa: F401
+from pineboolib.qt3_widgets.qspinbox import QSpinBox as SpinBox  # noqa: F401
+from pineboolib.qt3_widgets.numberedit import NumberEdit  # noqa: F401
+from pineboolib.qt3_widgets.qdateedit import QDateEdit as DateEdit  # noqa: F401
+from pineboolib.qt3_widgets.qtimeedit import QTimeEdit as TimeEdit  # noqa: F401
 
-AQUnpacker = aqunpacker.AQUnpacker
+from pineboolib.fllegacy.flapplication import aqApp  # noqa: F401
 
 from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqsqlquery import AQSqlQuery  # noqa: F401

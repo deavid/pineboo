@@ -1767,8 +1767,6 @@ class FLPopuWarn(QtWidgets.QWhatsThis):
     def clicked(self, href):
         if href:
 
-            
-
             if href.find(":") > -1:
                 h = href.split(":")[1]
             if h.find(".") == 1:
