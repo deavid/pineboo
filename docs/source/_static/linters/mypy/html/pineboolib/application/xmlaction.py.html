@@ -285,8 +285,21 @@
 <span id="L275" class="lineno"><a class="lineno" href="#L275">275</a></span>
 <span id="L276" class="lineno"><a class="lineno" href="#L276">276</a></span>
 <span id="L277" class="lineno"><a class="lineno" href="#L277">277</a></span>
+<span id="L278" class="lineno"><a class="lineno" href="#L278">278</a></span>
+<span id="L279" class="lineno"><a class="lineno" href="#L279">279</a></span>
+<span id="L280" class="lineno"><a class="lineno" href="#L280">280</a></span>
+<span id="L281" class="lineno"><a class="lineno" href="#L281">281</a></span>
+<span id="L282" class="lineno"><a class="lineno" href="#L282">282</a></span>
+<span id="L283" class="lineno"><a class="lineno" href="#L283">283</a></span>
+<span id="L284" class="lineno"><a class="lineno" href="#L284">284</a></span>
+<span id="L285" class="lineno"><a class="lineno" href="#L285">285</a></span>
+<span id="L286" class="lineno"><a class="lineno" href="#L286">286</a></span>
+<span id="L287" class="lineno"><a class="lineno" href="#L287">287</a></span>
 </pre></td>
-<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">from pineboolib.core.utils import logging</span>
+<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">XMLAction module.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">from pineboolib.core.utils import logging</span>
 <span class="line-empty" title="No Anys on this line!">import os.path</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.core.utils.struct import ActionStruct</span>
@@ -296,15 +309,15 @@
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">if TYPE_CHECKING:</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.fllegacy.flaction import FLAction  # noqa: F401</span>
-<span class="line-empty" title="No Anys on this line!">    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB</span>
-<span class="line-empty" title="No Anys on this line!">    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformrecorddb import FLFormRecordDB</span>
+<span class="line-empty" title="No Anys on this line!">    from pineboolib.fllegacy.flformdb import FLFormDB</span>
+<span class="line-empty" title="No Anys on this line!">    from pineboolib.fllegacy.flformrecorddb import FLFormRecordDB</span>
 <span class="line-empty" title="No Anys on this line!">    from .moduleactions import ModuleActions  # noqa: F401</span>
 <span class="line-empty" title="No Anys on this line!">    from .database.pnsqlcursor import PNSqlCursor  # noqa: F401</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class XMLAction(ActionStruct):</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Contiene información de las actions especificadas en el .xml del módulo</span>
+<span class="line-empty" title="No Anys on this line!">    Information related to actions specified in XML modules.</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    logger = logging.getLogger("main.XMLAction")</span>
@@ -314,7 +327,7 @@
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)">    def __init__(self, *args, project, name=None, **kwargs) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Constructor</span>
+<span class="line-empty" title="No Anys on this line!">        Constructor.</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Unannotated (x6)">        super(XMLAction, self).__init__(*args, **kwargs)</span>
@@ -338,13 +351,13 @@ Unannotated (x2)">        self.name = name or self._rv("name")  # Mandatory</spa
 <span class="line-precise" title="No Anys on this line!">        self.formrecord_widget: Optional[FLFormRecordDB] = None</span>
 <span class="line-precise" title="No Anys on this line!">        self._loaded = False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Carga FLFormRecordDB por defecto</span>
-<span class="line-empty" title="No Anys on this line!">    @param cursor. Asigna un cursor al FLFormRecord</span>
-<span class="line-empty" title="No Anys on this line!">    @return widget con form inicializado</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def loadRecord(self, cursor: Optional["PNSqlCursor"]) -&gt; "FLFormRecordDB":</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Load FLFormRecordDB by default.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param cursor. Asigna un cursor al FLFormRecord</span>
+<span class="line-empty" title="No Anys on this line!">        @return widget con form inicializado</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        self._loaded = getattr(self.formrecord_widget, "_loaded", False)</span>
 <span class="line-precise" title="No Anys on this line!">        if not self._loaded:</span>
@@ -395,6 +408,9 @@ Unannotated (x1)">            self.formrecord_widget.setCursor(cursor)</span>
 <span class="line-precise" title="No Anys on this line!">        return self.formrecord_widget</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def load(self) -&gt; "FLFormDB":</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Load master form.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        self._loaded = getattr(self.mainform_widget, "_loaded", False)</span>
 <span class="line-precise" title="No Anys on this line!">        if not self._loaded:</span>
@@ -438,12 +454,11 @@ Explicit (x4)">                getattr(self.mainform_widget, "widget", None),</s
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        return self.mainform_widget</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Llama a la función main de una action</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def execMainScript(self, name) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Execute function for main action.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x8)">        a = self.project.conn.manager().action(name)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -455,12 +470,13 @@ Unannotated (x1)">            self.logger.warning("No existe la acción %s", nam
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x6)">        self.project.call("%s.main" % a.name(), [], None, False)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Retorna el widget del formRecord. Esto es necesario porque a veces no hay un FLformRecordDB inicialidado todavía</span>
-<span class="line-empty" title="No Anys on this line!">    @return wigdet del formRecord.</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def formRecordWidget(self) -&gt; "FLFormRecordDB":</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Return formrecord widget.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        This is needed because sometimes there isn't a FLFormRecordDB initialized yet.</span>
+<span class="line-empty" title="No Anys on this line!">        @return wigdet del formRecord.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">        if not getattr(self.formrecord_widget, "_loaded", None):</span>
 <span class="line-precise" title="No Anys on this line!">            self.loadRecord(None)</span>
@@ -469,12 +485,13 @@ Explicit (x4)">        if not getattr(self.formrecord_widget, "_loaded", None):<
 <span class="line-precise" title="No Anys on this line!">            raise Exception("Unexpected: No form loaded")</span>
 <span class="line-precise" title="No Anys on this line!">        return self.formrecord_widget</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Abre el FLFormRecordDB por defecto</span>
-<span class="line-empty" title="No Anys on this line!">    @param cursor. Cursor a usar por el FLFormRecordDB</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    # FIXME: cursor is FLSqlCursor but should be something core, not "FL". Also, an interface</span>
 <span class="line-precise" title="No Anys on this line!">    def openDefaultFormRecord(self, cursor: "PNSqlCursor", wait: bool = True) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Open FLFormRecord specified on defaults.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param cursor. Cursor a usar por el FLFormRecordDB</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">        self.logger.info("Opening default formRecord for Action %s", self.name)</span>
 <span class="line-precise" title="No Anys on this line!">        w = self.loadRecord(cursor)</span>
@@ -489,6 +506,9 @@ Unannotated (x4)">            if self.project.DGI.localDesktop():</span>
 Unannotated (x2)">                    w.show()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def openDefaultForm(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Open Main FLForm specified on defaults.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">        self.logger.info("Opening default form for Action %s", self.name)</span>
 <span class="line-precise" title="No Anys on this line!">        w = self.load()</span>
@@ -499,11 +519,10 @@ Unannotated (x4)">            if self.project.DGI.localDesktop():</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">                w.show()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Ejecuta el script por defecto</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def execDefaultScript(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Execute script specified on default.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">        self.logger.info("Executing default script for Action %s", self.name)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -522,14 +541,14 @@ Explicit (x3)">            self.mainform_widget.iface.main()</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">            self.mainform_widget.main()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Convierte un script qsa en .py y lo carga</span>
-<span class="line-empty" title="No Anys on this line!">    @param scriptname. Nombre del script a convertir</span>
-<span class="line-empty" title="No Anys on this line!">    @param parent. Objecto al que carga el script, si no se especifica es a self.script</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    def load_script(self, scriptname: Optional[str], parent: Optional["FLFormDB"] = None) -&gt; Any:  # returns loaded script</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Transform QS script into Python and starts it up.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param scriptname. Nombre del script a convertir</span>
+<span class="line-empty" title="No Anys on this line!">        @param parent. Objecto al que carga el script, si no se especifica es a self.script</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!">        # FIXME: Parent logic is broken. We're loading scripts to two completely different objects.</span>
 <span class="line-empty" title="No Anys on this line!">        from importlib import machinery</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -668,6 +687,7 @@ Explicit (x3)">                parent_object.iface = parent.widget.iface</span>
 Explicit (x1)">        return script_loaded</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def unknownSlot(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Log error for actions with unknown slots or scripts."""</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">        self.logger.error("Executing unknown script for Action %s", self.name)</span>
 </pre></td>

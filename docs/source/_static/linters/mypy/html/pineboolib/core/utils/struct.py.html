@@ -126,6 +126,10 @@
 <span id="L116" class="lineno"><a class="lineno" href="#L116">116</a></span>
 <span id="L117" class="lineno"><a class="lineno" href="#L117">117</a></span>
 <span id="L118" class="lineno"><a class="lineno" href="#L118">118</a></span>
+<span id="L119" class="lineno"><a class="lineno" href="#L119">119</a></span>
+<span id="L120" class="lineno"><a class="lineno" href="#L120">120</a></span>
+<span id="L121" class="lineno"><a class="lineno" href="#L121">121</a></span>
+<span id="L122" class="lineno"><a class="lineno" href="#L122">122</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
 <span class="line-empty" title="No Anys on this line!">Struct Module.</span>
@@ -135,7 +139,7 @@
 <span class="line-empty" title="No Anys on this line!">Used to avoid creating specific classes for each possible type.</span>
 <span class="line-empty" title="No Anys on this line!">"""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">from typing import Any, List, Optional, Dict</span>
+<span class="line-empty" title="No Anys on this line!">from typing import Any, List, Optional, Dict, Callable</span>
 <span class="line-empty" title="No Anys on this line!">from xml.etree.ElementTree import Element</span>
 <span class="line-empty" title="No Anys on this line!">from .utils_base import aqtt</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -258,6 +262,12 @@ Explicit (x2)">    xmlroot: Any</span>
 <span class="line-precise" title="No Anys on this line!">    mainscript: Optional[str] = None</span>
 <span class="line-precise" title="No Anys on this line!">    formrecord: Optional[str] = None</span>
 <span class="line-precise" title="No Anys on this line!">    scriptformrecord: Optional[str] = None</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    # FIXME: Those methods are here to avoid projectmodule from loading XMLAction and qsa.*</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x6)">    load: Callable</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x6)">    load_script: Callable</span>
 </pre></td>
 </tr></tbody>
 </table>

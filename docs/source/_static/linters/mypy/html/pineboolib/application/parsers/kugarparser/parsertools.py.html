@@ -458,22 +458,16 @@
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        # node = Node()</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from PyQt5.QtXml import QDomDocument</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">        doc = pncontrolsfactory.FLDomDocument()</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        ele = doc.createElement("element")</span>
+<span class="line-precise" title="No Anys on this line!">        doc = QDomDocument()</span>
+<span class="line-precise" title="No Anys on this line!">        ele = doc.createElement("element")</span>
 <span class="line-precise" title="No Anys on this line!">        for k in data.keys():</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            attr_node = doc.createAttribute(k)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            attr_node.setValue(data.get(k))</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            ele.setAttributeNode(attr_node)</span>
+<span class="line-precise" title="No Anys on this line!">            attr_node = doc.createAttribute(k)</span>
+<span class="line-precise" title="No Anys on this line!">            attr_node.setValue(data.get(k) or "")</span>
+<span class="line-precise" title="No Anys on this line!">            ele.setAttributeNode(attr_node)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">        return ele</span>
+<span class="line-precise" title="No Anys on this line!">        return ele</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def getHeight(self, xml: Element) -&gt; int:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
@@ -564,11 +558,13 @@ Explicit (x1)">        return ret_</span>
 <span class="line-precise" title="No Anys on this line!">        ret = None</span>
 <span class="line-precise" title="No Anys on this line!">        table_name = "fllarge"</span>
 <span class="line-precise" title="No Anys on this line!">        if ref_key is not None:</span>
-<span class="line-empty" title="No Anys on this line!">            from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">            from PyQt5.QtGui import QPixmap</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            value = None</span>
-<span class="line-precise" title="No Anys on this line!">            tmp_dir = project.tmpdir</span>
-<span class="line-precise" title="No Anys on this line!">            img_file = "%s/%s.png" % (tmp_dir, ref_key)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">            tmp_dir = project.tmpdir</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            img_file = "%s/%s.png" % (tmp_dir, ref_key)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">            if not os.path.exists(img_file) and ref_key[0:3] == "RK@":</span>
@@ -596,21 +592,19 @@ Explicit (x2)">                    value = cacheXPM(q.value(0))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">                if value:</span>
 <span class="line-precise" title="No Anys on this line!">                    ret = img_file</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    pix = pncontrolsfactory.QPixmap(value)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    if not pix.save(img_file):</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">                    pix = QPixmap(value)</span>
+<span class="line-precise" title="No Anys on this line!">                    if not pix.save(img_file):</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">                        self.logger.warning("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))</span>
 <span class="line-precise" title="No Anys on this line!">                        ret = None</span>
 <span class="line-empty" title="No Anys on this line!">                    else:</span>
 <span class="line-precise" title="No Anys on this line!">                        ret = img_file</span>
 <span class="line-precise" title="No Anys on this line!">            elif ref_key.endswith(".xpm"):</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                pix = pncontrolsfactory.QPixmap(ref_key)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">                pix = QPixmap(ref_key)</span>
 <span class="line-precise" title="No Anys on this line!">                img_file = ref_key.replace(".xpm", ".png")</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                if not pix.save(img_file):</span>
+<span class="line-precise" title="No Anys on this line!">                if not pix.save(img_file):</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">                    self.logger.warning("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))</span>
 <span class="line-precise" title="No Anys on this line!">                    ret = None</span>

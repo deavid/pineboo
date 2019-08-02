@@ -1158,9 +1158,9 @@ Omitted Generics (x1)">        db_is_new = not os.path.exists("%s" % self.db_fil
 <span class="line-empty" title="No Anys on this line!">        import sqlite3</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x6)">        if project.conn is not None and self.db_filename == getattr(project.conn, "db_name", None):</span>
+Explicit (x10)">        if project.conn is not None and self.db_filename == getattr(project.conn, "db_name", None):</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)">            self.conn_ = project.conn.conn</span>
+Explicit (x4)">            self.conn_ = project.conn.conn</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x1)">            self.conn_ = sqlite3.connect("%s" % self.db_filename)</span>

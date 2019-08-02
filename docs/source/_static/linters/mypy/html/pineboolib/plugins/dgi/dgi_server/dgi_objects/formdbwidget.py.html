@@ -201,8 +201,6 @@
 <span id="L191" class="lineno"><a class="lineno" href="#L191">191</a></span>
 <span id="L192" class="lineno"><a class="lineno" href="#L192">192</a></span>
 <span id="L193" class="lineno"><a class="lineno" href="#L193">193</a></span>
-<span id="L194" class="lineno"><a class="lineno" href="#L194">194</a></span>
-<span id="L195" class="lineno"><a class="lineno" href="#L195">195</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># # -*- coding: utf-8 -*-</span>
 <span class="line-empty" title="No Anys on this line!">from PyQt5 import QtCore  # type: ignore</span>
@@ -265,11 +263,11 @@ Unannotated (x3)">        self._class_init()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def _connect(self, sender, signal, receiver, slot):</span>
 <span class="line-empty" title="No Anys on this line!">        # print(" &gt; &gt; &gt; connect:", sender, " signal ", str(signal))</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.application import connections</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x10)
-Unannotated (x5)">        signal_slot = pncontrolsfactory.connect(sender, signal, receiver, slot, caller=self)</span>
+Unannotated (x5)">        signal_slot = connections.connect(sender, signal, receiver, slot, caller=self)</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x2)">        if not signal_slot:</span>
 <span class="line-precise" title="No Anys on this line!">            return False</span>
@@ -279,11 +277,11 @@ Explicit (x2)">        self._formconnections.add(signal_slot)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def _disconnect(self, sender, signal, receiver, slot):</span>
 <span class="line-empty" title="No Anys on this line!">        # print(" &gt; &gt; &gt; disconnect:", self)</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.application import connections</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x10)
-Unannotated (x5)">        signal_slot = pncontrolsfactory.disconnect(sender, signal, receiver, slot, caller=self)</span>
+Unannotated (x5)">        signal_slot = connections.disconnect(sender, signal, receiver, slot, caller=self)</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x2)">        if not signal_slot:</span>
 <span class="line-precise" title="No Anys on this line!">            return False</span>
@@ -335,15 +333,12 @@ Unannotated (x3)">        self.clear_connections()</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)
 Unannotated (x1)">        if getattr(self, "iface", None) is not None:</span>
-<span class="line-empty" title="No Anys on this line!">            from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">            from pineboolib.core.garbage_collector import check_gc_referrers</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="Any Types on this line: 
-Omitted Generics (x3)
-Explicit (x1)">            pncontrolsfactory.check_gc_referrers(</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x14)
-Explicit (x1)">                "FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name</span>
-<span class="line-empty" title="No Anys on this line!">            )</span>
+Omitted Generics (x3)
+Explicit (x2)
+Unannotated (x14)">            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">            del self.iface.ctx</span>
 <span class="line-any" title="Any Types on this line: 

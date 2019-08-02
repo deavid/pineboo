@@ -659,6 +659,19 @@
 <span id="L649" class="lineno"><a class="lineno" href="#L649">649</a></span>
 <span id="L650" class="lineno"><a class="lineno" href="#L650">650</a></span>
 <span id="L651" class="lineno"><a class="lineno" href="#L651">651</a></span>
+<span id="L652" class="lineno"><a class="lineno" href="#L652">652</a></span>
+<span id="L653" class="lineno"><a class="lineno" href="#L653">653</a></span>
+<span id="L654" class="lineno"><a class="lineno" href="#L654">654</a></span>
+<span id="L655" class="lineno"><a class="lineno" href="#L655">655</a></span>
+<span id="L656" class="lineno"><a class="lineno" href="#L656">656</a></span>
+<span id="L657" class="lineno"><a class="lineno" href="#L657">657</a></span>
+<span id="L658" class="lineno"><a class="lineno" href="#L658">658</a></span>
+<span id="L659" class="lineno"><a class="lineno" href="#L659">659</a></span>
+<span id="L660" class="lineno"><a class="lineno" href="#L660">660</a></span>
+<span id="L661" class="lineno"><a class="lineno" href="#L661">661</a></span>
+<span id="L662" class="lineno"><a class="lineno" href="#L662">662</a></span>
+<span id="L663" class="lineno"><a class="lineno" href="#L663">663</a></span>
+<span id="L664" class="lineno"><a class="lineno" href="#L664">664</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
 <span class="line-empty" title="No Anys on this line!">"""</span>
@@ -672,6 +685,8 @@
 <span class="line-empty" title="No Anys on this line!">import io</span>
 <span class="line-empty" title="No Anys on this line!">import os.path</span>
 <span class="line-empty" title="No Anys on this line!">import shutil</span>
+<span class="line-empty" title="No Anys on this line!">import hashlib</span>
+<span class="line-empty" title="No Anys on this line!">import traceback</span>
 <span class="line-empty" title="No Anys on this line!">from PyQt5.QtGui import QPixmap  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!">from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir, pyqtSignal  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!">from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest  # type: ignore</span>
@@ -684,7 +699,7 @@
 <span class="line-empty" title="No Anys on this line!">from typing import Callable, TypeVar, TYPE_CHECKING</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">if TYPE_CHECKING:</span>
-<span class="line-empty" title="No Anys on this line!">    from pineboolib.application.types import Date  # noqa: F401</span>
+<span class="line-empty" title="No Anys on this line!">    from pineboolib.application.qsatypes.date import Date  # noqa: F401</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">logger = logging.getLogger(__name__)</span>
 <span class="line-empty" title="No Anys on this line!">T1 = TypeVar("T1")</span>
@@ -1396,6 +1411,17 @@ Explicit (x1)">def pixmap_fromMimeSource(name: str) -&gt; Any:</span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)
 Explicit (x1)">    return QPixmap(file_name) if os.path.exists(file_name) else None</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">def sha1(x: str) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">    """Get SHA1 hash from string in hex form."""</span>
+<span class="line-precise" title="No Anys on this line!">    return hashlib.sha1(str(x).encode("UTF-8")).hexdigest()</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">def print_stack(maxsize: int = 1) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">    """Print Python stack, like a traceback."""</span>
+<span class="line-precise" title="No Anys on this line!">    for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:</span>
+<span class="line-precise" title="No Anys on this line!">        print(tb.rstrip())</span>
 </pre></td>
 </tr></tbody>
 </table>

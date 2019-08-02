@@ -3768,14 +3768,6 @@
 <span id="L3758" class="lineno"><a class="lineno" href="#L3758">3758</a></span>
 <span id="L3759" class="lineno"><a class="lineno" href="#L3759">3759</a></span>
 <span id="L3760" class="lineno"><a class="lineno" href="#L3760">3760</a></span>
-<span id="L3761" class="lineno"><a class="lineno" href="#L3761">3761</a></span>
-<span id="L3762" class="lineno"><a class="lineno" href="#L3762">3762</a></span>
-<span id="L3763" class="lineno"><a class="lineno" href="#L3763">3763</a></span>
-<span id="L3764" class="lineno"><a class="lineno" href="#L3764">3764</a></span>
-<span id="L3765" class="lineno"><a class="lineno" href="#L3765">3765</a></span>
-<span id="L3766" class="lineno"><a class="lineno" href="#L3766">3766</a></span>
-<span id="L3767" class="lineno"><a class="lineno" href="#L3767">3767</a></span>
-<span id="L3768" class="lineno"><a class="lineno" href="#L3768">3768</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
 <span class="line-empty" title="No Anys on this line!">"""</span>
@@ -3784,9 +3776,11 @@
 <span class="line-empty" title="No Anys on this line!">import weakref</span>
 <span class="line-empty" title="No Anys on this line!">import importlib</span>
 <span class="line-empty" title="No Anys on this line!">import traceback</span>
-<span class="line-empty" title="No Anys on this line!">from typing import Any, Optional, List, Union, TYPE_CHECKING</span>
+<span class="line-empty" title="No Anys on this line!">from typing import Any, Optional, List, Union, cast, TYPE_CHECKING</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">from PyQt5 import QtCore  # type: ignore</span>
+<span class="line-empty" title="No Anys on this line!">from PyQt5 import QtCore</span>
+<span class="line-empty" title="No Anys on this line!">from PyQt5.QtWidgets import QMessageBox, QApplication, QDialog</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.core.error_manager import error_manager</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.core.decorators import pyqtSlot</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.core.utils import logging</span>
@@ -3802,14 +3796,12 @@
 <span class="line-empty" title="No Anys on this line!">from .pnbuffer import PNBuffer</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"># FIXME: Removde dependency: Should not import from fllegacy.*</span>
-<span class="line-empty" title="No Anys on this line!">from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  # FIXME: Removde dependency</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.fllegacy.aqsobjects.aqboolflagstate import AQBoolFlagStateList, AQBoolFlagState  # FIXME: Should not depend on AQS</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">if TYPE_CHECKING:</span>
 <span class="line-empty" title="No Anys on this line!">    from .pncursortablemodel import PNCursorTableModel  # noqa: F401</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application.metadata.pntablemetadata import PNTableMetaData  # noqa: F401</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData  # noqa: F401</span>
-<span class="line-empty" title="No Anys on this line!">    from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB  # noqa: F401</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.interfaces.iconnection import IConnection  # noqa: F401</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.fllegacy.flaction import FLAction  # noqa: F401</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application.database.pnbuffer import FieldStruct  # noqa: F401</span>
@@ -3912,7 +3904,7 @@ Explicit (x1)">        self._meta_model = None</span>
 <span class="line-precise" title="No Anys on this line!">        self.setActivatedBufferChanged(True)</span>
 <span class="line-precise" title="No Anys on this line!">        self.setActivatedBufferCommited(True)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">        ext_cursor = getattr(project.DGI, "FLSqlCursor", None)</span>
+Explicit (x7)">        ext_cursor = getattr(project.DGI, "FLSqlCursor", None)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">        if ext_cursor is not None:</span>
 <span class="line-any" title="Any Types on this line: 
@@ -3931,7 +3923,7 @@ Explicit (x2)">            logger.trace("FIXME::__init__ TableStruct %s", name.n
 <span class="line-precise" title="No Anys on this line!">            name_action = name</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">        act_ = project.conn.manager().action(name_action)</span>
+Explicit (x7)">        act_ = project.conn.manager().action(name_action)</span>
 <span class="line-empty" title="No Anys on this line!">        # self.actionName_ = name.name</span>
 <span class="line-empty" title="No Anys on this line!">        # name = name.table</span>
 <span class="line-empty" title="No Anys on this line!">        # else:</span>
@@ -3944,12 +3936,14 @@ Explicit (x3)">        act_ = project.conn.manager().action(name_action)</span>
 Explicit (x3)">        self.d.nameCursor_ = "%s_%s" % (act_.name(), QtCore.QDateTime.currentDateTime().toString("dd.MM.yyyyThh:mm:ss.zzz"))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if connectionName_or_db is None:</span>
-<span class="line-precise" title="No Anys on this line!">            self.d.db_ = project.conn</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            self.d.db_ = project.conn</span>
 <span class="line-empty" title="No Anys on this line!">        # elif isinstance(connectionName_or_db, QString) or</span>
 <span class="line-empty" title="No Anys on this line!">        # isinstance(connectionName_or_db, str):</span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">        elif isinstance(connectionName_or_db, str):</span>
-<span class="line-precise" title="No Anys on this line!">            self.d.db_ = project.conn.useConn(connectionName_or_db)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">            self.d.db_ = project.conn.useConn(connectionName_or_db)</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-precise" title="No Anys on this line!">            self.d.db_ = connectionName_or_db</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -4036,7 +4030,7 @@ Unannotated (x1)">                cR.newBuffer.disconnect(self.clearPersistentFi
 Unannotated (x1)">            cR.newBuffer.connect(self.clearPersistentFilter)</span>
 <span class="line-empty" title="No Anys on this line!">            if (</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">                project.DGI.use_model() and cR.meta_model()</span>
+Explicit (x5)">                project.DGI.use_model() and cR.meta_model()</span>
 <span class="line-empty" title="No Anys on this line!">            ):  # Si el cursor_relation tiene un model asociado , este cursor carga el propio también</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">                self.assoc_model()</span>
@@ -4306,7 +4300,7 @@ Explicit (x2)">            arglist.append(fN)</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x2)">            arglist.append(self.d.buffer_.value(fN))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x8)">            v = project.call(functionName, arglist, self.context())</span>
+Explicit (x7)">            v = project.call(functionName, arglist, self.context())</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Unannotated (x1)">            q = PNSqlQuery(None, self.db().dbAux())</span>
@@ -4333,21 +4327,19 @@ Explicit (x4)">            logger.warning("No se puede actualizar el campo de fo
 Explicit (x1)">        self.d.buffer_.setValue(fN, v)</span>
 <span class="line-precise" title="No Anys on this line!">        if self.activatedBufferChanged():</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            if project.DGI.use_model() and self.meta_model():</span>
+Explicit (x5)">            if project.DGI.use_model() and self.meta_model():</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x5)">                bch_model = getattr(self.meta_model(), "bChCursor", None)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">                if bch_model and bch_model(fN, self) is False:</span>
 <span class="line-empty" title="No Anys on this line!">                    return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">                from pineboolib import qsa  # FIXME: Should not import QSA at all</span>
+<span class="line-empty" title="No Anys on this line!">                from pineboolib.application.safeqsa import SafeQSA</span>
 <span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">                script = SafeQSA.get_formrecord("formRecord%s" % self.action())</span>
+<span class="line-precise" title="No Anys on this line!">                if script is not None:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">                script = getattr(qsa, "formRecord%s" % self.action(), None)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                if script is not None:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x7)">                    bChCursor = getattr(script.iface, "bChCursor", None)</span>
+Explicit (x6)">                    bChCursor = getattr(script.iface, "bChCursor", None)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                    if bChCursor:</span>
 <span class="line-any" title="Any Types on this line: 
@@ -4356,7 +4348,8 @@ Explicit (x2)">                        bChCursor(fN, self)</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x1)">            self.bufferChanged.emit(fN)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">            project.app.processEvents()</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">            project.app.processEvents()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    def setValueBuffer(self, fN: str, v: Any) -&gt; None:</span>
@@ -4457,21 +4450,19 @@ Explicit (x1)">            self.d.buffer_.setValue(fN, vv)</span>
 <span class="line-precise" title="No Anys on this line!">        if self.activatedBufferChanged():</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            if project.DGI.use_model() and self.meta_model():</span>
+Explicit (x5)">            if project.DGI.use_model() and self.meta_model():</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x5)">                bch_model = getattr(self.meta_model(), "bChCursor", None)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">                if bch_model and bch_model(fN, self) is False:</span>
 <span class="line-empty" title="No Anys on this line!">                    return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">                from pineboolib import qsa  # FIXME: Should not import QSA at all</span>
+<span class="line-empty" title="No Anys on this line!">                from pineboolib.application.safeqsa import SafeQSA</span>
 <span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">                script = SafeQSA.get_formrecord("formRecord%s" % self.action())</span>
+<span class="line-precise" title="No Anys on this line!">                if script is not None:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">                script = getattr(qsa, "formRecord%s" % self.action(), None)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                if script is not None:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x7)">                    bChCursor = getattr(script.iface, "bChCursor", None)</span>
+Explicit (x6)">                    bChCursor = getattr(script.iface, "bChCursor", None)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                    if bChCursor:</span>
 <span class="line-any" title="Any Types on this line: 
@@ -4479,7 +4470,8 @@ Explicit (x2)">                        bChCursor(fN, self)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x1)">            self.bufferChanged.emit(fN)</span>
-<span class="line-precise" title="No Anys on this line!">        project.app.processEvents()</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">        project.app.processEvents()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    def valueBuffer(self, fN: str) -&gt; Any:</span>
@@ -4491,7 +4483,7 @@ Explicit (x1)">    def valueBuffer(self, fN: str) -&gt; Any:</span>
 <span class="line-precise" title="No Anys on this line!">        fN = str(fN)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if project.DGI.use_model():</span>
+Explicit (x4)">        if project.DGI.use_model():</span>
 <span class="line-precise" title="No Anys on this line!">            if fN == "pk":</span>
 <span class="line-empty" title="No Anys on this line!">                # logger.warning("¡¡¡¡ OJO Cambiado fieldname PK!!", stack_info = True)</span>
 <span class="line-precise" title="No Anys on this line!">                pk_name = self.primaryKey()</span>
@@ -4760,8 +4752,7 @@ Explicit (x1)">        return v</span>
 <span class="line-empty" title="No Anys on this line!">        Check if DGI requires models (SqlAlchemy?).</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)
-Explicit (x1)">        return self._meta_model if project.DGI.use_model() else False</span>
+Explicit (x5)">        return self._meta_model if project.DGI.use_model() else False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x1)">    def setContext(self, c: Any = None) -&gt; None:</span>
@@ -4903,32 +4894,23 @@ Explicit (x1)">            self.commited.emit()</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-precise" title="No Anys on this line!">        if not self.d.metadata_:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from PyQt5.QtWidgets import QMessageBox, QApplication</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if (not self.isValid() or self.size() &lt;= 0) and not m == self.Insert:</span>
 <span class="line-precise" title="No Anys on this line!">            if not self.size():</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                pncontrolsfactory.QMessageBox.warning(</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    pncontrolsfactory.QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado")</span>
-<span class="line-empty" title="No Anys on this line!">                )</span>
+<span class="line-precise" title="No Anys on this line!">                QMessageBox.warning(QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"))</span>
 <span class="line-empty" title="No Anys on this line!">                return</span>
 <span class="line-precise" title="No Anys on this line!">            self.first()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if m == self.Del:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            res = pncontrolsfactory.QMessageBox.warning(</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                pncontrolsfactory.QApplication.focusWidget(),</span>
+<span class="line-precise" title="No Anys on this line!">            res = QMessageBox.warning(</span>
+<span class="line-precise" title="No Anys on this line!">                QApplication.focusWidget(),</span>
 <span class="line-precise" title="No Anys on this line!">                self.tr("Aviso"),</span>
 <span class="line-precise" title="No Anys on this line!">                self.tr("El registro activo será borrado. ¿ Está seguro ?"),</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">                pncontrolsfactory.QMessageBox.Ok,</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">                pncontrolsfactory.QMessageBox.No,</span>
+<span class="line-precise" title="No Anys on this line!">                QMessageBox.Ok,</span>
+<span class="line-precise" title="No Anys on this line!">                QMessageBox.No,</span>
 <span class="line-empty" title="No Anys on this line!">            )</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            if res == pncontrolsfactory.QMessageBox.No:</span>
+<span class="line-precise" title="No Anys on this line!">            if res == QMessageBox.No:</span>
 <span class="line-empty" title="No Anys on this line!">                return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            self.transaction()</span>
@@ -4960,10 +4942,8 @@ Explicit (x4)">            logger.warning(</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if not self._action.formRecord():</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            pncontrolsfactory.QMessageBox.warning(</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                pncontrolsfactory.QApplication.focusWidget(),</span>
+<span class="line-precise" title="No Anys on this line!">            QMessageBox.warning(</span>
+<span class="line-precise" title="No Anys on this line!">                QApplication.focusWidget(),</span>
 <span class="line-precise" title="No Anys on this line!">                self.tr("Aviso"),</span>
 <span class="line-precise" title="No Anys on this line!">                self.tr("No hay definido ningún formulario para manejar\nregistros de esta tabla : %s" % self.curName()),</span>
 <span class="line-empty" title="No Anys on this line!">            )</span>
@@ -4973,8 +4953,8 @@ Explicit (x3)">                pncontrolsfactory.QApplication.focusWidget(),</sp
 <span class="line-precise" title="No Anys on this line!">            if m != self.Insert:</span>
 <span class="line-precise" title="No Anys on this line!">                self.updateBufferCopy()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">            project.actions[self._action.name()].openDefaultFormRecord(self, wait)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">            project.actions[self._action.name()].openDefaultFormRecord(self, wait)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">            # if m != self.Insert and self.refreshBuffer():</span>
 <span class="line-empty" title="No Anys on this line!">            #     self.updateBufferCopy()</span>
@@ -5303,8 +5283,8 @@ Unannotated (x2)
 Explicit (x4)">                        q.setWhere(self.db().manager().formatAssignValue(r.foreignField(), field, s, True))</span>
 <span class="line-precise" title="Any Types on this line: 
 Unannotated (x1)">                        q.setForwardOnly(True)</span>
-<span class="line-precise" title="Any Types on this line: 
-Explicit (x4)">                        logger.debug("SQL linea = %s conn name = %s", q.sql(), str(project.conn.connectionName()))</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x8)">                        logger.debug("SQL linea = %s conn name = %s", q.sql(), str(project.conn.connectionName()))</span>
 <span class="line-precise" title="No Anys on this line!">                        q.exec_()</span>
 <span class="line-precise" title="No Anys on this line!">                        if not q.next():</span>
 <span class="line-precise" title="No Anys on this line!">                            msg = (</span>
@@ -6091,7 +6071,7 @@ Explicit (x13)">    @pyqtSlot()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        @return TRUE if the refreshment could be performed, FALSE otherwise</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import qsa as qsa_tree</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.application.safeqsa import SafeQSA</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if not self.d.metadata_:</span>
 <span class="line-precise" title="No Anys on this line!">            raise Exception("Not initialized")</span>
@@ -6162,26 +6142,23 @@ Explicit (x3)">                    if field.isCounter():</span>
 <span class="line-precise" title="No Anys on this line!">                        siguiente = None</span>
 <span class="line-precise" title="No Anys on this line!">                        if self._action.scriptFormRecord():</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x6)">                            context_ = getattr(qsa_tree, "formRecord%s" % self._action.scriptFormRecord()[:-3]).iface</span>
+Explicit (x2)">                            context_ = SafeQSA.formrecord("formRecord%s" % self._action.scriptFormRecord()[:-3]).iface</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x6)">                            function_counter = getattr(context_, "calculateCounter", None)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                            if function_counter is None:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x1)">                                siguiente = nextCounter(field_name, self)</span>
+Explicit (x1)">                                siguiente = nextCounter(field_name, self)</span>
 <span class="line-empty" title="No Anys on this line!">                            else:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                                siguiente = function_counter()</span>
+Explicit (x2)">                                siguiente = function_counter()</span>
 <span class="line-empty" title="No Anys on this line!">                        else:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x1)">                            siguiente = nextCounter(field_name, self)</span>
+Explicit (x1)">                            siguiente = nextCounter(field_name, self)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">                        if siguiente:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                        if siguiente:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">                            self.d.buffer_.setValue(field_name, siguiente)</span>
+Explicit (x1)">                            self.d.buffer_.setValue(field_name, siguiente)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            if self.d.cursorRelation_ is not None and self.d.relation_ is not None and self.d.cursorRelation_.metadata():</span>
 <span class="line-any" title="Any Types on this line: 
@@ -6710,17 +6687,11 @@ Explicit (x2)">        logger.trace("deleteRecord %s", self.actionName())</span>
 <span class="line-precise" title="No Anys on this line!">        if not self.d.metadata_ or not self.d.buffer_:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from PyQt5.QtWidgets import QMessageBox, QApplication</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if not self.isValid() or self.size() &lt;= 0:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            pncontrolsfactory.QMessageBox.warning(</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                pncontrolsfactory.QApplication.focusWidget(),</span>
-<span class="line-precise" title="No Anys on this line!">                self.tr("Aviso"),</span>
-<span class="line-precise" title="No Anys on this line!">                self.tr("No hay ningún registro seleccionado"),</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">                pncontrolsfactory.QMessageBox.Ok,</span>
+<span class="line-precise" title="No Anys on this line!">            QMessageBox.warning(</span>
+<span class="line-precise" title="No Anys on this line!">                QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"), QMessageBox.Ok</span>
 <span class="line-empty" title="No Anys on this line!">            )</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -6836,25 +6807,19 @@ Explicit (x13)">    @pyqtSlot()</span>
 <span class="line-precise" title="No Anys on this line!">        if not self.activatedBufferCommited():</span>
 <span class="line-precise" title="No Anys on this line!">            return True</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if self.db().interactiveGUI() and self.db().canDetectLocks() and (checkLocks or self.d.metadata_.detectLocks()):</span>
 <span class="line-precise" title="No Anys on this line!">            self.checkRisksLocks()</span>
 <span class="line-precise" title="No Anys on this line!">            if self.d.inRisksLocks_:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">                ret = pncontrolsfactory.QMessageBox.warning(</span>
-<span class="line-precise" title="No Anys on this line!">                    None,</span>
+<span class="line-precise" title="No Anys on this line!">                ret = QMessageBox.warning(</span>
+<span class="line-precise" title="No Anys on this line!">                    QApplication.activeWindow(),</span>
 <span class="line-empty" title="No Anys on this line!">                    "Bloqueo inminente",</span>
 <span class="line-empty" title="No Anys on this line!">                    "Los registros que va a modificar están bloqueados actualmente.\n"</span>
 <span class="line-empty" title="No Anys on this line!">                    "Si continua hay riesgo de que su conexión quede congelada hasta finalizar el bloqueo.\n"</span>
 <span class="line-empty" title="No Anys on this line!">                    "\n¿ Desa continuar aunque exista riesgo de bloqueo ?",</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">                    pncontrolsfactory.QMessageBox.Ok,</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x8)">                    pncontrolsfactory.QMessageBox.No | pncontrolsfactory.QMessageBox.Default | pncontrolsfactory.QMessageBox.Escape,</span>
+<span class="line-precise" title="No Anys on this line!">                    QMessageBox.Ok,</span>
+<span class="line-precise" title="No Anys on this line!">                    cast(QMessageBox.StandardButton, QMessageBox.No | QMessageBox.Default | QMessageBox.Escape),</span>
 <span class="line-empty" title="No Anys on this line!">                )</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">                if ret == pncontrolsfactory.QMessageBox.No:</span>
+<span class="line-precise" title="No Anys on this line!">                if ret == QMessageBox.No:</span>
 <span class="line-precise" title="No Anys on this line!">                    return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if not self.checkIntegrity():</span>
@@ -6887,9 +6852,9 @@ Explicit (x3)">                if not self.d.buffer_.isGenerated(field.name()):<
 <span class="line-any" title="Any Types on this line: 
 Explicit (x10)">                if self.context() and hasattr(self.context(), "calculateField") and field.calculated():</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x10)">                    v = project.call("calculateField", [field.name()], self.context(), False)</span>
+Explicit (x9)">                    v = project.call("calculateField", [field.name()], self.context(), False)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-imprecise" title="Any Types on this line: 
+<span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                    if v not in (True, False, None):</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x5)">                        self.setValueBuffer(field.name(), v)</span>
@@ -6902,11 +6867,13 @@ Explicit (x2)">        model_module: Any = None</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x5)">        idMod = self.db().managerModules().idModuleOfFile("%s.mtd" % self.d.metadata_.name())</span>
 <span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        # FIXME: module_script is FLFormDB</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">        module_script: "FLFormDB" = project.actions[idMod].load() if idMod in project.actions.keys() else project.actions["sys"].load()</span>
-<span class="line-empty" title="No Anys on this line!"></span>
+Explicit (x16)">        module_script: QDialog = project.actions[idMod].load() if idMod in project.actions.keys() else project.actions["sys"].load()</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if project.DGI.use_model():</span>
+Explicit (x6)">        module_iface: Any = getattr(module_script, "iface", None)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">        if project.DGI.use_model():</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">            model_name = "models.%s.%s_def" % (idMod, idMod)</span>
 <span class="line-empty" title="No Anys on this line!">            try:</span>
@@ -6925,20 +6892,18 @@ Unannotated (x1)">        if not self.modeAccess() == PNSqlCursor.Browse and sel
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">            if model_module is not None:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">                function_model_before = getattr(model_module.iface, "beforeCommit_%s" % self.d.metadata_.name(), None)</span>
+Explicit (x6)">                function_model_before = getattr(module_iface, "beforeCommit_%s" % self.d.metadata_.name(), None)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                if function_model_before:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    ret = function_model_before(self)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                    if not ret:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                        return ret</span>
+Explicit (x2)">                    ret = function_model_before(self)</span>
+<span class="line-precise" title="No Anys on this line!">                    if not ret:</span>
+<span class="line-precise" title="No Anys on this line!">                        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            if functionBefore:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x6)">                fn = getattr(module_script.iface, functionBefore, None)</span>
-<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x6)">                fn = getattr(module_iface, functionBefore, None)</span>
+<span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                v = None</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                if fn is not None:</span>
@@ -6946,8 +6911,7 @@ Explicit (x1)">                if fn is not None:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">                        v = fn(self)</span>
 <span class="line-precise" title="No Anys on this line!">                    except Exception:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                        pncontrolsfactory.aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)</span>
+<span class="line-precise" title="No Anys on this line!">                        QMessageBox.warning(QApplication.focusWidget(), "Error", error_manager(traceback.format_exc(limit=-6, chain=False)))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)
 Omitted Generics (x1)">                    if v and not isinstance(v, bool) or v is False:</span>
@@ -7028,7 +6992,7 @@ Explicit (x2)">            logger.trace("commitBuffer -- Edit . 30 . ")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            recordDelBefore = "recordDelBefore%s" % self.d.metadata_.name()</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">            v = project.call(recordDelBefore, [self], self.context(), False)</span>
+Explicit (x6)">            v = project.call(recordDelBefore, [self], self.context(), False)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)
 Omitted Generics (x1)">            if v and not isinstance(v, bool):</span>
@@ -7094,7 +7058,7 @@ Explicit (x3)">                            c.select(self.conn().manager().format
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            recordDelAfter = "recordDelAfter%s" % self.d.metadata_.name()</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">            v = project.call(recordDelAfter, [self], self.context(), False)</span>
+Explicit (x6)">            v = project.call(recordDelAfter, [self], self.context(), False)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            updated = True</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -7110,25 +7074,22 @@ Explicit (x7)">                function_model_after = getattr(model_module.iface
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                if function_model_after:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    ret = function_model_after(self)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                    if not ret:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                        return ret</span>
+Explicit (x2)">                    ret = function_model_after(self)</span>
+<span class="line-precise" title="No Anys on this line!">                    if not ret:</span>
+<span class="line-precise" title="No Anys on this line!">                        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            if functionAfter:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x6)">                fn = getattr(module_script.iface, functionAfter, None)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                if fn is not None:</span>
-<span class="line-imprecise" title="Any Types on this line: 
+<span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                    v = None</span>
 <span class="line-empty" title="No Anys on this line!">                    try:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">                        v = fn(self)</span>
 <span class="line-precise" title="No Anys on this line!">                    except Exception:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                        pncontrolsfactory.aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)</span>
+<span class="line-precise" title="No Anys on this line!">                        QMessageBox.warning(QApplication.focusWidget(), "Error", error_manager(traceback.format_exc(limit=-6, chain=False)))</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)
 Omitted Generics (x1)">                    if v and not isinstance(v, bool) or v is False:</span>
@@ -7164,11 +7125,9 @@ Explicit (x7)">            function_model_buffer_commited = getattr(model_module
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">            if function_model_buffer_commited:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                ret = function_model_buffer_commited(self)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                if not ret:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                    return ret</span>
+Explicit (x2)">                ret = function_model_buffer_commited(self)</span>
+<span class="line-precise" title="No Anys on this line!">                if not ret:</span>
+<span class="line-precise" title="No Anys on this line!">                    return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x1)">        self.bufferCommited.emit()</span>
@@ -7191,32 +7150,22 @@ Explicit (x13)">    @pyqtSlot()</span>
 <span class="line-precise" title="No Anys on this line!">            return ok</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if project.DGI.localDesktop():</span>
-<span class="line-empty" title="No Anys on this line!">            from pineboolib import pncontrolsfactory</span>
+Explicit (x4)">        if project.DGI.localDesktop():</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            activeWid = pncontrolsfactory.QApplication.activeModalWidget()</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">            if not activeWid:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">                activeWid = pncontrolsfactory.QApplication.activePopupWidget()</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">            if not activeWid:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">                activeWid = pncontrolsfactory.QApplication.activeWindow()</span>
+<span class="line-precise" title="No Anys on this line!">            activeWid = QApplication.activeModalWidget()</span>
+<span class="line-precise" title="No Anys on this line!">            if not activeWid:</span>
+<span class="line-precise" title="No Anys on this line!">                activeWid = QApplication.activePopupWidget()</span>
+<span class="line-precise" title="No Anys on this line!">            if not activeWid:</span>
+<span class="line-precise" title="No Anys on this line!">                activeWid = QApplication.activeWindow()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">            if activeWid:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                activeWidEnabled = activeWid.isEnabled()</span>
+<span class="line-precise" title="No Anys on this line!">            if activeWid:</span>
+<span class="line-precise" title="No Anys on this line!">                activeWidEnabled = activeWid.isEnabled()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if self.d.modeAccess_ == self.Insert:</span>
 <span class="line-precise" title="No Anys on this line!">            if self.d.cursorRelation_.metadata() and self.d.cursorRelation_.modeAccess() == self.Insert:</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x2)">                if activeWid and activeWidEnabled:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    activeWid.setEnabled(False)</span>
+<span class="line-precise" title="No Anys on this line!">                if activeWid and activeWidEnabled:</span>
+<span class="line-precise" title="No Anys on this line!">                    activeWid.setEnabled(False)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">                if not self.d.cursorRelation_.commitBuffer():</span>
 <span class="line-precise" title="No Anys on this line!">                    self.d.modeAccess_ = self.Browse</span>
@@ -7227,17 +7176,13 @@ Explicit (x3)">                    activeWid.setEnabled(False)</span>
 <span class="line-precise" title="No Anys on this line!">                    self.d.cursorRelation_.setModeAccess(self.Edit)</span>
 <span class="line-precise" title="No Anys on this line!">                    self.d.cursorRelation_.refreshBuffer()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x2)">                if activeWid and activeWidEnabled:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    activeWid.setEnabled(True)</span>
+<span class="line-precise" title="No Anys on this line!">                if activeWid and activeWidEnabled:</span>
+<span class="line-precise" title="No Anys on this line!">                    activeWid.setEnabled(True)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        elif self.d.modeAccess_ in [self.Browse, self.Edit]:</span>
 <span class="line-precise" title="No Anys on this line!">            if self.d.cursorRelation_.metadata() and self.d.cursorRelation_.modeAccess() == self.Insert:</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x2)">                if activeWid and activeWidEnabled:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    activeWid.setEnabled(False)</span>
+<span class="line-precise" title="No Anys on this line!">                if activeWid and activeWidEnabled:</span>
+<span class="line-precise" title="No Anys on this line!">                    activeWid.setEnabled(False)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">                if not self.d.cursorRelation_.commitBuffer():</span>
 <span class="line-precise" title="No Anys on this line!">                    self.d.modeAccess_ = self.Browse</span>
@@ -7247,10 +7192,8 @@ Explicit (x3)">                    activeWid.setEnabled(False)</span>
 <span class="line-precise" title="No Anys on this line!">                    self.d.cursorRelation_.setModeAccess(self.Edit)</span>
 <span class="line-precise" title="No Anys on this line!">                    self.d.cursorRelation_.refreshBuffer()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x2)">                if activeWid and activeWidEnabled:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    activeWid.setEnabled(True)</span>
+<span class="line-precise" title="No Anys on this line!">                if activeWid and activeWidEnabled:</span>
+<span class="line-precise" title="No Anys on this line!">                    activeWid.setEnabled(True)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        return ok</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -7461,9 +7404,10 @@ Explicit (x13)">    @pyqtSlot()</span>
 <span class="line-precise" title="No Anys on this line!">        if curConnName == connName:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">        newDB = project.conn.database(connName)</span>
-<span class="line-precise" title="No Anys on this line!">        if curConnName == newDB.connectionName():</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">        newDB = project.conn.database(connName)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">        if curConnName == newDB.connectionName():</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if self.d.transactionsOpened_:</span>
@@ -7491,7 +7435,8 @@ Unannotated (x1)">        newDB = project.conn.database(connName)</span>
 <span class="line-precise" title="No Anys on this line!">            self.d.buffer_ = None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        # c = FLSqlCursor(None, True, newDB.db())</span>
-<span class="line-precise" title="No Anys on this line!">        self.d.db_ = newDB</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">        self.d.db_ = newDB</span>
 <span class="line-precise" title="No Anys on this line!">        self.init(self.d.curName_, True, self.cursorRelation(), self.relation())</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if bufferNoEmpty:</span>
@@ -8060,78 +8005,54 @@ Explicit (x1)">            self.acTable_ = None</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!">        Create restrictions according to access control list.</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        # from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory  # FIXME: Remove dependency</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">        if not self.acTable_:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">            self.acTable_ = FLAccessControlFactory().create("table")</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            self.acTable_.setFromObject(self.metadata_)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            self.acosBackupTable_ = self.acTable_.getAcos()</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            self.acPermBackupTable_ = self.acTable_.perm()</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            self.acTable_.clear()</span>
-<span class="line-precise" title="No Anys on this line!">        cursor = self.cursor_</span>
-<span class="line-precise" title="No Anys on this line!">        if cursor is None:</span>
-<span class="line-precise" title="No Anys on this line!">            raise Exception("Cursor not created yet")</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">        if self.modeAccess_ == PNSqlCursor.Insert or (not self.lastAt_ == -1 and self.lastAt_ == cursor.at()):</span>
-<span class="line-empty" title="No Anys on this line!">            return</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if self.acosCondName_ is not None:</span>
-<span class="line-precise" title="No Anys on this line!">            condTrue_ = False</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">            if self.acosCond_ == PNSqlCursor.Value:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                condTrue_ = cursor.valueBuffer(self.acosCondName_) == self.acosCondVal_</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">            elif self.acosCond_ == PNSqlCursor.RegExp:</span>
-<span class="line-empty" title="No Anys on this line!">                from PyQt5.Qt import QRegExp  # type: ignore</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">                # FIXME: What is happenning here? bool(str(Regexp)) ??</span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x4)
-Explicit (x2)">                condTrue_ = bool(str(QRegExp(str(self.acosCondVal_)).exactMatch(str(cursor.value(self.acosCondName_)))))</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">            elif self.acosCond_ == PNSqlCursor.Function:</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x5)">                condTrue_ = project.call(self.acosCondName_, [self.cursor_]) == self.acosCondVal_</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">            if condTrue_:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">                if self.acTable_.name() != self.id_:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    self.acTable_.clear()</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    self.acTable_.setName(self.id_)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    self.acTable_.setPerm(self.acPermTable_)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    self.acTable_.setAcos(self.acosTable_)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    self.acTable_.processObject(self.metadata_)</span>
-<span class="line-precise" title="No Anys on this line!">                    self.aclDone_ = True</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">                return</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        elif cursor.isLocked() or (self.cursorRelation_ and self.cursorRelation_.isLocked()):</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            if not self.acTable_.name() == self.id_:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                self.acTable_.clear()</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                self.acTable_.setName(self.id_)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                self.acTable_.setPerm("r-")</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                self.acTable_.processObject(self.metadata_)</span>
-<span class="line-precise" title="No Anys on this line!">                self.aclDone_ = True</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">            return</span>
+<span class="line-empty" title="No Anys on this line!">        # if not self.acTable_:</span>
+<span class="line-empty" title="No Anys on this line!">        #     self.acTable_ = FLAccessControlFactory().create("table")</span>
+<span class="line-empty" title="No Anys on this line!">        #     self.acTable_.setFromObject(self.metadata_)</span>
+<span class="line-empty" title="No Anys on this line!">        #     self.acosBackupTable_ = self.acTable_.getAcos()</span>
+<span class="line-empty" title="No Anys on this line!">        #     self.acPermBackupTable_ = self.acTable_.perm()</span>
+<span class="line-empty" title="No Anys on this line!">        #     self.acTable_.clear()</span>
+<span class="line-empty" title="No Anys on this line!">        # cursor = self.cursor_</span>
+<span class="line-empty" title="No Anys on this line!">        # if cursor is None:</span>
+<span class="line-empty" title="No Anys on this line!">        #     raise Exception("Cursor not created yet")</span>
+<span class="line-empty" title="No Anys on this line!">        # if self.modeAccess_ == PNSqlCursor.Insert or (not self.lastAt_ == -1 and self.lastAt_ == cursor.at()):</span>
+<span class="line-empty" title="No Anys on this line!">        #     return</span>
+<span class="line-empty" title="No Anys on this line!">        #</span>
+<span class="line-empty" title="No Anys on this line!">        # if self.acosCondName_ is not None:</span>
+<span class="line-empty" title="No Anys on this line!">        #     condTrue_ = False</span>
+<span class="line-empty" title="No Anys on this line!">        #</span>
+<span class="line-empty" title="No Anys on this line!">        #     if self.acosCond_ == PNSqlCursor.Value:</span>
+<span class="line-empty" title="No Anys on this line!">        #         condTrue_ = cursor.valueBuffer(self.acosCondName_) == self.acosCondVal_</span>
+<span class="line-empty" title="No Anys on this line!">        #     elif self.acosCond_ == PNSqlCursor.RegExp:</span>
+<span class="line-empty" title="No Anys on this line!">        #         from PyQt5.Qt import QRegExp  # type: ignore</span>
+<span class="line-empty" title="No Anys on this line!">        #</span>
+<span class="line-empty" title="No Anys on this line!">        #         # FIXME: What is happenning here? bool(str(Regexp)) ??</span>
+<span class="line-empty" title="No Anys on this line!">        #         condTrue_ = bool(str(QRegExp(str(self.acosCondVal_)).exactMatch(str(cursor.value(self.acosCondName_)))))</span>
+<span class="line-empty" title="No Anys on this line!">        #     elif self.acosCond_ == PNSqlCursor.Function:</span>
+<span class="line-empty" title="No Anys on this line!">        #         condTrue_ = project.call(self.acosCondName_, [self.cursor_]) == self.acosCondVal_</span>
+<span class="line-empty" title="No Anys on this line!">        #</span>
+<span class="line-empty" title="No Anys on this line!">        #     if condTrue_:</span>
+<span class="line-empty" title="No Anys on this line!">        #         if self.acTable_.name() != self.id_:</span>
+<span class="line-empty" title="No Anys on this line!">        #             self.acTable_.clear()</span>
+<span class="line-empty" title="No Anys on this line!">        #             self.acTable_.setName(self.id_)</span>
+<span class="line-empty" title="No Anys on this line!">        #             self.acTable_.setPerm(self.acPermTable_)</span>
+<span class="line-empty" title="No Anys on this line!">        #             self.acTable_.setAcos(self.acosTable_)</span>
+<span class="line-empty" title="No Anys on this line!">        #             self.acTable_.processObject(self.metadata_)</span>
+<span class="line-empty" title="No Anys on this line!">        #             self.aclDone_ = True</span>
+<span class="line-empty" title="No Anys on this line!">        #</span>
+<span class="line-empty" title="No Anys on this line!">        #         return</span>
+<span class="line-empty" title="No Anys on this line!">        #</span>
+<span class="line-empty" title="No Anys on this line!">        # elif cursor.isLocked() or (self.cursorRelation_ and self.cursorRelation_.isLocked()):</span>
+<span class="line-empty" title="No Anys on this line!">        #</span>
+<span class="line-empty" title="No Anys on this line!">        #     if not self.acTable_.name() == self.id_:</span>
+<span class="line-empty" title="No Anys on this line!">        #         self.acTable_.clear()</span>
+<span class="line-empty" title="No Anys on this line!">        #         self.acTable_.setName(self.id_)</span>
+<span class="line-empty" title="No Anys on this line!">        #         self.acTable_.setPerm("r-")</span>
+<span class="line-empty" title="No Anys on this line!">        #         self.acTable_.processObject(self.metadata_)</span>
+<span class="line-empty" title="No Anys on this line!">        #         self.aclDone_ = True</span>
+<span class="line-empty" title="No Anys on this line!">        #</span>
+<span class="line-empty" title="No Anys on this line!">        #     return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        self.undoAcl()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -8146,9 +8067,9 @@ Explicit (x2)">        if self.acTable_ and self.aclDone_:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">            self.acTable_.clear()</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            self.acTable_.setPerm(self.acPermBackupTable_)</span>
+Explicit (x3)">            self.acTable_.setPerm(self.acPermBackupTable_)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            self.acTable_.setAcos(self.acosBackupTable_)</span>
+Explicit (x3)">            self.acTable_.setAcos(self.acosBackupTable_)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">            self.acTable_.processObject(self.metadata_)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -8175,12 +8096,9 @@ Explicit (x3)">            self.acTable_.processObject(self.metadata_)</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">        logger.warning(msg)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        if project._DGI and project.DGI.localDesktop():</span>
+Explicit (x7)">        if project._DGI and project.DGI.localDesktop():</span>
 <span class="line-precise" title="No Anys on this line!">            if not throwException:</span>
-<span class="line-empty" title="No Anys on this line!">                from pineboolib import pncontrolsfactory</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x6)">                pncontrolsfactory.QMessageBox.warning(pncontrolsfactory.QApplication.activeWindow(), "Pineboo", msg)</span>
+<span class="line-precise" title="No Anys on this line!">                QMessageBox.warning(QApplication.activeWindow(), "Pineboo", msg)</span>
 </pre></td>
 </tr></tbody>
 </table>

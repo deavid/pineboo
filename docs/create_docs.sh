@@ -1,6 +1,7 @@
 #!/bin/bash
 
 if [ "$1" = "" ]; then
+    rm source/code/pineboolib -R
     # Create folders
     (cd .. && git ls-files -- pineboolib/"*.py") | sed 's|/[^/]*$||' | sort -u | awk '{ print "source/code/" $0}' | xargs mkdir
 

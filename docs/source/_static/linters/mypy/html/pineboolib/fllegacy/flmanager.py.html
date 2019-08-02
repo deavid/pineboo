@@ -1592,7 +1592,6 @@
 <span id="L1582" class="lineno"><a class="lineno" href="#L1582">1582</a></span>
 <span id="L1583" class="lineno"><a class="lineno" href="#L1583">1583</a></span>
 <span id="L1584" class="lineno"><a class="lineno" href="#L1584">1584</a></span>
-<span id="L1585" class="lineno"><a class="lineno" href="#L1585">1585</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
 <span class="line-empty" title="No Anys on this line!">from PyQt5 import QtCore  # type: ignore</span>
@@ -2179,7 +2178,6 @@ Omitted Generics (x1)">                q.setTablesList(elem_tables.text.strip(" 
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.fllegacy.flaction import FLAction</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        a = FLAction()</span>
 <span class="line-precise" title="No Anys on this line!">        util = FLUtil()</span>
 <span class="line-precise" title="No Anys on this line!">        doc = QDomDocument(n)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -2206,7 +2204,7 @@ Explicit (x4)">                logger.warning("FLManager : " + FLUtil().translat
 <span class="line-precise" title="No Anys on this line!">        doc_elem = doc.documentElement()</span>
 <span class="line-precise" title="No Anys on this line!">        no = doc_elem.firstChild()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        a.setName(n)</span>
+<span class="line-precise" title="No Anys on this line!">        a = FLAction(n)</span>
 <span class="line-empty" title="No Anys on this line!">        # a.setTable(n)</span>
 <span class="line-precise" title="No Anys on this line!">        while not no.isNull():</span>
 <span class="line-precise" title="No Anys on this line!">            e = no.toElement()</span>
@@ -2290,8 +2288,7 @@ Explicit (x3)">                            self.logger.debug("WARN: Se encontró
 <span class="line-precise" title="No Anys on this line!">                                txt_ = auto_qt_translate_text(txt_)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">                                if a.caption() == "":</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">                                    a.setDescription(txt_)</span>
+<span class="line-precise" title="No Anys on this line!">                                    a.setDescription(txt_)</span>
 <span class="line-precise" title="No Anys on this line!">                                no2 = no2.nextSibling()</span>
 <span class="line-empty" title="No Anys on this line!">                                continue</span>
 <span class="line-precise" title="No Anys on this line!">                            elif e2.tagName() == "alias":</span>
@@ -3116,9 +3113,9 @@ Explicit (x6)">    @decorators.NotImplementedWarn</span>
 <span class="line-precise" title="No Anys on this line!">        if not self.existsTable(n):</span>
 <span class="line-precise" title="No Anys on this line!">            doc = QDomDocument()</span>
 <span class="line-precise" title="No Anys on this line!">            _path = filedir("..", "share", "pineboo", "tables")</span>
-<span class="line-empty" title="No Anys on this line!">            from pineboolib import qsa</span>
+<span class="line-empty" title="No Anys on this line!">            from pineboolib.application.types import Dir</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">            dir = qsa.Dir(_path)</span>
+<span class="line-precise" title="No Anys on this line!">            dir = Dir(_path)</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Omitted Generics (x3)">            _tables = dir.entryList("%s.mtd" % n)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -3244,7 +3241,7 @@ Explicit (x2)">            self.dictKeyMetaData_[table] = q2.value(1)</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if project._DGI and n in project.DGI.sys_mtds():</span>
+Explicit (x7)">        if project._DGI and n in project.DGI.sys_mtds():</span>
 <span class="line-precise" title="No Anys on this line!">            return True</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if n[0:2] != "fl":</span>
@@ -3290,10 +3287,9 @@ Unannotated (x4)">        tableName = mtd.name()</span>
 <span class="line-empty" title="No Anys on this line!">        #    return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        tableLarge = None</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.fllegacy.flapplication import aqApp</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">        if pncontrolsfactory.aqApp.singleFLLarge():</span>
+<span class="line-precise" title="No Anys on this line!">        if aqApp.singleFLLarge():</span>
 <span class="line-precise" title="No Anys on this line!">            tableLarge = "fllarge"</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-any" title="Any Types on this line: 
@@ -3361,10 +3357,9 @@ Explicit (x4)">                logger.warning("FLManager::ERROR:StoreLargeValue.
 <span class="line-precise" title="No Anys on this line!">        if not refKey[0:3] == "RK@":</span>
 <span class="line-precise" title="No Anys on this line!">            return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.fllegacy.flapplication import aqApp</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">        tableName = "fllarge" if pncontrolsfactory.aqApp.singleFLLarge() else "fllarge_" + refKey.split("@")[1]</span>
+<span class="line-precise" title="No Anys on this line!">        tableName = "fllarge" if aqApp.singleFLLarge() else "fllarge_" + refKey.split("@")[1]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if not self.existsTable(tableName):</span>
 <span class="line-precise" title="No Anys on this line!">            return None</span>

@@ -190,39 +190,24 @@
 <span id="L180" class="lineno"><a class="lineno" href="#L180">180</a></span>
 <span id="L181" class="lineno"><a class="lineno" href="#L181">181</a></span>
 <span id="L182" class="lineno"><a class="lineno" href="#L182">182</a></span>
-<span id="L183" class="lineno"><a class="lineno" href="#L183">183</a></span>
-<span id="L184" class="lineno"><a class="lineno" href="#L184">184</a></span>
-<span id="L185" class="lineno"><a class="lineno" href="#L185">185</a></span>
-<span id="L186" class="lineno"><a class="lineno" href="#L186">186</a></span>
-<span id="L187" class="lineno"><a class="lineno" href="#L187">187</a></span>
-<span id="L188" class="lineno"><a class="lineno" href="#L188">188</a></span>
-<span id="L189" class="lineno"><a class="lineno" href="#L189">189</a></span>
-<span id="L190" class="lineno"><a class="lineno" href="#L190">190</a></span>
-<span id="L191" class="lineno"><a class="lineno" href="#L191">191</a></span>
-<span id="L192" class="lineno"><a class="lineno" href="#L192">192</a></span>
-<span id="L193" class="lineno"><a class="lineno" href="#L193">193</a></span>
-<span id="L194" class="lineno"><a class="lineno" href="#L194">194</a></span>
-<span id="L195" class="lineno"><a class="lineno" href="#L195">195</a></span>
-<span id="L196" class="lineno"><a class="lineno" href="#L196">196</a></span>
-<span id="L197" class="lineno"><a class="lineno" href="#L197">197</a></span>
-<span id="L198" class="lineno"><a class="lineno" href="#L198">198</a></span>
-<span id="L199" class="lineno"><a class="lineno" href="#L199">199</a></span>
-<span id="L200" class="lineno"><a class="lineno" href="#L200">200</a></span>
-<span id="L201" class="lineno"><a class="lineno" href="#L201">201</a></span>
-<span id="L202" class="lineno"><a class="lineno" href="#L202">202</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
-<span class="line-empty" title="No Anys on this line!">from pineboolib.application.xmlaction import XMLAction</span>
+<span class="line-empty" title="No Anys on this line!">"""FLAction Module."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">from pineboolib.core.utils.struct import ActionStruct</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from typing import Union</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class FLAction(object):</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Esta clase contiene información de acciones para abrir formularios.</span>
+<span class="line-empty" title="No Anys on this line!">    FLAction Class.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    Se utiliza para enlazar automáticamente formularios con su script,</span>
-<span class="line-empty" title="No Anys on this line!">    interfaz y tabla de origen.</span>
+<span class="line-empty" title="No Anys on this line!">    This class contains information on actions to open forms.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    It is used to automatically link forms with your script,</span>
+<span class="line-empty" title="No Anys on this line!">    interface and source table.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @author InfoSiAL S.L.</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
@@ -230,57 +215,61 @@
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Nombre de la accion</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-precise" title="No Anys on this line!">    name_: str = ""</span>
+<span class="line-precise" title="No Anys on this line!">    _name: str</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Nombre del script asociado al formulario de edición de registros</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-precise" title="No Anys on this line!">    scriptFormRecord_: str = ""</span>
+<span class="line-precise" title="No Anys on this line!">    _script_form_record: str</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Nombre del script asociado al formulario maestro</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-precise" title="No Anys on this line!">    scriptForm_: str = ""</span>
+<span class="line-precise" title="No Anys on this line!">    _script_form: str</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Nombre de la tabla origen para el formulario maestro</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-precise" title="No Anys on this line!">    table_: str = ""</span>
+<span class="line-precise" title="No Anys on this line!">    _table: str</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Nombre del formulario maestro</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-precise" title="No Anys on this line!">    form_: str = ""</span>
+<span class="line-precise" title="No Anys on this line!">    _form: str</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Nombre del formulario de edición de registros</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-precise" title="No Anys on this line!">    formRecord_: str = ""</span>
+<span class="line-precise" title="No Anys on this line!">    _form_record: str</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Texto para la barra de título del formulario maestro</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-precise" title="No Anys on this line!">    caption_: str = ""</span>
+<span class="line-precise" title="No Anys on this line!">    _caption: str</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Descripción</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-precise" title="No Anys on this line!">    description_: str = ""</span>
+<span class="line-precise" title="No Anys on this line!">    _description: str</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    constructor.</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self, action: Union[str, ActionStruct]) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialize."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    def __init__(self, action: Union[str, XMLAction] = None) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        super(FLAction, self).__init__()</span>
-<span class="line-precise" title="No Anys on this line!">        if action is None:</span>
-<span class="line-empty" title="No Anys on this line!">            return</span>
+<span class="line-precise" title="No Anys on this line!">        self._name = ""</span>
+<span class="line-precise" title="No Anys on this line!">        self._caption = ""</span>
+<span class="line-precise" title="No Anys on this line!">        self._description = ""</span>
+<span class="line-precise" title="No Anys on this line!">        self._form = ""</span>
+<span class="line-precise" title="No Anys on this line!">        self._form_record = ""</span>
+<span class="line-precise" title="No Anys on this line!">        self._script_form = ""</span>
+<span class="line-precise" title="No Anys on this line!">        self._script_form_record = ""</span>
+<span class="line-precise" title="No Anys on this line!">        self._table = ""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">        if isinstance(action, str):</span>
 <span class="line-precise" title="No Anys on this line!">            self.setName(action)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
-Omitted Generics (x1)
-Unannotated (x4)">        elif isinstance(action, XMLAction):</span>
+Omitted Generics (x1)">        elif isinstance(action, ActionStruct):</span>
 <span class="line-precise" title="No Anys on this line!">            self.setName(action.name)</span>
 <span class="line-precise" title="No Anys on this line!">            if action.mainscript is not None:</span>
 <span class="line-precise" title="No Anys on this line!">                self.setScriptForm(action.mainscript)</span>
@@ -296,134 +285,102 @@ Unannotated (x4)">        elif isinstance(action, XMLAction):</span>
 <span class="line-unanalyzed" title="No Anys on this line!">            raise Exception("Unsupported action %r" % action)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def __repr__(self):</span>
+<span class="line-empty" title="No Anys on this line!">        """Return the values ​​in a text string."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        return "&lt;FLAction name=%r scriptForm=%r scriptFormRecord=%r form=%r formRecord=%r caption=%r&gt;" % (</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            self.name_,</span>
+Unannotated (x2)">            self._name,</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            self.scriptForm_,</span>
+Unannotated (x2)">            self._script_form,</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            self.scriptFormRecord_,</span>
+Unannotated (x2)">            self._script_form_record,</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            self.form_,</span>
+Unannotated (x2)">            self._form,</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            self.formRecord_,</span>
+Unannotated (x2)">            self._form_record,</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            self.caption_,</span>
+Unannotated (x2)">            self._caption,</span>
 <span class="line-empty" title="No Anys on this line!">        )</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Establece el nombre de la accion</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setName(self, n: str) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        self.name_ = n</span>
+<span class="line-empty" title="No Anys on this line!">        """Set the name of the action."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Establece el nombre del script asociado al formulario de edición de registros</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        self._name = n</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setScriptFormRecord(self, s: str) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        self.scriptFormRecord_ = "%s.qs" % s</span>
+<span class="line-empty" title="No Anys on this line!">        """Set the name of the script associated with the record editing form."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Establece el nombre del script asociado al formulario maestro</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        self._script_form_record = "%s.qs" % s</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setScriptForm(self, s: str) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        self.scriptForm_ = "%s.qs" % s</span>
+<span class="line-empty" title="No Anys on this line!">        """Set the name of the script associated with the master form."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Establece el nombre de la tabla origen del formulario maestro</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        self._script_form = "%s.qs" % s</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setTable(self, t: str) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        self.table_ = t</span>
+<span class="line-empty" title="No Anys on this line!">        """Set the name of the source table of the master form."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Establece el nombre del formulario maestro</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        self._table = t</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setForm(self, f: str) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        self.form_ = "%s.ui" % f</span>
+<span class="line-empty" title="No Anys on this line!">        """Set the name of the master form."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Establece el nombre del formulario de edición de registros</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        self._form = "%s.ui" % f</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setFormRecord(self, f: str) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        self.formRecord_ = "%s.ui" % f</span>
+<span class="line-empty" title="No Anys on this line!">        """Set the name of the record editing form."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Establece el texto de la barra de título del formulario maestro</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        self._form_record = "%s.ui" % f</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setCaption(self, c: str) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        self.caption_ = c</span>
+<span class="line-empty" title="No Anys on this line!">        """Set the text of the title bar of the master form."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Establece la descripción</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        self._caption = c</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    def setDescription(self, d) -&gt; None:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        self.description_ = d</span>
+<span class="line-precise" title="No Anys on this line!">    def setDescription(self, d: str) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Set description."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Obtiene el nombre de la accion</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        self._description = d</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def name(self) -&gt; str:</span>
-<span class="line-precise" title="No Anys on this line!">        return self.name_</span>
+<span class="line-empty" title="No Anys on this line!">        """Get the name of the action."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Obtiene el nombre del script asociado al formulario de edición de registros</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        return self._name</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def scriptFormRecord(self) -&gt; str:</span>
-<span class="line-precise" title="No Anys on this line!">        return self.scriptFormRecord_</span>
+<span class="line-empty" title="No Anys on this line!">        """Get the name of the script associated with the record editing form."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Obtiene el nombre del script asociado al formulario maestro</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        return self._script_form_record</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def scriptForm(self) -&gt; str:</span>
-<span class="line-precise" title="No Anys on this line!">        return self.scriptForm_</span>
+<span class="line-empty" title="No Anys on this line!">        """Get the name of the script associated with the master form."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Obtiene  la tabla asociada a la accion</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        return self._script_form</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def table(self) -&gt; str:</span>
-<span class="line-precise" title="No Anys on this line!">        return self.table_</span>
+<span class="line-empty" title="No Anys on this line!">        """Get the table associated with the action."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Obtiene el texto de la barra de título del formulario</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        return self._table</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def caption(self) -&gt; str:</span>
-<span class="line-precise" title="No Anys on this line!">        return self.caption_</span>
+<span class="line-empty" title="No Anys on this line!">        """Get the text from the form's title bar."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Obtiene la descripcion</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        return self._caption</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def description(self) -&gt; str:</span>
-<span class="line-precise" title="No Anys on this line!">        return self.description_</span>
+<span class="line-empty" title="No Anys on this line!">        """Get the description."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Obtiene el nombre del formulario mestro</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        return self._description</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def form(self) -&gt; str:</span>
-<span class="line-precise" title="No Anys on this line!">        return self.form_</span>
+<span class="line-empty" title="No Anys on this line!">        """Get the name of the mestro form."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Obtiene el nombre del formulario de edición de registros</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        return self._form</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def formRecord(self) -&gt; str:</span>
-<span class="line-precise" title="No Anys on this line!">        return self.formRecord_</span>
+<span class="line-empty" title="No Anys on this line!">        """Get the name of the record editing form."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        return self._form_record</span>
 </pre></td>
 </tr></tbody>
 </table>

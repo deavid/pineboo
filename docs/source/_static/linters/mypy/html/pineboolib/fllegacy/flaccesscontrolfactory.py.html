@@ -261,61 +261,94 @@
 <span id="L251" class="lineno"><a class="lineno" href="#L251">251</a></span>
 <span id="L252" class="lineno"><a class="lineno" href="#L252">252</a></span>
 <span id="L253" class="lineno"><a class="lineno" href="#L253">253</a></span>
+<span id="L254" class="lineno"><a class="lineno" href="#L254">254</a></span>
+<span id="L255" class="lineno"><a class="lineno" href="#L255">255</a></span>
+<span id="L256" class="lineno"><a class="lineno" href="#L256">256</a></span>
+<span id="L257" class="lineno"><a class="lineno" href="#L257">257</a></span>
+<span id="L258" class="lineno"><a class="lineno" href="#L258">258</a></span>
+<span id="L259" class="lineno"><a class="lineno" href="#L259">259</a></span>
+<span id="L260" class="lineno"><a class="lineno" href="#L260">260</a></span>
+<span id="L261" class="lineno"><a class="lineno" href="#L261">261</a></span>
+<span id="L262" class="lineno"><a class="lineno" href="#L262">262</a></span>
+<span id="L263" class="lineno"><a class="lineno" href="#L263">263</a></span>
+<span id="L264" class="lineno"><a class="lineno" href="#L264">264</a></span>
+<span id="L265" class="lineno"><a class="lineno" href="#L265">265</a></span>
+<span id="L266" class="lineno"><a class="lineno" href="#L266">266</a></span>
+<span id="L267" class="lineno"><a class="lineno" href="#L267">267</a></span>
+<span id="L268" class="lineno"><a class="lineno" href="#L268">268</a></span>
+<span id="L269" class="lineno"><a class="lineno" href="#L269">269</a></span>
+<span id="L270" class="lineno"><a class="lineno" href="#L270">270</a></span>
+<span id="L271" class="lineno"><a class="lineno" href="#L271">271</a></span>
+<span id="L272" class="lineno"><a class="lineno" href="#L272">272</a></span>
+<span id="L273" class="lineno"><a class="lineno" href="#L273">273</a></span>
+<span id="L274" class="lineno"><a class="lineno" href="#L274">274</a></span>
+<span id="L275" class="lineno"><a class="lineno" href="#L275">275</a></span>
+<span id="L276" class="lineno"><a class="lineno" href="#L276">276</a></span>
+<span id="L277" class="lineno"><a class="lineno" href="#L277">277</a></span>
+<span id="L278" class="lineno"><a class="lineno" href="#L278">278</a></span>
+<span id="L279" class="lineno"><a class="lineno" href="#L279">279</a></span>
+<span id="L280" class="lineno"><a class="lineno" href="#L280">280</a></span>
+<span id="L281" class="lineno"><a class="lineno" href="#L281">281</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">FLAccessControlFactory Module.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">Manage ACLs between different application objects.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
 <span class="line-empty" title="No Anys on this line!">from PyQt5 import QtWidgets  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.application.metadata.pntablemetadata import PNTableMetaData</span>
-<span class="line-empty" title="No Anys on this line!">from pineboolib.fllegacy.flaccesscontrol import FLAccessControl</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.application import project</span>
-<span class="line-empty" title="No Anys on this line!">from typing import Dict</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">from pineboolib.fllegacy.flaccesscontrol import FLAccessControl</span>
+<span class="line-empty" title="No Anys on this line!">from pineboolib.fllegacy.flformdb import FLFormDB</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">from pineboolib.qt3_widgets.qmainwindow import QMainWindow</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">from typing import Dict, Any</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">import logging</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">logger = logging.getLogger("FLAccessControlFactory")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class FLAccessControlMainWindow(FLAccessControl):</span>
-<span class="line-any" title="No Anys on this line!">    def __init__(self):</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        super(FLAccessControlMainWindow, self).__init__()</span>
+<span class="line-empty" title="No Anys on this line!">    """FLAccessControlMainWindow Class."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">  Dado un objeto general (tipo QObject) de alto nivel, identifica si existe un controlador que puede controlar</span>
-<span class="line-empty" title="No Anys on this line!">  su acceso devolviendo en tal caso el nombre de tipo asignado.</span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Inicialize."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">  @param Objeto de alto nivel del cual se quiere conocer su tipo.</span>
-<span class="line-empty" title="No Anys on this line!">  @return Devuelve el nombre del tipo asociado al objeto de alto nivel dado, si existe controlador de acceso para él,</span>
-<span class="line-empty" title="No Anys on this line!">  en caso contrario devuelve una cadena vacía.</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        super(FLAccessControlMainWindow, self).__init__()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def type(self):</span>
+<span class="line-precise" title="No Anys on this line!">    def type(self) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return target type."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        return "mainwindow"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    def processObject(self, obj) -&gt; None:</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-precise" title="No Anys on this line!">    def processObject(self, obj: QtWidgets.QWidget) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Process the object."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)
-Unannotated (x1)">        mw = pncontrolsfactory.QMainWindow(obj)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">        if not mw or not self.acosPerms_:</span>
+<span class="line-precise" title="No Anys on this line!">        mw = QMainWindow(obj)</span>
+<span class="line-precise" title="No Anys on this line!">        if not mw or not self._acos_perms:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        a: QtWidgets.QAction</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        list1 = mw.queryList("QAction")</span>
+Explicit (x3)">        list1 = mw.queryList("QAction")</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x8)">        actions_idx = {a.name(): a for a in list1}</span>
-<span class="line-precise" title="No Anys on this line!">        if not self.perm_:</span>
+<span class="line-precise" title="No Anys on this line!">        if not self._perm:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">            for a in list1:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)">                if self.acosPerms_[a.name()]:</span>
+Explicit (x2)">                if self._acos_perms[a.name()]:</span>
 <span class="line-empty" title="No Anys on this line!">                    continue</span>
-<span class="line-precise" title="No Anys on this line!">                if self.perm_ == "-w" or self.perm_ == "--":</span>
+<span class="line-precise" title="No Anys on this line!">                if self._perm == "-w" or self._perm == "--":</span>
 <span class="line-precise" title="No Anys on this line!">                    a.setVisible(False)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        for a_name, perm in self.acosPerms_.items():</span>
+<span class="line-precise" title="No Anys on this line!">        for a_name, perm in self._acos_perms.items():</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x2)">            if a_name in actions_idx:</span>
 <span class="line-any" title="Any Types on this line: 
@@ -324,83 +357,80 @@ Explicit (x3)">                a = actions_idx[a_name]</span>
 <span class="line-precise" title="No Anys on this line!">                    a.setVisible(False)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    def setFromObject(self, object) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        print("FLAccessControlMainWindow::setFromObject %s" % "No implementado todavía.")</span>
+Explicit (x1)">    def setFromObject(self, object: Any) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Not implemented jet."""</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">        logger.warning("FLAccessControlMainWindow::setFromObject %s", "No implementado todavía.")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class FLAccessControlForm(FLAccessControl):</span>
-<span class="line-any" title="No Anys on this line!">    def __init__(self):</span>
+<span class="line-empty" title="No Anys on this line!">    """FLAccessControlForm Class."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Inicialize."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        super().__init__()</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if project.DGI.localDesktop():</span>
+Explicit (x4)">        if project.DGI.localDesktop():</span>
 <span class="line-empty" title="No Anys on this line!">            from PyQt5.Qt import qApp  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!">            from PyQt5 import QtGui  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)
-Unannotated (x1)">            self.pal = QtGui.QPalette()</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">            self.pal = QtGui.QPalette()</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)
 Unimported (x5)">            bg = QtGui.QColor(qApp.palette().color(QtGui.QPalette.Active, QtGui.QPalette.Background))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)
+<span class="line-precise" title="Any Types on this line: 
 Explicit (x1)">            self.pal.setColor(QtGui.QPalette.Foreground, bg)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)
+<span class="line-precise" title="Any Types on this line: 
 Explicit (x1)">            self.pal.setColor(QtGui.QPalette.Text, bg)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)
+<span class="line-precise" title="Any Types on this line: 
 Explicit (x1)">            self.pal.setColor(QtGui.QPalette.ButtonText, bg)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)
+<span class="line-precise" title="Any Types on this line: 
 Explicit (x1)">            self.pal.setColor(QtGui.QPalette.Base, bg)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)
+<span class="line-precise" title="Any Types on this line: 
 Explicit (x1)">            self.pal.setColor(QtGui.QPalette.Background, bg)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">  @return El tipo del que se encarga; "form".</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def type(self):</span>
+<span class="line-precise" title="No Anys on this line!">    def type(self) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return target type."""</span>
 <span class="line-empty" title="No Anys on this line!">        return "form"</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">  Procesa objetos que son de la clase FLFormDB.</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">  Sólo controla los hijos del objeto que son de la clase QWidget,y sólo</span>
-<span class="line-empty" title="No Anys on this line!">  permite hacerlos no visibles o no editables. En realidad hacerlos</span>
-<span class="line-empty" title="No Anys on this line!">  no visibles significa que sean no editables y modficando la paleta para</span>
-<span class="line-empty" title="No Anys on this line!">  que toda la región del componente sea mostrada en color negro. Los permisos</span>
-<span class="line-empty" title="No Anys on this line!">  que acepta son :</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">  - "-w" o "--" (no_lectura/escritura o no_lectura/no_escritura) -&gt; no visible</span>
-<span class="line-empty" title="No Anys on this line!">  - "r-" (lectura/no_escritura) -&gt; no editable</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">  Esto permite que cualquier componente de un formulario de AbanQ ( FLFormDB,</span>
-<span class="line-empty" title="No Anys on this line!">  FLFormRecordDB y FLFormSearchDB) se pueda hacer no visible o no editable a conveniencia.</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def processObject(self, obj) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Process objects that are of the FLFormDB class.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        Only control the children of the object that are of the QWidget class, and only</span>
+<span class="line-empty" title="No Anys on this line!">        allows to make them not visible or not editable. Actually do them</span>
+<span class="line-empty" title="No Anys on this line!">        not visible means that they are not editable and modifying the palette to</span>
+<span class="line-empty" title="No Anys on this line!">        that the entire region of the component be shown in black. The permits</span>
+<span class="line-empty" title="No Anys on this line!">        which accepts are:</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        - "-w" or "--" (no_read / write or no_read / no_write) -&gt; not visible</span>
+<span class="line-empty" title="No Anys on this line!">        - "r-" (read / no_write) -&gt; not editable</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        This allows any component of an AbanQ form (FLFormDB,</span>
+<span class="line-empty" title="No Anys on this line!">        FLFormRecordDB and FLFormSearchDB) can be made not visible or not editable for convenience.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">        fm = obj</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if not fm or not self.acosPerms_:</span>
+Unannotated (x1)">        if not fm or not self._acos_perms:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if self.perm_:</span>
+<span class="line-precise" title="No Anys on this line!">        if self._perm:</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)">            list_ = fm.children()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">            for w in list_:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">                if self.acosPerms_[w.name()]:</span>
+Unannotated (x3)">                if self._acos_perms[w.name()]:</span>
 <span class="line-empty" title="No Anys on this line!">                    continue</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">                if self.perm_ in ("-w", "--"):</span>
+<span class="line-precise" title="No Anys on this line!">                if self._perm in ("-w", "--"):</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x3)">                    w.setPalette(self.pal)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -409,22 +439,21 @@ Unannotated (x3)">                    w.setDisabled(True)</span>
 Unannotated (x3)">                    w.hide()</span>
 <span class="line-empty" title="No Anys on this line!">                    continue</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">                if self.perm_ == "r-":</span>
+<span class="line-precise" title="No Anys on this line!">                if self._perm == "r-":</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x3)">                    w.setDisabled(True)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        for it in self.acosPerms_.keys():</span>
-<span class="line-empty" title="No Anys on this line!">            from pineboolib import pncontrolsfactory</span>
+<span class="line-precise" title="No Anys on this line!">        for it in self._acos_perms.keys():</span>
+<span class="line-empty" title="No Anys on this line!">            from pineboolib.qt3_widgets.qwidget import QWidget</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)
-Explicit (x1)">            w = fm.findChild(pncontrolsfactory.QWidget, it)</span>
+Unannotated (x4)">            w = fm.findChild(QWidget, it)</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">            if w:</span>
-<span class="line-precise" title="No Anys on this line!">                perm = self.acosPerms_[it]</span>
+<span class="line-precise" title="No Anys on this line!">                perm = self._acos_perms[it]</span>
 <span class="line-precise" title="No Anys on this line!">                if perm in ("-w", "--"):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                    if project.DGI.localDesktop():</span>
+Explicit (x4)">                    if project.DGI.localDesktop():</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x3)">                        w.setPalette(self.pal)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -442,30 +471,40 @@ Unannotated (x3)">                    w.setDisabled(True)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def setFromObject(self, object) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        print("FLAccessControlform::setFromObject: No implementado todavía.")</span>
+<span class="line-empty" title="No Anys on this line!">        """Not implemented jet."""</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">        logger.warning("FLAccessControlForm::setFromObject %s", "No implementado todavía.")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class FLAccessControlTable(FLAccessControl):</span>
-<span class="line-precise" title="No Anys on this line!">    def __init__(self) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        super().__init__()</span>
-<span class="line-precise" title="No Anys on this line!">        self.acosPerms_: Dict[str, str] = {}</span>
+<span class="line-empty" title="No Anys on this line!">    """FLAccessControlTable Class."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def type(self):</span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Inicialize."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        super().__init__()</span>
+<span class="line-precise" title="No Anys on this line!">        self._acos_perms: Dict[str, str] = {}</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def type(self) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return target type."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        return "table"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def processObject(self, obj: "PNTableMetaData") -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Process PNTableMetaData belonging to a table."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if not obj:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        tm = obj</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        mask_perm = 0</span>
-<span class="line-precise" title="No Anys on this line!">        has_acos = True if self.acosPerms_ else False</span>
+<span class="line-precise" title="No Anys on this line!">        has_acos = True if self._acos_perms else False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if self.perm_:</span>
-<span class="line-precise" title="No Anys on this line!">            if self.perm_[0] == "r":</span>
+<span class="line-precise" title="No Anys on this line!">        if self._perm:</span>
+<span class="line-precise" title="No Anys on this line!">            if self._perm[0] == "r":</span>
 <span class="line-precise" title="No Anys on this line!">                mask_perm = mask_perm + 2</span>
-<span class="line-precise" title="No Anys on this line!">            if self.perm_[1] == "w":</span>
+<span class="line-precise" title="No Anys on this line!">            if self._perm[1] == "w":</span>
 <span class="line-precise" title="No Anys on this line!">                mask_perm = mask_perm + 1</span>
 <span class="line-precise" title="No Anys on this line!">        elif has_acos:</span>
 <span class="line-precise" title="No Anys on this line!">            mask_perm = 3</span>
@@ -487,9 +526,9 @@ Explicit (x2)">        for it in fL:</span>
 Explicit (x2)">            field = it</span>
 <span class="line-precise" title="No Anys on this line!">            mask_field_perm = mask_perm</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            if has_acos and (field.name() in self.acosPerms_.keys()):</span>
+Explicit (x3)">            if has_acos and (field.name() in self._acos_perms.keys()):</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                field_perm = self.acosPerms_[field.name()]</span>
+Explicit (x3)">                field_perm = self._acos_perms[field.name()]</span>
 <span class="line-precise" title="No Anys on this line!">                mask_field_perm = 0</span>
 <span class="line-precise" title="No Anys on this line!">                if field_perm[0] == "r":</span>
 <span class="line-precise" title="No Anys on this line!">                    mask_field_perm = mask_field_perm + 2</span>
@@ -519,16 +558,18 @@ Explicit (x3)">                field.setVisible(True)</span>
 Explicit (x3)">                field.setEditable(True)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setFromObject(self, obj: "PNTableMetaData") -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Apply permissions from a PNTableMetaData."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        tm = obj</span>
 <span class="line-precise" title="No Anys on this line!">        if not tm:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if self.acosPerms_:</span>
-<span class="line-precise" title="No Anys on this line!">            self.acosPerms_.clear()</span>
-<span class="line-precise" title="No Anys on this line!">            del self.acosPerms_</span>
+<span class="line-precise" title="No Anys on this line!">        if self._acos_perms:</span>
+<span class="line-precise" title="No Anys on this line!">            self._acos_perms.clear()</span>
+<span class="line-precise" title="No Anys on this line!">            del self._acos_perms</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        self.acosPerms_ = {}</span>
-<span class="line-empty" title="No Anys on this line!">        # self.acosPerms_.setAutoDelete(True)</span>
+<span class="line-precise" title="No Anys on this line!">        self._acos_perms = {}</span>
+<span class="line-empty" title="No Anys on this line!">        # self._acos_perms.setAutoDelete(True)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x3)">        fL = tm.fieldList()</span>
@@ -549,11 +590,15 @@ Explicit (x3)">            if it.visible():</span>
 Explicit (x3)">            if it.editable():</span>
 <span class="line-precise" title="No Anys on this line!">                permW = "w"</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            self.acosPerms_[it.name()] = "%s%s" % (permR, permW)</span>
+Explicit (x3)">            self._acos_perms[it.name()] = "%s%s" % (permR, permW)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class FLAccessControlFactory(object):</span>
+<span class="line-empty" title="No Anys on this line!">    """FLAccessControlFactory Class."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def create(self, type_: str) -&gt; "FLAccessControl":</span>
+<span class="line-empty" title="No Anys on this line!">        """Create a control instance according to the type that we pass."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if type_ is None:</span>
 <span class="line-unanalyzed" title="No Anys on this line!">            raise ValueError("type_ must be set")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -567,27 +612,29 @@ Explicit (x3)">            self.acosPerms_[it.name()] = "%s%s" % (permR, permW)<
 <span class="line-precise" title="No Anys on this line!">        raise ValueError("type_ %r unknown" % type_)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    def type(self, obj) -&gt; str:</span>
+Explicit (x1)">    def type(self, obj: Any) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Return the type of instance target."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if obj is None:</span>
-<span class="line-precise" title="No Anys on this line!">            print("NO OBJ")</span>
+Explicit (x1)">        if obj is None:</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">            logger.warning("NO OBJ")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        ret_ = ""</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x1)
-Unannotated (x1)
-Explicit (x1)">        if isinstance(obj, pncontrolsfactory.QMainWindow):</span>
+Explicit (x1)">        if isinstance(obj, QMainWindow):</span>
 <span class="line-precise" title="No Anys on this line!">            ret_ = "mainwindow"</span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x1)
-Unannotated (x3)">        elif isinstance(obj, PNTableMetaData):</span>
+Explicit (x1)
+Unannotated (x2)">        elif isinstance(obj, PNTableMetaData):</span>
 <span class="line-precise" title="No Anys on this line!">            ret_ = "table"</span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x1)
-Unannotated (x1)
-Explicit (x1)">        elif isinstance(obj, pncontrolsfactory.FLFormDB):</span>
+Explicit (x1)
+Unannotated (x2)">        elif isinstance(obj, FLFormDB):</span>
 <span class="line-precise" title="No Anys on this line!">            ret_ = "form"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        return ret_</span>

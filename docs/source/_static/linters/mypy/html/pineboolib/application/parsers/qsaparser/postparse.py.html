@@ -934,6 +934,8 @@
 <span id="L924" class="lineno"><a class="lineno" href="#L924">924</a></span>
 <span id="L925" class="lineno"><a class="lineno" href="#L925">925</a></span>
 <span id="L926" class="lineno"><a class="lineno" href="#L926">926</a></span>
+<span id="L927" class="lineno"><a class="lineno" href="#L927">927</a></span>
+<span id="L928" class="lineno"><a class="lineno" href="#L928">928</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">#!/usr/bin/python3</span>
 <span class="line-empty" title="No Anys on this line!">"""</span>
@@ -949,64 +951,56 @@
 <span class="line-empty" title="No Anys on this line!">import logging</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from . import flscriptparse</span>
-<span class="line-empty" title="No Anys on this line!">from typing import List, Type, Optional, Dict, Tuple, Any</span>
+<span class="line-empty" title="No Anys on this line!">from typing import List, Type, Optional, Dict, Tuple, Any, Callable, cast, Iterable</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">TreeData = Dict[str, Any]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">logger = logging.getLogger("flparser.postparse")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">USEFUL_TOKENS = "ID,ICONST,FCONST,SCONST,CCONST,RXCONST".split(",")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">KNOWN_PARSERS = {}</span>
+<span class="line-precise" title="No Anys on this line!">KNOWN_PARSERS: Dict[str, Type["TagObjectBase"]] = {}</span>
 <span class="line-precise" title="No Anys on this line!">UNKNOWN_PARSERS = {}</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def parse_for(*tagnames):</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x3)">def parse_for(*tagnames: str) -&gt; Callable:</span>
 <span class="line-empty" title="No Anys on this line!">    """Decorate functions for registering tags."""</span>
 <span class="line-empty" title="No Anys on this line!">    global KNOWN_PARSERS</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def decorator(fn):</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        for n in tagnames:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            KNOWN_PARSERS[n] = fn</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        return fn</span>
+<span class="line-precise" title="No Anys on this line!">    def decorator(fn: Type["TagObjectBase"]) -&gt; Type["TagObjectBase"]:</span>
+<span class="line-imprecise" title="No Anys on this line!">        for n in tagnames:</span>
+<span class="line-precise" title="No Anys on this line!">            KNOWN_PARSERS[n] = fn</span>
+<span class="line-precise" title="No Anys on this line!">        return fn</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x2)">    return decorator</span>
+<span class="line-precise" title="No Anys on this line!">    return decorator</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def parse(tagname, treedata):</span>
+<span class="line-precise" title="No Anys on this line!">def parse(tagname: str, treedata: TreeData) -&gt; "TagObject":</span>
 <span class="line-empty" title="No Anys on this line!">    """Excecute registered function for given tagname on treedata."""</span>
 <span class="line-empty" title="No Anys on this line!">    global KNOWN_PARSERS, UNKNOWN_PARSERS</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">    if tagname not in KNOWN_PARSERS:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        UNKNOWN_PARSERS[tagname] = 1</span>
+<span class="line-precise" title="No Anys on this line!">    if tagname not in KNOWN_PARSERS:</span>
+<span class="line-precise" title="No Anys on this line!">        UNKNOWN_PARSERS[tagname] = 1</span>
 <span class="line-precise" title="Any Types on this line: 
 Unannotated (x6)">        fn = parse_unknown</span>
 <span class="line-empty" title="No Anys on this line!">    else:</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x3)">        fn = KNOWN_PARSERS[tagname]</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x7)">        fn = KNOWN_PARSERS[tagname]</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">    return fn(tagname, treedata)</span>
+Unannotated (x4)">    return fn(tagname, treedata)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def getxmltagname(tagname):</span>
+<span class="line-precise" title="No Anys on this line!">def getxmltagname(tagname: str) -&gt; str:</span>
 <span class="line-empty" title="No Anys on this line!">    """Transform tag names."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    if tagname == "source":</span>
+<span class="line-precise" title="No Anys on this line!">    if tagname == "source":</span>
 <span class="line-empty" title="No Anys on this line!">        return "Source"</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    if tagname == "funcdeclaration":</span>
+<span class="line-precise" title="No Anys on this line!">    if tagname == "funcdeclaration":</span>
 <span class="line-empty" title="No Anys on this line!">        return "Function"</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    if tagname == "classdeclaration":</span>
+<span class="line-precise" title="No Anys on this line!">    if tagname == "classdeclaration":</span>
 <span class="line-empty" title="No Anys on this line!">        return "Class"</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    if tagname == "vardeclaration":</span>
+<span class="line-precise" title="No Anys on this line!">    if tagname == "vardeclaration":</span>
 <span class="line-empty" title="No Anys on this line!">        return "Variable"</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    return "Unknown.%s" % tagname</span>
+<span class="line-precise" title="No Anys on this line!">    return "Unknown.%s" % tagname</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class TagObjectBase:</span>
@@ -1015,23 +1009,21 @@ Unannotated (x1)">    return "Unknown.%s" % tagname</span>
 <span class="line-precise" title="No Anys on this line!">    tags: List[str] = []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @classmethod</span>
-<span class="line-any" title="No Anys on this line!">    def can_process_tag(cls, tagname):</span>
+<span class="line-precise" title="No Anys on this line!">    def can_process_tag(cls, tagname: str) -&gt; bool:</span>
 <span class="line-empty" title="No Anys on this line!">        """Return if tagname is in class known tags."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        return tagname in cls.tags</span>
+<span class="line-precise" title="No Anys on this line!">        return tagname in cls.tags</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def __init__(self, tagname):</span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self, tagname: str) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Create base object for processing tags."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        self.astname = tagname</span>
+<span class="line-precise" title="No Anys on this line!">        self.astname = tagname</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def add_subelem(self, argn, subelem):</span>
+<span class="line-precise" title="No Anys on this line!">    def add_subelem(self, argn: int, subelem: "TagObject") -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Abstract function for adding sub elements."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def add_value(self, argn, vtype, value):</span>
+<span class="line-precise" title="No Anys on this line!">    def add_value(self, argn: int, vtype: str, value: str) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Abstract function for adding values."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def add_other(self, argn, vtype, data):</span>
+<span class="line-precise" title="No Anys on this line!">    def add_other(self, argn: int, vtype: str, data: str) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Abstract function for adding other types of data."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -1041,18 +1033,17 @@ Unannotated (x3)">        self.astname = tagname</span>
 <span class="line-empty" title="No Anys on this line!">class TagObjectFactory(type):</span>
 <span class="line-empty" title="No Anys on this line!">    """Metaclass for registering tag processors."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def __init__(cls, name, bases, dct):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">    def __init__(cls, name: str, bases: Any, dct: Any) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Register a new class as tag processor."""</span>
 <span class="line-empty" title="No Anys on this line!">        global xml_class_types</span>
-<span class="line-any" title="Any Types on this line: 
-Omitted Generics (x1)
-Unannotated (x2)">        if issubclass(cls, TagObjectBase):</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            xml_class_types.append(cls)</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x1)">        if issubclass(cls, TagObjectBase):</span>
+<span class="line-precise" title="No Anys on this line!">            xml_class_types.append(cast(Type[TagObjectBase], cls))</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-precise" title="No Anys on this line!">            raise Exception("This metaclass must be used as a subclass of TagObjectBase")</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        super().__init__(name, bases, dct)</span>
+Explicit (x2)">        super().__init__(name, bases, dct)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class TagObject(TagObjectBase, metaclass=TagObjectFactory):</span>
@@ -1067,127 +1058,106 @@ Unannotated (x3)">        super().__init__(name, bases, dct)</span>
 <span class="line-precise" title="No Anys on this line!">    promote_child_if_alone = False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @classmethod</span>
-<span class="line-any" title="No Anys on this line!">    def tagname(self, tagname):</span>
+<span class="line-precise" title="No Anys on this line!">    def tagname(self, tagname: str) -&gt; str:</span>
 <span class="line-empty" title="No Anys on this line!">        """Return processed target tag name."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        return self.__name__</span>
+<span class="line-precise" title="No Anys on this line!">        return self.__name__</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def __init__(self, tagname):</span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self, tagname: str) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Create new processor."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        super().__init__(tagname)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)
-Unannotated (x5)">        self.xml = ElementTree.Element(self.tagname(tagname))</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        self.xmlname = None</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)
-Unannotated (x2)">        self.subelems: List[Any] = []</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        self.values: List[Tuple[str, str]] = []</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if self.name_is_first_id:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            self.xml.set("name", "")</span>
+<span class="line-precise" title="No Anys on this line!">        super().__init__(tagname)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x2)">        self.xml = ElementTree.Element(self.tagname(tagname))</span>
+<span class="line-precise" title="No Anys on this line!">        self.xmlname: Optional[str] = None</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">        self.subelems: List[Any] = []</span>
+<span class="line-precise" title="No Anys on this line!">        self.values: List[Tuple[str, str]] = []</span>
+<span class="line-precise" title="No Anys on this line!">        if self.name_is_first_id:</span>
+<span class="line-precise" title="No Anys on this line!">            self.xml.set("name", "")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def adopt_children(self, argn, subelem):</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x1)">    def adopt_children(self, argn: int, subelem: "TagObject"):</span>
 <span class="line-empty" title="No Anys on this line!">        """Simplify tree by "merging" childs into itself."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        for child in list(subelem.xml):</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            if self.set_child_argn:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                child.set("argn", str(argn))</span>
+<span class="line-precise" title="No Anys on this line!">        for child in list(subelem.xml):</span>
+<span class="line-precise" title="No Anys on this line!">            if self.set_child_argn:</span>
+<span class="line-precise" title="No Anys on this line!">                child.set("argn", str(argn))</span>
 <span class="line-empty" title="No Anys on this line!">            else:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                if "argn" in child.attrib:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                    del child.attrib["argn"]</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">            self.xml.append(child)</span>
+<span class="line-precise" title="No Anys on this line!">                if "argn" in child.attrib:</span>
+<span class="line-precise" title="No Anys on this line!">                    del child.attrib["argn"]</span>
+<span class="line-precise" title="No Anys on this line!">            self.xml.append(child)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def omit_subelem(self, argn, subelem):</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x1)">    def omit_subelem(self, argn: int, subelem: "TagObject"):</span>
 <span class="line-empty" title="No Anys on this line!">        """Abstract function. Simplifies XML by removing unwanted terms."""</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def is_in(self, listobj):</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Omitted Generics (x1)">    def is_in(self, listobj: Iterable) -&gt; bool:</span>
 <span class="line-empty" title="No Anys on this line!">        """Return if the class type appears in any of the items."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">        return self.__class__ in listobj or self.astname in listobj</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Omitted Generics (x2)">        return self.__class__ in listobj or self.astname in listobj</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def get(self, listobj, default=None):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)
+Unannotated (x1)">    def get(self, listobj: Dict[Any, str], default=None) -&gt; Any:</span>
 <span class="line-empty" title="No Anys on this line!">        """Retrieve value from list based on this class type."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        if self.__class__ in listobj:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            return listobj[self.__class__]</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        if self.astname in listobj:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            return listobj[self.astname]</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">        if self.__class__ in listobj:</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">            return listobj[self.__class__]</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">        if self.astname in listobj:</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">            return listobj[self.astname]</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">        return default</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def add_subelem(self, argn, subelem):</span>
+<span class="line-precise" title="No Anys on this line!">    def add_subelem(self, argn: int, subelem: "TagObject") -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Add a new XML child."""</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x1)">        if subelem.is_in(self.omit_tags):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        if subelem.is_in(self.omit_tags):</span>
+Unannotated (x2)">            return self.omit_subelem(argn, subelem)</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x1)">        if subelem.is_in(self.adopt_childs_tags):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">            return self.omit_subelem(argn, subelem)</span>
+Unannotated (x2)">            return self.adopt_children(argn, subelem)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        if subelem.is_in(self.adopt_childs_tags):</span>
+Explicit (x4)
+Unannotated (x1)">        callback = subelem.get(self.callback_subelem)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">            return self.adopt_children(argn, subelem)</span>
+Explicit (x1)">        if callback:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">        callback = subelem.get(self.callback_subelem)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if callback:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x5)
-Unannotated (x4)">            return getattr(self, callback)(argn, subelem)</span>
+Explicit (x6)">            return getattr(self, callback)(argn, subelem)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if self.set_child_argn:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">            subelem.xml.set("argn", str(argn))</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">        self.xml.append(subelem.xml)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        self.subelems.append(subelem)</span>
+<span class="line-precise" title="No Anys on this line!">        if self.set_child_argn:</span>
+<span class="line-precise" title="No Anys on this line!">            subelem.xml.set("argn", str(argn))</span>
+<span class="line-precise" title="No Anys on this line!">        self.xml.append(subelem.xml)</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">        self.subelems.append(subelem)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def add_value(self, argn, vtype, value):</span>
+<span class="line-precise" title="No Anys on this line!">    def add_value(self, argn: int, vtype: str, value: str) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Add a new XML value."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">        self.values.append((vtype, value))</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">        if vtype == "ID" and self.name_is_first_id and self.xmlname is None:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            self.xmlname = value</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">            self.xml.set("name", value)</span>
+<span class="line-precise" title="No Anys on this line!">        self.values.append((vtype, value))</span>
+<span class="line-precise" title="No Anys on this line!">        if vtype == "ID" and self.name_is_first_id and self.xmlname is None:</span>
+<span class="line-precise" title="No Anys on this line!">            self.xmlname = value</span>
+<span class="line-precise" title="No Anys on this line!">            self.xml.set("name", value)</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x9)">        self.xml.set("arg%02d" % argn, vtype + ":" + repr(value))</span>
+<span class="line-precise" title="No Anys on this line!">        self.xml.set("arg%02d" % argn, vtype + ":" + repr(value))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def add_other(self, argn, vtype, data):</span>
+<span class="line-precise" title="No Anys on this line!">    def add_other(self, argn: int, vtype: str, data: str) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Add extra data to XML."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if self.debug_other:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">            self.xml.set("arg%02d" % argn, vtype)</span>
+<span class="line-precise" title="No Anys on this line!">        if self.debug_other:</span>
+<span class="line-precise" title="No Anys on this line!">            self.xml.set("arg%02d" % argn, vtype)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def polish(self):</span>
+<span class="line-precise" title="No Anys on this line!">    def polish(self) -&gt; "TagObject":</span>
 <span class="line-empty" title="No Anys on this line!">        """Clean up the structure by removing or merging some data."""</span>
+<span class="line-precise" title="No Anys on this line!">        if self.promote_child_if_alone:</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">            if len(self.values) == 0 and len(self.subelems) == 1:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if self.promote_child_if_alone:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            if len(self.values) == 0 and len(self.subelems) == 1:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">                return self.subelems[0]</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        return self</span>
+Explicit (x2)">                return self.subelems[0]</span>
+<span class="line-precise" title="No Anys on this line!">        return self</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class ListObject(TagObject):</span>
@@ -1288,10 +1258,8 @@ Unannotated (x1)">        return self</span>
 <span class="line-empty" title="No Anys on this line!">    """Process Function tags."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    tags = ["funcdeclaration"]</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">    callback_subelem = ListNamedObject.callback_subelem.copy()</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">    callback_subelem[VariableType] = "add_vartype"</span>
+<span class="line-precise" title="No Anys on this line!">    callback_subelem = ListNamedObject.callback_subelem.copy()</span>
+<span class="line-precise" title="No Anys on this line!">    callback_subelem[VariableType] = "add_vartype"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def add_vartype(self, argn, subelem):</span>
 <span class="line-empty" title="No Anys on this line!">        """Add returns notation."""</span>
@@ -1315,10 +1283,8 @@ Unannotated (x6)">        self.xml.set("returns", str(subelem.xmlname))</span>
 <span class="line-empty" title="No Anys on this line!">    """Process Variable tags."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    tags = ["vardecl"]</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">    callback_subelem = NamedObject.callback_subelem.copy()</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">    callback_subelem[VariableType] = "add_vartype"</span>
+<span class="line-precise" title="No Anys on this line!">    callback_subelem = NamedObject.callback_subelem.copy()</span>
+<span class="line-precise" title="No Anys on this line!">    callback_subelem[VariableType] = "add_vartype"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def add_vartype(self, argn, subelem):</span>
 <span class="line-empty" title="No Anys on this line!">        """Add type notation."""</span>
@@ -1352,10 +1318,8 @@ Unannotated (x1)">        return self</span>
 <span class="line-empty" title="No Anys on this line!">    """Process Class tags."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    tags = ["classdeclaration"]</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">    callback_subelem = ListNamedObject.callback_subelem.copy()</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">    callback_subelem[ExtendsType] = "add_exttype"</span>
+<span class="line-precise" title="No Anys on this line!">    callback_subelem = ListNamedObject.callback_subelem.copy()</span>
+<span class="line-precise" title="No Anys on this line!">    callback_subelem[ExtendsType] = "add_exttype"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def add_exttype(self, argn, subelem):</span>
 <span class="line-empty" title="No Anys on this line!">        """Add extends notation."""</span>
@@ -1442,46 +1406,27 @@ Unannotated (x6)">        self.xml.set("extends", str(subelem.xmlname))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    tags = ["constant"]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def add_value(self, argn, vtype, value):</span>
+<span class="line-precise" title="No Anys on this line!">    def add_value(self, argn: int, vtype: str, value: str) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Add value notation."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        value = str(value)  # str(value,"ISO-8859-15","replace")</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if vtype == "SCONST":</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            vtype = "String"</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            value = value[1:-1]</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            self.xml.set("delim", '"')</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if vtype == "CCONST":</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            vtype = "String"</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            value = value[1:-1]</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            self.xml.set("delim", "'")</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if vtype == "RCONST":</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            vtype = "Regex"</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if vtype == "ICONST":</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            vtype = "Number"</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if vtype == "FCONST":</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            vtype = "Number"</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        self.const_value = value</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        self.const_type = vtype</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        self.xml.set("type", vtype)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        self.xml.set("value", value)</span>
+<span class="line-precise" title="No Anys on this line!">        value = str(value)  # str(value,"ISO-8859-15","replace")</span>
+<span class="line-precise" title="No Anys on this line!">        if vtype == "SCONST":</span>
+<span class="line-precise" title="No Anys on this line!">            vtype = "String"</span>
+<span class="line-precise" title="No Anys on this line!">            value = value[1:-1]</span>
+<span class="line-precise" title="No Anys on this line!">            self.xml.set("delim", '"')</span>
+<span class="line-precise" title="No Anys on this line!">        if vtype == "CCONST":</span>
+<span class="line-precise" title="No Anys on this line!">            vtype = "String"</span>
+<span class="line-precise" title="No Anys on this line!">            value = value[1:-1]</span>
+<span class="line-precise" title="No Anys on this line!">            self.xml.set("delim", "'")</span>
+<span class="line-precise" title="No Anys on this line!">        if vtype == "RCONST":</span>
+<span class="line-precise" title="No Anys on this line!">            vtype = "Regex"</span>
+<span class="line-precise" title="No Anys on this line!">        if vtype == "ICONST":</span>
+<span class="line-precise" title="No Anys on this line!">            vtype = "Number"</span>
+<span class="line-precise" title="No Anys on this line!">        if vtype == "FCONST":</span>
+<span class="line-precise" title="No Anys on this line!">            vtype = "Number"</span>
+<span class="line-precise" title="No Anys on this line!">        self.const_value = value</span>
+<span class="line-precise" title="No Anys on this line!">        self.const_type = vtype</span>
+<span class="line-precise" title="No Anys on this line!">        self.xml.set("type", vtype)</span>
+<span class="line-precise" title="No Anys on this line!">        self.xml.set("value", value)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class InlineUpdate(ListObject):</span>
@@ -1719,16 +1664,15 @@ Unannotated (x1)">def create_xml(tagname) -&gt; Optional[TagObject]:</span>
 <span class="line-precise" title="No Anys on this line!">    classobj = None</span>
 <span class="line-precise" title="No Anys on this line!">    for cls in xml_class_types:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        if cls.can_process_tag(tagname):</span>
+Unannotated (x1)">        if cls.can_process_tag(tagname):</span>
 <span class="line-precise" title="No Anys on this line!">            classobj = cls</span>
 <span class="line-empty" title="No Anys on this line!">            break</span>
 <span class="line-precise" title="No Anys on this line!">    if classobj is None:</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-precise" title="Any Types on this line: 
-Omitted Generics (x1)
-Unannotated (x1)">    if issubclass(classobj, TagObject):</span>
+Omitted Generics (x1)">    if issubclass(classobj, TagObject):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        return classobj(tagname)</span>
+Unannotated (x1)">        return classobj(tagname)</span>
 <span class="line-empty" title="No Anys on this line!">    else:</span>
 <span class="line-precise" title="No Anys on this line!">        raise ValueError("Unexpected class %s" % classobj)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -1747,40 +1691,35 @@ Unannotated (x4)">    for k, v in treedata["content"]:</span>
 Explicit (x1)
 Unannotated (x1)">        if type(v) is dict:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x7)">            instruction = parse(k, v)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">            xmlelem.add_subelem(i, instruction)</span>
+Unannotated (x2)">            instruction = parse(k, v)</span>
+<span class="line-precise" title="No Anys on this line!">            xmlelem.add_subelem(i, instruction)</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">        elif k in USEFUL_TOKENS:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x7)">            xmlelem.add_value(i, k, v)</span>
+Unannotated (x2)">            xmlelem.add_value(i, k, v)</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x7)">            xmlelem.add_other(i, k, v)</span>
+Unannotated (x2)">            xmlelem.add_other(i, k, v)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        i += 1</span>
+<span class="line-precise" title="No Anys on this line!">    return xmlelem.polish()</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    return xmlelem.polish()</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def post_parse(treedata):</span>
+Unannotated (x1)">def post_parse(treedata: TreeData):</span>
 <span class="line-empty" title="No Anys on this line!">    """Parse a xml. Convenience function."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">    source = parse("source", treedata)</span>
+<span class="line-precise" title="No Anys on this line!">    source = parse("source", treedata)</span>
 <span class="line-empty" title="No Anys on this line!">    # print UNKNOWN_PARSERS.keys()</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    return source.xml</span>
+<span class="line-precise" title="No Anys on this line!">    return source.xml</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class Module(object):</span>
 <span class="line-empty" title="No Anys on this line!">    """Python code tester. Deprecated."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def __init__(self, name, path):</span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self, name: str, path: str) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Create Module."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        self.name = name</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        self.path = path</span>
+<span class="line-precise" title="No Anys on this line!">        self.name = name</span>
+<span class="line-precise" title="No Anys on this line!">        self.path = path</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def loadModule(self):</span>
 <span class="line-empty" title="No Anys on this line!">        """Import and return Python file."""</span>
@@ -1814,7 +1753,8 @@ Explicit (x4)">            logger.exception("Unexpected exception on loadModule"
 <span class="line-precise" title="No Anys on this line!">        return result</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def parseArgs(argv):</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">def parseArgs(argv: List[str]) -&gt; Tuple[Any, List[str]]:</span>
 <span class="line-empty" title="No Anys on this line!">    """Define parsing arguments for the program."""</span>
 <span class="line-precise" title="No Anys on this line!">    parser = OptionParser()</span>
 <span class="line-any" title="Any Types on this line: 
@@ -1861,12 +1801,11 @@ Unannotated (x2)">    parser.add_option("--strict", action="store_true", dest="s
 Explicit (x2)
 Unannotated (x2)">    parser.add_option("--python-ext", dest="python_ext", default=".qs.py", help="Change Python file extension (default: '.qs.py')")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    (options, args) = parser.parse_args(argv)</span>
+<span class="line-precise" title="No Anys on this line!">    (options, args) = parser.parse_args(argv)</span>
 <span class="line-precise" title="No Anys on this line!">    return (options, args)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def main():</span>
+<span class="line-precise" title="No Anys on this line!">def main() -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">    """Run the program from command line."""</span>
 <span class="line-precise" title="No Anys on this line!">    log_format = "%(asctime)s - %(levelname)s: %(name)s: %(message)s"</span>
 <span class="line-precise" title="No Anys on this line!">    logging.basicConfig(format=log_format, level=0)</span>
@@ -1874,23 +1813,22 @@ Unannotated (x1)">    (options, args) = parser.parse_args(argv)</span>
 <span class="line-precise" title="No Anys on this line!">    blib_logger.setLevel(logging.WARNING)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">    options, args = parseArgs(sys.argv[1:])</span>
+Explicit (x3)">    options, args = parseArgs(sys.argv[1:])</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">    execute(options, args)</span>
+Explicit (x2)">    execute(options, args)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def pythonify(filelist):</span>
+<span class="line-precise" title="No Anys on this line!">def pythonify(filelist: List[str]) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">    """Convert to python the files included in the list."""</span>
-<span class="line-any" title="Any Types on this line: 
-Omitted Generics (x1)
-Unannotated (x1)">    if not isinstance(filelist, list):</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x1)">    if not isinstance(filelist, list):</span>
 <span class="line-precise" title="No Anys on this line!">        raise ValueError("First argument must be a list")</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">    options, args = parseArgs([])</span>
+Explicit (x3)">    options, args = parseArgs([])</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    options.full = True</span>
+Explicit (x2)">    options.full = True</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">    execute(options, filelist)</span>
+Explicit (x2)">    execute(options, filelist)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">def pythonify2(filename: str, known_refs: Dict[str, Tuple[str, str]] = {}) -&gt; str:</span>
@@ -1900,75 +1838,76 @@ Unannotated (x5)">    execute(options, filelist)</span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)
 Explicit (x1)">    filecontent = open(filename, "r", encoding="latin-1").read()</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">    prog = flscriptparse.parse(filecontent)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    if not prog:</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x3)">    prog = flscriptparse.parse(filecontent)</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">    if not prog:</span>
 <span class="line-precise" title="No Anys on this line!">        raise Exception("Parse failed")</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">    if prog["error_count"] &gt; 0:</span>
+Explicit (x3)">    if prog["error_count"] &gt; 0:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        raise Exception("Found %d errors parsing %r" % (prog["error_count"], filename))</span>
+Explicit (x2)">        raise Exception("Found %d errors parsing %r" % (prog["error_count"], filename))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">    tree_data: TreeData = flscriptparse.calctree(prog, alias_mode=0)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x9)">    tree_data = flscriptparse.calctree(prog, alias_mode=0)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">    ast = post_parse(tree_data)</span>
+Unannotated (x3)">    ast = post_parse(tree_data)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    return pythonize2(ast, known_refs)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def execute(options, args):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">def execute(options: Any, args: List[str]) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">    """Execute conversion orders given by options and args. Can be used to emulate program calls."""</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application.parsers.qsaparser import pytnyzer</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    pytnyzer.STRICT_MODE = options.strict</span>
+Explicit (x2)">    pytnyzer.STRICT_MODE = options.strict</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    if options.full:</span>
+Explicit (x2)">    if options.full:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        execpython = options.exec_python</span>
+Explicit (x3)">        execpython = options.exec_python</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        options.exec_python = False</span>
+Explicit (x2)">        options.exec_python = False</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        options.full = False</span>
+Explicit (x2)">        options.full = False</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        options.toxml = True</span>
+Explicit (x2)">        options.toxml = True</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">        logger.info("Pass 1 - Parse and write XML file . . .")</span>
 <span class="line-empty" title="No Anys on this line!">        try:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">            execute(options, args)</span>
+Explicit (x2)">            execute(options, args)</span>
 <span class="line-precise" title="No Anys on this line!">        except Exception:</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">            logger.exception("Error parseando:")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        options.toxml = False</span>
+Explicit (x2)">        options.toxml = False</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        options.topython = True</span>
+Explicit (x2)">        options.topython = True</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">        logger.info("Pass 2 - Pythonize and write PY file . . .")</span>
 <span class="line-empty" title="No Anys on this line!">        try:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x9)">            execute(options, [arg + ".xml" for arg in args])</span>
+Explicit (x2)">            execute(options, [arg + ".xml" for arg in args])</span>
 <span class="line-precise" title="No Anys on this line!">        except Exception:</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">            logger.exception("Error convirtiendo:")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if execpython:</span>
+Explicit (x1)">        if execpython:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            options.exec_python = execpython</span>
+Explicit (x3)">            options.exec_python = execpython</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">            logger.info("Pass 3 - Test PY file load . . .")</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            options.topython = False</span>
+Explicit (x2)">            options.topython = False</span>
 <span class="line-empty" title="No Anys on this line!">            try:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x13)">                execute(options, [(arg + ".xml.py").replace(".qs.xml.py", options.python_ext) for arg in args])</span>
+Explicit (x4)">                execute(options, [(arg + ".xml.py").replace(".qs.xml.py", options.python_ext) for arg in args])</span>
 <span class="line-precise" title="No Anys on this line!">            except Exception:</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">                logger.exception("Error al ejecutar Python:")</span>
@@ -1976,167 +1915,134 @@ Explicit (x4)">                logger.exception("Error al ejecutar Python:")</sp
 Explicit (x4)">        logger.debug("Done.")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    elif options.exec_python:</span>
+Explicit (x2)">    elif options.exec_python:</span>
 <span class="line-empty" title="No Anys on this line!">        # import qsatype</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        for filename in args:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            realpath = os.path.realpath(filename)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">            path, name = os.path.split(realpath)</span>
-<span class="line-any" title="Any Types on this line: 
-Omitted Generics (x1)
-Unannotated (x1)">            if not os.path.exists(realpath):</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x1)">                logger.error("Fichero no existe: %s" % name)</span>
+<span class="line-precise" title="No Anys on this line!">        for filename in args:</span>
+<span class="line-precise" title="No Anys on this line!">            realpath = os.path.realpath(filename)</span>
+<span class="line-precise" title="No Anys on this line!">            path, name = os.path.split(realpath)</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x1)">            if not os.path.exists(realpath):</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">                logger.error("Fichero no existe: %s" % name)</span>
 <span class="line-empty" title="No Anys on this line!">                continue</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            mod = Module(name, path)</span>
+<span class="line-precise" title="No Anys on this line!">            mod = Module(name, path)</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">            if not mod.loadModule():</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x1)">                logger.error("Error cargando modulo %s" % name)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">                logger.error("Error cargando modulo %s" % name)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    elif options.topython:</span>
+Explicit (x2)">    elif options.topython:</span>
 <span class="line-empty" title="No Anys on this line!">        from .pytnyzer import pythonize</span>
 <span class="line-empty" title="No Anys on this line!">        import io</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if options.cache:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            args = [</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">                x</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                for x in args</span>
+Explicit (x2)">        if options.cache:</span>
+<span class="line-precise" title="No Anys on this line!">            args = [</span>
+<span class="line-precise" title="No Anys on this line!">                x</span>
+<span class="line-precise" title="No Anys on this line!">                for x in args</span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x1)
-Unannotated (x6)">                if not os.path.exists((x + ".py").replace(".qs.xml.py", options.python_ext))</span>
+Explicit (x2)">                if not os.path.exists((x + ".py").replace(".qs.xml.py", options.python_ext))</span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x2)
-Unannotated (x7)">                or os.path.getmtime(x) &gt; os.path.getctime((x + ".py").replace(".qs.xml.py", options.python_ext))</span>
+Explicit (x2)">                or os.path.getmtime(x) &gt; os.path.getctime((x + ".py").replace(".qs.xml.py", options.python_ext))</span>
 <span class="line-empty" title="No Anys on this line!">            ]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        nfs = len(args)</span>
+<span class="line-precise" title="No Anys on this line!">        for nf, filename in enumerate(args):</span>
+<span class="line-precise" title="No Anys on this line!">            bname = os.path.basename(filename)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        nfs = len(args)</span>
+Explicit (x2)">            if options.storepath:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        for nf, filename in enumerate(args):</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            bname = os.path.basename(filename)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            if options.storepath:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                destname = os.path.join(options.storepath, bname + ".py")</span>
+Explicit (x2)">                destname = os.path.join(options.storepath, bname + ".py")</span>
 <span class="line-empty" title="No Anys on this line!">            else:</span>
+<span class="line-precise" title="No Anys on this line!">                destname = filename + ".py"</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                destname = filename + ".py"</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            destname = destname.replace(".qs.xml.py", options.python_ext)</span>
-<span class="line-any" title="Any Types on this line: 
-Omitted Generics (x1)
-Unannotated (x1)">            if not os.path.exists(filename):</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x1)">                logger.error("Fichero %r no encontrado" % filename)</span>
+Explicit (x2)">            destname = destname.replace(".qs.xml.py", options.python_ext)</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x1)">            if not os.path.exists(filename):</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">                logger.error("Fichero %r no encontrado" % filename)</span>
 <span class="line-empty" title="No Anys on this line!">                continue</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x1)">            logger.debug("Pythonizing File: %-35s . . . .        (%.1f%%)" % (bname, 100.0 * (nf + 1.0) / nfs))</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">            logger.debug("Pythonizing File: %-35s . . . .        (%.1f%%)" % (bname, 100.0 * (nf + 1.0) / nfs))</span>
 <span class="line-precise" title="No Anys on this line!">            old_stderr = sys.stdout</span>
 <span class="line-precise" title="No Anys on this line!">            stream = io.StringIO()</span>
 <span class="line-precise" title="No Anys on this line!">            sys.stdout = stream</span>
 <span class="line-empty" title="No Anys on this line!">            try:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                pythonize(filename, destname, destname + ".debug")</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x3)">                pythonize(filename, destname, destname + ".debug")</span>
 <span class="line-precise" title="No Anys on this line!">            except Exception:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x1)">                logger.exception("Error al pythonificar %r:" % filename)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">                logger.exception("Error al pythonificar %r:" % filename)</span>
 <span class="line-precise" title="No Anys on this line!">            sys.stdout = old_stderr</span>
 <span class="line-precise" title="No Anys on this line!">            text = stream.getvalue()</span>
 <span class="line-precise" title="No Anys on this line!">            if len(text) &gt; 2:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x2)">                logger.info("%s: " % bname + ("\n%s: " % bname).join(text.splitlines()))</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">                logger.info("%s: " % bname + ("\n%s: " % bname).join(text.splitlines()))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    else:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if options.cache:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x9)
+Explicit (x2)">        if options.cache:</span>
+<span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x3)">            args = [x for x in args if not os.path.exists(x + ".xml") or os.path.getmtime(x) &gt; os.path.getctime(x + ".xml")]</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        nfs = len(args)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        for nf, filename in enumerate(args):</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            bname = os.path.basename(filename)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x1)">            logger.debug("Parsing File: %-35s . . . .        (%.1f%%)" % (bname, 100.0 * (nf + 1.0) / nfs))</span>
+<span class="line-precise" title="No Anys on this line!">        nfs = len(args)</span>
+<span class="line-precise" title="No Anys on this line!">        for nf, filename in enumerate(args):</span>
+<span class="line-precise" title="No Anys on this line!">            bname = os.path.basename(filename)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">            logger.debug("Parsing File: %-35s . . . .        (%.1f%%)" % (bname, 100.0 * (nf + 1.0) / nfs))</span>
 <span class="line-empty" title="No Anys on this line!">            try:</span>
-<span class="line-any" title="Any Types on this line: 
+<span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)
-Explicit (x1)
-Unannotated (x1)">                filecontent = open(filename, "r", encoding="latin-1").read()</span>
+Explicit (x1)">                filecontent = open(filename, "r", encoding="latin-1").read()</span>
 <span class="line-precise" title="No Anys on this line!">            except Exception:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x1)">                logger.exception("Error: No se pudo abrir fichero %s", filename)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">                logger.exception("Error: No se pudo abrir fichero %s", filename)</span>
+<span class="line-empty" title="No Anys on this line!">                continue</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x3)">            prog = flscriptparse.parse(filecontent)</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">            if not prog:</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">                logger.error("Error: No se pudo abrir %s" % (repr(filename)))</span>
 <span class="line-empty" title="No Anys on this line!">                continue</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">            prog = flscriptparse.parse(filecontent)</span>
+Explicit (x3)">            if prog["error_count"] &gt; 0:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            if not prog:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x1)">                logger.error("Error: No se pudo abrir %s" % (repr(filename)))</span>
+Explicit (x6)">                logger.error("Encontramos %d errores parseando: %-35s" % (prog["error_count"], repr(filename)))</span>
 <span class="line-empty" title="No Anys on this line!">                continue</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            if prog["error_count"] &gt; 0:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x3)">                logger.error("Encontramos %d errores parseando: %-35s" % (prog["error_count"], repr(filename)))</span>
-<span class="line-empty" title="No Anys on this line!">                continue</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            if not options.toxml:</span>
+Explicit (x2)">            if not options.toxml:</span>
 <span class="line-empty" title="No Anys on this line!">                # Si no se quiere guardar resultado, no hace falta calcular mas</span>
 <span class="line-empty" title="No Anys on this line!">                continue</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            tree_data = None</span>
 <span class="line-empty" title="No Anys on this line!">            try:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x9)">                tree_data = flscriptparse.calctree(prog, alias_mode=0)</span>
-<span class="line-precise" title="No Anys on this line!">            except Exception:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x1)">                logger.exception("Error al convertir a XML %r:" % bname)</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">            if not tree_data:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x1)">                logger.error("No se pudo parsear %s" % (repr(filename)))</span>
+Explicit (x2)">                tree_data = flscriptparse.calctree(prog, alias_mode=0)</span>
+<span class="line-precise" title="No Anys on this line!">            except Exception:</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">                logger.exception("Error al convertir a XML %r:" % bname)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            if not tree_data:</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">                logger.error("No se pudo parsear %s" % (repr(filename)))</span>
 <span class="line-empty" title="No Anys on this line!">                continue</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">            ast = post_parse(tree_data)</span>
+Unannotated (x3)">            ast = post_parse(tree_data)</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">            if ast is None:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x1)">                logger.error("No se pudo analizar %s" % (repr(filename)))</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x4)">                logger.error("No se pudo analizar %s" % (repr(filename)))</span>
 <span class="line-empty" title="No Anys on this line!">                continue</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            if options.storepath:</span>
+Explicit (x2)">            if options.storepath:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                destname = os.path.join(options.storepath, bname + ".xml")</span>
+Explicit (x2)">                destname = os.path.join(options.storepath, bname + ".xml")</span>
 <span class="line-empty" title="No Anys on this line!">            else:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                destname = filename + ".xml"</span>
+<span class="line-precise" title="No Anys on this line!">                destname = filename + ".xml"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x6)
@@ -2149,8 +2055,7 @@ Unimported (x1)">                f.write(xml_str)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">if __name__ == "__main__":</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    main()</span>
+<span class="line-precise" title="No Anys on this line!">    main()</span>
 </pre></td>
 </tr></tbody>
 </table>

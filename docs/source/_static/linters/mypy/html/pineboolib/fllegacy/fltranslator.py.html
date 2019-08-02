@@ -185,13 +185,15 @@ Explicit (x4)">        self.translation_from_qm = config.value("ebcomportamiento
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)
 Explicit (x1)">    def loadTsContent(self, key) -&gt; Any:</span>
-<span class="line-precise" title="No Anys on this line!">        if project.conn is None:</span>
-<span class="line-unanalyzed" title="No Anys on this line!">            raise Exception("Project is not connected yet")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">            raise Exception("Project is not connected yet")</span>
 <span class="line-precise" title="No Anys on this line!">        if self.idM_ == "sys":</span>
 <span class="line-precise" title="No Anys on this line!">            ts_file = filedir("../share/pineboo/translations/%s.%s" % (self.idM_, self.lang_))</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-precise" title="No Anys on this line!">            ts_file = filedir(</span>
 <span class="line-any" title="Any Types on this line: 
+Explicit (x6)
 Unannotated (x1)">                "%s/cache/%s/%s/file.ts/%s.%s/%s" % (project.tmpdir, project.conn.DBName(), self.idM_, self.idM_, self.lang_, key)</span>
 <span class="line-empty" title="No Anys on this line!">            )</span>
 <span class="line-empty" title="No Anys on this line!">        # qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"</span>

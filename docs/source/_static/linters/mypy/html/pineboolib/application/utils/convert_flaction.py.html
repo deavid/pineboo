@@ -82,11 +82,11 @@
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x3)">    if action.name() not in project.actions.keys():</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">    if action.name() not in project.actions.keys():</span>
 <span class="line-precise" title="No Anys on this line!">        raise KeyError("Action %s not loaded in current project" % action.name())</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">    return project.actions[action.name()]</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">    return project.actions[action.name()]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">def convert2FLAction(action: Union[str, "XMLAction"]) -&gt; "FLAction":</span>
@@ -105,14 +105,14 @@ Omitted Generics (x1)">    if isinstance(action, str):</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    if project.conn is None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        raise Exception("Project is not connected yet")</span>
+Explicit (x2)">    if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">        raise Exception("Project is not connected yet")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x2)">    logger.trace("convert2FLAction: Load action from db manager")</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">    flaction = project.conn.manager().action(name)</span>
+Explicit (x7)">    flaction = project.conn.manager().action(name)</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x2)">    logger.trace("convert2FLAction: done")</span>
 <span class="line-any" title="Any Types on this line: 

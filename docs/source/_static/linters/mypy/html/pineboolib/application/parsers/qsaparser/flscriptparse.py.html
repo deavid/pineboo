@@ -941,6 +941,14 @@
 <span id="L931" class="lineno"><a class="lineno" href="#L931">931</a></span>
 <span id="L932" class="lineno"><a class="lineno" href="#L932">932</a></span>
 <span id="L933" class="lineno"><a class="lineno" href="#L933">933</a></span>
+<span id="L934" class="lineno"><a class="lineno" href="#L934">934</a></span>
+<span id="L935" class="lineno"><a class="lineno" href="#L935">935</a></span>
+<span id="L936" class="lineno"><a class="lineno" href="#L936">936</a></span>
+<span id="L937" class="lineno"><a class="lineno" href="#L937">937</a></span>
+<span id="L938" class="lineno"><a class="lineno" href="#L938">938</a></span>
+<span id="L939" class="lineno"><a class="lineno" href="#L939">939</a></span>
+<span id="L940" class="lineno"><a class="lineno" href="#L940">940</a></span>
+<span id="L941" class="lineno"><a class="lineno" href="#L941">941</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
 <span class="line-empty" title="No Anys on this line!">Simple parser for FacturaLUX Scripting Language (QSA).</span>
@@ -951,12 +959,14 @@
 <span class="line-empty" title="No Anys on this line!">import math</span>
 <span class="line-empty" title="No Anys on this line!">import hashlib</span>
 <span class="line-empty" title="No Anys on this line!">import re</span>
-<span class="line-empty" title="No Anys on this line!">from typing import Any, Dict, List</span>
+<span class="line-empty" title="No Anys on this line!">from typing import Any, Dict, List, Tuple, Optional, TextIO</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">import ply.yacc as yacc  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!">import ply.lex as lex  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from . import flex</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">TreeData = Dict[str, Any]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">tempDir = "/tmp"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -969,13 +979,12 @@
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">endoffile = None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">hashes: List[Tuple[str, str]] = []</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Explicit (x2)">hashes: List[Any] = []</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x2)">ranges: List[Any] = []</span>
+Explicit (x2)">ranges: List[List[Any]] = []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">seen_tokens = []</span>
-<span class="line-precise" title="No Anys on this line!">tokelines: Dict[str, int] = {}</span>
+<span class="line-precise" title="No Anys on this line!">tokelines: Dict[int, int] = {}</span>
 <span class="line-precise" title="No Anys on this line!">last_lexspan = None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">precedence = (</span>
@@ -999,109 +1008,98 @@ Explicit (x2)">last_error_token: Any = None</span>
 <span class="line-precise" title="No Anys on this line!">ok_count = 0</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def cleanNoPython(data):</span>
+<span class="line-precise" title="No Anys on this line!">def cleanNoPython(data: str) -&gt; str:</span>
 <span class="line-empty" title="No Anys on this line!">    """Remove NOPYTHON blocks."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    return re.sub(r"\/\/___NOPYTHON\[\[.*?\/\/\]\]___NOPYTHON\s*", "", data, flags=re.DOTALL)</span>
+<span class="line-precise" title="No Anys on this line!">    return re.sub(r"\/\/___NOPYTHON\[\[.*?\/\/\]\]___NOPYTHON\s*", "", data, flags=re.DOTALL)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def cleanNoPythonNever(data):</span>
+<span class="line-precise" title="No Anys on this line!">def cleanNoPythonNever(data: str) -&gt; str:</span>
 <span class="line-empty" title="No Anys on this line!">    """Remove NOPYTHON_NEVER blocks."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    return re.sub(r"\/\/___NOPYTHON_NEVER\[\[.*?\/\/\]\]___NOPYTHON_NEVER\s*", "", data, flags=re.DOTALL)</span>
+<span class="line-precise" title="No Anys on this line!">    return re.sub(r"\/\/___NOPYTHON_NEVER\[\[.*?\/\/\]\]___NOPYTHON_NEVER\s*", "", data, flags=re.DOTALL)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def cnvrt(val):</span>
+<span class="line-precise" title="No Anys on this line!">def cnvrt(val: str) -&gt; str:</span>
 <span class="line-empty" title="No Anys on this line!">    """Convert special XML characters into XML entities."""</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    val = str(val)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">    val = val.replace("&amp;", "&amp;amp;")</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">    val = val.replace('"', "&amp;quot;")</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">    val = val.replace("'", "&amp;apos;")</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">    val = val.replace("&lt;", "&amp;lt;")</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">    val = val.replace("&gt;", "&amp;gt;")</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    return val</span>
+<span class="line-precise" title="No Anys on this line!">    val = str(val)</span>
+<span class="line-precise" title="No Anys on this line!">    val = val.replace("&amp;", "&amp;amp;")</span>
+<span class="line-precise" title="No Anys on this line!">    val = val.replace('"', "&amp;quot;")</span>
+<span class="line-precise" title="No Anys on this line!">    val = val.replace("'", "&amp;apos;")</span>
+<span class="line-precise" title="No Anys on this line!">    val = val.replace("&lt;", "&amp;lt;")</span>
+<span class="line-precise" title="No Anys on this line!">    val = val.replace("&gt;", "&amp;gt;")</span>
+<span class="line-precise" title="No Anys on this line!">    return val</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def p_parse(token):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">def p_parse(token: Any) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">    """Parse a single token."""</span>
 <span class="line-empty" title="No Anys on this line!">    global input_data</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">    lexspan = list(token.lexspan(0))</span>
+Explicit (x3)">    lexspan: List[int] = list(token.lexspan(0))</span>
 <span class="line-empty" title="No Anys on this line!">    # data = str(token.lexer.lexdata[lexspan[0]:lexspan[1]])</span>
 <span class="line-empty" title="No Anys on this line!">    # context = [</span>
 <span class="line-empty" title="No Anys on this line!">    #     str(token.lexer.lexdata[lexspan[0] - 32:lexspan[0]]),</span>
 <span class="line-empty" title="No Anys on this line!">    #     str(token.lexer.lexdata[lexspan[0]:lexspan[1]]),</span>
 <span class="line-empty" title="No Anys on this line!">    #     str(token.lexer.lexdata[lexspan[1]:lexspan[1] + 32]),</span>
 <span class="line-empty" title="No Anys on this line!">    # ]</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">    if len(lexspan) == 2:</span>
+<span class="line-precise" title="No Anys on this line!">    if len(lexspan) == 2:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        fromline = token.lineno(0)</span>
+Explicit (x4)">        fromline = token.lineno(0)</span>
 <span class="line-empty" title="No Anys on this line!">        global endoffile</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">        endoffile = fromline, lexspan, token.slice[0]</span>
+Explicit (x6)">        endoffile = fromline, lexspan, token.slice[0]</span>
 <span class="line-empty" title="No Anys on this line!">    # print(repr(token.slice), context, lexspan)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    token[0] = {</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        "00-toktype": str(token.slice[0]),</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">        "02-size": lexspan,</span>
+Explicit (x2)">    tok0: Dict[str, Any] = {</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">        "50-contents": [{"01-type": s.type, "99-value": s.value} for s in token.slice[1:]],</span>
+Explicit (x3)">        "00-toktype": str(token.slice[0]),</span>
+<span class="line-precise" title="No Anys on this line!">        "02-size": lexspan,</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x8)">        "50-contents": [{"01-type": s.type, "99-value": s.value} for s in token.slice[1:]],</span>
 <span class="line-empty" title="No Anys on this line!">    }</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">    token[0] = tok0</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">    for n in reversed(range(len(token[0]["50-contents"]))):</span>
+Explicit (x2)">    for n in reversed(range(len(tok0["50-contents"]))):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        contents = token[0]["50-contents"][n]</span>
+Explicit (x4)">        contents = tok0["50-contents"][n]</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">        if contents["01-type"] == token[0]["00-toktype"]:</span>
+Explicit (x5)">        if contents["01-type"] == tok0["00-toktype"]:</span>
 <span class="line-empty" title="No Anys on this line!">            # If the first element is same type, unpack left. This is for recursing lists</span>
 <span class="line-empty" title="No Anys on this line!">            # Makes tree calculation faster and less recursive.</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">            token[0]["50-contents"][n : n + 1] = contents["99-value"]["50-contents"]</span>
+Explicit (x5)">            tok0["50-contents"][n : n + 1] = contents["99-value"]["50-contents"]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x11)">    numelems = len([s for s in token.slice[1:] if s.type != "empty" and s.value is not None])</span>
+Explicit (x11)">    numelems: int = len([s for s in token.slice[1:] if s.type != "empty" and s.value is not None])</span>
 <span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    rspan = lexspan[0]</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">    rspan = lexspan[0]</span>
+Explicit (x3)">    if str(token.slice[0]) == "empty" or numelems == 0:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">    if str(token.slice[0]) == "empty" or numelems == 0:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        token[0] = None</span>
+Explicit (x1)">        token[0] = None</span>
 <span class="line-empty" title="No Anys on this line!">    else:</span>
 <span class="line-precise" title="No Anys on this line!">        rvalues = []</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x7)">        for n, s in enumerate(token.slice[1:]):</span>
+Explicit (x7)">        for n, s in enumerate(token.slice[1:]):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">            if s.type != "empty" and s.value is not None:</span>
+Explicit (x6)">            if s.type != "empty" and s.value is not None:</span>
 <span class="line-precise" title="No Anys on this line!">                val = None</span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x1)
-Unannotated (x2)">                if isinstance(s.value, str):</span>
+Explicit (x2)">                if isinstance(s.value, str):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">                    val = token.lexspan(n + 1)[0] + len(s.value) - 1</span>
+Explicit (x8)">                    val = token.lexspan(n + 1)[0] + len(s.value) - 1</span>
 <span class="line-empty" title="No Anys on this line!">                else:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">                    val = token.lexspan(n + 1)[1]</span>
+Explicit (x5)">                    val = token.lexspan(n + 1)[1]</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">                rvalues.append(val)</span>
+Explicit (x3)">                rvalues.append(val)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)
-Explicit (x3)">        rspan = max(rvalues)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    lexspan[1] = rspan</span>
+Explicit (x5)">        rspan = max(rvalues)</span>
+<span class="line-precise" title="No Anys on this line!">    lexspan[1] = rspan</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    # if str(token.slice[0]) == 'regexbody':</span>
 <span class="line-empty" title="No Anys on this line!">    #    token[0] = { "00-toktype": str(token.slice[0]) , "02-size" : lexspan,  "50-contents" :  input_data[lexspan[0]:lexspan[1]+1] }</span>
@@ -1111,22 +1109,20 @@ Unannotated (x2)">    lexspan[1] = rspan</span>
 <span class="line-empty" title="No Anys on this line!">    #    print "      " + "\n      ".join([ "%s(%r): %r" % (s.type, token.lexspan(n+1), s.value) for n,s in enumerate(token.slice[1:]) ])</span>
 <span class="line-empty" title="No Anys on this line!">    global seen_tokens, last_ok_token</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)
-Explicit (x1)">    last_ok_token = token</span>
+Explicit (x2)">    last_ok_token = token</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x13)">    seen_tokens.append((str(token.slice[0]), token.lineno(0), input_data[lexspan[0] : lexspan[1] + 1]))</span>
+Explicit (x8)">    seen_tokens.append((str(token.slice[0]), token.lineno(0), input_data[lexspan[0] : lexspan[1] + 1]))</span>
 <span class="line-empty" title="No Anys on this line!">    global ok_count</span>
 <span class="line-precise" title="No Anys on this line!">    ok_count += 1</span>
+<span class="line-precise" title="No Anys on this line!">    if lexspan[0] not in tokelines:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    if lexspan[0] not in tokelines:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        tokelines[lexspan[0]] = token.lexer.lineno</span>
+Explicit (x3)">        tokelines[lexspan[0]] = token.lexer.lineno</span>
 <span class="line-empty" title="No Anys on this line!">    global last_lexspan</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x2)">    last_lexspan = lexspan</span>
+<span class="line-precise" title="No Anys on this line!">    last_lexspan = lexspan</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def p_error(t):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">def p_error(t: Any) -&gt; Any:</span>
 <span class="line-empty" title="No Anys on this line!">    """Process and report errors in parsing."""</span>
 <span class="line-empty" title="No Anys on this line!">    global error_count</span>
 <span class="line-empty" title="No Anys on this line!">    global ok_count</span>
@@ -1135,25 +1131,24 @@ Unannotated (x2)">    last_lexspan = lexspan</span>
 <span class="line-precise" title="No Anys on this line!">    debug = False  # Poner a True para toneladas de debug.</span>
 <span class="line-empty" title="No Anys on this line!">    # if error_count == 0: print</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    if t is not None:</span>
+Explicit (x1)">    if t is not None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)
-Explicit (x6)">        if last_error_token is None or t.lexpos != getattr(last_error_token, "lexpos", None):</span>
+Explicit (x10)">        if last_error_token is None or t.lexpos != getattr(last_error_token, "lexpos", None):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">            if abs(last_error_line - t.lineno) &gt; 4 and ok_count &gt; 1 and error_count &lt; 4:</span>
+Explicit (x8)">            if abs(last_error_line - t.lineno) &gt; 4 and ok_count &gt; 1 and error_count &lt; 4:</span>
 <span class="line-precise" title="No Anys on this line!">                error_count += 1</span>
 <span class="line-empty" title="No Anys on this line!">                try:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                    print_context(t)</span>
+Explicit (x2)">                    print_context(t)</span>
 <span class="line-precise" title="No Anys on this line!">                except Exception:</span>
 <span class="line-empty" title="No Anys on this line!">                    pass</span>
 <span class="line-precise" title="No Anys on this line!">                if debug:</span>
 <span class="line-precise" title="No Anys on this line!">                    error_count += 20  # no imprimir mas de un error en debug.</span>
 <span class="line-precise" title="No Anys on this line!">                    print()</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">                    for tokname, tokln, tokdata in seen_tokens[-32:]:</span>
+Explicit (x3)">                    for tokname, tokln, tokdata in seen_tokens[-32:]:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                        if tokln == t.lineno:</span>
+Explicit (x4)">                        if tokln == t.lineno:</span>
 <span class="line-precise" title="No Anys on this line!">                            print(tokname, tokdata)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                    if last_ok_token:</span>
@@ -1164,11 +1159,11 @@ Explicit (x4)">                        for s in last_ok_token.slice[:]:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x5)">                            print("&gt;&gt;&gt;", s.lineno, repr(s), pprint.pformat(s.value, depth=3))</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                last_error_line = t.lineno</span>
+Explicit (x2)">                last_error_line = t.lineno</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">            elif abs(last_error_line - t.lineno) &gt; 1 and ok_count &gt; 1:</span>
+Explicit (x8)">            elif abs(last_error_line - t.lineno) &gt; 1 and ok_count &gt; 1:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                last_error_line = t.lineno</span>
+Explicit (x2)">                last_error_line = t.lineno</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x3)">            parser.errok()</span>
 <span class="line-precise" title="No Anys on this line!">            ok_count = 0</span>
@@ -1176,21 +1171,18 @@ Unimported (x3)">            parser.errok()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    ok_count = 0</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    if t is None:</span>
+Explicit (x1)">    if t is None:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">        if last_error_token != "EOF":</span>
 <span class="line-precise" title="No Anys on this line!">            print("ERROR: End of the file reached.")</span>
 <span class="line-empty" title="No Anys on this line!">            global endoffile</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x3)">            print("Last data:", endoffile)</span>
+Explicit (x2)">            print("Last data:", endoffile)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">            if last_lexspan:</span>
+<span class="line-precise" title="No Anys on this line!">            if last_lexspan:</span>
 <span class="line-empty" title="No Anys on this line!">                try:</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">                    print("HINT: Last lexspan:", last_lexspan)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                    print("HINT: Last line:", tokelines[last_lexspan[0]])</span>
+<span class="line-precise" title="No Anys on this line!">                    print("HINT: Last lexspan:", last_lexspan)</span>
+<span class="line-precise" title="No Anys on this line!">                    print("HINT: Last line:", tokelines[last_lexspan[0]])</span>
 <span class="line-precise" title="No Anys on this line!">                except Exception as e:</span>
 <span class="line-precise" title="No Anys on this line!">                    print("ERROR:", e)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -1198,18 +1190,17 @@ Explicit (x1)">        last_error_token = "EOF"</span>
 <span class="line-precise" title="No Anys on this line!">        return t</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x3)
-Unannotated (x1)">    t = parser.token()</span>
+Explicit (x1)">    t = parser.token()</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x3)">    parser.restart()</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)
-Explicit (x1)">    last_error_token = t</span>
+Explicit (x2)">    last_error_token = t</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    return t</span>
+Explicit (x1)">    return t</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
-Unannotated (x2)">p_parse.__doc__ = """</span>
+Explicit (x1)">p_parse.__doc__ = """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    inlinestoreinstruction  : PLUSPLUS variable</span>
 <span class="line-empty" title="No Anys on this line!">                            | MINUSMINUS variable</span>
@@ -1578,32 +1569,35 @@ Unimported (x4)">parser = yacc.yacc(method="LALR", debug=0, optimize=1, write_ta
 <span class="line-precise" title="No Anys on this line!">input_data = ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def print_context(token):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">def print_context(token: Any) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">    """Report errors in console when parsing fails."""</span>
 <span class="line-empty" title="No Anys on this line!">    global input_data</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    if token is None:</span>
+Explicit (x1)">    if token is None:</span>
 <span class="line-empty" title="No Anys on this line!">        return</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    last_cr = input_data.rfind("\n", 0, token.lexpos)</span>
+Explicit (x2)">    last_cr = input_data.rfind("\n", 0, token.lexpos)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    next_cr = input_data.find("\n", token.lexpos)</span>
+Explicit (x2)">    next_cr = input_data.find("\n", token.lexpos)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">    column = token.lexpos - last_cr</span>
+Explicit (x4)">    column = token.lexpos - last_cr</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">    column1 = token.lexpos - last_cr</span>
+Explicit (x4)">    column1 = token.lexpos - last_cr</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    while column1 &lt; 16:</span>
+Explicit (x2)">    while column1 &lt; 16:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        column1 = token.lexpos - last_cr</span>
+Explicit (x4)">        column1 = token.lexpos - last_cr</span>
 <span class="line-precise" title="No Anys on this line!">        last_cr = input_data.rfind("\n", 0, last_cr - 1)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    print(input_data[last_cr:next_cr].replace("\t", " "))</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">    print((" " * (column - 1)) + "^", column, "#ERROR#", token)</span>
+Explicit (x6)">    print((" " * (column - 1)) + "^", column, "#ERROR#", token)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def my_tokenfunc(*args, **kwargs):</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x2)
+Explicit (x1)">def my_tokenfunc(*args, **kwargs) -&gt; Any:</span>
 <span class="line-empty" title="No Anys on this line!">    """Tokenizer function."""</span>
 <span class="line-empty" title="No Anys on this line!">    # print("Call token:" ,args, kwargs)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -1614,36 +1608,38 @@ Unannotated (x2)">    ret = lex.lexer.token(*args, **kwargs)</span>
 Unimported (x1)">    return ret</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def print_tokentree(token, depth=0):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">def print_tokentree(token: Any, depth: int = 0) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">    """Debug output. Unused."""</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">    print("  " * depth, token.__class__, "=", token)</span>
+Explicit (x3)">    print("  " * depth, token.__class__, "=", token)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    if str(token.__class__) == "ply.yacc.YaccProduction":</span>
+Explicit (x2)">    if str(token.__class__) == "ply.yacc.YaccProduction":</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        print(token.lexer)</span>
+Explicit (x2)">        print(token.lexer)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        for tk in token.slice:</span>
+Explicit (x3)">        for tk in token.slice:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            if tk.value == token:</span>
+Explicit (x4)">            if tk.value == token:</span>
 <span class="line-empty" title="No Anys on this line!">                continue</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">            print("  " * (depth + 1), tk.type, end=" ")</span>
+Explicit (x2)">            print("  " * (depth + 1), tk.type, end=" ")</span>
 <span class="line-empty" title="No Anys on this line!">            try:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                print(tk.lexpos, end=" ")</span>
+Explicit (x2)">                print(tk.lexpos, end=" ")</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                print(tk.endlexpos, end=" ")</span>
+Explicit (x2)">                print(tk.endlexpos, end=" ")</span>
 <span class="line-precise" title="No Anys on this line!">            except Exception:</span>
 <span class="line-empty" title="No Anys on this line!">                pass</span>
 <span class="line-precise" title="No Anys on this line!">            print()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">            print_tokentree(tk.value, depth + 1)</span>
+Explicit (x3)">            print_tokentree(tk.value, depth + 1)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">def calctree(obj: Dict[str, Any], depth: int = 0, num: List[str] = [], otype: str = "source", alias_mode: int = 1) -&gt; TreeData:</span>
 <span class="line-empty" title="No Anys on this line!">    """Extract parsed AST and generate a custom structure for later XML generation."""</span>
 <span class="line-empty" title="No Anys on this line!">    # if depth &gt; 5: return</span>
 <span class="line-empty" title="No Anys on this line!">    # source_data = [</span>
@@ -1656,16 +1652,14 @@ Unannotated (x8)">            print_tokentree(tk.value, depth + 1)</span>
 <span class="line-empty" title="No Anys on this line!">    # ]</span>
 <span class="line-precise" title="No Anys on this line!">    final_obj = {}</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">    final_obj["range"] = obj["02-size"]</span>
+Explicit (x3)">    final_obj["range"] = obj["02-size"]</span>
 <span class="line-precise" title="No Anys on this line!">    has_data = 0</span>
 <span class="line-precise" title="No Anys on this line!">    has_objects = 0</span>
 <span class="line-precise" title="No Anys on this line!">    contentlist = []</span>
 <span class="line-precise" title="No Anys on this line!">    ctype_alias: Dict[str, str]</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    if alias_mode == 0:</span>
+<span class="line-precise" title="No Anys on this line!">    if alias_mode == 0:</span>
 <span class="line-precise" title="No Anys on this line!">        ctype_alias = {}</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    elif alias_mode == 1:</span>
+<span class="line-precise" title="No Anys on this line!">    elif alias_mode == 1:</span>
 <span class="line-precise" title="No Anys on this line!">        ctype_alias = {</span>
 <span class="line-empty" title="No Anys on this line!">            "member_var": "member",</span>
 <span class="line-empty" title="No Anys on this line!">            "member_call": "member",</span>
@@ -1679,20 +1673,18 @@ Unannotated (x2)">    elif alias_mode == 1:</span>
 <span class="line-empty" title="No Anys on this line!">    else:</span>
 <span class="line-precise" title="No Anys on this line!">        raise ValueError("alias_mode unknown")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    if otype in ctype_alias:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        otype = ctype_alias[otype]</span>
+<span class="line-precise" title="No Anys on this line!">    if otype in ctype_alias:</span>
+<span class="line-precise" title="No Anys on this line!">        otype = ctype_alias[otype]</span>
 <span class="line-empty" title="No Anys on this line!">    # print " " * depth , obj['02-size']</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">    for n, content in enumerate(obj["50-contents"]):</span>
+Explicit (x6)">    for n, content in enumerate(obj["50-contents"]):</span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x1)
-Unannotated (x1)">        if not isinstance(content, dict):</span>
+Explicit (x1)">        if not isinstance(content, dict):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            print("ERROR: content is not a dict!:", repr(content))</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            print(".. obj:", repr(obj))</span>
+Explicit (x1)">            print("ERROR: content is not a dict!:", repr(content))</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">            print(".. obj:", repr(obj))</span>
 <span class="line-precise" title="No Anys on this line!">            raise TypeError("content is not a dict")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        ctype = content["01-type"]</span>
@@ -1709,58 +1701,50 @@ Unannotated (x1)">            print(".. obj:", repr(obj))</span>
 Explicit (x1)">        if type(value) is dict:</span>
 <span class="line-empty" title="No Anys on this line!">            # print "*"</span>
 <span class="line-empty" title="No Anys on this line!">            # FIXME: Esto o no parsea todos los elementos o hace stackoverflow. problematico para programas largos</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            if depth &lt; 150:</span>
+<span class="line-precise" title="No Anys on this line!">            if depth &lt; 150:</span>
 <span class="line-empty" title="No Anys on this line!">                try:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x13)">                    tree_obj = calctree(value, depth + 1, num + [str(n)], ctype, alias_mode=alias_mode)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">                    tree_obj = calctree(value, depth + 1, num + [str(n)], ctype, alias_mode=alias_mode)</span>
 <span class="line-precise" title="No Anys on this line!">                except Exception as e:</span>
 <span class="line-precise" title="No Anys on this line!">                    print("ERROR: trying to calculate member:", e)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">                    tree_obj = None</span>
+<span class="line-empty" title="No Anys on this line!">                    continue</span>
 <span class="line-empty" title="No Anys on this line!">            else:</span>
 <span class="line-precise" title="No Anys on this line!">                print("PANIC: *** Stack overflow trying to calculate member %d on:" % n, ctype)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">                tree_obj = None</span>
+<span class="line-empty" title="No Anys on this line!">                continue</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)
-Unannotated (x1)">            if type(tree_obj) is dict:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x7)">                if (tree_obj["has_data"] or alias_mode == 0) and ctype != otype:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">                    contentlist.append([ctype, tree_obj])</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">            if type(tree_obj) is dict:</span>
+<span class="line-precise" title="No Anys on this line!">                if (tree_obj["has_data"] or alias_mode == 0) and ctype != otype:</span>
+<span class="line-precise" title="No Anys on this line!">                    contentlist.append([ctype, tree_obj])</span>
 <span class="line-precise" title="No Anys on this line!">                    has_objects += 1</span>
 <span class="line-empty" title="No Anys on this line!">                else:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                    contentlist += tree_obj["content"]</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                    has_data += tree_obj["has_data"]</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                    has_objects += tree_obj["has_objects"]</span>
+<span class="line-precise" title="No Anys on this line!">                    contentlist += tree_obj["content"]</span>
+<span class="line-precise" title="No Anys on this line!">                    has_data += tree_obj["has_data"]</span>
+<span class="line-precise" title="No Anys on this line!">                    has_objects += tree_obj["has_objects"]</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-empty" title="No Anys on this line!">            # print "=", repr(value)</span>
 <span class="line-precise" title="No Anys on this line!">            contentlist.append([ctype, value])</span>
 <span class="line-precise" title="No Anys on this line!">            has_data += 1</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">    final_obj["content"] = contentlist</span>
+Explicit (x1)">    final_obj["content"] = contentlist</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">    final_obj["has_data"] = has_data</span>
+Explicit (x1)">    final_obj["has_data"] = has_data</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">    final_obj["has_objects"] = has_objects</span>
+Explicit (x1)">    final_obj["has_objects"] = has_objects</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">    return final_obj</span>
+Explicit (x1)">    return final_obj</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x4)">def printtree(</span>
+<span class="line-unanalyzed" title="No Anys on this line!">    tree: Dict[str, Any], depth: int = 0, otype: str = "source", mode: Optional[str] = None, output: TextIO = sys.stdout</span>
+<span class="line-empty" title="No Anys on this line!">) -&gt; Tuple[Any, Any, Any]:</span>
 <span class="line-empty" title="No Anys on this line!">    """Export AST into different formats, mainly used for XML export."""</span>
 <span class="line-empty" title="No Anys on this line!">    global hashes, ranges</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    if depth == 0:</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">        hashes = []</span>
+<span class="line-precise" title="No Anys on this line!">    if depth == 0:</span>
+<span class="line-precise" title="No Anys on this line!">        hashes = []</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x1)">        ranges = []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -1774,51 +1758,47 @@ Explicit (x1)">        ranges = []</span>
 <span class="line-precise" title="No Anys on this line!">    closingtokens = ["RBRACE", "RPAREN", "RBRACKET", "SEMI"]</span>
 <span class="line-precise" title="No Anys on this line!">    nuevalinea = False</span>
 <span class="line-precise" title="No Anys on this line!">    name = ""</span>
-<span class="line-precise" title="No Anys on this line!">    lines = []</span>
+<span class="line-precise" title="No Anys on this line!">    lines: List[str] = []</span>
 <span class="line-precise" title="No Anys on this line!">    L = 0</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">    for ctype, value in tree["content"]:</span>
+Explicit (x4)">    for ctype, value in tree["content"]:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if nuevalinea and ctype in closingtokens:</span>
+Explicit (x1)">        if nuevalinea and ctype in closingtokens:</span>
 <span class="line-precise" title="No Anys on this line!">            nuevalinea = False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if nuevalinea:</span>
 <span class="line-precise" title="No Anys on this line!">            for i in range(int(math.ceil(L / 2.0))):</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                lines.append(sep * depth)</span>
+<span class="line-precise" title="No Anys on this line!">                lines.append(sep * depth)</span>
 <span class="line-precise" title="No Anys on this line!">            nuevalinea = False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)
-Explicit (x1)">        if type(value) is dict and ctype == otype:</span>
+Explicit (x5)">        if type(value) is dict and ctype == otype:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x13)">            tname, tlines, trange = printtree(value, depth, ctype)</span>
+Explicit (x12)">            tname, tlines, trange = printtree(value, depth, ctype)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            if name == "" and tname:</span>
+Explicit (x2)">            if name == "" and tname:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">                name = tname</span>
+Explicit (x1)">                name = tname</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            lines += tlines</span>
+Explicit (x1)">            lines += tlines</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)
-Unannotated (x1)">        elif type(value) is dict:</span>
+Explicit (x2)">        elif type(value) is dict:</span>
 <span class="line-precise" title="No Anys on this line!">            L = 0</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            if ctype in marginblocks:</span>
+Explicit (x1)">            if ctype in marginblocks:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">                L = marginblocks[ctype]</span>
+Explicit (x1)">                L = marginblocks[ctype]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            for i in range(int(math.floor(L / 2.0))):</span>
+<span class="line-precise" title="No Anys on this line!">                lines.append(sep * depth)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                lines.append(sep * depth)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x14)">            tname, tlines, trange = printtree(value, depth + 1, ctype)</span>
+Explicit (x12)">            tname, tlines, trange = printtree(value, depth + 1, ctype)</span>
 <span class="line-empty" title="No Anys on this line!">            # lines.append(sep * depth + "&lt;!-- %d --&gt;" % (len("".join(tlines))))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">            if value["has_data"] &gt; 0 and value["has_objects"] == 0 and False:</span>
+Explicit (x8)">            if value["has_data"] &gt; 0 and value["has_objects"] == 0 and False:</span>
 <span class="line-empty" title="No Anys on this line!">                pass</span>
 <span class="line-empty" title="No Anys on this line!">                # Do it inline!</span>
 <span class="line-empty" title="No Anys on this line!">                # if value["has_data"] == 1 and tname:</span>
@@ -1829,22 +1809,20 @@ Unannotated (x8)">            if value["has_data"] &gt; 0 and value["has_objects
 <span class="line-empty" title="No Anys on this line!">            else:</span>
 <span class="line-precise" title="No Anys on this line!">                attrs = []</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">                if tname:</span>
+Explicit (x1)">                if tname:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">                    attrs.append(("id", tname))</span>
+Explicit (x3)">                    attrs.append(("id", tname))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">                txtinline = "".join([line.strip() for line in tlines])</span>
+Explicit (x5)">                txtinline = "".join([line.strip() for line in tlines])</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">                # if len(tlines)&gt;1:</span>
 <span class="line-precise" title="No Anys on this line!">                txthash = hashlib.sha1(txtinline.encode("utf8")).hexdigest()[:16]</span>
 <span class="line-empty" title="No Anys on this line!">                # hashes.append(("depth:",depth,"hash:",txthash,"element:",ctype+":"+tname))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)
-Unannotated (x5)">                hashes.append((txthash, ctype + ":" + tname + "(%d)" % len(txtinline)))</span>
+Explicit (x5)">                hashes.append((txthash, ctype + ":" + tname + "(%d)" % len(txtinline)))</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)
-Unannotated (x8)">                ranges.append([depth, txthash] + trange + [ctype + ":" + tname, len(txtinline)])</span>
+Explicit (x9)">                ranges.append([depth, txthash] + trange + [ctype + ":" + tname, len(txtinline)])</span>
 <span class="line-empty" title="No Anys on this line!">                # ,"start:",trange[0],"end:",trange[1]))</span>
 <span class="line-empty" title="No Anys on this line!">                # attrs.append(("start",trange[0]))</span>
 <span class="line-empty" title="No Anys on this line!">                # attrs.append(("end",trange[1]))</span>
@@ -1852,95 +1830,79 @@ Unannotated (x8)">                ranges.append([depth, txthash] + trange + [cty
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">                txtattrs = ""</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                for name1, val1 in attrs:</span>
+Explicit (x2)">                for name1, val1 in attrs:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                    txtattrs += ' %s="%s"' % (name1, cnvrt(val1))</span>
+Explicit (x1)">                    txtattrs += ' %s="%s"' % (name1, cnvrt(val1))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">                lines.append(sep * depth + "&lt;%s%s&gt;" % (ctype, txtattrs))</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                if depth &gt; 50:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">                    lines.append(sep * (depth + 1) + "...")</span>
+Explicit (x1)">                lines.append(sep * depth + "&lt;%s%s&gt;" % (ctype, txtattrs))</span>
+<span class="line-precise" title="No Anys on this line!">                if depth &gt; 50:</span>
+<span class="line-precise" title="No Anys on this line!">                    lines.append(sep * (depth + 1) + "...")</span>
 <span class="line-empty" title="No Anys on this line!">                else:</span>
 <span class="line-precise" title="No Anys on this line!">                    if len(txtinline) &lt; 80:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">                        lines.append(sep * (depth + 1) + txtinline)</span>
+<span class="line-precise" title="No Anys on this line!">                        lines.append(sep * (depth + 1) + txtinline)</span>
 <span class="line-empty" title="No Anys on this line!">                    else:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                        lines += tlines</span>
+Explicit (x1)">                        lines += tlines</span>
 <span class="line-precise" title="No Anys on this line!">                if txtattrs:</span>
 <span class="line-precise" title="No Anys on this line!">                    txtattrs = "&lt;!--%s --&gt;" % txtattrs</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">                lines.append(sep * depth + "&lt;/%s&gt;" % (ctype))</span>
+Explicit (x1)">                lines.append(sep * depth + "&lt;/%s&gt;" % (ctype))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">                nuevalinea = True</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            if ctype == "ID" and name == "":</span>
+Explicit (x3)">            if ctype == "ID" and name == "":</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">                name = value</span>
+Explicit (x1)">                name = value</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            if ctype in flex.token_literals:</span>
+Explicit (x1)">            if ctype in flex.token_literals:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x10)">                lines.append(sep * depth + '&lt;%s value="%s" /&gt;' % (ctype, cnvrt(value)))</span>
+Explicit (x2)">                lines.append(sep * depth + '&lt;%s value="%s" /&gt;' % (ctype, cnvrt(value)))</span>
 <span class="line-empty" title="No Anys on this line!">            else:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">                lines.append(sep * depth + "&lt;%s /&gt;" % (ctype))</span>
+Explicit (x1)">                lines.append(sep * depth + "&lt;%s /&gt;" % (ctype))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    if mode == "hash":</span>
+<span class="line-precise" title="No Anys on this line!">    if mode == "hash":</span>
 <span class="line-empty" title="No Anys on this line!">        # print "\n".join(lines)</span>
-<span class="line-any" title="Any Types on this line: 
+<span class="line-imprecise" title="Any Types on this line: 
 Explicit (x7)">        for row in sorted(ranges):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)
 Explicit (x3)">            output.write("\t".join([str(x) for x in row]))</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            output.write("\n")</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            output.flush()</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    if mode == "xml":</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)
-Unannotated (x1)">        for row in lines:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)
-Explicit (x1)">            output.write(row)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            output.write("\n")</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            output.flush()</span>
+<span class="line-precise" title="No Anys on this line!">            output.write("\n")</span>
+<span class="line-precise" title="No Anys on this line!">            output.flush()</span>
+<span class="line-precise" title="No Anys on this line!">    if mode == "xml":</span>
+<span class="line-precise" title="No Anys on this line!">        for strrow in lines:</span>
+<span class="line-precise" title="No Anys on this line!">            output.write(strrow)</span>
+<span class="line-precise" title="No Anys on this line!">            output.write("\n")</span>
+<span class="line-precise" title="No Anys on this line!">            output.flush()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">    return name, lines, tree["range"]</span>
+Explicit (x2)">    return name, lines, tree["range"]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def parse(data, clean=True):</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">def parse(data: str, clean: bool = True) -&gt; Optional[Dict[str, Any]]:</span>
 <span class="line-empty" title="No Anys on this line!">    """Parse QS String."""</span>
 <span class="line-empty" title="No Anys on this line!">    global input_data</span>
 <span class="line-empty" title="No Anys on this line!">    global error_count</span>
 <span class="line-empty" title="No Anys on this line!">    global seen_tokens</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    if clean:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        data = cleanNoPythonNever(data)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        data = cleanNoPython(data)</span>
+<span class="line-precise" title="No Anys on this line!">    if clean:</span>
+<span class="line-precise" title="No Anys on this line!">        data = cleanNoPythonNever(data)</span>
+<span class="line-precise" title="No Anys on this line!">        data = cleanNoPython(data)</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">    seen_tokens[:] = []</span>
+Explicit (x1)">    seen_tokens[:] = []</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x2)">    parser.error = 0</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    input_data = data</span>
+<span class="line-precise" title="No Anys on this line!">    input_data = data</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x2)">    flex.lexer.lineno = 1</span>
 <span class="line-precise" title="No Anys on this line!">    error_count = 0</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x4)
-Unannotated (x4)">    p = parser.parse(data, debug=0, tracking=1, tokenfunc=my_tokenfunc)</span>
+Unannotated (x2)
+Explicit (x1)">    p = parser.parse(data, debug=0, tracking=1, tokenfunc=my_tokenfunc)</span>
 <span class="line-precise" title="No Anys on this line!">    if error_count &gt; 0:</span>
 <span class="line-precise" title="No Anys on this line!">        print("ERRORS (%d)" % error_count)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -1960,12 +1922,10 @@ Unimported (x1)">    if parser.error:</span>
 Unimported (x1)">    return p</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">def main():</span>
+<span class="line-precise" title="No Anys on this line!">def main() -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">    """Manage direct script calls for flscriptparse. Deprecated."""</span>
 <span class="line-empty" title="No Anys on this line!">    global start</span>
 <span class="line-precise" title="No Anys on this line!">    parser = OptionParser()</span>
-<span class="line-empty" title="No Anys on this line!">    # parser.add_option("-f", "--file", dest="filename",</span>
-<span class="line-empty" title="No Anys on this line!">    #                  help="write report to FILE", metavar="FILE")</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)
 Unannotated (x2)">    parser.add_option("-O", "--output", dest="output", default="none", help="Set output TYPE: xml|hash", metavar="TYPE")</span>
@@ -1975,11 +1935,9 @@ Unannotated (x2)">    parser.add_option("--start", dest="start", default=None, h
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)
 Unannotated (x2)">    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)
 Unannotated (x2)">    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)
 Unannotated (x2)">    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")</span>
@@ -1998,44 +1956,45 @@ Explicit (x1)">        start = options.start</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">        if options.output == "none":</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">        tree_data = calctree(prog)</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">        tree_data = calctree(prog)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">        if options.output == "hash":</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">            printtree(tree_data, mode="hash")</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x7)">            printtree(tree_data, mode="hash")</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">        elif options.output == "xml":</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">            printtree(tree_data, mode="xml")</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x7)">            printtree(tree_data, mode="xml")</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">        elif options.output == "file":</span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)
 Explicit (x1)">            f1_hash = open(filename + ".hash", "w")</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">            printtree(tree_data, mode="hash", output=f1_hash)</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x7)">            printtree(tree_data, mode="hash", output=f1_hash)</span>
 <span class="line-precise" title="No Anys on this line!">            f1_hash.close()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)
 Explicit (x1)">            f1_xml = open(filename + ".xml", "w")</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">            printtree(tree_data, mode="xml", output=f1_xml)</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x7)">            printtree(tree_data, mode="xml", output=f1_xml)</span>
 <span class="line-precise" title="No Anys on this line!">            f1_xml.close()</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">        elif options.output == "yaml":</span>
 <span class="line-empty" title="No Anys on this line!">            import yaml</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
+<span class="line-precise" title="Any Types on this line: 
 Explicit (x2)
-Unannotated (x25)">            print(yaml.safe_dump(tree_data["content"]))</span>
+Unannotated (x23)">            print(yaml.safe_dump(tree_data["content"]))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">            print("Unknown outputmode", options.output)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    prog = "$$$"</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">    prog: Dict[str, Any]</span>
 <span class="line-precise" title="No Anys on this line!">    if len(args) &gt; 0:</span>
 <span class="line-precise" title="No Anys on this line!">        for filename in args:</span>
 <span class="line-precise" title="No Anys on this line!">            fs = filename.split("/")</span>
@@ -2046,15 +2005,18 @@ Omitted Generics (x1)
 Explicit (x1)">            data = open(filename).read()</span>
 <span class="line-precise" title="No Anys on this line!">            sys.stderr.write(" parsing ...")</span>
 <span class="line-precise" title="No Anys on this line!">            sys.stderr.flush()</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            prog = parse(data)</span>
-<span class="line-precise" title="No Anys on this line!">            sys.stderr.write(" formatting ...")</span>
-<span class="line-precise" title="No Anys on this line!">            sys.stderr.flush()</span>
-<span class="line-precise" title="No Anys on this line!">            if prog:</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x3)">            prog_ = parse(data)</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">            if prog_ is not None:</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">                prog = prog_</span>
+<span class="line-precise" title="No Anys on this line!">                sys.stderr.write(" formatting ...")</span>
+<span class="line-precise" title="No Anys on this line!">                sys.stderr.flush()</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">                do_it()</span>
-<span class="line-precise" title="No Anys on this line!">            sys.stderr.write(" Done.\n")</span>
-<span class="line-precise" title="No Anys on this line!">            sys.stderr.flush()</span>
+<span class="line-precise" title="No Anys on this line!">                sys.stderr.write(" Done.\n")</span>
+<span class="line-precise" title="No Anys on this line!">                sys.stderr.flush()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    else:</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -2070,19 +2032,29 @@ Explicit (x1)">                line1 = input("flscript&gt; ")</span>
 <span class="line-precise" title="No Anys on this line!">                        print("Start setted to:", start)</span>
 <span class="line-precise" title="No Anys on this line!">                    if comm[0] == "parse":</span>
 <span class="line-precise" title="No Anys on this line!">                        print()</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                        prog = parse(line)</span>
 <span class="line-precise" title="No Anys on this line!">                        line = ""</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x3)">                        prog_ = parse(line)</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">                        if prog_ is None:</span>
+<span class="line-empty" title="No Anys on this line!">                            continue</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">                        prog = prog_</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">                else:</span>
 <span class="line-precise" title="No Anys on this line!">                    line += line1</span>
 <span class="line-precise" title="No Anys on this line!">            except EOFError:</span>
 <span class="line-empty" title="No Anys on this line!">                break</span>
 <span class="line-precise" title="No Anys on this line!">            line += "\n"</span>
 <span class="line-precise" title="No Anys on this line!">        print()</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x3)">        prog_ = parse(line)</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">        if prog_ is not None:</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">            prog = prog_</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        prog = parse(line)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        do_it()</span>
+Unannotated (x2)">            do_it()</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    import yaml</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -2099,8 +2071,7 @@ Unannotated (x2)">        do_it()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">if __name__ == "__main__":</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    main()</span>
+<span class="line-precise" title="No Anys on this line!">    main()</span>
 </pre></td>
 </tr></tbody>
 </table>

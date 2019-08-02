@@ -1,3 +1,4 @@
+   code/pineboolib/application/connections
    code/pineboolib/application/database/index
    code/pineboolib/application/database/pnbuffer
    code/pineboolib/application/database/pnconnection
@@ -40,6 +41,11 @@
    code/pineboolib/application/parsers/qt3uiparser/index
    code/pineboolib/application/projectmodule
    code/pineboolib/application/proxy
+   code/pineboolib/application/qsadictmodules
+   code/pineboolib/application/qsatypes/date
+   code/pineboolib/application/qsatypes/index
+   code/pineboolib/application/qsatypes/sysbasetype
+   code/pineboolib/application/safeqsa
    code/pineboolib/application/tests/index
    code/pineboolib/application/tests/test_types
    code/pineboolib/application/types
@@ -56,10 +62,12 @@
    code/pineboolib/core/decorators
    code/pineboolib/core/error_manager
    code/pineboolib/core/exceptions
+   code/pineboolib/core/garbage_collector
    code/pineboolib/core/index
    code/pineboolib/core/message_manager
    code/pineboolib/core/parsetable
    code/pineboolib/core/settings
+   code/pineboolib/core/system
    code/pineboolib/core/utils/get_table_obj
    code/pineboolib/core/utils/index
    code/pineboolib/core/utils/logging
@@ -67,6 +75,7 @@
    code/pineboolib/core/utils/struct
    code/pineboolib/core/utils/utils_base
    code/pineboolib/fllegacy/aqsobjects/aqboolflagstate
+   code/pineboolib/fllegacy/aqsobjects/aqformdb
    code/pineboolib/fllegacy/aqsobjects/aqods
    code/pineboolib/fllegacy/aqsobjects/aqs
    code/pineboolib/fllegacy/aqsobjects/aqsettings
@@ -77,7 +86,6 @@
    code/pineboolib/fllegacy/aqsobjects/aqsqlquery
    code/pineboolib/fllegacy/aqsobjects/aqutil
    code/pineboolib/fllegacy/aqsobjects/index
-   code/pineboolib/fllegacy/filedialog
    code/pineboolib/fllegacy/flaccesscontrol
    code/pineboolib/fllegacy/flaccesscontrolfactory
    code/pineboolib/fllegacy/flaccesscontrollists
@@ -126,7 +134,6 @@
    code/pineboolib/fllegacy/flwidget
    code/pineboolib/fllegacy/flworkspace
    code/pineboolib/fllegacy/index
-   code/pineboolib/fllegacy/sysqs
    code/pineboolib/fllegacy/systype
    code/pineboolib/index
    code/pineboolib/interfaces/cursoraccessmode
@@ -195,13 +202,16 @@
    code/pineboolib/plugins/sql/index
    code/pineboolib/plugins/test/flsqlcursormock
    code/pineboolib/plugins/test/index
-   code/pineboolib/pncontrolsfactory
+   code/pineboolib/qsa/dictmodules
    code/pineboolib/qsa/emptyscript
    code/pineboolib/qsa/index
    code/pineboolib/qsa/input
+   code/pineboolib/qsa/pncontrolsfactory
    code/pineboolib/qsa/qsa
+   code/pineboolib/qsa/utils
    code/pineboolib/qt3_widgets/checkbox
    code/pineboolib/qt3_widgets/dialog
+   code/pineboolib/qt3_widgets/filedialog
    code/pineboolib/qt3_widgets/formdbwidget
    code/pineboolib/qt3_widgets/groupbox
    code/pineboolib/qt3_widgets/index
@@ -216,17 +226,22 @@
    code/pineboolib/qt3_widgets/qcombobox
    code/pineboolib/qt3_widgets/qdateedit
    code/pineboolib/qt3_widgets/qdialog
+   code/pineboolib/qt3_widgets/qeventloop
    code/pineboolib/qt3_widgets/qframe
    code/pineboolib/qt3_widgets/qgroupbox
    code/pineboolib/qt3_widgets/qhboxlayout
    code/pineboolib/qt3_widgets/qlabel
+   code/pineboolib/qt3_widgets/qlayoutwidget
    code/pineboolib/qt3_widgets/qline
    code/pineboolib/qt3_widgets/qlineedit
    code/pineboolib/qt3_widgets/qlistview
    code/pineboolib/qt3_widgets/qmainwindow
    code/pineboolib/qt3_widgets/qmdiarea
+   code/pineboolib/qt3_widgets/qmenu
+   code/pineboolib/qt3_widgets/qmessagebox
    code/pineboolib/qt3_widgets/qpushbutton
    code/pineboolib/qt3_widgets/qradiobutton
+   code/pineboolib/qt3_widgets/qspinbox
    code/pineboolib/qt3_widgets/qtable
    code/pineboolib/qt3_widgets/qtabwidget
    code/pineboolib/qt3_widgets/qtextedit

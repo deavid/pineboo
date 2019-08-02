@@ -1,7 +1,7 @@
-Module pncontrolsfactory
+Module qsadictmodules
 ===============================================================
 
-.. automodule:: pineboolib.pncontrolsfactory
+.. automodule:: pineboolib.application.qsadictmodules
     :members:
     :undoc-members:
     :inherited-members:

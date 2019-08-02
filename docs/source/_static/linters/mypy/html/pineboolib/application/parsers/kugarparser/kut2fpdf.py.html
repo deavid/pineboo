@@ -1180,9 +1180,9 @@ Explicit (x4)">            self.logger.exception("KUT2FPDF: Problema al procesar
 <span class="line-precise" title="No Anys on this line!">            return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        project.message_manager().send("progress_dialog_manager", "create", ["Pineboo", len(self._xml_data), "kugar"])</span>
+Explicit (x5)">        project.message_manager().send("progress_dialog_manager", "create", ["Pineboo", len(self._xml_data), "kugar"])</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        project.message_manager().send("progress_dialog_manager", "setLabelText", ["Creando informe ...", "kugar"])</span>
+Explicit (x5)">        project.message_manager().send("progress_dialog_manager", "setLabelText", ["Creando informe ...", "kugar"])</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        self.name_ = name</span>
 <span class="line-precise" title="No Anys on this line!">        self.setPageFormat(self._xml)</span>
@@ -1263,17 +1263,23 @@ Unimported (x1)">        return self._document</span>
 <span class="line-empty" title="No Anys on this line!">        """Retrieve file name where PDF should be saved."""</span>
 <span class="line-empty" title="No Anys on this line!">        import os</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        pdf_name = project.tmpdir</span>
-<span class="line-precise" title="No Anys on this line!">        pdf_name += "/%s_%s.pdf" % (self.name_, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))</span>
-<span class="line-precise" title="Any Types on this line: 
-Omitted Generics (x1)">        if os.path.exists(pdf_name):</span>
-<span class="line-precise" title="Any Types on this line: 
-Omitted Generics (x1)">            os.remove(pdf_name)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">        pdf_name = project.tmpdir</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">        pdf_name += "/%s_%s.pdf" % (self.name_, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))</span>
+<span class="line-any" title="Any Types on this line: 
+Omitted Generics (x1)
+Explicit (x1)">        if os.path.exists(pdf_name):</span>
+<span class="line-any" title="Any Types on this line: 
+Omitted Generics (x1)
+Explicit (x1)">            os.remove(pdf_name)</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x1)">        if self._document is not None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unimported (x3)">            self._document.output(pdf_name, "F")</span>
-<span class="line-precise" title="No Anys on this line!">            return pdf_name</span>
+Unimported (x3)
+Explicit (x1)">            self._document.output(pdf_name, "F")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            return pdf_name</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-precise" title="No Anys on this line!">            return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -1389,7 +1395,7 @@ Unimported (x5)">        first_page_created = keep_page if keep_page is not None
 <span class="line-precise" title="No Anys on this line!">            self.prev_level = level</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            project.message_manager().send("progress_dialog_manager", "setProgress", [i, "kugar"])</span>
+Explicit (x5)">            project.message_manager().send("progress_dialog_manager", "setProgress", [i, "kugar"])</span>
 <span class="line-precise" title="No Anys on this line!">            i += 1</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if not self._no_print_footer:</span>
@@ -1397,7 +1403,7 @@ Unannotated (x4)">            project.message_manager().send("progress_dialog_ma
 <span class="line-precise" title="No Anys on this line!">                self.processData("DetailFooter", self.last_data_processed, l)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        project.message_manager().send("progress_dialog_manager", "destroy", ["kugar"])</span>
+Explicit (x5)">        project.message_manager().send("progress_dialog_manager", "destroy", ["kugar"])</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def processData(self, section_name: str, data: Element, data_level: int) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
@@ -1675,13 +1681,13 @@ Unimported (x2)">                ret_ = limit - pos_x</span>
 <span class="line-empty" title="No Anys on this line!">                    try:</span>
 <span class="line-precise" title="No Anys on this line!">                        nodo = self._parser_tools.convertToNode(data_row)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x5)">                        ret_ = project.call(function_name, [nodo, field_name], None, False)</span>
-<span class="line-imprecise" title="Any Types on this line: 
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">                        ret_ = project.call(function_name, [nodo, field_name], None, False)</span>
+<span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                        if ret_ is False:</span>
 <span class="line-empty" title="No Anys on this line!">                            return</span>
 <span class="line-empty" title="No Anys on this line!">                        else:</span>
-<span class="line-imprecise" title="Any Types on this line: 
+<span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                            text = str(ret_)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">                    except Exception:</span>
@@ -2146,34 +2152,36 @@ Unimported (x3)">            self._document.image(file_name, x, y, W, H, "PNG")<
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-precise" title="No Anys on this line!">        if text == "None":</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.fllegacy.flcodbar import FLCodBar</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        file_name = project.tmpdir</span>
-<span class="line-precise" title="No Anys on this line!">        file_name += "/%s.png" % (text)</span>
-<span class="line-precise" title="No Anys on this line!">        type = xml.get("CodBarType")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">        file_name = project.tmpdir</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">        file_name += "/%s.png" % (text)</span>
+<span class="line-precise" title="No Anys on this line!">        codbartype = xml.get("CodBarType")</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Omitted Generics (x1)
+Explicit (x1)">        if not os.path.exists(file_name):</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
-Omitted Generics (x1)">        if not os.path.exists(file_name):</span>
+Explicit (x1)
+Unannotated (x7)">            bar_code = FLCodBar(text)  # Code128</span>
+<span class="line-precise" title="No Anys on this line!">            if codbartype is not None:</span>
+<span class="line-precise" title="No Anys on this line!">                type: int = bar_code.nameToType(codbartype.lower())</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x1)">                bar_code.setType(type)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x1)">            bar_code.setText(text)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            pix = bar_code.pixmap()</span>
+<span class="line-precise" title="No Anys on this line!">            if not pix.isNull():</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                pix.save(file_name, "PNG")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            bar_code = pncontrolsfactory.FLCodBar(text)  # Code128</span>
-<span class="line-precise" title="No Anys on this line!">            if type is not None:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                type = bar_code.nameToType(type.lower())</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                bar_code.setType(type)</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            bar_code.setText(text)</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            pix = bar_code.pixmap()</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            if not pix.isNull():</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                pix.save(file_name, "PNG")</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        self.draw_image(x + 10, y, W - 20, H, xml, file_name)</span>
+Explicit (x1)">        self.draw_image(x + 10, y, W - 20, H, xml, file_name)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setPageFormat(self, xml: Element) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>

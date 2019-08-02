@@ -298,12 +298,6 @@
 <span id="L288" class="lineno"><a class="lineno" href="#L288">288</a></span>
 <span id="L289" class="lineno"><a class="lineno" href="#L289">289</a></span>
 <span id="L290" class="lineno"><a class="lineno" href="#L290">290</a></span>
-<span id="L291" class="lineno"><a class="lineno" href="#L291">291</a></span>
-<span id="L292" class="lineno"><a class="lineno" href="#L292">292</a></span>
-<span id="L293" class="lineno"><a class="lineno" href="#L293">293</a></span>
-<span id="L294" class="lineno"><a class="lineno" href="#L294">294</a></span>
-<span id="L295" class="lineno"><a class="lineno" href="#L295">295</a></span>
-<span id="L296" class="lineno"><a class="lineno" href="#L296">296</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""Main module for starting up Pineboo."""</span>
 <span class="line-empty" title="No Anys on this line!">import gc</span>
@@ -391,19 +385,19 @@ Unannotated (x3)">    return traceback.print_exception(type, value, tback)</span
 <span class="line-any" title="No Anys on this line!">def init_cli():</span>
 <span class="line-empty" title="No Anys on this line!">    """Create CLI singletons."""</span>
 <span class="line-empty" title="No Anys on this line!">    # FIXME: Order of import is REALLY important here. FIX.</span>
-<span class="line-empty" title="No Anys on this line!">    from pineboolib.fllegacy.aqsobjects import aqsobjectfactory</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    aqsobjectfactory.AQUtil = aqsobjectfactory.AQUtil_class()</span>
-<span class="line-precise" title="No Anys on this line!">    aqsobjectfactory.AQS = aqsobjectfactory.AQS_class()</span>
+<span class="line-empty" title="No Anys on this line!">    # from pineboolib.fllegacy.aqsobjects import aqsobjectfactory</span>
+<span class="line-empty" title="No Anys on this line!">    #</span>
+<span class="line-empty" title="No Anys on this line!">    # aqsobjectfactory.AQUtil = aqsobjectfactory.AQUtil_class()</span>
+<span class="line-empty" title="No Anys on this line!">    # aqsobjectfactory.AQS = aqsobjectfactory.AQS_class()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.fllegacy import flapplication</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    flapplication.aqApp = flapplication.FLApplication()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    from pineboolib import pncontrolsfactory</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    pncontrolsfactory.System = pncontrolsfactory.System_class()</span>
-<span class="line-precise" title="No Anys on this line!">    pncontrolsfactory.qsa_sys = pncontrolsfactory.SysType()</span>
+<span class="line-empty" title="No Anys on this line!">    # from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">    #</span>
+<span class="line-empty" title="No Anys on this line!">    # pncontrolsfactory.System = pncontrolsfactory.System_class()</span>
+<span class="line-empty" title="No Anys on this line!">    # pncontrolsfactory.qsa_sys = pncontrolsfactory.SysType()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">def init_gui():</span>
@@ -495,23 +489,26 @@ Unannotated (x2)">    init_cli()</span>
 <span class="line-precise" title="No Anys on this line!">    pytnyzer.STRICT_MODE = False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    project.load_version()</span>
+Explicit (x3)">    project.load_version()</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    project.setDebugLevel(options.debug_level)</span>
+Explicit (x4)">    project.setDebugLevel(options.debug_level)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    project.options = options</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">    project.options = options</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    if options.enable_gui:</span>
 <span class="line-empty" title="No Anys on this line!">        from PyQt5 import QtWidgets  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        project.set_app(QtWidgets.QApplication(sys.argv))</span>
-<span class="line-precise" title="No Anys on this line!">        project.app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)</span>
+Explicit (x3)">        project.set_app(QtWidgets.QApplication(sys.argv))</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        setup_gui(project.app, options)</span>
+Explicit (x4)">        project.app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x2)
+Explicit (x2)">        setup_gui(project.app, options)</span>
 <span class="line-empty" title="No Anys on this line!">    else:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        project.set_app(QtCore.QCoreApplication(sys.argv))</span>
+Explicit (x3)">        project.set_app(QtCore.QCoreApplication(sys.argv))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    if options.trace_debug:</span>
@@ -527,11 +524,13 @@ Explicit (x1)">    if options.trace_signals:</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    if options.enable_dbadmin:</span>
-<span class="line-precise" title="No Anys on this line!">        config.set_value("application/dbadmin_enabled", True)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">        config.set_value("application/dbadmin_enabled", True)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    if options.enable_quick:</span>
-<span class="line-precise" title="No Anys on this line!">        config.set_value("application/dbadmin_enabled", False)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">        config.set_value("application/dbadmin_enabled", False)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    if is_deployed():</span>
 <span class="line-precise" title="No Anys on this line!">        logging.basicConfig(stream=sys.stdout, level=logging.INFO)</span>
@@ -571,16 +570,10 @@ Unannotated (x3)">        return _DGI.alternativeMain(options)</span>
 Unannotated (x1)">    configdb = config_dbconn(options)</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">    logger.debug(configdb)</span>
-<span class="line-precise" title="No Anys on this line!">    project.init_dgi(_DGI)</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    from pineboolib import pncontrolsfactory</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    # FIXME: Find a saner way to do this</span>
-<span class="line-precise" title="No Anys on this line!">    pncontrolsfactory.reload_from_DGI()</span>
-<span class="line-empty" title="No Anys on this line!">    from pineboolib.fllegacy.flapplication import aqApp</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    pncontrolsfactory.aqApp = aqApp</span>
+Explicit (x3)">    project.init_dgi(_DGI)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    from pineboolib.fllegacy.flapplication import aqApp</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x6)">    if not configdb and _DGI.useDesktop() and _DGI.localDesktop():</span>
@@ -588,7 +581,8 @@ Unannotated (x6)">    if not configdb and _DGI.useDesktop() and _DGI.localDeskto
 Unannotated (x2)">        if not _DGI.mobilePlatform():</span>
 <span class="line-empty" title="No Anys on this line!">            from .conn_dialog import show_connection_dialog</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">            configdb = show_connection_dialog(project.app)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            configdb = show_connection_dialog(project.app)</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-precise" title="No Anys on this line!">            configdb = DEFAULT_SQLITE_CONN</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -597,17 +591,19 @@ Unannotated (x2)">        if not _DGI.mobilePlatform():</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Unannotated (x1)">    conn = connect_to_db(configdb)</span>
-<span class="line-precise" title="No Anys on this line!">    project.init_conn(connection=conn)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">    project.init_conn(connection=conn)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    settings.set_value("DBA/lastDB", conn.DBName())</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">    settings.set_value("DBA/lastDB", conn.DBName())</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    project.no_python_cache = options.no_python_cache</span>
+Explicit (x3)">    project.no_python_cache = options.no_python_cache</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    if options.test:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        return 0 if project.test() else 1</span>
+Explicit (x3)">        return 0 if project.test() else 1</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">    if _DGI.useDesktop():</span>
@@ -615,24 +611,25 @@ Unannotated (x2)">    if _DGI.useDesktop():</span>
 <span class="line-empty" title="No Anys on this line!">        import importlib  # FIXME: Delete dynamic import and move this code between Project and DGI plugins</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">        project.main_form = (</span>
-<span class="line-precise" title="No Anys on this line!">            importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (project.main_form_name, project.main_form_name))</span>
+Explicit (x2)">        project.main_form = (</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">            importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (project.main_form_name, project.main_form_name))</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">            if _DGI.localDesktop()</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">            else _DGI.mainForm()</span>
 <span class="line-empty" title="No Anys on this line!">        )</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x6)">        project.main_window = getattr(project.main_form, "mainWindow", None)</span>
+Explicit (x8)">        project.main_window = getattr(project.main_form, "mainWindow", None)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x6)">        main_form_ = getattr(project.main_form, "MainForm", None)</span>
+Explicit (x7)">        main_form_ = getattr(project.main_form, "MainForm", None)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">        if main_form_ is not None:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">            main_form_.setDebugLevel(options.debug_level)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">    project.message_manager().send("splash", "show")</span>
+Explicit (x5)">    project.message_manager().send("splash", "show")</span>
 <span class="line-empty" title="No Anys on this line!">    # Cargando spashscreen</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    # Create and display the splash screen</span>
@@ -645,10 +642,11 @@ Unannotated (x4)">    project.message_manager().send("splash", "show")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    # project._splash = splash</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    project.run()</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">    project.run()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    if not project.conn.conn:</span>
+Explicit (x3)">    if not project.conn.conn:</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">        logger.warning("No connection was provided. Aborting Pineboo load.")</span>
 <span class="line-precise" title="No Anys on this line!">        return -99</span>
@@ -657,15 +655,17 @@ Explicit (x4)">        logger.warning("No connection was provided. Aborting Pine
 Explicit (x3)">    if not config.value("ebcomportamiento/orm_parser_disabled", False):</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application.parsers.mtdparser.pnmtdparser import mtd_parse</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        for table in project.conn.tables("Tables"):</span>
-<span class="line-precise" title="No Anys on this line!">            mtd_parse(table)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">        for table in project.conn.tables("Tables"):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            mtd_parse(table)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    aqApp.loadTranslations()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    from .init_project import init_project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)
+Explicit (x8)
 Unannotated (x7)">    ret = init_project(_DGI, options, project, project.main_form if _DGI.useDesktop() else None, project.app)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    return ret</span>

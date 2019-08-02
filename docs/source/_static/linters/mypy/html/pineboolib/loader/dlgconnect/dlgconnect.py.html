@@ -623,7 +623,7 @@ Explicit (x5)">        last_profile = self.ui.cbProfiles.currentText()</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">        if last_profile not in (None, ""):</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">            settings.set_value("DBA/last_profile", last_profile)</span>
+Explicit (x2)">            settings.set_value("DBA/last_profile", last_profile)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        for profile in root.findall("profile-data"):</span>
 <span class="line-any" title="Any Types on this line: 
@@ -985,7 +985,8 @@ Explicit (x1)">            self.ui, self.tr("Carpeta profiles"), self.profile_di
 <span class="line-empty" title="No Anys on this line!">        )</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if new_dir and new_dir is not self.profile_dir:</span>
-<span class="line-precise" title="No Anys on this line!">            config.set_value("ebcomportamiento/profiles_folder", new_dir)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">            config.set_value("ebcomportamiento/profiles_folder", new_dir)</span>
 <span class="line-precise" title="No Anys on this line!">            self.profile_dir = new_dir</span>
 <span class="line-precise" title="No Anys on this line!">            self.loadProfiles()</span>
 </pre></td>

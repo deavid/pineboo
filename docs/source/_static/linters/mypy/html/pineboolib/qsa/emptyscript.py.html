@@ -48,48 +48,38 @@
 <span id="L38" class="lineno"><a class="lineno" href="#L38">38</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
-<span class="line-empty" title="No Anys on this line!">from pineboolib.pncontrolsfactory import FormDBWidget</span>
+<span class="line-empty" title="No Anys on this line!">from pineboolib.qt3_widgets.formdbwidget import FormDBWidget</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class interna(object):</span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x2)">    ctx: FormDBWidget</span>
+<span class="line-precise" title="No Anys on this line!">    ctx: FormDBWidget</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x1)">    def __init__(self, context: FormDBWidget) -&gt; None:</span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x2)">        self.ctx = context</span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self, context: FormDBWidget) -&gt; None:</span>
+<span class="line-precise" title="No Anys on this line!">        self.ctx = context</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def init(self) -&gt; None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unimported (x3)">        self.ctx.interna_init()</span>
+Unannotated (x2)">        self.ctx.interna_init()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class oficial(interna):</span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x1)">    def __init__(self, context: FormDBWidget):</span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x2)">        super(oficial, self).__init__(context)</span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self, context: FormDBWidget):</span>
+<span class="line-precise" title="No Anys on this line!">        super(oficial, self).__init__(context)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class head(oficial):</span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x1)">    def __init__(self, context: FormDBWidget):</span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x2)">        super(head, self).__init__(context)</span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self, context: FormDBWidget):</span>
+<span class="line-precise" title="No Anys on this line!">        super(head, self).__init__(context)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class ifaceCtx(head):</span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x1)">    def __init__(self, context: FormDBWidget):</span>
-<span class="line-any" title="Any Types on this line: 
-Unimported (x2)">        super(ifaceCtx, self).__init__(context)</span>
+<span class="line-precise" title="No Anys on this line!">    def __init__(self, context: FormDBWidget):</span>
+<span class="line-precise" title="No Anys on this line!">        super(ifaceCtx, self).__init__(context)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class FormInternalObj(FormDBWidget):</span>
 <span class="line-precise" title="No Anys on this line!">    def _class_init(self) -&gt; None:</span>
-<span class="line-precise" title="Any Types on this line: 
-Unimported (x1)">        self.iface = ifaceCtx(self)</span>
+<span class="line-precise" title="No Anys on this line!">        self.iface = ifaceCtx(self)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def interna_init(self) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        pass</span>

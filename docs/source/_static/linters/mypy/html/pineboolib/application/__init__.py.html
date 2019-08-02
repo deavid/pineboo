@@ -18,17 +18,24 @@
 <span id="L8" class="lineno"><a class="lineno" href="#L8">8</a></span>
 <span id="L9" class="lineno"><a class="lineno" href="#L9">9</a></span>
 <span id="L10" class="lineno"><a class="lineno" href="#L10">10</a></span>
+<span id="L11" class="lineno"><a class="lineno" href="#L11">11</a></span>
+<span id="L12" class="lineno"><a class="lineno" href="#L12">12</a></span>
+<span id="L13" class="lineno"><a class="lineno" href="#L13">13</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
 <span class="line-empty" title="No Anys on this line!">Application package for resources.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">This package holds all functions and classes that are like side resources.</span>
 <span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">from typing import TYPE_CHECKING, Any</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">from .projectmodule import Project</span>
+<span class="line-precise" title="No Anys on this line!">if not TYPE_CHECKING:</span>
+<span class="line-empty" title="No Anys on this line!">    from .projectmodule import Project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">project = Project()</span>
+<span class="line-unanalyzed" title="No Anys on this line!">    project = Project()</span>
+<span class="line-empty" title="No Anys on this line!">else:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">    project: Any  # FIXME: bad idea. Can we move Project() from this file to its own? Or create proper singleton...</span>
 </pre></td>
 </tr></tbody>
 </table>

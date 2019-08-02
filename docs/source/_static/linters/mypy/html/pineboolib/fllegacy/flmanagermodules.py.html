@@ -1137,48 +1137,54 @@ Unannotated (x5)">            modId = self.conn_.managerModules().idModuleOfFile
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if not project._DGI:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        if not project._DGI:</span>
 <span class="line-precise" title="No Anys on this line!">            raise Exception("DGI not loaded")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if project.DGI.alternative_content_cached():</span>
+Explicit (x4)">        if project.DGI.alternative_content_cached():</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x7)">            data = project.DGI.content_cached(project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey)</span>
+Explicit (x7)
+Unannotated (x4)">            data = project.DGI.content_cached(project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            if data is not None:</span>
+Explicit (x1)">            if data is not None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">                return data</span>
+Explicit (x1)">                return data</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">        if data is None:</span>
+Explicit (x1)">        if data is None:</span>
 <span class="line-empty" title="No Anys on this line!">            """Ruta por defecto"""</span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x1)
+Explicit (x2)
 Unannotated (x3)">            if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (project.tmpdir, self.conn_.DBName(), modId, ext_, name_)):</span>
 <span class="line-precise" title="No Anys on this line!">                utf8_ = True if ext_ == "kut" else False</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x3)">                data = self.contentFS(</span>
+Unannotated (x2)
+Explicit (x1)">                data = self.contentFS(</span>
 <span class="line-any" title="Any Types on this line: 
+Explicit (x2)
 Unannotated (x4)">                    "%s/cache/%s/%s/file.%s/%s/%s.%s" % (project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey, ext_), utf8_</span>
 <span class="line-empty" title="No Anys on this line!">                )</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">        if data is None:</span>
+Explicit (x1)">        if data is None:</span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">            if os.path.exists(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_))):</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x3)">                data = self.contentFS(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_)))</span>
+Unannotated (x2)
+Explicit (x1)">                data = self.contentFS(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_)))</span>
 <span class="line-empty" title="No Anys on this line!">            else:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)
-Unannotated (x2)">                data = self.content(n)</span>
+Explicit (x3)
+Unannotated (x1)">                data = self.content(n)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">        if data:</span>
+Explicit (x1)">        if data:</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">            self.filesCached_[n] = data</span>
+Explicit (x1)">            self.filesCached_[n] = data</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">        return data</span>
+Explicit (x1)">        return data</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Almacena el contenido de un fichero en un módulo dado.</span>
@@ -1246,10 +1252,12 @@ Unannotated (x4)
 Explicit (x1)">    def createUI(n, connector=None, parent=None, name=None) -&gt; Any:</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if not project._DGI:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        if not project._DGI:</span>
 <span class="line-precise" title="No Anys on this line!">            raise Exception("DGI not loaded")</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">        return project.DGI.createUI(n, connector, parent, name)</span>
+Explicit (x4)
+Unannotated (x4)">        return project.DGI.createUI(n, connector, parent, name)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Crea el formulario maestro de una acción a partir de su fichero de descripción.</span>
@@ -1262,7 +1270,7 @@ Unannotated (x6)">        return project.DGI.createUI(n, connector, parent, name
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)">    def createForm(self, action: Union["flaction.FLAction", "XMLAction"], connector=None, parent=None, name=None):</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.fllegacy.flformdb import FLFormDB</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.fllegacy.flaction import FLAction</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
@@ -1274,8 +1282,7 @@ Omitted Generics (x1)">        if not isinstance(action, FLAction):</span>
 <span class="line-precise" title="No Anys on this line!">        if not action:</span>
 <span class="line-precise" title="No Anys on this line!">            raise Exception</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)
-Unannotated (x1)">        return pncontrolsfactory.FLFormDB(parent, action, load=True)</span>
+Unannotated (x3)">        return FLFormDB(parent, action, load=True)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Esta función es igual a la anterior, sólo se diferencia en que carga</span>
@@ -1291,7 +1298,7 @@ Unannotated (x3)
 Explicit (x1)">    def createFormRecord(self, a: Union["flaction.FLAction", "XMLAction"], connector=None, parent_or_cursor=None, name=None) -&gt; Any:</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x2)">        logger.trace("createFormRecord: init")</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.fllegacy.flformrecorddb import FLFormRecordDB</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.fllegacy.flaction import FLAction</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        # Falta implementar conector y name</span>
@@ -1311,8 +1318,7 @@ Explicit (x2)">            logger.trace("createFormRecord: convert2FLAction")</s
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x2)">        logger.trace("createFormRecord: load FormRecordDB")</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)
-Unannotated (x1)">        return pncontrolsfactory.FLFormRecordDB(parent_or_cursor, action, load=False)</span>
+Unannotated (x4)">        return FLFormRecordDB(parent_or_cursor, action, load=False)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Para establecer el módulo activo.</span>
@@ -1466,7 +1472,7 @@ Explicit (x2)">            ret.append(str(q.value(0)))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    def iconModule(self, idM: str) -&gt; Any:</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from PyQt5.QtGui import QPixmap</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        pix = None</span>
 <span class="line-precise" title="No Anys on this line!">        modObj = self.dictInfoMods.get(idM.upper(), None)</span>
@@ -1474,11 +1480,11 @@ Explicit (x1)">    def iconModule(self, idM: str) -&gt; Any:</span>
 <span class="line-empty" title="No Anys on this line!">            from pineboolib.application.utils.xpm import cacheXPM</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            icono = cacheXPM(modObj.icono)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            pix = pncontrolsfactory.QPixmap(icono)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">            pix = QPixmap(icono)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        return pix or pncontrolsfactory.QPixmap()</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">        return pix or QPixmap()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Para obtener la versión de un módulo.</span>
@@ -1686,9 +1692,10 @@ Omitted Generics (x1)">        if not isinstance(name, str):</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if n.endswith(".mtd") and project._DGI:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            if n[: n.find(".mtd")] in project.DGI.sys_mtds() or n == "flfiles.mtd":</span>
+Explicit (x3)">        if n.endswith(".mtd") and project._DGI:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">            if n[: n.find(".mtd")] in project.DGI.sys_mtds() or n == "flfiles.mtd":</span>
 <span class="line-empty" title="No Anys on this line!">                return "sys"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
@@ -1723,9 +1730,12 @@ Unannotated (x15)">            idDB = "%s%s%s%s%s" % (db_aux.database(), db_aux.
 <span class="line-precise" title="No Anys on this line!">        if self.shaLocal_ is None:</span>
 <span class="line-precise" title="No Anys on this line!">            raise ValueError("shaLocal_ is empty!")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        settings.setValue("Modules/activeIdModule/%s" % idDB, self.activeIdModule_)</span>
-<span class="line-precise" title="No Anys on this line!">        settings.setValue("Modules/activeIdArea/%s" % idDB, self.activeIdArea_)</span>
-<span class="line-precise" title="No Anys on this line!">        settings.setValue("Modules/shaLocal/%s" % idDB, self.shaLocal_)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">        settings.setValue("Modules/activeIdModule/%s" % idDB, self.activeIdModule_)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">        settings.setValue("Modules/activeIdArea/%s" % idDB, self.activeIdArea_)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">        settings.setValue("Modules/shaLocal/%s" % idDB, self.shaLocal_)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Lee el estado del sistema de módulos</span>

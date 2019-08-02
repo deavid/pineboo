@@ -1531,16 +1531,15 @@ Explicit (x1)">            if fun_get_color is not None:</span>
 Explicit (x4)">                if fun_get_color.find(".") &gt; -1:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">                    list_ = fun_get_color.split(".")</span>
-<span class="line-empty" title="No Anys on this line!">                    import pineboolib.qsa as qsa_tree</span>
+<span class="line-empty" title="No Anys on this line!">                    from pineboolib.application.safeqsa import SafeQSA</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">                    qsa_widget = getattr(qsa_tree, list_[0], None)</span>
+Explicit (x2)">                    qsa_widget = SafeQSA.get_any(list_[0])</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">                    fun_name_ = list_[1]</span>
+<span class="line-precise" title="No Anys on this line!">                    if qsa_widget:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                    if qsa_widget:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                        context_ = qsa_widget.iface</span>
+Explicit (x2)">                        context_ = qsa_widget.iface</span>
 <span class="line-empty" title="No Anys on this line!">                else:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">                    context_ = iface</span>

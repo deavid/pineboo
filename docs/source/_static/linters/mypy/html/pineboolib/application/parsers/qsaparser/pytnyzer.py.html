@@ -2516,7 +2516,7 @@ Unimported (x1)">    BLACK_FILEMODE = None</span>
 <span class="line-precise" title="No Anys on this line!">STRICT_MODE = True</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"># To get the following list updated, do:</span>
-<span class="line-empty" title="No Anys on this line!"># In [1]: from pineboolib import qsa</span>
+<span class="line-empty" title="No Anys on this line!"># In [1]: from pineboolib.qsa import qsa</span>
 <span class="line-empty" title="No Anys on this line!"># In [2]: dir(qsa)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">QSA_KNOWN_ATTRS = {</span>
@@ -5332,8 +5332,8 @@ Explicit (x4)">def file_template(ast: Any, import_refs: Dict[str, Tuple[str, str
 <span class="line-empty" title="No Anys on this line!">    yield "line", "# -*- coding: utf-8 -*-"</span>
 <span class="line-empty" title="No Anys on this line!">    yield "line", "from typing import TYPE_CHECKING"</span>
 <span class="line-precise" title="No Anys on this line!">    if not STRICT_MODE:</span>
-<span class="line-empty" title="No Anys on this line!">        yield "line", "from pineboolib.qsa import *  # noqa: F403"</span>
-<span class="line-empty" title="No Anys on this line!">    yield "line", "from pineboolib import qsa"</span>
+<span class="line-empty" title="No Anys on this line!">        yield "line", "from pineboolib.qsa.qsa import *  # noqa: F403"</span>
+<span class="line-empty" title="No Anys on this line!">    yield "line", "from pineboolib.qsa import qsa"</span>
 <span class="line-empty" title="No Anys on this line!">    # yield "line", "from pineboolib.qsaglobals import *"</span>
 <span class="line-precise" title="No Anys on this line!">    for alias, (path, name) in import_refs.items():</span>
 <span class="line-precise" title="No Anys on this line!">        yield "line", "from %s import %s as %s" % (path, name, alias)</span>

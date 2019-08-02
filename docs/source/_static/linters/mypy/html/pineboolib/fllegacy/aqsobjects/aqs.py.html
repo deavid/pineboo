@@ -205,6 +205,17 @@
 <span id="L195" class="lineno"><a class="lineno" href="#L195">195</a></span>
 <span id="L196" class="lineno"><a class="lineno" href="#L196">196</a></span>
 <span id="L197" class="lineno"><a class="lineno" href="#L197">197</a></span>
+<span id="L198" class="lineno"><a class="lineno" href="#L198">198</a></span>
+<span id="L199" class="lineno"><a class="lineno" href="#L199">199</a></span>
+<span id="L200" class="lineno"><a class="lineno" href="#L200">200</a></span>
+<span id="L201" class="lineno"><a class="lineno" href="#L201">201</a></span>
+<span id="L202" class="lineno"><a class="lineno" href="#L202">202</a></span>
+<span id="L203" class="lineno"><a class="lineno" href="#L203">203</a></span>
+<span id="L204" class="lineno"><a class="lineno" href="#L204">204</a></span>
+<span id="L205" class="lineno"><a class="lineno" href="#L205">205</a></span>
+<span id="L206" class="lineno"><a class="lineno" href="#L206">206</a></span>
+<span id="L207" class="lineno"><a class="lineno" href="#L207">207</a></span>
+<span id="L208" class="lineno"><a class="lineno" href="#L208">208</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
 <span class="line-empty" title="No Anys on this line!">"""</span>
@@ -222,7 +233,7 @@
 <span class="line-empty" title="No Anys on this line!">from pineboolib.core.utils import logging</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">from typing import Type, Any, Optional, Union</span>
+<span class="line-empty" title="No Anys on this line!">from typing import Any, Optional, Union</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">logger = logging.getLogger("AQS")</span>
@@ -234,27 +245,33 @@
 <span class="line-precise" title="No Anys on this line!">    Box = None</span>
 <span class="line-precise" title="No Anys on this line!">    Plain = None</span>
 <span class="line-precise" title="No Anys on this line!">    translate = ["DockLeft", "ContextMenu"]</span>
+<span class="line-precise" title="No Anys on this line!">    InDock: str = "InDock"</span>
+<span class="line-precise" title="No Anys on this line!">    OutSideDock: str = "OutSideDock"</span>
+<span class="line-precise" title="No Anys on this line!">    SmtpSslConnection: int = 1</span>
+<span class="line-precise" title="No Anys on this line!">    SmtpTlsConnection: int = 2</span>
+<span class="line-precise" title="No Anys on this line!">    SmtpAuthPlain: int = 1</span>
+<span class="line-precise" title="No Anys on this line!">    SmtpAuthLogin: int = 2</span>
+<span class="line-precise" title="No Anys on this line!">    SmtpSendOk: int = 11</span>
+<span class="line-precise" title="No Anys on this line!">    SmtpError: int = 7</span>
+<span class="line-precise" title="No Anys on this line!">    SmtpMxDnsError: int = 10</span>
+<span class="line-precise" title="No Anys on this line!">    SmtpSocketError: int = 12</span>
+<span class="line-precise" title="No Anys on this line!">    SmtpAttachError: int = 15</span>
+<span class="line-precise" title="No Anys on this line!">    SmtpServerError: int = 16</span>
+<span class="line-precise" title="No Anys on this line!">    SmtpClientError: int = 17</span>
+<span class="line-precise" title="No Anys on this line!">    StFailed = None</span>
+<span class="line-precise" title="No Anys on this line!">    AlignTop = QtCore.Qt.AlignTop</span>
+<span class="line-precise" title="No Anys on this line!">    WordBreak = QtCore.Qt.TextWordWrap</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    def __init__(self) -&gt; None:</span>
-<span class="line-empty" title="No Anys on this line!">        """Initialize the class."""</span>
+<span class="line-precise" title="No Anys on this line!">    WindowStateChange = QtGui.QWindowStateChangeEvent</span>
+<span class="line-precise" title="No Anys on this line!">    ContextMenu = QtGui.QContextMenuEvent</span>
+<span class="line-precise" title="No Anys on this line!">    Close = QtGui.QCloseEvent</span>
+<span class="line-precise" title="No Anys on this line!">    Show = QtGui.QShowEvent</span>
+<span class="line-precise" title="No Anys on this line!">    LeftDockWidgetArea: int = 1</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        self.InDock: str = "InDock"</span>
-<span class="line-precise" title="No Anys on this line!">        self.OutSideDock: str = "OutSideDock"</span>
-<span class="line-precise" title="No Anys on this line!">        self.SmtpSslConnection: int = 1</span>
-<span class="line-precise" title="No Anys on this line!">        self.SmtpTlsConnection: int = 2</span>
-<span class="line-precise" title="No Anys on this line!">        self.SmtpAuthPlain: int = 1</span>
-<span class="line-precise" title="No Anys on this line!">        self.SmtpAuthLogin: int = 2</span>
-<span class="line-precise" title="No Anys on this line!">        self.SmtpSendOk: int = 11</span>
-<span class="line-precise" title="No Anys on this line!">        self.SmtpError: int = 7</span>
-<span class="line-precise" title="No Anys on this line!">        self.SmtpMxDnsError: int = 10</span>
-<span class="line-precise" title="No Anys on this line!">        self.SmtpSocketError: int = 12</span>
-<span class="line-precise" title="No Anys on this line!">        self.SmtpAttachError: int = 15</span>
-<span class="line-precise" title="No Anys on this line!">        self.SmtpServerError: int = 16</span>
-<span class="line-precise" title="No Anys on this line!">        self.SmtpClientError: int = 17</span>
-<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    @staticmethod</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    def ColorDialog_getColor(</span>
-<span class="line-empty" title="No Anys on this line!">        self, color: Optional[Union[int, str, QColor]] = None, parent: Optional["QWidget"] = None, name: Optional[str] = None</span>
+<span class="line-empty" title="No Anys on this line!">        color: Optional[Union[int, str, QColor]] = None, parent: Optional["QWidget"] = None, name: Optional[str] = None</span>
 <span class="line-empty" title="No Anys on this line!">    ) -&gt; Any:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!">        Display the color selection dialog.</span>
@@ -282,7 +299,7 @@ Explicit (x1)">            qcolor = QColor(color)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @classmethod</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    def toXml(cls: Type["AQS"], obj_: "QWidget", include_children: bool = True, include_complex_types: bool = False):</span>
+Unannotated (x1)">    def toXml(cls, obj_: "QWidget", include_children: bool = True, include_complex_types: bool = False):</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!">        Convert an object to xml.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -367,7 +384,7 @@ Explicit (x2)">        return pixmap_fromMimeSource(name)</span>
 <span class="line-precise" title="No Anys on this line!">    Pixmap_fromMineSource = pixmap_fromMimeSource</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @classmethod</span>
-<span class="line-precise" title="No Anys on this line!">    def sha1(self, byte_array: bytes) -&gt; str:</span>
+<span class="line-precise" title="No Anys on this line!">    def sha1(cls, byte_array: bytes) -&gt; str:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!">        Return the sha1 of a set of bytes.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -375,15 +392,14 @@ Explicit (x2)">        return pixmap_fromMimeSource(name)</span>
 <span class="line-empty" title="No Anys on this line!">        @return sha1 string</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib.pncontrolsfactory import QByteArray</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.qt3_widgets.qbytearray import QByteArray</span>
 <span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        ba = QByteArray(byte_array)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">        ba = QByteArray(byte_array)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">        return ba.sha1()</span>
+Explicit (x2)">        return ba.sha1()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @classmethod</span>
-<span class="line-precise" title="No Anys on this line!">    def Application_setOverrideCursor(self, shape: "QCursor", replace: bool = False) -&gt; None:</span>
+<span class="line-precise" title="No Anys on this line!">    def Application_setOverrideCursor(cls, shape: "QCursor", replace: bool = False) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!">        Set override cursor.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -394,7 +410,7 @@ Explicit (x3)">        return ba.sha1()</span>
 <span class="line-precise" title="No Anys on this line!">        QApplication.setOverrideCursor(shape)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @classmethod</span>
-<span class="line-precise" title="No Anys on this line!">    def Application_restoreOverrideCursor(self) -&gt; None:</span>
+<span class="line-precise" title="No Anys on this line!">    def Application_restoreOverrideCursor(cls) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Restore override cursor."""</span>
 <span class="line-precise" title="No Anys on this line!">        QApplication.restoreOverrideCursor()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -427,10 +443,17 @@ Explicit (x1)">                if ret_ is not None:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">        if ret_ is not None:</span>
 <span class="line-any" title="Any Types on this line: 
+Explicit (x5)">            logger.info("AQS: Looking up attr: %r -&gt; %r  (Please set these in AQS)", name, ret_)</span>
+<span class="line-any" title="Any Types on this line: 
 Explicit (x1)">            return ret_</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">        logger.warning("AQS: No se encuentra el atributo %s", name)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    @classmethod</span>
+<span class="line-any" title="No Anys on this line!">    def TextCodec_codecForName(cls, codec_name):</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x1)">        return codec_name</span>
 </pre></td>
 </tr></tbody>
 </table>

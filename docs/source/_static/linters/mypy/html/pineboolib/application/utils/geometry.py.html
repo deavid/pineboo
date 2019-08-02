@@ -70,12 +70,14 @@
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application import project  # FIXME</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    if project.conn is None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        raise Exception("Project is not connected yet")</span>
+Explicit (x2)">    if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">        raise Exception("Project is not connected yet")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    name = "geo/%s/%s" % (project.conn.DBName(), name)</span>
-<span class="line-precise" title="No Anys on this line!">    settings.set_value(name, geo)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">    name = "geo/%s/%s" % (project.conn.DBName(), name)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">    settings.set_value(name, geo)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">def loadGeometryForm(name: str) -&gt; "QSize":</span>
@@ -87,11 +89,12 @@ Unannotated (x1)">        raise Exception("Project is not connected yet")</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application import project  # FIXME</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    if project.conn is None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        raise Exception("Project is not connected yet")</span>
+Explicit (x2)">    if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">        raise Exception("Project is not connected yet")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    name = "geo/%s/%s" % (project.conn.DBName(), name)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">    name = "geo/%s/%s" % (project.conn.DBName(), name)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">    return settings.value(name, None)</span>
 </pre></td>

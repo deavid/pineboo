@@ -691,11 +691,11 @@ Unannotated (x4)">        self.sendStepNumber.emit(step)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">        if settings.value("email/sendMailLogo", True):</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            logo = settings.value("email/mailLogo", "%s/logo_mail.png" % project.tmpdir)</span>
+Explicit (x6)">            logo = settings.value("email/mailLogo", "%s/logo_mail.png" % project.tmpdir)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">            if not QtCore.QFile.exists(logo):</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                logo = "%s/logo.png" % project.tmpdir</span>
+Explicit (x3)">                logo = "%s/logo.png" % project.tmpdir</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x5)
 Explicit (x3)">                Qt.QPixmap(pixmap_fromMimeSource("pineboo-logo.png")).save(logo, "PNG")</span>

@@ -1480,8 +1480,10 @@ Unimported (x3)
 Unannotated (x5)">            self.engine_ = create_engine("mysql+mysqldb://%s:%s@%s:%s/%s" % (db_userName, db_password, db_host, db_port, db_name))</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x2)">        except MySQLdb.OperationalError as e:</span>
-<span class="line-precise" title="No Anys on this line!">            if project._splash:</span>
-<span class="line-unanalyzed" title="No Anys on this line!">                project._splash.hide()</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            if project._splash:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">                project._splash.hide()</span>
 <span class="line-any" title="Any Types on this line: 
 Unimported (x1)">            if "Unknown database" in str(e):</span>
 <span class="line-precise" title="No Anys on this line!">                ret = QMessageBox.warning(</span>

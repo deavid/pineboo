@@ -1315,8 +1315,8 @@ class SysType(SysBaseType):
 
         return False
 
-    @decorators.WorkingOnThis
     @classmethod
+    @decorators.WorkingOnThis
     def runTransaction(self, f=None, oParam=None):
         curT = PNSqlCursor(u"flfiles")
         curT.transaction(False)

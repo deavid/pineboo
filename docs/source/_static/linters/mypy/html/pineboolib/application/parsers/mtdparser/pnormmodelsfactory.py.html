@@ -255,7 +255,7 @@
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from typing import Any</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">logger = logging.getLogger("PNControlsFactory")</span>
+<span class="line-precise" title="No Anys on this line!">logger = logging.getLogger("PNORMModelsFactory")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"># processed_: List[str] = []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -266,15 +266,16 @@ Explicit (x1)">def base_model(name: str) -&gt; Any:</span>
 <span class="line-empty" title="No Anys on this line!">    # print("Base", name)</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    if project.conn is None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        raise Exception("Project is not connected yet")</span>
+Explicit (x2)">    if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">        raise Exception("Project is not connected yet")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    path = _path("%s.mtd" % name, False)</span>
 <span class="line-precise" title="No Anys on this line!">    if path is None:</span>
 <span class="line-precise" title="No Anys on this line!">        raise Exception("File %s.mtd not found" % name)</span>
 <span class="line-precise" title="No Anys on this line!">    if path.find("share/pineboo/tables") &gt; -1:</span>
-<span class="line-precise" title="No Anys on this line!">        path = path.replace("share/pineboo/tables", "tempdata/cache/%s/sys/file.mtd" % project.conn.DBName())</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">        path = path.replace("share/pineboo/tables", "tempdata/cache/%s/sys/file.mtd" % project.conn.DBName())</span>
 <span class="line-precise" title="No Anys on this line!">    if path:</span>
 <span class="line-precise" title="No Anys on this line!">        path = "%s_model.py" % path[:-4]</span>
 <span class="line-precise" title="Any Types on this line: 
@@ -311,18 +312,21 @@ Unannotated (x1)">    if nombre is None:</span>
 <span class="line-empty" title="No Anys on this line!">    # if mod is None:</span>
 <span class="line-empty" title="No Anys on this line!">    #    mod = base_model(nombre)</span>
 <span class="line-empty" title="No Anys on this line!">    #    if mod:</span>
-<span class="line-empty" title="No Anys on this line!">    #        setattr(qsa_dict_modules, model_name, mod)</span>
+<span class="line-empty" title="No Anys on this line!">    #        setattr(qsa_dict_modules, model_name, mod)  # NOTE: Use application.qsadictmodules</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    db_name = project.conn.DBName()</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">    db_name = project.conn.DBName()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    mod = None</span>
 <span class="line-any" title="Any Types on this line: 
+Explicit (x1)
 Unannotated (x1)">    file_path = filedir("..", "tempdata", "cache", db_name, "models", "%s_model.py" % nombre)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">    if os.path.exists(file_path):</span>
 <span class="line-any" title="Any Types on this line: 
+Explicit (x1)
 Unannotated (x1)">        module_path = "tempdata.cache.%s.models.%s_model" % (db_name, nombre)</span>
 <span class="line-precise" title="No Anys on this line!">        if module_path in sys.modules:</span>
 <span class="line-empty" title="No Anys on this line!">            # print("Recargando", module_path)</span>
@@ -356,57 +360,61 @@ Explicit (x4)">                logger.warning("Error cargando módulo:\n%s\n%s",
 <span class="line-empty" title="No Anys on this line!">    """Cleanup sqlalchemy models."""</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    if project.conn is None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        raise Exception("Project is not connected yet")</span>
+Explicit (x2)">    if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">        raise Exception("Project is not connected yet")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    # FIXME: Not a good idea to delete from other module</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)">    del project.conn.driver().declarative_base_</span>
+Explicit (x4)">    del project.conn.driver().declarative_base_</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">    project.conn.driver().declarative_base_ = None</span>
+Explicit (x5)">    project.conn.driver().declarative_base_ = None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">def load_models() -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">    """Load all sqlAlchemy models."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    from pineboolib import qsa as qsa_dict_modules</span>
+<span class="line-empty" title="No Anys on this line!">    from pineboolib.application.qsadictmodules import QSADictModules</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    if project.conn is None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        raise Exception("Project is not connected yet")</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    db_name = project.conn.DBName()</span>
-<span class="line-precise" title="No Anys on this line!">    tables = project.conn.tables()</span>
+Explicit (x2)">    if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">        raise Exception("Project is not connected yet")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">    setattr(qsa_dict_modules, "Base", project.conn.declarative_base())</span>
+Explicit (x5)">    db_name = project.conn.DBName()</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">    setattr(qsa_dict_modules, "session", project.conn.session())</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">    setattr(qsa_dict_modules, "engine", project.conn.engine())</span>
+Explicit (x5)">    tables = project.conn.tables()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    for t in tables:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">    QSADictModules.save_other("Base", project.conn.declarative_base())</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">    QSADictModules.save_other("session", project.conn.session())</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">    QSADictModules.save_other("engine", project.conn.engine())</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">    for t in tables:</span>
 <span class="line-empty" title="No Anys on this line!">        try:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            mod = base_model(t)</span>
+Explicit (x4)">            mod = base_model(t)</span>
 <span class="line-precise" title="No Anys on this line!">        except Exception:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">            mod = None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">        if mod is not None:</span>
-<span class="line-precise" title="No Anys on this line!">            model_name = "%s%s" % (t[0].upper(), t[1:])</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x6)">            model_name = "%s%s" % (t[0].upper(), t[1:])</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x6)">            class_ = getattr(mod, model_name, None)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">            if class_ is not None:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                setattr(qsa_dict_modules, model_name, class_)</span>
+Explicit (x2)">                QSADictModules.save_other(model_name, class_)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="Any Types on this line: 
-Explicit (x1)">    for root, dirs, files in os.walk(filedir("..", "tempdata", "cache", db_name, "models")):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">    for root, dirs, files in os.walk(filedir("..", "tempdata", "cache", db_name, "models")):</span>
 <span class="line-precise" title="No Anys on this line!">        for nombre in files:  # Buscamos los presonalizados</span>
 <span class="line-precise" title="No Anys on this line!">            if nombre.endswith("pyc"):</span>
 <span class="line-empty" title="No Anys on this line!">                continue</span>
@@ -423,7 +431,7 @@ Explicit (x6)">                class_ = getattr(mod, model_name, None)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                if class_ is not None:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    setattr(qsa_dict_modules, model_name, class_)</span>
+Explicit (x2)">                    QSADictModules.save_other(model_name, class_)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 

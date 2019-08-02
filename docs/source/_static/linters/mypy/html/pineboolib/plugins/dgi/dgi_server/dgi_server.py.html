@@ -358,12 +358,12 @@ Unannotated (x3)">        arguments = dict_["arguments"]</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)
+Explicit (x4)
 Unannotated (x2)">        result = project.call(func_name, arguments)</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)
 Explicit (x1)">        print("Llamada remota: %s(%s) --&gt; %s" % (func_name, ", ".join(arguments), result))</span>
-<span class="line-imprecise" title="Any Types on this line: 
+<span class="line-any" title="Any Types on this line: 
 Explicit (x1)">        return result</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
@@ -384,7 +384,8 @@ Unannotated (x3)">        id_conn = list_fun[0]</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">        if fun_name == "hello":</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            project.conn.removeConn("%s_remote_client" % id_conn)</span>
+Explicit (x4)
+Unannotated (x1)">            project.conn.removeConn("%s_remote_client" % id_conn)</span>
 <span class="line-empty" title="No Anys on this line!">            # list_to_delete = []</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x1)">            for k in list(cursor_dict.keys()):</span>
@@ -396,6 +397,7 @@ Explicit (x1)">                    cursor_dict[k] = None</span>
 Explicit (x1)">                    del cursor_dict[k]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
+Explicit (x5)
 Unannotated (x1)">        conn = project.conn.useConn("%s_remote_client" % id_conn)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        # print("---&gt;", dict_["function"], dict_["arguments"]["cursor_id"] if "cursor_id" in dict_["arguments"] else None)</span>
@@ -406,7 +408,7 @@ Unannotated (x2)">        if "cursor_id" in dict_["arguments"]:</span>
 Unannotated (x4)
 Explicit (x1)">            if not "%s_%s" % (id_conn, dict_["arguments"]["cursor_id"]) in cursor_dict.keys():</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)
+Explicit (x4)
 Unannotated (x4)">                cursor_dict["%s_%s" % (id_conn, dict_["arguments"]["cursor_id"])] = conn.cursor()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
@@ -453,7 +455,7 @@ Unannotated (x2)">        elif fun_name == "refreshQuery":</span>
 Explicit (x1)">                if cursor is None:</span>
 <span class="line-precise" title="No Anys on this line!">                    raise Exception("No cursor")</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)
+Explicit (x8)
 Unannotated (x1)">                fun = getattr(conn.driver(), fun_name)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
@@ -469,7 +471,7 @@ Unannotated (x3)">                    dict_["arguments"]["where"],</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                    cursor,</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    project.conn.driver().conn_,</span>
+Explicit (x5)">                    project.conn.driver().conn_,</span>
 <span class="line-empty" title="No Anys on this line!">                )</span>
 <span class="line-precise" title="No Anys on this line!">            except Exception:</span>
 <span class="line-precise" title="No Anys on this line!">                print("Error refreshQuery", traceback.format_exc())</span>
@@ -481,7 +483,7 @@ Unannotated (x2)">        elif fun_name == "refreshFetch":</span>
 Explicit (x1)">                if cursor is None:</span>
 <span class="line-precise" title="No Anys on this line!">                    raise Exception("No cursor")</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)
+Explicit (x8)
 Unannotated (x1)">                fun = getattr(conn.driver(), fun_name)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
@@ -509,7 +511,7 @@ Unannotated (x2)">        elif fun_name == "fetchAll":</span>
 Explicit (x1)">                if cursor is None:</span>
 <span class="line-precise" title="No Anys on this line!">                    raise Exception("No cursor")</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)
+Explicit (x8)
 Unannotated (x1)">                fun = getattr(conn.driver(), fun_name)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
@@ -567,7 +569,7 @@ Unannotated (x1)">                print("Error %s" % fun_name, traceback.format_
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)
+Explicit (x8)
 Unannotated (x1)">            fun = getattr(conn.driver(), fun_name, None)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 

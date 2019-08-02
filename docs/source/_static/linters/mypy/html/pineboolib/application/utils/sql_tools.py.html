@@ -898,17 +898,18 @@ Explicit (x2)">            ret_ = int(ret_)</span>
 <span class="line-precise" title="No Anys on this line!">        elif type_ == "pixmap":</span>
 <span class="line-empty" title="No Anys on this line!">            from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">            if project.conn is None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">                raise Exception("Project is not connected yet")</span>
+Explicit (x2)">            if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">                raise Exception("Project is not connected yet")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            metadata = mtd.metadata()</span>
 <span class="line-precise" title="No Anys on this line!">            if metadata is None:</span>
 <span class="line-precise" title="No Anys on this line!">                raise Exception("Metadata not found")</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            if raw or not project.conn.manager().isSystemTable(metadata.name()):</span>
+Unannotated (x2)
+Explicit (x6)">            if raw or not project.conn.manager().isSystemTable(metadata.name()):</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)">                ret_ = project.conn.manager().fetchLargeValue(ret_)</span>
+Explicit (x8)">                ret_ = project.conn.manager().fetchLargeValue(ret_)</span>
 <span class="line-precise" title="No Anys on this line!">        elif type_ == "date":</span>
 <span class="line-empty" title="No Anys on this line!">            from pineboolib.application import types</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -951,9 +952,9 @@ Omitted Generics (x2)">    def _create_mtd_fields(self, fields_list: Iterable, t
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if project.conn is None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            raise Exception("Project is not connected yet")</span>
+Explicit (x2)">        if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">            raise Exception("Project is not connected yet")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        _filter = ["sum(", "max(", "distint("]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -972,10 +973,9 @@ Omitted Generics (x2)">            field_name = field_name_org</span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x3)">            for table_name in list(tables_list):</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)
-Unannotated (x1)
+Explicit (x7)
 Omitted Generics (x1)">                mtd_table = project.conn.manager().metadata(table_name)</span>
-<span class="line-imprecise" title="Any Types on this line: 
+<span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                if mtd_table is not None:</span>
 <span class="line-precise" title="No Anys on this line!">                    for fil in _filter:</span>
 <span class="line-any" title="Any Types on this line: 
@@ -1020,13 +1020,12 @@ Omitted Generics (x1)">                    self._invalid_tables.append(table_nam
 <span class="line-precise" title="No Anys on this line!">    order_by = ""</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    if project.conn is None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        raise Exception("Project is not connected yet")</span>
+Explicit (x2)">    if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">        raise Exception("Project is not connected yet")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x3)
-Unannotated (x1)">    mtd = project.conn.manager().metadata(table_name)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)">    mtd = project.conn.manager().metadata(table_name)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x1)">    if hasattr(params, "_iterlists"):</span>
@@ -1038,12 +1037,12 @@ Explicit (x15)">        params = {k: q.getlist(k) if len(q.getlist(k)) &gt; 1 el
 <span class="line-precise" title="No Anys on this line!">    for p in params:</span>
 <span class="line-precise" title="No Anys on this line!">        if p.startswith("q_"):</span>
 <span class="line-precise" title="No Anys on this line!">            or_where += " OR " if len(or_where) else ""</span>
-<span class="line-imprecise" title="Any Types on this line: 
+<span class="line-any" title="Any Types on this line: 
 Unannotated (x1)
 Explicit (x1)">            or_where += resolve_where_params(p, params[p], mtd)</span>
 <span class="line-precise" title="No Anys on this line!">        elif p.startswith("s_"):</span>
 <span class="line-precise" title="No Anys on this line!">            and_where += " AND " if len(and_where) else ""</span>
-<span class="line-imprecise" title="Any Types on this line: 
+<span class="line-any" title="Any Types on this line: 
 Unannotated (x1)
 Explicit (x1)">            and_where += resolve_where_params(p, params[p], mtd)</span>
 <span class="line-precise" title="No Anys on this line!">        elif p.startswith("o_"):</span>

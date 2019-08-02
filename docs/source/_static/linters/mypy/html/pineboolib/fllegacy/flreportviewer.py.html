@@ -911,14 +911,17 @@
 <span id="L901" class="lineno"><a class="lineno" href="#L901">901</a></span>
 <span id="L902" class="lineno"><a class="lineno" href="#L902">902</a></span>
 <span id="L903" class="lineno"><a class="lineno" href="#L903">903</a></span>
+<span id="L904" class="lineno"><a class="lineno" href="#L904">904</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">from PyQt5 import QtWidgets, QtCore, QtXml</span>
 <span class="line-empty" title="No Anys on this line!">from PyQt5.QtCore import Qt</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.core import decorators</span>
-<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">from pineboolib.application.qsatypes.sysbasetype import SysBaseType</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.fllegacy.flutil import FLUtil</span>
-<span class="line-empty" title="No Anys on this line!">from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">from PyQt5.QtWidgets import QFileDialog</span>
+<span class="line-empty" title="No Anys on this line!">from pineboolib.qt3_widgets.messagebox import MessageBox</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"># from pineboolib.fllegacy.flpicture import FLPicture</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.fllegacy.flsqlquery import FLSqlQuery</span>
@@ -1145,10 +1148,10 @@ Explicit (x1)">            self.qry_ = self.rptEngine_.rptQueryData()</span>
 Explicit (x4)">        if self.rptViewer_.rptEngine_ and hasattr(self.rptViewer_.rptEngine_, "parser_"):</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x5)">            pdf_file = self.rptViewer_.rptEngine_.parser_.get_file_name()</span>
-<span class="line-empty" title="No Anys on this line!">            from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">            project.call("sys.openUrl", [pdf_file], None, True)</span>
+Unannotated (x3)
+Explicit (x1)">            SysBaseType.openUrl(pdf_file)</span>
 <span class="line-empty" title="No Anys on this line!">        # self.eventloop.exec_()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        # if self.embedInParent_:</span>
@@ -1289,27 +1292,23 @@ Explicit (x6)">    @decorators.BetaImplementation</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        util = FLUtil()</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        fileName = pncontrolsfactory.FileDialog.getSaveFileName(</span>
+<span class="line-precise" title="No Anys on this line!">        fileName = QFileDialog.getSaveFileName(</span>
 <span class="line-precise" title="No Anys on this line!">            self, util.translate("app", "Exportar a CSV"), "", util.translate("app", "Fichero CSV (*.csv *.txt)")</span>
 <span class="line-empty" title="No Anys on this line!">        )</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        if not fileName or fileName == "":</span>
+<span class="line-precise" title="No Anys on this line!">        if not fileName or fileName == "":</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x6)">        if fileName.upper().find(".CSV") == -1:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            fileName = fileName + ".csv"</span>
+Error (x5)">        if fileName.upper().find(".CSV") == -1:</span>
+<span class="line-imprecise" title="No Anys on this line!">            fileName = fileName + ".csv"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        q = pncontrolsfactory.MessageBox.question(</span>
+Explicit (x3)
+Unannotated (x1)">        q = MessageBox.question(</span>
 <span class="line-precise" title="No Anys on this line!">            self,</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">            util.translate("app", "Sobreescribir {}").format(fileName),</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">            util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),</span>
+<span class="line-precise" title="No Anys on this line!">            util.translate("app", "Sobreescribir {}").format(fileName),</span>
+<span class="line-precise" title="No Anys on this line!">            util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),</span>
 <span class="line-precise" title="No Anys on this line!">            util.translate("app", "&amp;Sí"),</span>
 <span class="line-precise" title="No Anys on this line!">            util.translate("app", "&amp;No"),</span>
 <span class="line-empty" title="No Anys on this line!">            "",</span>
@@ -1318,23 +1317,27 @@ Explicit (x1)">            util.translate("app", "Ya existe un fichero llamado {
 <span class="line-empty" title="No Anys on this line!">        )</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">        if QtCore.QFile.exists(fileName) and q:</span>
+Error (x2)
+Explicit (x1)">        if QtCore.QFile.exists(fileName) and q:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">        file = QtCore.QFile(fileName)</span>
+Error (x2)">        file = QtCore.QFile(fileName)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if file.open(Qt.IO_WriteOnly):</span>
-<span class="line-precise" title="No Anys on this line!">            stream = QtCore.QTextStream(file)</span>
+<span class="line-any" title="Any Types on this line: 
+Error (x3)">        if file.open(Qt.IO_WriteOnly):</span>
+<span class="line-any" title="Any Types on this line: 
+Error (x1)">            stream = QtCore.QTextStream(file)</span>
 <span class="line-precise" title="No Anys on this line!">            stream &lt;&lt; self.csvData() &lt;&lt; "\n"</span>
-<span class="line-precise" title="No Anys on this line!">            file.close()</span>
+<span class="line-any" title="Any Types on this line: 
+Error (x3)">            file.close()</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-precise" title="No Anys on this line!">            QtWidgets.QMessageBox.critical(</span>
 <span class="line-precise" title="No Anys on this line!">                self,</span>
 <span class="line-precise" title="No Anys on this line!">                util.translate("app", "Error abriendo fichero"),</span>
 <span class="line-precise" title="No Anys on this line!">                util.translate("app", "No se pudo abrir el fichero {} para escribir: {}").format(</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                    fileName, QtWidgets.QApplication.translate("QFile", file.errorString())</span>
+Error (x3)">                    fileName, QtWidgets.QApplication.translate("QFile", file.errorString())</span>
 <span class="line-empty" title="No Anys on this line!">                ),</span>
 <span class="line-empty" title="No Anys on this line!">            )</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -1347,30 +1350,25 @@ Explicit (x13)">    @decorators.pyqtSlot()</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        util = FLUtil()</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        fileName = pncontrolsfactory.FileDialog.getSaveFileName(</span>
+<span class="line-precise" title="No Anys on this line!">        fileName = QFileDialog.getSaveFileName(</span>
 <span class="line-precise" title="No Anys on this line!">            self, util.translate("app", "Exportar a PDF"), "", util.translate("app", "Fichero PDF (*.pdf)")</span>
 <span class="line-empty" title="No Anys on this line!">        )</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">        if fileName[0] == "":</span>
+<span class="line-precise" title="No Anys on this line!">        if fileName[0] == "":</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x7)">        if fileName[0].upper().find(".PDF") == -1:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            fileName = fileName[0] + ".pdf"</span>
+<span class="line-precise" title="No Anys on this line!">        if fileName[0].upper().find(".PDF") == -1:</span>
+<span class="line-precise" title="No Anys on this line!">            fileName = fileName[0] + ".pdf"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">        if QtCore.QFile.exists(fileName):</span>
+Error (x1)">        if QtCore.QFile.exists(fileName):</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            q = pncontrolsfactory.QMessageBox.question(</span>
+Explicit (x3)
+Unannotated (x1)">            q = MessageBox.question(</span>
 <span class="line-precise" title="No Anys on this line!">                self,</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                util.translate("app", "Sobreescribir {}").format(fileName),</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),</span>
+<span class="line-precise" title="No Anys on this line!">                util.translate("app", "Sobreescribir {}").format(fileName),</span>
+<span class="line-precise" title="No Anys on this line!">                util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),</span>
 <span class="line-precise" title="No Anys on this line!">                util.translate("app", "&amp;Sí"),</span>
 <span class="line-precise" title="No Anys on this line!">                util.translate("app", "&amp;No"),</span>
 <span class="line-empty" title="No Anys on this line!">                "",</span>
@@ -1381,8 +1379,7 @@ Explicit (x1)">                util.translate("app", "Ya existe un fichero llama
 Explicit (x1)">            if q:</span>
 <span class="line-empty" title="No Anys on this line!">                return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">        self.slotPrintReportToPdf(fileName)</span>
+<span class="line-precise" title="No Anys on this line!">        self.slotPrintReportToPdf(fileName)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x6)">    @decorators.BetaImplementation</span>
@@ -1394,8 +1391,7 @@ Explicit (x3)">        t = self.ui_["leDocumento"].text()</span>
 <span class="line-precise" title="No Anys on this line!">        util = FLUtil()</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x6)">        name = "informe.pdf" if not t or t == "" else t</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        fileName = pncontrolsfactory.FileDialog.getSaveFileName(</span>
+<span class="line-precise" title="No Anys on this line!">        fileName = QFileDialog.getSaveFileName(</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">            AQ_USRHOME + "/" + name + ".pdf",</span>
 <span class="line-precise" title="No Anys on this line!">            util.translate("app", "Fichero PDF a enviar (*.pdf)"),</span>
@@ -1404,22 +1400,19 @@ Explicit (x3)">            AQ_USRHOME + "/" + name + ".pdf",</span>
 <span class="line-precise" title="No Anys on this line!">            util.translate("app", "Exportar a PDF para enviar"),</span>
 <span class="line-empty" title="No Anys on this line!">        )</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        if not fileName or fileName == "":</span>
+<span class="line-precise" title="No Anys on this line!">        if not fileName or fileName == "":</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">        if not fileName.upper().contains(".PDF"):</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            fileName = fileName + ".pdf"</span>
+Error (x4)">        if not fileName.upper().contains(".PDF"):</span>
+<span class="line-imprecise" title="No Anys on this line!">            fileName = fileName + ".pdf"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        q = pncontrolsfactory.QMessageBox.question(</span>
+Explicit (x3)
+Unannotated (x1)">        q = MessageBox.question(</span>
 <span class="line-precise" title="No Anys on this line!">            self,</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">            util.translate("app", "Sobreescribir {}").format(fileName),</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">            util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),</span>
+<span class="line-precise" title="No Anys on this line!">            util.translate("app", "Sobreescribir {}").format(fileName),</span>
+<span class="line-precise" title="No Anys on this line!">            util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),</span>
 <span class="line-precise" title="No Anys on this line!">            util.translate("app", "&amp;Sí"),</span>
 <span class="line-precise" title="No Anys on this line!">            util.translate("app", "&amp;No"),</span>
 <span class="line-empty" title="No Anys on this line!">            "",</span>
@@ -1428,12 +1421,12 @@ Explicit (x1)">            util.translate("app", "Ya existe un fichero llamado {
 <span class="line-empty" title="No Anys on this line!">        )</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">        if QtCore.QFile.exists(fileName) and q:</span>
+Error (x2)
+Explicit (x1)">        if QtCore.QFile.exists(fileName) and q:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        autoCloseSave = self.autoClose_</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">        self.slotPrintReportToPdf(fileName)</span>
+<span class="line-precise" title="No Anys on this line!">        self.slotPrintReportToPdf(fileName)</span>
 <span class="line-precise" title="No Anys on this line!">        self.autoClose_ = autoCloseSave</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
@@ -1444,8 +1437,9 @@ Explicit (x3)">        util.writeSettingEntry("email/from", self.ui_["leDe"].tex
 Explicit (x3)">        util.writeSettingEntry("email/mailserver", self.ui_["leMailServer"].text())</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)">        fi = QtCore.QFileInfo(fileName)</span>
+Error (x2)">        fi = QtCore.QFileInfo(fileName)</span>
 <span class="line-any" title="Any Types on this line: 
+Error (x3)
 Explicit (x1)">        name = fi.fileName()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
@@ -1467,7 +1461,7 @@ Explicit (x6)">        self.smtpClient_.setBody(self.ui_["leCuerpo"].text() + "\
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">        self.smtpClient_.addTextPart(html, "text/html")</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        self.smtpClient_.addAttachment(fileName)</span>
+Explicit (x3)">        self.smtpClient_.addAttachment(fileName)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">        self.smtpClient_.startSend()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -1500,8 +1494,7 @@ Explicit (x6)">    @decorators.BetaImplementation</span>
 <span class="line-precise" title="No Anys on this line!">        util = FLUtil()</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x1)">        if self.report_:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            fileName = pncontrolsfactory.FileDialog.getSaveFileName(</span>
+<span class="line-precise" title="No Anys on this line!">            fileName = QFileDialog.getSaveFileName(</span>
 <span class="line-empty" title="No Anys on this line!">                "",</span>
 <span class="line-precise" title="No Anys on this line!">                util.translate("app", "Fichero SVG (*.svg)"),</span>
 <span class="line-precise" title="No Anys on this line!">                self,</span>
@@ -1509,22 +1502,19 @@ Explicit (x4)">            fileName = pncontrolsfactory.FileDialog.getSaveFileNa
 <span class="line-precise" title="No Anys on this line!">                util.translate("app", "Guardar en SVG"),</span>
 <span class="line-empty" title="No Anys on this line!">            )</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            if not fileName or fileName == "":</span>
+<span class="line-precise" title="No Anys on this line!">            if not fileName or fileName == "":</span>
 <span class="line-empty" title="No Anys on this line!">                return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">            if not fileName.upper().contains(".SVG"):</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                fileName = fileName + ".svg"</span>
+Error (x4)">            if not fileName.upper().contains(".SVG"):</span>
+<span class="line-imprecise" title="No Anys on this line!">                fileName = fileName + ".svg"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            q = pncontrolsfactory.QMessageBox.question(</span>
+Explicit (x3)
+Unannotated (x1)">            q = MessageBox.question(</span>
 <span class="line-precise" title="No Anys on this line!">                self,</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                util.translate("app", "Sobreescribir {}").format(fileName),</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),</span>
+<span class="line-precise" title="No Anys on this line!">                util.translate("app", "Sobreescribir {}").format(fileName),</span>
+<span class="line-precise" title="No Anys on this line!">                util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),</span>
 <span class="line-precise" title="No Anys on this line!">                util.translate("app", "&amp;Sí"),</span>
 <span class="line-precise" title="No Anys on this line!">                util.translate("app", "&amp;No"),</span>
 <span class="line-empty" title="No Anys on this line!">                "",</span>
@@ -1533,7 +1523,8 @@ Explicit (x1)">                util.translate("app", "Ya existe un fichero llama
 <span class="line-empty" title="No Anys on this line!">            )</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            if QtCore.QFile.exists(fileName) and q:</span>
+Error (x2)
+Explicit (x1)">            if QtCore.QFile.exists(fileName) and q:</span>
 <span class="line-empty" title="No Anys on this line!">                return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
@@ -1553,8 +1544,7 @@ Unannotated (x3)">            self.stylepainter.setSVGMode(False)</span>
 <span class="line-empty" title="No Anys on this line!">            #     page.save(fname, "svg")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)
-Explicit (x1)">            self.stylepainter.normalizeSVGFile(fileName, fileNames)</span>
+Unannotated (x4)">            self.stylepainter.normalizeSVGFile(fileName, fileNames)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            self.updateReport()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -1571,8 +1561,7 @@ Explicit (x6)">    @decorators.BetaImplementation</span>
 Explicit (x6)">    @decorators.BetaImplementation</span>
 <span class="line-precise" title="No Anys on this line!">    def loadSVGStyle(self) -&gt; None:</span>
 <span class="line-precise" title="No Anys on this line!">        util = FLUtil()</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        fileName = pncontrolsfactory.FileDialog.getOpenFileName(</span>
+<span class="line-precise" title="No Anys on this line!">        fileName = QFileDialog.getOpenFileName(</span>
 <span class="line-empty" title="No Anys on this line!">            "",</span>
 <span class="line-precise" title="No Anys on this line!">            util.translate("app", "Fichero SVG (*.svg)"),</span>
 <span class="line-precise" title="No Anys on this line!">            self,</span>
@@ -1580,12 +1569,11 @@ Explicit (x4)">        fileName = pncontrolsfactory.FileDialog.getOpenFileName(<
 <span class="line-precise" title="No Anys on this line!">            util.translate("app", "Cargar estilo SVG"),</span>
 <span class="line-empty" title="No Anys on this line!">        )</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        if not fileName or fileName == "":</span>
+<span class="line-precise" title="No Anys on this line!">        if not fileName or fileName == "":</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">        self.ui_["ledStyle"].setText("file:" + fileName)</span>
+Explicit (x2)">        self.ui_["ledStyle"].setText("file:" + fileName)</span>
 <span class="line-precise" title="No Anys on this line!">        self.updateReport()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 

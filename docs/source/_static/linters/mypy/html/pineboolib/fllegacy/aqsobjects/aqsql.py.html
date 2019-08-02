@@ -642,109 +642,65 @@
 <span id="L632" class="lineno"><a class="lineno" href="#L632">632</a></span>
 <span id="L633" class="lineno"><a class="lineno" href="#L633">633</a></span>
 <span id="L634" class="lineno"><a class="lineno" href="#L634">634</a></span>
-<span id="L635" class="lineno"><a class="lineno" href="#L635">635</a></span>
-<span id="L636" class="lineno"><a class="lineno" href="#L636">636</a></span>
-<span id="L637" class="lineno"><a class="lineno" href="#L637">637</a></span>
-<span id="L638" class="lineno"><a class="lineno" href="#L638">638</a></span>
-<span id="L639" class="lineno"><a class="lineno" href="#L639">639</a></span>
-<span id="L640" class="lineno"><a class="lineno" href="#L640">640</a></span>
-<span id="L641" class="lineno"><a class="lineno" href="#L641">641</a></span>
-<span id="L642" class="lineno"><a class="lineno" href="#L642">642</a></span>
-<span id="L643" class="lineno"><a class="lineno" href="#L643">643</a></span>
-<span id="L644" class="lineno"><a class="lineno" href="#L644">644</a></span>
-<span id="L645" class="lineno"><a class="lineno" href="#L645">645</a></span>
-<span id="L646" class="lineno"><a class="lineno" href="#L646">646</a></span>
-<span id="L647" class="lineno"><a class="lineno" href="#L647">647</a></span>
-<span id="L648" class="lineno"><a class="lineno" href="#L648">648</a></span>
-<span id="L649" class="lineno"><a class="lineno" href="#L649">649</a></span>
-<span id="L650" class="lineno"><a class="lineno" href="#L650">650</a></span>
-<span id="L651" class="lineno"><a class="lineno" href="#L651">651</a></span>
-<span id="L652" class="lineno"><a class="lineno" href="#L652">652</a></span>
-<span id="L653" class="lineno"><a class="lineno" href="#L653">653</a></span>
-<span id="L654" class="lineno"><a class="lineno" href="#L654">654</a></span>
-<span id="L655" class="lineno"><a class="lineno" href="#L655">655</a></span>
-<span id="L656" class="lineno"><a class="lineno" href="#L656">656</a></span>
-<span id="L657" class="lineno"><a class="lineno" href="#L657">657</a></span>
-<span id="L658" class="lineno"><a class="lineno" href="#L658">658</a></span>
-<span id="L659" class="lineno"><a class="lineno" href="#L659">659</a></span>
-<span id="L660" class="lineno"><a class="lineno" href="#L660">660</a></span>
-<span id="L661" class="lineno"><a class="lineno" href="#L661">661</a></span>
-<span id="L662" class="lineno"><a class="lineno" href="#L662">662</a></span>
-<span id="L663" class="lineno"><a class="lineno" href="#L663">663</a></span>
-<span id="L664" class="lineno"><a class="lineno" href="#L664">664</a></span>
-<span id="L665" class="lineno"><a class="lineno" href="#L665">665</a></span>
-<span id="L666" class="lineno"><a class="lineno" href="#L666">666</a></span>
-<span id="L667" class="lineno"><a class="lineno" href="#L667">667</a></span>
-<span id="L668" class="lineno"><a class="lineno" href="#L668">668</a></span>
-<span id="L669" class="lineno"><a class="lineno" href="#L669">669</a></span>
-<span id="L670" class="lineno"><a class="lineno" href="#L670">670</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">AQSql Module.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">Provide queries to DB.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">from enum import IntEnum, unique</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib import logging</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">from typing import Union, Any, TYPE_CHECKING</span>
+<span class="line-empty" title="No Anys on this line!">from typing import Union, Any, List, TYPE_CHECKING</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">if TYPE_CHECKING:</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.fllegacy.flsqlcursor import FLSqlCursor  # noqa: F401</span>
+<span class="line-empty" title="No Anys on this line!">    from pineboolib.interfaces.iconnection import IConnection</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">logger = logging.getLogger(__name__)</span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
-<span class="line-empty" title="No Anys on this line!">Provee consultas a DB</span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class AQSql(object):</span>
+<span class="line-empty" title="No Anys on this line!">    """AQSql Class."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    Insert = 0</span>
-<span class="line-precise" title="No Anys on this line!">    Edit = 1</span>
-<span class="line-precise" title="No Anys on this line!">    Del = 2</span>
-<span class="line-precise" title="No Anys on this line!">    Browse = 3</span>
+<span class="line-precise" title="No Anys on this line!">    Insert: int = 0</span>
+<span class="line-precise" title="No Anys on this line!">    Edit: int = 1</span>
+<span class="line-precise" title="No Anys on this line!">    Del: int = 2</span>
+<span class="line-precise" title="No Anys on this line!">    Browse: int = 3</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Obtiene la base de datos de una conexion.</span>
+<span class="line-precise" title="No Anys on this line!">    @unique</span>
+<span class="line-empty" title="No Anys on this line!">    class TableType(IntEnum):</span>
+<span class="line-precise" title="No Anys on this line!">        Tables = 0x01</span>
+<span class="line-precise" title="No Anys on this line!">        SystemTables = 0x02</span>
+<span class="line-precise" title="No Anys on this line!">        Views = 0x04</span>
+<span class="line-precise" title="No Anys on this line!">        AllTables = 0xFF</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    @param connectionNmae Nombre de la conexion</span>
-<span class="line-empty" title="No Anys on this line!">    @return La base de datos correspondiente al nombre de conexion indicado</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!">    @classmethod</span>
+<span class="line-precise" title="No Anys on this line!">    def database(self, connection_name: str = "default") -&gt; "IConnection":</span>
+<span class="line-empty" title="No Anys on this line!">        """Return the database of a connection."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">            raise Exception("Project is not connected yet")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">        return project.conn.useConn(connection_name)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @classmethod</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)
-Explicit (x1)">    def database(self, connection_name="default") -&gt; Any:</span>
-<span class="line-precise" title="No Anys on this line!">        if project.conn is None:</span>
-<span class="line-unanalyzed" title="No Anys on this line!">            raise Exception("Project is not connected yet")</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        return project.conn.useConn(connection_name)</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Actualiza un conjunto de registros de un cursor con nuevos valores</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    Si hay un error SQL, eleva una excepción con el mensaje de error</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    Ejemplo:</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    var cur = new AQSqlCursor("clientes");</span>
-<span class="line-empty" title="No Anys on this line!">    try {</span>
-<span class="line-empty" title="No Anys on this line!">      AQSql.update(cur,</span>
-<span class="line-empty" title="No Anys on this line!">                   ["nombre","cifnif","codserie"],</span>
-<span class="line-empty" title="No Anys on this line!">                   ["juan","ZYX","A"],</span>
-<span class="line-empty" title="No Anys on this line!">                   "codcliente='1'");</span>
-<span class="line-empty" title="No Anys on this line!">    } catch (e) {</span>
-<span class="line-empty" title="No Anys on this line!">      sys.errorMsgBox("Error SQL: " + e);</span>
-<span class="line-empty" title="No Anys on this line!">    }</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    @classmethod</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">    def update(self, table_or_cursor: Union[str, "FLSqlCursor"], fields, values, where="", conn=None):</span>
+Explicit (x1)
+Unannotated (x1)">    def update(</span>
+<span class="line-empty" title="No Anys on this line!">        self, table_or_cursor: Union[str, "FLSqlCursor"], fields: List[str], values: List[Any], where: str = "", conn: str = "default"</span>
+<span class="line-empty" title="No Anys on this line!">    ):</span>
+<span class="line-empty" title="No Anys on this line!">        """Update a set of cursor records with new values."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">        if isinstance(table_or_cursor, str):</span>
 <span class="line-empty" title="No Anys on this line!">            from pineboolib.application.database.pnsqlcursor import PNSqlCursor</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            cur = PNSqlCursor(table_or_cursor, conn)</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x1)">            cur = PNSqlCursor(table_or_cursor, conn)</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-precise" title="No Anys on this line!">            cur = table_or_cursor</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -754,14 +710,12 @@ Unannotated (x2)">            cur = PNSqlCursor(table_or_cursor, conn)</span>
 <span class="line-precise" title="No Anys on this line!">        if not cur.metadata():</span>
 <span class="line-precise" title="No Anys on this line!">            return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        cur.select(where)</span>
+<span class="line-precise" title="No Anys on this line!">        cur.select(where)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        ok = True</span>
 <span class="line-precise" title="No Anys on this line!">        actCheck = cur.activatedCheckIntegrity()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        fieldsCount = len(fields)</span>
+<span class="line-precise" title="No Anys on this line!">        fieldsCount = len(fields)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        while ok and cur.next():</span>
 <span class="line-precise" title="No Anys on this line!">            cur.setModeAccess(cur.Edit)</span>
@@ -769,8 +723,7 @@ Unannotated (x1)">        fieldsCount = len(fields)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            for i in range(0, fieldsCount - 1):</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)
-Unannotated (x4)">                cur.setValueBuffer(fields[i], values[i])</span>
+Explicit (x3)">                cur.setValueBuffer(fields[i], values[i])</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            msgCheck = cur.msgCheckIntegrity()</span>
 <span class="line-precise" title="No Anys on this line!">            if msgCheck != "":</span>
@@ -783,49 +736,34 @@ Unannotated (x4)">                cur.setValueBuffer(fields[i], values[i])</span
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        return ok</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Inserta un registro en un cursor</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    Si hay un error SQL, eleva una excepción con el mensaje de error</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    Ejemplo:</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    var cur = new AQSqlCursor("clientes");</span>
-<span class="line-empty" title="No Anys on this line!">    try {</span>
-<span class="line-empty" title="No Anys on this line!">        AQSql.insert(cur,</span>
-<span class="line-empty" title="No Anys on this line!">            ["codcliente","nombre","cifnif","codserie"],</span>
-<span class="line-empty" title="No Anys on this line!">            ["1","pepe","XYZ","A"]);</span>
-<span class="line-empty" title="No Anys on this line!">        } catch (e) {</span>
-<span class="line-empty" title="No Anys on this line!">            sys.errorMsgBox("Error SQL: " + e);</span>
-<span class="line-empty" title="No Anys on this line!">            }</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @classmethod</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">    def insert(self, table_or_cursor: Union[str, "FLSqlCursor"], fields, values, where="", conn=None):</span>
+Explicit (x1)
+Unannotated (x1)">    def insert(</span>
+<span class="line-empty" title="No Anys on this line!">        self, table_or_cursor: Union[str, "FLSqlCursor"], fields: List[str], values: List[Any], where: str = "", conn: str = "default"</span>
+<span class="line-empty" title="No Anys on this line!">    ):</span>
+<span class="line-empty" title="No Anys on this line!">        """Insert a record in a cursor."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">        if isinstance(table_or_cursor, str):</span>
 <span class="line-empty" title="No Anys on this line!">            from pineboolib.application.database.pnsqlcursor import PNSqlCursor</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            cur = PNSqlCursor(table_or_cursor, conn)</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x1)">            cur = PNSqlCursor(table_or_cursor, conn)</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-precise" title="No Anys on this line!">            cur = table_or_cursor</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if not cur.metadata():</span>
 <span class="line-precise" title="No Anys on this line!">            return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        fieldsCount = len(fields)</span>
+<span class="line-precise" title="No Anys on this line!">        fieldsCount = len(fields)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        cur.setModeAccess(cur.Insert)</span>
 <span class="line-precise" title="No Anys on this line!">        cur.refreshBuffer()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        for i in range(0, fieldsCount - 1):</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)
-Unannotated (x4)">            cur.setValueBuffer(fields[i], values[i])</span>
+Explicit (x3)">            cur.setValueBuffer(fields[i], values[i])</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        msgCheck = cur.msgCheckIntegrity()</span>
 <span class="line-precise" title="No Anys on this line!">        if msgCheck != "":</span>
@@ -840,24 +778,10 @@ Unannotated (x4)">            cur.setValueBuffer(fields[i], values[i])</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        return ok</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Elimina un conjunto de registros de un cursor</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    Si hay un error SQL, eleva una excepción con el mensaje de error</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    Ejemplo:</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    var cur = new AQSqlCursor("clientes");</span>
-<span class="line-empty" title="No Anys on this line!">    try {</span>
-<span class="line-empty" title="No Anys on this line!">        AQSql.del_(cur, "codcliente='1'");</span>
-<span class="line-empty" title="No Anys on this line!">        } catch (e) {</span>
-<span class="line-empty" title="No Anys on this line!">        sys.errorMsgBox("Error SQL: " + e);</span>
-<span class="line-empty" title="No Anys on this line!">        }</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @classmethod</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">    def del_(self, cur_or_table: Union[str, "FLSqlCursor"], where="", conn_name="default"):</span>
+Unannotated (x1)">    def del_(self, cur_or_table: Union[str, "FLSqlCursor"], where: str = "", conn_name: str = "default"):</span>
+<span class="line-empty" title="No Anys on this line!">        """Remove a recordset from a cursor."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">        if not isinstance(cur_or_table, str):</span>
@@ -870,8 +794,7 @@ Omitted Generics (x1)">        if not isinstance(cur_or_table, str):</span>
 Explicit (x4)">                logger.warning("No hay metadatos para '%s%s'" % (cur.curName(), cur.db()))</span>
 <span class="line-precise" title="No Anys on this line!">                return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            if not cur.select(where):</span>
+<span class="line-precise" title="No Anys on this line!">            if not cur.select(where):</span>
 <span class="line-precise" title="No Anys on this line!">                return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            ok = True</span>
@@ -899,12 +822,11 @@ Explicit (x4)">                    logger.warning(msg_check, cur.db())</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-empty" title="No Anys on this line!">            from pineboolib.application.database.pnsqlcursor import PNSqlCursor</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            cur = PNSqlCursor(cur_or_table, True, conn_name)</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x1)">            cur = PNSqlCursor(cur_or_table, True, conn_name)</span>
 <span class="line-precise" title="No Anys on this line!">            cur.setForwardOnly(True)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)
-Unannotated (x1)">            return cur.del_(where)</span>
+Explicit (x2)">            return cur.del_(where)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">"""</span>

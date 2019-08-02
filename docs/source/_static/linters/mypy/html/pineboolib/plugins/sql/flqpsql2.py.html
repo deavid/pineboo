@@ -177,14 +177,16 @@ Unannotated (x4)">            self.engine_ = create_engine("postgresql+pg8000://
 <span class="line-empty" title="No Anys on this line!">            from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            if project._DGI and not project.DGI.localDesktop():</span>
+Explicit (x7)">            if project._DGI and not project.DGI.localDesktop():</span>
 <span class="line-precise" title="No Anys on this line!">                if repr(traceback.format_exc()).find("the database system is starting up") &gt; -1:</span>
 <span class="line-empty" title="No Anys on this line!">                    raise</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">                return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">            if project._splash:</span>
-<span class="line-unanalyzed" title="No Anys on this line!">                project._splash.hide()</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            if project._splash:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">                project._splash.hide()</span>
 <span class="line-precise" title="No Anys on this line!">            if repr(traceback.format_exc()).find("does not exist") &gt; -1:</span>
 <span class="line-precise" title="No Anys on this line!">                ret = QMessageBox.warning(</span>
 <span class="line-precise" title="No Anys on this line!">                    QWidget(),</span>

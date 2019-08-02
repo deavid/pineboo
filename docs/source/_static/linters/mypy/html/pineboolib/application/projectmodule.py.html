@@ -511,8 +511,16 @@
 <span id="L501" class="lineno"><a class="lineno" href="#L501">501</a></span>
 <span id="L502" class="lineno"><a class="lineno" href="#L502">502</a></span>
 <span id="L503" class="lineno"><a class="lineno" href="#L503">503</a></span>
+<span id="L504" class="lineno"><a class="lineno" href="#L504">504</a></span>
+<span id="L505" class="lineno"><a class="lineno" href="#L505">505</a></span>
+<span id="L506" class="lineno"><a class="lineno" href="#L506">506</a></span>
+<span id="L507" class="lineno"><a class="lineno" href="#L507">507</a></span>
+<span id="L508" class="lineno"><a class="lineno" href="#L508">508</a></span>
 </pre></td>
-<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">import os</span>
+<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">Project Module.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">import os</span>
 <span class="line-empty" title="No Anys on this line!">import time</span>
 <span class="line-empty" title="No Anys on this line!">from typing import List, Optional, Any, Dict, TYPE_CHECKING</span>
 <span class="line-empty" title="No Anys on this line!">from optparse import Values</span>
@@ -527,19 +535,19 @@
 <span class="line-empty" title="No Anys on this line!">from pineboolib.core.settings import config</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.application.module import Module</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.application.utils.path import _dir</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">if TYPE_CHECKING:</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.interfaces.dgi_schema import dgi_schema</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.interfaces.iconnection import IConnection</span>
-<span class="line-empty" title="No Anys on this line!">    from pineboolib.application.xmlaction import XMLAction</span>
+<span class="line-empty" title="No Anys on this line!">    from pineboolib.core.utils.struct import ActionStruct  # noqa: F401</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class Project(object):</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Esta es la clase principal del proyecto. Se puede acceder a esta con pineboolib.project desde cualquier parte del projecto</span>
+<span class="line-empty" title="No Anys on this line!">    Singleton for the whole application.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    Can be accessed with pineboolib.project from anywhere.</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    logger = logging.getLogger("main.Project")</span>
@@ -565,9 +573,7 @@ Explicit (x2)">    main_window: Any = None</span>
 <span class="line-precise" title="No Anys on this line!">    _msg_mng = None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def __init__(self) -&gt; None:</span>
-<span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Constructor</span>
-<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        """Constructor."""</span>
 <span class="line-precise" title="No Anys on this line!">        self._conn = None</span>
 <span class="line-precise" title="No Anys on this line!">        self._DGI = None</span>
 <span class="line-precise" title="No Anys on this line!">        self.tree = None</span>
@@ -581,7 +587,7 @@ Explicit (x2)">    main_window: Any = None</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x2)">        self.translator_: List[Any] = []  # FIXME: Add proper type</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Explicit (x2)">        self.actions: Dict[Any, XMLAction] = {}  # FIXME: Add proper type</span>
+Explicit (x2)">        self.actions: Dict[Any, "ActionStruct"] = {}  # FIXME: Add proper type</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x4)">        self.tables: Dict[Any, Any] = {}  # FIXME: Add proper type</span>
 <span class="line-imprecise" title="Any Types on this line: 
@@ -591,27 +597,32 @@ Explicit (x1)">        self.options = Values()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @property</span>
 <span class="line-precise" title="No Anys on this line!">    def app(self) -&gt; QtCore.QCoreApplication:</span>
+<span class="line-empty" title="No Anys on this line!">        """Retrieve current Qt Application or throw error."""</span>
 <span class="line-precise" title="No Anys on this line!">        if self._app is None:</span>
 <span class="line-precise" title="No Anys on this line!">            raise Exception("No application set")</span>
 <span class="line-precise" title="No Anys on this line!">        return self._app</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def set_app(self, app: QtCore.QCoreApplication):</span>
+<span class="line-empty" title="No Anys on this line!">        """Set Qt Application."""</span>
 <span class="line-precise" title="No Anys on this line!">        self._app = app</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @property</span>
 <span class="line-precise" title="No Anys on this line!">    def conn(self) -&gt; "IConnection":</span>
+<span class="line-empty" title="No Anys on this line!">        """Retrieve current connection or throw."""</span>
 <span class="line-precise" title="No Anys on this line!">        if self._conn is None:</span>
 <span class="line-precise" title="No Anys on this line!">            raise Exception("Project is not initialized")</span>
 <span class="line-precise" title="No Anys on this line!">        return self._conn</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    @property</span>
 <span class="line-precise" title="No Anys on this line!">    def DGI(self) -&gt; "dgi_schema":</span>
+<span class="line-empty" title="No Anys on this line!">        """Retrieve current DGI or throw."""</span>
 <span class="line-precise" title="No Anys on this line!">        if self._DGI is None:</span>
 <span class="line-precise" title="No Anys on this line!">            raise Exception("Project is not initialized")</span>
 <span class="line-precise" title="No Anys on this line!">        return self._DGI</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def init_conn(self, connection: "IConnection") -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialize project with a connection."""</span>
 <span class="line-precise" title="No Anys on this line!">        self._conn = connection</span>
 <span class="line-precise" title="No Anys on this line!">        self.apppath = filedir("..")</span>
 <span class="line-any" title="Any Types on this line: 
@@ -627,7 +638,7 @@ Explicit (x3)">        self.deleteCache = config.value("ebcomportamiento/deleteC
 Explicit (x3)">        self.parseProject = config.value("ebcomportamiento/parseProject", False)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def init_dgi(self, DGI: "dgi_schema") -&gt; None:</span>
-<span class="line-empty" title="No Anys on this line!">        """Load and associate the defined DGI onto this project"""</span>
+<span class="line-empty" title="No Anys on this line!">        """Load and associate the defined DGI onto this project."""</span>
 <span class="line-empty" title="No Anys on this line!">        # FIXME: Actually, DGI should be loaded here, or kind of.</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.core.message_manager import Manager</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -644,6 +655,7 @@ Explicit (x3)">        if config.value("ebcomportamiento/mdi_mode"):</span>
 Unannotated (x2)">        self._DGI.extraProjectInit()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def load_modules(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Load all modules."""</span>
 <span class="line-precise" title="No Anys on this line!">        for module_name, mod_obj in self.modules.items():</span>
 <span class="line-precise" title="No Anys on this line!">            mod_obj.load()</span>
 <span class="line-imprecise" title="Any Types on this line: 
@@ -651,8 +663,10 @@ Explicit (x9)">            self.tables.update(mod_obj.tables)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setDebugLevel(self, q: int) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Especifica el nivel de debug de la aplicación</span>
+<span class="line-empty" title="No Anys on this line!">        Set debug level for application.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        @param q Número con el nivel espeficicado</span>
+<span class="line-empty" title="No Anys on this line!">        ***DEPRECATED***</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-precise" title="No Anys on this line!">        Project.debugLevel = q</span>
 <span class="line-empty" title="No Anys on this line!">        # self._DGI.pnqt3ui.Options.DEBUG_LEVEL = q</span>
@@ -664,12 +678,11 @@ Explicit (x9)">            self.tables.update(mod_obj.tables)</span>
 <span class="line-empty" title="No Anys on this line!">    #     """</span>
 <span class="line-empty" title="No Anys on this line!">    #     return self.acl_</span>
 <span class="line-any" title="No Anys on this line!">    def acl(self):</span>
-<span class="line-empty" title="No Anys on this line!">        """Devuelve el ACL cargado"""</span>
+<span class="line-empty" title="No Anys on this line!">        """Return loaded ACL."""</span>
 <span class="line-precise" title="No Anys on this line!">        raise CodeDoesNotBelongHereException("ACL Does not belong to PROJECT. Go away.")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def run(self) -&gt; bool:</span>
-<span class="line-empty" title="No Anys on this line!">        """Arranca el proyecto. Conecta a la BD y carga los datos</span>
-<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        """Run project. Connects to DB and loads data."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x1)">        if self.actions:</span>
@@ -690,8 +703,6 @@ Explicit (x2)">        self.tables = {}</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">        if not self.conn or not self.conn.conn:</span>
 <span class="line-precise" title="No Anys on this line!">            raise NotConnectedError("Cannot execute Pineboo Project without a connection in place")</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import load_models</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        # TODO: Refactorizar esta función en otras más sencillas</span>
 <span class="line-empty" title="No Anys on this line!">        # Preparar temporal</span>
@@ -940,7 +951,8 @@ Explicit (x1)">                        self.parseScript(_dir(root, nombre))</spa
 Explicit (x3)">        if not config.value("ebcomportamiento/orm_load_disabled", False):</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)">            self.message_manager().send("splash", "showMessage", ["Cargando objetos ..."])</span>
-<span class="line-precise" title="No Anys on this line!">            load_models()</span>
+<span class="line-empty" title="No Anys on this line!">            # from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import load_models</span>
+<span class="line-empty" title="No Anys on this line!">            # load_models()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)">        self.message_manager().send("splash", "showMessage", ["Cargando traducciones ..."])</span>
@@ -954,7 +966,8 @@ Unannotated (x4)">        self.message_manager().send("splash", "showMessage", [
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x3)">    def call(self, function: str, aList: List[Any], object_context: Any = None, showException: bool = True) -&gt; Optional[Any]:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        LLama a una función del projecto.</span>
+<span class="line-empty" title="No Anys on this line!">        Call to a QS project function.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        @param function. Nombre de la función a llamar.</span>
 <span class="line-empty" title="No Anys on this line!">        @param aList. Array con los argumentos.</span>
 <span class="line-empty" title="No Anys on this line!">        @param objectContext. Contexto en el que se ejecuta la función.</span>
@@ -989,33 +1002,41 @@ Explicit (x4)">                        self.logger.error("No existe la acción %
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x1)">            funAction = self.actions[aFunction[0]]</span>
 <span class="line-precise" title="No Anys on this line!">            if aFunction[1] == "iface" or len(aFunction) == 2:</span>
-<span class="line-precise" title="No Anys on this line!">                mW = funAction.load()</span>
+<span class="line-any" title="Any Types on this line: 
+Omitted Generics (x5)">                mW = funAction.load()</span>
 <span class="line-precise" title="No Anys on this line!">                if len(aFunction) == 2:</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x1)">                    object_context = None</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)">                    if hasattr(mW.widget, aFunction[1]):</span>
+Explicit (x1)
+Omitted Generics (x2)">                    if hasattr(mW.widget, aFunction[1]):</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)">                        object_context = mW.widget</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x2)">                    if hasattr(mW.iface, aFunction[1]):</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x2)">                        object_context = mW.iface</span>
+Omitted Generics (x2)
+Explicit (x1)">                        object_context = mW.widget</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)
+Omitted Generics (x2)">                    if hasattr(mW.iface, aFunction[1]):</span>
+<span class="line-any" title="Any Types on this line: 
+Omitted Generics (x2)
+Explicit (x1)">                        object_context = mW.iface</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                    if not object_context:</span>
-<span class="line-imprecise" title="Any Types on this line: 
+<span class="line-any" title="Any Types on this line: 
+Omitted Generics (x1)
 Explicit (x1)">                        object_context = mW</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">                else:</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x2)">                    object_context = mW.iface</span>
+<span class="line-any" title="Any Types on this line: 
+Omitted Generics (x2)
+Explicit (x1)">                    object_context = mW.iface</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            elif aFunction[1] == "widget":</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                fR = funAction.load_script(aFunction[0], None)</span>
+Omitted Generics (x5)">                fR = funAction.load_script(aFunction[0], None)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                object_context = fR.iface</span>
+Omitted Generics (x2)
+Explicit (x1)">                object_context = fR.iface</span>
 <span class="line-empty" title="No Anys on this line!">            else:</span>
 <span class="line-precise" title="No Anys on this line!">                return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -1062,7 +1083,8 @@ Explicit (x4)">            self.logger.exception("JSCALL: Error executing functi
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def parseScript(self, scriptname: str, txt_: str = "") -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Convierte un script .qs a .py lo deja al lado</span>
+<span class="line-empty" title="No Anys on this line!">        Convert QS script into Python and stores it in the same folder.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        @param scriptname, Nombre del script a convertir</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -1080,29 +1102,20 @@ Omitted Generics (x1)">        if not os.path.isfile(python_script_path) or self
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">            self.logger.info(msg)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">            # if self._splash:</span>
-<span class="line-empty" title="No Anys on this line!">            #     self._splash.showMessage(msg, QtCore.Qt.AlignLeft, QtCore.Qt.white)</span>
-<span class="line-empty" title="No Anys on this line!">            #</span>
-<span class="line-empty" title="No Anys on this line!">            # else:</span>
-<span class="line-empty" title="No Anys on this line!">            #     if settings.readBoolEntry("ebcomportamiento/SLInterface", False):</span>
-<span class="line-empty" title="No Anys on this line!">            #         from pineboolib.pncontrolsfactory import aqApp</span>
-<span class="line-empty" title="No Anys on this line!">            #</span>
-<span class="line-empty" title="No Anys on this line!">            #         aqApp.popupWarn(msg)</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">            # clean_no_python = self._DGI.clean_no_python() # FIXME: No longer needed. Applied on the go.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">            from pineboolib.application.parsers.qsaparser import postparse</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">            try:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">                postparse.pythonify([scriptname])</span>
+<span class="line-precise" title="No Anys on this line!">                postparse.pythonify([scriptname])</span>
 <span class="line-precise" title="No Anys on this line!">            except Exception:</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">                self.logger.exception("El fichero %s no se ha podido convertir", scriptname)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def test(self, name=None):</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Lanza los test</span>
+<span class="line-empty" title="No Anys on this line!">        Start GUI tests.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        @param name, Nombre del test específico. Si no se especifica se lanzan todos los tests disponibles</span>
 <span class="line-empty" title="No Anys on this line!">        @return Texto con la valoración de los test aplicados</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
@@ -1160,14 +1173,17 @@ Unannotated (x4)">        self.logger.warning("%s/%s", resultValue, maxValue)</s
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def get_temp_dir(self) -&gt; str:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Retorna la carpeta temporal predefinida de pineboo</span>
+<span class="line-empty" title="No Anys on this line!">        Return temporary folder defined for pineboo.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        @return ruta a la carpeta temporal</span>
+<span class="line-empty" title="No Anys on this line!">        ***DEPRECATED***</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!">        # FIXME: anti-pattern in Python. Getters for plain variables are wrong.</span>
 <span class="line-precise" title="No Anys on this line!">        raise CodeDoesNotBelongHereException("Use project.tmpdir instead, please.")</span>
 <span class="line-empty" title="No Anys on this line!">        # return self.tmpdir</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def load_version(self):</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialize current version numbers."""</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">        self.version = "0.12"</span>
 <span class="line-any" title="Any Types on this line: 
@@ -1179,6 +1195,7 @@ Unannotated (x4)">            self.version = "DBAdmin v%s" % self.version</span>
 Unannotated (x4)">            self.version = "Quick v%s" % self.version</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def message_manager(self):</span>
+<span class="line-empty" title="No Anys on this line!">        """Return message manager for splash and progress."""</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">        return self._msg_mng</span>
 </pre></td>

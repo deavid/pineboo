@@ -1114,15 +1114,17 @@ Unannotated (x1)">    def __init__(self, cx=None, connection_name: Union[str, "I
 <span class="line-empty" title="No Anys on this line!">        Initialize a new query.</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if project.conn is None:</span>
-<span class="line-unanalyzed" title="No Anys on this line!">            raise Exception("Project is not connected yet")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">            raise Exception("Project is not connected yet")</span>
 <span class="line-precise" title="No Anys on this line!">        self._sql_inspector = None</span>
 <span class="line-precise" title="No Anys on this line!">        self._fieldNameToPosDict = None</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">        self.d = PNSqlQueryPrivate(cx)</span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">        if isinstance(connection_name, str):</span>
-<span class="line-precise" title="No Anys on this line!">            self.d.db_ = project.conn.useConn(connection_name)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">            self.d.db_ = project.conn.useConn(connection_name)</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-precise" title="No Anys on this line!">            self.d.db_ = connection_name</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -1139,10 +1141,13 @@ Explicit (x1)">        self._datos = []</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">        if cx:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            retornoQry = project.conn.manager().query(cx, self)</span>
+Explicit (x7)
+Unannotated (x1)">            retornoQry = project.conn.manager().query(cx, self)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if retornoQry:</span>
-<span class="line-precise" title="No Anys on this line!">            self.d = retornoQry.d</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">        if retornoQry:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            self.d = retornoQry.d</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def __del__(self) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
@@ -1479,16 +1484,16 @@ Explicit (x3)">                v = self.d.parameterDict_[pD]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                if not v:</span>
-<span class="line-precise" title="No Anys on this line!">                    if not project._DGI:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">                    if not project._DGI:</span>
 <span class="line-precise" title="No Anys on this line!">                        raise Exception("project._DGI is empty!")</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                    dialog = project.DGI.QInputDialog</span>
+Explicit (x4)">                    dialog = project.DGI.QInputDialog</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">                    if dialog is not None:</span>
+Explicit (x1)">                    if dialog is not None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)
-Explicit (x1)">                        v = dialog.getText(None, "Entrada de parámetros de la consulta", pD)</span>
+Explicit (x4)">                        v = dialog.getText(None, "Entrada de parámetros de la consulta", pD)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                        if v:</span>
 <span class="line-any" title="Any Types on this line: 

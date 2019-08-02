@@ -83,25 +83,27 @@
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.core.utils.utils_base import filedir</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        dlg_ = filedir("plugins/dgi/dgi_qt/dgi_objects/dlg_about/about_pineboo.ui")</span>
-<span class="line-precise" title="No Anys on this line!">        version_ = project.version</span>
-<span class="line-precise" title="No Anys on this line!">        self.ui = None</span>
-<span class="line-precise" title="No Anys on this line!">        if project._DGI:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            self.ui = project.DGI.createUI(dlg_, None, self)</span>
+Explicit (x3)">        version_ = project.version</span>
+<span class="line-precise" title="No Anys on this line!">        self.ui = None</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        if project._DGI:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">            self.ui = project.DGI.createUI(dlg_, None, self)</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">        if self.ui is None:</span>
+Explicit (x1)">        if self.ui is None:</span>
 <span class="line-precise" title="No Anys on this line!">            raise Exception("Error creating UI About Dialog")</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        self.ui.lbl_version.setText("Pineboo v%s" % str(version_))</span>
+Explicit (x5)">        self.ui.lbl_version.setText("Pineboo v%s" % str(version_))</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x7)">        self.ui.btn_close.clicked.connect(self.ui.close)</span>
+Explicit (x7)">        self.ui.btn_close.clicked.connect(self.ui.close)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        self.ui.btn_clipboard.clicked.connect(self.to_clipboard)</span>
+Explicit (x5)">        self.ui.btn_clipboard.clicked.connect(self.to_clipboard)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        self.ui.show()</span>
+Explicit (x3)">        self.ui.show()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        self.ui.lbl_librerias.setText(self.load_components())</span>
+Explicit (x4)">        self.ui.lbl_librerias.setText(self.load_components())</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def load_components(self) -&gt; str:</span>
 <span class="line-empty" title="No Anys on this line!">        from PyQt5 import QtCore  # type: ignore</span>

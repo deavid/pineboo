@@ -308,61 +308,65 @@
 <span id="L298" class="lineno"><a class="lineno" href="#L298">298</a></span>
 <span id="L299" class="lineno"><a class="lineno" href="#L299">299</a></span>
 <span id="L300" class="lineno"><a class="lineno" href="#L300">300</a></span>
+<span id="L301" class="lineno"><a class="lineno" href="#L301">301</a></span>
+<span id="L302" class="lineno"><a class="lineno" href="#L302">302</a></span>
+<span id="L303" class="lineno"><a class="lineno" href="#L303">303</a></span>
+<span id="L304" class="lineno"><a class="lineno" href="#L304">304</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
-<span class="line-empty" title="No Anys on this line!">"""</span>
-<span class="line-empty" title="No Anys on this line!">Clase base para Controles de Acceso, también denominados Reglas de Control de Acceso.</span>
+<span class="line-empty" title="No Anys on this line!">r"""</span>
+<span class="line-empty" title="No Anys on this line!">Base class for Access Controls, also called Access Control Rules.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">Una regla de control de acceso se aplica a un usuario y a un objeto de alto nivel o contenedor</span>
-<span class="line-empty" title="No Anys on this line!">(ventanas principales,tablas, etc..), que a su vez contendrán otros objetos (acciones, campos, etc..).</span>
-<span class="line-empty" title="No Anys on this line!">La regla está definida por la siguiente información como cabecera de la misma, que la identifica</span>
-<span class="line-empty" title="No Anys on this line!">unívocamente:</span>
+<span class="line-empty" title="No Anys on this line!">An access control rule applies to a user and a high-level object or container</span>
+<span class="line-empty" title="No Anys on this line!">(main windows, tables, etc.), which in turn will contain other objects (actions, fields, etc.).</span>
+<span class="line-empty" title="No Anys on this line!">The rule is defined by the following information as its header, which identifies it</span>
+<span class="line-empty" title="No Anys on this line!">uniquely:</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">\\code</span>
+<span class="line-empty" title="No Anys on this line!">\\ code</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">         tipo           ;         nombre         ;      usuario           ;      permiso</span>
-<span class="line-empty" title="No Anys on this line!">--------------------------------------------------------------------------------------------------</span>
-<span class="line-empty" title="No Anys on this line!">FLAccessControl::type ; FLAccessControl::name ; FLAccessControl::user ; FLAccessControl::perm</span>
+<span class="line-empty" title="No Anys on this line!">         kind           ; first name         ; user           ; permission</span>
+<span class="line-empty" title="No Anys on this line!">-------------------------------------------------- ------------------------------------------------</span>
+<span class="line-empty" title="No Anys on this line!">FLAccessControl :: type; FLAccessControl :: name; FLAccessControl :: user; FLAccessControl :: perm</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">\\endcode</span>
+<span class="line-empty" title="No Anys on this line!">\\ endcode</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">El tipo será el del objeto de alto nivel, el nombre será el del objeto, el usuario corresponderá al</span>
-<span class="line-empty" title="No Anys on this line!">nombre del usuario en la base de datos al que se le aplica la regla y permiso será un identificador</span>
-<span class="line-empty" title="No Anys on this line!">de texto que define el tipo de permiso que se atribuye al objeto para el usuario dado. Este permiso</span>
-<span class="line-empty" title="No Anys on this line!">es general o global y se aplicará por defecto a todos los objetos hijos o que pertenezcan al objeto</span>
-<span class="line-empty" title="No Anys on this line!">de alto nivel.</span>
+<span class="line-empty" title="No Anys on this line!">The type will be that of the high level object, the name will be that of the object, the user will correspond to the</span>
+<span class="line-empty" title="No Anys on this line!">name of the user in the database to which the rule applies and permission will be an identifier</span>
+<span class="line-empty" title="No Anys on this line!">of text that defines the type of permission attributed to the object for the given user. This permission</span>
+<span class="line-empty" title="No Anys on this line!">It is general or global and will be applied by default to all child objects that belong to the object</span>
+<span class="line-empty" title="No Anys on this line!">high level.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">Al mismo tiempo una regla podrá tener una lista de Objetos de Control de Acceso (denominados ACOs,</span>
-<span class="line-empty" title="No Anys on this line!">Access Control Objects), a los que se les quiere aplicar un permiso distinto al general. Los ACOs serán</span>
-<span class="line-empty" title="No Anys on this line!">objetos hijo o pertenecientes al objeto de alto nivel. Internamente la lista de ACOs está compuesta por</span>
-<span class="line-empty" title="No Anys on this line!">tuplas de dos elementos; "nombre de objeto" y "permiso", el nombre de objeto será el que tiene asignado</span>
-<span class="line-empty" title="No Anys on this line!">dentro de la jerarquía de objetos pertenecientes al objeto de alto nivel y permiso será el permiso para ese</span>
-<span class="line-empty" title="No Anys on this line!">objeto y que sobreescribirá al permiso general.</span>
+<span class="line-empty" title="No Anys on this line!">At the same time a rule may have a list of Access Control Objects (called ACOs,</span>
+<span class="line-empty" title="No Anys on this line!">Access Control Objects), to which you want to apply a permission other than the general one. The ACOs will be</span>
+<span class="line-empty" title="No Anys on this line!">child objects or belonging to the high level object. Internally the list of ACOs is composed of</span>
+<span class="line-empty" title="No Anys on this line!">tuples of two elements; 'object name' and 'permission', the object name will be the one assigned</span>
+<span class="line-empty" title="No Anys on this line!">within the hierarchy of objects belonging to the high level object and permission will be the permission for that</span>
+<span class="line-empty" title="No Anys on this line!">object and that will overwrite the general permit.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">Los valores de la regla se podrán establecer a partir de un nodo DOM de un documento DOM/XML, mediante</span>
-<span class="line-empty" title="No Anys on this line!">FLAccessControl::set . De forma recíproca se podrá obtener un nodo DOM con el contenido de la regla,</span>
-<span class="line-empty" title="No Anys on this line!">a insertar en un documento DOM/XML, mediante FLAccessControl::get . La estructura general en XML del nodo DOM</span>
-<span class="line-empty" title="No Anys on this line!">que representa una regla de control de acceso es la siguiente:</span>
+<span class="line-empty" title="No Anys on this line!">The values ​​of the rule can be set from a DOM node of a DOM / XML document, using</span>
+<span class="line-empty" title="No Anys on this line!">FLAccessControl :: set. Reciprocally you can obtain a DOM node with the content of the rule,</span>
+<span class="line-empty" title="No Anys on this line!">to insert into a DOM / XML document, using FLAccessControl :: get. The general XML structure of the DOM node</span>
+<span class="line-empty" title="No Anys on this line!">which represents an access control rule is as follows:</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">\\code</span>
+<span class="line-empty" title="No Anys on this line!">\\ code</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!"> &lt;[mainwindow,table,etc..] perm="XXX"&gt;</span>
-<span class="line-empty" title="No Anys on this line!">  &lt;name&gt;XXX&lt;/name&gt;</span>
-<span class="line-empty" title="No Anys on this line!">  &lt;user&gt;XXX&lt;/user&gt;</span>
-<span class="line-empty" title="No Anys on this line!">  &lt;aco perm="XXX"&gt;XXX&lt;/aco&gt;</span>
+<span class="line-empty" title="No Anys on this line!">&lt;[mainwindow, table, etc ..] perm = 'XXX'&gt;</span>
+<span class="line-empty" title="No Anys on this line!">  &lt;name&gt; XXX &lt;/name&gt;</span>
+<span class="line-empty" title="No Anys on this line!">  &lt;user&gt; XXX &lt;/user&gt;</span>
+<span class="line-empty" title="No Anys on this line!">  &lt;aco perm = 'XXX'&gt; XXX &lt;/aco&gt;</span>
 <span class="line-empty" title="No Anys on this line!">  ....</span>
-<span class="line-empty" title="No Anys on this line!">  &lt;aco perm="XXX"&gt;XXX&lt;/aco&gt;</span>
-<span class="line-empty" title="No Anys on this line!"> &lt;/[mainwindow,table,etc..]&gt;</span>
+<span class="line-empty" title="No Anys on this line!">  &lt;aco perm = 'XXX'&gt; XXX &lt;/aco&gt;</span>
+<span class="line-empty" title="No Anys on this line!"> &lt;/ [mainwindow, table, etc ..]&gt;</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">\\endcode</span>
+<span class="line-empty" title="No Anys on this line!">\\ endcode</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">Por comodidad, también se proporciona el método FLAccessControl::setAcos, que permite establecer la lista de</span>
-<span class="line-empty" title="No Anys on this line!">ACOs de una regla directamente a partir de una lista de cadenas de texto.</span>
+<span class="line-empty" title="No Anys on this line!">For convenience, the FLAccessControl :: setAcos method is also provided, which allows you to establish the list of</span>
+<span class="line-empty" title="No Anys on this line!">ACOs of a rule directly from a list of text strings.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">Esta clase no está pensada para ser usada directamente, sino como base para clases derivadas que se</span>
-<span class="line-empty" title="No Anys on this line!">encargan específicamente del procesamiento de objetos de alto nivel. Un ejemplo sería FLAccessControlMainWindow,</span>
-<span class="line-empty" title="No Anys on this line!">que se encarga de control de acceso para objetos de alto nivel de tipo "mainwindow", es decir ventanas principales,</span>
-<span class="line-empty" title="No Anys on this line!">como el selector de módulos, o cada una de las ventanas principales de los módulos.</span>
+<span class="line-empty" title="No Anys on this line!">This class is not intended to be used directly, but as a basis for derived classes that are</span>
+<span class="line-empty" title="No Anys on this line!">specifically responsible for processing high-level objects. An example would be FLAccessControlMainWindow,</span>
+<span class="line-empty" title="No Anys on this line!">which is responsible for access control for high-level objects of type 'mainwindow', ie main windows,</span>
+<span class="line-empty" title="No Anys on this line!">as the module selector, or each of the main windows of the modules.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">@author InfoSiAL S.L.</span>
 <span class="line-empty" title="No Anys on this line!">"""</span>
@@ -372,20 +376,21 @@
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class FLAccessControl(object):</span>
+<span class="line-empty" title="No Anys on this line!">    """FLAccessControl Class."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Almacena el nombre del objeto de alto nivel.</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    name_: str</span>
+<span class="line-precise" title="No Anys on this line!">    _name: str</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Almacena el nombre del usuario de la base de datos.</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-precise" title="No Anys on this line!">    user_: str</span>
+<span class="line-precise" title="No Anys on this line!">    _user: str</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Almacena el permiso general de la regla de control de acceso.</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-precise" title="No Anys on this line!">    perm_: str</span>
+<span class="line-precise" title="No Anys on this line!">    _perm: str</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Diccionario de permisos específicos de los ACOs (Access Control Objects)</span>
@@ -393,172 +398,168 @@
 <span class="line-empty" title="No Anys on this line!">    correspondencia entre el nombre del ACO (utilizado como clave de búsqueda)</span>
 <span class="line-empty" title="No Anys on this line!">    y el permiso a aplicar.</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-precise" title="No Anys on this line!">    acosPerms_: Dict[str, str]</span>
+<span class="line-precise" title="No Anys on this line!">    _acos_perms: Dict[str, str]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def __init__(self) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        self.name_ = ""</span>
-<span class="line-precise" title="No Anys on this line!">        self.user_ = ""</span>
-<span class="line-precise" title="No Anys on this line!">        self.perm_ = ""</span>
-<span class="line-precise" title="No Anys on this line!">        self.acosPerms_ = {}</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Destructor</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialization."""</span>
+<span class="line-precise" title="No Anys on this line!">        self._name = ""</span>
+<span class="line-precise" title="No Anys on this line!">        self._user = ""</span>
+<span class="line-precise" title="No Anys on this line!">        self._perm = ""</span>
+<span class="line-precise" title="No Anys on this line!">        self._acos_perms = {}</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def __del__(self) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        if self.acosPerms_:</span>
-<span class="line-precise" title="No Anys on this line!">            self.acosPerms_.clear()</span>
-<span class="line-precise" title="No Anys on this line!">            del self.acosPerms_</span>
+<span class="line-empty" title="No Anys on this line!">        """Remove values ​​when closed."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Obtiene el nombre del objeto de alto nivel.</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    @return Cadena de texto con el nombre del objeto.</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        if self._acos_perms:</span>
+<span class="line-precise" title="No Anys on this line!">            self._acos_perms.clear()</span>
+<span class="line-precise" title="No Anys on this line!">            del self._acos_perms</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def name(self) -&gt; str:</span>
-<span class="line-precise" title="No Anys on this line!">        return self.name_</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Get the name of the high level object.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Obtiene el nombre del usuario de la base de datos.</span>
+<span class="line-empty" title="No Anys on this line!">        @return Text string with the name of the object.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    @return Cadena de texto con el nombre (login) del usuario.</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        return self._name</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    def user(self) -&gt; Any:</span>
-<span class="line-precise" title="No Anys on this line!">        return self.user_</span>
+<span class="line-precise" title="No Anys on this line!">    def user(self) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Get the name of the database user.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Obtiene el permiso general.</span>
+<span class="line-empty" title="No Anys on this line!">        @return Text string with the user's name (login).</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    @return Cadena de texto que identifica el permiso a aplicar.</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        return self._user</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def perm(self) -&gt; str:</span>
-<span class="line-precise" title="No Anys on this line!">        return self.perm_</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Get general permission.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Establece el nombre del objeto de alto nivel.</span>
+<span class="line-empty" title="No Anys on this line!">        @return Text string that identifies the permission to apply.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    @param n Nombre del objeto.</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        return self._perm</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setName(self, n: str) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        self.name_ = n</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Set the name of the high level object.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Establece el nombre del usuario de la base de datos.</span>
+<span class="line-empty" title="No Anys on this line!">        @param n Object name.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    @param u Nombre (login) del usuario.</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        self._name = n</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    def setUser(self, u) -&gt; None:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        self.user_ = u</span>
+<span class="line-precise" title="No Anys on this line!">    def setUser(self, u: str) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Set the name of the database user.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Establece el permiso general.</span>
+<span class="line-empty" title="No Anys on this line!">        @param u Name (login) of the user.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    @param p Cadena de texto con el identificador del permiso.</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        self._user = u</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setPerm(self, p: str) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        self.perm_ = p</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Set the general permission.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Limpia la regla vaciándola y liberando todos los recursos</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!">        @param p Text string with the permission identifier.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        self._perm = p</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def clear(self) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        self.name_ = ""</span>
-<span class="line-precise" title="No Anys on this line!">        self.user_ = ""</span>
-<span class="line-precise" title="No Anys on this line!">        self.perm_ = ""</span>
-<span class="line-precise" title="No Anys on this line!">        if self.acosPerms_:</span>
-<span class="line-precise" title="No Anys on this line!">            self.acosPerms_.clear()</span>
-<span class="line-precise" title="No Anys on this line!">            del self.acosPerms_</span>
-<span class="line-precise" title="No Anys on this line!">            self.acosPerms_ = {}</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Clean the rule by emptying it and freeing all resources.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Devuelve una constante de texto que identifica el tipo.</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    Esta función deberá ser reimplementada en las clases derivadas que se</span>
-<span class="line-empty" title="No Anys on this line!">    encargan del procesamiento de un tipo de objeto concreto y devolver</span>
-<span class="line-empty" title="No Anys on this line!">    el identificador pertinente.</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    @return Cadena de texto que identifica al tipo de objeto general de la regla, p.e.: "table".</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">        self._name = ""</span>
+<span class="line-precise" title="No Anys on this line!">        self._user = ""</span>
+<span class="line-precise" title="No Anys on this line!">        self._perm = ""</span>
+<span class="line-precise" title="No Anys on this line!">        if self._acos_perms:</span>
+<span class="line-precise" title="No Anys on this line!">            self._acos_perms.clear()</span>
+<span class="line-precise" title="No Anys on this line!">            del self._acos_perms</span>
+<span class="line-precise" title="No Anys on this line!">            self._acos_perms = {}</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def type(self) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Return a text constant that identifies the type.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        This function must be reimplemented in the derived classes that are</span>
+<span class="line-empty" title="No Anys on this line!">        responsible for processing a specific object type and return the relevant identifier</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @return A text string that identifies the general object type of the rule, eg "table".</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        return ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Define la regla de control de acceso a partir de la información de un nodo DOM de un documento DOM/XML dado.</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">    def set(self, e: Any) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Define the access control rule from the information of a DOM node of a given DOM / XML document.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    @param e Elemento correspondiente al nodo DOM que se utilizará para definir la regla.</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!">        @param e Element corresponding to the DOM node that will be used to define the rule.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    def set(self, e) -&gt; None:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if not e:</span>
+Explicit (x1)">        if not e:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if self.acosPerms_:</span>
-<span class="line-precise" title="No Anys on this line!">            self.acosPerms_.clear()</span>
-<span class="line-precise" title="No Anys on this line!">            del self.acosPerms_</span>
+<span class="line-precise" title="No Anys on this line!">        if self._acos_perms:</span>
+<span class="line-precise" title="No Anys on this line!">            self._acos_perms.clear()</span>
+<span class="line-precise" title="No Anys on this line!">            del self._acos_perms</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        self.acosPerms_ = {}</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        self.perm_ = e.attribute("perm")</span>
+<span class="line-precise" title="No Anys on this line!">        self._acos_perms = {}</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        no = e.firstChild()</span>
+Explicit (x3)">        self._perm = e.attribute("perm")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        while not no.isNull():</span>
+Explicit (x4)">        no = e.firstChild()</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            e = no.toElement()</span>
+Explicit (x3)">        while not no.isNull():</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            if not e.isNull():</span>
+Explicit (x4)">            e = no.toElement()</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                if e.tagName() == "name":</span>
+Explicit (x3)">            if not e.isNull():</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">                    self.name_ = e.text()</span>
+Explicit (x4)">                if e.tagName() == "name":</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                    no = no.nextSibling()</span>
+Explicit (x3)">                    self._name = e.text()</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">                    no = no.nextSibling()</span>
 <span class="line-empty" title="No Anys on this line!">                    continue</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                elif e.tagName() == "user":</span>
+Explicit (x4)">                elif e.tagName() == "user":</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">                    self.user_ = e.text()</span>
+Explicit (x3)">                    self._user = e.text()</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                    no = no.nextSibling()</span>
+Explicit (x4)">                    no = no.nextSibling()</span>
 <span class="line-empty" title="No Anys on this line!">                    continue</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                elif e.tagName() == "aco":</span>
+Explicit (x4)">                elif e.tagName() == "aco":</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">                    self.acosPerms_[e.text()] = e.attribute("perm")</span>
+Explicit (x6)">                    self._acos_perms[e.text()] = e.attribute("perm")</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                    no = no.nextSibling()</span>
+Explicit (x4)">                    no = no.nextSibling()</span>
 <span class="line-empty" title="No Anys on this line!">                    continue</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            no = no.nextSibling()</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    A partir del contenido de la regla de control de acceso crea un nodo DOM que se insertará como</span>
-<span class="line-empty" title="No Anys on this line!">    hijo del primer nodo de un documento DOM/XML.</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    @param d Documento DOM/XML donde se insertará el nodo construido a partir de la regla de control de acceso.</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
+Explicit (x4)">            no = no.nextSibling()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def get(self, d) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        From the content of the access control rule create a DOM node.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        This will be inserted as child of the first node of a DOM / XML document.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param d DOM / XML document where the node built from the access control rule will be inserted.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">        if not self.type() or d is None:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
@@ -568,7 +569,7 @@ Unannotated (x6)">        root = d.fisrtChild().toElement()</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)">        e = d.createElement(self.type())</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        e.setAttribute("perm", self.perm_)</span>
+Unannotated (x3)">        e.setAttribute("perm", self._perm)</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)">        root.appendChild(e)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -577,7 +578,7 @@ Unannotated (x4)">        name = d.createElement("name")</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)">        e.appendChild(name)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        n = d.createTextNone(self.name_)</span>
+Unannotated (x4)">        n = d.createTextNone(self._name)</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)">        name.appendChild(n)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -586,16 +587,16 @@ Unannotated (x4)">        user = d.createElement("user")</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)">        e.appendChild(user)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        u = d.createTextNone(self.user_)</span>
+Unannotated (x4)">        u = d.createTextNone(self._user)</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)">        user.appendChild(u)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if self.acosPerms_:</span>
-<span class="line-precise" title="No Anys on this line!">            for key in self.acosPerms_.keys():</span>
+<span class="line-precise" title="No Anys on this line!">        if self._acos_perms:</span>
+<span class="line-precise" title="No Anys on this line!">            for key in self._acos_perms.keys():</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)">                aco = d.createElement("aco")</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">                aco.setAttribute("perm", self.acosPerms_[key])</span>
+Unannotated (x3)">                aco.setAttribute("perm", self._acos_perms[key])</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)">                e.appendChild(aco)</span>
 <span class="line-any" title="Any Types on this line: 
@@ -603,49 +604,53 @@ Unannotated (x4)">                t = d.createTextNone(key)</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x4)">                aco.appendChild(t)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Establece la lista de Acos a partir de una lista de cadenas de texto.</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    Esta lista de textos deberá tener en sus componentes de orden par los nombres de los objetos,y en los</span>
-<span class="line-empty" title="No Anys on this line!">    componentes de orden impar el permiso a aplicar a ese objeto, p.e.: "pbAbrir", "r-", "lblTexto", "--", "tbBorrar", "rw",...</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    @param acos Lista de cadenas de texto con los objetos y permisos.</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def setAcos(self, acos: List[str]) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        self.acosPerms_.clear()</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Set the list of Acos from a list of text strings.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        This list of texts must have in their order components the names of the objects, and in the</span>
+<span class="line-empty" title="No Anys on this line!">        odd order components the permission to apply to that object, eg: "pbOpen", "r-", "lblText", "-", "tbErase", "rw", ...</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param acos List of text strings with objects and permissions.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        self._acos_perms.clear()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        i = 0</span>
 <span class="line-precise" title="No Anys on this line!">        while i &lt; len(acos):</span>
-<span class="line-precise" title="No Anys on this line!">            self.acosPerms_[acos[i]] = acos[i + 1]</span>
+<span class="line-precise" title="No Anys on this line!">            self._acos_perms[acos[i]] = acos[i + 1]</span>
 <span class="line-precise" title="No Anys on this line!">            i += 2</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Obtiene una lista de cadenas de texto correspondiente a la lista de ACOs establecida</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    El formato de esta lista es igual al descrito en FLAccessControl::setAcos</span>
-<span class="line-empty" title="No Anys on this line!">    p.e.: "pbAbrir", "r-", "lblTexto", "--", "tbBorrar", "rw",...</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    @return Lista de cadenas de texto con los objetos y permisos.</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def getAcos(self) -&gt; List[str]:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Get a list of text strings corresponding to the list of ACOs set.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        The format of this list is the same as described in FLAccessControl :: setAcos</span>
+<span class="line-empty" title="No Anys on this line!">        eg 'pbOpen', 'r-', 'lblText', '--', 'tbErase', 'rw', ...</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @return List of text strings with objects and permissions.</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        acos = []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if self.acosPerms_:</span>
+<span class="line-precise" title="No Anys on this line!">        if self._acos_perms:</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">            for key in self.acosPerms_.keys():</span>
+<span class="line-precise" title="No Anys on this line!">            for key in self._acos_perms.keys():</span>
 <span class="line-precise" title="No Anys on this line!">                acos.append(key)</span>
-<span class="line-precise" title="No Anys on this line!">                acos.append(self.acosPerms_[key])</span>
+<span class="line-precise" title="No Anys on this line!">                acos.append(self._acos_perms[key])</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        return acos</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    def processObject(self, o) -&gt; None:</span>
+Explicit (x1)">    def processObject(self, obj: Any) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """To be overloaded."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        raise ValueError("Cannot access base class")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    def setFromObject(self, obj: Any) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """To be overloaded."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        raise ValueError("Cannot access base class")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>

@@ -365,6 +365,18 @@
 <span id="L355" class="lineno"><a class="lineno" href="#L355">355</a></span>
 <span id="L356" class="lineno"><a class="lineno" href="#L356">356</a></span>
 <span id="L357" class="lineno"><a class="lineno" href="#L357">357</a></span>
+<span id="L358" class="lineno"><a class="lineno" href="#L358">358</a></span>
+<span id="L359" class="lineno"><a class="lineno" href="#L359">359</a></span>
+<span id="L360" class="lineno"><a class="lineno" href="#L360">360</a></span>
+<span id="L361" class="lineno"><a class="lineno" href="#L361">361</a></span>
+<span id="L362" class="lineno"><a class="lineno" href="#L362">362</a></span>
+<span id="L363" class="lineno"><a class="lineno" href="#L363">363</a></span>
+<span id="L364" class="lineno"><a class="lineno" href="#L364">364</a></span>
+<span id="L365" class="lineno"><a class="lineno" href="#L365">365</a></span>
+<span id="L366" class="lineno"><a class="lineno" href="#L366">366</a></span>
+<span id="L367" class="lineno"><a class="lineno" href="#L367">367</a></span>
+<span id="L368" class="lineno"><a class="lineno" href="#L368">368</a></span>
+<span id="L369" class="lineno"><a class="lineno" href="#L369">369</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
 <span class="line-empty" title="No Anys on this line!">Provide some functions based on data.</span>
@@ -372,15 +384,18 @@
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.core.utils import logging</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">from typing import Any, Union, List, Optional</span>
+<span class="line-empty" title="No Anys on this line!">from typing import Any, Union, List, Optional, TYPE_CHECKING</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">if TYPE_CHECKING:</span>
+<span class="line-empty" title="No Anys on this line!">    from .pnsqlcursor import PNSqlCursor</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">logger = logging.getLogger("database.utils")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)
-Explicit (x1)">def nextCounter(*args) -&gt; Any:</span>
+<span class="line-precise" title="No Anys on this line!">def nextCounter(</span>
+<span class="line-empty" title="No Anys on this line!">    name_or_series: str, cursor_or_name: Union[str, "PNSqlCursor"], cursor_: Optional["PNSqlCursor"] = None</span>
+<span class="line-empty" title="No Anys on this line!">) -&gt; Optional[Union[str, int]]:</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Return the following value of a counter type field of a table.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -420,196 +435,155 @@ Explicit (x1)">def nextCounter(*args) -&gt; Any:</span>
 <span class="line-empty" title="No Anys on this line!">    @return Qvariant with the following number.</span>
 <span class="line-empty" title="No Anys on this line!">    @author Andrés Otón Urbano.</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="No Anys on this line!">    if cursor_ is None:</span>
+<span class="line-empty" title="No Anys on this line!">        from .pnsqlcursor import PNSqlCursor</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x1)
+Unannotated (x1)">        if not isinstance(cursor_or_name, PNSqlCursor):</span>
+<span class="line-precise" title="No Anys on this line!">            raise ValueError</span>
+<span class="line-precise" title="No Anys on this line!">        return _nextCounter_2(name_or_series, cursor_or_name)</span>
+<span class="line-empty" title="No Anys on this line!">    else:</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x1)">        if not isinstance(cursor_or_name, str):</span>
+<span class="line-precise" title="No Anys on this line!">            raise ValueError</span>
+<span class="line-precise" title="No Anys on this line!">        return _nextCounter_3(name_or_series, cursor_or_name, cursor_)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">def _nextCounter_2(name: str, cursor_: "PNSqlCursor") -&gt; Optional[Union[str, int]]:</span>
 <span class="line-empty" title="No Anys on this line!">    from .pnsqlquery import PNSqlQuery</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">    if len(args) == 2:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        name = args[0]</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        cursor_ = args[1]</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if not cursor_:</span>
-<span class="line-precise" title="No Anys on this line!">            return None</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        tMD = cursor_.metadata()</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if not tMD:</span>
-<span class="line-precise" title="No Anys on this line!">            return None</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        field = tMD.field(name)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if not field:</span>
-<span class="line-precise" title="No Anys on this line!">            return None</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        type_ = field.type()</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if type_ not in ["string", "double"]:</span>
-<span class="line-precise" title="No Anys on this line!">            return None</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        _len = int(field.length())</span>
-<span class="line-precise" title="No Anys on this line!">        cadena = None</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">        q = PNSqlQuery(None, cursor_.db().connectionName())</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">        q.setForwardOnly(True)</span>
-<span class="line-any" title="Any Types on this line: 
-Omitted Generics (x1)
-Unannotated (x3)">        q.setTablesList(tMD.name())</span>
-<span class="line-any" title="Any Types on this line: 
-Omitted Generics (x1)
-Unannotated (x1)">        q.setSelect(name)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        q.setFrom(tMD.name())</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        q.setWhere("LENGTH(%s)=%s" % (name, _len))</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        q.setOrderBy(name + " DESC")</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if not q.exec_():</span>
-<span class="line-precise" title="No Anys on this line!">            return None</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">        maxRange = 10 ** _len</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">        numero = maxRange</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">        while numero &gt;= maxRange:</span>
-<span class="line-precise" title="No Anys on this line!">            if not q.next():</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                numero = 1</span>
-<span class="line-empty" title="No Anys on this line!">                break</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">            try:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                numero = int(q.value(0))</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                numero = numero + 1</span>
-<span class="line-precise" title="No Anys on this line!">            except Exception:</span>
-<span class="line-empty" title="No Anys on this line!">                pass</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if type_ == "string":</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">            cadena = str(numero)</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">            if len(cadena) &lt; _len:</span>
-<span class="line-precise" title="No Anys on this line!">                relleno = None</span>
-<span class="line-precise" title="No Anys on this line!">                relleno = cadena.rjust(_len, "0")</span>
-<span class="line-precise" title="No Anys on this line!">                cadena = relleno</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">            return cadena</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if type_ == "double":</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">            return numero</span>
-<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    if not cursor_:</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    else:</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        serie = args[0]</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        name = args[1]</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        cursor_ = args[2]</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if not cursor_:</span>
-<span class="line-precise" title="No Anys on this line!">            return None</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        tMD = cursor_.metadata()</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if not tMD:</span>
-<span class="line-precise" title="No Anys on this line!">            return None</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        field = tMD.field(name)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if not field:</span>
-<span class="line-precise" title="No Anys on this line!">            return None</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        type_ = field.type()</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if type_ not in ["string", "double"]:</span>
-<span class="line-precise" title="No Anys on this line!">            return None</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        _len = field.length() - len(serie)</span>
-<span class="line-precise" title="No Anys on this line!">        cadena = None</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x7)">        where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (name, field.length(), name, len(serie), serie)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        select = "substring(%s FROM %d) as %s" % (name, len(serie) + 1, name)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">        q = PNSqlQuery(None, cursor_.db().connectionName())</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">        q.setForwardOnly(True)</span>
-<span class="line-any" title="Any Types on this line: 
-Omitted Generics (x1)
-Unannotated (x3)">        q.setTablesList(tMD.name())</span>
-<span class="line-precise" title="Any Types on this line: 
-Omitted Generics (x1)">        q.setSelect(select)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        q.setFrom(tMD.name())</span>
-<span class="line-precise" title="No Anys on this line!">        q.setWhere(where)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        q.setOrderBy(name + " DESC")</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if not q.exec_():</span>
-<span class="line-precise" title="No Anys on this line!">            return None</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">        maxRange = 10 ** _len</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">        numero = maxRange</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">        while numero &gt;= maxRange:</span>
-<span class="line-precise" title="No Anys on this line!">            if not q.next():</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">                numero = 1</span>
-<span class="line-empty" title="No Anys on this line!">                break</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            numero = int(q.value(0))</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            numero = numero + 1</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if type_ in ["string", "double"]:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">            cadena = numero</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">            if len(cadena) &lt; _len:</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">                relleno = "0" * (_len - len(cadena))</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">                cadena = relleno + cadena</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">            # res = serie + cadena</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">            return cadena</span>
-<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    tMD = cursor_.metadata()</span>
+<span class="line-precise" title="No Anys on this line!">    if not tMD:</span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    field = tMD.field(name)</span>
+<span class="line-precise" title="No Anys on this line!">    if not field:</span>
+<span class="line-precise" title="No Anys on this line!">        return None</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    type_ = field.type()</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    if type_ not in ["string", "double"]:</span>
+<span class="line-precise" title="No Anys on this line!">        return None</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    _len = int(field.length())</span>
+<span class="line-precise" title="No Anys on this line!">    cadena = None</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x1)">    q = PNSqlQuery(None, cursor_.db().connectionName())</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x1)">    q.setForwardOnly(True)</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x1)">    q.setTablesList(tMD.name())</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x1)">    q.setSelect(name)</span>
+<span class="line-precise" title="No Anys on this line!">    q.setFrom(tMD.name())</span>
+<span class="line-precise" title="No Anys on this line!">    q.setWhere("LENGTH(%s)=%s" % (name, _len))</span>
+<span class="line-precise" title="No Anys on this line!">    q.setOrderBy(name + " DESC")</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    if not q.exec_():</span>
+<span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)
+Explicit (x1)">    maxRange: int = 10 ** _len</span>
+<span class="line-precise" title="No Anys on this line!">    numero: int = maxRange</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    while numero &gt;= maxRange:</span>
+<span class="line-precise" title="No Anys on this line!">        if not q.next():</span>
+<span class="line-precise" title="No Anys on this line!">            numero = 1</span>
+<span class="line-empty" title="No Anys on this line!">            break</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        try:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            numero = int(q.value(0))</span>
+<span class="line-precise" title="No Anys on this line!">            numero = numero + 1</span>
+<span class="line-precise" title="No Anys on this line!">        except Exception:</span>
+<span class="line-empty" title="No Anys on this line!">            pass</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    if type_ == "string":</span>
+<span class="line-precise" title="No Anys on this line!">        cadena = str(numero)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        if len(cadena) &lt; _len:</span>
+<span class="line-precise" title="No Anys on this line!">            relleno = None</span>
+<span class="line-precise" title="No Anys on this line!">            relleno = cadena.rjust(_len, "0")</span>
+<span class="line-precise" title="No Anys on this line!">            cadena = relleno</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        return cadena</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    if type_ == "double":</span>
+<span class="line-precise" title="No Anys on this line!">        return numero</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    return None</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">def _nextCounter_3(serie: str, name: str, cursor_: "PNSqlCursor") -&gt; Optional[str]:</span>
+<span class="line-empty" title="No Anys on this line!">    from .pnsqlquery import PNSqlQuery</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    if not cursor_:</span>
+<span class="line-precise" title="No Anys on this line!">        return None</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    tMD = cursor_.metadata()</span>
+<span class="line-precise" title="No Anys on this line!">    if not tMD:</span>
+<span class="line-precise" title="No Anys on this line!">        return None</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    field = tMD.field(name)</span>
+<span class="line-precise" title="No Anys on this line!">    if not field:</span>
+<span class="line-precise" title="No Anys on this line!">        return None</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    type_ = field.type()</span>
+<span class="line-precise" title="No Anys on this line!">    if type_ not in ["string", "double"]:</span>
+<span class="line-precise" title="No Anys on this line!">        return None</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    _len: int = field.length() - len(serie)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (name, field.length(), name, len(serie), serie)</span>
+<span class="line-precise" title="No Anys on this line!">    select = "substring(%s FROM %d) as %s" % (name, len(serie) + 1, name)</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x1)">    q = PNSqlQuery(None, cursor_.db().connectionName())</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x1)">    q.setForwardOnly(True)</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x1)">    q.setTablesList(tMD.name())</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x1)">    q.setSelect(select)</span>
+<span class="line-precise" title="No Anys on this line!">    q.setFrom(tMD.name())</span>
+<span class="line-precise" title="No Anys on this line!">    q.setWhere(where)</span>
+<span class="line-precise" title="No Anys on this line!">    q.setOrderBy(name + " DESC")</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    if not q.exec_():</span>
+<span class="line-precise" title="No Anys on this line!">        return None</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">    maxRange: int = 10 ** _len</span>
+<span class="line-precise" title="No Anys on this line!">    numero: int = maxRange</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    while numero &gt;= maxRange:</span>
+<span class="line-precise" title="No Anys on this line!">        if not q.next():</span>
+<span class="line-precise" title="No Anys on this line!">            numero = 1</span>
+<span class="line-empty" title="No Anys on this line!">            break</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        numero = int(q.value(0))</span>
+<span class="line-precise" title="No Anys on this line!">        numero = numero + 1</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    if type_ in ["string", "double"]:</span>
+<span class="line-precise" title="No Anys on this line!">        cadena: str = str(numero)</span>
+<span class="line-precise" title="No Anys on this line!">        if len(cadena) &lt; _len:</span>
+<span class="line-precise" title="No Anys on this line!">            relleno = "0" * (_len - len(cadena))</span>
+<span class="line-precise" title="No Anys on this line!">            cadena = relleno + cadena</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        # res = serie + cadena</span>
+<span class="line-precise" title="No Anys on this line!">        return cadena</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    return None</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
 Omitted Generics (x1)
-Explicit (x1)">def sqlSelect(f: str, s: str, w, tL: Optional[Union[str, List]] = None, size: int = 0, connName: str = "default") -&gt; Any:</span>
+Explicit (x1)">def sqlSelect(f: str, s: str, w: str, tL: Optional[Union[str, List]] = None, size: int = 0, connName: str = "default") -&gt; Any:</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Execute a query of type select, returning the results of the first record found.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -621,8 +595,7 @@ Explicit (x1)">def sqlSelect(f: str, s: str, w, tL: Optional[Union[str, List]] =
 <span class="line-empty" title="No Anys on this line!">    @param connName Connection name.</span>
 <span class="line-empty" title="No Anys on this line!">    @return Value resulting from the query or false if it finds nothing.</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">    if w is None or w == "":</span>
+<span class="line-precise" title="No Anys on this line!">    if not w:</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    from .pnsqlquery import PNSqlQuery</span>
@@ -640,8 +613,7 @@ Omitted Generics (x1)">        q.setTablesList(f)</span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">    q.setSelect(s)</span>
 <span class="line-precise" title="No Anys on this line!">    q.setFrom(f)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    q.setWhere(w)</span>
+<span class="line-precise" title="No Anys on this line!">    q.setWhere(w)</span>
 <span class="line-empty" title="No Anys on this line!">    # q.setForwardOnly(True)</span>
 <span class="line-precise" title="No Anys on this line!">    if not q.exec_():</span>
 <span class="line-precise" title="No Anys on this line!">        return False</span>
@@ -678,8 +650,7 @@ Unannotated (x1)">    q = PNSqlQuery(None, connName)</span>
 Explicit (x2)">    return q.value(0) if q.first() else False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">def sqlInsert(t, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connName: str = "default") -&gt; bool:</span>
+<span class="line-precise" title="No Anys on this line!">def sqlInsert(t: str, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connName: str = "default") -&gt; bool:</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Perform the insertion of a record in a table using an FLSqlCursor object.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -700,8 +671,8 @@ Omitted Generics (x1)">    vL: List[str] = vL_.split(",") if isinstance(vL_, str
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    from .pnsqlcursor import PNSqlCursor</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    c = PNSqlCursor(t, True, connName)</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x1)">    c = PNSqlCursor(t, True, connName)</span>
 <span class="line-precise" title="Any Types on this line: 
 Unannotated (x1)">    c.setModeAccess(PNSqlCursor.Insert)</span>
 <span class="line-precise" title="No Anys on this line!">    c.refreshBuffer()</span>
@@ -719,8 +690,7 @@ Explicit (x1)">            c.setValueBuffer(f, vL[i])</span>
 <span class="line-precise" title="No Anys on this line!">    return c.commitBuffer()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">def sqlUpdate(t, fL: Union[str, List[str]], vL: Union[str, List[str]], w, connName: str = "default") -&gt; bool:</span>
+<span class="line-precise" title="No Anys on this line!">def sqlUpdate(t: str, fL: Union[str, List[str]], vL: Union[str, List[str]], w: str, connName: str = "default") -&gt; bool:</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Modify one or more records in a table using an FLSqlCursor object.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -733,10 +703,9 @@ Unannotated (x2)">def sqlUpdate(t, fL: Union[str, List[str]], vL: Union[str, Lis
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    from .pnsqlcursor import PNSqlCursor</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    c = PNSqlCursor(t, True, connName)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    c.select(w)</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x1)">    c = PNSqlCursor(t, True, connName)</span>
+<span class="line-precise" title="No Anys on this line!">    c.select(w)</span>
 <span class="line-precise" title="No Anys on this line!">    c.setForwardOnly(True)</span>
 <span class="line-precise" title="No Anys on this line!">    while c.next():</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -803,20 +772,22 @@ Unannotated (x1)">        c.setModeAccess(PNSqlCursor.Del)</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    if project.conn is None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        raise Exception("Project is not connected yet")</span>
+Explicit (x2)">    if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">        raise Exception("Project is not connected yet")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    conn_ = project.conn.useConn(connName)</span>
-<span class="line-precise" title="No Anys on this line!">    cur = conn_.cursor()</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">    conn_ = project.conn.useConn(connName)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">    cur = conn_.cursor()</span>
 <span class="line-empty" title="No Anys on this line!">    try:</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">        logger.warning("execSql: Ejecutando la consulta : %s", sql)</span>
 <span class="line-empty" title="No Anys on this line!">        # sql = conn_.db().driver().fix_query(sql)</span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x2)">        cur.execute(sql)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">        conn_.conn.commit()</span>
+Explicit (x3)">        cur.execute(sql)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">        conn_.conn.commit()</span>
 <span class="line-precise" title="No Anys on this line!">        return True</span>
 <span class="line-precise" title="No Anys on this line!">    except Exception as exc:</span>
 <span class="line-precise" title="Any Types on this line: 

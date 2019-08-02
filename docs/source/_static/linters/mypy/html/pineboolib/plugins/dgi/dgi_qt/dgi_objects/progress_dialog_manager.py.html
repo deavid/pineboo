@@ -98,25 +98,28 @@ Explicit (x1)">    def create(self, title, steps, id_) -&gt; Any:</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!">        from PyQt5 import QtCore  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if project._DGI:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">            pd_widget = project.DGI.QProgressDialog(str(title), str(project.DGI.QApplication.translate("scripts", "Cancelar")), 0, steps)</span>
+Explicit (x2)">        if project._DGI:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            if pd_widget is not None:</span>
+Explicit (x10)
+Unannotated (x2)">            pd_widget = project.DGI.QProgressDialog(str(title), str(project.DGI.QApplication.translate("scripts", "Cancelar")), 0, steps)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                pd_widget.setObjectName(id_)</span>
+Explicit (x1)">            if pd_widget is not None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">                pd_widget.setWindowModality(QtCore.Qt.WindowModal)</span>
+Explicit (x3)
+Unannotated (x1)">                pd_widget.setObjectName(id_)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                pd_widget.setWindowTitle(str(title))</span>
+Explicit (x3)">                pd_widget.setWindowModality(QtCore.Qt.WindowModal)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)
-Unannotated (x1)">                self.progress_dialog_stack.append(pd_widget)</span>
+Explicit (x3)
+Unannotated (x1)">                pd_widget.setWindowTitle(str(title))</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">                pd_widget.setMinimumDuration(100)</span>
+Explicit (x3)">                self.progress_dialog_stack.append(pd_widget)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">                pd_widget.setMinimumDuration(100)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">                return pd_widget</span>
+Explicit (x1)">                return pd_widget</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>
 <span class="line-empty" title="No Anys on this line!"></span>

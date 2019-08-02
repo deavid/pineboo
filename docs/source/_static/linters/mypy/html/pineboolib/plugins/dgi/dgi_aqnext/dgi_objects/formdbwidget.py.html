@@ -218,8 +218,6 @@
 <span id="L208" class="lineno"><a class="lineno" href="#L208">208</a></span>
 <span id="L209" class="lineno"><a class="lineno" href="#L209">209</a></span>
 <span id="L210" class="lineno"><a class="lineno" href="#L210">210</a></span>
-<span id="L211" class="lineno"><a class="lineno" href="#L211">211</a></span>
-<span id="L212" class="lineno"><a class="lineno" href="#L212">212</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># # -*- coding: utf-8 -*-</span>
 <span class="line-empty" title="No Anys on this line!">"""</span>
@@ -282,11 +280,11 @@ Unannotated (x5)">        self._formconnections = set([])</span>
 Unannotated (x3)">        self._class_init()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def _connect(self, sender, signal, receiver, slot):</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.application import connections</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x10)
-Unannotated (x5)">        signal_slot = pncontrolsfactory.connect(sender, signal, receiver, slot, caller=self)</span>
+Unannotated (x5)">        signal_slot = connections.connect(sender, signal, receiver, slot, caller=self)</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x2)">        if not signal_slot:</span>
 <span class="line-precise" title="No Anys on this line!">            return False</span>
@@ -296,11 +294,11 @@ Explicit (x2)">        self._formconnections.add(signal_slot)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def _disconnect(self, sender, signal, receiver, slot):</span>
 <span class="line-empty" title="No Anys on this line!">        # print(" &gt; &gt; &gt; disconnect:", self)</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.application import connections</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x10)
-Unannotated (x5)">        signal_slot = pncontrolsfactory.disconnect(sender, signal, receiver, slot, caller=self)</span>
+Unannotated (x5)">        signal_slot = connections.disconnect(sender, signal, receiver, slot, caller=self)</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x2)">        if not signal_slot:</span>
 <span class="line-precise" title="No Anys on this line!">            return False</span>
@@ -352,15 +350,12 @@ Unannotated (x3)">        self.clear_connections()</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)
 Unannotated (x1)">        if getattr(self, "iface", None) is not None:</span>
-<span class="line-empty" title="No Anys on this line!">            from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">            from pineboolib.core.garbage_collector import check_gc_referrers</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="Any Types on this line: 
-Omitted Generics (x3)
-Explicit (x1)">            pncontrolsfactory.check_gc_referrers(</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x14)
-Explicit (x1)">                "FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name</span>
-<span class="line-empty" title="No Anys on this line!">            )</span>
+Omitted Generics (x3)
+Explicit (x2)
+Unannotated (x14)">            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">            del self.iface.ctx</span>
 <span class="line-any" title="Any Types on this line: 
@@ -499,13 +494,11 @@ Unannotated (x3)">        if self._iter_current &gt;= len(list_):</span>
 Unannotated (x2)">        return list_[self._iter_current]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def legacy(self):</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import qsa as qsa_dict_modules</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.application.safeqsa import SafeQSA</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)
-Unannotated (x3)">        ret_ = getattr(qsa_dict_modules, "%s_legacy" % self._action.name, None)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">        if ret_ is None:</span>
+Unannotated (x3)">        ret_ = SafeQSA.get_any("%s_legacy" % self._action.name)</span>
+<span class="line-precise" title="No Anys on this line!">        if ret_ is None:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 </pre></td>
 </tr></tbody>

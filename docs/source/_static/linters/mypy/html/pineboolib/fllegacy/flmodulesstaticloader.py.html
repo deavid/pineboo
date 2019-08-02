@@ -340,6 +340,8 @@
 <span id="L330" class="lineno"><a class="lineno" href="#L330">330</a></span>
 <span id="L331" class="lineno"><a class="lineno" href="#L331">331</a></span>
 <span id="L332" class="lineno"><a class="lineno" href="#L332">332</a></span>
+<span id="L333" class="lineno"><a class="lineno" href="#L333">333</a></span>
+<span id="L334" class="lineno"><a class="lineno" href="#L334">334</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
 <span class="line-empty" title="No Anys on this line!">import os</span>
@@ -348,11 +350,13 @@
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib import logging</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.core import decorators</span>
-<span class="line-empty" title="No Anys on this line!">from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.core.settings import config</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.fllegacy.flutil import FLUtil</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.fllegacy.flapplication import aqApp</span>
+<span class="line-empty" title="No Anys on this line!">from pineboolib.fllegacy.flcheckbox import FLCheckBox</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from typing import Any, List, Optional, cast, TYPE_CHECKING</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">if TYPE_CHECKING:</span>
@@ -424,7 +428,8 @@ Explicit (x2)">            self.dirs_.append(AQStaticDirInfo(active_, path_))</s
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def writeSettings(self) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        config.set_value("%senabled" % self.key_, self.enabled_)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">        config.set_value("%senabled" % self.key_, self.enabled_)</span>
 <span class="line-precise" title="No Anys on this line!">        dirs = []</span>
 <span class="line-precise" title="No Anys on this line!">        active_dirs = []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -434,8 +439,10 @@ Explicit (x2)">            self.dirs_.append(AQStaticDirInfo(active_, path_))</s
 <span class="line-precise" title="No Anys on this line!">            if info.active_:</span>
 <span class="line-precise" title="No Anys on this line!">                active_dirs.append(info.path_)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        config.set_value("%sdirs" % self.key_, dirs)</span>
-<span class="line-precise" title="No Anys on this line!">        config.set_value("%sactiveDirs" % self.key_, ",".join(active_dirs))</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">        config.set_value("%sdirs" % self.key_, dirs)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">        config.set_value("%sactiveDirs" % self.key_, ",".join(active_dirs))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class FLStaticLoaderWarning(QtCore.QObject):</span>
@@ -611,21 +618,20 @@ Explicit (x3)
 Unannotated (x2)">                self.tblDirs.setText(row, 0, info.path_)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">                chk = pncontrolsfactory.FLCheckBox(self.tblDirs, row)</span>
+Unannotated (x2)
+Explicit (x1)">                chk = FLCheckBox(self.tblDirs, row)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)
 Unannotated (x3)">                chk.setChecked(info.active_ == "True")</span>
+<span class="line-precise" title="No Anys on this line!">                chk.toggled.connect(self.setChecked)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">                chk.toggled.connect(self.setChecked)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">                self.tblDirs.setCellWidget(row, 1, chk)</span>
+Explicit (x3)">                self.tblDirs.setCellWidget(row, 1, chk)</span>
 <span class="line-precise" title="No Anys on this line!">                row += 1</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">            self.tblDirs.setCurrentCell(n_rows, 0)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
-Explicit (x5)">    @QtCore.pyqtSlot(bool)</span>
+Explicit (x13)">    @decorators.pyqtSlot(bool)</span>
 <span class="line-precise" title="No Anys on this line!">    def addDir(self) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
@@ -649,14 +655,13 @@ Explicit (x4)
 Unimported (x1)">            self.tblDirs.setText(n_rows, 0, dir)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">            chk = pncontrolsfactory.FLCheckBox(self.tblDirs, n_rows)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            chk.setChecked(True)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            chk.toggled.connect(self.setChecked)</span>
+Unannotated (x2)
+Explicit (x2)">            chk = FLCheckBox(self.tblDirs, n_rows)</span>
+<span class="line-precise" title="No Anys on this line!">            chk.setChecked(True)</span>
+<span class="line-precise" title="No Anys on this line!">            chk.toggled.connect(self.setChecked)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">            self.tblDirs.setCellWidget(n_rows, 1, chk)</span>
+Explicit (x4)">            self.tblDirs.setCellWidget(n_rows, 1, chk)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)">            self.tblDirs.setCurrentCell(n_rows, 0)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -726,13 +731,13 @@ Unannotated (x5)">            self.b_.dirs_.remove(info)</span>
 Explicit (x4)">        self.tblDirs.removeRow(cur_row)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
-Explicit (x5)">    @QtCore.pyqtSlot(bool)</span>
+Explicit (x13)">    @decorators.pyqtSlot(bool)</span>
 <span class="line-precise" title="No Anys on this line!">    def setEnabled(self, on: bool) -&gt; None:</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">        self.b_.enabled_ = on</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
-Explicit (x5)">    @QtCore.pyqtSlot(bool)</span>
+Explicit (x13)">    @decorators.pyqtSlot(bool)</span>
 <span class="line-precise" title="No Anys on this line!">    def setChecked(self, on: bool) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        chk = self.sender()</span>
@@ -819,11 +824,12 @@ Explicit (x1)">                    return content_path</span>
 <span class="line-empty" title="No Anys on this line!">                else:</span>
 <span class="line-empty" title="No Anys on this line!">                    from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">                    if project.conn is None:</span>
-<span class="line-unanalyzed" title="No Anys on this line!">                        raise Exception("Project is not connected yet")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">                    if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">                        raise Exception("Project is not connected yet")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x8)
+Explicit (x10)
 Unannotated (x1)">                    return project.conn.managerModules().contentFS(info.path_ + separator + n)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        return None</span>

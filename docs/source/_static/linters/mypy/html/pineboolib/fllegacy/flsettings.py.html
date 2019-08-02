@@ -185,7 +185,8 @@ Explicit (x1)">        if isinstance(ret, bool):</span>
 <span class="line-precise" title="No Anys on this line!">        raise ValueError("Configuration key %s cannot be converted to boolean" % key)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def writeEntry(self, key: str, value: Union[int, str, bool]) -&gt; None:</span>
-<span class="line-precise" title="No Anys on this line!">        self.s.setValue(key, value)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">        self.s.setValue(key, value)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def writeEntryList(self, key: str, value: List[str]) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        # FIXME: This function flattens the array when saving in some cases. Should always save an array.</span>
@@ -197,7 +198,8 @@ Explicit (x1)">        if isinstance(ret, bool):</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-precise" title="No Anys on this line!">            val = value</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        self.s.setValue(key, val)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">        self.s.setValue(key, val)</span>
 </pre></td>
 </tr></tbody>
 </table>

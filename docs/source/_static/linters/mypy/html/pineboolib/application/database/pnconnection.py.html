@@ -1215,7 +1215,7 @@ Unannotated (x2)">        return self.lastActiveCursor_</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">            if config.value("application/isDebuggerMode", False):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                project.message_manager().send("status_help_msg", "send", ["Iniciando Transacción... %s" % self.transaction_])</span>
+Explicit (x5)">                project.message_manager().send("status_help_msg", "send", ["Iniciando Transacción... %s" % self.transaction_])</span>
 <span class="line-precise" title="No Anys on this line!">            if self.transaction():</span>
 <span class="line-precise" title="No Anys on this line!">                self.lastActiveCursor_ = cursor</span>
 <span class="line-precise" title="No Anys on this line!">                db_signals.emitTransactionBegin(cursor)</span>
@@ -1240,7 +1240,7 @@ Explicit (x4)">                logger.warning("doTransaction: Fallo al intentar 
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">            if config.value("application/isDebuggerMode", False):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                project.message_manager().send(</span>
+Explicit (x5)">                project.message_manager().send(</span>
 <span class="line-precise" title="No Anys on this line!">                    "status_help_msg", "send", ["Creando punto de salvaguarda %s:%s" % (self.name, self.transaction_)]</span>
 <span class="line-empty" title="No Anys on this line!">                )</span>
 <span class="line-precise" title="No Anys on this line!">            if not self.canSavePoint():</span>
@@ -1293,7 +1293,7 @@ Explicit (x1)">        if not cur or not self.conn:</span>
 <span class="line-empty" title="No Anys on this line!">        ):</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            if project.DGI.localDesktop():</span>
+Explicit (x4)">            if project.DGI.localDesktop():</span>
 <span class="line-precise" title="No Anys on this line!">                res = QtWidgets.QMessageBox.information(</span>
 <span class="line-precise" title="No Anys on this line!">                    QtWidgets.QApplication.activeWindow(),</span>
 <span class="line-empty" title="No Anys on this line!">                    "Cancelar Cambios",</span>
@@ -1328,7 +1328,7 @@ Explicit (x4)">                logger.info("FLSqlDatabaser : El cursor va a desh
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">            if config.value("application/isDebuggerMode", False):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                project.message_manager().send("status_help_msg", "send", ["Deshaciendo Transacción... %s" % self.transaction_])</span>
+Explicit (x5)">                project.message_manager().send("status_help_msg", "send", ["Deshaciendo Transacción... %s" % self.transaction_])</span>
 <span class="line-precise" title="No Anys on this line!">            if self.rollbackTransaction():</span>
 <span class="line-precise" title="No Anys on this line!">                self.lastActiveCursor_ = None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -1354,7 +1354,7 @@ Explicit (x4)">                logger.warning("doRollback: Fallo al intentar des
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            project.message_manager().send(</span>
+Explicit (x5)">            project.message_manager().send(</span>
 <span class="line-precise" title="No Anys on this line!">                "status_help_msg", "send", ["Restaurando punto de salvaguarda %s:%s..." % (self.name, self.transaction_)]</span>
 <span class="line-empty" title="No Anys on this line!">            )</span>
 <span class="line-precise" title="No Anys on this line!">            if not self.canSavePoint():</span>
@@ -1425,7 +1425,7 @@ Explicit (x4)">                logger.warning("El cursor va a terminar la transa
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)">            if config.value("application/isDebuggerMode", False):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">                project.message_manager().send("status_help_msg", "send", ["Terminando transacción... %s" % self.transaction_])</span>
+Explicit (x5)">                project.message_manager().send("status_help_msg", "send", ["Terminando transacción... %s" % self.transaction_])</span>
 <span class="line-empty" title="No Anys on this line!">            try:</span>
 <span class="line-precise" title="No Anys on this line!">                if self.commit():</span>
 <span class="line-precise" title="No Anys on this line!">                    self.lastActiveCursor_ = None</span>
@@ -1455,7 +1455,7 @@ Explicit (x4)">                logger.error("doCommit: Fallo al intentar termina
 <span class="line-precise" title="No Anys on this line!">                return False</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            project.message_manager().send(</span>
+Explicit (x5)">            project.message_manager().send(</span>
 <span class="line-precise" title="No Anys on this line!">                "status_help_msg", "send", ["Liberando punto de salvaguarda %s:%s..." % (self.name, self.transaction_)]</span>
 <span class="line-empty" title="No Anys on this line!">            )</span>
 <span class="line-precise" title="No Anys on this line!">            if (self.transaction_ == 1 and self.canTransaction()) or (self.transaction_ == 0 and not self.canTransaction()):</span>

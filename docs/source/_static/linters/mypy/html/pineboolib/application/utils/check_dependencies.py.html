@@ -95,8 +95,6 @@
 <span id="L85" class="lineno"><a class="lineno" href="#L85">85</a></span>
 <span id="L86" class="lineno"><a class="lineno" href="#L86">86</a></span>
 <span id="L87" class="lineno"><a class="lineno" href="#L87">87</a></span>
-<span id="L88" class="lineno"><a class="lineno" href="#L88">88</a></span>
-<span id="L89" class="lineno"><a class="lineno" href="#L89">89</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
 <span class="line-empty" title="No Anys on this line!">"""Check the application dependencies."""</span>
@@ -189,14 +187,12 @@ Explicit (x4)">                logger.warning("HINT: Instale el paquete %s" % de
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            if exit:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">                if project.DGI.useDesktop() and project.DGI.localDesktop():</span>
-<span class="line-empty" title="No Anys on this line!">                    from pineboolib import pncontrolsfactory</span>
+Explicit (x9)">                if project.DGI.useDesktop() and project.DGI.localDesktop():</span>
+<span class="line-empty" title="No Anys on this line!">                    from pineboolib.qt3_widgets.messagebox import MessageBox</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    pncontrolsfactory.QMessageBox.warning(</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">                        None, "Pineboo - Dependencias Incumplidas -", msg, pncontrolsfactory.QMessageBox.Ok</span>
-<span class="line-empty" title="No Anys on this line!">                    )</span>
+Explicit (x2)
+Unannotated (x1)">                    MessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, MessageBox.Ok)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">                if not is_deployed():</span>
 <span class="line-precise" title="No Anys on this line!">                    sys.exit(32)</span>

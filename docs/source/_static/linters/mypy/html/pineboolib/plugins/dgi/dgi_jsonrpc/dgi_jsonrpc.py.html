@@ -516,6 +516,7 @@
 <span id="L506" class="lineno"><a class="lineno" href="#L506">506</a></span>
 <span id="L507" class="lineno"><a class="lineno" href="#L507">507</a></span>
 <span id="L508" class="lineno"><a class="lineno" href="#L508">508</a></span>
+<span id="L509" class="lineno"><a class="lineno" href="#L509">509</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># # -*- coding: utf-8 -*-</span>
 <span class="line-empty" title="No Anys on this line!">import traceback</span>
@@ -579,13 +580,13 @@ Unimported (x2)">    @dispatcher.add_method</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if project.DGI._par._queqe:</span>
+Explicit (x4)">        if project.DGI._par._queqe:</span>
 <span class="line-empty" title="No Anys on this line!">            return "queqePending"</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Unannotated (x1)">        if not args:</span>
 <span class="line-empty" title="No Anys on this line!">            return "needArguments"</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x6)
+Explicit (x7)
 Unannotated (x2)">        obj_ = getattr(project.main_window, "json_%s" % args[0], None)</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">        if obj_:</span>
@@ -603,16 +604,17 @@ Unimported (x2)">    @dispatcher.add_method</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if project.DGI._par._queqe:</span>
+Explicit (x4)">        if project.DGI._par._queqe:</span>
 <span class="line-empty" title="No Anys on this line!">            return "queqePending"</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Unannotated (x1)">        if not args:</span>
 <span class="line-empty" title="No Anys on this line!">            return "needArguments"</span>
 <span class="line-empty" title="No Anys on this line!">        try:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            obj_ = project.DGI.mainForm()</span>
+Explicit (x5)">            obj_ = project.DGI.mainForm()</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            return obj_.json_process(args)</span>
+Explicit (x3)
+Unannotated (x1)">            return obj_.json_process(args)</span>
 <span class="line-precise" title="No Anys on this line!">        except Exception:</span>
 <span class="line-precise" title="No Anys on this line!">            print(traceback.format_exc())</span>
 <span class="line-empty" title="No Anys on this line!">            return "notFound"</span>
@@ -623,7 +625,7 @@ Unimported (x2)">    @dispatcher.add_method</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if project.DGI._par._queqe:</span>
+Explicit (x4)">        if project.DGI._par._queqe:</span>
 <span class="line-empty" title="No Anys on this line!">            return "queqePending"</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
@@ -639,7 +641,7 @@ Unannotated (x2)">            param_ = [",".join(args[1:])]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        try:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)
+Explicit (x3)
 Unannotated (x1)">            project.call(fun_, param_)</span>
 <span class="line-precise" title="No Anys on this line!">        except Exception:</span>
 <span class="line-empty" title="No Anys on this line!">            return "notFound"</span>
@@ -660,30 +662,30 @@ Unannotated (x1)">        if len(args) == 1:</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x3)">            if args[0] == "clean":</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                project.DGI._par._queqe = {}</span>
+Explicit (x4)">                project.DGI._par._queqe = {}</span>
 <span class="line-precise" title="No Anys on this line!">                return True</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">            elif args[0] in project.DGI._par._queqe.keys():</span>
+Unannotated (x2)
+Explicit (x6)">            elif args[0] in project.DGI._par._queqe.keys():</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                ret = []</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">                for q in project.DGI._par._queqe.keys():</span>
+Explicit (x7)">                for q in project.DGI._par._queqe.keys():</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">                    if q.find(args[0]) &gt; -1:</span>
+Explicit (x4)
+Unannotated (x2)">                    if q.find(args[0]) &gt; -1:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)
-Unannotated (x5)">                        ret.append((q, project.DGI._par._queqe[q]))</span>
+Explicit (x10)">                        ret.append((q, project.DGI._par._queqe[q]))</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">                        del project.DGI._par._queqe[q]</span>
+Explicit (x5)">                        del project.DGI._par._queqe[q]</span>
 <span class="line-empty" title="No Anys on this line!">            else:</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                ret = "Not Found"</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)
-Explicit (x1)">            ret = project.DGI._par._queqe</span>
+Explicit (x5)">            ret = project.DGI._par._queqe</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            project.DGI._par._queqe = {}</span>
+Explicit (x4)">            project.DGI._par._queqe = {}</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">        return ret</span>
@@ -692,10 +694,11 @@ Explicit (x1)">        return ret</span>
 Unimported (x2)">    @dispatcher.add_method</span>
 <span class="line-any" title="No Anys on this line!">    def action(*args):</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application import project</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.fllegacy.flfielddb import FLFieldDB</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.fllegacy.fltabledb import FLTableDB</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if project.DGI._par._queqe:</span>
+Explicit (x4)">        if project.DGI._par._queqe:</span>
 <span class="line-empty" title="No Anys on this line!">            return "queqePending"</span>
 <span class="line-imprecise" title="Any Types on this line: 
 Unannotated (x2)">        arguments = args</span>
@@ -706,25 +709,29 @@ Unannotated (x3)">        control = arguments[1]</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x3)">        emite = arguments[2]</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        if actionName in project.DGI._WJS.keys():</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">            ac = project.DGI._W[actionName]</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">            cr = ac.child(control)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">            if cr:</span>
+Unannotated (x1)
+Explicit (x5)">        if actionName in project.DGI._WJS.keys():</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x5)
-Unannotated (x2)">                em = getattr(cr, emite, None)</span>
+Unannotated (x1)">            ac = project.DGI._W[actionName]</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)
+Unannotated (x1)">            cr = ac.child(control)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            if cr:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x6)
+Unannotated (x1)">                em = getattr(cr, emite, None)</span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x1)
-Unannotated (x1)
-Explicit (x1)">                if isinstance(cr, pncontrolsfactory.FLFieldDB):</span>
+Explicit (x1)
+Unannotated (x1)">                if isinstance(cr, FLFieldDB):</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">                    if emite == "setText":</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x6)">                        cr.editor_.setText(arguments[3])</span>
+Explicit (x2)
+Unannotated (x2)">                        cr.editor_.setText(arguments[3])</span>
 <span class="line-precise" title="No Anys on this line!">                        return True</span>
 <span class="line-empty" title="No Anys on this line!">                    else:</span>
 <span class="line-any" title="Any Types on this line: 
@@ -733,8 +740,7 @@ Unannotated (x1)">                        print("Función desconocida", emite)</
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x1)
-Unannotated (x1)
-Explicit (x1)">                elif isinstance(cr, pncontrolsfactory.FLTableDB):</span>
+Explicit (x1)">                elif isinstance(cr, FLTableDB):</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">                    if emite == "data":</span>
 <span class="line-precise" title="No Anys on this line!">                        print("Recoge data!!!")</span>
@@ -742,8 +748,8 @@ Unannotated (x2)">                    if emite == "data":</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">                elif em:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x6)
-Unannotated (x2)">                    getattr(cr, emite).emit()</span>
+Explicit (x7)
+Unannotated (x1)">                    getattr(cr, emite).emit()</span>
 <span class="line-precise" title="No Anys on this line!">                    return True</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            return False</span>
@@ -1192,13 +1198,14 @@ Unannotated (x1)">            self.initialized_mods_.append(module)</span>
 <span class="line-empty" title="No Anys on this line!">            from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)
+Explicit (x3)
 Unannotated (x1)">            project.call("%s.iface.init" % module, [], None, False)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if project.conn is None:</span>
-<span class="line-unanalyzed" title="No Anys on this line!">            raise Exception("Project is not connected yet")</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">        mng = project.conn.managerModules()</span>
+Explicit (x2)">        if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">            raise Exception("Project is not connected yet")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">        mng = project.conn.managerModules()</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x3)
 Unannotated (x1)">        mng.setActiveIdModule(module)</span>

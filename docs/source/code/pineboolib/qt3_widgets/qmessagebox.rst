@@ -1,7 +1,7 @@
-Module sysqs
+Module qmessagebox
 ===============================================================
 
-.. automodule:: pineboolib.fllegacy.sysqs
+.. automodule:: pineboolib.qt3_widgets.qmessagebox
     :members:
     :undoc-members:
     :inherited-members:

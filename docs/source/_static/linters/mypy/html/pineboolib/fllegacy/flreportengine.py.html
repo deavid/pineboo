@@ -542,10 +542,11 @@ Unannotated (x1)">        self.d_.template_ = t</span>
 <span class="line-precise" title="No Anys on this line!">        if not self.d_.qry_:</span>
 <span class="line-empty" title="No Anys on this line!">            from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">            if project.conn is None:</span>
-<span class="line-unanalyzed" title="No Anys on this line!">                raise Exception("Project is not connected yet")</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">            mgr = project.conn.managerModules()</span>
+Explicit (x2)">            if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">                raise Exception("Project is not connected yet")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">            mgr = project.conn.managerModules()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-any" title="Any Types on this line: 

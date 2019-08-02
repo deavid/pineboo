@@ -271,11 +271,22 @@
 <span id="L261" class="lineno"><a class="lineno" href="#L261">261</a></span>
 <span id="L262" class="lineno"><a class="lineno" href="#L262">262</a></span>
 <span id="L263" class="lineno"><a class="lineno" href="#L263">263</a></span>
+<span id="L264" class="lineno"><a class="lineno" href="#L264">264</a></span>
+<span id="L265" class="lineno"><a class="lineno" href="#L265">265</a></span>
+<span id="L266" class="lineno"><a class="lineno" href="#L266">266</a></span>
+<span id="L267" class="lineno"><a class="lineno" href="#L267">267</a></span>
 </pre></td>
-<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">from PyQt5.QtXml import QDomDocument  # type: ignore</span>
+<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">FLAccessControlList Module.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">Manage access lists to limit the application to users..</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">from PyQt5.QtXml import QDomDocument  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!">from PyQt5 import QtCore  # type: ignore</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">from pineboolib.fllegacy.flsqlquery import FLSqlQuery</span>
+<span class="line-empty" title="No Anys on this line!">from pineboolib.application.database.pnsqlquery import PNSqlQuery</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib import logging</span>
 <span class="line-empty" title="No Anys on this line!">from typing import Any, Dict</span>
@@ -284,14 +295,14 @@
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class FLAccessControlLists(object):</span>
-<span class="line-empty" title="No Anys on this line!">    """Gestionar las listas de acceso para limitar la aplicación a los usuarios."""</span>
+<span class="line-empty" title="No Anys on this line!">    """FLAccessControlList Class."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Nombre que identifica la lista de control de acceso actualmente establecida.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    Generalmente corresponderá con el identificador del registro de la tabla "flacls" que se utilizó para crear "acl.xml".</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-precise" title="No Anys on this line!">    name_ = None</span>
+<span class="line-precise" title="No Anys on this line!">    _name: str</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!">    Diccionario (lista) que mantiene los objetos de las reglas de control de acceso establecidas.</span>
@@ -305,78 +316,72 @@
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
-Explicit (x2)">    accessControlList_: Dict[str, Any]</span>
+Explicit (x2)">    _access_control_list: Dict[str, Any]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def __init__(self):</span>
-<span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Constructor</span>
-<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialize the class."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        self.name_ = None</span>
+Unannotated (x2)">        self._name = None</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        self.accessControlList_ = []</span>
+Unannotated (x2)">        self._access_control_list = []</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def __del__(self) -&gt; None:</span>
-<span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Destructor</span>
-<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        """Process when destroying the class."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">        if self.accessControlList_:</span>
+Explicit (x1)">        if self._access_control_list:</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">            self.accessControlList_.clear()</span>
-<span class="line-precise" title="No Anys on this line!">            del self.accessControlList_</span>
+Explicit (x1)">            self._access_control_list.clear()</span>
+<span class="line-precise" title="No Anys on this line!">            del self._access_control_list</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    def name(self) -&gt; Any:</span>
+<span class="line-precise" title="No Anys on this line!">    def name(self) -&gt; str:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Para obtener el nombre que identifica la lista de control de acceso actualmente establecida.</span>
+<span class="line-empty" title="No Anys on this line!">        Return the name that identifies the currently established access control list.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        @return Nombre la lista de control de acceso actual.</span>
+<span class="line-empty" title="No Anys on this line!">        @return Name the current access control list.</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-precise" title="No Anys on this line!">        return self.name_</span>
+<span class="line-precise" title="No Anys on this line!">        return self._name</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    def init(self, aclXml=None) -&gt; None:</span>
+<span class="line-precise" title="No Anys on this line!">    def init(self, aclXml: str = None) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Lee el fichero "acl.xml" y establece una nueva lista de control de acceso.</span>
+<span class="line-empty" title="No Anys on this line!">        Read the file "acl.xml" and establish a new access control list.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        Si el fichero "acl.xml" no se puede leer, la lista de control de acceso queda vacía y</span>
-<span class="line-empty" title="No Anys on this line!">        no se procesará ningún control de acceso sobre ningún objeto.</span>
+<span class="line-empty" title="No Anys on this line!">        If the file "acl.xml" cannot be read, the access control list is empty and</span>
+<span class="line-empty" title="No Anys on this line!">        no access control will be processed on any object.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        @param  aclXml  Contenido XML con la definición de la lista de control de acceso.</span>
+<span class="line-empty" title="No Anys on this line!">        @param aclXml XML content with the definition of the access control list.</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.fllegacy.flutil import FLUtil</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        util = FLUtil()</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        if aclXml is None:</span>
+<span class="line-precise" title="No Anys on this line!">        if aclXml is None:</span>
 <span class="line-empty" title="No Anys on this line!">            from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">            if project.conn is None:</span>
-<span class="line-unanalyzed" title="No Anys on this line!">                raise Exception("Project is not connected yet")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">                raise Exception("Project is not connected yet")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)
-Unannotated (x1)">            aclXml = project.conn.managerModules().content("acl.xml")</span>
+Explicit (x6)">            aclXml = project.conn.managerModules().content("acl.xml")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        doc = QDomDocument("ACL")</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">        if self.accessControlList_:</span>
+Explicit (x1)">        if self._access_control_list:</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">            self.accessControlList_.clear()</span>
-<span class="line-precise" title="No Anys on this line!">            del self.accessControlList_</span>
+Explicit (x1)">            self._access_control_list.clear()</span>
+<span class="line-precise" title="No Anys on this line!">            del self._access_control_list</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">            self.accessControlList_ = {}</span>
+Explicit (x1)">            self._access_control_list = {}</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        if aclXml and not util.domDocumentSetContent(doc, aclXml):</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x3)">        if aclXml and not util.domDocumentSetContent(doc, aclXml):</span>
 <span class="line-precise" title="No Anys on this line!">            QtCore.qWarning("FLAccessControlList : " + FLUtil().tr("Lista de control de acceso errónea"))</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">        self.accessControlList_ = {}</span>
-<span class="line-empty" title="No Anys on this line!">        # self.accessControlList_.setAutoDelete(True)</span>
+Explicit (x1)">        self._access_control_list = {}</span>
+<span class="line-empty" title="No Anys on this line!">        # self._access_control_list.setAutoDelete(True)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        docElem = doc.documentElement()</span>
 <span class="line-precise" title="No Anys on this line!">        no = docElem.firstChild()</span>
@@ -385,68 +390,65 @@ Explicit (x1)">        self.accessControlList_ = {}</span>
 <span class="line-precise" title="No Anys on this line!">            e = no.toElement()</span>
 <span class="line-precise" title="No Anys on this line!">            if e:</span>
 <span class="line-precise" title="No Anys on this line!">                if e.tagName() == "name":</span>
-<span class="line-precise" title="No Anys on this line!">                    self.name_ = e.text()</span>
+<span class="line-precise" title="No Anys on this line!">                    self._name = e.text()</span>
 <span class="line-precise" title="No Anys on this line!">                    no = no.nextSibling()</span>
 <span class="line-empty" title="No Anys on this line!">                    continue</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">                ac = FLAccessControlFactory().create(e.tagName())</span>
 <span class="line-precise" title="No Anys on this line!">                if ac:</span>
 <span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">                    ac.set(e)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    self.accessControlList_["%s::%s::%s" % (ac.type(), ac.name(), ac.user())] = ac</span>
+Explicit (x1)">                    ac.set(e)</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">                    self._access_control_list["%s::%s::%s" % (ac.type(), ac.name(), ac.user())] = ac</span>
 <span class="line-precise" title="No Anys on this line!">                    no = no.nextSibling()</span>
 <span class="line-empty" title="No Anys on this line!">                    continue</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            no = no.nextSibling()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    def process(self, obj) -&gt; None:</span>
+Explicit (x1)">    def process(self, obj: Any) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Procesa un objeto de alto nivel según la lista de control de acceso establecida.</span>
+<span class="line-empty" title="No Anys on this line!">        Process a high-level object according to the established access control list.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        @param obj Objeto de alto nivel al que aplicar el control de acceso. Debe ser o heredar de la clase QObject.</span>
+<span class="line-empty" title="No Anys on this line!">        @param obj High-level object to which access control is applied. It must be or inherit from the QObject class.</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x1)
-Explicit (x1)">        if obj is None or not self.accessControlList_:</span>
+Explicit (x2)">        if obj is None or not self._access_control_list:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">        if not self.accessControlList_:</span>
+Explicit (x1)">        if not self._access_control_list:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        type = FLAccessControlFactory().type(obj)</span>
+Explicit (x2)">        type = FLAccessControlFactory().type(obj)</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x1)
-Unannotated (x5)">        name = obj.objectName() if hasattr(obj, "objectName") else ""</span>
+Explicit (x6)">        name = obj.objectName() if hasattr(obj, "objectName") else ""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        if project.conn is None:</span>
-<span class="line-unanalyzed" title="No Anys on this line!">            raise Exception("Project is not connected yet")</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        user = project.conn.user()</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)">        if type == "" or name == "" or user == "":</span>
+Explicit (x2)">        if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">            raise Exception("Project is not connected yet")</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">        user = project.conn.user()</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x6)">        if type == "" or name == "" or user == "":</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)
-Unannotated (x1)">        ac = self.accessControlList_["%s::%s::%s" % (type, name, user)]</span>
+Explicit (x5)">        ac = self._access_control_list["%s::%s::%s" % (type, name, user)]</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">        if ac:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)
-Unannotated (x1)">            ac.processObject(obj)</span>
+Explicit (x4)">            ac.processObject(obj)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">    def installACL(self, idacl) -&gt; None:</span>
+<span class="line-precise" title="No Anys on this line!">    def installACL(self, idacl: str) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Crea un nuevo fichero "acl.xml" y lo almacena sustituyendo el anterior, en el caso de que exista.</span>
+<span class="line-empty" title="No Anys on this line!">        Create a new file "acl.xml" and store it replacing the previous one, if it exists.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        @param idacl Identificador del registro de la tabla "flacls" a utilizar para crear "acl.xml".</span>
+<span class="line-empty" title="No Anys on this line!">        @param idacl Record identifier of the "flacls" table to use to create "acl.xml".</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-precise" title="No Anys on this line!">        doc = QDomDocument("ACL")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -455,20 +457,18 @@ Unannotated (x1)">    def installACL(self, idacl) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        name = doc.createElement("name")</span>
 <span class="line-precise" title="No Anys on this line!">        root.appendChild(name)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        n = doc.createTextNode(idacl)</span>
+<span class="line-precise" title="No Anys on this line!">        n = doc.createTextNode(idacl)</span>
 <span class="line-precise" title="No Anys on this line!">        name.appendChild(n)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">        q = FLSqlQuery()</span>
+Unannotated (x1)">        q = PNSqlQuery()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">        q.setTablesList("flacs")</span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">        q.setSelect("idac,tipo,nombre,iduser,idgroup,degroup,permiso")</span>
 <span class="line-precise" title="No Anys on this line!">        q.setFrom("flacs")</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        q.setWhere("idacl='%s'" % idacl)</span>
+<span class="line-precise" title="No Anys on this line!">        q.setWhere("idacl='%s'" % idacl)</span>
 <span class="line-precise" title="No Anys on this line!">        q.setOrderBy("prioridad DESC, tipo")</span>
 <span class="line-precise" title="Any Types on this line: 
 Unannotated (x1)">        q.setForwardOnly(True)</span>
@@ -481,75 +481,75 @@ Unannotated (x1)">        q.setForwardOnly(True)</span>
 <span class="line-empty" title="No Anys on this line!">            # progress.setProgress(++step)</span>
 <span class="line-precise" title="No Anys on this line!">            while q.next():</span>
 <span class="line-precise" title="Any Types on this line: 
-Unannotated (x2)">                self.makeRule(q, doc)</span>
+Explicit (x1)">                self.makeRule(q, doc)</span>
 <span class="line-empty" title="No Anys on this line!">                # progress.setProgress(++step)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">            from pineboolib.application import project</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">            if project.conn is None:</span>
-<span class="line-unanalyzed" title="No Anys on this line!">                raise Exception("Project is not connected yet")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            if project.conn is None:</span>
+<span class="line-precise" title="No Anys on this line!">                raise Exception("Project is not connected yet")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x4)">            project.conn.managerModules().setContent("acl.xml", "sys", doc.toString())</span>
+Explicit (x6)">            project.conn.managerModules().setContent("acl.xml", "sys", doc.toString())</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">    def makeRule(self, q, d) -&gt; None:</span>
+Explicit (x1)">    def makeRule(self, q: PNSqlQuery, d: Any) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Crea el/los nodo(s) DOM correspondiente(s) a un registro de la tabla "flacs".</span>
+<span class="line-empty" title="No Anys on this line!">        Create the corresponding DOM node (s) to a record in the "flacs" table.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        Utiliza FLAccessControlLists::makeRuleUser o FLAccessControlLists::makeRuleGroup dependiendo si el registro</span>
-<span class="line-empty" title="No Anys on this line!">        al que apunta la consulta indica que la regla es para un usuario o un grupo. Si el registro indica a un</span>
-<span class="line-empty" title="No Anys on this line!">        usuario se creará una regla de usuario, si indica a un grupo se creará una regla de usuario por cada uno de</span>
-<span class="line-empty" title="No Anys on this line!">        los usuarios miembros del grupo.</span>
+<span class="line-empty" title="No Anys on this line!">        Use FLAccessControlLists :: makeRuleUser or FLAccessControlLists :: makeRuleGroup depending on whether the registry</span>
+<span class="line-empty" title="No Anys on this line!">        to which the query points indicates that the rule is for a user or a group. If the record indicates a</span>
+<span class="line-empty" title="No Anys on this line!">        user will create a user rule, if you indicate a group a user rule will be created for each of</span>
+<span class="line-empty" title="No Anys on this line!">        Group member users.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        @param q Consulta sobre la tabla "flacs" posicionada en el registro a utilizar para construir la(s) regla(s).</span>
-<span class="line-empty" title="No Anys on this line!">        @param d Documento DOM/XML en el que insertará(n) el/los nodo(s) que describe(n) la(s) regla(s) de control de acceso.</span>
+<span class="line-empty" title="No Anys on this line!">        @param q Query about the "flacs" table positioned in the register to be used to construct the rule (s).</span>
+<span class="line-empty" title="No Anys on this line!">        @param d DOM / XML document in which you will insert the node (s) that describe the access control rule (s).</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        if not q or not d:</span>
+Explicit (x1)">        if not q or not d:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        if q.value(5) in ("True", True, "true"):</span>
+Explicit (x2)">        if q.value(5) in ("True", True, "true"):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">            self.makeRuleGroup(q, d, str(q.value(4)))</span>
+Explicit (x4)">            self.makeRuleGroup(q, d, str(q.value(4)))</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x8)">            self.makeRuleUser(q, d, str(q.value(3)))</span>
+Explicit (x4)">            self.makeRuleUser(q, d, str(q.value(3)))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">    def makeRuleUser(self, q, d, iduser) -&gt; None:</span>
+Explicit (x1)">    def makeRuleUser(self, q: PNSqlQuery, d: Any, iduser: str) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Crea un nodo DOM correspondiente a un registro de la tabla "flacs" y para un usuario determinado.</span>
+<span class="line-empty" title="No Anys on this line!">        Create a DOM node corresponding to a record in the "flacs" table and for a given user.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        @param q Consulta sobre la tabla "flacs" posicionada en el registro a utilizar para construir la regla.</span>
-<span class="line-empty" title="No Anys on this line!">        @param d Documento DOM/XML en el que insertará el nodo que describe la regla de control de acceso.</span>
-<span class="line-empty" title="No Anys on this line!">        @param iduser Identificador del usuario utilizado en la regla de control de acceso.</span>
+<span class="line-empty" title="No Anys on this line!">        @param q Query about the "flacs" table positioned in the register to be used to construct the rule.</span>
+<span class="line-empty" title="No Anys on this line!">        @param d DOM / XML document in which you will insert the node that describes the access control rule.</span>
+<span class="line-empty" title="No Anys on this line!">        @param iduser Identifier of the user used in the access control rule.</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        if not iduser or not q or not d:</span>
+Explicit (x1)">        if not iduser or not q or not d:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        ac = FLAccessControlFactory().create(str(q.value(1)))</span>
+Explicit (x2)">        ac = FLAccessControlFactory().create(str(q.value(1)))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if ac:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            ac.setName(str(q.value(2)))</span>
+Explicit (x2)">            ac.setName(str(q.value(2)))</span>
+<span class="line-precise" title="No Anys on this line!">            ac.setUser(iduser)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            ac.setUser(iduser)</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            ac.setPerm(str(q.value(6)))</span>
+Explicit (x2)">            ac.setPerm(str(q.value(6)))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">            qAcos = FLSqlQuery()</span>
+Unannotated (x1)">            qAcos = PNSqlQuery()</span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">            qAcos.setTablesList("flacos")</span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">            qAcos.setSelect("nombre,permiso")</span>
 <span class="line-precise" title="No Anys on this line!">            qAcos.setFrom("flacos")</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">            qAcos.setWhere("idac ='%s'" % q.value(0))</span>
+Explicit (x2)">            qAcos.setWhere("idac ='%s'" % q.value(0))</span>
 <span class="line-precise" title="Any Types on this line: 
 Unannotated (x1)">            qAcos.setForwardOnly(True)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -564,44 +564,43 @@ Explicit (x2)">                    acos.append((qAcos.value(1)))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">            ac.setAcos(acos)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            ac.get(d)</span>
+Unannotated (x1)
+Explicit (x1)">            ac.get(d)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-unanalyzed" title="No Anys on this line!">            del ac</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">    def makeRuleGroup(self, q, d, idgroup="") -&gt; None:</span>
+Explicit (x1)">    def makeRuleGroup(self, q: PNSqlQuery, d: Any, idgroup: str = "") -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Crea varios nodos DOM correspondientes a un registro de la tabla "flacs" y para un grupo de usuarios determinado.</span>
+<span class="line-empty" title="No Anys on this line!">        Create several DOM nodes corresponding to a record in the "flacs" table and for a specific user group.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        La función de este método es crear una regla para cada uno de los usuarios miembros del grupo, utilizando</span>
-<span class="line-empty" title="No Anys on this line!">        FLAccessControlLists::makeRuleUser.</span>
+<span class="line-empty" title="No Anys on this line!">        The function of this method is to create a rule for each of the group member users, using</span>
+<span class="line-empty" title="No Anys on this line!">        FLAccessControlLists :: makeRuleUser.</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        @param q Consulta sobre la tabla "flacs" posicionada en el registro a utilizar para construir las reglas.</span>
-<span class="line-empty" title="No Anys on this line!">        @param d Documento DOM/XML en el que insertarán los nodos que describe las reglas de control de acceso.</span>
-<span class="line-empty" title="No Anys on this line!">        @param idgroup Identificador del grupo de usuarios.</span>
+<span class="line-empty" title="No Anys on this line!">        @param q Query about the "flacs" table positioned in the register to use to build the rules.</span>
+<span class="line-empty" title="No Anys on this line!">        @param d DOM / XML document in which the nodes that describe the access control rules will be inserted.</span>
+<span class="line-empty" title="No Anys on this line!">        @param idgroup Identifier of the user group.</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)">        if idgroup == "" or not q or not d:</span>
+Explicit (x1)">        if idgroup == "" or not q or not d:</span>
 <span class="line-empty" title="No Anys on this line!">            return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
-Unannotated (x1)">        qU = FLSqlQuery()</span>
+Unannotated (x1)">        qU = PNSqlQuery()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">        qU.setTablesList("flusers")</span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">        qU.setSelect("iduser")</span>
 <span class="line-precise" title="No Anys on this line!">        qU.setFrom("flusers")</span>
-<span class="line-any" title="Any Types on this line: 
-Unannotated (x1)">        qU.setWhere("'idgroup='%s'" % idgroup)</span>
+<span class="line-precise" title="No Anys on this line!">        qU.setWhere("'idgroup='%s'" % idgroup)</span>
 <span class="line-precise" title="Any Types on this line: 
 Unannotated (x1)">        qU.setForwardOnly(True)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        if qU.exec_():</span>
 <span class="line-precise" title="No Anys on this line!">            while qU.next():</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x5)
-Explicit (x2)">                self.makeRuleUser(q, d, str(qU.value(0)))</span>
+Explicit (x4)">                self.makeRuleUser(q, d, str(qU.value(0)))</span>
 </pre></td>
 </tr></tbody>
 </table>

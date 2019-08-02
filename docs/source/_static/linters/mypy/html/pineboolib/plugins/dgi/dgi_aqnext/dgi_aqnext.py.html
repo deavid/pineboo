@@ -659,15 +659,16 @@ Unannotated (x2)">        return self._mainForm</span>
 Unannotated (x4)">        return super().resolveObject(self._name, name)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="No Anys on this line!">    def exec_(self):</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.fllegacy.systype import SysType</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        qsa_sys = pncontrolsfactory.SysType()</span>
+<span class="line-precise" title="No Anys on this line!">        qsa_sys = SysType()</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x4)
 Unannotated (x2)">        logger.warning("DGI_%s se ha inicializado correctamente" % self._alias)</span>
-<span class="line-precise" title="No Anys on this line!">        if project.conn:</span>
-<span class="line-precise" title="Any Types on this line: 
-Explicit (x4)">            logger.warning("Driver  DB: %s", project.conn.driverAlias())</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        if project.conn:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x8)">            logger.warning("Driver  DB: %s", project.conn.driverAlias())</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x4)">            logger.warning("Usuario DB: %s", qsa_sys.nameUser())</span>
 <span class="line-any" title="Any Types on this line: 
@@ -702,10 +703,11 @@ Unannotated (x2)">        return self._use_authentication</span>
 Unannotated (x7)">        if module_id == "sys" and file_name in self.sys_mtds():</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x3)">            path_ = filedir("./plugins/dgi/dgi_aqnext/system_files/%s/%s.%s" % (file_ext, file_name, file_ext))</span>
-<span class="line-precise" title="Any Types on this line: 
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)
 Omitted Generics (x1)">            if os.path.exists(path_) and project.conn:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">                data_ = project.conn.managerModules().contentFS(path_, False)</span>
+Explicit (x7)">                data_ = project.conn.managerModules().contentFS(path_, False)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-imprecise" title="Any Types on this line: 
 Explicit (x1)">        return data_</span>
@@ -728,7 +730,8 @@ Explicit (x1)">        return data_</span>
 <span class="line-any" title="No Anys on this line!">    def __content_cached__old__(self, tmp_dir, db_name, module_id, ext_, name_, sha_key):</span>
 <span class="line-precise" title="No Anys on this line!">        data = None</span>
 <span class="line-precise" title="No Anys on this line!">        utf8_ = False</span>
-<span class="line-precise" title="No Anys on this line!">        if not project.conn:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        if not project.conn:</span>
 <span class="line-precise" title="No Anys on this line!">            raise Exception</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">        if ext_ == "qs":</span>
@@ -743,7 +746,7 @@ Unannotated (x2)">            legacy_path = "%s/legacy/%s/%s.py" % (folder_, mod
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x1)">            if os.path.exists(legacy_path):</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">                data = project.conn.managerModules().contentFS(legacy_path, True)</span>
+Explicit (x7)">                data = project.conn.managerModules().contentFS(legacy_path, True)</span>
 <span class="line-empty" title="No Anys on this line!">        else:</span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x1)
@@ -752,7 +755,7 @@ Unannotated (x5)">            if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (t
 Unannotated (x2)">                if ext_ == "kut":</span>
 <span class="line-precise" title="No Anys on this line!">                    utf8_ = True</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)">                data = project.conn.managerModules().contentFS(</span>
+Explicit (x7)">                data = project.conn.managerModules().contentFS(</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x7)">                    "%s/cache/%s/%s/file.%s/%s/%s.%s" % (tmp_dir, db_name, module_id, ext_, name_, sha_key, ext_), utf8_</span>
 <span class="line-empty" title="No Anys on this line!">                )</span>
@@ -791,12 +794,13 @@ Unannotated (x6)">        ret_ = self.alternative_script_path("%s.py" % script_n
 Unannotated (x1)">        if ret_ is None:</span>
 <span class="line-precise" title="No Anys on this line!">            raise ImportError</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib import qsa as qsa_dict_modules</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.qsa import qsa as qsa_dict_modules  # FIXME: Use application.qsadictmodules instead</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application.xmlaction import XMLAction</span>
 <span class="line-empty" title="No Anys on this line!">        from pineboolib.application.proxy import DelayedObjectProxyLoader</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x4)">        action = XMLAction(project=project)</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x4)
+Explicit (x1)">        action = XMLAction(project=project)</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">        action.name = module_name</span>
 <span class="line-any" title="Any Types on this line: 
@@ -822,28 +826,29 @@ Explicit (x1)">                delattr(qsa_dict_modules, action.name)  # Borramo
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">            # Se crea el script</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)
+Explicit (x4)
 Omitted Generics (x3)
-Unannotated (x3)">            setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % app))</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">            project.actions[action.name] = action</span>
+Unannotated (x1)">            setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % app))</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            project.actions[action.name] = action</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">            if prefix == "":</span>
 <span class="line-empty" title="No Anys on this line!">                return</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="Any Types on this line: 
-Unannotated (x4)">        action_xml = XMLAction(project=project)</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x4)
+Explicit (x1)">        action_xml = XMLAction(project=project)</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">        action_xml.name = module_name</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x3)">        if "%s_legacy" in action_xml.name not in project.actions.keys():</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x3)">            if action_xml.name in project.actions.keys():</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x2)">                project.actions["%s_legacy" % action_xml.name] = project.actions[action_xml.name]</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">                del project.actions[action_xml.name]</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">        if "%s_legacy" in action_xml.name not in project.actions.keys():</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">            if action_xml.name in project.actions.keys():</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">                project.actions["%s_legacy" % action_xml.name] = project.actions[action_xml.name]</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">                del project.actions[action_xml.name]</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">        if prefix == "form":</span>
@@ -860,11 +865,12 @@ Explicit (x1)">                delattr(qsa_dict_modules, action_xml.name)</span>
 <span class="line-precise" title="No Anys on this line!">            action_xml.table = action_xml.name</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">            action_xml.scriptform = script_name</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">            project.actions[action_xml.name] = action_xml</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            project.actions[action_xml.name] = action_xml</span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x3)
-Unannotated (x3)">            delayed_action = DelayedObjectProxyLoader(action_xml.load, name="QSA.Module.%s.Action.form%s" % (app, action_xml.name))</span>
+Explicit (x2)
+Unannotated (x1)">            delayed_action = DelayedObjectProxyLoader(action_xml.load, name="QSA.Module.%s.Action.form%s" % (app, action_xml.name))</span>
 <span class="line-empty" title="No Anys on this line!">            # print("Creando", "form" + module_name)</span>
 <span class="line-precise" title="Any Types on this line: 
 Explicit (x2)">            setattr(qsa_dict_modules, "form" + action_xml.name, delayed_action)</span>
@@ -884,11 +890,11 @@ Explicit (x1)">                delattr(qsa_dict_modules, action_xml.name)</span>
 <span class="line-precise" title="No Anys on this line!">            action_xml.table = action_xml.name</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">            action_xml.scriptformrecord = script_name</span>
-<span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">            project.actions[action_xml.name] = action_xml</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            project.actions[action_xml.name] = action_xml</span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x3)
-Unannotated (x2)">            delayed_action = DelayedObjectProxyLoader(</span>
+Explicit (x2)">            delayed_action = DelayedObjectProxyLoader(</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">                action_xml.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (app, action_xml.name)</span>
 <span class="line-empty" title="No Anys on this line!">            )</span>
@@ -900,7 +906,7 @@ Explicit (x2)">            setattr(qsa_dict_modules, "formRecord" + action_xml.n
 <span class="line-empty" title="No Anys on this line!">        import importlib</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x5)
+Explicit (x7)
 Unannotated (x1)">        module_name = project.conn.managerModules().idModuleOfFile("%s.mtd" % action_name)</span>
 <span class="line-precise" title="No Anys on this line!">        module = None</span>
 <span class="line-precise" title="No Anys on this line!">        ret_ = None</span>

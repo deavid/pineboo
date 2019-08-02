@@ -26,39 +26,25 @@
 <span id="L16" class="lineno"><a class="lineno" href="#L16">16</a></span>
 <span id="L17" class="lineno"><a class="lineno" href="#L17">17</a></span>
 <span id="L18" class="lineno"><a class="lineno" href="#L18">18</a></span>
-<span id="L19" class="lineno"><a class="lineno" href="#L19">19</a></span>
-<span id="L20" class="lineno"><a class="lineno" href="#L20">20</a></span>
-<span id="L21" class="lineno"><a class="lineno" href="#L21">21</a></span>
-<span id="L22" class="lineno"><a class="lineno" href="#L22">22</a></span>
-<span id="L23" class="lineno"><a class="lineno" href="#L23">23</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># -*- coding: utf-8 -*-</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">AQUtil Module.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">Use the resources of pineboolib.fllegacy.flutil.FLUtil.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib import logging</span>
-<span class="line-empty" title="No Anys on this line!">from typing import Any</span>
+<span class="line-empty" title="No Anys on this line!">from pineboolib.fllegacy.flutil import FLUtil</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">class AQUtil(object):</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    util = None</span>
-<span class="line-precise" title="No Anys on this line!">    logger = None</span>
+<span class="line-empty" title="No Anys on this line!">class AQUtil(FLUtil):</span>
+<span class="line-empty" title="No Anys on this line!">    """AQUtil Class."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def __init__(self) -&gt; None:</span>
-<span class="line-empty" title="No Anys on this line!">        from pineboolib.fllegacy.flutil import FLUtil</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialize a new instance."""</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">        self.util = FLUtil()</span>
-<span class="line-precise" title="No Anys on this line!">        self.logger = logging.getLogger(__name__)</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">    def __getattr__(self, name: str) -&gt; Any:</span>
-<span class="line-empty" title="No Anys on this line!">        # self.logger.info("Usando function FAKE %s de FLUtil()", name)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x5)">        result = getattr(self.util, name, None)</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">        if result is None:</span>
-<span class="line-precise" title="No Anys on this line!">            raise Exception('AQUtil can\'t load "%s" attribute fom FLUtil!' % name)</span>
-<span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x1)">        return result</span>
+<span class="line-precise" title="No Anys on this line!">        self._logger = logging.getLogger(__name__)</span>
 </pre></td>
 </tr></tbody>
 </table>

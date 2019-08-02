@@ -1496,11 +1496,13 @@ Unannotated (x4)">            self.conn_ = pymysql.connect(host=db_host, user=db
 Unimported (x3)
 Unannotated (x5)">            self.engine_ = create_engine("mysql+mysqldb://%s:%s@%s:%s/%s" % (db_userName, db_password, db_host, db_port, db_name))</span>
 <span class="line-precise" title="No Anys on this line!">        except pymysql.Error as e:</span>
-<span class="line-precise" title="No Anys on this line!">            if project._splash:</span>
-<span class="line-unanalyzed" title="No Anys on this line!">                project._splash.hide()</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            if project._splash:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">                project._splash.hide()</span>
 <span class="line-precise" title="No Anys on this line!">            if "Unknown database" in str(e):</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">                if project._DGI and not project.DGI.localDesktop():</span>
+Explicit (x7)">                if project._DGI and not project.DGI.localDesktop():</span>
 <span class="line-precise" title="No Anys on this line!">                    return False</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">                ret = QMessageBox.warning(</span>

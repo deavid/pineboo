@@ -1,7 +1,12 @@
-Module filedialog
+Package qsatypes
 ===============================================================
 
-.. automodule:: pineboolib.fllegacy.filedialog
+.. automodule:: pineboolib.application.qsatypes
     :members:
     :undoc-members:
     :inherited-members:
+    
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+

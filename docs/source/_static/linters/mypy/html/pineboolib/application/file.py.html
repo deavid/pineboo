@@ -59,8 +59,15 @@
 <span id="L49" class="lineno"><a class="lineno" href="#L49">49</a></span>
 <span id="L50" class="lineno"><a class="lineno" href="#L50">50</a></span>
 <span id="L51" class="lineno"><a class="lineno" href="#L51">51</a></span>
+<span id="L52" class="lineno"><a class="lineno" href="#L52">52</a></span>
+<span id="L53" class="lineno"><a class="lineno" href="#L53">53</a></span>
+<span id="L54" class="lineno"><a class="lineno" href="#L54">54</a></span>
+<span id="L55" class="lineno"><a class="lineno" href="#L55">55</a></span>
 </pre></td>
-<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">import os.path</span>
+<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">File module.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">import os.path</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.core.utils import logging</span>
 <span class="line-empty" title="No Anys on this line!">from typing import Optional</span>
 <span class="line-empty" title="No Anys on this line!"></span>
@@ -69,7 +76,7 @@
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class File(object):</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Clase que gestiona cada uno de los ficheros de un módulo</span>
+<span class="line-empty" title="No Anys on this line!">    Manage files from a module.</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    logger = logging.getLogger("application.File")</span>
@@ -78,7 +85,8 @@
 <span class="line-empty" title="No Anys on this line!">        self, module: str, filename: str, sha: Optional[str] = None, basedir: Optional[str] = None, db_name: Optional[str] = None</span>
 <span class="line-empty" title="No Anys on this line!">    ) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Constructor</span>
+<span class="line-empty" title="No Anys on this line!">        Constructor.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        @param module. Identificador del módulo propietario</span>
 <span class="line-empty" title="No Anys on this line!">        @param filename. Nombre del fichero</span>
 <span class="line-empty" title="No Anys on this line!">        @param sha. Código sha1 del contenido del fichero</span>
@@ -99,12 +107,12 @@
 <span class="line-precise" title="No Anys on this line!">            self.filekey = filename</span>
 <span class="line-precise" title="No Anys on this line!">        self.basedir = basedir</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Devuelve la ruta absoluta del fichero</span>
-<span class="line-empty" title="No Anys on this line!">    @return Ruta absoluta del fichero</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def path(self) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Return absolute path to file.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @return Ruta absoluta del fichero</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-precise" title="No Anys on this line!">        if self.basedir:</span>
 <span class="line-empty" title="No Anys on this line!">            # Probablemente porque es local . . .</span>
 <span class="line-precise" title="Any Types on this line: 

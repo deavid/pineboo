@@ -103,45 +103,31 @@
 <span id="L93" class="lineno"><a class="lineno" href="#L93">93</a></span>
 <span id="L94" class="lineno"><a class="lineno" href="#L94">94</a></span>
 <span id="L95" class="lineno"><a class="lineno" href="#L95">95</a></span>
-<span id="L96" class="lineno"><a class="lineno" href="#L96">96</a></span>
-<span id="L97" class="lineno"><a class="lineno" href="#L97">97</a></span>
-<span id="L98" class="lineno"><a class="lineno" href="#L98">98</a></span>
-<span id="L99" class="lineno"><a class="lineno" href="#L99">99</a></span>
-<span id="L100" class="lineno"><a class="lineno" href="#L100">100</a></span>
-<span id="L101" class="lineno"><a class="lineno" href="#L101">101</a></span>
-<span id="L102" class="lineno"><a class="lineno" href="#L102">102</a></span>
-<span id="L103" class="lineno"><a class="lineno" href="#L103">103</a></span>
-<span id="L104" class="lineno"><a class="lineno" href="#L104">104</a></span>
-<span id="L105" class="lineno"><a class="lineno" href="#L105">105</a></span>
-<span id="L106" class="lineno"><a class="lineno" href="#L106">106</a></span>
-<span id="L107" class="lineno"><a class="lineno" href="#L107">107</a></span>
-<span id="L108" class="lineno"><a class="lineno" href="#L108">108</a></span>
-<span id="L109" class="lineno"><a class="lineno" href="#L109">109</a></span>
-<span id="L110" class="lineno"><a class="lineno" href="#L110">110</a></span>
-<span id="L111" class="lineno"><a class="lineno" href="#L111">111</a></span>
-<span id="L112" class="lineno"><a class="lineno" href="#L112">112</a></span>
 </pre></td>
-<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">from pineboolib.core.utils import logging</span>
+<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">ModuleActions module.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">from pineboolib.core.utils import logging</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.core.exceptions import ForbiddenError</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.core.utils.utils_base import load2xml</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib.application.xmlaction import XMLAction</span>
-<span class="line-empty" title="No Anys on this line!">from .proxy import DelayedObjectProxyLoader</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">from typing import Any, TYPE_CHECKING, NoReturn</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class ModuleActions(object):</span>
-<span class="line-empty" title="No Anys on this line!">    """Genera un arbol con las acciones de los diferentes módulos</span>
-<span class="line-empty" title="No Anys on this line!">    @param name. Nombre del la función buscada</span>
-<span class="line-empty" title="No Anys on this line!">    @return el objecto del XMLAction afectado</span>
+<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!">    Generate tree with actions from modules.</span>
 <span class="line-empty" title="No Anys on this line!">    """</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    logger = logging.getLogger("application.ModuleActions")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    def __init__(self, module: Any, path: str, modulename: str) -&gt; None:</span>
-<span class="line-empty" title="No Anys on this line!">        """Constructor</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Constructor.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        @param module. Identificador del módulo</span>
 <span class="line-empty" title="No Anys on this line!">        @param path. Ruta del módulo</span>
 <span class="line-empty" title="No Anys on this line!">        @param modulename. Nombre del módulo</span>
@@ -163,14 +149,9 @@ Explicit (x2)">        self.mod = module  # application.Module</span>
 Explicit (x4)">            self.logger.error("El módulo no tiene un path válido %s", self.module_name)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    def load(self) -&gt; None:</span>
-<span class="line-empty" title="No Anys on this line!">        """Carga las actions del módulo en el projecto</span>
-<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        """Load module actions into project."""</span>
 <span class="line-empty" title="No Anys on this line!">        # Ojo: Almacena un arbol con los módulos cargados</span>
-<span class="line-precise" title="No Anys on this line!">        if TYPE_CHECKING:</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">            qsa_dict_modules = self.mod</span>
-<span class="line-empty" title="No Anys on this line!">        else:</span>
-<span class="line-empty" title="No Anys on this line!">            from pineboolib import qsa as qsa_dict_modules</span>
+<span class="line-empty" title="No Anys on this line!">        from pineboolib.application.qsadictmodules import QSADictModules</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        self.tree = load2xml(self.path)</span>
 <span class="line-precise" title="No Anys on this line!">        self.root = self.tree.getroot()</span>
@@ -191,16 +172,7 @@ Explicit (x2)">        action.alias = self.mod.name</span>
 Explicit (x2)">        action.scriptform = self.mod.name</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x2)">        self.project.actions[action.name] = action  # FIXME: Actions should be loaded to their parent, not the singleton</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">        if hasattr(qsa_dict_modules, action.name):</span>
-<span class="line-precise" title="No Anys on this line!">            if action.name != "sys":</span>
-<span class="line-precise" title="Any Types on this line: 
-Explicit (x4)">                self.logger.warning("No se sobreescribe variable de entorno %s", action.name)</span>
-<span class="line-empty" title="No Anys on this line!">        else:  # Se crea la action del módulo</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)
-Omitted Generics (x3)
-Unannotated (x2)">            setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % action.name))</span>
+<span class="line-precise" title="No Anys on this line!">        QSADictModules.save_action_for_root_module(action)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">        for xmlaction in self.root:</span>
 <span class="line-any" title="Any Types on this line: 
@@ -208,44 +180,20 @@ Unannotated (x4)
 Explicit (x1)">            action_xml = XMLAction(xmlaction, project=self.project)</span>
 <span class="line-precise" title="No Anys on this line!">            action_xml.mod = self</span>
 <span class="line-precise" title="No Anys on this line!">            name = action_xml.name</span>
-<span class="line-precise" title="No Anys on this line!">            if name != "unnamed":</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">                if hasattr(qsa_dict_modules, "form%s" % name):</span>
-<span class="line-precise" title="Any Types on this line: 
-Explicit (x4)">                    self.logger.debug(</span>
-<span class="line-empty" title="No Anys on this line!">                        "No se sobreescribe variable de entorno %s. Hay una definición previa en %s",</span>
-<span class="line-precise" title="No Anys on this line!">                        "%s.form%s" % (self.module_name, name),</span>
-<span class="line-precise" title="No Anys on this line!">                        self.module_name,</span>
-<span class="line-empty" title="No Anys on this line!">                    )</span>
-<span class="line-empty" title="No Anys on this line!">                else:  # Se crea la action del form</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x2)">                    self.project.actions[name] = action_xml  # FIXME: Actions should be loaded to their parent, not the singleton</span>
-<span class="line-any" title="Any Types on this line: 
-Omitted Generics (x3)
-Unannotated (x2)
-Explicit (x2)">                    delayed_action = DelayedObjectProxyLoader(action_xml.load, name="QSA.Module.%s.Action.form%s" % (self.mod.name, name))</span>
-<span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    setattr(qsa_dict_modules, "form" + name, delayed_action)</span>
+<span class="line-precise" title="No Anys on this line!">            if not name or name == "unnamed":</span>
+<span class="line-empty" title="No Anys on this line!">                continue</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)">                if hasattr(qsa_dict_modules, "formRecord" + name):</span>
-<span class="line-precise" title="Any Types on this line: 
-Explicit (x4)">                    self.logger.debug("No se sobreescribe variable de entorno %s", "formRecord" + name)</span>
-<span class="line-empty" title="No Anys on this line!">                else:  # Se crea la action del formRecord</span>
-<span class="line-precise" title="Any Types on this line: 
-Omitted Generics (x3)
-Unannotated (x2)">                    delayed_action = DelayedObjectProxyLoader(</span>
+Unannotated (x2)">            if QSADictModules.save_action_for_mainform(action_xml):</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x2)">                        action_xml.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)</span>
-<span class="line-empty" title="No Anys on this line!">                    )</span>
+Explicit (x2)">                self.project.actions[name] = action_xml  # FIXME: Actions should be loaded to their parent, not the singleton</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x3)">                    setattr(qsa_dict_modules, "formRecord" + name, delayed_action)</span>
+Unannotated (x2)">            QSADictModules.save_action_for_formrecord(action_xml)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)">    def __contains__(self, k) -&gt; bool:</span>
-<span class="line-empty" title="No Anys on this line!">        """Busca si es propietario de una action</span>
-<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        """Determine if it is the owner of an action."""</span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)
 Explicit (x2)">        return k in self.project.actions  # FIXME: Actions should be loaded to their parent, not the singleton</span>
@@ -253,7 +201,9 @@ Explicit (x2)">        return k in self.project.actions  # FIXME: Actions should
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x1)
 Explicit (x1)">    def __getitem__(self, name) -&gt; Any:</span>
-<span class="line-empty" title="No Anys on this line!">        """Recoge una action determinada</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Retrieve particular action by name.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        @param name. Nombre de la action</span>
 <span class="line-empty" title="No Anys on this line!">        @return Retorna el XMLAction de la action dada</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
@@ -261,14 +211,14 @@ Explicit (x1)">    def __getitem__(self, name) -&gt; Any:</span>
 Explicit (x3)
 Unannotated (x1)">        return self.project.actions[name]  # FIXME: Actions should be loaded to their parent, not the singleton</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!">    Añade una action a propiedad del módulo</span>
-<span class="line-empty" title="No Anys on this line!">    @param name. Nombre de la action</span>
-<span class="line-empty" title="No Anys on this line!">    @param action_. Action a añadir a la propiedad del módulo</span>
-<span class="line-empty" title="No Anys on this line!">    """</span>
-<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Unannotated (x2)">    def __setitem__(self, name, action_) -&gt; NoReturn:</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-empty" title="No Anys on this line!">        Add action to a module property.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        @param name. Nombre de la action</span>
+<span class="line-empty" title="No Anys on this line!">        @param action_. Action a añadir a la propiedad del módulo</span>
+<span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-precise" title="No Anys on this line!">        raise ForbiddenError("Actions are not writable!")</span>
 <span class="line-empty" title="No Anys on this line!">        # self.project.actions[name] = action_</span>
 </pre></td>

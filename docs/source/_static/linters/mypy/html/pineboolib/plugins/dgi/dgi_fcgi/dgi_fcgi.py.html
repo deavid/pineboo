@@ -85,6 +85,8 @@
 <span id="L75" class="lineno"><a class="lineno" href="#L75">75</a></span>
 <span id="L76" class="lineno"><a class="lineno" href="#L76">76</a></span>
 <span id="L77" class="lineno"><a class="lineno" href="#L77">77</a></span>
+<span id="L78" class="lineno"><a class="lineno" href="#L78">78</a></span>
+<span id="L79" class="lineno"><a class="lineno" href="#L79">79</a></span>
 </pre></td>
 <td class="table-code"><pre><span class="line-empty" title="No Anys on this line!"># # -*- coding: utf-8 -*-</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib import logging</span>
@@ -170,16 +172,18 @@ Unannotated (x2)">        start_response("200 OK", [("Content-Type", "text/html"
 Explicit (x3)">        aList = environ["QUERY_STRING"]</span>
 <span class="line-empty" title="No Anys on this line!">        try:</span>
 <span class="line-any" title="Any Types on this line: 
-Explicit (x7)">            retorno_: Any = project.call(self._callScript, aList)</span>
+Explicit (x6)">            retorno_: Any = project.call(self._callScript, aList)</span>
 <span class="line-precise" title="No Anys on this line!">        except Exception:</span>
-<span class="line-empty" title="No Anys on this line!">            from pineboolib import pncontrolsfactory</span>
+<span class="line-empty" title="No Anys on this line!">            from pineboolib.fllegacy.systype import SysType</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            qsa_sys = SysType()</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x6)">            logger.info(self._callScript, environ["QUERY_STRING"])</span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">            retorno_ = (</span>
 <span class="line-precise" title="No Anys on this line!">                """&lt;html&gt;&lt;head&gt;&lt;title&gt;Pineboo %s - FastCGI - &lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;Function %s not found!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;"""</span>
-<span class="line-precise" title="No Anys on this line!">                % (pncontrolsfactory.SysType().version(), self._callScript)</span>
+<span class="line-precise" title="No Anys on this line!">                % (qsa_sys.version(), self._callScript)</span>
 <span class="line-empty" title="No Anys on this line!">            )</span>
 <span class="line-empty" title="No Anys on this line!">            pass</span>
 <span class="line-any" title="Any Types on this line: 

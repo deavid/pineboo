@@ -241,17 +241,19 @@ Explicit (x5)">            logger.debug("Error trying to parse json for %s: %s (
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">            return value</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    def set_value(self, key: str, value: Union[QSize, str, bool, int, List[str]]) -&gt; None:</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">    def set_value(self, key: str, value: Union[QSize, str, bool, int, List[Any]]) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """Set a value into INI file for specified key."""</span>
-<span class="line-precise" title="Any Types on this line: 
-Explicit (x5)">        logger.debug("%s.set_value(%s) &lt;- %s %r", self.application, key, type(value), value)</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x8)">        logger.debug("%s.set_value(%s) &lt;- %s %r", self.application, key, type(value), value)</span>
 <span class="line-precise" title="No Anys on this line!">        curtime = time.time()</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Explicit (x1)">        self.cache[key] = (curtime, value)</span>
-<span class="line-precise" title="Any Types on this line: 
-Explicit (x2)">        return super().setValue(key, self.dump_value(value))</span>
+Explicit (x2)">        self.cache[key] = (curtime, value)</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x3)">        return super().setValue(key, self.dump_value(value))</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-precise" title="No Anys on this line!">    setValue = set_value</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x2)">    setValue = set_value</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">config = PinebooSettings("Config")</span>

@@ -47,61 +47,88 @@
 <span id="L37" class="lineno"><a class="lineno" href="#L37">37</a></span>
 <span id="L38" class="lineno"><a class="lineno" href="#L38">38</a></span>
 <span id="L39" class="lineno"><a class="lineno" href="#L39">39</a></span>
+<span id="L40" class="lineno"><a class="lineno" href="#L40">40</a></span>
+<span id="L41" class="lineno"><a class="lineno" href="#L41">41</a></span>
+<span id="L42" class="lineno"><a class="lineno" href="#L42">42</a></span>
+<span id="L43" class="lineno"><a class="lineno" href="#L43">43</a></span>
+<span id="L44" class="lineno"><a class="lineno" href="#L44">44</a></span>
+<span id="L45" class="lineno"><a class="lineno" href="#L45">45</a></span>
+<span id="L46" class="lineno"><a class="lineno" href="#L46">46</a></span>
+<span id="L47" class="lineno"><a class="lineno" href="#L47">47</a></span>
+<span id="L48" class="lineno"><a class="lineno" href="#L48">48</a></span>
+<span id="L49" class="lineno"><a class="lineno" href="#L49">49</a></span>
+<span id="L50" class="lineno"><a class="lineno" href="#L50">50</a></span>
 </pre></td>
-<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">from typing import Callable</span>
+<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">Proxy Module.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">from typing import Callable</span>
 <span class="line-empty" title="No Anys on this line!">from pineboolib import logging</span>
-<span class="line-empty" title="No Anys on this line!">from typing import Any</span>
+<span class="line-empty" title="No Anys on this line!">from typing import Any, Optional</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">class DelayedObjectProxyLoader(object):</span>
+<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!">    Delay load of an object until its first accessed.</span>
+<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-precise" title="No Anys on this line!">    logger = logging.getLogger("application.DelayedObjectProxyLoader")</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Omitted Generics (x3)
-Unannotated (x2)">    def __init__(self, obj: Callable, *args, **kwargs) -&gt; None:</span>
+Explicit (x2)">    def __init__(self, obj: Callable, *args: Any, **kwargs: Any) -&gt; None:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Constructor</span>
+<span class="line-empty" title="No Anys on this line!">        Constructor.</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-precise" title="No Anys on this line!">        self._name = "unnamed-loader"</span>
+<span class="line-precise" title="No Anys on this line!">        self._name: str = "unnamed-loader"</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">        if "name" in kwargs:</span>
+Explicit (x1)">        if "name" in kwargs:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">            self._name = kwargs["name"]</span>
+Explicit (x2)">            self._name = str(kwargs["name"])</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x1)">            del kwargs["name"]</span>
+Explicit (x1)">            del kwargs["name"]</span>
 <span class="line-precise" title="Any Types on this line: 
 Omitted Generics (x6)">        self._obj = obj</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x2)">        self._args = args</span>
+Explicit (x2)">        self._args = args</span>
 <span class="line-imprecise" title="Any Types on this line: 
-Unannotated (x2)">        self._kwargs = kwargs</span>
-<span class="line-precise" title="No Anys on this line!">        self.loaded_obj = None</span>
+Explicit (x2)">        self._kwargs = kwargs</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">        self.loaded_obj: Optional[Any] = None</span>
 <span class="line-empty" title="No Anys on this line!"></span>
-<span class="line-any" title="No Anys on this line!">    def __load(self):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">    def __load(self) -&gt; Any:</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Carga un objeto nuevo</span>
+<span class="line-empty" title="No Anys on this line!">        Load a new object.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        @return objeto nuevo o si ya existe , cacheado</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">        if self.loaded_obj is not None:</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x12)">        self.logger.debug("DelayedObjectProxyLoader: loading %s %s( *%s **%s)", self._name, self._obj, self._args, self._kwargs)</span>
+Explicit (x1)">            return self.loaded_obj</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x6)
+Omitted Generics (x3)">        self.logger.debug("DelayedObjectProxyLoader: loading %s %s( *%s **%s)", self._name, self._obj, self._args, self._kwargs)</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x9)">        self.loaded_obj = self._obj(*self._args, **self._kwargs)</span>
+Omitted Generics (x4)
+Explicit (x3)">        self.loaded_obj = self._obj(*self._args, **self._kwargs)</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x2)">        return self.loaded_obj</span>
+Explicit (x1)">        return self.loaded_obj</span>
 <span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-any" title="Any Types on this line: 
 Explicit (x1)">    def __getattr__(self, name: str) -&gt; Any:  # Solo se lanza si no existe la propiedad.</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
-<span class="line-empty" title="No Anys on this line!">        Retorna una función buscada</span>
+<span class="line-empty" title="No Anys on this line!">        Return attribute or method from internal object.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
 <span class="line-empty" title="No Anys on this line!">        @param name. Nombre del la función buscada</span>
 <span class="line-empty" title="No Anys on this line!">        @return el objecto del XMLAction afectado</span>
 <span class="line-empty" title="No Anys on this line!">        """</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x3)">        obj_ = self.__load()</span>
+Explicit (x3)">        obj_ = self.__load()</span>
 <span class="line-any" title="Any Types on this line: 
-Unannotated (x4)
-Explicit (x8)">        return getattr(obj_, name, getattr(obj_.widget, name, None)) if obj_ else None</span>
+Explicit (x12)">        return getattr(obj_, name, getattr(obj_.widget, name, None)) if obj_ else None</span>
 </pre></td>
 </tr></tbody>
 </table>
