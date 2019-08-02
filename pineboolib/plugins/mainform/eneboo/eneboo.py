@@ -8,11 +8,12 @@ from PyQt5.QtXml import QDomDocument  # type: ignore
 from PyQt5.QtGui import QIcon
 
 from pineboolib.qt3_widgets.qaction import QAction
-from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQFormDB
-from pineboolib.fllegacy.flformdb import FLFormDB
-
+from pineboolib.qt3_widgets.qmessagebox import QMessageBox
 from pineboolib.qt3_widgets.qmenu import QMenu
 from pineboolib.qt3_widgets.qmainwindow import QMainWindow
+
+from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQFormDB
+from pineboolib.fllegacy.flformdb import FLFormDB
 
 
 # from pineboolib.core.settings import settings
@@ -38,9 +39,9 @@ class MainForm(QtWidgets.QMainWindow):
 
     MAX_RECENT = 10
     app_ = None
-    ag_menu_ = None
-    ag_rec_ = None
-    ag_mar_ = None
+    ag_menu_: QActionGroup
+    ag_rec_: QActionGroup
+    ag_mar_: QActionGroup
     dck_mod_ = None
     dck_rec_ = None
     dck_mar_ = None
