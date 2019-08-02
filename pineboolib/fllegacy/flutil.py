@@ -4,7 +4,7 @@ import datetime
 
 from PyQt5 import QtCore  # type: ignore
 
-from pineboolib.fllegacy.systype import SysType
+from pineboolib.application.qsatypes.sysbasetype import SysBaseType
 from pineboolib.core import decorators
 from pineboolib import logging
 
@@ -1011,7 +1011,7 @@ class FLUtil(QtCore.QObject):
 
     @classmethod
     def getOS(cls) -> str:
-        return SysType().osName()
+        return SysBaseType.osName()
 
     @classmethod
     @decorators.NotImplementedWarn
@@ -1272,7 +1272,7 @@ class FLUtil(QtCore.QObject):
     @classmethod
     def nameUser(cls) -> str:
 
-        return SysType().nameUser()
+        return SysBaseType.nameUser()
 
     # FIXME: Missing in SysType:
     # @classmethod
@@ -1293,4 +1293,4 @@ class FLUtil(QtCore.QObject):
     @classmethod
     def nameBD(cls) -> str:
 
-        return SysType().nameBD()
+        return SysBaseType.nameBD()

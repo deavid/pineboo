@@ -28,8 +28,7 @@ from pineboolib.fllegacy.aqsobjects.aqs import AQS
 from pineboolib.fllegacy.aqsobjects.aqsql import AQSql
 from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings
 from pineboolib.fllegacy.flvar import FLVar
-
-# from pineboolib.fllegacy.flutil import FLUtil # cyclic dependency
+from pineboolib.fllegacy.flutil import FLUtil
 
 from pineboolib.qt3_widgets.dialog import Dialog
 from pineboolib.qt3_widgets.qbytearray import QByteArray
