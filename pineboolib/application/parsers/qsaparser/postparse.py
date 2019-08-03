@@ -732,27 +732,79 @@ class Module(object):
 def parseArgs(argv: List[str]) -> Tuple[Any, List[str]]:
     """Define parsing arguments for the program."""
     parser = OptionParser()
-    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
+    parser.add_option(
+        "-q",
+        "--quiet",
+        action="store_false",
+        dest="verbose",
+        default=True,
+        help="don't print status messages to stdout",
+    )
 
-    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
+    parser.add_option(
+        "--optdebug",
+        action="store_true",
+        dest="optdebug",
+        default=False,
+        help="debug optparse module",
+    )
 
-    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
+    parser.add_option(
+        "--debug",
+        action="store_true",
+        dest="debug",
+        default=False,
+        help="prints lots of useless messages",
+    )
 
     parser.add_option("--path", dest="storepath", default=None, help="store XML results in PATH")
 
-    parser.add_option("--topython", action="store_true", dest="topython", default=False, help="write python file from xml")
+    parser.add_option(
+        "--topython",
+        action="store_true",
+        dest="topython",
+        default=False,
+        help="write python file from xml",
+    )
 
-    parser.add_option("--exec-py", action="store_true", dest="exec_python", default=False, help="try to execute python file")
+    parser.add_option(
+        "--exec-py",
+        action="store_true",
+        dest="exec_python",
+        default=False,
+        help="try to execute python file",
+    )
 
-    parser.add_option("--toxml", action="store_true", dest="toxml", default=False, help="write xml file from qs")
+    parser.add_option(
+        "--toxml", action="store_true", dest="toxml", default=False, help="write xml file from qs"
+    )
 
-    parser.add_option("--full", action="store_true", dest="full", default=False, help="write xml file from qs")
+    parser.add_option(
+        "--full", action="store_true", dest="full", default=False, help="write xml file from qs"
+    )
 
-    parser.add_option("--cache", action="store_true", dest="cache", default=False, help="If dest file exists, don't regenerate it")
+    parser.add_option(
+        "--cache",
+        action="store_true",
+        dest="cache",
+        default=False,
+        help="If dest file exists, don't regenerate it",
+    )
 
-    parser.add_option("--strict", action="store_true", dest="strict", default=False, help="Enable STRICT_MODE on pytnyzer")
+    parser.add_option(
+        "--strict",
+        action="store_true",
+        dest="strict",
+        default=False,
+        help="Enable STRICT_MODE on pytnyzer",
+    )
 
-    parser.add_option("--python-ext", dest="python_ext", default=".qs.py", help="Change Python file extension (default: '.qs.py')")
+    parser.add_option(
+        "--python-ext",
+        dest="python_ext",
+        default=".qs.py",
+        help="Change Python file extension (default: '.qs.py')",
+    )
 
     (options, args) = parser.parse_args(argv)
     return (options, args)
@@ -825,7 +877,10 @@ def execute(options: Any, args: List[str]) -> None:
             logger.info("Pass 3 - Test PY file load . . .")
             options.topython = False
             try:
-                execute(options, [(arg + ".xml.py").replace(".qs.xml.py", options.python_ext) for arg in args])
+                execute(
+                    options,
+                    [(arg + ".xml.py").replace(".qs.xml.py", options.python_ext) for arg in args],
+                )
             except Exception:
                 logger.exception("Error al ejecutar Python:")
         logger.debug("Done.")
@@ -852,7 +907,8 @@ def execute(options: Any, args: List[str]) -> None:
                 x
                 for x in args
                 if not os.path.exists((x + ".py").replace(".qs.xml.py", options.python_ext))
-                or os.path.getmtime(x) > os.path.getctime((x + ".py").replace(".qs.xml.py", options.python_ext))
+                or os.path.getmtime(x)
+                > os.path.getctime((x + ".py").replace(".qs.xml.py", options.python_ext))
             ]
 
         nfs = len(args)
@@ -866,7 +922,10 @@ def execute(options: Any, args: List[str]) -> None:
             if not os.path.exists(filename):
                 logger.error("Fichero %r no encontrado" % filename)
                 continue
-            logger.debug("Pythonizing File: %-35s . . . .        (%.1f%%)" % (bname, 100.0 * (nf + 1.0) / nfs))
+            logger.debug(
+                "Pythonizing File: %-35s . . . .        (%.1f%%)"
+                % (bname, 100.0 * (nf + 1.0) / nfs)
+            )
             old_stderr = sys.stdout
             stream = io.StringIO()
             sys.stdout = stream
@@ -881,11 +940,18 @@ def execute(options: Any, args: List[str]) -> None:
 
     else:
         if options.cache:
-            args = [x for x in args if not os.path.exists(x + ".xml") or os.path.getmtime(x) > os.path.getctime(x + ".xml")]
+            args = [
+                x
+                for x in args
+                if not os.path.exists(x + ".xml")
+                or os.path.getmtime(x) > os.path.getctime(x + ".xml")
+            ]
         nfs = len(args)
         for nf, filename in enumerate(args):
             bname = os.path.basename(filename)
-            logger.debug("Parsing File: %-35s . . . .        (%.1f%%)" % (bname, 100.0 * (nf + 1.0) / nfs))
+            logger.debug(
+                "Parsing File: %-35s . . . .        (%.1f%%)" % (bname, 100.0 * (nf + 1.0) / nfs)
+            )
             try:
                 filecontent = open(filename, "r", encoding="latin-1").read()
             except Exception:
@@ -896,7 +962,10 @@ def execute(options: Any, args: List[str]) -> None:
                 logger.error("Error: No se pudo abrir %s" % (repr(filename)))
                 continue
             if prog["error_count"] > 0:
-                logger.error("Encontramos %d errores parseando: %-35s" % (prog["error_count"], repr(filename)))
+                logger.error(
+                    "Encontramos %d errores parseando: %-35s"
+                    % (prog["error_count"], repr(filename))
+                )
                 continue
             if not options.toxml:
                 # Si no se quiere guardar resultado, no hace falta calcular mas

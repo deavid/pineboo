@@ -103,8 +103,15 @@ def slot_done(fn: Callable, signal: Any, sender: Any, caller: Any) -> Callable:
         if caller is not None:
             try:
                 if signal.signal != caller.signal_test.signal:
-                    signal_name = signal.signal[1 : signal.signal.find("(")]  # Quitamos el caracter "2" inicial y parámetros
-                    logger.debug("Emitir evento test: %s, args:%s kwargs:%s", signal_name, args if args else "", kwargs if kwargs else "")
+                    signal_name = signal.signal[
+                        1 : signal.signal.find("(")
+                    ]  # Quitamos el caracter "2" inicial y parámetros
+                    logger.debug(
+                        "Emitir evento test: %s, args:%s kwargs:%s",
+                        signal_name,
+                        args if args else "",
+                        kwargs if kwargs else "",
+                    )
                     caller.signal_test.emit(signal_name, sender)
             except Exception:
                 pass
@@ -114,7 +121,9 @@ def slot_done(fn: Callable, signal: Any, sender: Any, caller: Any) -> Callable:
     return new_fn
 
 
-def connect(sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = None) -> Optional[Tuple[Any, Any]]:
+def connect(
+    sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = None
+) -> Optional[Tuple[Any, Any]]:
     """Connect signal to slot for QSA."""
     if caller is not None:
         logger.trace("* * * Connect:: %s %s %s %s %s", caller, sender, signal, receiver, slot)
@@ -146,7 +155,9 @@ def connect(sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = No
     return signal_slot
 
 
-def disconnect(sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = None) -> Optional[Tuple[Any, Any]]:
+def disconnect(
+    sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = None
+) -> Optional[Tuple[Any, Any]]:
     """Disconnect signal from slot for QSA."""
     signal_slot = solve_connection(sender, signal, receiver, slot)
     if not signal_slot:
@@ -160,7 +171,9 @@ def disconnect(sender: Any, signal: Any, receiver: Any, slot: str, caller: Any =
     return signal_slot
 
 
-def solve_connection(sender: Any, signal: str, receiver: Any, slot: str) -> Optional[Tuple[Any, Any]]:
+def solve_connection(
+    sender: Any, signal: str, receiver: Any, slot: str
+) -> Optional[Tuple[Any, Any]]:
     """Try hard to guess which is the correct way of connecting signal to slot. For QSA."""
     if sender is None:
         logger.error("Connect Error:: %s %s %s %s", sender, signal, receiver, slot)
@@ -198,7 +211,9 @@ def solve_connection(sender: Any, signal: str, receiver: Any, slot: str) -> Opti
     # if not oSignal and sender.__class__.__name__ == "FormInternalObj":
     #    oSignal = getattr(sender.parent(), sg_name, None)
     if not oSignal:
-        logger.error("ERROR: No existe la señal %s para la clase %s", signal, sender.__class__.__name__)
+        logger.error(
+            "ERROR: No existe la señal %s para la clase %s", signal, sender.__class__.__name__
+        )
         return None
 
     if remote_fn:
@@ -224,11 +239,22 @@ def solve_connection(sender: Any, signal: str, receiver: Any, slot: str) -> Opti
                 if hasattr(receiver, "iface"):
                     oSlot = getattr(receiver.iface, slot, None)
             if not oSlot:
-                logger.error("Al realizar connect %s:%s -> %s:%s ; " "el es QObject pero no tiene slot", sender, signal, receiver, slot)
+                logger.error(
+                    "Al realizar connect %s:%s -> %s:%s ; " "el es QObject pero no tiene slot",
+                    sender,
+                    signal,
+                    receiver,
+                    slot,
+                )
                 return None
             return oSignal, oSlot
     else:
         logger.error(
-            "Al realizar connect %s:%s -> %s:%s ; " "el slot no se reconoce y el receptor no es QObject.", sender, signal, receiver, slot
+            "Al realizar connect %s:%s -> %s:%s ; "
+            "el slot no se reconoce y el receptor no es QObject.",
+            sender,
+            signal,
+            receiver,
+            slot,
         )
     return None

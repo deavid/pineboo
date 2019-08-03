@@ -195,10 +195,18 @@ class SysBaseType(object):
         if len(args) == 1:
             conn_db = project.conn.useConn(args[0])
             if not conn_db.isOpen():
-                if conn_db.driverName_ and conn_db.driverSql and conn_db.driverSql.loadDriver(conn_db.driverName_):
+                if (
+                    conn_db.driverName_
+                    and conn_db.driverSql
+                    and conn_db.driverSql.loadDriver(conn_db.driverName_)
+                ):
                     conn_db.driver_ = conn_db.driverSql.driver()
                     conn_db.conn = conn_db.conectar(
-                        project.conn.db_name, project.conn.db_host, project.conn.db_port, project.conn.db_userName, project.conn.db_password
+                        project.conn.db_name,
+                        project.conn.db_host,
+                        project.conn.db_port,
+                        project.conn.db_userName,
+                        project.conn.db_password,
                     )
                     if conn_db.conn is False:
                         return False
@@ -274,8 +282,18 @@ class SysBaseType(object):
                 ret[key] = "@".join(info)
                 size += 1
             else:
-                if arrNew[key]["shatext"] != arrOld[key]["shatext"] or arrNew[key]["shabinary"] != arrOld[key]["shabinary"]:
-                    info = [key, "mod", arrOld[key]["shatext"], arrOld[key]["shabinary"], arrNew[key]["shatext"], arrNew[key]["shabinary"]]
+                if (
+                    arrNew[key]["shatext"] != arrOld[key]["shatext"]
+                    or arrNew[key]["shabinary"] != arrOld[key]["shabinary"]
+                ):
+                    info = [
+                        key,
+                        "mod",
+                        arrOld[key]["shatext"],
+                        arrOld[key]["shabinary"],
+                        arrNew[key]["shatext"],
+                        arrNew[key]["shabinary"],
+                    ]
                     ret[key] = "@".join(info)
                     size += 1
 
@@ -386,7 +404,14 @@ class SysBaseType(object):
         msg = ustr(msg)
         caption = self.translate(u"AbanQ Información")
         msg = msg.replace("\n", "<br>")
-        msgHtml = ustr(u'<img source="about.png" align="right">', u"<b><u>", caption, u"</u></b><br><br>", msg, u"<br>")
+        msgHtml = ustr(
+            u'<img source="about.png" align="right">',
+            u"<b><u>",
+            caption,
+            u"</u></b><br><br>",
+            msg,
+            u"<br>",
+        )
         self._warnHtmlPopup(msgHtml, [])
 
     @classmethod
@@ -395,7 +420,14 @@ class SysBaseType(object):
         msg = ustr(msg)
         msg = msg.replace("\n", "<br>")
         caption = self.translate(u"AbanQ Aviso")
-        msgHtml = ustr(u'<img source="bug.png" align="right">', u"<b><u>", caption, u"</u></b><br><br>", msg, u"<br>")
+        msgHtml = ustr(
+            u'<img source="bug.png" align="right">',
+            u"<b><u>",
+            caption,
+            u"</u></b><br><br>",
+            msg,
+            u"<br>",
+        )
         self._warnHtmlPopup(msgHtml, [])
 
     @classmethod
@@ -404,7 +436,14 @@ class SysBaseType(object):
         msg = ustr(msg)
         msg = msg.replace("\n", "<br>")
         caption = self.translate(u"AbanQ Error")
-        msgHtml = ustr(u'<img source="remove.png" align="right">', u"<b><u>", caption, u"</u></b><br><br>", msg, u"<br>")
+        msgHtml = ustr(
+            u'<img source="remove.png" align="right">',
+            u"<b><u>",
+            caption,
+            u"</u></b><br><br>",
+            msg,
+            u"<br>",
+        )
         self._warnHtmlPopup(msgHtml, [])
 
     @classmethod
@@ -421,7 +460,10 @@ class SysBaseType(object):
     def updatePineboo(self):
         """Execute auto-updater."""
         QMessageBox.warning(
-            QApplication.focusWidget(), "Pineboo", self.translate(u"Funcionalidad no soportada aún en Pineboo."), QMessageBox.Ok
+            QApplication.focusWidget(),
+            "Pineboo",
+            self.translate(u"Funcionalidad no soportada aún en Pineboo."),
+            QMessageBox.Ok,
         )
         return
 
@@ -452,7 +494,11 @@ class SysBaseType(object):
         if not c:
             return False
         clase = (
-            "FLFieldDB" if isinstance(c, project.DGI.FLFieldDB) else "FLTableDB" if isinstance(c, project.DGI.FLTableDB) else c.className()
+            "FLFieldDB"
+            if isinstance(c, project.DGI.FLFieldDB)
+            else "FLTableDB"
+            if isinstance(c, project.DGI.FLTableDB)
+            else c.className()
         )
         if clase in ["QToolButton", "QPushButton"]:
             self.runObjMethod(container, component, u"setEnabled", False)
@@ -469,7 +515,11 @@ class SysBaseType(object):
         c = self.testObj(container, component)
         if not c:
             return False
-        clase = u"FLFieldDB" if (u"editor" in c) else ((u"FLTableDB" if (u"tableName" in c) else c.className()))
+        clase = (
+            u"FLFieldDB"
+            if (u"editor" in c)
+            else ((u"FLTableDB" if (u"tableName" in c) else c.className()))
+        )
         if clase == u"QPushButton":
             pass
         elif clase == u"QToolButton":
@@ -486,7 +536,11 @@ class SysBaseType(object):
         c = self.testObj(container, component)
         if not c:
             return False
-        clase = u"FLFieldDB" if (u"editor" in c) else ((u"FLTableDB" if (u"tableName" in c) else c.className()))
+        clase = (
+            u"FLFieldDB"
+            if (u"editor" in c)
+            else ((u"FLTableDB" if (u"tableName" in c) else c.className()))
+        )
         if clase == u"FLTableDB":
             pass
         elif clase == u"FLFieldDB":

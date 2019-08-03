@@ -59,8 +59,14 @@ class dgi_qt(dgi_schema):
         from PyQt5.QtWidgets import qApp  # type: ignore
         from pineboolib.qt3_widgets.messagebox import MessageBox
 
-        parent = qApp.focusWidget().parent() if hasattr(qApp.focusWidget(), "parent") else qApp.focusWidget()
-        MessageBox.warning(t, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo", parent)
+        parent = (
+            qApp.focusWidget().parent()
+            if hasattr(qApp.focusWidget(), "parent")
+            else qApp.focusWidget()
+        )
+        MessageBox.warning(
+            t, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo", parent
+        )
 
     def createUI(self, n, connector=None, parent=None, name=None) -> Any:
 

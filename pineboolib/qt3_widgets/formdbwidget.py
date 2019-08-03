@@ -21,11 +21,17 @@ class FormDBWidget(QtWidgets.QWidget):
             super().__init__(parent)
 
             self._module = sys.modules[self.__module__]
-            self._module.connect = self._connect  # FIXME: Please don't write to the module. Fails flake8/mypy.
+            self._module.connect = (
+                self._connect
+            )  # FIXME: Please don't write to the module. Fails flake8/mypy.
             self._module.disconnect = self._disconnect
             self._action = action
             self.cursor_ = None
-            self.parent_ = parent or parent.parentWidget() if parent and hasattr(parent, "parentWidget") else parent
+            self.parent_ = (
+                parent or parent.parentWidget()
+                if parent and hasattr(parent, "parentWidget")
+                else parent
+            )
 
             if not TYPE_CHECKING:
                 # FIXME: qt3_widgets should not interact with fllegacy
@@ -89,7 +95,11 @@ class FormDBWidget(QtWidgets.QWidget):
         if getattr(self, "iface", None) is not None:
             from pineboolib.core.garbage_collector import check_gc_referrers
 
-            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)
+            check_gc_referrers(
+                "FormDBWidget.iface:" + self.iface.__class__.__name__,
+                weakref.ref(self.iface),
+                self._action.name,
+            )
             del self.iface.ctx
             del self.iface
             self._action.formrecord_widget = None
@@ -169,14 +179,20 @@ class FormDBWidget(QtWidgets.QWidget):
 
             ret_ = getattr(aqApp, name, None)
             if ret_:
-                self.logger.info("FormDBWidget: Coearcing attribute %r from aqApp (should be avoided)" % name)
+                self.logger.info(
+                    "FormDBWidget: Coearcing attribute %r from aqApp (should be avoided)" % name
+                )
                 return ret_
 
         raise AttributeError("FormDBWidget: Attribute does not exist: %r" % name)
 
     def __hasattr__(self, name):
         """Guess if attribute can be found in other related objects."""
-        ret_ = hasattr(self.cursor_, name) or hasattr(self.parent(), name) or hasattr(self.parent().script, name)
+        ret_ = (
+            hasattr(self.cursor_, name)
+            or hasattr(self.parent(), name)
+            or hasattr(self.parent().script, name)
+        )
         return ret_
 
     def __iter__(self):

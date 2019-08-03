@@ -306,7 +306,11 @@ def id_translate(name: str, qsa_exclude: Set[str] = None, transform: Dict[str, s
         name = name + "_"
 
     if qsa_exclude is not None:
-        qsa_lower = {x.lower(): x for x in qsa_exclude | QSA_KNOWN_ATTRS if x.lower() != x and x.lower() not in qsa_exclude}
+        qsa_lower = {
+            x.lower(): x
+            for x in qsa_exclude | QSA_KNOWN_ATTRS
+            if x.lower() != x and x.lower() not in qsa_exclude
+        }
         if orig_name.lower() in qsa_lower:
             new_name = qsa_lower[orig_name.lower()]
             count_diff_chars = len([1 for a, b in zip(new_name, orig_name) if a != b])
@@ -359,7 +363,9 @@ class ASTPythonBase(object):
         """Return if this instance can process given tagname."""
         return False
 
-    def generate(self, break_mode=False, include_pass=True, **kwargs) -> Generator[Tuple[str, str], None, None]:
+    def generate(
+        self, break_mode=False, include_pass=True, **kwargs
+    ) -> Generator[Tuple[str, str], None, None]:
         """Generate Python code."""
         yield "type", "value"
 
@@ -469,7 +475,9 @@ class Source(ASTPython):
         self.locals = set()
         self.locals_transform = {}
 
-    def generate(self, break_mode=False, include_pass=True, declare_identifiers: Set = None, **kwargs):
+    def generate(
+        self, break_mode=False, include_pass=True, declare_identifiers: Set = None, **kwargs
+    ):
         """Generate python code."""
         elems = 0
         after_lines = []
@@ -486,7 +494,9 @@ class Source(ASTPython):
                 yield "line", ""
             prev_ast_type = ast_type
 
-            for dtype, data in ast_python.generate(break_mode=break_mode, plusplus_as_instruction=True):
+            for dtype, data in ast_python.generate(
+                break_mode=break_mode, plusplus_as_instruction=True
+            ):
                 if dtype == "line+1":
                     after_lines.append(data)
                     continue
@@ -776,7 +786,9 @@ class TryCatch(ASTPython):
         for ident in self.elem.findall("Identifier"):
             ident.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(ident, parent=self).generate(isolate=False, is_member=True):
+            for dtype, data in parse_ast(ident, parent=self).generate(
+                isolate=False, is_member=True
+            ):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -1199,7 +1211,9 @@ class With(ASTPython):
         yield "line", " #WITH_START"
         source = cast(Source, parse_ast(source_elem, parent=self))
         source.locals.add(" ".join(var_expr))
-        source.locals_transform = {x: "%s.%s" % (" ".join(var_expr), x) for x in With.python_keywords}
+        source.locals_transform = {
+            x: "%s.%s" % (" ".join(var_expr), x) for x in With.python_keywords
+        }
 
         for obj in source.generate(break_mode=True):
             obj_ = None
@@ -1214,7 +1228,9 @@ class With(ASTPython):
                 if obj_1.startswith(t):
                     obj_1 = "%s.%s" % (" ".join(var_expr), obj_1)
                 elif obj_1.startswith("connect(%s" % t):
-                    obj_1 = obj_1.replace("connect(%s" % t, "connect(%s.%s" % (" ".join(var_expr), t))
+                    obj_1 = obj_1.replace(
+                        "connect(%s" % t, "connect(%s.%s" % (" ".join(var_expr), t)
+                    )
                 elif obj_1.find(".") == -1 and obj_1.find(t) > -1:
                     obj_1 = obj_1.replace(t, "%s.%s" % (" ".join(var_expr), t))
 
@@ -1297,7 +1313,9 @@ class InstructionUpdate(ASTPython):
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False, is_member=(n == 0)):
+            for dtype, data in parse_ast(arg, parent=self).generate(
+                isolate=False, is_member=(n == 0)
+            ):
                 if dtype == "expr":
                     if data is None:
                         raise ValueError(ElementTree.tostring(arg))
@@ -1518,7 +1536,9 @@ class Member(ASTPython):
                     classname = full_fun_name.split("_")[0]
 
                 arguments[2] = arguments[2][2:]
-                arguments[0:2] = ['super(getattr(self._module, "%s"), %s)' % (classname, ".".join(arguments[0:2]))]
+                arguments[0:2] = [
+                    'super(getattr(self._module, "%s"), %s)' % (classname, ".".join(arguments[0:2]))
+                ]
 
         # Lectura del self.iface.__init() al nuevo estilo yeboyebo
         if len(arguments) >= 2 and arguments[0:1] == ["_i"] and arguments[1].startswith("__"):
@@ -1546,7 +1566,9 @@ class Member(ASTPython):
                 else:
                     classname = full_fun_name.split("_")[0]
                 arguments[1] = arguments[1][2:]
-                arguments[0:1] = ['super(getattr(self._module, "%s"), %s)' % (classname, ".".join(arguments[0:1]))]
+                arguments[0:1] = [
+                    'super(getattr(self._module, "%s"), %s)' % (classname, ".".join(arguments[0:1]))
+                ]
 
         replace_members = [
             "toString()",
@@ -1589,7 +1611,9 @@ class Member(ASTPython):
                     elif member == "right":
                         value = arg[6:]
                         value = value[: len(value) - 1]
-                        arguments = ["%s[(len(%s) - (%s)):]" % (".".join(part1), ".".join(part1), value)] + part2
+                        arguments = [
+                            "%s[(len(%s) - (%s)):]" % (".".join(part1), ".".join(part1), value)
+                        ] + part2
                     elif member == "substring":
                         value = arg[10:]
                         value = value[: len(value) - 1]
@@ -1599,7 +1623,9 @@ class Member(ASTPython):
                         value = arg[4:]
                         value = value[: len(value) - 1]
                         if value.find(",") > -1:
-                            if (value.find("(") < value.find(",")) and value.find(")") < value.find(","):
+                            if (value.find("(") < value.find(",")) and value.find(")") < value.find(
+                                ","
+                            ):
                                 i, k = value.split(",")
                             # if (len(value.split(",")) == 2 and value.find("(") == -1) or value.find("(") < value.find(","):
                             #    i, l = value.split(",")
@@ -1667,7 +1693,9 @@ class Member(ASTPython):
                     elif member == "attributeValue":
                         value = arg[15:]
                         value = value[: len(value) - 1]
-                        arguments = ["%s.attributes().namedItem(%s).nodeValue()" % (".".join(part1), value)] + part2
+                        arguments = [
+                            "%s.attributes().namedItem(%s).nodeValue()" % (".".join(part1), value)
+                        ] + part2
                     elif member == "replace":
                         value = arg[8:-1]
                         part_list = []
@@ -1679,7 +1707,10 @@ class Member(ASTPython):
                             if part_list[1] == ' "':
                                 part_list[1] = '","'
                         if part_list[0].find("re.compile") > -1:
-                            arguments = ["%s.sub(%s,%s)" % (part_list[0], ",".join(part_list[1:]), ".".join(part1))] + part2
+                            arguments = [
+                                "%s.sub(%s,%s)"
+                                % (part_list[0], ",".join(part_list[1:]), ".".join(part1))
+                            ] + part2
                         else:
                             if not part2:
                                 if ".".join(part1) and "replace(" in " ".join(arguments[0:1]):
@@ -1691,7 +1722,9 @@ class Member(ASTPython):
 
                                     rep_extra = arguments[2:]
                                     # print(arguments)
-                                    arguments = ["qsa.replace(%s, %s)" % (rep_str, rep_from_to)] + rep_extra
+                                    arguments = [
+                                        "qsa.replace(%s, %s)" % (rep_str, rep_from_to)
+                                    ] + rep_extra
                                     # print(arguments)
                                     # print("*")
 
@@ -1718,7 +1751,9 @@ class ArrayMember(ASTPython):
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False, is_member=(n == 0)):
+            for dtype, data in parse_ast(arg, parent=self).generate(
+                isolate=False, is_member=(n == 0)
+            ):
                 # if data.find(".") > -1:
                 #    l = data.split(".")
                 #    data = "%s['%s']" % (l[0], l[1])
@@ -2293,7 +2328,9 @@ def parse_ast(elem, parent=None) -> ASTPythonBase:
     return elemparser
 
 
-def file_template(ast: Any, import_refs: Dict[str, Tuple[str, str]] = {}) -> Generator[Tuple[Any, Any], Any, None]:
+def file_template(
+    ast: Any, import_refs: Dict[str, Tuple[str, str]] = {}
+) -> Generator[Tuple[Any, Any], Any, None]:
     """Create a new file template."""
     yield "line", "# -*- coding: utf-8 -*-"
     yield "line", "from typing import TYPE_CHECKING"
@@ -2312,7 +2349,9 @@ def file_template(ast: Any, import_refs: Dict[str, Tuple[str, str]] = {}) -> Gen
         cls.set("parent_", ast)
         sourceclasses.append(cls)
 
-    mainclass = ElementTree.SubElement(sourceclasses, "Class", name="FormInternalObj", extends="qsa.FormDBWidget")
+    mainclass = ElementTree.SubElement(
+        sourceclasses, "Class", name="FormInternalObj", extends="qsa.FormDBWidget"
+    )
     mainsource = ElementTree.SubElement(mainclass, "Source")
 
     constructor = ElementTree.SubElement(mainsource, "Function", name="_class_init")
@@ -2416,7 +2455,9 @@ def pythonize(filename, destfilename, debugname=None) -> None:
     write_python_file(f1, ast)
     f1.close()
     if black:
-        new_code = black.format_file_contents(Path(destfilename).read_text(), fast=True, mode=BLACK_FILEMODE)
+        new_code = black.format_file_contents(
+            Path(destfilename).read_text(), fast=True, mode=BLACK_FILEMODE
+        )
         f1 = open(destfilename, "w", encoding="UTF-8")
         f1.write(new_code)
         f1.close()
@@ -2449,11 +2490,30 @@ def pythonize2(root_ast: ElementTree.Element, known_refs: Dict[str, Tuple[str, s
 def main() -> None:
     """Run main program."""
     parser = OptionParser()
-    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
+    parser.add_option(
+        "-q",
+        "--quiet",
+        action="store_false",
+        dest="verbose",
+        default=True,
+        help="don't print status messages to stdout",
+    )
 
-    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
+    parser.add_option(
+        "--optdebug",
+        action="store_true",
+        dest="optdebug",
+        default=False,
+        help="debug optparse module",
+    )
 
-    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
+    parser.add_option(
+        "--debug",
+        action="store_true",
+        dest="debug",
+        default=False,
+        help="prints lots of useless messages",
+    )
 
     parser.add_option("--path", dest="storepath", default=None, help="store PY results in PATH")
 

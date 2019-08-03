@@ -51,7 +51,9 @@ class AQS(object):
 
     @staticmethod
     def ColorDialog_getColor(
-        color: Optional[Union[int, str, QColor]] = None, parent: Optional["QWidget"] = None, name: Optional[str] = None
+        color: Optional[Union[int, str, QColor]] = None,
+        parent: Optional["QWidget"] = None,
+        name: Optional[str] = None,
     ) -> Any:
         """
         Display the color selection dialog.
@@ -74,7 +76,9 @@ class AQS(object):
         return cL.getColor()
 
     @classmethod
-    def toXml(cls, obj_: "QWidget", include_children: bool = True, include_complex_types: bool = False):
+    def toXml(
+        cls, obj_: "QWidget", include_children: bool = True, include_complex_types: bool = False
+    ):
         """
         Convert an object to xml.
 

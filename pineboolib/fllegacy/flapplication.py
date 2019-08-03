@@ -212,7 +212,9 @@ class FLApplication(QtCore.QObject):
                 if ke.key() == QtCore.Qt.Key_Q and (ke.state() == QtCore.Qt.Key_Control):
                     self.generalExit()
                     return True
-                if ke.key() == QtCore.Qt.Key_W and (ke.state() in (QtCore.Qt.Key_Control, QtCore.Qt.Key_Alt)):
+                if ke.key() == QtCore.Qt.Key_W and (
+                    ke.state() in (QtCore.Qt.Key_Control, QtCore.Qt.Key_Alt)
+                ):
                     print("????")
                     return True
                 if ke.key() == QtCore.Qt.Key_Escape:
@@ -299,13 +301,19 @@ class FLApplication(QtCore.QObject):
         self.window_menu = QMenu(self.container_)
         self.window_menu.setObjectName("windowMenu")
 
-        self.window_cascade_action = QAction(QIcon(AQS.pixmap_fromMimeSource("cascada.png")), self.tr("Cascada"), self.container_)
+        self.window_cascade_action = QAction(
+            QIcon(AQS.pixmap_fromMimeSource("cascada.png")), self.tr("Cascada"), self.container_
+        )
         self.window_menu.addAction(self.window_cascade_action)
 
-        self.window_tile_action = QAction(QIcon(AQS.pixmap_fromMimeSource("mosaico.png")), self.tr("Mosaico"), self.container_)
+        self.window_tile_action = QAction(
+            QIcon(AQS.pixmap_fromMimeSource("mosaico.png")), self.tr("Mosaico"), self.container_
+        )
         self.window_menu.addAction(self.window_tile_action)
 
-        self.window_close_action = QAction(QIcon(AQS.pixmap_fromMimeSource("cerrar.png")), self.tr("Cerrar"), self.container_)
+        self.window_close_action = QAction(
+            QIcon(AQS.pixmap_fromMimeSource("cerrar.png")), self.tr("Cerrar"), self.container_
+        )
         self.window_menu.addAction(self.window_close_action)
 
         self.modules_menu = QMenu(self.container_)
@@ -316,7 +324,9 @@ class FLApplication(QtCore.QObject):
         w.setObjectName("widgetContainer")
         vl = QVBoxLayout(w)
 
-        self.exit_button = QPushButton(QIcon(AQS.pixmap_fromMimeSource("exit.png")), self.tr("Salir"), w)
+        self.exit_button = QPushButton(
+            QIcon(AQS.pixmap_fromMimeSource("exit.png")), self.tr("Salir"), w
+        )
         self.exit_button.setObjectName("pbSalir")
         self.exit_button.setShortcut(QKeySequence(self.tr("Ctrl+Q")))
         self.exit_button.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed))
@@ -451,9 +461,15 @@ class FLApplication(QtCore.QObject):
                 view_back.show()
 
         self.setCaptionMainWidget(None)
-        descript_area = self.db().managerModules().idAreaToDescription(self.db().managerModules().activeIdArea())
+        descript_area = (
+            self.db()
+            .managerModules()
+            .idAreaToDescription(self.db().managerModules().activeIdArea())
+        )
         w.setWindowIcon(QIcon(self.db().managerModules().iconModule(w.objectName())))
-        self.tool_box_.setCurrentIndex(self.tool_box_.indexOf(self.tool_box_.findChild(QToolBar, descript_area)))
+        self.tool_box_.setCurrentIndex(
+            self.tool_box_.indexOf(self.tool_box_.findChild(QToolBar, descript_area))
+        )
 
     def setMainWidget(self, w) -> None:
         """Set mainWidget."""
@@ -569,12 +585,17 @@ class FLApplication(QtCore.QObject):
                 if mod == "sys":
                     if config.value("application/isDebuggerMode", False):
 
-                        descript_module = "%s: %s" % (str(chr(c)), self.tr("Carga Estática desde Disco Duro"))
+                        descript_module = "%s: %s" % (
+                            str(chr(c)),
+                            self.tr("Carga Estática desde Disco Duro"),
+                        )
                         new_module_action = QAction(new_area_bar)
                         new_module_action.setObjectName("StaticLoadAction")
                         new_module_action.setText(self.tr(descript_module))
                         new_module_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
-                        new_module_action.setIcon(QIcon(AQS.pixmap_fromMimeSource("folder_update.png")))
+                        new_module_action.setIcon(
+                            QIcon(AQS.pixmap_fromMimeSource("folder_update.png"))
+                        )
                         new_area_bar.addAction(new_module_action)
                         new_module_action.triggered.connect(self.staticLoaderSetup)
                         ag.addAction(new_module_action)
@@ -591,7 +612,10 @@ class FLApplication(QtCore.QObject):
                         ag.addAction(new_module_action)
                         c += 1
 
-                        descript_module = "%s: %s" % (str(chr(c)), self.tr("Mostrar Consola de mensajes"))
+                        descript_module = "%s: %s" % (
+                            str(chr(c)),
+                            self.tr("Mostrar Consola de mensajes"),
+                        )
                         new_module_action = QAction(new_area_bar)
                         new_module_action.setObjectName("shConsoleAction")
                         new_module_action.setText(self.tr(descript_module))
@@ -602,7 +626,10 @@ class FLApplication(QtCore.QObject):
                         ag.addAction(new_module_action)
                         c += 1
 
-                descript_module = "%s: %s" % (str(chr(c)), self.db().managerModules().idModuleToDescription(mod))
+                descript_module = "%s: %s" % (
+                    str(chr(c)),
+                    self.db().managerModules().idModuleToDescription(mod),
+                )
                 new_module_action = QAction(new_area_bar)
                 new_module_action.setObjectName(mod)
                 new_module_action.setText(self.tr(descript_module))
@@ -1116,17 +1143,27 @@ class FLApplication(QtCore.QObject):
 
         # FIXME: main_form_name Belongs to loader.main; will be removed
         if project.main_form_name != "eneboo_mdi":
-            self.mainWidget().setWindowTitle("Pineboo %s - %s" % (project.version, self.last_text_caption_))
+            self.mainWidget().setWindowTitle(
+                "Pineboo %s - %s" % (project.version, self.last_text_caption_)
+            )
 
         else:
             if self.main_widget_ is None:
                 raise Exception("self.main_widget_ is empty!")
 
-            descript_area = self.db().managerModules().idAreaToDescription(self.db().managerModules().activeIdArea())
-            descript_module = self.db().managerModules().idModuleToDescription(self.main_widget_.objectName())
+            descript_area = (
+                self.db()
+                .managerModules()
+                .idAreaToDescription(self.db().managerModules().activeIdArea())
+            )
+            descript_module = (
+                self.db().managerModules().idModuleToDescription(self.main_widget_.objectName())
+            )
 
             if descript_area:
-                self.main_widget_.setWindowTitle("%s - %s - %s" % (self.last_text_caption_, descript_area, descript_module))
+                self.main_widget_.setWindowTitle(
+                    "%s - %s - %s" % (self.last_text_caption_, descript_area, descript_module)
+                )
 
     @decorators.NotImplementedWarn
     def setNotExit(self, b):
@@ -1153,7 +1190,9 @@ class FLApplication(QtCore.QObject):
         self.script_entry_function_ = script_enttry_function
 
     @decorators.NotImplementedWarn
-    def setDatabaseLockDetection(self, on, msec_lapsus, lim_checks, show_warn, msg_warn, connection_name):
+    def setDatabaseLockDetection(
+        self, on, msec_lapsus, lim_checks, show_warn, msg_warn, connection_name
+    ):
         """Not implemented."""
         pass
 
@@ -1182,7 +1221,9 @@ class FLApplication(QtCore.QObject):
             raise Exception("self.container_ and self.main_widget are empty!")
 
         if not mw.isHidden():
-            wi.showText(self.mainWidget().mapToGlobal(QtCore.QPoint(mw.width() * 2, 0)), msg_warn, mw)
+            wi.showText(
+                self.mainWidget().mapToGlobal(QtCore.QPoint(mw.width() * 2, 0)), msg_warn, mw
+            )
             QtCore.QTimer.singleShot(4000, wi.hideText)
             self.processEvents()
 
@@ -1418,7 +1459,11 @@ class FLApplication(QtCore.QObject):
             return True
 
         ret = QMessageBox.information(
-            self.mainWidget(), self.tr("Salir ..."), self.tr("¿ Quiere salir de la aplicación ?"), QMessageBox.Yes, QMessageBox.No
+            self.mainWidget(),
+            self.tr("Salir ..."),
+            self.tr("¿ Quiere salir de la aplicación ?"),
+            QMessageBox.Yes,
+            QMessageBox.No,
         )
         return ret == QMessageBox.Yes
 
@@ -1444,7 +1489,11 @@ class FLApplication(QtCore.QObject):
                             it.setDisabled(True)
             else:
                 for it in _list:
-                    if it != self.container_ and it.isVisible() and it.objectName() in self._dict_main_widgets.keys():
+                    if (
+                        it != self.container_
+                        and it.isVisible()
+                        and it.objectName() in self._dict_main_widgets.keys()
+                    ):
                         windows_opened.append(it.objectName())
 
             settings.set_value("windowsOpened/Main", windows_opened)
@@ -1497,7 +1546,9 @@ class FLApplication(QtCore.QObject):
         if self.container_:
             r = QtCore.QRect(self.container_.pos(), self.container_.size())
             self._multi_lang_enabled = settings.value("MultiLang/Enabled", False)
-            self._multi_lang_id = settings.value("MultiLang/LangId", QtCore.QLocale().name()[:2].upper())
+            self._multi_lang_id = settings.value(
+                "MultiLang/LangId", QtCore.QLocale().name()[:2].upper()
+            )
 
             if not settings.value("Geometry/MainWindowMaximized", False):
                 r.setX(settings.value("Geometry/MainWindowX", r.x()))
@@ -1512,7 +1563,9 @@ class FLApplication(QtCore.QObject):
                     self.container_.move(r.topLeft())
 
             else:
-                self.container_.resize(QApplication.desktop().availableGeometry(self.container_).size())
+                self.container_.resize(
+                    QApplication.desktop().availableGeometry(self.container_).size()
+                )
 
             active_id_module = self.db().managerModules().activeIdModule()
 
@@ -1590,7 +1643,9 @@ class FLApplication(QtCore.QObject):
             if (inter.width() * inter.height()) > (r.width() * r.height() / 20):
                 self.main_widget_.move(r.topLeft())
             else:
-                self.main_widget_.resize(QApplication.desktop().availableGeometry(self.main_widget_).size())
+                self.main_widget_.resize(
+                    QApplication.desktop().availableGeometry(self.main_widget_).size()
+                )
 
     def loadScripts(self) -> None:
         """Load scripts for all modules."""

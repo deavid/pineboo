@@ -101,7 +101,9 @@ class Date(object):
 
         @param yyyy. Año a setear
         """
-        self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (year, self.date_.toString("MM"), self.date_.toString("dd")), "yyyy-MM-dd")
+        self.date_ = QtCore.QDate.fromString(
+            "%s-%s-%s" % (year, self.date_.toString("MM"), self.date_.toString("dd")), "yyyy-MM-dd"
+        )
 
         return self
 
@@ -125,7 +127,9 @@ class Date(object):
         if len(mm) == 1:
             mm = "0%s" % mm
 
-        self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (self.date_.toString("yyyy"), mm, self.date_.toString("dd")), "yyyy-MM-dd")
+        self.date_ = QtCore.QDate.fromString(
+            "%s-%s-%s" % (self.date_.toString("yyyy"), mm, self.date_.toString("dd")), "yyyy-MM-dd"
+        )
 
         return self
 
@@ -149,7 +153,9 @@ class Date(object):
         if len(str(dd)) == 1:
             dd = "0%s" % dd
 
-        self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (self.date_.toString("yyyy"), self.date_.toString("mm"), dd), "yyyy-MM-dd")
+        self.date_ = QtCore.QDate.fromString(
+            "%s-%s-%s" % (self.date_.toString("yyyy"), self.date_.toString("mm"), dd), "yyyy-MM-dd"
+        )
 
         return self
 

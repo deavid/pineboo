@@ -54,7 +54,9 @@ def startup(enable_gui: bool = None) -> None:
         sys.exit(0)
 
 
-def init_logging(loglevel: int = logging.INFO, logtime: bool = False, trace_loggers: List[str] = []) -> None:
+def init_logging(
+    loglevel: int = logging.INFO, logtime: bool = False, trace_loggers: List[str] = []
+) -> None:
     """Initialize pineboo logging."""
     # ---- LOGGING -----
     log_format = "%(levelname)s: %(module)s: %(message)s"
@@ -136,7 +138,12 @@ def setup_gui(app: QtCore.QCoreApplication, options: Values) -> None:
     from pineboolib.application.utils.mobilemode import is_mobile_mode
     from PyQt5 import QtGui  # type: ignore
 
-    noto_fonts = ["NotoSans-BoldItalic.ttf", "NotoSans-Bold.ttf", "NotoSans-Italic.ttf", "NotoSans-Regular.ttf"]
+    noto_fonts = [
+        "NotoSans-BoldItalic.ttf",
+        "NotoSans-Bold.ttf",
+        "NotoSans-Italic.ttf",
+        "NotoSans-Regular.ttf",
+    ]
     for fontfile in noto_fonts:
         QtGui.QFontDatabase.addApplicationFont(filedir("../share/fonts/Noto_Sans", fontfile))
 
@@ -245,7 +252,9 @@ def exec_main(options: Values) -> int:
     if options.trace_debug:
         from pineboolib.core.utils.utils_base import traceit
 
-        sys.settrace(traceit)  # noqa: DUO111 "sys" function found that could lead to arbitrary code execution
+        # "sys.settrace" function could lead to arbitrary code execution
+        sys.settrace(traceit)  # noqa: DUO111
+
     if options.trace_signals:
         from .utils import monkey_patch_connect
 
@@ -268,10 +277,16 @@ def exec_main(options: Values) -> int:
         init_gui()
 
     if _DGI.useDesktop() and not options.enable_gui:
-        logger.info("Selected DGI <%s> is not compatible with <pineboo-core>. Use <pineboo> instead" % options.dgi)
+        logger.info(
+            "Selected DGI <%s> is not compatible with <pineboo-core>. Use <pineboo> instead"
+            % options.dgi
+        )
 
     if not _DGI.useDesktop() and options.enable_gui:
-        logger.info("Selected DGI <%s> does not need graphical interface. Use <pineboo-core> for better results" % options.dgi)
+        logger.info(
+            "Selected DGI <%s> does not need graphical interface. Use <pineboo-core> for better results"
+            % options.dgi
+        )
 
     if not _DGI.useMLDefault():
         # When a particular DGI doesn't want the standard init, we stop loading here
@@ -310,7 +325,10 @@ def exec_main(options: Values) -> int:
         import importlib  # FIXME: Delete dynamic import and move this code between Project and DGI plugins
 
         project.main_form = (
-            importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (project.main_form_name, project.main_form_name))
+            importlib.import_module(
+                "pineboolib.plugins.mainform.%s.%s"
+                % (project.main_form_name, project.main_form_name)
+            )
             if _DGI.localDesktop()
             else _DGI.mainForm()
         )
@@ -357,5 +375,7 @@ def exec_main(options: Values) -> int:
 
     from .init_project import init_project
 
-    ret = init_project(_DGI, options, project, project.main_form if _DGI.useDesktop() else None, project.app)
+    ret = init_project(
+        _DGI, options, project, project.main_form if _DGI.useDesktop() else None, project.app
+    )
     return ret

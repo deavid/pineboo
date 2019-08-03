@@ -12,9 +12,9 @@ import os.path
 import shutil
 import hashlib
 import traceback
-from PyQt5.QtGui import QPixmap  # type: ignore
-from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir, pyqtSignal  # type: ignore
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest  # type: ignore
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir, pyqtSignal
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from pineboolib.core import decorators
 from typing import Optional, Union, Any, List, cast
 from types import FrameType
@@ -81,19 +81,35 @@ class DefFun:
     def __str__(self) -> Any:
         """Emulate call function... when converted to string."""
         if self.realfun:
-            logger.debug("%r: Redirigiendo Propiedad a función %r", self.parent.__class__.__name__, self.funname)
+            logger.debug(
+                "%r: Redirigiendo Propiedad a función %r",
+                self.parent.__class__.__name__,
+                self.funname,
+            )
             return self.realfun()
 
-        logger.debug("WARN: %r: Propiedad no implementada %r", self.parent.__class__.__name__, self.funname)
+        logger.debug(
+            "WARN: %r: Propiedad no implementada %r", self.parent.__class__.__name__, self.funname
+        )
         return 0
 
     def __call__(self, *args: Any) -> Any:
         """Emulate call function."""
         if self.realfun:
-            logger.debug("%r: Redirigiendo Llamada a función %s %s", self.parent.__class__.__name__, self.funname, args)
+            logger.debug(
+                "%r: Redirigiendo Llamada a función %s %s",
+                self.parent.__class__.__name__,
+                self.funname,
+                args,
+            )
             return self.realfun(*args)
 
-        logger.debug("%r: Método no implementado %s %s", self.parent.__class__.__name__, self.funname.encode("UTF-8"), args)
+        logger.debug(
+            "%r: Método no implementado %s %s",
+            self.parent.__class__.__name__,
+            self.funname.encode("UTF-8"),
+            args,
+        )
         return None
 
 
@@ -135,12 +151,14 @@ class TraceBlock:
 
     def __enter__(self) -> Callable[[FrameType, str, Any], Any]:
         """Create tracing context on enter."""
-        sys.settrace(traceit)  # noqa: DUO111 "sys" function found that could lead to arbitrary code execution
+        # NOTE: "sys.systrace" function could lead to arbitrary code execution
+        sys.settrace(traceit)  # noqa: DUO111
         return traceit
 
     def __exit__(self, type: Any, value: Any, traceback: Any) -> None:
         """Remove tracing context on exit."""
-        sys.settrace(None)  # noqa: DUO111 "sys" function found that could lead to arbitrary code execution
+        # NOTE: "sys.systrace" function could lead to arbitrary code execution
+        sys.settrace(None)  # noqa: DUO111
 
 
 def trace_function(f: Callable) -> Callable:
@@ -366,7 +384,9 @@ class StructMyDict(dict):
 def version_check(mod_name: str, mod_ver: str, min_ver: str) -> None:
     """Compare two version numbers and raise a warning if "minver" is not met."""
     if version_normalize(mod_ver) < version_normalize(min_ver):
-        logger.warning("La version de <%s> es %s. La mínima recomendada es %s.", mod_name, mod_ver, min_ver)
+        logger.warning(
+            "La version de <%s> es %s. La mínima recomendada es %s.", mod_name, mod_ver, min_ver
+        )
 
 
 def version_normalize(v: str) -> List[int]:
@@ -414,7 +434,9 @@ def load2xml(form_path_or_str: str) -> ElementTree:
             parser = ET.XMLParser(encoding="ISO-8859-15")
             return ET.parse(file_ptr or form_path_or_str, parser)
         except Exception:
-            logger.exception("Error cargando UI después de intentar con UTF8 e ISO \n%s", form_path_or_str)
+            logger.exception(
+                "Error cargando UI después de intentar con UTF8 e ISO \n%s", form_path_or_str
+            )
             raise
 
 
@@ -543,7 +565,11 @@ def format_double(d: Union[int, str, float], part_integer: int, part_decimal: in
     str_integer = format_int(str_integer, part_integer)
 
     # Fixme: Que pasa cuando la parte entera sobrepasa el limite, se coge el maximo valor o
-    ret_ = "%s%s%s" % (str_integer, decimal_separator if found_comma else "", str_decimal if part_decimal > 0 else "")
+    ret_ = "%s%s%s" % (
+        str_integer,
+        decimal_separator if found_comma else "",
+        str_decimal if part_decimal > 0 else "",
+    )
     return ret_
 
 

@@ -296,7 +296,10 @@ class FLSmtpClient(QtCore.QObject):
                 s.login(self.user_, self.password_)
 
                 self.changeStatus(
-                    status_msg, State.WaitingForAuthLogin if self.auth_method_ == State.SendAuthLogin else State.WaitingForAuthPlain
+                    status_msg,
+                    State.WaitingForAuthLogin
+                    if self.auth_method_ == State.SendAuthLogin
+                    else State.WaitingForAuthPlain,
                 )
 
             s.sendmail(self.from_value_, self.to_, composed)
@@ -337,7 +340,9 @@ class FLSmtpClient(QtCore.QObject):
             self.changeStatus(status_msg, State.ClientError)
             return False
         except socket.gaierror:
-            status_msg = "Servidor SMTP no encontrado.Verifique el nombre de host de su servidor SMTP."
+            status_msg = (
+                "Servidor SMTP no encontrado.Verifique el nombre de host de su servidor SMTP."
+            )
             self.changeStatus(status_msg, State.SmtpError)
             return False
         except Exception as e:

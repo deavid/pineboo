@@ -256,7 +256,9 @@ class FLFormDB(QDialog):
     def initScript(self):
         if self._loaded:
             if not getattr(self.widget, "iface", None):
-                self.iface = self.widget  # Es posible que no tenga ifaceCtx, así hacemos que sea polivalente
+                self.iface = (
+                    self.widget
+                )  # Es posible que no tenga ifaceCtx, así hacemos que sea polivalente
 
             if self.widget:
                 self.widget.clear_connections()
@@ -269,7 +271,9 @@ class FLFormDB(QDialog):
                     from pineboolib.core.error_manager import error_manager
                     from pineboolib.application import project
 
-                    aqApp.msgBoxWarning(error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI)
+                    aqApp.msgBoxWarning(
+                        error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI
+                    )
 
             return True
 
@@ -454,9 +458,14 @@ class FLFormDB(QDialog):
     def saveSnapShot(self, path_file=None) -> None:
         if not path_file:
 
-            tmp_file = "%s/snap_shot_%s.png" % (aqApp.tmp_dir(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
+            tmp_file = "%s/snap_shot_%s.png" % (
+                aqApp.tmp_dir(),
+                QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"),
+            )
 
-            ret = QFileDialog.getSaveFileName(QApplication.activeWindow(), "Pineboo", tmp_file, "PNG(*.png)")
+            ret = QFileDialog.getSaveFileName(
+                QApplication.activeWindow(), "Pineboo", tmp_file, "PNG(*.png)"
+            )
             path_file = ret[0] if ret else None
 
         if path_file:
@@ -498,7 +507,9 @@ class FLFormDB(QDialog):
     Devuelve si se ha aceptado el formulario
     """
 
-    def accepted(self) -> bool:  # type: ignore   # FIXME: QDialog.accepted() is a signal. We're shadowing it.
+    def accepted(
+        self
+    ) -> bool:  # type: ignore   # FIXME: QDialog.accepted() is a signal. We're shadowing it.
         return self.accepted_
 
     """
@@ -702,7 +713,9 @@ class FLFormDB(QDialog):
         #    self.layout = None
         # Limpiamos la toolbar
 
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0)
+        )
         sizePolicy.setHeightForWidth(True)
 
         pbSize = self.iconSize
@@ -728,7 +741,9 @@ class FLFormDB(QDialog):
                 push_button_snapshot.setSizePolicy(sizePolicy)
                 push_button_snapshot.setMinimumSize(pbSize)
                 push_button_snapshot.setMaximumSize(pbSize)
-                push_button_snapshot.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-paste.png")))
+                push_button_snapshot.setIcon(
+                    QtGui.QIcon(filedir("../share/icons", "gtk-paste.png"))
+                )
                 push_button_snapshot.setShortcut(QKeySequence(self.tr("F8")))
                 push_button_snapshot.setWhatsThis("Capturar pantalla(F8)")
                 push_button_snapshot.setToolTip("Capturar pantalla(F8)")
@@ -736,7 +751,9 @@ class FLFormDB(QDialog):
                 self.bottomToolbar.layout().addWidget(push_button_snapshot)
                 push_button_snapshot.clicked.connect(self.saveSnapShot)
 
-            spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+            spacer = QtWidgets.QSpacerItem(
+                20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            )
             self.bottomToolbar.layout().addItem(spacer)
 
         if not self.pushButtonCancel:
@@ -843,7 +860,11 @@ class FLFormDB(QDialog):
             self.script = None
         except Exception:
 
-            self.logger.error("El FLFormDB %s no se cerró correctamente:\n%s", self.formName(), traceback.format_exc())
+            self.logger.error(
+                "El FLFormDB %s no se cerró correctamente:\n%s",
+                self.formName(),
+                traceback.format_exc(),
+            )
         from PyQt5.QtWidgets import QMdiSubWindow
 
         if isinstance(self.parent(), QMdiSubWindow):

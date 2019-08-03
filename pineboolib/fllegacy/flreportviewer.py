@@ -317,7 +317,10 @@ class FLReportViewer(QtWidgets.QWidget):
 
         util = FLUtil()
         fileName = QFileDialog.getSaveFileName(
-            self, util.translate("app", "Exportar a CSV"), "", util.translate("app", "Fichero CSV (*.csv *.txt)")
+            self,
+            util.translate("app", "Exportar a CSV"),
+            "",
+            util.translate("app", "Fichero CSV (*.csv *.txt)"),
         )
 
         if not fileName or fileName == "":
@@ -329,7 +332,9 @@ class FLReportViewer(QtWidgets.QWidget):
         q = MessageBox.question(
             self,
             util.translate("app", "Sobreescribir {}").format(fileName),
-            util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+            util.translate(
+                "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+            ).format(fileName),
             util.translate("app", "&Sí"),
             util.translate("app", "&No"),
             "",
@@ -363,7 +368,10 @@ class FLReportViewer(QtWidgets.QWidget):
 
         util = FLUtil()
         fileName = QFileDialog.getSaveFileName(
-            self, util.translate("app", "Exportar a PDF"), "", util.translate("app", "Fichero PDF (*.pdf)")
+            self,
+            util.translate("app", "Exportar a PDF"),
+            "",
+            util.translate("app", "Fichero PDF (*.pdf)"),
         )
 
         if fileName[0] == "":
@@ -377,7 +385,9 @@ class FLReportViewer(QtWidgets.QWidget):
             q = MessageBox.question(
                 self,
                 util.translate("app", "Sobreescribir {}").format(fileName),
-                util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+                util.translate(
+                    "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+                ).format(fileName),
                 util.translate("app", "&Sí"),
                 util.translate("app", "&No"),
                 "",
@@ -412,7 +422,9 @@ class FLReportViewer(QtWidgets.QWidget):
         q = MessageBox.question(
             self,
             util.translate("app", "Sobreescribir {}").format(fileName),
-            util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+            util.translate(
+                "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+            ).format(fileName),
             util.translate("app", "&Sí"),
             util.translate("app", "&No"),
             "",
@@ -454,7 +466,9 @@ class FLReportViewer(QtWidgets.QWidget):
         if show:
             self.rptViewer_.hide()
             wrv.setCentralWidget(self.initCentralWidget_)
-            self.ui["leDocumento"].setText("doc-" + str(QtCore.QDateTime.currentDateTime()).replace(":", ",").replace(" ", ""))
+            self.ui["leDocumento"].setText(
+                "doc-" + str(QtCore.QDateTime.currentDateTime()).replace(":", ",").replace(" ", "")
+            )
             self.ui_["frEMail"].show()
             self.initCentralWidget_.show()
         else:
@@ -484,7 +498,9 @@ class FLReportViewer(QtWidgets.QWidget):
             q = MessageBox.question(
                 self,
                 util.translate("app", "Sobreescribir {}").format(fileName),
-                util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+                util.translate(
+                    "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+                ).format(fileName),
                 util.translate("app", "&Sí"),
                 util.translate("app", "&No"),
                 "",

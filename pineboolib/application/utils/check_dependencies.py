@@ -79,7 +79,9 @@ def check_dependencies(dict_: Dict[str, str], exit: bool = True) -> bool:
                 if project.DGI.useDesktop() and project.DGI.localDesktop():
                     from pineboolib.qt3_widgets.messagebox import MessageBox
 
-                    MessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, MessageBox.Ok)
+                    MessageBox.warning(
+                        None, "Pineboo - Dependencias Incumplidas -", msg, MessageBox.Ok
+                    )
 
                 if not is_deployed():
                     sys.exit(32)

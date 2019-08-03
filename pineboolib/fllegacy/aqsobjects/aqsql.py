@@ -42,7 +42,12 @@ class AQSql(object):
 
     @classmethod
     def update(
-        self, table_or_cursor: Union[str, "FLSqlCursor"], fields: List[str], values: List[Any], where: str = "", conn: str = "default"
+        self,
+        table_or_cursor: Union[str, "FLSqlCursor"],
+        fields: List[str],
+        values: List[Any],
+        where: str = "",
+        conn: str = "default",
     ):
         """Update a set of cursor records with new values."""
 
@@ -86,7 +91,12 @@ class AQSql(object):
 
     @classmethod
     def insert(
-        self, table_or_cursor: Union[str, "FLSqlCursor"], fields: List[str], values: List[Any], where: str = "", conn: str = "default"
+        self,
+        table_or_cursor: Union[str, "FLSqlCursor"],
+        fields: List[str],
+        values: List[Any],
+        where: str = "",
+        conn: str = "default",
     ):
         """Insert a record in a cursor."""
 
@@ -122,7 +132,9 @@ class AQSql(object):
         return ok
 
     @classmethod
-    def del_(self, cur_or_table: Union[str, "FLSqlCursor"], where: str = "", conn_name: str = "default"):
+    def del_(
+        self, cur_or_table: Union[str, "FLSqlCursor"], where: str = "", conn_name: str = "default"
+    ):
         """Remove a recordset from a cursor."""
 
         if not isinstance(cur_or_table, str):

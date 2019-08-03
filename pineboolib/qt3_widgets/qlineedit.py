@@ -16,7 +16,9 @@ class QLineEdit(QtWidgets.QLineEdit):
     _parent = None
     WindowOrigin = 0
 
-    def __init__(self, parent: Optional[Union["QGroupBox", "QWidget", "QFrame"]] = None, name: str = None) -> None:
+    def __init__(
+        self, parent: Optional[Union["QGroupBox", "QWidget", "QFrame"]] = None, name: str = None
+    ) -> None:
         super(QLineEdit, self).__init__(parent)
         self._parent = parent
         if name:

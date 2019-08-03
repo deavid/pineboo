@@ -43,7 +43,9 @@ class OpInfo:
 
         self.setAutoDelete(False)
 
-    def opInfo(self, pK: str, o: Any, b: "PNBuffer", a: int, s: str, f: str, n: str, c: "PNSqlCursor") -> None:
+    def opInfo(
+        self, pK: str, o: Any, b: "PNBuffer", a: int, s: str, f: str, n: str, c: "PNSqlCursor"
+    ) -> None:
         """
         Save initialization values.
 
@@ -165,7 +167,9 @@ class PNSqlSavePoint:
         self.clear()
 
     @decorators.BetaImplementation
-    def saveInsert(self, primaryKey: str, buffer: Optional["PNBuffer"], cursor: Optional["PNSqlCursor"]) -> None:
+    def saveInsert(
+        self, primaryKey: str, buffer: Optional["PNBuffer"], cursor: Optional["PNSqlCursor"]
+    ) -> None:
         """
         Save the buffer with the contents of the inserted record.
 
@@ -175,9 +179,22 @@ class PNSqlSavePoint:
         """
         if not cursor or not buffer:
             return
-        self.opInfos.append(OpInfo(primaryKey, 0, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
+        self.opInfos.append(
+            OpInfo(
+                primaryKey,
+                0,
+                buffer,
+                cursor.at(),
+                cursor.sort(),
+                cursor.filter(),
+                cursor.name,
+                cursor,
+            )
+        )
 
-    def saveEdit(self, primaryKey: str, buffer: Optional["PNBuffer"], cursor: Optional["PNSqlCursor"]) -> None:
+    def saveEdit(
+        self, primaryKey: str, buffer: Optional["PNBuffer"], cursor: Optional["PNSqlCursor"]
+    ) -> None:
         """
         Save the buffer with the contents of the record to be edited.
 
@@ -189,10 +206,23 @@ class PNSqlSavePoint:
         if not cursor or not buffer:
             return
 
-        self.opInfos.append(OpInfo(primaryKey, 1, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
+        self.opInfos.append(
+            OpInfo(
+                primaryKey,
+                1,
+                buffer,
+                cursor.at(),
+                cursor.sort(),
+                cursor.filter(),
+                cursor.name,
+                cursor,
+            )
+        )
 
     @decorators.BetaImplementation
-    def saveDel(self, primaryKey: str, buffer: Optional["PNBuffer"], cursor: Optional["PNSqlCursor"]) -> None:
+    def saveDel(
+        self, primaryKey: str, buffer: Optional["PNBuffer"], cursor: Optional["PNSqlCursor"]
+    ) -> None:
         """
         Save the buffer with the contents of the record to be deleted.
 
@@ -203,7 +233,18 @@ class PNSqlSavePoint:
         """
         if not cursor or not buffer:
             return
-        self.opInfos.append(OpInfo(primaryKey, 2, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
+        self.opInfos.append(
+            OpInfo(
+                primaryKey,
+                2,
+                buffer,
+                cursor.at(),
+                cursor.sort(),
+                cursor.filter(),
+                cursor.name,
+                cursor,
+            )
+        )
 
     @decorators.BetaImplementation
     def undoInsert(self, opInf: OpInfo) -> None:
@@ -226,7 +267,9 @@ class PNSqlSavePoint:
             return
 
         if opInf.buffer.indexField(opInf.primaryKey) and not opInf.buffer.isNull(opInf.primaryKey):
-            valuePrimaryKey = str(opInf.buffer.value(opInf.primaryKey))  # FIXME: (deavid) plz add notes on what needs to be fixed here.
+            valuePrimaryKey = str(
+                opInf.buffer.value(opInf.primaryKey)
+            )  # FIXME: (deavid) plz add notes on what needs to be fixed here.
             ok = cursor_.select(opInf.primaryKey + "='" + valuePrimaryKey + "'")
             if ok and cursor_.next():
                 cursor_.primeDelete()
