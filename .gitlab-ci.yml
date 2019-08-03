@@ -15,46 +15,70 @@ image: deavidsedice/pineboo-build:latest-devel
 #     - .cache/pip
 #     - venv/
 
+stages:
+    - test
+    - deploy
+
 before_script:
-  - python3 -V  # Print out python version for debugging
-  - pip3 install -r requirements.txt
-  # - pip install virtualenv
-  # - virtualenv venv
-  # - source venv/bin/activate
+    - python3 -V  # Print out python version for debugging
+    - pip3 install -r requirements.txt
+    # - pip install virtualenv
+    # - virtualenv venv
+    # - source venv/bin/activate
 
-test:
-  script:
-    - flake8 pineboolib/
-    - black --check --fast -l 100 --exclude='(\.eggs|\.git|\.hg|\.mypy_cache|\.nox|\.tox|\.venv|_build|buck-out|build|dist|lextab.py)' pineboolib/
-    - mypy -p pineboolib
-    - pytest --cov=pineboolib pineboolib/
-    - coverage report --fail-under=23
-    # PyDocStyle lacks "exclude":
-    - rm pineboolib/application/parsers/qsaparser/lextab.py || /bin/true
-    - pydocstyle pineboolib/application pineboolib/core pineboolib/interfaces
-    - pyroma .
+test_flake8:
+    stage: test
+    script:
+        - flake8 pineboolib/
 
-run:
-  script:
-    - python3 setup.py bdist_wheel
-    # an alternative approach is to install and run:
-    - pip3 install dist/*
-    # run the command here
-    # pineboo --help
-  artifacts:
-    paths:
-      - dist/*.whl
+test_black:
+    stage: test
+    script:
+        - black --check --fast -l 100 --exclude='(\.eggs|\.git|\.hg|\.mypy_cache|\.nox|\.tox|\.venv|_build|buck-out|build|dist|lextab.py)' pineboolib/
+
+test_mypy:
+    stage: test
+    script:
+        - mypy -p pineboolib
+test_pytest:
+    stage: test
+    script:
+        - pytest --cov=pineboolib pineboolib/
+        - coverage report --fail-under=23
+test_pydocstyle:
+    stage: test
+    script:
+        # PyDocStyle lacks "exclude":
+        - rm pineboolib/application/parsers/qsaparser/lextab.py || /bin/true
+        - pydocstyle pineboolib/application pineboolib/core pineboolib/interfaces
+test_pyroma:
+    stage: test
+    script:
+        - pyroma .
+
+deploy_build:
+    stage: deploy
+    script:
+        - python3 setup.py bdist_wheel
+        # an alternative approach is to install and run:
+        - pip3 install dist/*
+        # run the command here
+        # pineboo --help
+    artifacts:
+        paths:
+            - dist/*.whl
 
 pages:
-  script:
-    # - pip install sphinx sphinx-rtd-theme
-    - cd docs
-    - ./create_docs.sh | ts
-    - ./update_linters.sh | ts
-    - make html | ts
-    - mv build/html/ ../public/
-  artifacts:
-    paths:
-      - public
-  # only:
-  #   - master
+    stage: deploy
+    script:
+        # - pip install sphinx sphinx-rtd-theme
+        - cd docs
+        - ./create_docs.sh | ts
+        - ./update_linters.sh | ts
+        - make html | ts
+        - mv build/html/ ../public/
+    artifacts:
+        paths:
+            - public
+#   only:
+#       - master
