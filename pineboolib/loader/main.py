@@ -59,7 +59,7 @@ def init_logging(
 ) -> None:
     """Initialize pineboo logging."""
     # ---- LOGGING -----
-    log_format = "%(levelname)s: %(module)s: %(message)s"
+    log_format = "%(levelname)s: %(name)s: %(message)s"
 
     if logtime:
         log_format = "%(asctime)s - %(levelname)s: %(name)s: %(message)s"

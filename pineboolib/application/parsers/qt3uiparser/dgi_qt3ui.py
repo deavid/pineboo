@@ -26,7 +26,7 @@ from pineboolib.qt3_widgets import qspinbox
 from pineboolib.core.settings import config
 
 
-from typing import Optional, Tuple, Callable, List, Dict, Any, cast
+from typing import Optional, Tuple, Callable, List, Dict, Any, cast, Type
 
 
 ICONS: Dict[str, Any] = {}
@@ -408,23 +408,21 @@ def loadAction(action, widget) -> None:
             act_.setWhatsThis(string.text)
 
 
-def createWidget(classname: str, parent=None) -> Any:
+class WidgetResolver:
     """
-    Create a Widget for given class name.
+    Resolve classnames into widgets with caching.
     """
-    # FIXME: Avoid dynamic imports. Also, this is slow.
-    cls = None
-    mod_name_full = "pineboolib.qt3_widgets.%s" % classname.lower()
-    try:
-        mod_ = import_module(mod_name_full)
-        cls = getattr(mod_, classname, None)
-    except ModuleNotFoundError:
-        logger.trace("resolveObject: Module not found %s", mod_name_full)
-    except Exception:
-        logger.exception("resolveObject: Unable to load module %s", mod_name_full)
 
-    if cls is None:
-        mod_name_full = "pineboolib.fllegacy.%s" % classname.lower()
+    KNOWN_WIDGETS: Dict[str, Type[QtWidgets.QWidget]] = {}
+
+    @classmethod
+    def get_widget_class(resolver_cls, classname: str) -> Type[QtWidgets.QWidget]:
+        """Get a widget class from class name."""
+        if classname in resolver_cls.KNOWN_WIDGETS:
+            return resolver_cls.KNOWN_WIDGETS[classname]
+
+        cls: Optional[Type[QtWidgets.QWidget]] = None
+        mod_name_full = "pineboolib.qt3_widgets.%s" % classname.lower()
         try:
             mod_ = import_module(mod_name_full)
             cls = getattr(mod_, classname, None)
@@ -433,16 +431,39 @@ def createWidget(classname: str, parent=None) -> Any:
         except Exception:
             logger.exception("resolveObject: Unable to load module %s", mod_name_full)
 
-    if cls is None:
-        cls = getattr(QtWidgets, classname, None)
+        if cls is None:
+            mod_name_full = "pineboolib.fllegacy.%s" % classname.lower()
+            try:
+                mod_ = import_module(mod_name_full)
+                cls = getattr(mod_, classname, None)
+            except ModuleNotFoundError:
+                logger.trace("resolveObject: Module not found %s", mod_name_full)
+            except Exception:
+                logger.exception("resolveObject: Unable to load module %s", mod_name_full)
 
-    if cls is None:
+        if cls is None:
+            cls = getattr(QtWidgets, classname, None)
+
+        if cls is None:
+            raise AttributeError("Class %r not found" % classname)
+
+        resolver_cls.KNOWN_WIDGETS[classname] = cls
+        return cls
+
+
+def createWidget(classname: str, parent=None) -> Any:
+    """
+    Create a Widget for given class name.
+    """
+    # FIXME: Avoid dynamic imports. Also, this is slow.
+    try:
+        cls = WidgetResolver.get_widget_class(classname)
+        return cls(parent)
+    except AttributeError:
         logger.warning("WARN: Class name not found in QtWidgets:", classname)
         widgt = QtWidgets.QWidget(parent)
         widgt.setStyleSheet("* { background-color: #fa3; } ")
         return widgt
-
-    return cls(parent)
 
 
 class loadWidget:
