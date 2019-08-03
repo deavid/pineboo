@@ -2,7 +2,7 @@
 
 if [ "$1" = "" ]; then
     test -e source/code/pineboolib && mv source/code/pineboolib source/code/old.pineboolib
-
+    mkdir source/code/pineboolib
     # Create folders
     (cd .. && git ls-files -- pineboolib/"*.py") | sed 's|/[^/]*$||' | sort -u | awk '{ print "source/code/" $0}' | xargs mkdir
 
