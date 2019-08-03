@@ -1,5 +1,8 @@
 image: deavidsedice/pineboo-build:latest-devel
-
+variables:
+  GIT_STRATEGY: fetch
+  GIT_CLEAN_FLAGS: none
+  GIT_SUBMODULE_STRATEGY: none
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
 # variables:
