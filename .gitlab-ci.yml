@@ -13,14 +13,6 @@ variables:
 #
 # If you want to also cache the installed packages, you have to install
 # them in a virtualenv and cache it as well.
-cache:
-    paths:
-        - .mypy_cache/
-        - docs/source/_static/linters/
-        - docs/source/linters/pylint/static
-        - docs/index_template.rst
-        - docs/source/code/pineboolib
-        - docs/build/
 
 stages:
     - test
@@ -43,6 +35,10 @@ test_flake8_pydocstyle:
         - pydocstyle pineboolib/application pineboolib/core pineboolib/interfaces
 
 test_mypy_pyroma_black_pytest:
+    cache:
+        key: "mypy-1-$CI_COMMIT_REF_SLUG"
+        paths:
+            - .mypy_cache/
     stage: test
     script:
         - mypy -p pineboolib
@@ -64,6 +60,15 @@ deploy_build:
             - dist/*.whl
 
 pages:
+    cache:
+        key: "pages-1-$CI_COMMIT_REF_SLUG"
+        paths:
+            - .mypy_cache/
+            - docs/source/_static/linters/
+            - docs/source/linters/pylint/static
+            - docs/index_template.rst
+            - docs/source/code/pineboolib
+            - docs/build/
     stage: deploy
     script:
         # NOTE: to be able to use cache for sphinx:
