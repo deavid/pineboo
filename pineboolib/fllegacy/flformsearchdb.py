@@ -114,7 +114,9 @@ class FLFormSearchDB(FLFormDB):
         self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
         self.layout_.addWidget(self.bottomToolbar)
 
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0)
+        )
         sizePolicy.setHeightForWidth(True)
 
         pbSize = self.iconSize
@@ -147,7 +149,9 @@ class FLFormSearchDB(FLFormDB):
                 self.bottomToolbar.widget_hlayout.addWidget(push_button_snapshot)
                 push_button_snapshot.clicked.connect(self.saveSnapShot)
 
-            spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+            spacer = QtWidgets.QSpacerItem(
+                20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            )
             self.bottomToolbar.widget_hlayout.addItem(spacer)
 
         if not self.pushButtonAccept:

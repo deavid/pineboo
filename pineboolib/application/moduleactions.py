@@ -56,7 +56,9 @@ class ModuleActions(object):
         action.form = None
         action.table = None
         action.scriptform = self.mod.name
-        self.project.actions[action.name] = action  # FIXME: Actions should be loaded to their parent, not the singleton
+        self.project.actions[
+            action.name
+        ] = action  # FIXME: Actions should be loaded to their parent, not the singleton
         QSADictModules.save_action_for_root_module(action)
 
         for xmlaction in self.root:
@@ -67,13 +69,17 @@ class ModuleActions(object):
                 continue
 
             if QSADictModules.save_action_for_mainform(action_xml):
-                self.project.actions[name] = action_xml  # FIXME: Actions should be loaded to their parent, not the singleton
+                self.project.actions[
+                    name
+                ] = action_xml  # FIXME: Actions should be loaded to their parent, not the singleton
 
             QSADictModules.save_action_for_formrecord(action_xml)
 
     def __contains__(self, k) -> bool:
         """Determine if it is the owner of an action."""
-        return k in self.project.actions  # FIXME: Actions should be loaded to their parent, not the singleton
+        return (
+            k in self.project.actions
+        )  # FIXME: Actions should be loaded to their parent, not the singleton
 
     def __getitem__(self, name) -> Any:
         """
@@ -82,7 +88,9 @@ class ModuleActions(object):
         @param name. Nombre de la action
         @return Retorna el XMLAction de la action dada
         """
-        return self.project.actions[name]  # FIXME: Actions should be loaded to their parent, not the singleton
+        return self.project.actions[
+            name
+        ]  # FIXME: Actions should be loaded to their parent, not the singleton
 
     def __setitem__(self, name, action_) -> NoReturn:
         """

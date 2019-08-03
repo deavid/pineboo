@@ -150,7 +150,11 @@ class SysType(SysBaseType):
                     break
 
             headInfo += u"</tr>"
-            headRecord = ustr(u'<table border="1"><tr><td><b>', self.translate(u"scripts", u"Registro bloqueado"), u"</b></td></tr>")
+            headRecord = ustr(
+                u'<table border="1"><tr><td><b>',
+                self.translate(u"scripts", u"Registro bloqueado"),
+                u"</b></td></tr>",
+            )
             i = 1
             while_pass = True
             while i < len(locks):
@@ -527,7 +531,10 @@ class SysType(SysBaseType):
             dir_ = Dir(ustr(self.installPrefix(), u"/share/eneboo/packages"))
             dir_.setCurrent()
             input_ = QFileDialog.getOpenFileName(
-                QApplication.focusWidget(), u"Eneboo/AbanQ Packages", self.translate(u"scripts", u"Seleccionar Fichero"), "*.eneboopkg"
+                QApplication.focusWidget(),
+                u"Eneboo/AbanQ Packages",
+                self.translate(u"scripts", u"Seleccionar Fichero"),
+                "*.eneboopkg",
             )
         if warnBackup is None:
             warnBackup = True
@@ -559,7 +566,9 @@ class SysType(SysBaseType):
                 unpacker = AQUnpacker(input_)
                 errors = unpacker.errorMessages()
                 if len(errors) != 0:
-                    msg = self.translate(u"Hubo los siguientes errores al intentar cargar los módulos:")
+                    msg = self.translate(
+                        u"Hubo los siguientes errores al intentar cargar los módulos:"
+                    )
                     msg += u"\n"
                     i = 0
                     while_pass = True
@@ -589,7 +598,9 @@ class SysType(SysBaseType):
                     ok = self.loadFilesDef(unpacker)
 
             if not ok:
-                self.errorMsgBox(self.translate(u"No se ha podido realizar la carga de los módulos."))
+                self.errorMsgBox(
+                    self.translate(u"No se ha podido realizar la carga de los módulos.")
+                )
             else:
                 self.registerUpdate(input_)
                 self.infoMsgBox(self.translate(u"La carga de módulos se ha realizado con éxito."))
@@ -602,7 +613,9 @@ class SysType(SysBaseType):
         filesDef = self.toUnicode(un.getText(), u"utf8")
         doc = QDomDocument()
         if not doc.setContent(filesDef):
-            self.errorMsgBox(self.translate(u"Error XML al intentar cargar la definición de los ficheros."))
+            self.errorMsgBox(
+                self.translate(u"Error XML al intentar cargar la definición de los ficheros.")
+            )
             return False
         ok = True
         root = doc.firstChild()
@@ -631,7 +644,9 @@ class SysType(SysBaseType):
             if len(fil["id"]) == 0 or fil["skip"] == u"true":
                 continue
             if not self.registerFile(fil, un):
-                self.errorMsgBox(ustr(self.translate(u"Error registrando el fichero"), u" ", fil["id"]))
+                self.errorMsgBox(
+                    ustr(self.translate(u"Error registrando el fichero"), u" ", fil["id"])
+                )
                 ok = False
                 break
             i += 1
@@ -691,8 +706,12 @@ class SysType(SysBaseType):
         txt += self.translate(u"Está intentando cargar un proyecto o rama de módulos cuyo\n")
         txt += self.translate(u"nombre difiere del instalado actualmente en la base de datos.\n")
         txt += self.translate(u"Es posible que la estructura de los módulos que quiere cargar\n")
-        txt += self.translate(u"sea completamente distinta a la instalada actualmente, y si continua\n")
-        txt += self.translate(u"podría dañar el código, datos y la estructura de tablas de Eneboo.\n\n")
+        txt += self.translate(
+            u"sea completamente distinta a la instalada actualmente, y si continua\n"
+        )
+        txt += self.translate(
+            u"podría dañar el código, datos y la estructura de tablas de Eneboo.\n\n"
+        )
         txt += self.translate(u"- Nombre del proyecto instalado: %s\n") % (str(dbProName))
         txt += self.translate(u"- Nombre del proyecto a cargar: %s\n\n") % (str(proName))
         txt += u"\n\n"
@@ -700,14 +719,18 @@ class SysType(SysBaseType):
             logger.warning(txt)
             return False
         txt += self.translate(u"¿Desea continuar?")
-        return MessageBox.Yes == MessageBox.warning(txt, MessageBox.No, MessageBox.Yes, MessageBox.NoButton, u"AbanQ")
+        return MessageBox.Yes == MessageBox.warning(
+            txt, MessageBox.No, MessageBox.Yes, MessageBox.NoButton, u"AbanQ"
+        )
 
     @classmethod
     def loadModulesDef(self, un=None):
         modulesDef = self.toUnicode(un.getText(), u"utf8")
         doc = QDomDocument()
         if not doc.setContent(modulesDef):
-            self.errorMsgBox(self.translate(u"Error XML al intentar cargar la definición de los módulos."))
+            self.errorMsgBox(
+                self.translate(u"Error XML al intentar cargar la definición de los módulos.")
+            )
             return False
         root = doc.firstChild()
         if not self.checkProjectName(root.toElement().attribute(u"projectname", u"")):
@@ -734,7 +757,9 @@ class SysType(SysBaseType):
             FLUtil.setProgress(i)
             FLUtil.setLabelText(ustr(self.translate(u"Registrando módulo"), u" ", mod["id"]))
             if not self.registerArea(mod) or not self.registerModule(mod):
-                self.errorMsgBox(ustr(self.translate(u"Error registrando el módulo"), u" ", mod["id"]))
+                self.errorMsgBox(
+                    ustr(self.translate(u"Error registrando el módulo"), u" ", mod["id"])
+                )
                 ok = False
                 break
             i += 1
@@ -772,7 +797,16 @@ class SysType(SysBaseType):
         return cur.commitBuffer()
 
     @classmethod
-    def questionMsgBox(self, msg=None, keyRemember=None, txtRemember=None, forceShow=None, txtCaption=None, txtYes=None, txtNo=None):
+    def questionMsgBox(
+        self,
+        msg=None,
+        keyRemember=None,
+        txtRemember=None,
+        forceShow=None,
+        txtCaption=None,
+        txtYes=None,
+        txtNo=None,
+    ):
         settings = AQSettings()
         key = u"QuestionMsgBox/"
         valRemember = False
@@ -832,7 +866,11 @@ class SysType(SysBaseType):
         if not dirBasePath:
             return
         dataBaseName = project.conn.db().database()
-        dirBasePath = Dir.cleanDirPath(ustr(dirBasePath, u"/modulos_exportados_", dataBaseName.mid(dataBaseName.rfind(u"/") + 1)))
+        dirBasePath = Dir.cleanDirPath(
+            ustr(
+                dirBasePath, u"/modulos_exportados_", dataBaseName.mid(dataBaseName.rfind(u"/") + 1)
+            )
+        )
         dir = Dir()
         if not dir.fileExists(dirBasePath):
             try:
@@ -843,7 +881,9 @@ class SysType(SysBaseType):
                 return
 
         else:
-            self.warnMsgBox(dirBasePath + self.translate(u" ya existe,\ndebe borrarlo antes de continuar"))
+            self.warnMsgBox(
+                dirBasePath + self.translate(u" ya existe,\ndebe borrarlo antes de continuar")
+            )
             return
 
         qry = PNSqlQuery()
@@ -1056,7 +1096,9 @@ class SysType(SysBaseType):
         dirAnt = settings.value(key)
         from pineboolib.qt3_widgets.filedialog import FileDialog
 
-        dirMods = FileDialog.getExistingDirectory(str(dirAnt) if dirAnt else None, self.translate(u"Directorio de Módulos"))
+        dirMods = FileDialog.getExistingDirectory(
+            str(dirAnt) if dirAnt else None, self.translate(u"Directorio de Módulos")
+        )
         if not dirMods:
             return
         dirMods = Dir.cleanDirPath(dirMods)
@@ -1166,7 +1208,9 @@ class SysType(SysBaseType):
                 "version": (nodeMod.namedItem(u"version").toElement().text()),
             }
             if not self.registerArea(mod) or not self.registerModule(mod):
-                self.errorMsgBox(ustr(self.translate(u"Error registrando el módulo"), u" ", mod["id"]))
+                self.errorMsgBox(
+                    ustr(self.translate(u"Error registrando el módulo"), u" ", mod["id"])
+                )
                 return False
             if not self.importFiles(mod_folder, u"*.xml", mod["id"]):
                 return False
@@ -1240,7 +1284,10 @@ class SysType(SysBaseType):
         ok = True
         name = file.name
         if (
-            not FLUtil.isFLDefFile(content) and not name.endswith(u".qs") and not name.endswith(u".ar") and not name.endswith(u".svg")
+            not FLUtil.isFLDefFile(content)
+            and not name.endswith(u".qs")
+            and not name.endswith(u".ar")
+            and not name.endswith(u".svg")
         ) or name.endswith(u"untranslated.ts"):
             return ok
         cur = PNSqlCursor(u"flfiles")
@@ -1385,7 +1432,9 @@ class SysType(SysBaseType):
 
         settings = AQSettings()
         if not url:
-            url = settings.readEntry("ebcomportamiento/git_updates_repo", "https://github.com/Aulla/pineboo.git")
+            url = settings.readEntry(
+                "ebcomportamiento/git_updates_repo", "https://github.com/Aulla/pineboo.git"
+            )
 
         command = "git status %s" % url
 
@@ -1397,13 +1446,21 @@ class SysType(SysBaseType):
 
         if pro.stdout.find("git pull") > -1:
             if MessageBox.Yes != MessageBox.warning(
-                "Hay nuevas actualizaciones disponibles para Pineboo. ¿Desea actualizar?", MessageBox.No, MessageBox.Yes
+                "Hay nuevas actualizaciones disponibles para Pineboo. ¿Desea actualizar?",
+                MessageBox.No,
+                MessageBox.Yes,
             ):
                 return
 
             pro.execute("git pull %s" % url)
 
-            MessageBox.information("Pineboo se va a reiniciar ahora", MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, u"Eneboo")
+            MessageBox.information(
+                "Pineboo se va a reiniciar ahora",
+                MessageBox.Ok,
+                MessageBox.NoButton,
+                MessageBox.NoButton,
+                u"Eneboo",
+            )
             # os.execl(executable, os.path.abspath(__file__)) #FIXME
 
     @classmethod
@@ -1433,7 +1490,9 @@ class SysType(SysBaseType):
             return ret
         docUpt = QDomDocument()
         if not docUpt.setContent(strXmlUpt):
-            self.errorMsgBox(self.translate(u"Error XML al intentar cargar la definición de los ficheros."))
+            self.errorMsgBox(
+                self.translate(u"Error XML al intentar cargar la definición de los ficheros.")
+            )
             return ret
         docBd = self.xmlFilesDefBd()
         ret = self.diffXmlFilesDef(docBd, docUpt)
@@ -1491,7 +1550,10 @@ class AbanQDbDumper(object):
         # layFrm = QVBoxLayout(frm, 6, 6)
         layFrm = QVBoxLayout(frm)
         lbl = QLabel(frm)
-        lbl.setText(SysType.translate(u"Driver: %s") % (str(self.db_.driverNameToDriverAlias(self.db_.driverName()))))
+        lbl.setText(
+            SysType.translate(u"Driver: %s")
+            % (str(self.db_.driverNameToDriverAlias(self.db_.driverName())))
+        )
         lbl.setAlignment(Qt.AlignTop)
         layFrm.addWidget(lbl)
         lbl = QLabel(frm)
@@ -1513,7 +1575,9 @@ class AbanQDbDumper(object):
         layAux = QHBoxLayout()
         layFrm.addLayout(layAux)
         self.lblDirBase_ = QLabel(frm)
-        self.lblDirBase_.setText(SysType.translate(u"Directorio Destino: %s") % (str(self.dirBase_)))
+        self.lblDirBase_.setText(
+            SysType.translate(u"Directorio Destino: %s") % (str(self.dirBase_))
+        )
         self.lblDirBase_.setAlignment(Qt.AlignVCenter)
         layAux.addWidget(self.lblDirBase_)
         self.pbChangeDir_ = QPushButton(SysType.translate(u"Cambiar"), frm)
@@ -1568,7 +1632,9 @@ class AbanQDbDumper(object):
                 return
         self.dirBase_ = dirBasePath
         if self.showGui_ and self.lblDirBase_ is not None:
-            self.lblDirBase_.text = SysType.translate(u"Directorio Destino: %s") % (str(self.dirBase_))
+            self.lblDirBase_.text = SysType.translate(u"Directorio Destino: %s") % (
+                str(self.dirBase_)
+            )
         self.fileName_ = self.genFileName()
 
     def addLog(self, msg=None):
@@ -1618,7 +1684,10 @@ class AbanQDbDumper(object):
                 typeBd = 2
 
         if typeBd == 0:
-            self.setState(False, SysType.translate(u"Este tipo de base de datos no soporta el volcado a disco."))
+            self.setState(
+                False,
+                SysType.translate(u"Este tipo de base de datos no soporta el volcado a disco."),
+            )
             self.funLog_(self.state_.msg)
             self.dumpAllTablesToCsv()
             return False
@@ -1643,10 +1712,16 @@ class AbanQDbDumper(object):
         if not ok:
             self.dumpAllTablesToCsv()
         if not ok:
-            self.setState(False, SysType.translate(u"No se ha podido realizar la copia de seguridad."))
+            self.setState(
+                False, SysType.translate(u"No se ha podido realizar la copia de seguridad.")
+            )
             self.funLog_(self.state_.msg)
         else:
-            self.setState(True, SysType.translate(u"Copia de seguridad realizada con éxito en:\n%s") % (str(self.fileName_)))
+            self.setState(
+                True,
+                SysType.translate(u"Copia de seguridad realizada con éxito en:\n%s")
+                % (str(self.fileName_)),
+            )
             self.funLog_(self.state_.msg)
 
         return ok
@@ -1659,10 +1734,33 @@ class AbanQDbDumper(object):
         if SysType.osName() == u"WIN32":
             pgDump += u".exe"
             System.setenv(u"PGPASSWORD", db.password())
-            command = [pgDump, u"-f", fileName, u"-h", db.host(), u"-p", db.port(), u"-U", db.user(), db.database()]
+            command = [
+                pgDump,
+                u"-f",
+                fileName,
+                u"-h",
+                db.host(),
+                u"-p",
+                db.port(),
+                u"-U",
+                db.user(),
+                db.database(),
+            ]
         else:
             System.setenv(u"PGPASSWORD", db.password())
-            command = [pgDump, u"-v", u"-f", fileName, u"-h", db.host(), u"-p", db.port(), u"-U", db.user(), db.database()]
+            command = [
+                pgDump,
+                u"-v",
+                u"-f",
+                fileName,
+                u"-h",
+                db.host(),
+                u"-p",
+                db.port(),
+                u"-U",
+                db.user(),
+                db.database(),
+            ]
 
         if not self.launchProc(command):
             self.setState(
@@ -1750,7 +1848,9 @@ class AbanQDbDumper(object):
                 break
 
         ts.opIn(ustr(rec, u"\n"))
-        FLUtil.createProgressDialog(SysType.translate(u"Haciendo copia en CSV de ") + table, qry.size())
+        FLUtil.createProgressDialog(
+            SysType.translate(u"Haciendo copia en CSV de ") + table, qry.size()
+        )
         p = 0
         while qry.next():
             rec = u""

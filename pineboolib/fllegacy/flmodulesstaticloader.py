@@ -208,7 +208,9 @@ class FLStaticLoader(QtCore.QObject):
         cur_row = self.tblDirs.currentRow()
         dir_init = self.tblDirs.text(cur_row, 0) if cur_row > -1 else ""
 
-        dir = Qt.QFileDialog.getExistingDirectory(None, self.tr("Selecciones el directorio a insertar"), dir_init)
+        dir = Qt.QFileDialog.getExistingDirectory(
+            None, self.tr("Selecciones el directorio a insertar"), dir_init
+        )
 
         if dir:
 
@@ -234,7 +236,9 @@ class FLStaticLoader(QtCore.QObject):
 
         dir_init = self.tblDirs.text(cur_row, 0) if cur_row > -1 else ""
 
-        dir = Qt.QFileDialog.getExistingDirectory(None, self.tr("Selecciones el directorio a modificar"), dir_init)
+        dir = Qt.QFileDialog.getExistingDirectory(
+            None, self.tr("Selecciones el directorio a modificar"), dir_init
+        )
 
         if dir:
             info = self.b_.findPath(self.tblDirs.text(cur_row, 0))

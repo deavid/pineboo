@@ -92,7 +92,9 @@ class QSADictModules:
             )
             return False
         # Se crea la action del form
-        delayed_action = DelayedObjectProxyLoader(action.load, name="QSA.Module.%s.Action.form%s" % (module.mod.name, name))
+        delayed_action = DelayedObjectProxyLoader(
+            action.load, name="QSA.Module.%s.Action.form%s" % (module.mod.name, name)
+        )
         cls.save_action(actionname, delayed_action)
         SafeQSA.save_mainform(actionname, delayed_action)
         return True
@@ -110,7 +112,8 @@ class QSADictModules:
             return False
         # Se crea la action del formRecord
         delayed_action = DelayedObjectProxyLoader(
-            action.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (module.mod.name, name)
+            action.formRecordWidget,
+            name="QSA.Module.%s.Action.formRecord%s" % (module.mod.name, name),
         )
 
         cls.save_action(actionname, delayed_action)

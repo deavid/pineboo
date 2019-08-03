@@ -113,7 +113,11 @@ class parser(object):
             #        res.append(data)
 
             except Exception:
-                print("Error %s  %s %s" % (dict_["arguments"]["cursor_id"], dict_["arguments"]["sql"], fun_name), traceback.format_exc())
+                print(
+                    "Error %s  %s %s"
+                    % (dict_["arguments"]["cursor_id"], dict_["arguments"]["sql"], fun_name),
+                    traceback.format_exc(),
+                )
 
         elif fun_name == "fetchone":
             ret = None

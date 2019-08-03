@@ -6,7 +6,9 @@ from .utils.struct import TableStruct
 logger = logging.getLogger("core.parsetable")
 
 
-def parseTable(nombre: str, contenido: str, encoding: str = "UTF-8", remove_blank_text: bool = True) -> TableStruct:
+def parseTable(
+    nombre: str, contenido: str, encoding: str = "UTF-8", remove_blank_text: bool = True
+) -> TableStruct:
     """Parse MTD and convert to table object."""
 
     from io import StringIO

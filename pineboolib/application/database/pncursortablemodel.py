@@ -11,7 +11,9 @@ from datetime import date
 
 from PyQt5 import QtCore, QtGui, Qt  # type: ignore
 from PyQt5.QtCore import pyqtSignal  # type: ignore
-from PyQt5 import QtWidgets  # type: ignore  # FIXME: Not allowed here! this is for QCheckBox but it's not needed
+from PyQt5 import (
+    QtWidgets,
+)  # type: ignore  # FIXME: Not allowed here! this is for QCheckBox but it's not needed
 
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.utils import logging
@@ -84,7 +86,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         if not self.USE_THREADS and not self.USE_TIMER:
             self.USE_TIMER = True
-            self.logger.warning("SQL Driver supports neither Threads nor Timer, defaulting to Timer")
+            self.logger.warning(
+                "SQL Driver supports neither Threads nor Timer, defaulting to Timer"
+            )
         self.USE_THREADS = False
         self.USE_TIMER = True
         self.rowsLoaded = 0
@@ -245,7 +249,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         else:
             pK = str(self.value(row, self.metadata().primaryKey()))
             if pK not in self._checkColumn.keys():
-                d = QtWidgets.QCheckBox()  # FIXME: Not allowed here. This is GUI. This can be emulated with TRUE/FALSE
+                d = (
+                    QtWidgets.QCheckBox()
+                )  # FIXME: Not allowed here. This is GUI. This can be emulated with TRUE/FALSE
                 self._checkColumn[pK] = d
 
         if self.parent_view and role in [QtCore.Qt.BackgroundRole, QtCore.Qt.ForegroundRole]:
@@ -271,9 +277,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     field_value = d
                     cursor = self._parent
                     selected = False
-                    res_color_function = function_color(field_name, field_value, cursor, selected, _type)
+                    res_color_function = function_color(
+                        field_name, field_value, cursor, selected, _type
+                    )
                 else:
-                    raise Exception("No se ha resuelto functionGetColor %s desde %s" % (fun_get_color, context_))
+                    raise Exception(
+                        "No se ha resuelto functionGetColor %s desde %s" % (fun_get_color, context_)
+                    )
         # print("Data ", index, role)
         # print("Registros", self.rowCount())
         # roles
@@ -345,7 +355,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     except AttributeError:
                         import platform
 
-                        self.logger.warning("locale specific date format is not yet implemented for %s", platform.system())
+                        self.logger.warning(
+                            "locale specific date format is not yet implemented for %s",
+                            platform.system(),
+                        )
 
             elif _type == "check":
                 return
@@ -371,7 +384,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     else:
                         pixmap = QtGui.QPixmap(filedir("../share/icons", "lock.png"))
                     if self.parent_view is not None:
-                        if self.parent_view.showAllPixmap() or row == self.parent_view.cursor().at():
+                        if (
+                            self.parent_view.showAllPixmap()
+                            or row == self.parent_view.cursor().at()
+                        ):
                             if pixmap and not pixmap.isNull() and self.parent_view:
 
                                 row_height = self.parent_view.rowHeight(row)  # Altura row
@@ -381,7 +397,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                                 center_height = (row_height - pixmap.height()) / 2
                                 new_pixmap.fill(QtCore.Qt.transparent)
                                 painter = Qt.QPainter(new_pixmap)
-                                painter.drawPixmap(center_width, center_height, pixmap.width(), pixmap.height(), pixmap)
+                                painter.drawPixmap(
+                                    center_width,
+                                    center_height,
+                                    pixmap.width(),
+                                    pixmap.height(),
+                                    pixmap,
+                                )
 
                                 pixmap = new_pixmap
 
@@ -473,7 +495,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         torow = self.fetchedRows - ROW_BATCH_COUNT - 1
         if torow - fromrow < 5:
             if self.canFetchMoreRows:
-                self.logger.trace("Updaterows %s (updated:%d)", self.metadata().name(), self.fetchedRows)
+                self.logger.trace(
+                    "Updaterows %s (updated:%d)", self.metadata().name(), self.fetchedRows
+                )
                 self.fetchMore(parent, self.metadata().name(), self.where_filter)
             return
 
@@ -487,7 +511,11 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.dataChanged.emit(topLeft, bottomRight)
 
     def fetchMore(
-        self, index: QtCore.QModelIndex, tablename: Optional[str] = None, where_filter: Optional[str] = None, size_hint: int = 1000
+        self,
+        index: QtCore.QModelIndex,
+        tablename: Optional[str] = None,
+        where_filter: Optional[str] = None,
+        size_hint: int = 1000,
     ) -> None:
         """
         Retrieve new data from DB.
@@ -512,7 +540,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         if tablename is None:
             tablename = self.metadata().name()
 
-        self.logger.trace("refrescando modelo tabla %r, rows: %d %r" % (tablename, self.rows, (fromrow, torow)))
+        self.logger.trace(
+            "refrescando modelo tabla %r, rows: %d %r" % (tablename, self.rows, (fromrow, torow))
+        )
         if torow < fromrow:
             return
 
@@ -525,7 +555,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             if where_filter is None:
                 where_filter = self.where_filter
 
-            c_all = self.driver_sql().fetchAll(self.cursorDB(), tablename, where_filter, self.sql_str, self._curname)
+            c_all = self.driver_sql().fetchAll(
+                self.cursorDB(), tablename, where_filter, self.sql_str, self._curname
+            )
             newrows = len(c_all)  # self._cursor.rowcount
             from_rows = self.rows
             self._data += c_all
@@ -533,7 +565,12 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self.fetchedRows += newrows
             self.rows += newrows
             self.canFetchMoreRows = bool(newrows > 0)
-            self.logger.trace("refrescando modelo tabla %r, new rows: %d  fetched: %d", tablename, newrows, self.fetchedRows)
+            self.logger.trace(
+                "refrescando modelo tabla %r, new rows: %d  fetched: %d",
+                tablename,
+                newrows,
+                self.fetchedRows,
+            )
             if not self.USE_THREADS:
                 self.refreshFetch(ROW_BATCH_COUNT)
 
@@ -600,7 +637,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             if qry is None:
                 raise Exception(" The query %s return empty value" % self.metadata().query())
             qry_select = [x.strip() for x in (qry.select()).split(",")]
-            qry_fields: Dict[str, str] = {fieldname.split(".")[-1]: fieldname for fieldname in qry_select}
+            qry_fields: Dict[str, str] = {
+                fieldname.split(".")[-1]: fieldname for fieldname in qry_select
+            }
 
             for table in qry.tablesList():
                 mtd = self.db().manager().metadata(table, True)
@@ -650,12 +689,16 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         """
         Refresh information mananged by this class.
         """
-        if self._initialized is None and self.parent_view:  # Si es el primer refresh y estoy conectado a un FLDatatable()
+        if (
+            self._initialized is None and self.parent_view
+        ):  # Si es el primer refresh y estoy conectado a un FLDatatable()
             self._initialized = True
             QtCore.QTimer.singleShot(1, self.refresh)
             return
 
-        if self._initialized:  # Si estoy inicializando y no me ha enviado un sender, cancelo el refesh
+        if (
+            self._initialized
+        ):  # Si estoy inicializando y no me ha enviado un sender, cancelo el refesh
             obj = self.sender()
             if not obj:
                 return
@@ -666,7 +709,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return
 
         if not self.metadata():
-            self.logger.warning("ERROR: CursorTableModel :: No hay tabla %s", self.metadata().name())
+            self.logger.warning(
+                "ERROR: CursorTableModel :: No hay tabla %s", self.metadata().name()
+            )
             return
 
         """ FILTRO WHERE """
@@ -690,7 +735,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         # Si no existe un orderBy y se ha definido uno desde FLTableDB ...
         if self.where_filter.find("ORDER BY") == -1 and self.getSortOrder():
             if self.where_filter.find(";") > -1:  # Si el where termina en ; ...
-                self.where_filter = self.where_filter.replace(";", " ORDER BY %s;" % self.getSortOrder())
+                self.where_filter = self.where_filter.replace(
+                    ";", " ORDER BY %s;" % self.getSortOrder()
+                )
             else:
                 self.where_filter = "%s ORDER BY %s" % (self.where_filter, self.getSortOrder())
         """ FIN """
@@ -732,7 +779,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self.sql_str = ", ".join(self.sql_fields)
 
         SZ_FETCH = max(1000, oldrows)
-        self.driver_sql().refreshQuery(self._curname, self.sql_str, from_, self.where_filter, self.cursorDB(), self.db().db())
+        self.driver_sql().refreshQuery(
+            self._curname, self.sql_str, from_, self.where_filter, self.cursorDB(), self.db().db()
+        )
 
         self.refreshFetch(SZ_FETCH)
         self.need_update = False
@@ -755,7 +804,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         @param n. Number of records to fetch
         """
-        self.driver_sql().refreshFetch(n, self._curname, self.metadata().name(), self.cursorDB(), self.sql_str, self.where_filter)
+        self.driver_sql().refreshFetch(
+            n,
+            self._curname,
+            self.metadata().name(),
+            self.cursorDB(),
+            self.sql_str,
+            self.where_filter,
+        )
 
     def indexUpdateRow(self, rownum: int) -> None:
         """
@@ -845,7 +901,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         if self.value(row, self.pK()) != pKValue:
             raise AssertionError(
-                "Los indices del CursorTableModel devolvieron un registro erroneo: %r != %r" % (self.value(row, self.pK()), pKValue)
+                "Los indices del CursorTableModel devolvieron un registro erroneo: %r != %r"
+                % (self.value(row, self.pK()), pKValue)
             )
 
         self.setValuesDict(row, dict_update)
@@ -898,7 +955,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     self.setValuesDict(row, dict_update)
 
         except Exception:
-            self.logger.exception("updateValuesDB: Error al assignar los valores de vuelta al buffer")
+            self.logger.exception(
+                "updateValuesDB: Error al assignar los valores de vuelta al buffer"
+            )
 
         self.need_update = True
 
@@ -932,11 +991,15 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 except ValueError:
                     colsnotfound.append(fieldname)
             if colsnotfound:
-                self.logger.warning("CursorTableModel.setValuesDict:: columns not found: %r", colsnotfound)
+                self.logger.warning(
+                    "CursorTableModel.setValuesDict:: columns not found: %r", colsnotfound
+                )
             self.indexUpdateRow(row)
 
         except Exception:
-            self.logger.exception("CursorTableModel.setValuesDict(row %s) = %r :: ERROR:", row, update_dict)
+            self.logger.exception(
+                "CursorTableModel.setValuesDict(row %s) = %r :: ERROR:", row, update_dict
+            )
 
     def setValue(self, row: int, fieldname: str, value: Any) -> None:
         """
@@ -996,7 +1059,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
                 self.need_update = True
             except Exception:
-                self.logger.exception("CursorTableModel.%s.Insert() :: SQL: %s", self.metadata().name(), sql)
+                self.logger.exception(
+                    "CursorTableModel.%s.Insert() :: SQL: %s", self.metadata().name(), sql
+                )
                 # self._cursor.execute("ROLLBACK")
                 return False
 
@@ -1038,7 +1103,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         @return row index.
         """
         if not isinstance(pklist, (tuple, list)):
-            raise ValueError("findPKRow expects a list as first argument. Enclose PK inside brackets [self.pkvalue]")
+            raise ValueError(
+                "findPKRow expects a list as first argument. Enclose PK inside brackets [self.pkvalue]"
+            )
         if not self.indexes_valid:
             for n in range(self.rows):
                 self.indexUpdateRow(n)
@@ -1057,7 +1124,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         if pklist not in self.pkidx:
             self.logger.info(
-                "CursorTableModel.%s.findPKRow:: PK not found: %r (from: %r)", self.metadata().name(), pklist, list(self.pkidx.keys())[:8]
+                "CursorTableModel.%s.findPKRow:: PK not found: %r (from: %r)",
+                self.metadata().name(),
+                pklist,
+                list(self.pkidx.keys())[:8],
             )
             return None
         return self.pkidx[pklist]
@@ -1077,7 +1147,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self.indexes_valid = True
         cklist = tuple(cklist)
         if cklist not in self.ckidx:
-            self.logger.warning("CursorTableModel.%s.findCKRow:: CK not found: %r ", self.metadata().name(), cklist)
+            self.logger.warning(
+                "CursorTableModel.%s.findCKRow:: CK not found: %r ", self.metadata().name(), cklist
+            )
             return None
         return self.ckidx[cklist]
 
@@ -1171,7 +1243,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         return size
 
-    def headerData(self, section: int, orientation: QtCore.Qt.Orientation, role: int = QtCore.Qt.DisplayRole) -> Any:
+    def headerData(
+        self, section: int, orientation: QtCore.Qt.Orientation, role: int = QtCore.Qt.DisplayRole
+    ) -> Any:
         """
         Retrieve header data.
 
@@ -1193,7 +1267,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         """
         Load column alias for every column.
         """
-        self.col_aliases = [str(self.metadata().indexFieldObject(i).alias()) for i in range(self.cols)]
+        self.col_aliases = [
+            str(self.metadata().indexFieldObject(i).alias()) for i in range(self.cols)
+        ]
 
     def fieldMetadata(self, fieldName: str) -> "PNFieldMetaData":
         """

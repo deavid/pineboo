@@ -35,7 +35,11 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
 
         if state[0] in (self.Invalid, self.Intermediate) and len(value_in) > 0:
             s = value_in[1:]
-            if value_in[0] == "-" and super().validate(s, pos_cursor)[0] == self.Acceptable or s == "":
+            if (
+                value_in[0] == "-"
+                and super().validate(s, pos_cursor)[0] == self.Acceptable
+                or s == ""
+            ):
                 ret_0 = self.Acceptable
             else:
                 ret_0 = self.Invalid
@@ -47,7 +51,20 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
         if aqApp.commaSeparator() == "," and ret_1.endswith("."):
             ret_1 = ret_1[0 : len(ret_1) - 1] + ","
 
-        if len(ret_1) == 1 and ret_1 not in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "."):
+        if len(ret_1) == 1 and ret_1 not in (
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            ",",
+            ".",
+        ):
             ret_0 = self.Invalid
             ret_1 = ""
             ret_2 = 0

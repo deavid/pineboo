@@ -64,7 +64,9 @@ class XMLAction(ActionStruct):
             self.logger.debug("Loading record action %s . . . ", self.name)
             if self.project.DGI.useDesktop():
                 # FIXME: looks like code duplication. Bet both sides of the IF do the same.
-                self.formrecord_widget = self.project.conn.managerModules().createFormRecord(self, None, cursor, None)
+                self.formrecord_widget = self.project.conn.managerModules().createFormRecord(
+                    self, None, cursor, None
+                )
             else:
                 # self.script = getattr(self, "script", None)
                 # if isinstance(self.script, str) or self.script is None:
@@ -100,9 +102,13 @@ class XMLAction(ActionStruct):
                 self.mainform_widget.widget.doCleanUp()
             if self.project.DGI.useDesktop() and hasattr(self.project.main_window, "w_"):
                 self.logger.info("Loading action %s (createForm). . . ", self.name)
-                self.mainform_widget = self.project.conn.managerModules().createForm(action=self, parent=self.project.main_window.w_)
+                self.mainform_widget = self.project.conn.managerModules().createForm(
+                    action=self, parent=self.project.main_window.w_
+                )
             else:
-                self.logger.info("Loading action %s (load_script %s). . . ", self.name, self.scriptform)
+                self.logger.info(
+                    "Loading action %s (load_script %s). . . ", self.name, self.scriptform
+                )
                 script = self.load_script(self.scriptform, None)
                 self.mainform_widget = script.form  # FormDBWidget FIXME: Add interface for types
                 if self.mainform_widget is None:
@@ -191,7 +197,9 @@ class XMLAction(ActionStruct):
         else:
             self.mainform_widget.main()
 
-    def load_script(self, scriptname: Optional[str], parent: Optional["FLFormDB"] = None) -> Any:  # returns loaded script
+    def load_script(
+        self, scriptname: Optional[str], parent: Optional["FLFormDB"] = None
+    ) -> Any:  # returns loaded script
         """
         Transform QS script into Python and starts it up.
 
@@ -203,7 +211,9 @@ class XMLAction(ActionStruct):
 
         if scriptname:
             scriptname = scriptname.replace(".qs", "")
-            self.logger.debug("Loading script %s of %s for action %s", scriptname, parent, self.name)
+            self.logger.debug(
+                "Loading script %s of %s for action %s", scriptname, parent, self.name
+            )
         else:
             self.logger.info("No script to load on %s for action %s", parent, self.name)
 
@@ -227,7 +237,9 @@ class XMLAction(ActionStruct):
         script_loaded: Any = emptyscript
 
         if scriptname is None:
-            script_loaded.form = script_loaded.FormInternalObj(action=action_, project=self.project, parent=parent_object)
+            script_loaded.form = script_loaded.FormInternalObj(
+                action=action_, project=self.project, parent=parent_object
+            )
             if parent:
                 parent.widget = script_loaded.form
                 parent.iface = parent.widget.iface
@@ -243,11 +255,15 @@ class XMLAction(ActionStruct):
         if mng_modules.staticBdInfo_ and mng_modules.staticBdInfo_.enabled_:
             from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader  # FIXME
 
-            ret_py = FLStaticLoader.content("%s.qs.py" % scriptname, mng_modules.staticBdInfo_, True)  # Con True solo devuelve el path
+            ret_py = FLStaticLoader.content(
+                "%s.qs.py" % scriptname, mng_modules.staticBdInfo_, True
+            )  # Con True solo devuelve el path
             if ret_py:
                 script_path_py = ret_py
             else:
-                ret_qs = FLStaticLoader.content("%s.qs" % scriptname, mng_modules.staticBdInfo_, True)  # Con True solo devuelve el path
+                ret_qs = FLStaticLoader.content(
+                    "%s.qs" % scriptname, mng_modules.staticBdInfo_, True
+                )  # Con True solo devuelve el path
                 if ret_qs:
                     script_path_qs = ret_qs
 
@@ -257,7 +273,11 @@ class XMLAction(ActionStruct):
             if not os.path.isfile(script_path):
                 raise IOError
             try:
-                self.logger.debug("Cargando %s : %s ", scriptname, script_path.replace(self.project.tmpdir, "tempdata"))
+                self.logger.debug(
+                    "Cargando %s : %s ",
+                    scriptname,
+                    script_path.replace(self.project.tmpdir, "tempdata"),
+                )
                 loader = machinery.SourceFileLoader(scriptname, script_path)
                 script_loaded = loader.load_module()  # type: ignore
             except Exception:
@@ -269,7 +289,11 @@ class XMLAction(ActionStruct):
             self.logger.info("Loading script QS %s . . . ", scriptname)
             python_script_path = (script_path + ".xml.py").replace(".qs.xml.py", ".qs.py")
             try:
-                self.logger.debug("Cargando %s : %s ", scriptname, python_script_path.replace(self.project.tmpdir, "tempdata"))
+                self.logger.debug(
+                    "Cargando %s : %s ",
+                    scriptname,
+                    python_script_path.replace(self.project.tmpdir, "tempdata"),
+                )
                 loader = machinery.SourceFileLoader(scriptname, python_script_path)
                 script_loaded = loader.load_module()  # type: ignore
             except Exception:

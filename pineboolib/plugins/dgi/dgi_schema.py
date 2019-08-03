@@ -26,7 +26,9 @@ class dgi_schema(object):
         # ... calling __init__, on purpose, to have different behavior than calling it.
 
         self._desktopEnabled = True  # Indica si se usa en formato escritorio con interface Qt
-        self.setUseMLDefault(True)  # FIXME: Setters are wrong. Inside private context, even wronger.
+        self.setUseMLDefault(
+            True
+        )  # FIXME: Setters are wrong. Inside private context, even wronger.
         self.setLocalDesktop(True)
         self._name = "dgi_shema"
         self._alias = "Default Schema"

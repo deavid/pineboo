@@ -19,7 +19,9 @@ class Q3TableWidget(QtWidgets.QTableWidget):
 class QTable(Q3TableWidget):
 
     lineaActual = None
-    currentChanged = QtCore.pyqtSignal(int, int)  # need overload (in Qt5, this signal is dataChanged)
+    currentChanged = QtCore.pyqtSignal(
+        int, int
+    )  # need overload (in Qt5, this signal is dataChanged)
     doubleClicked = QtCore.pyqtSignal(int, int)
     clicked = QtCore.pyqtSignal(int, int)  # need overload
     valueChanged = QtCore.pyqtSignal(int, int)
@@ -53,7 +55,9 @@ class QTable(Q3TableWidget):
         self.resize_policy = 0  # Default
         self.sort_column_ = None
 
-    def currentChanged_(self, current_row: int, current_column: int, previous_row: int, previous_column: int) -> None:
+    def currentChanged_(
+        self, current_row: int, current_column: int, previous_row: int, previous_column: int
+    ) -> None:
         if current_row > -1 and current_column > -1:
             cast(pyqtSignal, self.currentChanged).emit(current_row, current_column)
 
@@ -180,9 +184,18 @@ class QTable(Q3TableWidget):
 
         if new_item is not None:
             if row in self.read_only_rows or col in self.read_only_cols:
-                new_item.setFlags(cast(QtCore.Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled))
+                new_item.setFlags(
+                    cast(QtCore.Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                )
             else:
-                new_item.setFlags(cast(QtCore.Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable))
+                new_item.setFlags(
+                    cast(
+                        QtCore.Qt.ItemFlag,
+                        QtCore.Qt.ItemIsSelectable
+                        | QtCore.Qt.ItemIsEnabled
+                        | QtCore.Qt.ItemIsEditable,
+                    )
+                )
 
     def setCellWidget(self, row, col, obj) -> None:
         super().setCellWidget(row, col, obj)
@@ -211,9 +224,18 @@ class QTable(Q3TableWidget):
             item = self.item(row, col)
             if item:
                 if b:
-                    item.setFlags(cast(Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled))
+                    item.setFlags(
+                        cast(Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                    )
                 else:
-                    item.setFlags(cast(Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable))
+                    item.setFlags(
+                        cast(
+                            Qt.ItemFlag,
+                            QtCore.Qt.ItemIsSelectable
+                            | QtCore.Qt.ItemIsEnabled
+                            | QtCore.Qt.ItemIsEditable,
+                        )
+                    )
 
     def setColumnReadOnly(self, col, b) -> None:
         if b:
@@ -231,9 +253,18 @@ class QTable(Q3TableWidget):
             item = self.item(row, col)
             if item:
                 if b:
-                    item.setFlags(cast(Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled))
+                    item.setFlags(
+                        cast(Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                    )
                 else:
-                    item.setFlags(cast(Qt.ItemFlag, QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable))
+                    item.setFlags(
+                        cast(
+                            Qt.ItemFlag,
+                            QtCore.Qt.ItemIsSelectable
+                            | QtCore.Qt.ItemIsEnabled
+                            | QtCore.Qt.ItemIsEditable,
+                        )
+                    )
 
     @decorators.NotImplementedWarn
     def setLeftMargin(self, n):

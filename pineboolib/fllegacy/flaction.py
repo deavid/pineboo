@@ -92,13 +92,16 @@ class FLAction(object):
     def __repr__(self):
         """Return the values ​​in a text string."""
 
-        return "<FLAction name=%r scriptForm=%r scriptFormRecord=%r form=%r formRecord=%r caption=%r>" % (
-            self._name,
-            self._script_form,
-            self._script_form_record,
-            self._form,
-            self._form_record,
-            self._caption,
+        return (
+            "<FLAction name=%r scriptForm=%r scriptFormRecord=%r form=%r formRecord=%r caption=%r>"
+            % (
+                self._name,
+                self._script_form,
+                self._script_form_record,
+                self._form,
+                self._form_record,
+                self._caption,
+            )
         )
 
     def setName(self, n: str) -> None:

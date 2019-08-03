@@ -16,7 +16,9 @@ class splashscreen(object):
         self._splash.setMask(splash_pix.mask())
 
         frameGm = self._splash.frameGeometry()
-        screen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
+        screen = QtWidgets.QApplication.desktop().screenNumber(
+            QtWidgets.QApplication.desktop().cursor().pos()
+        )
         centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self._splash.move(frameGm.topLeft())

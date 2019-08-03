@@ -60,7 +60,9 @@ def cleanNoPython(data: str) -> str:
 
 def cleanNoPythonNever(data: str) -> str:
     """Remove NOPYTHON_NEVER blocks."""
-    return re.sub(r"\/\/___NOPYTHON_NEVER\[\[.*?\/\/\]\]___NOPYTHON_NEVER\s*", "", data, flags=re.DOTALL)
+    return re.sub(
+        r"\/\/___NOPYTHON_NEVER\[\[.*?\/\/\]\]___NOPYTHON_NEVER\s*", "", data, flags=re.DOTALL
+    )
 
 
 def cnvrt(val: str) -> str:
@@ -131,7 +133,9 @@ def p_parse(token: Any) -> None:
     #    print "      " + "\n      ".join([ "%s(%r): %r" % (s.type, token.lexspan(n+1), s.value) for n,s in enumerate(token.slice[1:]) ])
     global seen_tokens, last_ok_token
     last_ok_token = token
-    seen_tokens.append((str(token.slice[0]), token.lineno(0), input_data[lexspan[0] : lexspan[1] + 1]))
+    seen_tokens.append(
+        (str(token.slice[0]), token.lineno(0), input_data[lexspan[0] : lexspan[1] + 1])
+    )
     global ok_count
     ok_count += 1
     if lexspan[0] not in tokelines:
@@ -552,7 +556,14 @@ p_parse.__doc__ = """
 # Build the grammar
 
 
-parser = yacc.yacc(method="LALR", debug=0, optimize=1, write_tables=1, debugfile="%s/yaccdebug.txt" % tempDir, outputdir="%s/" % tempDir)
+parser = yacc.yacc(
+    method="LALR",
+    debug=0,
+    optimize=1,
+    write_tables=1,
+    debugfile="%s/yaccdebug.txt" % tempDir,
+    outputdir="%s/" % tempDir,
+)
 
 # parser = yacc.yacc(method='LALR', debug=1,
 #                   optimize=0, write_tables=0, debugfile='%s/yaccdebug.txt' % tempDir, outputdir='%s/' % tempDir)
@@ -607,7 +618,13 @@ def print_tokentree(token: Any, depth: int = 0) -> None:
             print_tokentree(tk.value, depth + 1)
 
 
-def calctree(obj: Dict[str, Any], depth: int = 0, num: List[str] = [], otype: str = "source", alias_mode: int = 1) -> TreeData:
+def calctree(
+    obj: Dict[str, Any],
+    depth: int = 0,
+    num: List[str] = [],
+    otype: str = "source",
+    alias_mode: int = 1,
+) -> TreeData:
     """Extract parsed AST and generate a custom structure for later XML generation."""
     # if depth > 5: return
     # source_data = [
@@ -664,7 +681,9 @@ def calctree(obj: Dict[str, Any], depth: int = 0, num: List[str] = [], otype: st
             # FIXME: Esto o no parsea todos los elementos o hace stackoverflow. problematico para programas largos
             if depth < 150:
                 try:
-                    tree_obj = calctree(value, depth + 1, num + [str(n)], ctype, alias_mode=alias_mode)
+                    tree_obj = calctree(
+                        value, depth + 1, num + [str(n)], ctype, alias_mode=alias_mode
+                    )
                 except Exception as e:
                     print("ERROR: trying to calculate member:", e)
                     continue
@@ -693,7 +712,11 @@ def calctree(obj: Dict[str, Any], depth: int = 0, num: List[str] = [], otype: st
 
 
 def printtree(
-    tree: Dict[str, Any], depth: int = 0, otype: str = "source", mode: Optional[str] = None, output: TextIO = sys.stdout
+    tree: Dict[str, Any],
+    depth: int = 0,
+    otype: str = "source",
+    mode: Optional[str] = None,
+    output: TextIO = sys.stdout,
 ) -> Tuple[Any, Any, Any]:
     """Export AST into different formats, mainly used for XML export."""
     global hashes, ranges
@@ -838,11 +861,37 @@ def main() -> None:
     """Manage direct script calls for flscriptparse. Deprecated."""
     global start
     parser = OptionParser()
-    parser.add_option("-O", "--output", dest="output", default="none", help="Set output TYPE: xml|hash", metavar="TYPE")
+    parser.add_option(
+        "-O",
+        "--output",
+        dest="output",
+        default="none",
+        help="Set output TYPE: xml|hash",
+        metavar="TYPE",
+    )
     parser.add_option("--start", dest="start", default=None, help="Set start block", metavar="STMT")
-    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
-    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
-    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
+    parser.add_option(
+        "-q",
+        "--quiet",
+        action="store_false",
+        dest="verbose",
+        default=True,
+        help="don't print status messages to stdout",
+    )
+    parser.add_option(
+        "--optdebug",
+        action="store_true",
+        dest="optdebug",
+        default=False,
+        help="debug optparse module",
+    )
+    parser.add_option(
+        "--debug",
+        action="store_true",
+        dest="debug",
+        default=False,
+        help="prints lots of useless messages",
+    )
 
     (options, args) = parser.parse_args()
     if options.optdebug:

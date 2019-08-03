@@ -24,11 +24,15 @@ class PNRelationMetaData:
         if len(args) == 1:
             self.inicializeFromFLRelationMetaData(args[0])
         else:
-            self.inicializeNewFLRelationMetaData(args[0], args[1], args[2], args[3], args[4], args[5])
+            self.inicializeNewFLRelationMetaData(
+                args[0], args[1], args[2], args[3], args[4], args[5]
+            )
 
         ++self.count_
 
-    def inicializeNewFLRelationMetaData(self, fT: str, fF: str, rC: str, dC: bool = False, uC: bool = False, cI: bool = True) -> None:
+    def inicializeNewFLRelationMetaData(
+        self, fT: str, fF: str, rC: str, dC: bool = False, uC: bool = False, cI: bool = True
+    ) -> None:
         """
         Fill in the relation data.
 
@@ -133,7 +137,9 @@ class PNRelationMetaData:
         if other == self:
             return
         if not isinstance(other, PNRelationMetaData):
-            raise ValueError("FLRelationMetaData::copy requires an instance to a PNRelationMetaData class")
+            raise ValueError(
+                "FLRelationMetaData::copy requires an instance to a PNRelationMetaData class"
+            )
         self.d.field_ = other.d.field_
         self.d.foreignTable_ = other.d.foreignTable_
         self.d.foreignField_ = other.d.foreignField_
@@ -188,9 +194,13 @@ class PNRelationMetaDataPrivate:
         if len(args) == 0:
             self.inicializeFLRelationMetaDataPrivate()
         else:
-            self.inicializeNewFLRelationMetaDataPrivate(args[0], args[1], args[2], args[3], args[4], args[5])
+            self.inicializeNewFLRelationMetaDataPrivate(
+                args[0], args[1], args[2], args[3], args[4], args[5]
+            )
 
-    def inicializeNewFLRelationMetaDataPrivate(self, fT: str, fF: str, rC: str, dC: bool, uC: bool, cI: bool) -> None:
+    def inicializeNewFLRelationMetaDataPrivate(
+        self, fT: str, fF: str, rC: str, dC: bool, uC: bool, cI: bool
+    ) -> None:
         """Fill initial values ​​with given values."""
 
         self.foreignTable_ = fT.lower()

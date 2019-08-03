@@ -20,8 +20,30 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-ACCEPTABLE_VALUES = (int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, decimal.Decimal, datetime.timedelta)
-T_VALUE2 = Union[int, float, str, datetime.time, datetime.date, bool, types.Date, bytearray, datetime.timedelta, None]
+ACCEPTABLE_VALUES = (
+    int,
+    float,
+    str,
+    datetime.time,
+    datetime.date,
+    bool,
+    types.Date,
+    bytearray,
+    decimal.Decimal,
+    datetime.timedelta,
+)
+T_VALUE2 = Union[
+    int,
+    float,
+    str,
+    datetime.time,
+    datetime.date,
+    bool,
+    types.Date,
+    bytearray,
+    datetime.timedelta,
+    None,
+]
 
 
 class FieldStruct(object):
@@ -288,7 +310,9 @@ class PNBuffer(object):
         """
         return self.fieldDict_[name].generated
 
-    def setGenerated(self, f: Union[int, str, "ifieldmetadata.IFieldMetaData"], value: bool) -> None:
+    def setGenerated(
+        self, f: Union[int, str, "ifieldmetadata.IFieldMetaData"], value: bool
+    ) -> None:
         """
         Set that is a generated field.
 
@@ -390,7 +414,9 @@ class PNBuffer(object):
         @param mark_. If True verifies that it has changed from the value assigned in primeUpdate and mark it as modified (Default to True).
         """
         if value is not None and not isinstance(value, ACCEPTABLE_VALUES):
-            raise ValueError("No se admite el tipo %r , en setValue(%s,%r)" % (type(value), name, value))
+            raise ValueError(
+                "No se admite el tipo %r , en setValue(%s,%r)" % (type(value), name, value)
+            )
 
         field = self.field(name)
 

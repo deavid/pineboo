@@ -229,7 +229,9 @@ class SqlInspector(object):
         type_ = "double"
         if pos not in self._mtd_fields.keys():
             if pos not in self._field_names.values():
-                logger.warning("SQL_TOOLS : resolve_empty_value : No se encuentra la posición %s", pos)
+                logger.warning(
+                    "SQL_TOOLS : resolve_empty_value : No se encuentra la posición %s", pos
+                )
                 return None
         else:
             mtd = self._mtd_fields[pos]
@@ -437,7 +439,11 @@ def resolve_where_params(key: str, valor: Optional[str], mtd_table) -> str:
     if field is not None:
         field_type = field.type()
     else:
-        logger.warning("pineboolib.utils.resolve_where_params No se encuentra el campo %s en la tabla %s.", campo, mtd_table.name())
+        logger.warning(
+            "pineboolib.utils.resolve_where_params No se encuentra el campo %s en la tabla %s.",
+            campo,
+            mtd_table.name(),
+        )
         return ""
     # valor = aqApp.db().manager().formatValue(field_type , valor, False)
 

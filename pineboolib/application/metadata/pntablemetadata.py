@@ -303,7 +303,9 @@ class PNTableMetaData(ITableMetaData):
                 ret_ = 300
             else:
                 # FIXME: Falta stringlist e int
-                self.logger.warning("FIXME:: No hay definido un valor numérico para el tipo %s", type_)
+                self.logger.warning(
+                    "FIXME:: No hay definido un valor numérico para el tipo %s", type_
+                )
 
         return ret_
 
@@ -473,7 +475,10 @@ class PNTableMetaData(ITableMetaData):
 
             if relationList:
                 for itR in relationList:
-                    if itR.foreignField() == str(fFN).lower() and itR.foreignTable() == str(fTN).lower():
+                    if (
+                        itR.foreignField() == str(fFN).lower()
+                        and itR.foreignTable() == str(fTN).lower()
+                    ):
                         return itR
 
         return None

@@ -155,7 +155,13 @@ def loadUi(form_path: str, widget, parent=None) -> None:
                 else None
             )
             fn_name = slot_name.rstrip("()")
-            logger.trace("Conectando de UI a QS: (%r.%r -> %r.%r)", sender_name, signal_name, receiv_name, fn_name)
+            logger.trace(
+                "Conectando de UI a QS: (%r.%r -> %r.%r)",
+                sender_name,
+                signal_name,
+                receiv_name,
+                fn_name,
+            )
 
             ifx = widget
             # if hasattr(widget, "iface"):
@@ -167,7 +173,14 @@ def loadUi(form_path: str, widget, parent=None) -> None:
                     #    getattr(ifx, fn_name))
                     connections.connect(sender, signal_name, ifx, fn_name)
                 except Exception:
-                    logger.exception("Error connecting: %s %s %s %s %s", sender, signal_name, receiver, slot_name, getattr(ifx, fn_name))
+                    logger.exception(
+                        "Error connecting: %s %s %s %s %s",
+                        sender,
+                        signal_name,
+                        receiver,
+                        slot_name,
+                        getattr(ifx, fn_name),
+                    )
                 continue
 
         if receiver is None:
@@ -196,15 +209,29 @@ def loadUi(form_path: str, widget, parent=None) -> None:
                 try:
                     getattr(sender, sg_name).connect(getattr(iface, sl_name))
                 except Exception:
-                    logger.exception("Error connecting: %s:%s %s.iface:%s", sender, signal_name, receiver, slot_name)
+                    logger.exception(
+                        "Error connecting: %s:%s %s.iface:%s",
+                        sender,
+                        signal_name,
+                        receiver,
+                        slot_name,
+                    )
                 continue
         if hasattr(receiver, sl_name):
             try:
                 getattr(sender, sg_name).connect(getattr(receiver, sl_name))
             except Exception:
-                logger.exception("Error connecting: %s:%s %s:%s", sender, signal_name, receiver, slot_name)
+                logger.exception(
+                    "Error connecting: %s:%s %s:%s", sender, signal_name, receiver, slot_name
+                )
         else:
-            logger.error("Error connecting: %s:%s %s:%s (no candidate found)", sender, signal_name, receiver, slot_name)
+            logger.error(
+                "Error connecting: %s:%s %s:%s (no candidate found)",
+                sender,
+                signal_name,
+                receiver,
+                slot_name,
+            )
 
     # Cargamos menubar ...
     xmlmenubar = root.find("menubar")
@@ -280,7 +307,12 @@ def loadMenuBar(xml: ET.Element, widget) -> None:
             elif name == "geometry":
                 geo_ = x.find("rect")
                 if geo_:
-                    ex, ey, ew, eh = (geo_.find("x"), geo_.find("y"), geo_.find("width"), geo_.find("height"))
+                    ex, ey, ew, eh = (
+                        geo_.find("x"),
+                        geo_.find("y"),
+                        geo_.find("width"),
+                        geo_.find("height"),
+                    )
                     if ex is None or ey is None or ew is None or eh is None:
                         continue
                     x1 = ex.text
@@ -438,7 +470,13 @@ class loadWidget:
         """
         Load a random widget from given XML.
         """
-        logger.trace("loadWidget: xml: %s widget: %s parent: %s origWidget: %s", xml, widget, parent, origWidget)
+        logger.trace(
+            "loadWidget: xml: %s widget: %s parent: %s origWidget: %s",
+            xml,
+            widget,
+            parent,
+            origWidget,
+        )
         if widget is None:
             raise ValueError
         if parent is None:
@@ -486,7 +524,9 @@ class loadWidget:
                 continue
 
             if c.tag in ("vbox", "hbox", "grid"):
-                if has_layout_defined:  # nos saltamos una nueva definición del layout ( mezclas de ui incorrectas)
+                if (
+                    has_layout_defined
+                ):  # nos saltamos una nueva definición del layout ( mezclas de ui incorrectas)
                     # El primer layout que se define es el que se respeta
                     continue
 
@@ -532,7 +572,9 @@ class loadWidget:
 
                 self.widget._layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
                 self.widget._layout.setObjectName(lay_name or "layout")
-                self.widget._layout.setContentsMargins(lay_margin_h, lay_margin_v, lay_margin_h, lay_margin_v)
+                self.widget._layout.setContentsMargins(
+                    lay_margin_h, lay_margin_v, lay_margin_h, lay_margin_v
+                )
                 self.widget._layout.setSpacing(lay_spacing)
 
                 lay_type = "grid" if c.tag == "grid" else "box"
@@ -559,7 +601,11 @@ class loadWidget:
                 if attrs is not None:
                     attrs[k] = v
                 else:
-                    logger.warning("qt3ui: [NOT ASSIGNED] attribute %r => %r" % (k, v), self.widget.__class__, repr(c.tag))
+                    logger.warning(
+                        "qt3ui: [NOT ASSIGNED] attribute %r => %r" % (k, v),
+                        self.widget.__class__,
+                        repr(c.tag),
+                    )
                 continue
             if c.tag == "widget":
                 # Si dentro del widget hay otro significa
@@ -600,7 +646,11 @@ class loadWidget:
                         lay.addWidget(new_widget)
                 else:
                     if Options.DEBUG_LEVEL > 50:
-                        logger.warning("qt3ui: Unknown container widget xml tag", self.widget.__class__, repr(c.tag))
+                        logger.warning(
+                            "qt3ui: Unknown container widget xml tag",
+                            self.widget.__class__,
+                            repr(c.tag),
+                        )
                 unbold_fonts.append(new_widget)
                 continue
 
@@ -633,7 +683,9 @@ class loadWidget:
 
                 continue
 
-            logger.info("%s: Unknown widget xml tag %s %s", __name__, self.widget.__class__, repr(c.tag))
+            logger.info(
+                "%s: Unknown widget xml tag %s %s", __name__, self.widget.__class__, repr(c.tag)
+            )
 
         for c in properties:
             self.process_property(c)
@@ -791,7 +843,9 @@ class loadWidget:
                     try:
                         widget._layout.addWidget(new_widget)
                     except Exception:
-                        logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget._layout)
+                        logger.warning(
+                            "qt3ui: No se ha podido añadir %s a %s", new_widget, widget._layout
+                        )
 
                 elif mode == "grid":
                     rowSpan = c.get("rowspan") or 1
@@ -1011,7 +1065,12 @@ def _loadVariant(variant, widget=None) -> Any:
 
     if variant.tag == "enum":
         v = None
-        libs_2: List[Any] = [QtCore.Qt, QtWidgets.QFrame, QtWidgets.QSizePolicy, QtWidgets.QTabWidget]
+        libs_2: List[Any] = [
+            QtCore.Qt,
+            QtWidgets.QFrame,
+            QtWidgets.QSizePolicy,
+            QtWidgets.QTabWidget,
+        ]
         for lib in libs_2:
             v = getattr(lib, text, None)
             if v is not None:

@@ -14,7 +14,9 @@ logger = logging.getLogger("database.utils")
 
 
 def nextCounter(
-    name_or_series: str, cursor_or_name: Union[str, "PNSqlCursor"], cursor_: Optional["PNSqlCursor"] = None
+    name_or_series: str,
+    cursor_or_name: Union[str, "PNSqlCursor"],
+    cursor_: Optional["PNSqlCursor"] = None,
 ) -> Optional[Union[str, int]]:
     """
     Return the following value of a counter type field of a table.
@@ -150,7 +152,13 @@ def _nextCounter_3(serie: str, name: str, cursor_: "PNSqlCursor") -> Optional[st
 
     _len: int = field.length() - len(serie)
 
-    where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (name, field.length(), name, len(serie), serie)
+    where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (
+        name,
+        field.length(),
+        name,
+        len(serie),
+        serie,
+    )
     select = "substring(%s FROM %d) as %s" % (name, len(serie) + 1, name)
     q = PNSqlQuery(None, cursor_.db().connectionName())
     q.setForwardOnly(True)
@@ -186,7 +194,14 @@ def _nextCounter_3(serie: str, name: str, cursor_: "PNSqlCursor") -> Optional[st
     return None
 
 
-def sqlSelect(f: str, s: str, w: str, tL: Optional[Union[str, List]] = None, size: int = 0, connName: str = "default") -> Any:
+def sqlSelect(
+    f: str,
+    s: str,
+    w: str,
+    tL: Optional[Union[str, List]] = None,
+    size: int = 0,
+    connName: str = "default",
+) -> Any:
     """
     Execute a query of type select, returning the results of the first record found.
 
@@ -243,7 +258,9 @@ def quickSqlSelect(f: str, s: str, w: str, connName: str = "default") -> Any:
     return q.value(0) if q.first() else False
 
 
-def sqlInsert(t: str, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connName: str = "default") -> bool:
+def sqlInsert(
+    t: str, fL_: Union[str, List[str]], vL_: Union[str, List[str]], connName: str = "default"
+) -> bool:
     """
     Perform the insertion of a record in a table using an FLSqlCursor object.
 
@@ -278,7 +295,9 @@ def sqlInsert(t: str, fL_: Union[str, List[str]], vL_: Union[str, List[str]], co
     return c.commitBuffer()
 
 
-def sqlUpdate(t: str, fL: Union[str, List[str]], vL: Union[str, List[str]], w: str, connName: str = "default") -> bool:
+def sqlUpdate(
+    t: str, fL: Union[str, List[str]], vL: Union[str, List[str]], w: str, connName: str = "default"
+) -> bool:
     """
     Modify one or more records in a table using an FLSqlCursor object.
 

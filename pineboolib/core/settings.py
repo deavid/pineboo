@@ -81,7 +81,9 @@ class PinebooSettings(QSettings):
     def _value(self, key: str, default: Any = None) -> Any:
         value = super().value(key, None)
         if value is None:
-            logger.debug("%s.value(%s) -> Default: %s %r", self.application, key, type(default), default)
+            logger.debug(
+                "%s.value(%s) -> Default: %s %r", self.application, key, type(default), default
+            )
             return default
         try:
             ret = self.load_value(value)

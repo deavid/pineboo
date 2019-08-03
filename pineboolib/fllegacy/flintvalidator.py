@@ -23,7 +23,11 @@ class FLIntValidator(QtGui.QIntValidator):
 
         if state[0] in (self.Invalid, self.Intermediate) and len(input_) > 0:
             s = input_[1:]
-            if input_[0] == "-" and super().validate(s, pos_cursor)[0] == self.Acceptable or s == "":
+            if (
+                input_[0] == "-"
+                and super().validate(s, pos_cursor)[0] == self.Acceptable
+                or s == ""
+            ):
                 ret_0 = self.Acceptable
             else:
                 ret_0 = self.Invalid

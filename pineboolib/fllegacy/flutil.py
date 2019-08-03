@@ -63,7 +63,18 @@ class FLUtil(QtCore.QObject):
         "veintinueve",
     ]
 
-    vecDecenas: List[str] = ["", "", "", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"]
+    vecDecenas: List[str] = [
+        "",
+        "",
+        "",
+        "treinta",
+        "cuarenta",
+        "cincuenta",
+        "sesenta",
+        "setenta",
+        "ochenta",
+        "noventa",
+    ]
     vecCentenas: List[str] = [
         "",
         "ciento",
@@ -88,9 +99,16 @@ class FLUtil(QtCore.QObject):
                 if cursor.next():
                     cursor.setModeAccess(cursor.Del)
                     if not cursor.commitBuffer():
-                        raise Exception("No pudo eliminar " + str(field.model._meta.db_table) + " : " + str(o.pk))
+                        raise Exception(
+                            "No pudo eliminar "
+                            + str(field.model._meta.db_table)
+                            + " : "
+                            + str(o.pk)
+                        )
             except Exception:
-                raise Exception("No pudo eliminar " + str(field.model._meta.db_table) + " : " + str(o.pk))
+                raise Exception(
+                    "No pudo eliminar " + str(field.model._meta.db_table) + " : " + str(o.pk)
+                )
 
     @staticmethod
     def partInteger(n: float) -> int:
@@ -791,7 +809,9 @@ class FLUtil(QtCore.QObject):
         return True
 
     @classmethod
-    def roundFieldValue(cls, value: Union[float, int, str], table_name: str, field_name: str) -> str:
+    def roundFieldValue(
+        cls, value: Union[float, int, str], table_name: str, field_name: str
+    ) -> str:
         """
         Redondea un valor en función de la precisión especificada para un campo tipo double de la base de datos
 
@@ -811,7 +831,15 @@ class FLUtil(QtCore.QObject):
         return cls.buildNumber(value, "float", fmd.partDecimal()) if fmd is not None else ""
 
     @classmethod
-    def sqlSelect(cls, f: str, s: str, w: str, tL: Optional[Union[str, List]] = None, size: int = 0, connName: str = "default") -> Any:
+    def sqlSelect(
+        cls,
+        f: str,
+        s: str,
+        w: str,
+        tL: Optional[Union[str, List]] = None,
+        size: int = 0,
+        connName: str = "default",
+    ) -> Any:
         from pineboolib.application.database.utils import sqlSelect
 
         return sqlSelect(f, s, w, tL, size, connName)
@@ -823,13 +851,17 @@ class FLUtil(QtCore.QObject):
         return quickSqlSelect(f, s, w, connName)
 
     @classmethod
-    def sqlInsert(cls, t: str, fL: Union[str, List], vL: Union[str, List], connName: str = "default") -> Any:
+    def sqlInsert(
+        cls, t: str, fL: Union[str, List], vL: Union[str, List], connName: str = "default"
+    ) -> Any:
         from pineboolib.application.database.utils import sqlInsert
 
         return sqlInsert(t, fL, vL, connName)
 
     @classmethod
-    def sqlUpdate(cls, t: str, fL: Union[str, List], vL: Union[str, List], w: str, connName: str = "default") -> Any:
+    def sqlUpdate(
+        cls, t: str, fL: Union[str, List], vL: Union[str, List], w: str, connName: str = "default"
+    ) -> Any:
         from pineboolib.application.database.utils import sqlUpdate
 
         return sqlUpdate(t, fL, vL, w, connName)
@@ -862,7 +894,9 @@ class FLUtil(QtCore.QObject):
         """
         from pineboolib.application import project
 
-        return project.message_manager().send("progress_dialog_manager", "create", [title, steps, id_])
+        return project.message_manager().send(
+            "progress_dialog_manager", "create", [title, steps, id_]
+        )
 
     @classmethod
     def destroyProgressDialog(cls, id_: str = "default") -> None:
@@ -932,7 +966,12 @@ class FLUtil(QtCore.QObject):
 
         # if not doc.setContent(content, ErrMsg, errLine, errColumn):
         if not doc.setContent(content):
-            logger.warning("Error en fichero XML.\nError : %s\nLinea : %s\nColumna : %s", ErrMsg, errLine, errColumn)
+            logger.warning(
+                "Error en fichero XML.\nError : %s\nLinea : %s\nColumna : %s",
+                ErrMsg,
+                errLine,
+                errColumn,
+            )
             return False
 
         return True
@@ -1036,7 +1075,9 @@ class FLUtil(QtCore.QObject):
 
     @classmethod
     @decorators.NotImplementedWarn
-    def findFiles(cls, paths: str, filter_: str = "*", break_on_first_match: bool = False) -> List[str]:
+    def findFiles(
+        cls, paths: str, filter_: str = "*", break_on_first_match: bool = False
+    ) -> List[str]:
         """
         Busca ficheros recursivamente en las rutas indicadas y según el patrón indicado
         @param  paths   Rutas de búsqueda

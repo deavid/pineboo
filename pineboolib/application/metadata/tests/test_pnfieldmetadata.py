@@ -403,7 +403,10 @@ class TestOptionsListField(unittest.TestCase):
         self.assertEqual(field.partInteger(), 0)
         self.assertEqual(field.partDecimal(), 0)
         self.assertEqual(field.flDecodeType("string"), "string")
-        self.assertEqual(field.optionsList(), ["primero", "segundo", "tercero", "cuarto", "quinto", "sexto", "12345678901234567890"])
+        self.assertEqual(
+            field.optionsList(),
+            ["primero", "segundo", "tercero", "cuarto", "quinto", "sexto", "12345678901234567890"],
+        )
         self.assertEqual(field.getIndexOptionsList("segundo"), 1)
 
 

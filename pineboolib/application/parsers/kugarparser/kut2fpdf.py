@@ -80,7 +80,9 @@ class Kut2FPDF(object):
         self.reset_page_count = False
         self.new_page = False
 
-    def parse(self, name: str, kut: str, data: str, report: "FPDF" = None, flags: List[int] = []) -> Optional[str]:
+    def parse(
+        self, name: str, kut: str, data: str, report: "FPDF" = None, flags: List[int] = []
+    ) -> Optional[str]:
         """
         Parse string containing ".kut" file into a pdf and return its file path.
 
@@ -100,8 +102,12 @@ class Kut2FPDF(object):
             self.logger.exception("KUT2FPDF: Problema al procesar xml_data")
             return None
 
-        project.message_manager().send("progress_dialog_manager", "create", ["Pineboo", len(self._xml_data), "kugar"])
-        project.message_manager().send("progress_dialog_manager", "setLabelText", ["Creando informe ...", "kugar"])
+        project.message_manager().send(
+            "progress_dialog_manager", "create", ["Pineboo", len(self._xml_data), "kugar"]
+        )
+        project.message_manager().send(
+            "progress_dialog_manager", "setLabelText", ["Creando informe ...", "kugar"]
+        )
 
         self.name_ = name
         self.setPageFormat(self._xml)
@@ -202,7 +208,9 @@ class Kut2FPDF(object):
         """
         self._document.add_page(self._page_orientation)
         self._page_top[int(self._document.page_no())] = self._top_margin
-        self._document.set_margins(self._left_margin, self._top_margin, self._right_margin)  # Lo dejo pero no se nota nada
+        self._document.set_margins(
+            self._left_margin, self._top_margin, self._right_margin
+        )  # Lo dejo pero no se nota nada
         self._no_print_footer = False
         if self.design_mode:
             self.draw_margins()
@@ -244,7 +252,9 @@ class Kut2FPDF(object):
 
         top_level = 0
         level = 0
-        first_page_created = keep_page if keep_page is not None and self._document.page_no() > 0 else False
+        first_page_created = (
+            keep_page if keep_page is not None and self._document.page_no() > 0 else False
+        )
 
         rows_array = self._xml_data.findall("Row")
         i = 0
@@ -313,7 +323,11 @@ class Kut2FPDF(object):
             if dF.get("Level") == str(data_level) and show not in ("", "False", "None"):
 
                 if section_name in ("DetailHeader", "Detail"):
-                    heightCalculated = self._parser_tools.getHeight(dF) + self.topSection() + self.increase_section_size
+                    heightCalculated = (
+                        self._parser_tools.getHeight(dF)
+                        + self.topSection()
+                        + self.increase_section_size
+                    )
 
                     if section_name == "DetailHeader":
                         for detail in self._xml.findall("Detail"):
@@ -342,7 +356,9 @@ class Kut2FPDF(object):
                         limit_bottom = self._document.h - aof_size
                         actual_size = self._parser_tools.getHeight(dF) + self.topSection()
 
-                        if (actual_size >= limit_bottom - 2) or self.last_detail:  # +2 se usa de margen extra
+                        if (
+                            actual_size >= limit_bottom - 2
+                        ) or self.last_detail:  # +2 se usa de margen extra
                             self.processSection("AddOnFooter", int(data_level))
 
                             self.newPage(data_level)
@@ -367,7 +383,11 @@ class Kut2FPDF(object):
                 sec_ = s
 
         if sec_ is not None:
-            if sec_.get("PrintFrequency") == "1" or self._document.page_no() == 1 or name in ("AddOnHeader", "AddOnFooter"):
+            if (
+                sec_.get("PrintFrequency") == "1"
+                or self._document.page_no() == 1
+                or name in ("AddOnHeader", "AddOnFooter")
+            ):
                 self.processXML(sec_)
 
     def processXML(self, xml: Element, data: Optional[Element] = None) -> None:
@@ -419,7 +439,11 @@ class Kut2FPDF(object):
                 if df.get("Level") == detail_level:
                     for cf in df.iter("CalculatedField"):
                         if cf.get("DrawAtHeader") == "true":
-                            header_name = "%s_header_%s_%s" % (self.detailn[detail_level], detail_level, cf.get("Field"))
+                            header_name = "%s_header_%s_%s" % (
+                                self.detailn[detail_level],
+                                detail_level,
+                                cf.get("Field"),
+                            )
                             self.draws_at_header[header_name] = ""
                             self.processText(cf, data, fix_height, xml.tag)
 
@@ -508,7 +532,11 @@ class Kut2FPDF(object):
         return ret_
 
     def processText(
-        self, xml: Element, data_row: Optional[Element] = None, fix_height: bool = True, section_name: Optional[str] = None
+        self,
+        xml: Element,
+        data_row: Optional[Element] = None,
+        fix_height: bool = True,
+        section_name: Optional[str] = None,
     ) -> None:
         """
         Check tag (calculated, label, special or image).
@@ -529,9 +557,13 @@ class Kut2FPDF(object):
 
         x = int(xml.get("X") or "0")
 
-        y = int(xml.get("Y") or "0") + self.topSection()  # Añade la altura que hay ocupada por otras secciones
+        y = (
+            int(xml.get("Y") or "0") + self.topSection()
+        )  # Añade la altura que hay ocupada por otras secciones
         if fix_height:
-            y = self._parser_tools.ratio_correction_h(y)  # Corrige la posición con respecto al kut original
+            y = self._parser_tools.ratio_correction_h(
+                y
+            )  # Corrige la posición con respecto al kut original
 
         data_type = xml.get("DataType")
 
@@ -560,12 +592,16 @@ class Kut2FPDF(object):
                             text = str(ret_)
 
                     except Exception:
-                        self.logger.exception("KUT2FPDF:: Error llamando a function %s", function_name)
+                        self.logger.exception(
+                            "KUT2FPDF:: Error llamando a function %s", function_name
+                        )
                         return
                 else:
                     return
             elif calculation_type == "1":
-                text = self._parser_tools.calculate_sum(field_name, self.last_data_processed, self._xml_data, self.actual_data_level)
+                text = self._parser_tools.calculate_sum(
+                    field_name, self.last_data_processed, self._xml_data, self.actual_data_level
+                )
 
             elif calculation_type in ("5"):
                 if data_row is None:
@@ -574,7 +610,9 @@ class Kut2FPDF(object):
                 text = data_row.get(field_name) or ""
 
         if data_type is not None:
-            text = self._parser_tools.calculated(text, int(data_type), xml.get("Precision"), data_row)
+            text = self._parser_tools.calculated(
+                text, int(data_type), xml.get("Precision"), data_row
+            )
 
         if data_type == "5":
             is_image = True
@@ -667,7 +705,11 @@ class Kut2FPDF(object):
         # font_name, font_size, font_style
         font_style = ""
         font_size = int(xml.get("FontSize") or "0")
-        font_name_orig = (xml.get("FontFamily") or "").lower() if xml.get("FontFamily") is not None else "helvetica"
+        font_name_orig = (
+            (xml.get("FontFamily") or "").lower()
+            if xml.get("FontFamily") is not None
+            else "helvetica"
+        )
         font_name = font_name_orig
 
         font_w = int(xml.get("FontWeight") or "50")
@@ -701,7 +743,12 @@ class Kut2FPDF(object):
                 font_found = self._parser_tools.find_font(font_full_name, font_style)
             if font_found:
                 if self.design_mode:
-                    self.logger.warning("KUT2FPDF::Añadiendo el tipo de letra %s %s (%s)", font_name, font_style, font_found)
+                    self.logger.warning(
+                        "KUT2FPDF::Añadiendo el tipo de letra %s %s (%s)",
+                        font_name,
+                        font_style,
+                        font_found,
+                    )
                 self._document.add_font(font_name, font_style, font_found, True)
                 self._avalible_fonts.append(font_full_name)
 
@@ -709,7 +756,8 @@ class Kut2FPDF(object):
                 if font_full_name not in self._unavalible_fonts:
                     if self.design_mode:
                         self.logger.warning(
-                            "KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica%s." % (font_full_name, font_style)
+                            "KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica%s."
+                            % (font_full_name, font_style)
                         )
                     self._unavalible_fonts.append(font_full_name)
                 font_name = "helvetica"
@@ -800,13 +848,18 @@ class Kut2FPDF(object):
 
             if self.design_mode:
                 self.write_debug(
-                    self.calculateLeftStart(orig_x), y, "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w), 6, "green"
+                    self.calculateLeftStart(orig_x),
+                    y,
+                    "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w),
+                    6,
+                    "green",
                 )
                 if xml.tag == "CalculatedField":
                     self.write_debug(
                         self.calculateLeftStart(orig_x),
                         y,
-                        "CalculatedField:%s, Field:%s" % (xml.get("FunctionName"), xml.get("Field")),
+                        "CalculatedField:%s, Field:%s"
+                        % (xml.get("FunctionName"), xml.get("Field")),
                         3,
                         "blue",
                     )
@@ -816,7 +869,9 @@ class Kut2FPDF(object):
 
         result_section_size = result_section_size - start_section_size
 
-        if self.increase_section_size < extra_size:  # Si algun incremento extra hay superior se respeta
+        if (
+            self.increase_section_size < extra_size
+        ):  # Si algun incremento extra hay superior se respeta
             self.increase_section_size = extra_size
 
     def split_text(self, texto: str, limit_w: int) -> List[str]:
@@ -919,7 +974,8 @@ class Kut2FPDF(object):
         self.write_debug(
             int(x),
             int(y),
-            "X:%s Y:%s W:%s H:%s orig_x:%s, orig_W:%s" % (round(x, 2), round(y, 2), round(w, 2), round(h, 2), round(ox, 2), round(ow, 2)),
+            "X:%s Y:%s W:%s H:%s orig_x:%s, orig_W:%s"
+            % (round(x, 2), round(y, 2), round(w, 2), round(h, 2), round(ox, 2), round(ow, 2)),
             2,
             "red",
         )
@@ -1022,23 +1078,40 @@ class Kut2FPDF(object):
         page_orientation = xml.get("PageOrientation") or "0"
 
         if page_size in [30, 31]:
-            custom_size = [int(xml.get("CustomHeightMM") or "0"), int(xml.get("CustomWidthMM") or "0")]
+            custom_size = [
+                int(xml.get("CustomHeightMM") or "0"),
+                int(xml.get("CustomWidthMM") or "0"),
+            ]
 
         self._page_orientation = "P" if page_orientation == "0" else "L"
-        self._page_size = self._parser_tools.converPageSize(page_size, int(page_orientation), custom_size)  # devuelve un array
+        self._page_size = self._parser_tools.converPageSize(
+            page_size, int(page_orientation), custom_size
+        )  # devuelve un array
 
     def draw_margins(self) -> None:
         """Draw margins on the report."""
-        self.draw_debug_line(0 + self._left_margin, 0, 0 + self._left_margin, self._page_size[1])  # Vertical derecha
         self.draw_debug_line(
-            self._page_size[0] - self._right_margin, 0, self._page_size[0] - self._right_margin, self._page_size[1]
+            0 + self._left_margin, 0, 0 + self._left_margin, self._page_size[1]
+        )  # Vertical derecha
+        self.draw_debug_line(
+            self._page_size[0] - self._right_margin,
+            0,
+            self._page_size[0] - self._right_margin,
+            self._page_size[1],
         )  # Vertical izquierda
-        self.draw_debug_line(0, 0 + self._top_margin, self._page_size[0], 0 + self._top_margin)  # Horizontal superior
         self.draw_debug_line(
-            0, self._page_size[1] - self._bottom_margin, self._page_size[0], self._page_size[1] - self._bottom_margin
+            0, 0 + self._top_margin, self._page_size[0], 0 + self._top_margin
+        )  # Horizontal superior
+        self.draw_debug_line(
+            0,
+            self._page_size[1] - self._bottom_margin,
+            self._page_size[0],
+            self._page_size[1] - self._bottom_margin,
         )  # Horizontal inferior
 
-    def draw_debug_line(self, X1: int, Y1: int, X2: int, Y2: int, title: Optional[str] = None, color: str = "GREY") -> None:
+    def draw_debug_line(
+        self, X1: int, Y1: int, X2: int, Y2: int, title: Optional[str] = None, color: str = "GREY"
+    ) -> None:
         """Draw a debug line on the report."""
         dash_length = 2
         space_length = 2

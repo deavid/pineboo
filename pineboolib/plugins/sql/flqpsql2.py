@@ -28,7 +28,9 @@ class FLQPSQL2(FLQPSQL):
     def safe_load(self):
         return check_dependencies({"pg8000": "pg8000", "sqlalchemy": "sqlAlchemy"}, False)
 
-    def connect(self, db_name, db_host, db_port: Union[bytes, str, SupportsInt], db_userName, db_password) -> Any:
+    def connect(
+        self, db_name, db_host, db_port: Union[bytes, str, SupportsInt], db_userName, db_password
+    ) -> Any:
         self._dbname = db_name
         check_dependencies({"pg8000": "pg8000", "sqlalchemy": "sqlAlchemy"})
         import pg8000  # type: ignore
@@ -39,9 +41,17 @@ class FLQPSQL2(FLQPSQL):
 
         try:
             self.conn_ = pg8000.connect(
-                user=db_userName, host=db_host, port=int(db_port), database=db_name, password=db_password, timeout=5
+                user=db_userName,
+                host=db_host,
+                port=int(db_port),
+                database=db_name,
+                password=db_password,
+                timeout=5,
             )
-            self.engine_ = create_engine("postgresql+pg8000://%s:%s@%s:%s/%s" % (db_userName, db_password, db_host, db_port, db_name))
+            self.engine_ = create_engine(
+                "postgresql+pg8000://%s:%s@%s:%s/%s"
+                % (db_userName, db_password, db_host, db_port, db_name)
+            )
         except Exception as e:
             from pineboolib.application import project
 
@@ -64,7 +74,13 @@ class FLQPSQL2(FLQPSQL):
                     return False
                 else:
                     try:
-                        tmpConn = pg8000.connect(user="postgres", host=db_host, port=int(db_port), password=db_password, timeout=5)
+                        tmpConn = pg8000.connect(
+                            user="postgres",
+                            host=db_host,
+                            port=int(db_port),
+                            password=db_password,
+                            timeout=5,
+                        )
                         tmpConn.autocommit = True
 
                         cursor = tmpConn.cursor()
@@ -80,12 +96,17 @@ class FLQPSQL2(FLQPSQL):
                     except Exception:
                         qWarning(traceback.format_exc())
                         QMessageBox.information(
-                            QWidget(), "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok
+                            QWidget(),
+                            "Pineboo",
+                            "ERROR: No se ha podido crear la Base de Datos %s" % db_name,
+                            QMessageBox.Ok,
                         )
                         print("ERROR: No se ha podido crear la Base de Datos %s" % db_name)
                         return False
             else:
-                QMessageBox.information(QWidget(), "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok)
+                QMessageBox.information(
+                    QWidget(), "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok
+                )
                 return False
 
         # self.conn_.autocommit = True #Posiblemente tengamos que ponerlo a

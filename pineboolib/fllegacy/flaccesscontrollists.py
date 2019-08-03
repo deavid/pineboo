@@ -87,7 +87,9 @@ class FLAccessControlLists(object):
             self._access_control_list = {}
 
         if aclXml and not util.domDocumentSetContent(doc, aclXml):
-            QtCore.qWarning("FLAccessControlList : " + FLUtil().tr("Lista de control de acceso errónea"))
+            QtCore.qWarning(
+                "FLAccessControlList : " + FLUtil().tr("Lista de control de acceso errónea")
+            )
             return
 
         self._access_control_list = {}

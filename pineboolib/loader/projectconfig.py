@@ -53,7 +53,9 @@ class ProjectConfig:
         if version_ is None:
             version = 1.0
         else:
-            version = float(version_)  # FIXME: Esto es muy mala idea. Tratar versiones como float causará problemas al comparar.
+            version = float(
+                version_
+            )  # FIXME: Esto es muy mala idea. Tratar versiones como float causará problemas al comparar.
 
         for profile in root.findall("profile-data"):
             invalid_password = False
@@ -91,7 +93,10 @@ class ProjectConfig:
                 return False
 
         for credentials in root.findall("database-credentials"):
-            username_elem, password_elem = (credentials.find("username"), credentials.find("password"))
+            username_elem, password_elem = (
+                credentials.find("username"),
+                credentials.find("password"),
+            )
             if username_elem is None:
                 self.username = ""
             else:
@@ -135,7 +140,11 @@ class ProjectConfig:
 
         if _user_pass:
             user_pass = _user_pass.split(":") + ["", "", ""]
-            user, passwd, driver_alias = (user_pass[0], user_pass[1] or passwd, user_pass[2] or driver_alias)
+            user, passwd, driver_alias = (
+                user_pass[0],
+                user_pass[1] or passwd,
+                user_pass[2] or driver_alias,
+            )
             if user_pass[3]:
                 raise ValueError("La cadena de usuario debe tener el formato user:pass:driver.")
 
@@ -152,6 +161,12 @@ class ProjectConfig:
         if not re.match(r"\d+", port):
             raise ValueError("puerto no valido")
         cls.logger.debug(
-            "user:%s, passwd:%s, driver_alias:%s, host:%s, port:%s, dbname:%s", user, "*" * len(passwd), driver_alias, host, port, dbname
+            "user:%s, passwd:%s, driver_alias:%s, host:%s, port:%s, dbname:%s",
+            user,
+            "*" * len(passwd),
+            driver_alias,
+            host,
+            port,
+            dbname,
         )
         return user, passwd, driver_alias, host, port, dbname

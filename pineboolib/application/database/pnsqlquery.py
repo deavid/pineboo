@@ -525,7 +525,9 @@ class PNSqlQuery(object):
         It is intended only for debugging tasks.
         """
         if not self.isActive():
-            logger.warning("DEBUG : La consulta no está activa : No se ha ejecutado exec() o la sentencia SQL no es válida")
+            logger.warning(
+                "DEBUG : La consulta no está activa : No se ha ejecutado exec() o la sentencia SQL no es válida"
+            )
 
         logger.warning("DEBUG : Nombre de la consulta : %s", self.d.name_)
         logger.warning("DEBUG : Niveles de agrupamiento :")
