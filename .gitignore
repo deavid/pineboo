@@ -32,4 +32,5 @@ docs/source/_static/linters/bandit
 docs/source/linters/pylint/static
 docs/index_template.rst
 docs/source/code/pineboolib
+docs/source/code/old.pineboolib
 mypy_report
