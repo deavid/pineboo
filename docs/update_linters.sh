@@ -4,14 +4,15 @@ APP=$2
 if [ "$LINTER" = "pylint" ]; then
     if test -f source/linters/pylint/static/pylint_$APP.html; then
         # If we have a cache of previous run, check if we need to update:
-        if find ../pineboolib/$APP -type f -name "*.py" \
-            -newer source/linters/pylint/static/pylint_$APP.html | \
-            head -n1 | grep pineboolib; then
-            echo "Changed files found for pineboolib.$APP."
+        MTIME=$(date -r source/linters/pylint/static/pylint_$APP.html "+%Y-%m-%dT%H:%M:%S")
+        if git log -1 --since=$MTIME -- ../pineboolib/$APP | grep commit >/dev/null; then
+            echo "Changed files found for pineboolib.$APP since $MTIME."
         else
-            echo "Cache for pineboolib.$APP is still valid."
+            echo "Cache at $MTIME for pineboolib.$APP is still valid."
             exit 0;
         fi
+    else
+        echo "No cached version for pineboolib.$APP, will be created fresh."
     fi
 
     (cd .. && pylint pineboolib/$APP --load-plugins=pylint_json2html --output-format=jsonextended) \
