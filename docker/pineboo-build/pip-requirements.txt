@@ -32,3 +32,4 @@ pytest-cov
 json-rpc
 werkzeug
 odfpy
+wheel
