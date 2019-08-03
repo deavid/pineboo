@@ -43,10 +43,6 @@ from typing import Any, Optional, TYPE_CHECKING, cast
 if TYPE_CHECKING:
     from PyQt5.QtGui import QPixmap
 
-    # from pineboolib.fllegacy.flpixmapview import FLPixmapView
-
-logger = logging.getLogger(__name__)
-
 
 class FLFieldDB(QtWidgets.QWidget):
     logger = logging.getLogger("FLFieldDB")
@@ -119,6 +115,7 @@ class FLFieldDB(QtWidgets.QWidget):
         self._loaded = False
         self.DEBUG = False  # FIXME: debe recoger DEBUG de pineboolib.project
         self.editor_ = QtWidgets.QWidget(parent)
+        self.editor_.hide()
         self.cursor_ = None
         self.cursorBackup_ = None
         self.cursorInit_ = False
