@@ -5,6 +5,7 @@ from pineboolib.core.utils.utils_base import filedir
 from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings
 from PyQt5 import QtCore  # type: ignore
 from pineboolib.qt3_widgets.formdbwidget import FormDBWidget
+import os
 
 settings = AQSettings()
 
@@ -14,8 +15,8 @@ class FormInternalObj(FormDBWidget):
         pass
 
     def main(self):
-        mng = aqApp.db().managerModules()
-        self.w_ = QWidget(aqApp.mainWidget(), QtCore.Qt.Dialog)
+        mng = qsa.aqApp.db().managerModules()
+        self.w_ = qsa.QWidget(qsa.aqApp.mainWidget(), QtCore.Qt.Dialog)
         self.w_ = mng.createUI(u"ebcomportamiento.ui", None, self.w_)
         w = self.w_
         botonAceptar = w.child(u"pbnAceptar")
@@ -94,10 +95,10 @@ class FormInternalObj(FormDBWidget):
 
     def search_git_updates(self):
         url = self.w_.child("le_git_ruta").text
-        sys.search_git_updates(url)
+        qsa.sys.search_git_updates(url)
 
     def leerValorGlobal(self, valor_name=None):
-        util = FLUtil()
+        util = qsa.FLUtil()
         value = util.sqlSelect("flsettings", "valor", "flkey='%s'" % valor_name)
 
         if value is None:
@@ -106,14 +107,13 @@ class FormInternalObj(FormDBWidget):
         return value
 
     def grabarValorGlobal(self, valor_name=None, value=None):
-        util = FLUtil()
+        util = qsa.FLUtil()
         if not util.sqlSelect("flsettings", "flkey", "flkey='%s'" % valor_name):
             util.sqlInsert("flsettings", "flkey,valor", "%s,%s" % (valor_name, value))
         else:
             util.sqlUpdate("flsettings", u"valor", value, "flkey = '%s'" % valor_name)
 
     def leerValorLocal(self, valor_name):
-        util = FLUtil()
         from pineboolib.core.settings import config
 
         if valor_name in ("isDebuggerMode", "dbadmin_enabled"):
@@ -142,12 +142,12 @@ class FormInternalObj(FormDBWidget):
 
     def initEventFilter(self):
         w = self.w_
-        w.eventFilterFunction = ustr(w.objectName, u".eventFilter")
-        w.allowedEvents = Array([AQS.Close])
+        w.eventFilterFunction = qsa.ustr(w.objectName, u".eventFilter")
+        w.allowedEvents = qsa.Array([qsa.AQS.Close])
         w.installEventFilter(w)
 
     def eventFilter(self, o=None, e=None):
-        if e.type == AQS.Close:
+        if e.type == qsa.AQS.Close:
             self.cerrar_clicked()
 
     def cerrar_clicked(self):
@@ -198,20 +198,20 @@ class FormInternalObj(FormDBWidget):
         self.cerrar_clicked()
 
     def seleccionarColor_clicked(self):
-        self.colorActual_ = AQS.ColorDialog_getColor(self.colorActual_, self.w_).name()
+        self.colorActual_ = qsa.AQS.ColorDialog_getColor(self.colorActual_, self.w_).name()
         self.w_.child(u"leCO").setStyleSheet("background-color:" + self.colorActual_)
 
     def cambiar_kugar_clicked(self):
         old_dir = self.w_.child("le_kut_temporales").text
         old_dir = self.fixPath(old_dir)
-        new_dir = FileDialog.getExistingDirectory(old_dir)
+        new_dir = qsa.FileDialog.getExistingDirectory(old_dir)
         if new_dir and new_dir is not old_dir:
             self.w_.child("le_kut_temporales").text = new_dir
             project.tmpdir = new_dir
 
     def fixPath(self, ruta=None):
         rutaFixed = ""
-        if sys.osName() == u"WIN32":
+        if qsa.sys.osName() == u"WIN32":
             barra = u"\\"
             while ruta != rutaFixed:
                 rutaFixed = ruta
