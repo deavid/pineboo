@@ -35,3 +35,4 @@ docs/source/code/pineboolib
 docs/source/code/old.pineboolib
 mypy_report
 venv
+public/

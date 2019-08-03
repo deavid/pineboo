@@ -74,13 +74,11 @@ pages:
         # NOTE: to be able to use cache for sphinx:
         # Reset modification time of the files to the original authored time.
         - ./git_reset_mtime.sh
-        - ls --full-time -lhR docs/build/
-        - ls --full-time -lh pineboolib/application
         - cd docs
         - ./create_docs.sh | ts
         - ./update_linters.sh | ts
         - make html | ts
-        - mv build/html/ ../public/
+        - cp -R build/html/ ../public/
     artifacts:
         paths:
             - public
