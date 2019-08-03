@@ -12,6 +12,7 @@ image: deavidsedice/pineboo-build:latest-devel
 # them in a virtualenv and cache it as well.
 cache:
   paths:
+      - .mypy_cache/
       - docs/
     # - .cache/pip
     # - venv/
