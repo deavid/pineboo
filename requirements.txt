@@ -33,3 +33,4 @@ json-rpc
 werkzeug
 odfpy
 wheel
+lxml
