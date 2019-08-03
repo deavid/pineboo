@@ -2,9 +2,10 @@ FROM ubuntu:19.04
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    git \
-    python3-dev python3-pip python3-psycopg2 python3-mysqldb python3-pymysql python3-venv \
-    xvfb libfontconfig1 && \
+    git libglib2.0-0 libfontconfig1 \
+    python3-pip python3-setuptools \
+    python3-psycopg2 python3-mysqldb python3-pymysql python3-venv \
+    && \
     rm -rf /var/lib/apt/lists/*
 
 COPY pip-requirements.txt /
