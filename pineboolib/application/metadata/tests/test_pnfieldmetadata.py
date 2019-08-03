@@ -3,7 +3,7 @@ from pineboolib.loader.main import init_testing
 
 
 class TestStringField(unittest.TestCase):
-    """Test string field"""
+    """Test string field."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -30,9 +30,46 @@ class TestStringField(unittest.TestCase):
         self.assertEqual(field.defaultValue(), "0.0")
         self.assertEqual(field.regExpValidator(), "[0-9]\\.[0-9]")
 
+        assign_value_1 = field.formatAssignValue("version", "a.1", False)
+        assign_value_2 = field.formatAssignValue("version", "b.1", True)
+        self.assertEqual(assign_value_1, "version = 'a.1'")
+        self.assertEqual(assign_value_2, "upper(version) = 'B.1'")
+
+
+class TestCopyField(unittest.TestCase):
+    """Test Copy a field."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Ensure pineboo is initialized for testing."""
+        init_testing()
+
+    def test_basic(self) -> None:
+        """Test copy a field data from another."""
+
+        from pineboolib.application import project
+        from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
+
+        mtd = project.conn.manager().metadata("flmodules")
+        field_1 = mtd.field("version")
+
+        field_2 = PNFieldMetaData(field_1)
+
+        self.assertNotEqual(field_2, None)
+        self.assertEqual(field_2.name(), "version")
+        self.assertEqual(field_2.isPrimaryKey(), False)
+        self.assertEqual(field_2.isCompoundKey(), False)
+        self.assertEqual(field_2.length(), 3)
+        self.assertEqual(field_2.allowNull(), False)
+        self.assertEqual(field_2.visibleGrid(), True)
+        self.assertEqual(field_2.visible(), True)
+        self.assertEqual(field_2.editable(), False)
+        self.assertEqual(field_2.defaultValue(), "0.0")
+        self.assertEqual(field_2.regExpValidator(), "[0-9]\\.[0-9]")
+
 
 class TestUintField(unittest.TestCase):
-    """Test uint field"""
+    """Test uint field."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -60,9 +97,17 @@ class TestUintField(unittest.TestCase):
         self.assertEqual(field.defaultValue(), None)
         self.assertEqual(field.regExpValidator(), None)
 
+        assign_value = field.formatAssignValue("seq", 666, False)
+
+        self.assertEqual(assign_value, "seq = 666")
+
+        table_metadata = field.metadata()
+
+        self.assertEqual(table_metadata.name(), "flseqs")
+
 
 class TestStringListField(unittest.TestCase):
-    """Test string field"""
+    """Test stringlist field."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -89,10 +134,11 @@ class TestStringListField(unittest.TestCase):
         self.assertEqual(field.editable(), True)
         self.assertEqual(field.defaultValue(), None)
         self.assertEqual(field.regExpValidator(), None)
+        self.assertEqual(field.flDecodeType("stringlist"), "string")
 
 
 class TestPixmapField(unittest.TestCase):
-    """Test string field"""
+    """Test pixmap field."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -118,10 +164,11 @@ class TestPixmapField(unittest.TestCase):
         self.assertEqual(field.visible(), True)
         self.assertEqual(field.editable(), True)
         self.assertEqual(field.defaultValue(), None)
+        self.assertEqual(field.flDecodeType("pixmap"), "string")
 
 
 class TestUnlockField(unittest.TestCase):
-    """Test string field"""
+    """Test unlock field."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -148,10 +195,11 @@ class TestUnlockField(unittest.TestCase):
         self.assertEqual(field.editable(), True)
         self.assertEqual(field.defaultValue(), True)
         self.assertEqual(field.regExpValidator(), None)
+        self.assertEqual(field.flDecodeType("unlock"), "bool")
 
 
 class TestBoolField(unittest.TestCase):
-    """Test string field"""
+    """Test bool field."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -159,7 +207,7 @@ class TestBoolField(unittest.TestCase):
         init_testing()
 
     def test_basic(self) -> None:
-        """Test collect a field from the pntablemetadata flmodules and check the values"""
+        """Test collect a field from the pntablemetadata flmetadata and check the values"""
 
         from pineboolib.application import project
 
@@ -179,10 +227,11 @@ class TestBoolField(unittest.TestCase):
         self.assertEqual(field.editable(), True)
         self.assertEqual(field.defaultValue(), None)
         self.assertEqual(field.regExpValidator(), None)
+        self.assertEqual(field.flDecodeType("bool"), "bool")
 
 
 class TestDateField(unittest.TestCase):
-    """Test date field"""
+    """Test date field."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -210,10 +259,11 @@ class TestDateField(unittest.TestCase):
         self.assertEqual(field.editable(), False)
         self.assertEqual(field.defaultValue(), None)
         self.assertEqual(field.regExpValidator(), None)
+        self.assertEqual(field.flDecodeType("date"), "date")
 
 
 class TestTimeField(unittest.TestCase):
-    """Test date field"""
+    """Test time field."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -241,10 +291,11 @@ class TestTimeField(unittest.TestCase):
         self.assertEqual(field.editable(), False)
         self.assertEqual(field.defaultValue(), None)
         self.assertEqual(field.regExpValidator(), None)
+        self.assertEqual(field.flDecodeType("time"), "time")
 
 
 class TestDoubleField(unittest.TestCase):
-    """Test date field"""
+    """Test double field."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -294,6 +345,66 @@ class TestDoubleField(unittest.TestCase):
         self.assertEqual(field.regExpValidator(), None)
         self.assertEqual(field.partInteger(), 5)
         self.assertEqual(field.partDecimal(), 8)
+        self.assertEqual(field.flDecodeType("double"), "double")
+
+
+class TestOptionsListField(unittest.TestCase):
+    """Test string field with optionsList."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Ensure pineboo is initialized for testing."""
+        init_testing()
+
+    def test_basic(self) -> None:
+        """Test collect a field and check the values"""
+
+        from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
+
+        field = PNFieldMetaData(
+            "new_string",
+            "Nuevo String",
+            False,
+            False,
+            "string",
+            20,
+            False,
+            True,
+            True,
+            0,
+            0,
+            False,
+            False,
+            False,
+            "primero",
+            False,
+            None,
+            True,
+            False,
+            False,
+        )
+
+        self.assertNotEqual(field, None)
+
+        field.setOptionsList("primero,segundo,tercero,cuarto,quinto,sexto,12345678901234567890")
+
+        self.assertEqual(field.name(), "new_string")
+        self.assertEqual(field.alias(), "Nuevo String")
+        self.assertEqual(field.isPrimaryKey(), False)
+        self.assertEqual(field.isCompoundKey(), False)
+        self.assertEqual(field.length(), 20)
+        self.assertEqual(field.type(), "string")
+        self.assertEqual(field.allowNull(), False)
+        self.assertEqual(field.visibleGrid(), True)
+        self.assertEqual(field.visible(), True)
+        self.assertEqual(field.editable(), True)
+        self.assertEqual(field.defaultValue(), "primero")
+        self.assertEqual(field.regExpValidator(), None)
+        self.assertEqual(field.partInteger(), 0)
+        self.assertEqual(field.partDecimal(), 0)
+        self.assertEqual(field.flDecodeType("string"), "string")
+        self.assertEqual(field.optionsList(), ["primero", "segundo", "tercero", "cuarto", "quinto", "sexto", "12345678901234567890"])
+        self.assertEqual(field.getIndexOptionsList("segundo"), 1)
 
 
 if __name__ == "__main__":

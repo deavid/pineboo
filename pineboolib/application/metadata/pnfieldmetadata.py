@@ -542,7 +542,7 @@ class PNFieldMetaData(IFieldMetaData):
 
         return self.d.mtd_
 
-    def flDecodeType(self, fltype_) -> Optional[str]:
+    def flDecodeType(self, fltype_=None) -> Optional[str]:
         """
         Get the type of the field converted to an equivalent type of the QVariant class.
         """
@@ -562,7 +562,7 @@ class PNFieldMetaData(IFieldMetaData):
             _type = "time"
         elif fltype_ == "date":
             _type = "date"
-        elif fltype_ == "string" or fltype_ == "pixmap" or fltype_ == "stringList":
+        elif fltype_ == "string" or fltype_ == "pixmap" or fltype_ == "stringlist":
             _type = "string"
         elif fltype_ == "bytearray":
             _type = "bytearray"
@@ -614,6 +614,7 @@ class PNFieldMetaData(IFieldMetaData):
         self.d.allowNull_ = od.allowNull_
         self.d.isPrimaryKey_ = od.isPrimaryKey_
         self.d.type_ = od.type_
+        self.d.length_ = od.length_
         self.d.calculated_ = od.calculated_
         self.d.fullyCalculated_ = od.fullyCalculated_
         self.d.trimmed_ = od.trimmed_
