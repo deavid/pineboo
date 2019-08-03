@@ -32,7 +32,7 @@ cp source/_static/linters/mypy-html-tpl.css source/_static/linters/mypy/mypy-htm
 # ----
 echo "Running Coverage . . ."
 (cd .. && pytest -q --cov=pineboolib --cov-report= pineboolib/)
-(cd .. && coverage html -d source/_static/linters/pytest-coverage/)
+(cd .. && coverage html -d docs/source/_static/linters/pytest-coverage/)
 cp source/_static/linters/pytest-coverage-style-tpl.css source/_static/linters/pytest-coverage/style.css
 # ----
 echo "Running Bandit . . ."
