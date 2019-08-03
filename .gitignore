@@ -27,5 +27,7 @@ dist/
 pineboo.egg-info/
 .coverage
 docs/source/_static/linters/pytest-coverage
+docs/source/_static/linters/mypy
+docs/source/_static/linters/bandit
 docs/source/linters/pylint/static
 mypy_report
