@@ -185,7 +185,7 @@ class XMLAction(ActionStruct):
         if self.mainform_widget is None:
             raise Exception("Unexpected: No form loaded")
 
-        if self.mainform_widget.iface:
+        if hasattr(self.mainform_widget, "iface"):
             self.mainform_widget.iface.main()
         else:
             self.mainform_widget.main()
