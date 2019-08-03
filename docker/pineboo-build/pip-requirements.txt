@@ -93,3 +93,4 @@ xenon
 pylint-json2html
 pytest-cov
 json-rpc
+werkzeug
