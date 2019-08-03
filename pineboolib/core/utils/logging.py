@@ -5,7 +5,7 @@ It allows MyPy/PyType to properly keep track of the new message types
 """
 import logging as python_logging
 from logging import basicConfig  # noqa: F401
-from typing import Any
+from typing import Any, Set
 
 CRITICAL = 50
 FATAL = CRITICAL
@@ -27,6 +27,16 @@ class Logger(python_logging.Logger):
 
     Adds message, hint, notice  and trace
     """
+
+    PINEBOO_DEFAULT_LEVEL = 0
+    PINEBOO_LOGGERS: Set["Logger"] = set()
+
+    @classmethod
+    def set_pineboo_default_level(cls, level: int) -> None:
+        """Set the default logging level for the whole app."""
+        cls.PINEBOO_DEFAULT_LEVEL = level
+        for logger in cls.PINEBOO_LOGGERS:
+            logger.setLevel(level)
 
     def message(self, message: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
@@ -55,7 +65,15 @@ def getLogger(name: str = None) -> Logger:
     If no name is specified, return the root logger.
     """
     if name:
-        return python_logging.Logger.manager.getLogger(name)  # type: ignore
+        # print(name)
+        # if not name.startswith("pineboolib."):
+        #     raise ValueError("Invalid logger name %r, should be the module path.")
+        logger: Logger = python_logging.Logger.manager.getLogger(name)  # type: ignore
+        Logger.PINEBOO_LOGGERS.add(logger)
+        if Logger.PINEBOO_DEFAULT_LEVEL != 0 and logger.level == 0:
+            logger.setLevel(Logger.PINEBOO_DEFAULT_LEVEL)
+
+        return logger
     else:
         raise Exception("Pineboo getLogger does not allow for root logger")
 

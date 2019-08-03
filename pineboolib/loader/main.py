@@ -1,8 +1,9 @@
 """Main module for starting up Pineboo."""
 import gc
 import sys
-import traceback
 from optparse import Values
+from typing import List, Type
+from types import TracebackType
 
 from PyQt5 import QtCore, QtWidgets
 
@@ -15,7 +16,7 @@ from .dgi import load_dgi
 logger = logging.getLogger(__name__)
 
 
-def startup_no_X():
+def startup_no_X() -> None:
     """Start Pineboo with no GUI."""
     startup(enable_gui=False)
 
@@ -33,8 +34,11 @@ def startup(enable_gui: bool = None) -> None:
     options = parse_options()
     if enable_gui is not None:
         options.enable_gui = enable_gui
+    trace_loggers: List[str] = []
+    if options.trace_loggers:
+        trace_loggers = options.trace_loggers.split(",")
 
-    init_logging(logtime=options.log_time, loglevel=options.loglevel)
+    init_logging(logtime=options.log_time, loglevel=options.loglevel, trace_loggers=trace_loggers)
 
     if options.enable_profiler:
         ret = exec_main_with_profiler(options)
@@ -50,23 +54,31 @@ def startup(enable_gui: bool = None) -> None:
         sys.exit(0)
 
 
-def init_logging(loglevel: int = logging.INFO, logtime: bool = False):
+def init_logging(loglevel: int = logging.INFO, logtime: bool = False, trace_loggers: List[str] = []) -> None:
     """Initialize pineboo logging."""
     # ---- LOGGING -----
-    log_format = "%(levelname)s: %(name)s: %(message)s"
+    log_format = "%(levelname)s: %(module)s: %(message)s"
 
     if logtime:
         log_format = "%(asctime)s - %(levelname)s: %(name)s: %(message)s"
 
-    logging.basicConfig(format=log_format, level=loglevel)
+    app_loglevel = logging.TRACE if trace_loggers else loglevel
+    if trace_loggers:
+        logging.Logger.set_pineboo_default_level(loglevel)
+
+    logging.basicConfig(format=log_format, level=app_loglevel)
     # logger.info("LOG LEVEL: %s", loglevel)
     disable_loggers = ["PyQt5.uic.uiparser", "PyQt5.uic.properties", "blib2to3.pgen2.driver"]
     for loggername in disable_loggers:
         modlogger = logging.getLogger(loggername)
         modlogger.setLevel(logging.WARN)
 
+    for loggername in trace_loggers:
+        modlogger = logging.getLogger(loggername)
+        modlogger.setLevel(logging.TRACE)
 
-def exec_main_with_profiler(options) -> int:
+
+def exec_main_with_profiler(options: Values) -> int:
     """Enable profiler."""
     import cProfile
     import pstats
@@ -85,11 +97,13 @@ def exec_main_with_profiler(options) -> int:
     return ret
 
 
-def _excepthook(type, value, tback):
-    return traceback.print_exception(type, value, tback)
+def _excepthook(type_: Type[BaseException], value: BaseException, traceback: TracebackType) -> None:
+    import traceback as pytback
+
+    pytback.print_exception(type_, value, traceback)
 
 
-def init_cli():
+def init_cli() -> None:
     """Create CLI singletons."""
     # FIXME: Order of import is REALLY important here. FIX.
     # from pineboolib.fllegacy.aqsobjects import aqsobjectfactory
@@ -107,7 +121,7 @@ def init_cli():
     # pncontrolsfactory.qsa_sys = pncontrolsfactory.SysType()
 
 
-def init_gui():
+def init_gui() -> None:
     """Create GUI singletons."""
     from pineboolib.plugins.mainform.eneboo import eneboo
     from pineboolib.plugins.mainform.eneboo_mdi import eneboo_mdi
@@ -116,7 +130,7 @@ def init_gui():
     eneboo_mdi.mainWindow = eneboo_mdi.MainForm()
 
 
-def setup_gui(app: QtCore.QCoreApplication, options: Values):
+def setup_gui(app: QtCore.QCoreApplication, options: Values) -> None:
     """Initialize GUI app."""
     from pineboolib.core.utils.utils_base import filedir
     from pineboolib.application.utils.mobilemode import is_mobile_mode
@@ -147,7 +161,7 @@ def setup_gui(app: QtCore.QCoreApplication, options: Values):
     app.setFont(font)
 
 
-def init_testing():
+def init_testing() -> None:
     """Initialize Pineboo for testing purposes."""
     from pineboolib.application import project  # FIXME: next time, proper singleton
 

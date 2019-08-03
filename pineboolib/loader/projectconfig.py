@@ -29,7 +29,7 @@ class ProjectConfig:
         if load_xml:
             self.load_projectxml(load_xml)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<ProjectConfig database=%s host:port=%s:%s type=%s user=%s>" % (
             self.database,
             self.host,
