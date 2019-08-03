@@ -32,7 +32,6 @@ if [ "$1" = "tpl" ]; then
     if [ "$MODNAME_PRE" == "index" ]; then
         TEMPLATE="package_template.rst"
     fi
-    echo "MOD: $MODULE  DST: $DSTFILE"
     sed -e "s|%MODULE%|$MODULE|g" -e "s|%MODNAME%|$MODNAME|g" "$TEMPLATE" > "$DSTFILE"
     if [ "$MODNAME_PRE" == "index" ]; then
         echo "" >> "$DSTFILE"
@@ -44,6 +43,9 @@ if [ "$1" = "tpl" ]; then
         # this serves to avoid changing the modification times, so other tools may cache.
         rm "$DSTFILE"
         mv "$DSTOLDFILE" "$DSTFILE"
+    else
+        # Report file change:
+        echo "MOD: $MODULE  DST: $DSTFILE"
     fi
 
 fi
