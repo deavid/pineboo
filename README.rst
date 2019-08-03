@@ -181,3 +181,5 @@ Por ejemplo, las conversiones de masterarticulos.qs se pueden ver en la ruta
 `tempdata/cache/nombre_bd/flfactalma/file.qs/masterarticulos/`.
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8851ebbd29a64616904500cc0aa30096)](https://www.codacy.com/app/Aulla/pineboo?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Aulla/pineboo&amp;utm_campaign=Badge_Grade)
+[![pipeline status](https://gitlab.com/deavidsedice/pineboo/badges/master/pipeline.svg)](https://gitlab.com/deavidsedice/pineboo/commits/master)
+[![coverage report](https://gitlab.com/deavidsedice/pineboo/badges/master/coverage.svg)](https://gitlab.com/deavidsedice/pineboo/commits/master)
