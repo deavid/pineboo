@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QWidget
+from . import qwidget
 
 
-class QLayoutWidget(QWidget):
+class QLayoutWidget(qwidget.QWidget):
     pass

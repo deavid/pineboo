@@ -156,7 +156,10 @@ class FormDBWidget(QtWidgets.QWidget):
 
     def __getattr__(self, name):
         """Guess if attribute can be found in other related objects."""
-        ret_ = getattr(self.cursor_, name, None) or getattr(self.parent(), name, None) or getattr(self.parent().script, name, None)
+        ret_ = getattr(self.cursor_, name, None)
+        if ret_ is None and self.parent():
+            ret_ = getattr(self.parent(), name, None) or getattr(self.parent().script, name, None)
+
         if ret_:
             return ret_
 

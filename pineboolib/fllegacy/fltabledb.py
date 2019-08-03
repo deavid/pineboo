@@ -2442,15 +2442,16 @@ class FLTableDB(QtWidgets.QWidget):
         # cur.seek(cur_row)
         sheet.close()
         spread_sheet.close()
+        from PyQt5.QtWidgets import qApp
 
         util.setProgress(tdb_num_rows)
-        aqApp.setOverrideCursor(QtCore.Qt.WaitCursor)
+        qApp.setOverrideCursor(QtCore.Qt.WaitCursor)
         file_name = "%s/%s%s.ods" % (aqApp.tmp_dir(), mtd.name(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
         ods_gen.generateOds(file_name)
 
         SysBaseType.openUrl(file_name)
 
-        aqApp.restoreOverrideCursor()
+        qApp.restoreOverrideCursor()
         util.destroyProgressDialog()
 
     def switchSortOrder(self, col: int = 0) -> None:

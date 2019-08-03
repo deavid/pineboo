@@ -10,7 +10,7 @@ from pineboolib.application.packager.aqunpacker import AQUnpacker  # noqa: F401
 
 from pineboolib.qt3_widgets.qcombobox import QComboBox  # noqa: F401
 from pineboolib.qt3_widgets.qtable import QTable  # noqa: F401
-from pineboolib.qt3_widgets.qwidget import QWidget as QLayoutWidget  # noqa: F401
+from pineboolib.qt3_widgets.qlayoutwidget import QLayoutWidget  # noqa: F401
 from pineboolib.qt3_widgets.qtoolbutton import QToolButton  # noqa: F401
 from pineboolib.qt3_widgets.qtabwidget import QTabWidget  # noqa: F401
 from pineboolib.qt3_widgets.qlabel import QLabel  # noqa: F401
@@ -33,13 +33,14 @@ from pineboolib.qt3_widgets.qmainwindow import QMainWindow  # noqa: F401
 from pineboolib.qt3_widgets.qmenu import QMenu  # noqa: F401
 from pineboolib.qt3_widgets.qtoolbar import QToolBar  # noqa: F401
 from pineboolib.qt3_widgets.qaction import QAction  # noqa: F401
-from pineboolib.qt3_widgets.qwidget import QWidget as QDataView  # noqa: F401
+from pineboolib.qt3_widgets.qdataview import QDataView  # noqa: F401
 from pineboolib.qt3_widgets.process import Process  # noqa: F401
 from pineboolib.qt3_widgets.qbytearray import QByteArray  # noqa: F401
 from pineboolib.qt3_widgets.qradiobutton import QRadioButton  # noqa: F401
 from pineboolib.qt3_widgets.qspinbox import QSpinBox  # noqa: F401
 from pineboolib.qt3_widgets.qmdiarea import QMdiArea  # noqa: F401
 from pineboolib.qt3_widgets.qeventloop import QEventLoop  # noqa: F401
+from pineboolib.qt3_widgets.qlistviewwidget import QListViewWidget  # noqa: F401
 
 from PyQt5.QtWidgets import QActionGroup  # noqa: F401
 from PyQt5.QtWidgets import QInputDialog  # noqa: F401
@@ -57,7 +58,7 @@ from PyQt5.QtWidgets import QTreeWidget  # noqa: F401
 from PyQt5.QtWidgets import QTreeWidgetItem  # noqa: F401
 from PyQt5.QtWidgets import QTreeWidgetItemIterator  # noqa: F401
 from PyQt5.QtWidgets import QListWidgetItem  # noqa: F401
-from PyQt5.QtWidgets import QListWidget as QListViewWidget  # noqa: F401
+
 
 from PyQt5.QtCore import QSignalMapper  # noqa: F401
 from PyQt5.QtCore import QSize  # noqa: F401
@@ -80,8 +81,8 @@ from PyQt5.QtXml import QDomNode as FLDomNode  # noqa: F401
 from PyQt5.QtXml import QDomNodeList as FLDomNodeList  # noqa: F401
 
 from pineboolib.qt3_widgets.formdbwidget import FormDBWidget  # noqa: F401
-from pineboolib.qt3_widgets.qtable import QTable as FLTable  # noqa: F401
 
+from pineboolib.fllegacy.fltable import FLTable  # noqa: F401
 from pineboolib.fllegacy.fllineedit import FLLineEdit  # noqa: F401
 from pineboolib.fllegacy.fltimeedit import FLTimeEdit  # noqa: F401
 from pineboolib.fllegacy.fldateedit import FLDateEdit  # noqa: F401
@@ -115,24 +116,26 @@ from pineboolib.fllegacy.flsmtpclient import FLSmtpClient  # noqa: F401
 
 
 # Clases QSA
-from PyQt5.QtWidgets import QFileDialog as FileDialog  # noqa: F401
+
 from PyQt5.QtGui import QColor as Color  # noqa: F401
 from PyQt5.QtWidgets import QLabel as Label  # noqa: F401
 from PyQt5.QtCore import QLine as Line  # noqa: F401
 
 from pineboolib.qt3_widgets.checkbox import CheckBox  # noqa: F401
-from pineboolib.qt3_widgets.qcombobox import QComboBox as ComboBox  # noqa: F401
-from pineboolib.qt3_widgets.qtextedit import QTextEdit as TextEdit  # noqa: F401
-from pineboolib.qt3_widgets.qlineedit import QLineEdit as LineEdit  # noqa: F401
+from pineboolib.qt3_widgets.combobox import ComboBox  # noqa: F401
+from pineboolib.qt3_widgets.textedit import TextEdit  # noqa: F401
+from pineboolib.qt3_widgets.lineedit import LineEdit  # noqa: F401
 from pineboolib.qt3_widgets.messagebox import MessageBox  # noqa: F401
 from pineboolib.qt3_widgets.radiobutton import RadioButton  # noqa: F401
+from pineboolib.qt3_widgets.filedialog import FileDialog  # noqa: F401
+from pineboolib.qt3_widgets.spinbox import SpinBox  # noqa: F401
 
 from pineboolib.qt3_widgets.dialog import Dialog  # noqa: F401
 from pineboolib.qt3_widgets.groupbox import GroupBox  # noqa: F401
-from pineboolib.qt3_widgets.qspinbox import QSpinBox as SpinBox  # noqa: F401
+
 from pineboolib.qt3_widgets.numberedit import NumberEdit  # noqa: F401
-from pineboolib.qt3_widgets.qdateedit import QDateEdit as DateEdit  # noqa: F401
-from pineboolib.qt3_widgets.qtimeedit import QTimeEdit as TimeEdit  # noqa: F401
+from pineboolib.qt3_widgets.dateedit import DateEdit  # noqa: F401
+from pineboolib.qt3_widgets.timeedit import TimeEdit  # noqa: F401
 
 from pineboolib.fllegacy.flapplication import aqApp  # noqa: F401
 
