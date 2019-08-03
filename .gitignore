@@ -34,3 +34,4 @@ docs/index_template.rst
 docs/source/code/pineboolib
 docs/source/code/old.pineboolib
 mypy_report
+venv
