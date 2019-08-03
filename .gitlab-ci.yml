@@ -27,8 +27,8 @@ test:
     - flake8 pineboolib/
     - black --check --fast -l 140 --exclude='(\.eggs|\.git|\.hg|\.mypy_cache|\.nox|\.tox|\.venv|_build|buck-out|build|dist|lextab.py)' pineboolib/
     - mypy -p pineboolib
-    - pytest --cov pineboolib/
-    - coverage report --fail-under=11
+    - pytest --cov=pineboolib pineboolib/
+    - coverage report --fail-under=23
     # PyDocStyle lacks "exclude":
     - rm pineboolib/application/parsers/qsaparser/lextab.py || /bin/true
     - pydocstyle pineboolib/application pineboolib/core pineboolib/interfaces
