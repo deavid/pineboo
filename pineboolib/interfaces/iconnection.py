@@ -15,10 +15,10 @@ class IConnection:
     """Interface for database cursors which are used to emulate FLSqlCursor."""
 
     db_name: str
-    db_host: str
-    db_port: int
-    db_userName: str
-    db_password: str
+    db_host: Optional[str]
+    db_port: Optional[int]
+    db_userName: Optional[str]
+    db_password: Optional[str]
     conn: Any  # connection from the actual driver
     connAux: Dict[str, "IConnection"]
     driverSql: Any
@@ -135,17 +135,17 @@ class IConnection:
 
         return ""
 
-    def host(self) -> str:
+    def host(self) -> Optional[str]:
         """Return the name of the database host."""
 
         return ""
 
-    def port(self) -> int:
+    def port(self) -> Optional[int]:
         """Return the port used by the database."""
 
         return 0
 
-    def user(self) -> str:
+    def user(self) -> Optional[str]:
         """Return the user name used by the database."""
 
         return ""

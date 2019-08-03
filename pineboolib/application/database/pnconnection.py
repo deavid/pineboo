@@ -29,10 +29,10 @@ class PNConnection(QtCore.QObject, IConnection):
     """Wrapper for database cursors which are used to emulate FLSqlCursor."""
 
     db_name: str
-    db_host: str
-    db_port: int
-    db_userName: str
-    db_password: str
+    db_host: Optional[str]
+    db_port: Optional[int]
+    db_userName: Optional[str]
+    db_password: Optional[str]
     conn: Any = None  # Connection from the actual driver
     driverSql: "PNSqlDrivers"
     transaction_: int
@@ -49,7 +49,14 @@ class PNConnection(QtCore.QObject, IConnection):
     lastActiveCursor_: Optional["PNSqlCursor"]
 
     def __init__(
-        self, db_name: str, db_host: str, db_port: int, db_userName: str, db_password: str, driverAlias: str, name: str = None
+        self,
+        db_name: str,
+        db_host: Optional[str],
+        db_port: Optional[int],
+        db_userName: Optional[str],
+        db_password: Optional[str],
+        driverAlias: str,
+        name: str = None,
     ) -> None:
         """Database connection through a sql driver."""
 
@@ -211,7 +218,9 @@ class PNConnection(QtCore.QObject, IConnection):
 
         return self.conn.cursor()
 
-    def conectar(self, db_name: str, db_host: str, db_port: int, db_userName: str, db_password: str) -> Any:
+    def conectar(
+        self, db_name: str, db_host: Optional[str], db_port: Optional[int], db_userName: Optional[str], db_password: Optional[str]
+    ) -> Any:
         """Request a connection to the database."""
 
         self.db_name = db_name
@@ -246,22 +255,22 @@ class PNConnection(QtCore.QObject, IConnection):
 
         return self.driver().lastError()
 
-    def host(self) -> str:
+    def host(self) -> Optional[str]:
         """Return the name of the database host."""
 
         return self.db_host
 
-    def port(self) -> int:
+    def port(self) -> Optional[int]:
         """Return the port used by the database."""
 
         return self.db_port
 
-    def user(self) -> str:
+    def user(self) -> Optional[str]:
         """Return the user name used by the database."""
 
         return self.db_userName
 
-    def password(self) -> Any:
+    def password(self) -> Optional[str]:
         """Return the password used by the database."""
 
         return self.db_password
