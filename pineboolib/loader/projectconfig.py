@@ -24,19 +24,32 @@ class ProjectConfig:
     """
 
     logger = logging.getLogger("loader.projectConfig")
+
+    #: Folder where to read/write project configs.
     profile_dir: str = filedir(config.value("ebcomportamiento/profiles_folder", "../profiles"))
+
+    database: str  #: Database Name, file path to store it, or :memory:
+    host: Optional[str]  #: DB server Hostname. None for local files.
+    port: Optional[int]  #: DB server port. None for local files.
+    username: Optional[str]  #: Database User login name.
+    password: Optional[str]  #: Database User login password.
+    type: str  #: Driver Type name to use when connecting
+    project_password: str  #: Password to cipher when load/saving. Empty string for no ciphering.
+    description: str  #: Project name in GUI
+    filename: str  #: File path to read / write this project from / to
 
     def __init__(
         self,
         database: Optional[str] = None,
         host: Optional[str] = None,
-        port: Optional[str] = None,
+        port: Optional[int] = None,
         type: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
         load_xml: Optional[str] = None,
         connstring: Optional[str] = None,
         description: Optional[str] = None,
+        filename: Optional[str] = None,
     ) -> None:
         """Initialize."""
 
@@ -46,6 +59,10 @@ class ProjectConfig:
             self.filename = load_xml
             self.load_projectxml()
             return
+        if database is None:
+            raise ValueError("Database is mandatory. Or use load_xml / connstring params")
+        if type is None:
+            raise ValueError("Type is mandatory. Or use load_xml / connstring params")
         self.database = database
         self.host = host
         self.port = port
@@ -54,8 +71,11 @@ class ProjectConfig:
         self.password = password
         self.project_password = ""
         self.description = description if description else "unnamed"
-        file_basename = self.description.lower().replace(" ", "_")
-        self.filename = os.path.join(self.profile_dir, "%s.xml" % file_basename)
+        if filename is None:
+            file_basename = self.description.lower().replace(" ", "_")
+            self.filename = os.path.join(self.profile_dir, "%s.xml" % file_basename)
+        else:
+            self.filename = filename
 
     def __repr__(self) -> str:
         """Display the information in text mode."""
@@ -78,17 +98,23 @@ class ProjectConfig:
         tree = ET.parse(file_name)
         root = tree.getroot()
         version = VersionNumber(root.get("Version"), default="1.0")
+        self.description = ""
+        for xmldescription in root.findall("name"):
+            self.description = xmldescription.text or ""
 
         for profile in root.findall("profile-data"):
             invalid_password = False
             if version == VERSION_1_0:
-                if getattr(profile.find("password"), "text", None) is not None:
+                self.project_password = getattr(profile.find("password"), "text", "")
+                if self.project_password:
                     invalid_password = True
             else:
-                profile_pwd = getattr(profile.find("password"), "text", None)
-                user_pwd = hashlib.sha256("".encode()).hexdigest()
-                if profile_pwd != user_pwd:
-                    invalid_password = True
+                profile_pwd = getattr(profile.find("password"), "text", "")
+                self.project_password = profile_pwd
+                if profile_pwd:
+                    user_pwd = hashlib.sha256("".encode()).hexdigest()
+                    if profile_pwd != user_pwd:
+                        invalid_password = True
 
             if invalid_password:
                 self.logger.warning("No se puede cargar un profile con contraseña por consola")
@@ -100,19 +126,22 @@ class ProjectConfig:
         dbname_elem = root.find("database-name")
         if dbname_elem is None:
             raise ValueError("database-name not found")
+        if not dbname_elem.text:
+            raise ValueError("database-name not valid")
         self.database = dbname_elem.text
         for db in root.findall("database-server"):
             host_elem, port_elem, type_elem = (db.find("host"), db.find("port"), db.find("type"))
             if host_elem is None or port_elem is None or type_elem is None:
                 raise ValueError("host, port and type are required")
             self.host = host_elem.text
-            self.port = port_elem.text
-            self.type = type_elem.text
+            self.port = int(port_elem.text) if port_elem.text else None
+            if type_elem.text:
+                self.type = type_elem.text
+            else:
+                raise ValueError("No type defined")
             # FIXME: Move this to project, or to the connection handler.
             if self.type not in sql_drivers_manager.aliasList():
                 self.logger.warning("Esta versión de pineboo no soporta el driver '%s'" % self.type)
-                self.database = None
-                return False
 
         for credentials in root.findall("database-credentials"):
             username_elem, password_elem = (
@@ -124,8 +153,6 @@ class ProjectConfig:
             else:
                 self.username = username_elem.text
             if password_elem is not None and password_elem.text:
-                import base64
-
                 self.password = base64.b64decode(password_elem.text).decode()
             else:
                 self.password = ""
@@ -154,10 +181,11 @@ class ProjectConfig:
         passwDB = self.password or ""
         nameDB = self.database
 
-        pass_profile = hashlib.sha256(self.project_password.encode()).hexdigest()
         profile_user = ET.SubElement(profile, "profile-data")
         profile_password = ET.SubElement(profile_user, "password")
-        profile_password.text = pass_profile
+        if self.project_password:
+            pass_profile = hashlib.sha256(self.project_password.encode()).hexdigest()
+            profile_password.text = pass_profile
 
         name = ET.SubElement(profile, "name")
         name.text = description
@@ -167,7 +195,8 @@ class ProjectConfig:
         dbshost = ET.SubElement(dbs, "host")
         dbshost.text = url
         dbsport = ET.SubElement(dbs, "port")
-        dbsport.text = port
+        if port:
+            dbsport.text = str(port)
 
         dbc = ET.SubElement(profile, "database-credentials")
         dbcuser = ET.SubElement(dbc, "username")
@@ -184,7 +213,7 @@ class ProjectConfig:
         tree.write(filename, xml_declaration=True, encoding="utf-8")
 
     @classmethod
-    def translate_connstring(cls, connstring: str) -> Tuple[Any, Any, Any, Any, Any, Any]:
+    def translate_connstring(cls, connstring: str) -> Tuple[str, str, str, str, int, str]:
         """
         Translate a DSN connection string into user, pass, etc.
 
@@ -200,13 +229,13 @@ class ProjectConfig:
         driver_alias = ""
         user_pass = None
         host_port = None
-        try:
-            uphpstring = connstring[: connstring.rindex("/")]
-        except ValueError:
+        if "/" not in connstring:
             dbname = connstring
             if not re.match(r"\w+", dbname):
                 raise ValueError("base de datos no valida")
-            return user, passwd, driver_alias, host, port, dbname
+            return user, passwd, driver_alias, host, int(port), dbname
+
+        uphpstring = connstring[: connstring.rindex("/")]
         dbname = connstring[connstring.rindex("/") + 1 :]
         up, hp = uphpstring.split("@")
         conn_list = [None, None, up, hp]
@@ -243,7 +272,7 @@ class ProjectConfig:
             port,
             dbname,
         )
-        return user, passwd, driver_alias, host, port, dbname
+        return user, passwd, driver_alias, host, int(port), dbname
 
 
 class ProfileAlreadyExistsError(Exception):
