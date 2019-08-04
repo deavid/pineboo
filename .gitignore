@@ -13,6 +13,9 @@ share/pineboo/scripts/*.py.src
 deploy_tools/src/*
 deploy_tools/sysroots/*
 deploy_tools/builds/*
+deploy_tools/pineboolib/*
+deploy_tools/share/*
+deploy_tools/profiles/*
 __pycache__
 test.qs.py
 test.qs.py.debug
