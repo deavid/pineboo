@@ -222,7 +222,7 @@ def Deprecated(fn: T_FN) -> T_FN:
 
 def pyqtSlot(*args: Any) -> Callable[[T_FN], T_FN]:
     """
-    Create Qt Slot from classm method.
+    Create Qt Slot from class method.
 
     Same as QtCore.pyQtSlot but with Typing information for mypy.
     Please use this one instead of QtCore.pyQtSlot().
@@ -232,3 +232,15 @@ def pyqtSlot(*args: Any) -> Callable[[T_FN], T_FN]:
         return cast(T_FN, QtCore.pyqtSlot(*args)(fn))
 
     return _pyqtSlot
+
+
+# NOTE: Does not work with Python 3.6 or newer :-(
+# def typecheck(fn: T_FN) -> T_FN:
+#     """
+#     Check function call parameters by using typecheck-decorator.
+#
+#     This decorator uses casting to preserve original function signature on MyPy.
+#     """
+#     import typecheck as tc
+#
+#     return cast(T_FN, tc.typecheck(fn))

@@ -4,8 +4,11 @@ import re
 from typing import Any, Tuple, Optional
 
 from pineboolib import logging
+from pineboolib.core.utils.version import VersionNumber
 
-# from pineboolib.core.utils.version import VersionNumber
+VERSION_1_0 = VersionNumber("1.0")
+VERSION_1_1 = VersionNumber("1.1")
+VERSION_1_2 = VersionNumber("1.2")
 
 
 class ProjectConfig:
@@ -62,18 +65,11 @@ class ProjectConfig:
 
         tree = ET.parse(file_name)
         root = tree.getroot()
-
-        version_ = root.get("Version")
-        if version_ is None:
-            version = 1.0
-        else:
-            version = float(
-                version_
-            )  # FIXME: Esto es muy mala idea. Tratar versiones como float causará problemas al comparar.
+        version = VersionNumber(root.get("Version"), default="1.0")
 
         for profile in root.findall("profile-data"):
             invalid_password = False
-            if version == 1.0:
+            if version == VERSION_1_0:
                 if getattr(profile.find("password"), "text", None) is not None:
                     invalid_password = True
             else:
