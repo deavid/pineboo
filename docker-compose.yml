@@ -5,4 +5,4 @@ services:
     image: pineboo/build
     volumes:
      - ./:/usr/src/pineboo
-    command: bash -c 'cd /usr/src/pineboo; flake8 pineboolib/; mypy -p pineboolib; pytest pineboolib/'
+    # command: bash -c 'cd /usr/src/pineboo; flake8 pineboolib/; mypy -p pineboolib; pytest pineboolib/'

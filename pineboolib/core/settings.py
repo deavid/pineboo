@@ -81,7 +81,9 @@ class PinebooSettings(QSettings):
     def _value(self, key: str, default: Any = None) -> Any:
         value = super().value(key, None)
         if value is None:
-            logger.debug("%s.value(%s) -> Default: %s %r", self.application, key, type(default), default)
+            logger.debug(
+                "%s.value(%s) -> Default: %s %r", self.application, key, type(default), default
+            )
             return default
         try:
             ret = self.load_value(value)
@@ -92,7 +94,7 @@ class PinebooSettings(QSettings):
             logger.debug("Error trying to parse json for %s: %s (%s)", key, exc, value)
             return value
 
-    def set_value(self, key: str, value: Union[QSize, str, bool, int, List[str]]) -> None:
+    def set_value(self, key: str, value: Union[QSize, str, bool, int, List[Any]]) -> None:
         """Set a value into INI file for specified key."""
         logger.debug("%s.set_value(%s) <- %s %r", self.application, key, type(value), value)
         curtime = time.time()

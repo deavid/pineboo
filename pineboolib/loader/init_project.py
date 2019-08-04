@@ -1,10 +1,13 @@
+"""
+Finalize pineboo setup and load.
+"""
 from pineboolib import logging
 from typing import Any
 
 logger = logging.getLogger("loader.init_project")
 
 
-def init_project(DGI, options, project, mainForm, app) -> Any:
+def init_project(DGI: Any, options: Any, project: Any, mainForm: Any, app: Any) -> Any:
     """Initialize the project and start it."""
     # from PyQt5 import QtCore  # type: ignore
 
@@ -13,12 +16,6 @@ def init_project(DGI, options, project, mainForm, app) -> Any:
     #     DGI.processEvents()
 
     logger.info("Iniciando proyecto ...")
-
-    # Necesario para que funcione isLoadedModule ¿es este el mejor sitio?
-    project.conn.managerModules().loadIdAreas()
-    project.conn.managerModules().loadAllIdModules()
-
-    project.load_modules()
 
     if options.preload:
         from .preload import preload_actions

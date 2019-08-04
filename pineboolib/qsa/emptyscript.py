@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pineboolib.pncontrolsfactory import FormDBWidget
+from pineboolib.qt3_widgets.formdbwidget import FormDBWidget
 
 
 class interna(object):

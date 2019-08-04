@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Módulo base para la ejecución de pineboo.
-Librería orientada a emular Eneboo desde python."""
+"""
+Base module for the execution of pineboo.
+
+Library oriented to emulate Eneboo from python.
+"""
 from .core.utils import logging  # noqa: F401

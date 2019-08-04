@@ -1,24 +1,7 @@
 # -*- coding: utf-8 -*-
-from pineboolib.application.utils.path import _path
-from pineboolib.core.utils.utils_base import filedir
-from importlib import machinery
-
-from sqlalchemy import String  # type: ignore
-
-import importlib
-import traceback
-import sys
-import os
-from pineboolib import logging
-
-from typing import Any
-
-logger = logging.getLogger("PNControlsFactory")
-
-# processed_: List[str] = []
-
 """
-Esta librería crea y registra modelos sqlAlchemy en el arbol qsa.
+Create and register sqlAlchemy models in QSA tree.
+
 Para llamar a uno de estos se puede hacer desde cualquier script de la siguiente manera
 
 from pineboolib.qsa import *
@@ -53,9 +36,27 @@ Ejemplo de uso:
         instance.saluda()
 
 """
+from pineboolib.application.utils.path import _path
+from pineboolib.core.utils.utils_base import filedir
+from importlib import machinery
+
+from sqlalchemy import String  # type: ignore
+
+import importlib
+import traceback
+import sys
+import os
+from pineboolib import logging
+
+from typing import Any
+
+logger = logging.getLogger("PNORMModelsFactory")
+
+# processed_: List[str] = []
 
 
 def base_model(name: str) -> Any:
+    """Import and return sqlAlchemy model for given table name."""
     # print("Base", name)
     from pineboolib.application import project
 
@@ -66,7 +67,9 @@ def base_model(name: str) -> Any:
     if path is None:
         raise Exception("File %s.mtd not found" % name)
     if path.find("share/pineboo/tables") > -1:
-        path = path.replace("share/pineboo/tables", "tempdata/cache/%s/sys/file.mtd" % project.conn.DBName())
+        path = path.replace(
+            "share/pineboo/tables", "tempdata/cache/%s/sys/file.mtd" % project.conn.DBName()
+        )
     if path:
         path = "%s_model.py" % path[:-4]
         if os.path.exists(path):
@@ -84,6 +87,7 @@ def base_model(name: str) -> Any:
 
 
 def load_model(nombre):
+    """Import and return sqlAlchemy model for given table name."""
 
     if nombre is None:
         return
@@ -99,7 +103,7 @@ def load_model(nombre):
     # if mod is None:
     #    mod = base_model(nombre)
     #    if mod:
-    #        setattr(qsa_dict_modules, model_name, mod)
+    #        setattr(qsa_dict_modules, model_name, mod)  # NOTE: Use application.qsadictmodules
     from pineboolib.application import project
 
     db_name = project.conn.DBName()
@@ -136,6 +140,7 @@ def load_model(nombre):
 
 
 def empty_base():
+    """Cleanup sqlalchemy models."""
     from pineboolib.application import project
 
     if project.conn is None:
@@ -147,8 +152,9 @@ def empty_base():
 
 
 def load_models() -> None:
+    """Load all sqlAlchemy models."""
 
-    from pineboolib import qsa as qsa_dict_modules
+    from pineboolib.application.qsadictmodules import QSADictModules
     from pineboolib.application import project
 
     if project.conn is None:
@@ -157,9 +163,9 @@ def load_models() -> None:
     db_name = project.conn.DBName()
     tables = project.conn.tables()
 
-    setattr(qsa_dict_modules, "Base", project.conn.declarative_base())
-    setattr(qsa_dict_modules, "session", project.conn.session())
-    setattr(qsa_dict_modules, "engine", project.conn.engine())
+    QSADictModules.save_other("Base", project.conn.declarative_base())
+    QSADictModules.save_other("session", project.conn.session())
+    QSADictModules.save_other("engine", project.conn.engine())
 
     for t in tables:
         try:
@@ -171,7 +177,7 @@ def load_models() -> None:
             model_name = "%s%s" % (t[0].upper(), t[1:])
             class_ = getattr(mod, model_name, None)
             if class_ is not None:
-                setattr(qsa_dict_modules, model_name, class_)
+                QSADictModules.save_other(model_name, class_)
 
     for root, dirs, files in os.walk(filedir("..", "tempdata", "cache", db_name, "models")):
         for nombre in files:  # Buscamos los presonalizados
@@ -184,7 +190,7 @@ def load_models() -> None:
 
                 class_ = getattr(mod, model_name, None)
                 if class_ is not None:
-                    setattr(qsa_dict_modules, model_name, class_)
+                    QSADictModules.save_other(model_name, class_)
 
 
 Calculated = String

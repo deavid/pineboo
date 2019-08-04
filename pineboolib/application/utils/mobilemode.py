@@ -1,7 +1,17 @@
+"""
+To detect if we are in mobile mode.
+"""
+
 MOBILE_MODE = None
 
 
 def is_mobile_mode() -> bool:
+    """
+    Return if you are working in mobile mode.
+
+    @return True or False
+    """
+
     global MOBILE_MODE
     if MOBILE_MODE is None:
         MOBILE_MODE = check_mobile_mode()
@@ -9,6 +19,12 @@ def is_mobile_mode() -> bool:
 
 
 def check_mobile_mode() -> bool:
+    """
+    Return if you are working in mobile mode, searching local settings or importing Android library.
+
+    @return True or False.
+    """
+
     from pineboolib.core.settings import config
 
     cfg_mobile = config.value(u"ebcomportamiento/mobileMode", None)

@@ -66,13 +66,13 @@ class KParserTools(object):
         """
 
         # node = Node()
-        from pineboolib import pncontrolsfactory
+        from PyQt5.QtXml import QDomDocument
 
-        doc = pncontrolsfactory.FLDomDocument()
+        doc = QDomDocument()
         ele = doc.createElement("element")
         for k in data.keys():
             attr_node = doc.createAttribute(k)
-            attr_node.setValue(data.get(k))
+            attr_node.setValue(data.get(k) or "")
             ele.setAttributeNode(attr_node)
 
         return ele
@@ -105,7 +105,13 @@ class KParserTools(object):
 
         return ret
 
-    def calculated(self, value: Any, data_type: int, p: Union[bytes, str, SupportsInt] = None, data: Element = None) -> Any:
+    def calculated(
+        self,
+        value: Any,
+        data_type: int,
+        p: Union[bytes, str, SupportsInt] = None,
+        data: Element = None,
+    ) -> Any:
         """
         Get value of type "calculated".
 
@@ -155,7 +161,7 @@ class KParserTools(object):
         ret = None
         table_name = "fllarge"
         if ref_key is not None:
-            from pineboolib import pncontrolsfactory
+            from PyQt5.QtGui import QPixmap
 
             value = None
             tmp_dir = project.tmpdir
@@ -172,7 +178,9 @@ class KParserTools(object):
                     if single_query.value(0) == "True":
                         single_fllarge = False
 
-                if not single_fllarge:  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
+                if (
+                    not single_fllarge
+                ):  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
                     table_name += "_%s" % ref_key.split("@")[1]
 
                 q = PNSqlQuery()
@@ -182,17 +190,23 @@ class KParserTools(object):
 
                 if value:
                     ret = img_file
-                    pix = pncontrolsfactory.QPixmap(value)
+                    pix = QPixmap(value)
                     if not pix.save(img_file):
-                        self.logger.warning("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
+                        self.logger.warning(
+                            "%s:refkey2cache No se ha podido guardar la imagen %s"
+                            % (__name__, img_file)
+                        )
                         ret = None
                     else:
                         ret = img_file
             elif ref_key.endswith(".xpm"):
-                pix = pncontrolsfactory.QPixmap(ref_key)
+                pix = QPixmap(ref_key)
                 img_file = ref_key.replace(".xpm", ".png")
                 if not pix.save(img_file):
-                    self.logger.warning("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
+                    self.logger.warning(
+                        "%s:refkey2cache No se ha podido guardar la imagen %s"
+                        % (__name__, img_file)
+                    )
                     ret = None
                 else:
                     ret = img_file
@@ -203,7 +217,9 @@ class KParserTools(object):
 
         return ret
 
-    def converPageSize(self, size: int, orientation: int, custom: Optional[List[int]] = None) -> List[int]:
+    def converPageSize(
+        self, size: int, orientation: int, custom: Optional[List[int]] = None
+    ) -> List[int]:
         """
         Get page size for the page code specified on .kut file.
 
@@ -332,7 +348,9 @@ class KParserTools(object):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
-                for filename in fnmatch.filter(filenames, "%s%s.ttf" % (font_name[0].upper(), font_name[1:])):
+                for filename in fnmatch.filter(
+                    filenames, "%s%s.ttf" % (font_name[0].upper(), font_name[1:])
+                ):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
@@ -340,7 +358,9 @@ class KParserTools(object):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
-                for filename in fnmatch.filter(filenames, "%s%s.ttf" % (font_name2[0].upper(), font_name2[1:])):
+                for filename in fnmatch.filter(
+                    filenames, "%s%s.ttf" % (font_name2[0].upper(), font_name2[1:])
+                ):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
@@ -348,7 +368,9 @@ class KParserTools(object):
                     ret_ = os.path.join(root, filename)
                     return ret_
 
-                for filename in fnmatch.filter(filenames, "%s%s.ttf" % (font_name3[0].upper(), font_name3[1:])):
+                for filename in fnmatch.filter(
+                    filenames, "%s%s.ttf" % (font_name3[0].upper(), font_name3[1:])
+                ):
                     ret_ = os.path.join(root, filename)
                     return ret_
 

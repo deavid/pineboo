@@ -118,14 +118,19 @@ class FLSQLITE(object):
 
         import sqlite3
 
-        if project.conn is not None and self.db_filename == getattr(project.conn, "db_name", None):
+        if project._conn is not None and self.db_filename == getattr(
+            project._conn, "db_name", None
+        ):
             self.conn_ = project.conn.conn
         else:
             self.conn_ = sqlite3.connect("%s" % self.db_filename)
-            self.engine_ = create_engine("sqlite:///%s" % self.db_filename)
+            sqlalchemy_uri = "sqlite:///%s" % self.db_filename
+            if self.db_filename == ":memory:":
+                sqlalchemy_uri = "sqlite://"
+            self.engine_ = create_engine(sqlalchemy_uri)
             self.conn_.isolation_level = None
 
-            if db_is_new:
+            if db_is_new and self.db_filename != ":memory:":
                 self.logger.warning("La base de datos %s no existe", self.db_filename)
 
         if self.conn_:
@@ -268,7 +273,9 @@ class FLSQLITE(object):
             cursor.execute("SAVEPOINT sv_%s" % n)
         except Exception:
             self.setLastError("No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
-            self.logger.error("%s:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s", __name__, n)
+            self.logger.error(
+                "%s:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s", __name__, n
+            )
             return False
 
         return True
@@ -291,8 +298,14 @@ class FLSQLITE(object):
         try:
             cursor.execute("ROLLBACK TRANSACTION TO SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
-            self.logger.error("%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s", __name__, n)
+            self.setLastError(
+                "No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n
+            )
+            self.logger.error(
+                "%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s",
+                __name__,
+                n,
+            )
             return False
 
         return True
@@ -312,7 +325,11 @@ class FLSQLITE(object):
             cursor.execute("END TRANSACTION")
         except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
-            self.logger.error("%s:: No se pudo aceptar la transacción COMMIT. %s", __name__, traceback.format_exc())
+            self.logger.error(
+                "%s:: No se pudo aceptar la transacción COMMIT. %s",
+                __name__,
+                traceback.format_exc(),
+            )
             return False
 
         return True
@@ -378,8 +395,12 @@ class FLSQLITE(object):
         try:
             cursor.execute("RELEASE SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError("No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
-            self.logger.error("SQL3Driver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s", n)
+            self.setLastError(
+                "No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n
+            )
+            self.logger.error(
+                "SQL3Driver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s", n
+            )
             return False
 
         return True
@@ -495,7 +516,9 @@ class FLSQLITE(object):
                     self.logger.debug(
                         QApplication.tr("FLManager : Tabla-> ")
                         + tmd.name()
-                        + QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ")
+                        + QApplication.tr(
+                            " . Se ha intentado poner una segunda clave primaria para el campo "
+                        )
                         + field.name()
                         + QApplication.tr(" , pero el campo ")
                         + primaryKey
@@ -520,7 +543,11 @@ class FLSQLITE(object):
         sql = sql + ");"
         create_index = ""
         if tmd.primaryKey():
-            create_index = "CREATE INDEX %s_pkey ON %s (%s)" % (tmd.name(), tmd.name(), tmd.primaryKey())
+            create_index = "CREATE INDEX %s_pkey ON %s (%s)" % (
+                tmd.name(),
+                tmd.name(),
+                tmd.primaryKey(),
+            )
 
         # q = PNSqlQuery()
         # q.setForwardOnly(True)
@@ -582,7 +609,9 @@ class FLSQLITE(object):
             if field1[1] == "stringlist" and not field2[1] in ("stringlist", "pixmap"):
                 ret = True
 
-            elif field1[1] == "string" and (not field2[1] in ("string", "time", "date") or not field1[3] == field2[3]):
+            elif field1[1] == "string" and (
+                not field2[1] in ("string", "time", "date") or not field1[3] == field2[3]
+            ):
                 if field2[1] in ("time", "date") and field1[3] == 20:
                     ret = False
                 else:
@@ -628,7 +657,12 @@ class FLSQLITE(object):
             stream = self.db_.managerModules().contentCached("%s.mtd" % tablename)
             util = FLUtil()
             if not util.domDocumentSetContent(doc, stream):
-                self.logger.warning("FLManager : " + QApplication.tr("Error al cargar los metadatos para la tabla %1").arg(tablename))
+                self.logger.warning(
+                    "FLManager : "
+                    + QApplication.tr("Error al cargar los metadatos para la tabla %1").arg(
+                        tablename
+                    )
+                )
 
                 return self.recordInfo2(tablename)
 

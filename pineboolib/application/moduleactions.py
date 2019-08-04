@@ -1,23 +1,26 @@
+"""
+ModuleActions module.
+"""
 from pineboolib.core.utils import logging
 
 from pineboolib.core.exceptions import ForbiddenError
 from pineboolib.core.utils.utils_base import load2xml
 from pineboolib.application.xmlaction import XMLAction
-from .proxy import DelayedObjectProxyLoader
 
 from typing import Any, TYPE_CHECKING, NoReturn
 
 
 class ModuleActions(object):
-    """Genera un arbol con las acciones de los diferentes módulos
-    @param name. Nombre del la función buscada
-    @return el objecto del XMLAction afectado
+    """
+    Generate tree with actions from modules.
     """
 
     logger = logging.getLogger("application.ModuleActions")
 
     def __init__(self, module: Any, path: str, modulename: str) -> None:
-        """Constructor
+        """
+        Constructor.
+
         @param module. Identificador del módulo
         @param path. Ruta del módulo
         @param modulename. Nombre del módulo
@@ -36,13 +39,9 @@ class ModuleActions(object):
             self.logger.error("El módulo no tiene un path válido %s", self.module_name)
 
     def load(self) -> None:
-        """Carga las actions del módulo en el projecto
-        """
+        """Load module actions into project."""
         # Ojo: Almacena un arbol con los módulos cargados
-        if TYPE_CHECKING:
-            qsa_dict_modules = self.mod
-        else:
-            from pineboolib import qsa as qsa_dict_modules
+        from pineboolib.application.qsadictmodules import QSADictModules
 
         self.tree = load2xml(self.path)
         self.root = self.tree.getroot()
@@ -57,56 +56,48 @@ class ModuleActions(object):
         action.form = None
         action.table = None
         action.scriptform = self.mod.name
-        self.project.actions[action.name] = action  # FIXME: Actions should be loaded to their parent, not the singleton
-        if hasattr(qsa_dict_modules, action.name):
-            if action.name != "sys":
-                self.logger.warning("No se sobreescribe variable de entorno %s", action.name)
-        else:  # Se crea la action del módulo
-            setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % action.name))
+        self.project.actions[
+            action.name
+        ] = action  # FIXME: Actions should be loaded to their parent, not the singleton
+        QSADictModules.save_action_for_root_module(action)
 
         for xmlaction in self.root:
             action_xml = XMLAction(xmlaction, project=self.project)
             action_xml.mod = self
             name = action_xml.name
-            if name != "unnamed":
-                if hasattr(qsa_dict_modules, "form%s" % name):
-                    self.logger.debug(
-                        "No se sobreescribe variable de entorno %s. Hay una definición previa en %s",
-                        "%s.form%s" % (self.module_name, name),
-                        self.module_name,
-                    )
-                else:  # Se crea la action del form
-                    self.project.actions[name] = action_xml  # FIXME: Actions should be loaded to their parent, not the singleton
-                    delayed_action = DelayedObjectProxyLoader(action_xml.load, name="QSA.Module.%s.Action.form%s" % (self.mod.name, name))
-                    setattr(qsa_dict_modules, "form" + name, delayed_action)
+            if not name or name == "unnamed":
+                continue
 
-                if hasattr(qsa_dict_modules, "formRecord" + name):
-                    self.logger.debug("No se sobreescribe variable de entorno %s", "formRecord" + name)
-                else:  # Se crea la action del formRecord
-                    delayed_action = DelayedObjectProxyLoader(
-                        action_xml.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)
-                    )
+            if QSADictModules.save_action_for_mainform(action_xml):
+                self.project.actions[
+                    name
+                ] = action_xml  # FIXME: Actions should be loaded to their parent, not the singleton
 
-                    setattr(qsa_dict_modules, "formRecord" + name, delayed_action)
+            QSADictModules.save_action_for_formrecord(action_xml)
 
     def __contains__(self, k) -> bool:
-        """Busca si es propietario de una action
-        """
-        return k in self.project.actions  # FIXME: Actions should be loaded to their parent, not the singleton
+        """Determine if it is the owner of an action."""
+        return (
+            k in self.project.actions
+        )  # FIXME: Actions should be loaded to their parent, not the singleton
 
     def __getitem__(self, name) -> Any:
-        """Recoge una action determinada
+        """
+        Retrieve particular action by name.
+
         @param name. Nombre de la action
         @return Retorna el XMLAction de la action dada
         """
-        return self.project.actions[name]  # FIXME: Actions should be loaded to their parent, not the singleton
-
-    """
-    Añade una action a propiedad del módulo
-    @param name. Nombre de la action
-    @param action_. Action a añadir a la propiedad del módulo
-    """
+        return self.project.actions[
+            name
+        ]  # FIXME: Actions should be loaded to their parent, not the singleton
 
     def __setitem__(self, name, action_) -> NoReturn:
+        """
+        Add action to a module property.
+
+        @param name. Nombre de la action
+        @param action_. Action a añadir a la propiedad del módulo
+        """
         raise ForbiddenError("Actions are not writable!")
         # self.project.actions[name] = action_

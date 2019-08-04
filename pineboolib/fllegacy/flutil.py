@@ -4,7 +4,7 @@ import datetime
 
 from PyQt5 import QtCore  # type: ignore
 
-from pineboolib.fllegacy.systype import SysType
+from pineboolib.application.qsatypes.sysbasetype import SysBaseType
 from pineboolib.core import decorators
 from pineboolib import logging
 
@@ -63,7 +63,18 @@ class FLUtil(QtCore.QObject):
         "veintinueve",
     ]
 
-    vecDecenas: List[str] = ["", "", "", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"]
+    vecDecenas: List[str] = [
+        "",
+        "",
+        "",
+        "treinta",
+        "cuarenta",
+        "cincuenta",
+        "sesenta",
+        "setenta",
+        "ochenta",
+        "noventa",
+    ]
     vecCentenas: List[str] = [
         "",
         "ciento",
@@ -77,7 +88,8 @@ class FLUtil(QtCore.QObject):
         "novecientos",
     ]
 
-    def deleteCascade(self, collector, field, sub_objs, using) -> None:  # FIXME TIPEADO
+    @staticmethod
+    def deleteCascade(collector, field, sub_objs, using) -> None:  # FIXME TIPEADO
         for o in sub_objs:
             try:
                 from pineboolib.application.database.pnsqlcursor import PNSqlCursor
@@ -87,11 +99,19 @@ class FLUtil(QtCore.QObject):
                 if cursor.next():
                     cursor.setModeAccess(cursor.Del)
                     if not cursor.commitBuffer():
-                        raise Exception("No pudo eliminar " + str(field.model._meta.db_table) + " : " + str(o.pk))
+                        raise Exception(
+                            "No pudo eliminar "
+                            + str(field.model._meta.db_table)
+                            + " : "
+                            + str(o.pk)
+                        )
             except Exception:
-                raise Exception("No pudo eliminar " + str(field.model._meta.db_table) + " : " + str(o.pk))
+                raise Exception(
+                    "No pudo eliminar " + str(field.model._meta.db_table) + " : " + str(o.pk)
+                )
 
-    def partInteger(self, n: float) -> int:
+    @staticmethod
+    def partInteger(n: float) -> int:
         """
         Obtiene la parte entera de un número.
 
@@ -104,7 +124,8 @@ class FLUtil(QtCore.QObject):
         i, d = divmod(n, 1)
         return int(i)
 
-    def partDecimal(self, n: float) -> int:
+    @staticmethod
+    def partDecimal(n: float) -> int:
         """
         Obtiene la parte decimal de un número.
 
@@ -118,19 +139,21 @@ class FLUtil(QtCore.QObject):
         d = d * 100
         return int(d)
 
-    def unidades(self, n: int) -> str:
+    @classmethod
+    def unidades(cls, n: int) -> str:
         """
         Enunciado de las unidades de un número.
 
         @param n Número a tratar. Debe ser positivo
         """
         if n >= 0:
-            return self.vecUnidades[n]
+            return cls.vecUnidades[n]
         else:
             raise ValueError("Parameter 'n' must be a positive integer")
 
+    @staticmethod
     @decorators.NotImplementedWarn
-    def utf8(self, s: str) -> str:
+    def utf8(s: str) -> str:
         """
         Pasa una cadena a codificación utf-8
 
@@ -139,7 +162,8 @@ class FLUtil(QtCore.QObject):
         """
         return s
 
-    def centenamillar(self, n: int) -> str:
+    @classmethod
+    def centenamillar(cls, n: int) -> str:
         """
         Enunciado de las centenas de millar de un número.
 
@@ -149,16 +173,17 @@ class FLUtil(QtCore.QObject):
         if n < 0:
             raise ValueError("Param n must be positive integer")
         if n < 10000:
-            buffer = self.decenasmillar(n)
+            buffer = cls.decenasmillar(n)
             return buffer
 
-        buffer = self.centenas(n / 1000)
+        buffer = cls.centenas(n / 1000)
         buffer = buffer + " mil "
-        buffer = buffer + self.centenas(n % 1000)
+        buffer = buffer + cls.centenas(n % 1000)
 
         return buffer
 
-    def decenas(self, n: Union[int, float]) -> str:
+    @classmethod
+    def decenas(cls, n: Union[int, float]) -> str:
         """
         Enunciado de las decenas de un número.
 
@@ -169,16 +194,17 @@ class FLUtil(QtCore.QObject):
         if n < 0:
             raise ValueError("Param n must be positive integer")
         if n < 30:
-            buffer = self.unidades(int(n))
+            buffer = cls.unidades(int(n))
         else:
-            buffer = self.vecDecenas[self.partInteger(n / 10)]
+            buffer = cls.vecDecenas[cls.partInteger(n / 10)]
             if n % 10:
                 buffer = buffer + " y "
-                buffer = buffer + self.unidades(int(n % 10))
+                buffer = buffer + cls.unidades(int(n % 10))
 
         return buffer
 
-    def centenas(self, n: Union[int, float]) -> str:
+    @classmethod
+    def centenas(cls, n: Union[int, float]) -> str:
         """
         Enunciado de las centenas de un número.
 
@@ -191,15 +217,16 @@ class FLUtil(QtCore.QObject):
             buffer = "cien"
 
         elif n < 100:
-            buffer = self.decenas(int(n))
+            buffer = cls.decenas(int(n))
         else:
-            buffer = buffer + self.vecCentenas[self.partInteger(n / 100)]
+            buffer = buffer + cls.vecCentenas[cls.partInteger(n / 100)]
             buffer = buffer + " "
-            buffer = buffer + self.decenas(int(n % 100))
+            buffer = buffer + cls.decenas(int(n % 100))
 
         return buffer
 
-    def unidadesmillar(self, n: int) -> str:
+    @classmethod
+    def unidadesmillar(cls, n: int) -> str:
         """
         Enunciado de las unidades de millar de un número.
 
@@ -213,14 +240,15 @@ class FLUtil(QtCore.QObject):
             buffer = "mil "
 
         if n / 1000 > 1:
-            buffer = self.unidades(int(n / 1000))
+            buffer = cls.unidades(int(n / 1000))
             buffer = buffer + " mil "
 
-        buffer = buffer + self.centenas(int(n % 1000))
+        buffer = buffer + cls.centenas(int(n % 1000))
 
         return buffer
 
-    def decenasmillar(self, n: int) -> str:
+    @classmethod
+    def decenasmillar(cls, n: int) -> str:
         """
         Enunciado de las decenas de millar de un número.
 
@@ -228,15 +256,16 @@ class FLUtil(QtCore.QObject):
         """
         buffer = ""
         if n < 10000:
-            buffer = self.unidadesmillar(n)
+            buffer = cls.unidadesmillar(n)
             return buffer
 
-        buffer = self.decenas(n / 1000)
+        buffer = cls.decenas(n / 1000)
         buffer = buffer + " mil "
-        buffer = buffer + self.centenas(int(n % 10000))
+        buffer = buffer + cls.centenas(int(n % 10000))
         return buffer
 
-    def enLetra(self, n: int) -> str:
+    @classmethod
+    def enLetra(cls, n: int) -> str:
         """
         Obtiene la expresión en texto de como se enuncia un número, en castellano.
 
@@ -253,20 +282,21 @@ class FLUtil(QtCore.QObject):
             return buffer
 
         if n < 1000000:
-            buffer = self.centenamillar(int(n))
+            buffer = cls.centenamillar(int(n))
             return buffer
         else:
             if n / 1000000 == 1:
                 buffer = "un millon"
             else:
-                buffer = self.centenas(int(n / 1000000))
+                buffer = cls.centenas(int(n / 1000000))
                 buffer = buffer + " millones "
 
-        buffer = buffer + self.centenamillar(int(n % 1000000))
+        buffer = buffer + cls.centenamillar(int(n % 1000000))
         return buffer.upper()
 
+    @classmethod
     @decorators.BetaImplementation
-    def enLetraMoneda(self, n: int, m: str) -> str:
+    def enLetraMoneda(cls, n: int, m: str) -> str:
         """
         Obtiene la expresión en texto de como se enuncia una cantidad monetaria, en castellano
         y en cualquier moneda indicada.
@@ -280,20 +310,20 @@ class FLUtil(QtCore.QObject):
         @return Cadena de texto con su expresión hablada
         """
         nTemp = n * -1.00 if n < 0.00 else n
-        entero = self.partInteger(nTemp)
-        decimal = self.partDecimal(nTemp)
+        entero = cls.partInteger(nTemp)
+        decimal = cls.partDecimal(nTemp)
         res = ""
 
         if entero > 0:
-            res = self.enLetra(entero) + " " + m
+            res = cls.enLetra(entero) + " " + m
 
         if entero > 0 and decimal > 0:
             # res += QString(" ") + QT_TR_NOOP("con") + " " + enLetra(decimal) + " " + QT_TR_NOOP("céntimos");
-            res += " " + "con" + " " + self.enLetra(decimal) + " " + "céntimos"
+            res += " " + "con" + " " + cls.enLetra(decimal) + " " + "céntimos"
 
         if entero <= 0 and decimal > 0:
             # res = enLetra(decimal) + " " + QT_TR_NOOP("céntimos");
-            res = self.enLetra(decimal) + " " + "céntimos"
+            res = cls.enLetra(decimal) + " " + "céntimos"
 
         if n < 0.00:
             # res = QT_TR_NOOP("menos") + QString(" ") + res;
@@ -301,8 +331,9 @@ class FLUtil(QtCore.QObject):
 
         return res.upper()
 
+    @classmethod
     @decorators.BetaImplementation
-    def enLetraMonedaEuro(self, n: int) -> str:
+    def enLetraMonedaEuro(cls, n: int) -> str:
         """
         Obtiene la expresión en texto de como se enuncia una cantidad monetaria, en castellano
         y en Euros.
@@ -315,9 +346,10 @@ class FLUtil(QtCore.QObject):
         @return Cadena de texto con su expresión hablada
         """
         # return enLetraMoneda(n, QT_TR_NOOP("euros"));
-        return self.enLetraMoneda(n, "euros")
+        return cls.enLetraMoneda(n, "euros")
 
-    def letraDni(self, n: int) -> str:
+    @classmethod
+    def letraDni(cls, n: int) -> str:
         """
         Obtiene la letra asociada al némero del D.N.I. español.
 
@@ -327,7 +359,8 @@ class FLUtil(QtCore.QObject):
         letras = "TRWAGMYFPDXBNJZSQVHLCKE"
         return letras[n % 23]
 
-    def nombreCampos(self, tablename: str) -> List[Union[str, int]]:
+    @classmethod
+    def nombreCampos(cls, tablename: str) -> List[Union[str, int]]:
         """
         Obtiene la lista de nombres de campos de la tabla especificada.
         El primer string de la lista contiene el número de campos de la tabla
@@ -341,7 +374,8 @@ class FLUtil(QtCore.QObject):
         campos = aqApp.db().manager().metadata(tablename).fieldNames()
         return [len(campos)] + campos
 
-    def calcularDC(self, n: int) -> str:
+    @classmethod
+    def calcularDC(cls, n: int) -> str:
         """
         Obtiene el número del digito de control, para cuentas bancarias.
 
@@ -384,7 +418,8 @@ class FLUtil(QtCore.QObject):
         char = chr(DC + 48)
         return char
 
-    def dateDMAtoAMD(self, f) -> Optional[str]:
+    @classmethod
+    def dateDMAtoAMD(cls, f) -> Optional[str]:
         """
         Convierte fechas del tipo DD-MM-AAAA, DD/MM/AAAA o
         DDMMAAAA al tipo AAAA-MM-DD.
@@ -396,7 +431,8 @@ class FLUtil(QtCore.QObject):
 
         return date_dma_to_amd(f)
 
-    def dateAMDtoDMA(self, f) -> Optional[str]:
+    @classmethod
+    def dateAMDtoDMA(cls, f) -> Optional[str]:
         """
         Convierte fechas del tipo AAAA-MM-DD, AAAA-MM-DD o
         AAAAMMDD al tipo DD-MM-AAAA.
@@ -408,8 +444,9 @@ class FLUtil(QtCore.QObject):
 
         return date_amd_to_dma(f)
 
+    @classmethod
     @decorators.BetaImplementation
-    def formatoMiles(self, s: str) -> str:
+    def formatoMiles(cls, s: str) -> str:
         """
         Formatea una cadena de texto poniéndole separadores de miles.
 
@@ -452,7 +489,8 @@ class FLUtil(QtCore.QObject):
 
         return ret
 
-    def translate(self, group: str, text_: str) -> str:
+    @classmethod
+    def translate(cls, group: str, text_: str) -> str:
         """
         Traducción de una cadena al idioma local
 
@@ -472,7 +510,8 @@ class FLUtil(QtCore.QObject):
 
         return str(FLTranslate(group, text_))
 
-    def numCreditCard(self, num: str) -> bool:
+    @classmethod
+    def numCreditCard(cls, num: str) -> bool:
         """
         Devuelve si el numero de tarjeta de Credito es valido.
 
@@ -495,13 +534,15 @@ class FLUtil(QtCore.QObject):
 
         return True if n_sum % 10 == 0 else False
 
-    def nextCounter(self, *args) -> Any:
+    @classmethod
+    def nextCounter(cls, *args) -> Any:
         from pineboolib.application.database.utils import nextCounter
 
         return nextCounter(*args)
 
+    @classmethod
     @decorators.NotImplementedWarn
-    def nextSequence(self, nivel: int, secuencia: str, ultimo: str) -> str:
+    def nextSequence(cls, nivel: int, secuencia: str, ultimo: str) -> str:
         """
         Nos devuelve el siguiente valor de la secuencia segun la profundidad indicada por nivel.
         Para explicar el funcionamiento pondremos un ejemplo. Supongamos una secuencia tipo %A-%N.
@@ -519,7 +560,8 @@ class FLUtil(QtCore.QObject):
         """
         return ""
 
-    def isFLDefFile(self, head: str) -> bool:
+    @classmethod
+    def isFLDefFile(cls, head: str) -> bool:
         """
         Para comprobar si la cabecera de un fichero de definición corresponde
         con las soportadas por AbanQ.
@@ -553,7 +595,8 @@ class FLUtil(QtCore.QObject):
 
         return ret
 
-    def addDays(self, fecha: Any, offset: int) -> Optional["Date"]:
+    @classmethod
+    def addDays(cls, fecha: Any, offset: int) -> Optional["Date"]:
         """
         Suma dias a una fecha.
 
@@ -570,7 +613,8 @@ class FLUtil(QtCore.QObject):
             return None
         return fecha.addDays(offset)
 
-    def addMonths(self, fecha: Any, offset: int) -> Optional["Date"]:
+    @classmethod
+    def addMonths(cls, fecha: Any, offset: int) -> Optional["Date"]:
         """
         Suma meses a una fecha.
 
@@ -587,7 +631,8 @@ class FLUtil(QtCore.QObject):
             return None
         return fecha.addMonths(offset)
 
-    def addYears(self, fecha: Any, offset: int) -> Optional["Date"]:
+    @classmethod
+    def addYears(cls, fecha: Any, offset: int) -> Optional["Date"]:
         """
         Suma años a una fecha.
 
@@ -603,7 +648,8 @@ class FLUtil(QtCore.QObject):
             return None
         return fecha.addYears(offset)
 
-    def daysTo(self, d1: Any, d2: Any) -> Optional[int]:
+    @classmethod
+    def daysTo(cls, d1: Any, d2: Any) -> Optional[int]:
         """
         Diferencia de dias desde una fecha a otra.
 
@@ -644,7 +690,8 @@ class FLUtil(QtCore.QObject):
         d2 = datetime.datetime.strptime(d2, "%Y-%m-%d").date()
         return (d2 - d1).days
 
-    def buildNumber(self, v: Union[int, float, str], tipo: str, partDecimal: int) -> str:
+    @classmethod
+    def buildNumber(cls, v: Union[int, float, str], tipo: str, partDecimal: int) -> str:
         """
         Construye un string a partir de un número, especificando el formato y precisión
 
@@ -674,7 +721,8 @@ class FLUtil(QtCore.QObject):
         """
         return str(ret)
 
-    def readSettingEntry(self, key: str, def_: Any = u"") -> Any:
+    @classmethod
+    def readSettingEntry(cls, key: str, def_: Any = u"") -> Any:
         """
         Lee el valor de un setting en el directorio de la instalación de AbanQ
 
@@ -688,7 +736,8 @@ class FLUtil(QtCore.QObject):
 
         return settings.value(key, def_)
 
-    def writeSettingEntry(self, key: str, value: Any) -> None:
+    @classmethod
+    def writeSettingEntry(cls, key: str, value: Any) -> None:
         """
         Establece el valor de un setting en el directorio de instalación de AbanQ
 
@@ -701,7 +750,8 @@ class FLUtil(QtCore.QObject):
 
         return settings.set_value(key, value)
 
-    def readDBSettingEntry(self, key: str) -> Any:
+    @classmethod
+    def readDBSettingEntry(cls, key: str) -> Any:
         """
         Lee el valor de un setting en la tabla flsettings
 
@@ -726,7 +776,8 @@ class FLUtil(QtCore.QObject):
 
         return ret
 
-    def writeDBSettingEntry(self, key: str, value: Any) -> bool:
+    @classmethod
+    def writeDBSettingEntry(cls, key: str, value: Any) -> bool:
         """
         Establece el valor de un setting en la tabla flsettings
 
@@ -739,7 +790,7 @@ class FLUtil(QtCore.QObject):
         from pineboolib.application import project
 
         where = "flkey = '%s'" % key
-        found = self.readDBSettingEntry(key)
+        found = cls.readDBSettingEntry(key)
         cursor = project.conn.cursor()
         if found is None:
             sql = "INSERT INTO flsettings (flkey, valor) VALUES ('%s', '%s')" % (key, value)
@@ -757,7 +808,10 @@ class FLUtil(QtCore.QObject):
         cursor.close()
         return True
 
-    def roundFieldValue(self, value: Union[float, int, str], table_name: str, field_name: str) -> str:
+    @classmethod
+    def roundFieldValue(
+        cls, value: Union[float, int, str], table_name: str, field_name: str
+    ) -> str:
         """
         Redondea un valor en función de la precisión especificada para un campo tipo double de la base de datos
 
@@ -774,44 +828,64 @@ class FLUtil(QtCore.QObject):
         if tmd is None:
             return ""
         fmd = tmd.field(field_name)
-        return self.buildNumber(value, "float", fmd.partDecimal()) if fmd is not None else ""
+        return cls.buildNumber(value, "float", fmd.partDecimal()) if fmd is not None else ""
 
-    def sqlSelect(self, f: str, s: str, w: str, tL: Optional[Union[str, List]] = None, size: int = 0, connName: str = "default") -> Any:
+    @classmethod
+    def sqlSelect(
+        cls,
+        f: str,
+        s: str,
+        w: str,
+        tL: Optional[Union[str, List]] = None,
+        size: int = 0,
+        connName: str = "default",
+    ) -> Any:
         from pineboolib.application.database.utils import sqlSelect
 
         return sqlSelect(f, s, w, tL, size, connName)
 
-    def quickSqlSelect(self, f: str, s: str, w: str, connName: str = "default") -> Any:
+    @classmethod
+    def quickSqlSelect(cls, f: str, s: str, w: str, connName: str = "default") -> Any:
         from pineboolib.application.database.utils import quickSqlSelect
 
         return quickSqlSelect(f, s, w, connName)
 
-    def sqlInsert(self, t: str, fL: Union[str, List], vL: Union[str, List], connName: str = "default") -> Any:
+    @classmethod
+    def sqlInsert(
+        cls, t: str, fL: Union[str, List], vL: Union[str, List], connName: str = "default"
+    ) -> Any:
         from pineboolib.application.database.utils import sqlInsert
 
         return sqlInsert(t, fL, vL, connName)
 
-    def sqlUpdate(self, t: str, fL: Union[str, List], vL: Union[str, List], w: str, connName: str = "default") -> Any:
+    @classmethod
+    def sqlUpdate(
+        cls, t: str, fL: Union[str, List], vL: Union[str, List], w: str, connName: str = "default"
+    ) -> Any:
         from pineboolib.application.database.utils import sqlUpdate
 
         return sqlUpdate(t, fL, vL, w, connName)
 
-    def sqlDelete(self, t: str, w: str, connName: str = "default"):
+    @classmethod
+    def sqlDelete(cls, t: str, w: str, connName: str = "default"):
         from pineboolib.application.database.utils import sqlDelete
 
         return sqlDelete(t, w, connName)
 
-    def quickSqlDelete(self, t: str, w: str, connName: str = "default"):
+    @classmethod
+    def quickSqlDelete(cls, t: str, w: str, connName: str = "default"):
         from pineboolib.application.database.utils import quickSqlDelete
 
         return quickSqlDelete(t, w, connName)
 
-    def execSql(self, sql: str, connName: str = "default"):
+    @classmethod
+    def execSql(cls, sql: str, connName: str = "default"):
         from pineboolib.application.database.utils import execSql
 
         return execSql(sql, connName)
 
-    def createProgressDialog(self, title: str, steps: int, id_: str = "default") -> Any:
+    @classmethod
+    def createProgressDialog(cls, title: str, steps: int, id_: str = "default") -> Any:
         """
         Crea un diálogo de progreso
 
@@ -820,9 +894,12 @@ class FLUtil(QtCore.QObject):
         """
         from pineboolib.application import project
 
-        return project.message_manager().send("progress_dialog_manager", "create", [title, steps, id_])
+        return project.message_manager().send(
+            "progress_dialog_manager", "create", [title, steps, id_]
+        )
 
-    def destroyProgressDialog(self, id_: str = "default") -> None:
+    @classmethod
+    def destroyProgressDialog(cls, id_: str = "default") -> None:
         """
         Destruye el diálogo de progreso
         """
@@ -831,7 +908,8 @@ class FLUtil(QtCore.QObject):
 
         project.message_manager().send("progress_dialog_manager", "destroy", [id_])
 
-    def setProgress(self, step_number: int, id_: str = "default") -> None:
+    @classmethod
+    def setProgress(cls, step_number: int, id_: str = "default") -> None:
         """
         Establece el grado de progreso del diálogo
 
@@ -842,7 +920,8 @@ class FLUtil(QtCore.QObject):
 
         project.message_manager().send("progress_dialog_manager", "setProgress", [step_number, id_])
 
-    def setLabelText(self, l: str, id_: str = "default") -> None:
+    @classmethod
+    def setLabelText(cls, l: str, id_: str = "default") -> None:
         """
         Cambia el texto de la etiqueta del diálogo
 
@@ -853,7 +932,8 @@ class FLUtil(QtCore.QObject):
 
         project.message_manager().send("progress_dialog_manager", "setLabelText", [l, id_])
 
-    def setTotalSteps(self, tS: int, id_: str = "default") -> None:
+    @classmethod
+    def setTotalSteps(cls, tS: int, id_: str = "default") -> None:
         """
         Establece el número total de pasos del diálogo
 
@@ -864,7 +944,8 @@ class FLUtil(QtCore.QObject):
 
         project.message_manager().send("progress_dialog_manager", "setTotalSteps", [tS, id_])
 
-    def domDocumentSetContent(self, doc: "QDomDocument", content: str) -> bool:
+    @classmethod
+    def domDocumentSetContent(cls, doc: "QDomDocument", content: str) -> bool:
         """
         Establece el contenido de un documento XML.
 
@@ -885,31 +966,39 @@ class FLUtil(QtCore.QObject):
 
         # if not doc.setContent(content, ErrMsg, errLine, errColumn):
         if not doc.setContent(content):
-            logger.warning("Error en fichero XML.\nError : %s\nLinea : %s\nColumna : %s", ErrMsg, errLine, errColumn)
+            logger.warning(
+                "Error en fichero XML.\nError : %s\nLinea : %s\nColumna : %s",
+                ErrMsg,
+                errLine,
+                errColumn,
+            )
             return False
 
         return True
 
-    def sha1(self, str_: Optional[str]) -> str:
-        if str_ is None:
-            str_ = ""
+    @classmethod
+    def sha1(cls, str_: Optional[str]) -> str:
         """
         Obtiene la clave SHA1 de una cadena de texto.
 
         @param str Cadena de la que obtener la clave SHA1
         @return Clave correspondiente en digitos hexadecimales
         """
+        if str_ is None:
+            str_ = ""
         sha_ = hashlib.new("sha1", str_.encode())
         st = "%s" % sha_.hexdigest()
         st = st.upper()
         return st
 
+    @classmethod
     @decorators.NotImplementedWarn
-    def usha1(self, data, _len):
+    def usha1(cls, data, _len):
         pass
 
+    @classmethod
     @decorators.NotImplementedWarn
-    def snapShotUI(self, n):
+    def snapShotUI(cls, n):
         """
         Obtiene la imagen o captura de pantalla de un formulario.
 
@@ -917,8 +1006,9 @@ class FLUtil(QtCore.QObject):
         """
         pass
 
+    @classmethod
     @decorators.NotImplementedWarn
-    def saveSnapShotUI(self, n, pathFile):
+    def saveSnapShotUI(cls, n, pathFile):
         """
         Salva en un fichero con formato PNG la imagen o captura de pantalla de un formulario.
 
@@ -927,8 +1017,9 @@ class FLUtil(QtCore.QObject):
         """
         pass
 
+    @classmethod
     @decorators.NotImplementedWarn
-    def flDecodeType(self, fltype):
+    def flDecodeType(cls, fltype):
         """
         Decodifica un tipo de AbanQ a un tipo QVariant
 
@@ -937,8 +1028,9 @@ class FLUtil(QtCore.QObject):
         """
         pass
 
+    @classmethod
     @decorators.NotImplementedWarn
-    def saveIconFile(self, data, pathFile):
+    def saveIconFile(cls, data, pathFile):
         """
         Guarda la imagen de icono de un botón de un formulario en un ficher png. Utilizado para documentación
 
@@ -947,7 +1039,8 @@ class FLUtil(QtCore.QObject):
         """
         pass
 
-    def getIdioma(self) -> str:
+    @classmethod
+    def getIdioma(cls) -> str:
         """
         Devuelve una cadena de dos caracteres con el código de idioma del sistema
 
@@ -955,11 +1048,13 @@ class FLUtil(QtCore.QObject):
         """
         return QtCore.QLocale().name()[:2]
 
-    def getOS(self) -> str:
-        return SysType().osName()
+    @classmethod
+    def getOS(cls) -> str:
+        return SysBaseType.osName()
 
+    @classmethod
     @decorators.NotImplementedWarn
-    def serialLettertoNumber(self, letter: str) -> str:
+    def serialLettertoNumber(cls, letter: str) -> str:
         """
         Esta función convierte una cadena que es una serie de letras en su correspondiente valor numerico.
 
@@ -968,8 +1063,9 @@ class FLUtil(QtCore.QObject):
         """
         return ""
 
+    @classmethod
     @decorators.NotImplementedWarn
-    def serialNumbertoLetter(self, number: Union[int, float]) -> str:
+    def serialNumbertoLetter(cls, number: Union[int, float]) -> str:
         """
         Esta función convierte un numero a su correspondiente secuencia de Letras.
 
@@ -977,8 +1073,11 @@ class FLUtil(QtCore.QObject):
         """
         return ""
 
+    @classmethod
     @decorators.NotImplementedWarn
-    def findFiles(self, paths: str, filter_: str = "*", break_on_first_match: bool = False) -> List[str]:
+    def findFiles(
+        cls, paths: str, filter_: str = "*", break_on_first_match: bool = False
+    ) -> List[str]:
         """
         Busca ficheros recursivamente en las rutas indicadas y según el patrón indicado
         @param  paths   Rutas de búsqueda
@@ -1000,8 +1099,9 @@ class FLUtil(QtCore.QObject):
 
         return files_found
 
+    @classmethod
     @decorators.NotImplementedWarn
-    def savePixmap(self, data: str, filename: str, format_: str) -> None:
+    def savePixmap(cls, data: str, filename: str, format_: str) -> None:
         """
         Guarda imagen Pixmap en una ruta determinada.
 
@@ -1012,7 +1112,8 @@ class FLUtil(QtCore.QObject):
         """
         pass
 
-    def fieldType(self, fn: str, tn: str, conn_name: str = "default") -> Optional[str]:
+    @classmethod
+    def fieldType(cls, fn: str, tn: str, conn_name: str = "default") -> Optional[str]:
         """
         Retorna el tipo numérico de un campo
         @param field_name. Nombre del campo
@@ -1028,7 +1129,8 @@ class FLUtil(QtCore.QObject):
 
         return None if mtd is None else mtd.fieldType(fn)
 
-    def fieldLength(self, fn: str, tn: Optional[str], conn_name: str = "default") -> int:
+    @classmethod
+    def fieldLength(cls, fn: str, tn: Optional[str], conn_name: str = "default") -> int:
         """
         Retorna la longitud de un campo
         @param fn. Nombre del campo
@@ -1046,7 +1148,8 @@ class FLUtil(QtCore.QObject):
 
         return 0 if mtd is None else mtd.fieldLength(fn)
 
-    def fieldNameToAlias(self, fn: str, tn: Optional[str], conn_name: str = "default") -> str:
+    @classmethod
+    def fieldNameToAlias(cls, fn: str, tn: Optional[str], conn_name: str = "default") -> str:
         """
         Retorna el alias de un campo a partir de su nombre
         @param fn. Nombre del campo
@@ -1064,7 +1167,8 @@ class FLUtil(QtCore.QObject):
 
         return fn if mtd is None else mtd.fieldNameToAlias(fn)
 
-    def tableNameToAlias(self, tn: Optional[str], conn_name: str = "default") -> Optional[str]:
+    @classmethod
+    def tableNameToAlias(cls, tn: Optional[str], conn_name: str = "default") -> Optional[str]:
         """
         Retorna el nombre de una tabla a partir de su alias
         @param tn. Nombre de la tabla
@@ -1082,7 +1186,8 @@ class FLUtil(QtCore.QObject):
 
         return None if mtd is None else mtd.alias()
 
-    def fieldAliasToName(self, an: str, tn: Optional[str], conn_name: str = "default") -> str:
+    @classmethod
+    def fieldAliasToName(cls, an: str, tn: Optional[str], conn_name: str = "default") -> str:
 
         """
         Retorna el nombre de un campo a partir de su alias
@@ -1102,7 +1207,8 @@ class FLUtil(QtCore.QObject):
 
         return an if mtd is None else mtd.fieldAliasToName(an)
 
-    def fieldAllowNull(self, fn: str, tn: Optional[str], conn_name: str = "default") -> bool:
+    @classmethod
+    def fieldAllowNull(cls, fn: str, tn: Optional[str], conn_name: str = "default") -> bool:
         """
         Retorna si el campo permite dejarse en blanco
         @param fn. Nombre del campo
@@ -1121,7 +1227,8 @@ class FLUtil(QtCore.QObject):
 
         return False if mtd is None else mtd.fieldAllowNull(fn)
 
-    def fieldIsPrimaryKey(self, fn: str, tn: Optional[str], conn_name: str = "default") -> bool:
+    @classmethod
+    def fieldIsPrimaryKey(cls, fn: str, tn: Optional[str], conn_name: str = "default") -> bool:
         """
         Retorna si el campo es clave primaria de la tabla
         @param fn. Nombre del campo
@@ -1139,7 +1246,8 @@ class FLUtil(QtCore.QObject):
 
         return False if mtd is None else mtd.fieldIsPrimaryKey(fn)
 
-    def fieldIsCompoundKey(self, fn: str, tn: Optional[str], conn_name: str = "default") -> bool:
+    @classmethod
+    def fieldIsCompoundKey(cls, fn: str, tn: Optional[str], conn_name: str = "default") -> bool:
         """
         Retorna si el campo es clave compuesta de la tabla
         @param fn. Nombre del campo
@@ -1161,7 +1269,8 @@ class FLUtil(QtCore.QObject):
         # field = None  # FIXME: field is not defined anywhere
         # return False if field is None else field.isCompoundKey()
 
-    def fieldDefaultValue(self, fn: str, tn: Optional[str], conn_name: str = "default") -> Any:
+    @classmethod
+    def fieldDefaultValue(cls, fn: str, tn: Optional[str], conn_name: str = "default") -> Any:
         """
         Retorna el valor por defecto de un campo
         @param fn. Nombre del campo
@@ -1186,7 +1295,8 @@ class FLUtil(QtCore.QObject):
 
         return field.defaultValue()
 
-    def formatValue(self, t: str, v: Any, upper: bool, conn_name: str = "default") -> Any:
+    @classmethod
+    def formatValue(cls, t: str, v: Any, upper: bool, conn_name: str = "default") -> Any:
         """
         Retorna valor formateado
         @param t. Tipo de campo
@@ -1200,22 +1310,28 @@ class FLUtil(QtCore.QObject):
         conn = aqApp.db().useConn(conn_name)
         return conn.manager().formatValue(t, v, upper)
 
-    def nameUser(self) -> str:
+    @classmethod
+    def nameUser(cls) -> str:
 
-        return SysType().nameUser()
+        return SysBaseType.nameUser()
 
-    def userGroups(self) -> str:
+    # FIXME: Missing in SysType:
+    # @classmethod
+    # def userGroups(cls) -> str:
+    #
+    #     return SysType().userGroups()
+    #
+    # @classmethod
+    # def isInProd(cls) -> bool:
+    #
+    #     return SysType().isInProd()
+    #
+    # @classmethod
+    # def request(cls) -> str:
+    #
+    #     return SysType().request()
 
-        return SysType().userGroups()
+    @classmethod
+    def nameBD(cls) -> str:
 
-    def isInProd(self) -> bool:
-
-        return SysType().isInProd()
-
-    def request(self) -> str:
-
-        return SysType().request()
-
-    def nameBD(self) -> str:
-
-        return SysType().nameBD()
+        return SysBaseType.nameBD()

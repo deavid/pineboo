@@ -16,7 +16,9 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath("../.."))
+from pineboolib.loader.main import init_cli  # noqa: F402
 
+init_cli()
 # -- Project information -----------------------------------------------------
 
 project = "Pineboo"
@@ -56,3 +58,6 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 
 typehints_fully_qualified = True
+autoclass_content = "both"
+autodoc_member_order = "bysource"
+autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]

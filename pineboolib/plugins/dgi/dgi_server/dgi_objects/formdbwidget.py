@@ -1,6 +1,6 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtCore  # type: ignore
-from typing import Set, Tuple
+from typing import Set, Tuple, Any, Dict
 import sys
 import weakref
 
@@ -15,7 +15,7 @@ class FormDBWidget(QtCore.QObject):
     signal_test = QtCore.pyqtSignal(str, QtCore.QObject)
     _loaded = None
 
-    _cursors = {}
+    _cursors: Dict[str, Any]
 
     def __init__(self, action=None, project=None, parent=None):
         if project is None:
@@ -42,18 +42,18 @@ class FormDBWidget(QtCore.QObject):
 
     def _connect(self, sender, signal, receiver, slot):
         # print(" > > > connect:", sender, " signal ", str(signal))
-        from pineboolib import pncontrolsfactory
+        from pineboolib.application import connections
 
-        signal_slot = pncontrolsfactory.connect(sender, signal, receiver, slot, caller=self)
+        signal_slot = connections.connect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
         self._formconnections.add(signal_slot)
 
     def _disconnect(self, sender, signal, receiver, slot):
         # print(" > > > disconnect:", self)
-        from pineboolib import pncontrolsfactory
+        from pineboolib.application import connections
 
-        signal_slot = pncontrolsfactory.disconnect(sender, signal, receiver, slot, caller=self)
+        signal_slot = connections.disconnect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
 
@@ -87,10 +87,12 @@ class FormDBWidget(QtCore.QObject):
     def doCleanUp(self):
         self.clear_connections()
         if getattr(self, "iface", None) is not None:
-            from pineboolib import pncontrolsfactory
+            from pineboolib.core.garbage_collector import check_gc_referrers
 
-            pncontrolsfactory.check_gc_referrers(
-                "FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name
+            check_gc_referrers(
+                "FormDBWidget.iface:" + self.iface.__class__.__name__,
+                weakref.ref(self.iface),
+                self._action.name,
             )
             del self.iface.ctx
             del self.iface

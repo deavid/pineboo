@@ -117,7 +117,8 @@ class FLManagerModules(object):
         from pineboolib.fllegacy.flmodulesstaticloader import AQStaticBdInfo
 
         self.staticBdInfo_ = AQStaticBdInfo(self.conn_)
-
+        self.activeIdModule_ = None
+        self.activeIdArea_ = None
         self.filesCached_ = {}
 
     # """
@@ -171,7 +172,9 @@ class FLManagerModules(object):
     """
 
     def content(self, n) -> Any:
-        cursor = self.conn_.dbAux().execute_query("SELECT contenido FROM flfiles WHERE nombre='%s' AND NOT sha = ''" % n)
+        cursor = self.conn_.dbAux().execute_query(
+            "SELECT contenido FROM flfiles WHERE nombre='%s' AND NOT sha = ''" % n
+        )
 
         for contenido in cursor:
             return contenido[0]
@@ -269,16 +272,23 @@ class FLManagerModules(object):
             raise Exception("DGI not loaded")
 
         if project.DGI.alternative_content_cached():
-            data = project.DGI.content_cached(project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey)
+            data = project.DGI.content_cached(
+                project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey
+            )
             if data is not None:
                 return data
 
         if data is None:
             """Ruta por defecto"""
-            if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (project.tmpdir, self.conn_.DBName(), modId, ext_, name_)):
+            if os.path.exists(
+                "%s/cache/%s/%s/file.%s/%s"
+                % (project.tmpdir, self.conn_.DBName(), modId, ext_, name_)
+            ):
                 utf8_ = True if ext_ == "kut" else False
                 data = self.contentFS(
-                    "%s/cache/%s/%s/file.%s/%s/%s.%s" % (project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey, ext_), utf8_
+                    "%s/cache/%s/%s/file.%s/%s/%s.%s"
+                    % (project.tmpdir, self.conn_.DBName(), modId, ext_, name_, shaKey, ext_),
+                    utf8_,
                 )
 
         if data is None:
@@ -352,8 +362,14 @@ class FLManagerModules(object):
     @return QWidget correspondiente al formulario construido.
     """
 
-    def createForm(self, action: Union["flaction.FLAction", "XMLAction"], connector=None, parent=None, name=None):
-        from pineboolib import pncontrolsfactory
+    def createForm(
+        self,
+        action: Union["flaction.FLAction", "XMLAction"],
+        connector=None,
+        parent=None,
+        name=None,
+    ):
+        from pineboolib.fllegacy.flformdb import FLFormDB
         from pineboolib.fllegacy.flaction import FLAction
 
         if not isinstance(action, FLAction):
@@ -363,7 +379,7 @@ class FLManagerModules(object):
 
         if not action:
             raise Exception
-        return pncontrolsfactory.FLFormDB(parent, action, load=True)
+        return FLFormDB(parent, action, load=True)
 
     """
     Esta función es igual a la anterior, sólo se diferencia en que carga
@@ -374,9 +390,15 @@ class FLManagerModules(object):
     @param name. Nombre del formRecord
     """
 
-    def createFormRecord(self, a: Union["flaction.FLAction", "XMLAction"], connector=None, parent_or_cursor=None, name=None) -> Any:
+    def createFormRecord(
+        self,
+        a: Union["flaction.FLAction", "XMLAction"],
+        connector=None,
+        parent_or_cursor=None,
+        name=None,
+    ) -> Any:
         logger.trace("createFormRecord: init")
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flformrecorddb import FLFormRecordDB
         from pineboolib.fllegacy.flaction import FLAction
 
         # Falta implementar conector y name
@@ -392,7 +414,7 @@ class FLManagerModules(object):
             return None
 
         logger.trace("createFormRecord: load FormRecordDB")
-        return pncontrolsfactory.FLFormRecordDB(parent_or_cursor, action, load=False)
+        return FLFormRecordDB(parent_or_cursor, action, load=False)
 
     """
     Para establecer el módulo activo.
@@ -533,7 +555,7 @@ class FLManagerModules(object):
     """
 
     def iconModule(self, idM: str) -> Any:
-        from pineboolib import pncontrolsfactory
+        from PyQt5.QtGui import QPixmap
 
         pix = None
         modObj = self.dictInfoMods.get(idM.upper(), None)
@@ -541,9 +563,9 @@ class FLManagerModules(object):
             from pineboolib.application.utils.xpm import cacheXPM
 
             icono = cacheXPM(modObj.icono)
-            pix = pncontrolsfactory.QPixmap(icono)
+            pix = QPixmap(icono)
 
-        return pix or pncontrolsfactory.QPixmap()
+        return pix or QPixmap()
 
     """
     Para obtener la versión de un módulo.
@@ -647,7 +669,9 @@ class FLManagerModules(object):
 
         q = PNSqlQuery(None, self.conn_.dbAux())
         q.setTablesList("flmodules,flareas")
-        q.setSelect("idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion")
+        q.setSelect(
+            "idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion"
+        )
         q.setFrom("flmodules left join flareas on flmodules.idarea = flareas.idarea")
         q.setWhere("1 = 1")
         q.setForwardOnly(True)
@@ -737,7 +761,13 @@ class FLManagerModules(object):
         idDB = "noDB"
         if self.conn_.dbAux():
             db_aux = self.conn_.dbAux()
-            idDB = "%s%s%s%s%s" % (db_aux.database(), db_aux.host(), db_aux.user(), db_aux.driverName(), db_aux.port())
+            idDB = "%s%s%s%s%s" % (
+                db_aux.database(),
+                db_aux.host(),
+                db_aux.user(),
+                db_aux.driverName(),
+                db_aux.port(),
+            )
 
         from pineboolib.core.settings import settings
 
@@ -764,7 +794,13 @@ class FLManagerModules(object):
 
         db_aux = self.conn_.dbAux()
 
-        idDB = "%s%s%s%s%s" % (db_aux.database(), db_aux.host(), db_aux.user(), db_aux.driverName(), db_aux.port())
+        idDB = "%s%s%s%s%s" % (
+            db_aux.database(),
+            db_aux.host(),
+            db_aux.user(),
+            db_aux.driverName(),
+            db_aux.port(),
+        )
 
         from pineboolib.core.settings import settings
 

@@ -1,3 +1,6 @@
+"""
+Lexer for Pineboo QS files.
+"""
 import ply.lex as lex  # type: ignore
 from ply.lex import TOKEN  # type: ignore
 
@@ -112,6 +115,7 @@ t_ignore = " \r\t\x0c"
 
 @TOKEN(r"\n+")
 def t_NEWLINE(t):
+    """Keep track of line numbers."""
     t.lexer.lineno += t.value.count("\n")
 
 
@@ -186,6 +190,7 @@ for r in reserved:
 
 @TOKEN(r"[A-Za-z_]+[\w_]*")
 def t_ID(t):
+    """Get ID tokens."""
     t.type = reserved_map.get(t.value, "ID")
     return t
 
@@ -210,11 +215,13 @@ t_CCONST = r"\'([^\'\\\n]|(\\.)|\\\n)*?\'"
 
 @TOKEN(r"(/\*( |\*\*)(.|\n)*?\*/)|(//.*)")
 def t_comment(t):
+    """Keep track of line count in comments."""
     t.lexer.lineno += t.value.count("\n")
 
 
 @TOKEN(r"/\*\*[ ]+")
 def t_DOCSTRINGOPEN(t):
+    """Return docstring for later analysis."""
     return t
 
 
@@ -225,10 +232,12 @@ t_COMMENTCLOSE = r"\*/"
 # Preprocessor directive (ignored)
 @TOKEN(r"\#(.)*?\n")
 def t_preprocessor(t):
+    """Ignored Preprocessor directive. Not used."""
     t.lexer.lineno += 1
 
 
 def t_error(t) -> None:
+    """Skip invalid characters and report."""
     print("Illegal character %s" % repr(t.value[0]))
     t.lexer.skip(1)
 

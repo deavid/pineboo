@@ -1,6 +1,5 @@
 # # -*- coding: utf-8 -*-
 from pineboolib import logging
-from flup.server.fcgi import WSGIServer  # type: ignore
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.application.utils.check_dependencies import check_dependencies
 
@@ -10,8 +9,6 @@ from typing import Any, Mapping
 
 
 logger = logging.getLogger(__name__)
-
-check_dependencies({"flup": "flup-py3"})
 
 
 class dgi_fcgi(dgi_schema):
@@ -28,8 +25,11 @@ class dgi_fcgi(dgi_schema):
         self.setUseDesktop(False)
         self.setUseMLDefault(False)
         self.showInitBanner()
+        check_dependencies({"flup": "flup-py3"})
 
     def alternativeMain(self, main_) -> None:
+        from flup.server.fcgi import WSGIServer  # type: ignore
+
         logger.info("=============================================")
         logger.info("FCGI:INFO: Listening socket %s", self._fcgiSocket)
         logger.info("FCGI:INFO: Sending queries to %s", self._fcgiCall)
@@ -64,12 +64,14 @@ class parser(object):
         try:
             retorno_: Any = project.call(self._callScript, aList)
         except Exception:
-            from pineboolib import pncontrolsfactory
+            from pineboolib.fllegacy.systype import SysType
+
+            qsa_sys = SysType()
 
             logger.info(self._callScript, environ["QUERY_STRING"])
             retorno_ = (
                 """<html><head><title>Pineboo %s - FastCGI - </title></head><body><h1>Function %s not found!</h1></body></html>"""
-                % (pncontrolsfactory.SysType().version(), self._callScript)
+                % (qsa_sys.version(), self._callScript)
             )
             pass
         logger.info("FCGI:INFO: Processing '%s' ...", environ["QUERY_STRING"])

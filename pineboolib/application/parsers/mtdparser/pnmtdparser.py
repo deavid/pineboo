@@ -1,32 +1,38 @@
 # -*- coding: utf-8 -*-
+"""
+MTD Parser to sqlAlchemy model.
+
+Creates a Python file side by side with the original MTD file.
+Can be overloaded with a custom class to enhance/change available
+functions. See pineboolib/pnobjectsfactory.py
+"""
+
 from pineboolib import logging
-from typing import List
+from typing import List, cast
 from pineboolib.application.utils.path import _path
 from pineboolib.application import project
+from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
+from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
 import os
 
 logger = logging.getLogger(__name__)
 
 reserved_words = ["pass"]
 
-"""
-    Esta librería es un parser de mtd a model de sqlAlchemy.
-    Se crea un fichero .py y se aloja al lado del .mtd relacionado.
-    También se puede sobrecargar con una clase personalizada para aumentar/modificar
-        las funciones disponibles. Ver pineboolib.pnobjectsfactory.py
-"""
-
 
 def mtd_parse(table_name: str) -> None:
+    """
+    Parse MTD into SqlAlchemy model.
+    """
     if table_name.find("alteredtable") > -1 or table_name.startswith("fllarge_"):
         return
 
     if project.conn is None:
         raise Exception("Project is not connected yet")
-    mtd = project.conn.manager().metadata(table_name)
-    if mtd is None:
+    mtd_ = project.conn.manager().metadata(table_name)
+    if mtd_ is None:
         return
-
+    mtd: PNTableMetaData = cast(PNTableMetaData, mtd_)
     if mtd.isQuery():
         return
 
@@ -38,7 +44,9 @@ def mtd_parse(table_name: str) -> None:
 
     dest_file = "%s_model.py" % mtd_file[: len(mtd_file) - 4]
     if dest_file.find("share/pineboo/tables") > -1:
-        dest_file = dest_file.replace("share/pineboo/tables", "tempdata/cache/%s/sys/file.mtd" % project.conn.DBName())
+        dest_file = dest_file.replace(
+            "share/pineboo/tables", "tempdata/cache/%s/sys/file.mtd" % project.conn.DBName()
+        )
         sys_dir = dest_file[: dest_file.find("/file.mtd")]
         if not os.path.exists(sys_dir):
             os.mkdir(sys_dir)
@@ -55,15 +63,21 @@ def mtd_parse(table_name: str) -> None:
             f.close()
 
 
-def generate_model(dest_file, mtd_table) -> List[str]:
-
+def generate_model(dest_file: str, mtd_table: PNTableMetaData) -> List[str]:
+    """
+    Create a list of lines from a mtd_table (PNTableMetaData).
+    """
     data = []
     pk_found = False
     data.append("# -*- coding: utf-8 -*-")
     # data.append("from sqlalchemy.ext.declarative import declarative_base")
-    data.append("from sqlalchemy import Column, Integer, Numeric, String, BigInteger, Boolean, DateTime, ForeignKey, LargeBinary")
+    data.append(
+        "from sqlalchemy import Column, Integer, Numeric, String, BigInteger, Boolean, DateTime, ForeignKey, LargeBinary"
+    )
     data.append("from sqlalchemy.orm import relationship, validates")
-    data.append("from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import Calculated, load_model")
+    data.append(
+        "from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import Calculated, load_model"
+    )
     data.append("from pineboolib.application import project")
     data.append("")
     # data.append("Base = declarative_base()")
@@ -88,11 +102,15 @@ def generate_model(dest_file, mtd_table) -> List[str]:
 
     for field in mtd_table.fieldList():  # Crea los campos
         if field.name() in validator_list:
-            logger.warning("Hay un campo %s duplicado en %s.mtd. Omitido", field.name(), mtd_table.name())
+            logger.warning(
+                "Hay un campo %s duplicado en %s.mtd. Omitido", field.name(), mtd_table.name()
+            )
         else:
             field_data = []
             field_data.append("    ")
-            field_data.append("%s" % field.name() + "_" if field.name() in reserved_words else field.name())
+            field_data.append(
+                "%s" % field.name() + "_" if field.name() in reserved_words else field.name()
+            )
             field_data.append(" = Column('%s', " % field.name())
             field_data.append(field_type(field))
             field_data.append(")")
@@ -121,7 +139,11 @@ def generate_model(dest_file, mtd_table) -> List[str]:
                 if foreign_table_mtd.field(r.foreignField()):
 
                     foreign_object = "%s%s" % (r.foreignTable()[0].upper(), r.foreignTable()[1:])
-                    relation_ = "    %s_%s = relationship('%s'" % (r.foreignTable(), r.foreignField(), foreign_object)
+                    relation_ = "    %s_%s = relationship('%s'" % (
+                        r.foreignTable(),
+                        r.foreignField(),
+                        foreign_object,
+                    )
                     relation_ += ", foreign_keys='%s.%s'" % (foreign_object, r.foreignField())
                     relation_ += ")"
 
@@ -134,7 +156,9 @@ def generate_model(dest_file, mtd_table) -> List[str]:
     data.append("")
     data.append("    @validates('%s')" % "','".join(validator_list))
     data.append("    def validate(self, key, value):")
-    data.append("        self.__dict__[key] = value #Chapuza para que el atributo ya contenga el valor")
+    data.append(
+        "        self.__dict__[key] = value #Chapuza para que el atributo ya contenga el valor"
+    )
     data.append("        self.bufferChanged(key)")
     data.append("        return value #Ahora si se asigna de verdad")
     data.append("")
@@ -186,7 +210,10 @@ def generate_model(dest_file, mtd_table) -> List[str]:
     return data
 
 
-def field_type(field) -> str:
+def field_type(field: PNFieldMetaData) -> str:
+    """
+    Get text representation for sqlAlchemy of a field type given its PNFieldMetaData.
+    """
     ret = "String"
     if field.type() in ("int, serial"):
         ret = "Integer"
@@ -220,7 +247,7 @@ def field_type(field) -> str:
         if project.conn is None:
             raise Exception("Project is not connected yet")
         rel = field.relationM1()
-        if project.conn.manager().existsTable(rel.foreignTable()):
+        if rel and project.conn.manager().existsTable(rel.foreignTable()):
             ret += ", ForeignKey('%s.%s'" % (rel.foreignTable(), rel.foreignField())
             if rel.deleteCascade():
                 ret += ", ondelete='CASCADE'"

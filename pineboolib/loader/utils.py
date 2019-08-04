@@ -1,29 +1,37 @@
+"""
+Utilities for loading pineboo.
+"""
 import traceback
 from pineboolib import logging
-from typing import Dict, Any
+from typing import Dict, Any, Callable
 
 logger = logging.getLogger(__name__)
 
 
 def monkey_patch_connect() -> None:
-    """Patch Qt5 signal/event functions for tracing them.
+    """
+    Patch Qt5 signal/event functions for tracing them.
 
     This is not stable and should be used with care
     """
     from PyQt5 import QtCore  # type: ignore
 
-    logger.warning("--trace-signals es experimental. Tiene problemas de memoria y falla en llamadas con un argumento (False)")
-    logger.warning("... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa.")
+    logger.warning(
+        "--trace-signals es experimental. Tiene problemas de memoria y falla en llamadas con un argumento (False)"
+    )
+    logger.warning(
+        "... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa."
+    )
 
     class BoundSignal:
         _CONNECT = QtCore.pyqtBoundSignal.connect  # type: ignore
         _EMIT = QtCore.pyqtBoundSignal.emit
         _LAST_EMITTED_SIGNAL: Dict[str, Any] = {}
 
-        def slot_decorator(self, slot, connect_stack):
+        def slot_decorator(self: Any, slot: Callable, connect_stack: Any) -> Callable:
             selfid = repr(self)
 
-            def decorated_slot(*args):
+            def decorated_slot(*args: Any) -> Any:
                 ret = None
                 if len(args) == 1 and args[0] is False:
                     args = tuple()
@@ -44,8 +52,9 @@ def monkey_patch_connect() -> None:
 
             return decorated_slot
 
-        def connect(self, slot, type_=0, no_receiver_check=False):
-            """Proxy a connection to the original connect in the Qt library.
+        def connect(self: Any, slot: Any, type_: int = 0, no_receiver_check: bool = False) -> Any:
+            """
+            Proxy a connection to the original connect in the Qt library.
 
             This function wraps on top of the original Qt.connect so everything
             is logged.
@@ -64,7 +73,7 @@ def monkey_patch_connect() -> None:
                 newslot = slot
             return BoundSignal._CONNECT(self, newslot, type_, no_receiver_check)
 
-        def emit(self, *args):
+        def emit(self: Any, *args: Any) -> Any:
             """Proxy original Qt Emit function for tracing signal emits."""
             # print("Emit: %s :: %r" % (self, args))
             stack = traceback.extract_stack()

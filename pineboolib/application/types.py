@@ -1,20 +1,29 @@
+"""
+Data Types for QSA.
+"""
+
 import os
 import os.path
 import collections
-from typing import Any, Optional, Dict, Union, Generator
+from typing import Any, Optional, Dict, Union, Generator, List
 
+from os.path import expanduser
 from PyQt5 import QtCore  # type: ignore
+from PyQt5.Qt import QIODevice  # type: ignore
+
+from pineboolib.core import decorators
 
 from pineboolib.core.utils import logging
-from pineboolib.core.utils.utils_base import StructMyDict
-from pineboolib.application.utils.date_conversion import date_dma_to_amd
+from pineboolib.core.utils.utils_base import StructMyDict, filedir
+
+from pineboolib.application.qsatypes.date import Date  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
 
 def Boolean(x: Union[bool, str, float] = False) -> bool:
     """
-    Retorna Boolean de una cadena de texto
+    Return boolean from string.
     """
     if isinstance(x, bool):
         return x
@@ -37,12 +46,13 @@ def Boolean(x: Union[bool, str, float] = False) -> bool:
 
 class QString(str):
     """
-    Clase QString para simular la original que no existe en PyQt5
+    Emulate original QString as was removed from PyQt5.
     """
 
     def mid(self, start: int, length: Optional[int] = None) -> str:
         """
-        Recoje una sub cadena a partir de una cadena
+        Cut sub-string.
+
         @param start. Posición inicial
         @param length. Longitud de la cadena. Si no se especifica , es hasta el final
         @return sub cadena de texto.
@@ -54,6 +64,11 @@ class QString(str):
 
 
 def Function(*args: str) -> Any:
+    """
+    Load QS string code and create a function from it.
+
+    Parses it to Python and return the pointer to the function.
+    """
 
     import importlib
     import sys as python_sys
@@ -81,6 +96,8 @@ function anon(%s) {
     from . import project
 
     prog = flscriptparse.parse(qs_source)
+    if prog is None:
+        raise ValueError("Failed to convert to Python")
     tree_data = flscriptparse.calctree(prog, alias_mode=0)
     ast = postparse.post_parse(tree_data)
 
@@ -101,13 +118,13 @@ function anon(%s) {
     else:
         mod = importlib.import_module(module_path)
     forminternalobj = getattr(mod, "FormInternalObj", None)
-    os.remove(dest_filename)
+    # os.remove(dest_filename)
     return getattr(forminternalobj(), "anon", None)
 
 
 def Object(x: Optional[Dict[str, Any]] = None) -> StructMyDict:
     """
-    Objeto tipo object
+    Object type "object".
     """
     if x is None:
         x = {}
@@ -117,7 +134,8 @@ def Object(x: Optional[Dict[str, Any]] = None) -> StructMyDict:
 
 def String(value: str) -> str:
     """
-    Devuelve una cadena de texto
+    Convert something into string.
+
     @param value. Valor a convertir
     @return cadena de texto.
     """
@@ -126,7 +144,7 @@ def String(value: str) -> str:
 
 class Array(object):
     """
-    Objeto tipo Array
+    Array type object.
     """
 
     # NOTE: To avoid infinite recursion on getattr/setattr, all attributes MUST be defined at class-level.
@@ -134,6 +152,7 @@ class Array(object):
     _pos_iter = 0
 
     def __init__(self, *args: Any) -> None:
+        """Create new array."""
         self._pos_iter = 0
         self._dict = collections.OrderedDict()
 
@@ -158,14 +177,15 @@ class Array(object):
 
     def __iter__(self) -> Generator[Any, None, None]:
         """
-        iterable
+        Iterate through values.
         """
         for v in self._dict.values():
             yield v
 
     def __setitem__(self, key: Union[str, int], value: Any) -> None:
         """
-        Especificamos una nueva entrada
+        Set item.
+
         @param key. Nombre del registro
         @param value. Valor del registro
         """
@@ -176,7 +196,8 @@ class Array(object):
 
     def __getitem__(self, key: Union[str, int, slice]) -> Any:
         """
-        Recogemos el valor de un registro
+        Get item.
+
         @param key. Valor que idenfica el registro a recoger
         @return Valor del registro especificado
         """
@@ -195,17 +216,21 @@ class Array(object):
         return None
 
     def length(self) -> int:
+        """Return array size."""
         return len(self._dict)
 
     def __getattr__(self, k: str) -> Any:
+        """Support for attribute style access."""
         return self._dict[k]
 
     def __setattr__(self, k: str, val: Any) -> None:
+        """Support for attribute style writes."""
         if k[0] == "_":
             return super().__setattr__(k, val)
         self._dict[k] = val
 
     def __eq__(self, other: Any) -> bool:
+        """Support for equality comparisons."""
         if isinstance(other, Array):
             return other._dict == self._dict
         if isinstance(other, list):
@@ -215,9 +240,11 @@ class Array(object):
         return False
 
     def __repr__(self) -> str:
+        """Support for repr."""
         return "<%s %r>" % (self.__class__.__name__, list(self._dict.values()))
 
     def splice(self, *args: Any) -> None:
+        """Cut or replace array."""
         if len(args) == 2:  # Delete
             pos_ini = args[0]
             length_ = args[1]
@@ -262,12 +289,15 @@ class Array(object):
             self._dict = new
 
     def __len__(self) -> int:
+        """Return size of array."""
         return len(self._dict)
 
     def __str__(self) -> str:
+        """Support for str."""
         return repr(list(self._dict.values()))
 
     def append(self, val: Any) -> None:
+        """Append new value."""
         k = len(self._dict)
         while k in self._dict:
             k += 1
@@ -275,239 +305,363 @@ class Array(object):
         self._dict[k] = val
 
 
-class Date(object):
-    """
-    Case que gestiona un objeto tipo Date
-    """
-
-    date_: QtCore.QDate
-    time_: QtCore.QTime
-
-    def __init__(self, *args: Union["Date", QtCore.QDate, str, QtCore.QTime, int]) -> None:
-        super(Date, self).__init__()
-        if not args:
-            self.date_ = QtCore.QDate.currentDate()
-            self.time_ = QtCore.QTime.currentTime()
-        elif len(args) <= 2:
-            date_ = args[0]
-            format_ = args[1] if len(args) == 2 else "yyyy-MM-dd"
-            if not isinstance(format_, str):
-                raise ValueError("format must be string")
-            self.time_ = QtCore.QTime(0, 0)
-            if isinstance(date_, str):
-                if len(date_) == 10:
-                    tmp = date_.split("-")
-                    if len(tmp[2]) == 4:
-                        date_amd = date_dma_to_amd(date_)
-                        if date_amd is None:
-                            raise ValueError("Date %s is invalid" % date_)
-                        date_ = date_amd
-
-                    self.date_ = QtCore.QDate.fromString(date_, format_)
-                else:
-                    self.date_ = QtCore.QDate.fromString(date_[0:10], format_)
-                    self.time_ = QtCore.QTime.fromString(date_[11:], "hh:mm:ss")
-
-            elif isinstance(date_, Date):
-                self.date_ = date_.date_
-                self.time_ = date_.time_
-
-            elif isinstance(date_, QtCore.QDate):
-                self.date_ = date_
-            if not self.time_:
-                self.time_ = QtCore.QTime(0, 0)
-        else:
-            y, m, d = args[0], args[1], args[2]
-            if not isinstance(y, int) or not isinstance(m, int) or not isinstance(d, int):
-                raise ValueError("Expected year, month, day as integers")
-            self.date_ = QtCore.QDate(y, m, d)
-            self.time_ = QtCore.QTime(0, 0)
-
-    def toString(self, pattern: Optional[str] = None) -> str:
-        """
-        Retorna una cadena de texto con los datos de fecha y hora.
-        @return cadena de texto con los datos de fecha y hora
-        """
-        if pattern:
-            texto = self.date_.toString(pattern)
-        else:
-            texto = "%s-%s-%sT%s:%s:%s" % (
-                self.date_.toString("yyyy"),
-                self.date_.toString("MM"),
-                self.date_.toString("dd"),
-                self.time_.toString("hh"),
-                self.time_.toString("mm"),
-                self.time_.toString("ss"),
-            )
-
-        return texto
-
-    def getTime(self) -> int:
-        pattern = "%s%s%s%s%s%s" % (
-            self.date_.toString("yyyy"),
-            self.date_.toString("MM"),
-            self.date_.toString("dd"),
-            self.time_.toString("hh"),
-            self.time_.toString("mm"),
-            self.time_.toString("ss"),
-        )
-        return int(pattern)
-
-    def getYear(self) -> int:
-        """
-        Retorna el año
-        @return año
-        """
-        return self.date_.year()
-
-    def setYear(self, year: Union[str, int]) -> "Date":
-        """
-        Setea un año dado
-        @param yyyy. Año a setear
-        """
-        self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (year, self.date_.toString("MM"), self.date_.toString("dd")), "yyyy-MM-dd")
-
-        return self
-
-    def getMonth(self) -> int:
-        """
-        Retorna el mes
-        @return mes
-        """
-        return self.date_.month()
-
-    def setMonth(self, mm: Union[str, int]) -> "Date":
-        """
-        Setea un mes dado
-        @param mm. Mes a setear
-        """
-        if isinstance(mm, int):
-            mm = str(mm)
-
-        if len(mm) == 1:
-            mm = "0%s" % mm
-
-        self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (self.date_.toString("yyyy"), mm, self.date_.toString("dd")), "yyyy-MM-dd")
-
-        return self
-
-    def getDay(self) -> int:
-        """
-        Retorna el día
-        @return día
-        """
-        return self.date_.day()
-
-    def setDay(self, dd: Union[str, int]) -> "Date":
-        """
-        Setea un dia dado
-        @param dd. Dia a setear
-        """
-        if isinstance(dd, int):
-            dd = str(dd)
-
-        if len(str(dd)) == 1:
-            dd = "0%s" % dd
-
-        self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (self.date_.toString("yyyy"), self.date_.toString("mm"), dd), "yyyy-MM-dd")
-
-        return self
-
-    def getHours(self) -> int:
-        """
-        Retorna horas
-        @return horas
-        """
-        return self.time_.hour()
-
-    def getMinutes(self) -> int:
-        """
-        Retorna minutos
-        @return minutos
-        """
-        return self.time_.minute()
-
-    def getSeconds(self) -> int:
-        """
-        Retorna segundos
-        @return segundos
-        """
-        return self.time_.second()
-
-    def getMilliseconds(self) -> int:
-        """
-        Retorna milisegundos
-        @return milisegundos
-        """
-        return self.time_.msec()
-
-    getDate = getDay
-    # setDate = setDay
-
-    def setDate(self, date: Any) -> "Date":
-        """
-        Se especifica fecha
-        @param date. Fecha a setear
-        """
-        year_ = self.date_.toString("yyyy")
-        month_ = self.date_.toString("MM")
-        day_ = str(date)
-        if len(day_) == 1:
-            day_ = "0" + day_
-
-        str_ = "%s-%s-%s" % (year_, month_, day_)
-        self.date_ = QtCore.QDate.fromString(str_, "yyyy-MM-dd")
-
-        return self
-
-    def addDays(self, d: int) -> "Date":
-        """
-        Se añaden dias a una fecha dada
-        @param d. Dias a sumar (o restar) a la fecha dada
-        @return nueva fecha calculada
-        """
-        return Date(self.date_.addDays(d).toString("yyyy-MM-dd"))
-
-    def addMonths(self, m: int) -> "Date":
-        """
-        Se añaden meses a una fecha dada
-        @param m. Meses a sumar (o restar) a la fecha dada
-        @return nueva fecha calculada
-        """
-        return Date(self.date_.addMonths(m).toString("yyyy-MM-dd"))
-
-    def addYears(self, y: int) -> "Date":
-        """
-        Se añaden años a una fecha dada
-        @param y. Años a sumar (o restar) a la fecha dada
-        @return nueva fecha calculada
-        """
-        return Date(self.date_.addYears(y).toString("yyyy-MM-dd"))
-
-    @classmethod
-    def parse(cls, value: str) -> "Date":
-        return Date(value, "yyyy-MM-dd")
-
-    def __str__(self) -> str:
-        return self.toString()
-
-    def __lt__(self, other: Union[str, "Date"]) -> bool:
-        return str(self) < str(other)
-
-    def __le__(self, other: Union[str, "Date"]) -> bool:
-        return str(self) <= str(other)
-
-    def __ge__(self, other: Union[str, "Date"]) -> bool:
-        return str(self) >= str(other)
-
-    def __gt__(self, other: Union[str, "Date"]) -> bool:
-        return str(self) > str(other)
-
-    def __eq__(self, other: Any) -> bool:
-        return str(other) == str(self)
-
-    def __ne__(self, other: Any) -> bool:
-        return not self.__eq__(other)
-
-
 AttributeDict = StructMyDict
+
+
+class Dir(object):
+    """
+    Manage folder.
+
+    Emulates QtCore.QDir for QSA.
+    """
+
+    # Filters :
+    Files = QtCore.QDir.Files
+    Dirs = QtCore.QDir.Dirs
+    NoFilter = QtCore.QDir.NoFilter
+
+    # Sort Flags:
+    Name = QtCore.QDir.Name
+    NoSort = QtCore.QDir.NoSort
+
+    # other:
+    home = expanduser("~")
+
+    def __init__(self, path: Optional[str] = None):
+        """Create a new Dir."""
+        self.path_: Optional[str] = path
+
+    def entryList(self, patron: str, type_: int = NoFilter, sort: int = NoSort) -> list:
+        """
+        Create listing for files inside given folder.
+
+        @param patron. Patron a usa para identificar los ficheros
+        @return lista con los ficheros que coinciden con el patrón
+        """
+        # p = os.walk(self.path_)
+        retorno: List[str] = []
+        try:
+            import fnmatch
+
+            if self.path_ is None:
+                raise ValueError("self.path_ is not defined!")
+
+            if os.path.exists(self.path_):
+                for file in os.listdir(self.path_):
+                    if fnmatch.fnmatch(file, patron):
+                        retorno.append(file)
+        except Exception as e:
+            print("Dir_Class.entryList:", e)
+
+        return retorno
+
+    def fileExists(self, file_name: str) -> bool:
+        """
+        Check if a file does exist.
+
+        @param file_name. Nombre del fichero
+        @return Boolean. Si existe el ficehro o no.
+        """
+        return os.path.exists(file_name)
+
+    @staticmethod
+    def cleanDirPath(name: str) -> str:
+        """
+        Clean path from unnecesary folders.
+
+        @param name. Rtua del ficehro a limpiar
+        @return ruta limpia
+        """
+        return os.path.normpath(name)
+
+    @staticmethod
+    @decorators.Deprecated
+    def convertSeparators(filename: str) -> str:
+        """
+        Convert path from backslash to slashes or viceversa.
+
+        ***DEPRECATED***
+        """
+        return filename
+
+    def setCurrent(self, val: Optional[str] = None) -> None:
+        """
+        Change current working folder.
+
+        @param val. Ruta especificada
+        """
+        os.chdir(val or filedir("."))
+
+    def mkdir(self, name: Optional[str] = None) -> None:
+        """
+        Create a new folder.
+
+        @param name. Nombre de la ruta a crear
+        """
+        if name is None:
+            if self.path_ is None:
+                raise ValueError("self.path_ is not defined!")
+
+            name = self.path_
+        try:
+            os.stat(name)
+        except Exception:
+            os.mkdir(name)
+
+
+class File(object):  # FIXME : Rehacer!!
+    """
+    Manage a file.
+    """
+
+    ReadOnly = QIODevice.ReadOnly
+    WriteOnly = QIODevice.WriteOnly
+    ReadWrite = QIODevice.ReadWrite
+    Append = QIODevice.Append
+    ioDevice = QIODevice
+
+    fichero: str
+    mode_: QIODevice
+    path = None
+
+    encode_: str
+    last_seek = None
+    qfile: QtCore.QFile
+    eof = False
+
+    def __init__(self, rutaFichero: Optional[str] = None, encode: Optional[str] = None):
+        """Create a new File Object. This does not create a file on disk."""
+        self.encode_ = "iso-8859-15"
+        if rutaFichero:
+            # if isinstance(rutaFichero, tuple):
+            #     rutaFichero = rutaFichero[0]
+            self.fichero = str(rutaFichero)
+            self.qfile = QtCore.QFile(rutaFichero)
+
+            self.path = os.path.dirname(os.path.abspath(self.fichero))
+        else:
+            self.qfile = QtCore.QFile()
+
+        if encode is not None:
+            self.encode_ = encode
+
+        self.mode_ = self.ReadWrite
+
+    def open(self, m: QIODevice) -> bool:
+        """Open file."""
+        self.mode_ = m
+        self.eof = False
+        return True
+
+    def close(self) -> None:
+        """Close file."""
+        pass
+
+    def read(self: Union["File", str], bytes: bool = False) -> Union[str, bytes]:
+        """
+        Read file completely.
+
+        @param bytes. Especifica si se lee en modo texto o en bytess
+        @retunr contenido del fichero
+        """
+        file_: str
+        encode: str
+
+        if isinstance(self, str):
+            file_ = self
+            encode = "iso-8859-15"
+        else:
+            if self.fichero is None:
+                raise ValueError("self.fichero is not defined!")
+
+            file_ = self.fichero
+            encode = self.encode_
+        import codecs
+
+        if file_ is None:
+            raise ValueError("file is empty!")
+
+        f = codecs.open(file_, "r" if not bytes else "rb", encoding=encode)
+        ret = ""
+        for l in f:
+            ret = ret + l
+
+        f.close()
+        if isinstance(self, File):
+            self.eof = True
+        return ret
+
+    def write(self: Union["File", str], data: Union[str, bytes], length: int = -1) -> None:
+        """
+        Write data back to the file.
+
+        @param data. Valores a guardar en el fichero
+        @param length. Tamaño de data. (No se usa)
+        """
+        encode: str
+        file_: str
+
+        if isinstance(self, str):
+            file_ = self
+            encode = "utf-8"
+        else:
+            if self.fichero is None:
+                raise ValueError("self.fichero is empty!")
+            file_ = self.fichero
+            encode = self.encode_
+
+        if encode is None:
+            raise ValueError("encode is empty!")
+
+        if isinstance(data, str):
+            bytes_ = data.encode(encode)
+        else:
+            bytes_ = data
+        mode = "wb"
+        if isinstance(self, File):
+            if self.mode_ == self.Append:
+                mode = "ab"
+        with open(file_, mode) as file:
+            file.write(bytes_)
+
+        file.close()
+
+    def writeBlock(self, bytes_array: bytes) -> None:
+        """Write a block of data to the file."""
+        if self.fichero is None:
+            raise ValueError("self.fichero is empty!")
+
+        with open(self.fichero, "wb") as file:
+            file.write(bytes_array)
+
+        file.close()
+
+    @staticmethod
+    def exists(name: str) -> bool:
+        """
+        Check if a file does exist.
+
+        @param name. Nombre del fichero.
+        @return boolean informando si existe o no el fichero.
+        """
+        return os.path.exists(name)
+
+    @staticmethod
+    def isDir(dir_name: str) -> bool:
+        """
+        Check if given path is a folder.
+
+        @param. Nombre del directorio
+        @return. boolean informando si la ruta dada es un directorio o no.
+        """
+        return os.path.isdir(dir_name)
+
+    @staticmethod
+    def isFile(file_name: str) -> bool:
+        """
+        Check if given path is a file.
+
+        @param. Nombre del fichero
+        @return. boolean informando si la ruta dada es un fichero o no.
+        """
+        return os.path.isfile(file_name)
+
+    def getName(self) -> str:
+        """
+        Get file name.
+
+        @return Nombre del fichero
+        """
+        if self.fichero is None:
+            raise ValueError("self.fichero is empty!")
+
+        path_, file_name = os.path.split(self.fichero)
+        return file_name
+
+    def writeLine(self, data: str) -> None:
+        """
+        Write a new line with "data" contents into the file.
+
+        @param data. Datos a añadir en el fichero
+        """
+        import codecs
+
+        if self.fichero is None:
+            raise ValueError("self.fichero is empty!")
+
+        f = codecs.open(self.fichero, encoding=self.encode_, mode="a")
+        f.write("%s\n" % data)
+        f.close()
+
+    def readLine(self) -> str:
+        """
+        Read a line from file.
+
+        @return cadena de texto con los datos de la linea actual
+        """
+        if self.last_seek is None:
+            self.last_seek = 0
+
+        import codecs
+
+        if self.fichero is None:
+            raise ValueError("self.fichero is empty!")
+
+        f = codecs.open(self.fichero, "r", encoding=self.encode_)
+        ret = f.readline(self.last_seek)
+        self.last_seek += 1
+        f.close()
+        return ret
+
+    def readLines(self) -> List[str]:
+        """
+        Read all lines from a file and return it as array.
+
+        @return array con las lineas del fichero.
+        """
+        ret: List[str]
+        import codecs
+
+        f = codecs.open(self.fichero, encoding=self.encode_, mode="a")
+        if self.last_seek is not None:
+            f.seek(self.last_seek)
+        ret = f.readlines()
+        f.close()
+        return ret
+
+    def readbytes(self) -> bytes:
+        """
+        Read the whole file as binary.
+
+        @return bytess con los datos de la linea actual
+        """
+        ret_ = self.read(True)
+        if isinstance(ret_, str):
+            raise ValueError("expected bytes")
+
+        return ret_
+
+    def writebytes(self, data_b: bytes) -> None:
+        """
+        Write file as binary.
+
+        @param data_b. Datos a añadir en el fichero
+        """
+
+        f = open(self.fichero, "wb")
+        f.write(data_b)
+        f.close()
+
+    def remove(self: Union["File", str]) -> bool:
+        """
+        Delete file from filesystem.
+
+        @return Boolean . True si se ha borrado el fichero, si no False.
+        """
+        if isinstance(self, str):
+            file = File(self)
+            return file.remove()
+        else:
+            return self.qfile.remove()
+
+    name = property(getName)

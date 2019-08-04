@@ -103,7 +103,7 @@ class PNSqlQuery(object):
     invalidTablesList = False
     _is_active: bool
     _fieldNameToPosDict: Optional[Dict[str, int]]
-    _sql_inspector: Optional[sql_tools.sql_inspector]
+    _sql_inspector: Optional[sql_tools.SqlInspector]
     _row: List[Any]
     _datos: List[Any]
     _posicion: int
@@ -144,18 +144,13 @@ class PNSqlQuery(object):
         """
 
         try:
-            del self.d
-            del self._datos
             if self._cursor is not None:
                 self._cursor.close()
-                del self._cursor
         except Exception:
             pass
 
-        self.countRefQuery = self.countRefQuery - 1
-
     @property
-    def sql_inspector(self) -> sql_tools.sql_inspector:
+    def sql_inspector(self) -> sql_tools.SqlInspector:
         """
         Return a sql inspector instance.
 
@@ -166,7 +161,7 @@ class PNSqlQuery(object):
         if self._sql_inspector is None:
             logger.warning("sql_inspector: Query has not executed yet", stack_info=True)
             sql = self.sql()
-            self._sql_inspector = sql_tools.sql_inspector(sql.lower())
+            self._sql_inspector = sql_tools.SqlInspector(sql.lower())
         return self._sql_inspector
 
     def exec_(self, sql: Optional[str] = None) -> bool:
@@ -179,14 +174,16 @@ class PNSqlQuery(object):
         """
 
         if self.invalidTablesList:
+            logger.error("exec_: invalid tables list found")
             return False
 
         if not sql:
             sql = self.sql()
         if not sql:
+            logger.warning("exec_: no sql provided and PNSqlQuery.sql() also returned empty")
             return False
 
-        self._sql_inspector = sql_tools.sql_inspector(sql.lower())
+        self._sql_inspector = sql_tools.SqlInspector(sql.lower())
 
         sql = self.db().driver().fix_query(sql)
         if sql is None:
@@ -209,6 +206,7 @@ class PNSqlQuery(object):
             logger.trace("Detalle:", stack_info=True)
             return False
         # conn.commit()
+        logger.trace("_exec: Rows: %s SQL: <%s>", len(self._datos), sql)
 
         return True
 
@@ -527,7 +525,9 @@ class PNSqlQuery(object):
         It is intended only for debugging tasks.
         """
         if not self.isActive():
-            logger.warning("DEBUG : La consulta no está activa : No se ha ejecutado exec() o la sentencia SQL no es válida")
+            logger.warning(
+                "DEBUG : La consulta no está activa : No se ha ejecutado exec() o la sentencia SQL no es válida"
+            )
 
         logger.warning("DEBUG : Nombre de la consulta : %s", self.d.name_)
         logger.warning("DEBUG : Niveles de agrupamiento :")
@@ -709,6 +709,7 @@ class PNSqlQuery(object):
         for tabla in table_list.split(","):
             if not self.db().manager().existsTable(tabla) and len(table_list.split(",")) >= 1:
                 self.invalidTablesList = True
+                logger.warning("setTablesList: table not found %r. Query will not execute.", tabla)
 
             self.d.tablesList_.append(tabla)
 

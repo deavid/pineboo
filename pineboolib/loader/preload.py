@@ -1,11 +1,14 @@
+"""Preload Module."""
+
 from pineboolib import logging
-from typing import Container
+from typing import Container, Any
 
 logger = logging.getLogger("loader.preload_actions")
 
 
-def preload_actions(project, forceload: Container = None) -> None:
-    """Preload actions for warming up the pythonizer cache.
+def preload_actions(project: Any, forceload: Container = None) -> None:
+    """
+    Preload actions for warming up the pythonizer cache.
 
     forceload: When passed an string, it filters and loads all
         actions that match "*forceload*". If None, all actions
@@ -20,9 +23,9 @@ def preload_actions(project, forceload: Container = None) -> None:
             project.actions[action].load()
         except Exception:
             logger.exception("Failure trying to load action %s", action)
-            project.conn.conn.rollbackTransaction()  # FIXME: Proper transaction handling using with context
+            project.conn.conn.rollback()  # FIXME: Proper transaction handling using with context
         try:
             project.actions[action].loadRecord(None)
         except Exception:
             logger.exception("Failure trying to loadRecord action %s", action)
-            project.conn.conn.rollbackTransaction()  # FIXME: Proper transaction handling using with context
+            project.conn.conn.rollback()  # FIXME: Proper transaction handling using with context

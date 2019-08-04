@@ -1,3 +1,6 @@
+"""
+Project Module.
+"""
 import os
 import time
 from typing import List, Optional, Any, Dict, TYPE_CHECKING
@@ -13,19 +16,19 @@ from pineboolib.core.exceptions import CodeDoesNotBelongHereException, NotConnec
 from pineboolib.core.settings import config
 
 from pineboolib.application.module import Module
-
-
 from pineboolib.application.utils.path import _dir
 
 if TYPE_CHECKING:
     from pineboolib.interfaces.dgi_schema import dgi_schema
     from pineboolib.interfaces.iconnection import IConnection
-    from pineboolib.application.xmlaction import XMLAction
+    from pineboolib.core.utils.struct import ActionStruct  # noqa: F401
 
 
 class Project(object):
     """
-    Esta es la clase principal del proyecto. Se puede acceder a esta con pineboolib.project desde cualquier parte del projecto
+    Singleton for the whole application.
+
+    Can be accessed with pineboolib.project from anywhere.
     """
 
     logger = logging.getLogger("main.Project")
@@ -49,9 +52,7 @@ class Project(object):
     _msg_mng = None
 
     def __init__(self) -> None:
-        """
-        Constructor
-        """
+        """Constructor."""
         self._conn = None
         self._DGI = None
         self.tree = None
@@ -63,33 +64,38 @@ class Project(object):
         self.deleteCache = False
         self.parseProject = False
         self.translator_: List[Any] = []  # FIXME: Add proper type
-        self.actions: Dict[Any, XMLAction] = {}  # FIXME: Add proper type
+        self.actions: Dict[Any, "ActionStruct"] = {}  # FIXME: Add proper type
         self.tables: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.files: Dict[Any, Any] = {}  # FIXME: Add proper type
         self.options = Values()
 
     @property
     def app(self) -> QtCore.QCoreApplication:
+        """Retrieve current Qt Application or throw error."""
         if self._app is None:
             raise Exception("No application set")
         return self._app
 
     def set_app(self, app: QtCore.QCoreApplication):
+        """Set Qt Application."""
         self._app = app
 
     @property
     def conn(self) -> "IConnection":
+        """Retrieve current connection or throw."""
         if self._conn is None:
             raise Exception("Project is not initialized")
         return self._conn
 
     @property
     def DGI(self) -> "dgi_schema":
+        """Retrieve current DGI or throw."""
         if self._DGI is None:
             raise Exception("Project is not initialized")
         return self._DGI
 
     def init_conn(self, connection: "IConnection") -> None:
+        """Initialize project with a connection."""
         self._conn = connection
         self.apppath = filedir("..")
         self.tmpdir = config.value("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))
@@ -100,7 +106,7 @@ class Project(object):
         self.parseProject = config.value("ebcomportamiento/parseProject", False)
 
     def init_dgi(self, DGI: "dgi_schema") -> None:
-        """Load and associate the defined DGI onto this project"""
+        """Load and associate the defined DGI onto this project."""
         # FIXME: Actually, DGI should be loaded here, or kind of.
         from pineboolib.core.message_manager import Manager
 
@@ -115,14 +121,17 @@ class Project(object):
         self._DGI.extraProjectInit()
 
     def load_modules(self) -> None:
+        """Load all modules."""
         for module_name, mod_obj in self.modules.items():
             mod_obj.load()
             self.tables.update(mod_obj.tables)
 
     def setDebugLevel(self, q: int) -> None:
         """
-        Especifica el nivel de debug de la aplicación
+        Set debug level for application.
+
         @param q Número con el nivel espeficicado
+        ***DEPRECATED***
         """
         Project.debugLevel = q
         # self._DGI.pnqt3ui.Options.DEBUG_LEVEL = q
@@ -134,12 +143,11 @@ class Project(object):
     #     """
     #     return self.acl_
     def acl(self):
-        """Devuelve el ACL cargado"""
+        """Return loaded ACL."""
         raise CodeDoesNotBelongHereException("ACL Does not belong to PROJECT. Go away.")
 
     def run(self) -> bool:
-        """Arranca el proyecto. Conecta a la BD y carga los datos
-        """
+        """Run project. Connects to DB and loads data."""
 
         if self.actions:
             del self.actions
@@ -156,15 +164,15 @@ class Project(object):
         if not self.conn or not self.conn.conn:
             raise NotConnectedError("Cannot execute Pineboo Project without a connection in place")
 
-        from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import load_models
-
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
 
         if self.deleteCache and os.path.exists(_dir("cache/%s" % self.conn.DBName())):
 
             self.message_manager().send("splash", "showMessage", ["Borrando caché ..."])
-            self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", _dir("cache/%s" % self.conn.DBName()))
+            self.logger.debug(
+                "DEVELOP: DeleteCache Activado\nBorrando %s", _dir("cache/%s" % self.conn.DBName())
+            )
             for root, dirs, files in os.walk(_dir("cache/%s" % self.conn.DBName()), topdown=False):
                 for name in files:
                     os.remove(os.path.join(root, name))
@@ -188,7 +196,17 @@ class Project(object):
         # Conectar:
 
         # Se verifica que existen estas tablas
-        for table in ("flareas", "flmodules", "flfiles", "flgroups", "fllarge", "flserial", "flusers", "flvar", "flmetadata"):
+        for table in (
+            "flareas",
+            "flmodules",
+            "flfiles",
+            "flgroups",
+            "fllarge",
+            "flserial",
+            "flusers",
+            "flvar",
+            "flmetadata",
+        ):
             self.conn.manager().createSystemTable(table)
 
         cursor_ = self.conn.dbAux().cursor()
@@ -219,7 +237,9 @@ class Project(object):
 
         self.modules["sys"] = Module("sys", "sys", "Administración", icono)
 
-        cursor_.execute(""" SELECT idmodulo, nombre, sha FROM flfiles WHERE NOT sha = '' ORDER BY idmodulo, nombre """)
+        cursor_.execute(
+            """ SELECT idmodulo, nombre, sha FROM flfiles WHERE NOT sha = '' ORDER BY idmodulo, nombre """
+        )
 
         size_ = cursor_.rowcount
 
@@ -264,10 +284,13 @@ class Project(object):
                     continue
 
             cur2 = self.conn.dbAux().cursor()
-            sql = "SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha = %s" % (
-                self.conn.driver().formatValue("string", idmodulo, False),
-                self.conn.driver().formatValue("string", nombre, False),
-                self.conn.driver().formatValue("string", sha, False),
+            sql = (
+                "SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha = %s"
+                % (
+                    self.conn.driver().formatValue("string", idmodulo, False),
+                    self.conn.driver().formatValue("string", nombre, False),
+                    self.conn.driver().formatValue("string", sha, False),
+                )
             )
             cur2.execute(sql)
             for (contenido,) in cur2:
@@ -276,13 +299,20 @@ class Project(object):
                 if str(nombre).endswith(".kut") or str(nombre).endswith(".ts"):
                     encode_ = "utf-8"
 
-                folder = _dir("cache", "/".join(fileobj.filekey.split("/")[: len(fileobj.filekey.split("/")) - 1]))
-                if os.path.exists(folder) and not file_name:  # Borra la carpeta si no existe el fichero destino
+                folder = _dir(
+                    "cache",
+                    "/".join(fileobj.filekey.split("/")[: len(fileobj.filekey.split("/")) - 1]),
+                )
+                if (
+                    os.path.exists(folder) and not file_name
+                ):  # Borra la carpeta si no existe el fichero destino
                     for root, dirs, files in os.walk(folder):
                         for f in files:
                             os.remove(os.path.join(root, f))
 
-                self.message_manager().send("splash", "showMessage", ["Volcando a caché %s..." % nombre])
+                self.message_manager().send(
+                    "splash", "showMessage", ["Volcando a caché %s..." % nombre]
+                )
 
                 if contenido and not os.path.exists(file_name):
                     f2 = open(file_name, "wb")
@@ -290,14 +320,22 @@ class Project(object):
                     f2.write(txt)
                     f2.close()
 
-            if self.parseProject and nombre.endswith(".qs") and config.value("application/isDebuggerMode", False):
-                self.message_manager().send("splash", "showMessage", ["Convirtiendo %s ( %d/ %d) ..." % (nombre, p, size_)])
+            if (
+                self.parseProject
+                and nombre.endswith(".qs")
+                and config.value("application/isDebuggerMode", False)
+            ):
+                self.message_manager().send(
+                    "splash", "showMessage", ["Convirtiendo %s ( %d/ %d) ..." % (nombre, p, size_)]
+                )
                 if os.path.exists(file_name):
 
                     self.parseScript(file_name, "(%d de %d)" % (p, size_))
 
         tiempo_fin = time.time()
-        self.logger.info("Descarga del proyecto completo a disco duro: %.3fs", (tiempo_fin - tiempo_ini))
+        self.logger.info(
+            "Descarga del proyecto completo a disco duro: %.3fs", (tiempo_fin - tiempo_ini)
+        )
 
         # Cargar el núcleo común del proyecto
         idmodulo = "sys"
@@ -312,7 +350,8 @@ class Project(object):
 
         if not config.value("ebcomportamiento/orm_load_disabled", False):
             self.message_manager().send("splash", "showMessage", ["Cargando objetos ..."])
-            load_models()
+            # from pineboolib.application.parsers.mtdparser.pnormmodelsfactory import load_models
+            # load_models()
 
         self.message_manager().send("splash", "showMessage", ["Cargando traducciones ..."])
 
@@ -322,9 +361,16 @@ class Project(object):
 
         return True
 
-    def call(self, function: str, aList: List[Any], object_context: Any = None, showException: bool = True) -> Optional[Any]:
+    def call(
+        self,
+        function: str,
+        aList: List[Any],
+        object_context: Any = None,
+        showException: bool = True,
+    ) -> Optional[Any]:
         """
-        LLama a una función del projecto.
+        Call to a QS project function.
+
         @param function. Nombre de la función a llamar.
         @param aList. Array con los argumentos.
         @param objectContext. Contexto en el que se ejecuta la función.
@@ -333,7 +379,9 @@ class Project(object):
         """
         # FIXME: No deberíamos usar este método. En Python hay formas mejores
         # de hacer esto.
-        self.logger.trace("JS.CALL: fn:%s args:%s ctx:%s", function, aList, object_context, stack_info=True)
+        self.logger.trace(
+            "JS.CALL: fn:%s args:%s ctx:%s", function, aList, object_context, stack_info=True
+        )
 
         # Tipicamente flfactalma.iface.beforeCommit_articulos()
         if function[-2:] == "()":
@@ -345,7 +393,9 @@ class Project(object):
             if not aFunction[0] in self.actions:
                 if len(aFunction) > 1:
                     if showException:
-                        self.logger.error("No existe la acción %s en el módulo %s", aFunction[1], aFunction[0])
+                        self.logger.error(
+                            "No existe la acción %s en el módulo %s", aFunction[1], aFunction[0]
+                        )
                 else:
                     if showException:
                         self.logger.error("No existe la acción %s", aFunction[0])
@@ -375,7 +425,11 @@ class Project(object):
 
             if not object_context:
                 if showException:
-                    self.logger.error("No existe el script para la acción %s en el módulo %s", aFunction[0], aFunction[0])
+                    self.logger.error(
+                        "No existe el script para la acción %s en el módulo %s",
+                        aFunction[0],
+                        aFunction[0],
+                    )
                 return None
 
         fn = None
@@ -396,7 +450,9 @@ class Project(object):
         if fn is None:
             if showException:
                 self.logger.error("No existe la función %s en %s", function_name, aFunction[0])
-            return True  # FIXME: Esto devuelve true? debería ser false, pero igual se usa por el motor para detectar propiedades
+            return (
+                True
+            )  # FIXME: Esto devuelve true? debería ser false, pero igual se usa por el motor para detectar propiedades
 
         try:
             return fn(*aList)
@@ -407,7 +463,8 @@ class Project(object):
 
     def parseScript(self, scriptname: str, txt_: str = "") -> None:
         """
-        Convierte un script .qs a .py lo deja al lado
+        Convert QS script into Python and stores it in the same folder.
+
         @param scriptname, Nombre del script a convertir
         """
 
@@ -422,15 +479,6 @@ class Project(object):
             msg = "Convirtiendo a Python . . . %s.qs %s" % (file_name, txt_)
             self.logger.info(msg)
 
-            # if self._splash:
-            #     self._splash.showMessage(msg, QtCore.Qt.AlignLeft, QtCore.Qt.white)
-            #
-            # else:
-            #     if settings.readBoolEntry("ebcomportamiento/SLInterface", False):
-            #         from pineboolib.pncontrolsfactory import aqApp
-            #
-            #         aqApp.popupWarn(msg)
-
             # clean_no_python = self._DGI.clean_no_python() # FIXME: No longer needed. Applied on the go.
 
             from pineboolib.application.parsers.qsaparser import postparse
@@ -442,7 +490,8 @@ class Project(object):
 
     def test(self, name=None):
         """
-        Lanza los test
+        Start GUI tests.
+
         @param name, Nombre del test específico. Si no se especifica se lanzan todos los tests disponibles
         @return Texto con la valoración de los test aplicados
         """
@@ -485,19 +534,23 @@ class Project(object):
 
     def get_temp_dir(self) -> str:
         """
-        Retorna la carpeta temporal predefinida de pineboo
+        Return temporary folder defined for pineboo.
+
         @return ruta a la carpeta temporal
+        ***DEPRECATED***
         """
         # FIXME: anti-pattern in Python. Getters for plain variables are wrong.
         raise CodeDoesNotBelongHereException("Use project.tmpdir instead, please.")
         # return self.tmpdir
 
     def load_version(self):
-        self.version = "0.12"
+        """Initialize current version numbers."""
+        self.version = "0.13"
         if config.value("application/dbadmin_enabled", False):
             self.version = "DBAdmin v%s" % self.version
         else:
             self.version = "Quick v%s" % self.version
 
     def message_manager(self):
+        """Return message manager for splash and progress."""
         return self._msg_mng

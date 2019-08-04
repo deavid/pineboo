@@ -1,0 +1,100 @@
+Esta herramienta permite crear binarios para plataformas a partir de python3 y pyqt5
+
+
+Instalación:
+ sudo -H pip3 install pyqtdeploy (Actualmente instala la versión 2.4)
+ 
+Copiamos los siguientes paquetes en la carpeta src.
+
+Compilación básica (Linux64 - Linux64)
+============================================
+https://www.python.org/ftp/python/3.6.7/Python-3.6.7.tar.xz (3.7.2 linux ok)
+https://www.openssl.org/source/openssl-1.1.0j.tar.gz (1.1.1 no está soportado)
+https://www.riverbankcomputing.com/static/Downloads/sip/4.19.16/sip-4.19.16.tar.gz
+https://www.riverbankcomputing.com/static/Downloads/PyQt5/5.12.1/PyQt5_gpl-5.12.1.tar.gz
+https://download.qt.io/official_releases/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz
+
+qt5.12 (Instalar en /opt/Qt5.12.3 o modificar sysroot.json)
+
+sudo apt-get install build-essential libbz2-dev libsqlite3-dev pkg-config flex bison gperf dbus-*dev libssl-dev qt5-default libclang-dev
+sudo apt-get install "^libxcb.*" libx11-xcb-dev libglu1-mesa-dev libxrender-dev libre2-dev
+
+Ejecutar:
+build_binaries_linux_64.sh
+
+
+
+Compilación cruzada android-32 
+============================================
+https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip?hl=ES (extraer en ./src)
+https://dl.google.com/dl/android/studio/ide-zips/3.4.0.18/android-studio-ide-183.5452501-linux.tar.gz (en ./src y ejecutar studio.sh. Configurar compiladores y descargar SDK)
+
+configure -> sdk manager -> Appearance & Behavior -> System Settings -> Android SDK -> SDK Tools
+
+.. and make sure you have these installed and up to date:
+
+    Android SDK Build tools
+    Google Play Services
+    Google Repository
+
+
+sudo apt-get install gcc-arm-linux-gnueabi
+
+
+Ejecutar:
+build_binaries_android.sh
+
+
+Compilación windows-64 (nativa)
+============================================
+
+* Visual Studio Build Tools 2019 Community (Instalar VC2017)
+* qt-unified-windows-x86-3.1.0-online.exe
+
+
+
+
+Compilación cruzada windows-64
+============================================
+
+sudo apt-get install autoconf
+
+./configure -xplatform win32-g++ -prefix /opt/qt5win32 -device-option CROSS_COMPILE=x86_64-w64-mingw32- -nomake examples -nomake tools -continue -opensource -confirm-license -static
+
+
+
+Compilar qt cruzado para qmake:
+* Descomprimir qt-everywhere-opensource-src-5.9.3.tar.xz
+* ./configure -platform linux-arm-gnueabi-g++ -prefix /home/joserepos/github/pineboo/src/Qt -opensource -confirm-license -static -release -nomake examples -nomake tools -ssl -openssl-runtime -qt-xcb
+
+
+
+    export ANDROID_SDK_ROOT=/path/to/android_sdk
+    export ANDROID_NDK_ROOT=/path/to/android_ndk
+    export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
+    export PATH=$PATH:$ANDROID_SDK_ROOT/tools
+    export PATH=$PATH:$ANDROID_NDK
+    export ANDROID_NDK_PLATFORM=android-21
+    export ANDROID_NDK_TOOLCHAIN_VERSION=4.9
+    
+
+Compilación cruzada ios (en desarrollo)
+============================================
+http://docs.godotengine.org/en/3.0/development/compiling/cross-compiling_for_ios_on_linux.html
+https://vedanamedia.com/wp-content/uploads/2017/07/LIBS-README.txt
+
+
+Plataformas soportadas:
+win-32
+win-64
+macos-64
+linux-32
+linux-64
+android-32
+ios-64
+
+
+
+
+
+

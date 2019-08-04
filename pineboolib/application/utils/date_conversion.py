@@ -1,3 +1,7 @@
+"""
+Convert a date to different formats.
+"""
+
 import datetime
 from PyQt5 import QtCore  # type: ignore
 from PyQt5.QtCore import QDate  # type: ignore
@@ -5,6 +9,13 @@ from typing import Optional, List, Any
 
 
 def date_dma_to_amd(f) -> Optional[str]:
+    """
+    Convert day, month, year to year, month day.
+
+    @param f: date string.
+    @return date string formated.
+    """
+
     if not f:
         return None
 
@@ -36,6 +47,13 @@ def date_dma_to_amd(f) -> Optional[str]:
 
 
 def date_amd_to_dma(f) -> Optional[str]:
+    """
+    Convert year, month day to day, month, year.
+
+    @param f: date string.
+    @return date string formated.
+    """
+
     if not f:
         return None
 
@@ -66,10 +84,13 @@ def date_amd_to_dma(f) -> Optional[str]:
 
 
 def convert_to_qdate(date: Any) -> QDate:
-    """Convierte diferentes formatos de fecha a QDate
-    @param date: Fecha a convertir
-    @return QDate con el valor de la fecha dada
     """
+    Convert different date formats to QDate.
+
+    @param date: Date to convert.
+    @return QDate with the value of the given date.
+    """
+
     internal_date = getattr(date, "date_", None)  # For types.Date
     if internal_date is not None:
         date = date.toString()  # QDate -> str

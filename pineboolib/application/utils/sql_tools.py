@@ -1,3 +1,7 @@
+"""
+Collect information from the query, such as field tables, lines, etc ...
+"""
+
 from pineboolib.core.utils import logging
 import datetime
 from typing import Dict, Iterable, Tuple, Union, Any, List, Optional, TYPE_CHECKING
@@ -8,13 +12,21 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class sql_inspector(object):
+class SqlInspector(object):
+    """SqlInspector Class."""
 
-    _sql_list = None
-    _sql = None
+    _sql_list: List[str]
+    _sql: str
+    _invalid_tables: List[str]
 
     def __init__(self, sql_text: str) -> None:
-        self._invalid_tables: List[str] = []  # FIXME: Maybe a set() is better
+        """
+        Initialize the class.
+
+        @param sql_text . query string.
+        """
+
+        self._invalid_tables = []
         self._mtd_fields: Dict[int, "IFieldMetaData"] = {}
         self._field_names: Dict[str, int] = {}
         self._table_names: List[str] = []
@@ -33,15 +45,39 @@ class sql_inspector(object):
             # self.field_names()
 
     def mtd_fields(self) -> Dict[int, Any]:
+        """
+        Return a dictionary with the fields of the query.
+
+        @return fields dictionary.
+        """
+
         return self._mtd_fields
 
     def table_names(self) -> List[str]:
+        """
+        Return a list with the tables of the query.
+
+        @return tables list.
+        """
+
         return self._table_names
 
     def field_names(self) -> List[str]:  # FIXME: This does NOT preserve order!
+        """
+        Return a list with the name of the fields.
+
+        @return fields list.
+        """
+
         return list(self._field_names.keys())
 
-    def fieldNameToPos(self, name: str) -> Any:
+    def fieldNameToPos(self, name: str) -> int:
+        """
+        Return the position of a field, from the name.
+
+        @param name. field name.
+        @return index position.
+        """
 
         if name in self._field_names.keys():
             return self._field_names[name]
@@ -55,15 +91,27 @@ class sql_inspector(object):
 
         raise Exception("No se encuentra el campo %s el la query:\n%s" % (name, self._sql))
 
-    def posToFieldName(self, pos) -> Any:
+    def posToFieldName(self, pos) -> str:
+        """
+        Return the name of a field, from the position.
+
+        @param name. field name.
+        @return field name.
+        """
 
         for k, v in self._field_names:
             if v == pos:
                 return k
 
-        return False
+        raise Exception("fieldName not found!")
 
     def _resolve_fields(self, sql) -> None:
+        """
+        Break the query into the different data.
+
+        @param sql. Quey string.
+        """
+
         list_sql = sql.split(" ")
 
         if list_sql[0] == "select":
@@ -169,13 +217,21 @@ class sql_inspector(object):
             self._create_mtd_fields(fl_finish, tablas)
 
     def resolve_empty_value(self, pos) -> Any:
+        """
+        Return a data type according to field type and value None.
+
+        @param pos. index postion.
+        """
+
         if not self.mtd_fields():
             return None
 
         type_ = "double"
         if pos not in self._mtd_fields.keys():
             if pos not in self._field_names.values():
-                logger.warning("SQL_TOOLS : resolve_empty_value : No se encuentra la posición %s", pos)
+                logger.warning(
+                    "SQL_TOOLS : resolve_empty_value : No se encuentra la posición %s", pos
+                )
                 return None
         else:
             mtd = self._mtd_fields[pos]
@@ -201,6 +257,11 @@ class sql_inspector(object):
         return ret_
 
     def resolve_value(self, pos, value: Union[bytes, float, str, datetime.time], raw=False) -> Any:
+        """
+        Return a data type according to field type.
+
+        @param pos. index postion.
+        """
 
         if not self.mtd_fields():
             if isinstance(value, datetime.time):
@@ -258,6 +319,13 @@ class sql_inspector(object):
         return ret_
 
     def _create_mtd_fields(self, fields_list: Iterable, tables_list: Iterable) -> None:
+        """
+        Solve the fields that make up the query.
+
+        @param fields_list. fields list.
+        @param tables_list. tables list.
+        """
+
         from pineboolib.application import project
 
         if project.conn is None:
@@ -296,7 +364,11 @@ class sql_inspector(object):
                     # tables_list.remove(table_name)
 
 
-def resolve_query(table_name, params: Dict[str, str]) -> Tuple[str, str]:
+def resolve_query(table_name: str, params: Dict[str, str]) -> Tuple[str, str]:
+    """
+    Solve the information of a DJANGO query.
+    """
+
     or_where = ""
     and_where = ""
     where = ""
@@ -335,6 +407,10 @@ def resolve_query(table_name, params: Dict[str, str]) -> Tuple[str, str]:
 
 
 def resolve_order_params(key, valor: str) -> Any:
+    """
+    Solve the order information of a DJANGO query.
+    """
+
     if valor.startswith("-"):
         valor = valor[1:] + " DESC, "
     else:
@@ -344,6 +420,8 @@ def resolve_order_params(key, valor: str) -> Any:
 
 
 def resolve_where_params(key: str, valor: Optional[str], mtd_table) -> str:
+    """Solve where information from a DJANGO query."""
+
     list_params = key.split("__")
     campo = "_".join(list_params[0].split("_")[1:])
     tipo = list_params[1]
@@ -361,7 +439,11 @@ def resolve_where_params(key: str, valor: Optional[str], mtd_table) -> str:
     if field is not None:
         field_type = field.type()
     else:
-        logger.warning("pineboolib.utils.resolve_where_params No se encuentra el campo %s en la tabla %s.", campo, mtd_table.name())
+        logger.warning(
+            "pineboolib.utils.resolve_where_params No se encuentra el campo %s en la tabla %s.",
+            campo,
+            mtd_table.name(),
+        )
         return ""
     # valor = aqApp.db().manager().formatValue(field_type , valor, False)
 
@@ -401,6 +483,8 @@ def resolve_where_params(key: str, valor: Optional[str], mtd_table) -> str:
 
 
 def resolve_pagination(query: Dict[str, Any]) -> Tuple[str, str]:
+    """Solve the pagination of a DJANGO query."""
+
     init = 0
     limit = 0
     for k, v in query.items():
@@ -423,6 +507,8 @@ def resolve_pagination(query: Dict[str, Any]) -> Tuple[str, str]:
 
 
 def get_tipo_aqnext(tipo) -> int:
+    """Solve the type of data used by DJANGO."""
+
     tipo_ = 3
     # subtipo_ = None
 

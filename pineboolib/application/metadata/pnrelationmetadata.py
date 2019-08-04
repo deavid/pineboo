@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+"""PNRelationMetaData manages relations between tables."""
 
-# Completada Si
 from pineboolib.core import decorators
 
 
 class PNRelationMetaData:
+    """PNRelationMetaData Class."""
 
     """
     Constantes de tipos de cardinalidades de una relacion
@@ -18,112 +19,127 @@ class PNRelationMetaData:
     d: "PNRelationMetaDataPrivate"
 
     def __init__(self, *args, **kwargs) -> None:
+        """Initialize the relation."""
+
         if len(args) == 1:
             self.inicializeFromFLRelationMetaData(args[0])
         else:
-            self.inicializeNewFLRelationMetaData(args[0], args[1], args[2], args[3], args[4], args[5])
+            self.inicializeNewFLRelationMetaData(
+                args[0], args[1], args[2], args[3], args[4], args[5]
+            )
 
         ++self.count_
 
-    """
-    constructor
+    def inicializeNewFLRelationMetaData(
+        self, fT: str, fF: str, rC: str, dC: bool = False, uC: bool = False, cI: bool = True
+    ) -> None:
+        """
+        Fill in the relation data.
 
-    @param fT Tabla foránea relacionada
-    @param fF Campo foráneo relacionado
-    @param rC Cardinalidad de la relacion
-    @param dC Borrado en cascada, sólo se tiene en cuenta en cardinalidades M1
-    @param uC Actualizaciones en cascada, sólo se tiene en cuenta en cardinalidades M1
-    @param cI Chequeos de integridad sobre la relacion
-    """
+        @param fT Related foreign table.
+        @param fF Related foreign field.
+        @param rC Cardinality of the relation.
+        @param dC Deleted in cascade, only taken into account in M1 cardinalities.
+        @param uC Cascade updates, only taken into account in M1 cardinalities.
+        @param cI Integrity checks on the relation.
+        """
 
-    def inicializeNewFLRelationMetaData(self, fT: str, fF: str, rC: str, dC: bool = False, uC: bool = False, cI: bool = True) -> None:
         self.d = PNRelationMetaDataPrivate(fT, fF, rC, dC, uC, cI)
 
     @decorators.BetaImplementation
-    def inicializeFromFLRelationMetaData(self, *other):
+    def inicializeFromFLRelationMetaData(self, other: "PNRelationMetaData"):
+        """
+        Fill in the data from another relation.
+
+        @param other. original PNRelationMetaData.
+        """
+
         self.d = PNRelationMetaDataPrivate()
         self.copy(other)
 
-    """
-    Establece el nombre del campo relacionado.
-
-    @param fN Nombre del campo relacionado
-    """
-
     def setField(self, fN: str) -> None:
+        """
+        Set the name of the related field.
+
+        @param fN Related field name.
+        """
+
         self.d.field_ = fN.lower()
 
-    """
-    Obtiene en el nombre del campo de la relacion.
-
-    @return Devuelve el nombre del campo relacionado
-    """
-
     def field(self) -> str:
+        """
+        Get in the name of the related field.
+
+        @return Returns the name of the related field
+        """
+
         return self.d.field_
 
-    """
-    Obtiene el nombre de la tabla foránea.
-
-    @return Devuelve el nombre de la tabla de la base de datos con la que se está relacionada
-    """
-
     def foreignTable(self) -> str:
+        """
+        Get the name of the foreign table.
+
+        @return Returns the name of the database table with which it is related
+        """
+
         return self.d.foreignTable_
 
-    """
-    Obtiene el nombre de la campo foráneo.
-
-    @return Devuelve el nombre del campo de la tabla foránea con la que está relacionada
-    """
-
     def foreignField(self) -> str:
+        """
+        Get the name of the foreign field.
+
+        @return Returns the name of the foreign table field with which it is related
+        """
+
         return self.d.foreignField_
 
-    """
-    Obtiene la cardinalidad de la relacion.
-
-    @return Devuelve la cardinalidad de la relacion, mirando desde la tabla donde se
-        define este objeto hacia la foránea
-    """
-
     def cardinality(self) -> str:
+        """
+        Get the cardinality of the relationship.
+
+        @return Returns the cardinality of the relationship, looking from the table where define this object towards the outside
+        """
+
         return self.d.cardinality_
-
-    """
-    Obtiene si la relación implica borrados en cascada, sólo se tiene en cuenta en cardinalidades M1.
-
-    @return Devuelve TRUE si la relacion implica borrados en cascada, FALSE en caso contrario
-    """
 
     @decorators.BetaImplementation
     def deleteCascade(self):
+        """
+        Get if the relationship implies cascaded deletions, it is only taken into account in M1 cardinalities.
+
+        @return Returns TRUE if the relationship implies cascaded deletions, FALSE otherwise
+        """
+
         return self.d.deleteCascade_ and self.d.cardinality_ == self.RELATION_M1
-
-    """
-    Obtiene si la relación implica modificaciones en cascada, sólo se tiene en cuenta en cardinalidades M1.
-
-    @return Devuelve TRUE si la relacion implica modificaciones en cascada, FALSE en caso contrario
-    """
 
     @decorators.BetaImplementation
     def updateCascade(self):
+        """
+        Get if the relationship involves cascade modifications, it is only taken into account in M1 cardinalities.
+
+        @return Returns TRUE if the relationship implies cascading modifications, FALSE otherwise
+        """
+
         return self.d.updateCascade_ and self.d.cardinality_ == self.RELATION_M1
 
-    """
-    Obtiene si se deben aplicar la reglas de integridad sobre la relación
-    """
-
     @decorators.BetaImplementation
-    def checkIn(self):
+    def checkIn(self) -> bool:
+        """
+        Get if the integrity rules on the relationship should be applied.
+        """
+
         return self.d.checkIn_
 
     @decorators.BetaImplementation
-    def copy(self, other):
+    def copy(self, other: "PNRelationMetaData") -> None:
+        """Copy a PNRelationMetaData to another."""
+
         if other == self:
             return
         if not isinstance(other, PNRelationMetaData):
-            raise ValueError("FLRelationMetaData::copy requires an instance to a PNRelationMetaData class")
+            raise ValueError(
+                "FLRelationMetaData::copy requires an instance to a PNRelationMetaData class"
+            )
         self.d.field_ = other.d.field_
         self.d.foreignTable_ = other.d.foreignTable_
         self.d.foreignField_ = other.d.foreignField_
@@ -134,6 +150,7 @@ class PNRelationMetaData:
 
 
 class PNRelationMetaDataPrivate:
+    """PNRelationMetaDataPrivate Class."""
 
     """
     Nombre del campo a relacionar
@@ -169,15 +186,23 @@ class PNRelationMetaDataPrivate:
     """
     Indica si se deben aplicar la reglas de integridad en esta relación
     """
-    checkIn_ = None
+    checkIn_: bool
 
     def __init__(self, *args, **kwargs) -> None:
+        """Initialize the class."""
+
         if len(args) == 0:
             self.inicializeFLRelationMetaDataPrivate()
         else:
-            self.inicializeNewFLRelationMetaDataPrivate(args[0], args[1], args[2], args[3], args[4], args[5])
+            self.inicializeNewFLRelationMetaDataPrivate(
+                args[0], args[1], args[2], args[3], args[4], args[5]
+            )
 
-    def inicializeNewFLRelationMetaDataPrivate(self, fT: str, fF: str, rC: str, dC: bool, uC: bool, cI: bool) -> None:
+    def inicializeNewFLRelationMetaDataPrivate(
+        self, fT: str, fF: str, rC: str, dC: bool, uC: bool, cI: bool
+    ) -> None:
+        """Fill initial values ​​with given values."""
+
         self.foreignTable_ = fT.lower()
         self.foreignField_ = fF.lower()
         self.cardinality_ = rC
@@ -187,4 +212,6 @@ class PNRelationMetaDataPrivate:
 
     @decorators.BetaImplementation
     def inicializeFLRelationMetaDataPrivate(self):
+        """Initialize the empty class."""
+
         return

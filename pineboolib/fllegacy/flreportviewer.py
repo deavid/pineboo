@@ -2,9 +2,11 @@ from PyQt5 import QtWidgets, QtCore, QtXml
 from PyQt5.QtCore import Qt
 
 from pineboolib.core import decorators
-
+from pineboolib.application.qsatypes.sysbasetype import SysBaseType
 from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib import pncontrolsfactory
+
+from PyQt5.QtWidgets import QFileDialog
+from pineboolib.qt3_widgets.messagebox import MessageBox
 
 # from pineboolib.fllegacy.flpicture import FLPicture
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
@@ -203,9 +205,8 @@ class FLReportViewer(QtWidgets.QWidget):
         #    return
         if self.rptViewer_.rptEngine_ and hasattr(self.rptViewer_.rptEngine_, "parser_"):
             pdf_file = self.rptViewer_.rptEngine_.parser_.get_file_name()
-            from pineboolib.application import project
 
-            project.call("sys.openUrl", [pdf_file], None, True)
+            SysBaseType.openUrl(pdf_file)
         # self.eventloop.exec_()
 
         # if self.embedInParent_:
@@ -315,8 +316,11 @@ class FLReportViewer(QtWidgets.QWidget):
             return
 
         util = FLUtil()
-        fileName = pncontrolsfactory.FileDialog.getSaveFileName(
-            self, util.translate("app", "Exportar a CSV"), "", util.translate("app", "Fichero CSV (*.csv *.txt)")
+        fileName = QFileDialog.getSaveFileName(
+            self,
+            util.translate("app", "Exportar a CSV"),
+            "",
+            util.translate("app", "Fichero CSV (*.csv *.txt)"),
         )
 
         if not fileName or fileName == "":
@@ -325,10 +329,12 @@ class FLReportViewer(QtWidgets.QWidget):
         if fileName.upper().find(".CSV") == -1:
             fileName = fileName + ".csv"
 
-        q = pncontrolsfactory.MessageBox.question(
+        q = MessageBox.question(
             self,
             util.translate("app", "Sobreescribir {}").format(fileName),
-            util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+            util.translate(
+                "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+            ).format(fileName),
             util.translate("app", "&Sí"),
             util.translate("app", "&No"),
             "",
@@ -361,8 +367,11 @@ class FLReportViewer(QtWidgets.QWidget):
             return
 
         util = FLUtil()
-        fileName = pncontrolsfactory.FileDialog.getSaveFileName(
-            self, util.translate("app", "Exportar a PDF"), "", util.translate("app", "Fichero PDF (*.pdf)")
+        fileName = QFileDialog.getSaveFileName(
+            self,
+            util.translate("app", "Exportar a PDF"),
+            "",
+            util.translate("app", "Fichero PDF (*.pdf)"),
         )
 
         if fileName[0] == "":
@@ -373,10 +382,12 @@ class FLReportViewer(QtWidgets.QWidget):
 
         if QtCore.QFile.exists(fileName):
 
-            q = pncontrolsfactory.QMessageBox.question(
+            q = MessageBox.question(
                 self,
                 util.translate("app", "Sobreescribir {}").format(fileName),
-                util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+                util.translate(
+                    "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+                ).format(fileName),
                 util.translate("app", "&Sí"),
                 util.translate("app", "&No"),
                 "",
@@ -394,7 +405,7 @@ class FLReportViewer(QtWidgets.QWidget):
         t = self.ui_["leDocumento"].text()
         util = FLUtil()
         name = "informe.pdf" if not t or t == "" else t
-        fileName = pncontrolsfactory.FileDialog.getSaveFileName(
+        fileName = QFileDialog.getSaveFileName(
             AQ_USRHOME + "/" + name + ".pdf",
             util.translate("app", "Fichero PDF a enviar (*.pdf)"),
             self,
@@ -408,10 +419,12 @@ class FLReportViewer(QtWidgets.QWidget):
         if not fileName.upper().contains(".PDF"):
             fileName = fileName + ".pdf"
 
-        q = pncontrolsfactory.QMessageBox.question(
+        q = MessageBox.question(
             self,
             util.translate("app", "Sobreescribir {}").format(fileName),
-            util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+            util.translate(
+                "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+            ).format(fileName),
             util.translate("app", "&Sí"),
             util.translate("app", "&No"),
             "",
@@ -453,7 +466,9 @@ class FLReportViewer(QtWidgets.QWidget):
         if show:
             self.rptViewer_.hide()
             wrv.setCentralWidget(self.initCentralWidget_)
-            self.ui["leDocumento"].setText("doc-" + str(QtCore.QDateTime.currentDateTime()).replace(":", ",").replace(" ", ""))
+            self.ui["leDocumento"].setText(
+                "doc-" + str(QtCore.QDateTime.currentDateTime()).replace(":", ",").replace(" ", "")
+            )
             self.ui_["frEMail"].show()
             self.initCentralWidget_.show()
         else:
@@ -466,7 +481,7 @@ class FLReportViewer(QtWidgets.QWidget):
     def saveSVGStyle(self) -> None:
         util = FLUtil()
         if self.report_:
-            fileName = pncontrolsfactory.FileDialog.getSaveFileName(
+            fileName = QFileDialog.getSaveFileName(
                 "",
                 util.translate("app", "Fichero SVG (*.svg)"),
                 self,
@@ -480,10 +495,12 @@ class FLReportViewer(QtWidgets.QWidget):
             if not fileName.upper().contains(".SVG"):
                 fileName = fileName + ".svg"
 
-            q = pncontrolsfactory.QMessageBox.question(
+            q = MessageBox.question(
                 self,
                 util.translate("app", "Sobreescribir {}").format(fileName),
-                util.translate("app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+                util.translate(
+                    "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+                ).format(fileName),
                 util.translate("app", "&Sí"),
                 util.translate("app", "&No"),
                 "",
@@ -523,7 +540,7 @@ class FLReportViewer(QtWidgets.QWidget):
     @decorators.BetaImplementation
     def loadSVGStyle(self) -> None:
         util = FLUtil()
-        fileName = pncontrolsfactory.FileDialog.getOpenFileName(
+        fileName = QFileDialog.getOpenFileName(
             "",
             util.translate("app", "Fichero SVG (*.svg)"),
             self,

@@ -1,21 +1,28 @@
 """Main module for starting up Pineboo."""
 import gc
 import sys
-import traceback
-from pineboolib import logging
+from optparse import Values
+from typing import List, Type
+from types import TracebackType
 
+from PyQt5 import QtCore, QtWidgets
+
+from pineboolib import logging
 from pineboolib.core.utils.utils_base import is_deployed
 from pineboolib.core.settings import config, settings
-from .dgi import load_dgi
+from pineboolib.loader.dlgconnect.conn_dialog import show_connection_dialog
+from pineboolib.loader.options import parse_options
+from pineboolib.loader.dgi import load_dgi
+from pineboolib.loader.connection import config_dbconn, connect_to_db
+from pineboolib.loader.connection import DEFAULT_SQLITE_CONN, IN_MEMORY_SQLITE_CONN
 
-from PyQt5 import QtCore  # type: ignore
-
-from optparse import Values
+from pineboolib.application import project  # FIXME: next time, proper singleton
+from pineboolib.application.parsers.qsaparser import pytnyzer
 
 logger = logging.getLogger(__name__)
 
 
-def startup_no_X():
+def startup_no_X() -> None:
     """Start Pineboo with no GUI."""
     startup(enable_gui=False)
 
@@ -23,18 +30,26 @@ def startup_no_X():
 def startup(enable_gui: bool = None) -> None:
     """Start up pineboo."""
     # FIXME: No hemos cargado pineboo aún. No se pueden usar métodos internos.
-    # from pineboolib.application.utils.check_dependencies import check_dependencies
-    # check_dependencies({"ply": "python3-ply", "PyQt5.QtCore": "python3-pyqt5", "Python": "Python"})
+    from pineboolib.core.utils.check_dependencies import check_dependencies_cli
+
+    if not check_dependencies_cli(
+        {"ply": "python3-ply", "PyQt5.QtCore": "python3-pyqt5", "Python": "Python"}
+    ):
+        sys.exit(32)
 
     MIN_PYTHON = (3, 6)
     if sys.version_info < MIN_PYTHON:
         sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
 
-    from .options import parse_options
-
     options = parse_options()
     if enable_gui is not None:
         options.enable_gui = enable_gui
+    trace_loggers: List[str] = []
+    if options.trace_loggers:
+        trace_loggers = options.trace_loggers.split(",")
+
+    init_logging(logtime=options.log_time, loglevel=options.loglevel, trace_loggers=trace_loggers)
+
     if options.enable_profiler:
         ret = exec_main_with_profiler(options)
     else:
@@ -49,7 +64,33 @@ def startup(enable_gui: bool = None) -> None:
         sys.exit(0)
 
 
-def exec_main_with_profiler(options) -> int:
+def init_logging(
+    loglevel: int = logging.INFO, logtime: bool = False, trace_loggers: List[str] = []
+) -> None:
+    """Initialize pineboo logging."""
+    # ---- LOGGING -----
+    log_format = "%(levelname)s: %(name)s: %(message)s"
+
+    if logtime:
+        log_format = "%(asctime)s - %(levelname)s: %(name)s: %(message)s"
+
+    app_loglevel = logging.TRACE if trace_loggers else loglevel
+    if trace_loggers:
+        logging.Logger.set_pineboo_default_level(loglevel)
+
+    logging.basicConfig(format=log_format, level=app_loglevel)
+    # logger.info("LOG LEVEL: %s", loglevel)
+    disable_loggers = ["PyQt5.uic.uiparser", "PyQt5.uic.properties", "blib2to3.pgen2.driver"]
+    for loggername in disable_loggers:
+        modlogger = logging.getLogger(loggername)
+        modlogger.setLevel(logging.WARN)
+
+    for loggername in trace_loggers:
+        modlogger = logging.getLogger(loggername)
+        modlogger.setLevel(logging.TRACE)
+
+
+def exec_main_with_profiler(options: Values) -> int:
     """Enable profiler."""
     import cProfile
     import pstats
@@ -68,29 +109,50 @@ def exec_main_with_profiler(options) -> int:
     return ret
 
 
-def _excepthook(type, value, tback):
-    return traceback.print_exception(type, value, tback)
+def init_cli(catch_ctrl_c: bool = True) -> None:
+    """Initialize singletons, signal handling and exception handling."""
 
+    def _excepthook(
+        type_: Type[BaseException], value: BaseException, traceback: TracebackType
+    ) -> None:
+        import traceback as pytback
 
-def init_cli():
-    """Create CLI singletons."""
+        pytback.print_exception(type_, value, traceback)
+
+    # PyQt 5.5 o superior aborta la ejecución si una excepción en un slot()
+    # no es capturada dentro de la misma; el programa falla con SegFault.
+    # Aunque esto no debería ocurrir, y se debería prevenir lo máximo posible
+    # es bastante incómodo y genera problemas graves para detectar el problema.
+    # Agregamos sys.excepthook para controlar esto y hacer que PyQt5 no nos
+    # dé un segfault, aunque el resultado no sea siempre correcto:
+    sys.excepthook = _excepthook
+    # -------------------
+    if catch_ctrl_c:
+        # Fix Control-C / KeyboardInterrupt for PyQt:
+        import signal
+
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
+
     # FIXME: Order of import is REALLY important here. FIX.
-    from pineboolib.fllegacy.aqsobjects import aqsobjectfactory
-
-    aqsobjectfactory.AQUtil = aqsobjectfactory.AQUtil_class()
-    aqsobjectfactory.AQS = aqsobjectfactory.AQS_class()
+    # from pineboolib.fllegacy.aqsobjects import aqsobjectfactory
+    #
+    # aqsobjectfactory.AQUtil = aqsobjectfactory.AQUtil_class()
+    # aqsobjectfactory.AQS = aqsobjectfactory.AQS_class()
 
     from pineboolib.fllegacy import flapplication
 
     flapplication.aqApp = flapplication.FLApplication()
 
-    from pineboolib import pncontrolsfactory
+    from pineboolib.qsa import qsa
 
-    pncontrolsfactory.System = pncontrolsfactory.System_class()
-    pncontrolsfactory.qsa_sys = pncontrolsfactory.SysType()
+    qsa.aqApp = flapplication.aqApp
+    # from pineboolib import pncontrolsfactory
+    #
+    # pncontrolsfactory.System = pncontrolsfactory.System_class()
+    # pncontrolsfactory.qsa_sys = pncontrolsfactory.SysType()
 
 
-def init_gui():
+def init_gui() -> None:
     """Create GUI singletons."""
     from pineboolib.plugins.mainform.eneboo import eneboo
     from pineboolib.plugins.mainform.eneboo_mdi import eneboo_mdi
@@ -99,13 +161,18 @@ def init_gui():
     eneboo_mdi.mainWindow = eneboo_mdi.MainForm()
 
 
-def setup_gui(app: QtCore.QCoreApplication, options: Values):
-    """Initialize GUI app."""
+def setup_gui(app: QtCore.QCoreApplication, options: Values) -> None:
+    """Configure GUI app."""
     from pineboolib.core.utils.utils_base import filedir
     from pineboolib.application.utils.mobilemode import is_mobile_mode
-    from PyQt5 import QtGui  # type: ignore
+    from PyQt5 import QtGui
 
-    noto_fonts = ["NotoSans-BoldItalic.ttf", "NotoSans-Bold.ttf", "NotoSans-Italic.ttf", "NotoSans-Regular.ttf"]
+    noto_fonts = [
+        "NotoSans-BoldItalic.ttf",
+        "NotoSans-Bold.ttf",
+        "NotoSans-Italic.ttf",
+        "NotoSans-Regular.ttf",
+    ]
     for fontfile in noto_fonts:
         QtGui.QFontDatabase.addApplicationFont(filedir("../share/fonts/Noto_Sans", fontfile))
 
@@ -130,6 +197,36 @@ def setup_gui(app: QtCore.QCoreApplication, options: Values):
     app.setFont(font)
 
 
+def init_testing() -> None:
+    """Initialize Pineboo for testing purposes."""
+
+    if project._conn is not None:
+        # Assume already initialized, return without doing anything
+        # Tests may call this several times, so we have to take it into account.
+        return
+    qapp = QtWidgets.QApplication(sys.argv + ["-platform", "offscreen"])
+
+    init_logging()  # NOTE: Use pytest --log-level=0 for debug
+    init_cli(catch_ctrl_c=False)
+
+    pytnyzer.STRICT_MODE = False
+    project.load_version()
+    project.setDebugLevel(1000)
+    project.set_app(qapp)
+    _DGI = load_dgi("qt", None)
+    project.init_dgi(_DGI)
+    conn = connect_to_db(IN_MEMORY_SQLITE_CONN)
+    project.init_conn(connection=conn)
+    project.no_python_cache = True
+    project.run()
+
+    # Necesario para que funcione isLoadedModule ¿es este el mejor sitio?
+    project.conn.managerModules().loadIdAreas()
+    project.conn.managerModules().loadAllIdModules()
+
+    project.load_modules()
+
+
 def exec_main(options: Values) -> int:
     """
     Exec main program.
@@ -137,31 +234,17 @@ def exec_main(options: Values) -> int:
     Handles optionlist and help.
     Also initializes all the objects
     """
-    # PyQt 5.5 o superior aborta la ejecución si una excepción en un slot()
-    # no es capturada dentro de la misma; el programa falla con SegFault.
-    # Aunque esto no debería ocurrir, y se debería prevenir lo máximo posible
-    # es bastante incómodo y genera problemas graves para detectar el problema.
-    # Agregamos sys.excepthook para controlar esto y hacer que PyQt5 no nos
-    # dé un segfault, aunque el resultado no sea siempre correcto:
-    sys.excepthook = _excepthook
-    # -------------------
+    # FIXME: This function should not initialize the program
 
-    # Corregir Control-C:
-    import signal
-
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
     # -------------------
 
     # import pineboolib.pnapplication
     # from pineboolib.core.utils.utils_base import filedir
     # from pineboolib.pnsqldrivers import PNSqlDrivers
 
-    # FIXME: This function should not initialize the program
     init_cli()
 
     # TODO: Refactorizar función en otras más pequeñas
-    from pineboolib.application import project  # FIXME: next time, proper singleton
-    from pineboolib.application.parsers.qsaparser import pytnyzer
 
     pytnyzer.STRICT_MODE = False
 
@@ -170,18 +253,18 @@ def exec_main(options: Values) -> int:
 
     project.options = options
     if options.enable_gui:
-        from PyQt5 import QtWidgets  # type: ignore
-
         project.set_app(QtWidgets.QApplication(sys.argv))
         project.app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
         setup_gui(project.app, options)
     else:
-        project.set_app(QtCore.QCoreApplication(sys.argv))
+        project.set_app(QtWidgets.QApplication(sys.argv + ["-platform", "offscreen"]))
 
     if options.trace_debug:
         from pineboolib.core.utils.utils_base import traceit
 
-        sys.settrace(traceit)
+        # "sys.settrace" function could lead to arbitrary code execution
+        sys.settrace(traceit)  # noqa: DUO111
+
     if options.trace_signals:
         from .utils import monkey_patch_connect
 
@@ -204,33 +287,28 @@ def exec_main(options: Values) -> int:
         init_gui()
 
     if _DGI.useDesktop() and not options.enable_gui:
-        raise Exception("Selected DGI <%s> is not compatible with <pineboo-core>. Use <pineboo> instead" % options.dgi)
+        logger.info(
+            "Selected DGI <%s> is not compatible with <pineboo-core>. Use <pineboo> instead"
+            % options.dgi
+        )
 
     if not _DGI.useDesktop() and options.enable_gui:
-        logger.info("Selected DGI <%s> does not need graphical interface. Use <pineboo-core> for better results" % options.dgi)
+        logger.info(
+            "Selected DGI <%s> does not need graphical interface. Use <pineboo-core> for better results"
+            % options.dgi
+        )
 
     if not _DGI.useMLDefault():
         # When a particular DGI doesn't want the standard init, we stop loading here
         # and let it take control of the remaining pieces.
         return _DGI.alternativeMain(options)
 
-    from .connection import config_dbconn, connect_to_db, DEFAULT_SQLITE_CONN
-
     configdb = config_dbconn(options)
     logger.debug(configdb)
     project.init_dgi(_DGI)
 
-    from pineboolib import pncontrolsfactory
-
-    # FIXME: Find a saner way to do this
-    pncontrolsfactory.reload_from_DGI()
-    from pineboolib.fllegacy.flapplication import aqApp
-
-    pncontrolsfactory.aqApp = aqApp
-
     if not configdb and _DGI.useDesktop() and _DGI.localDesktop():
         if not _DGI.mobilePlatform():
-            from .conn_dialog import show_connection_dialog
 
             configdb = show_connection_dialog(project.app)
         else:
@@ -254,7 +332,10 @@ def exec_main(options: Values) -> int:
         import importlib  # FIXME: Delete dynamic import and move this code between Project and DGI plugins
 
         project.main_form = (
-            importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (project.main_form_name, project.main_form_name))
+            importlib.import_module(
+                "pineboolib.plugins.mainform.%s.%s"
+                % (project.main_form_name, project.main_form_name)
+            )
             if _DGI.localDesktop()
             else _DGI.mainForm()
         )
@@ -264,17 +345,6 @@ def exec_main(options: Values) -> int:
             main_form_.setDebugLevel(options.debug_level)
 
     project.message_manager().send("splash", "show")
-    # Cargando spashscreen
-
-    # Create and display the splash screen
-    # if _DGI.localDesktop() and not options.action:
-    #     splash = show_splashscreen(project)
-    #     _DGI.processEvents()
-    # else:
-    #     splash = None
-    # splash = None
-
-    # project._splash = splash
 
     project.run()
 
@@ -288,9 +358,20 @@ def exec_main(options: Values) -> int:
         for table in project.conn.tables("Tables"):
             mtd_parse(table)
 
+    # Necesario para que funcione isLoadedModule ¿es este el mejor sitio?
+    project.conn.managerModules().loadIdAreas()
+    project.conn.managerModules().loadAllIdModules()
+
+    project.load_modules()
+
+    # FIXME: move this code to pineboo.application
+    from pineboolib.fllegacy.flapplication import aqApp
+
     aqApp.loadTranslations()
 
     from .init_project import init_project
 
-    ret = init_project(_DGI, options, project, project.main_form if _DGI.useDesktop() else None, project.app)
+    ret = init_project(
+        _DGI, options, project, project.main_form if _DGI.useDesktop() else None, project.app
+    )
     return ret

@@ -16,6 +16,8 @@ setuptools.setup(
     url="https://github.com/deavid/pineboo",
     packages=setuptools.find_packages(),
     package_data={"pineboolib": ["py.typed"]},
+    keywords="erp pineboo eneboo accounting sales warehouse",
+    python_requires="~=3.6",
     entry_points={
         "console_scripts": [
             "pineboo-parse=pineboolib.application.parsers.qsaparser.postparse:main",
@@ -24,5 +26,22 @@ setuptools.setup(
             "pineboo=pineboolib.loader.main:startup",
         ]
     },
-    classifiers=["Programming Language :: Python :: 3", "License :: OSI Approved :: MIT License", "Operating System :: OS Independent"],
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Environment :: X11 Applications :: Qt",
+        "Topic :: Office/Business :: Financial :: Accounting",
+        "Typing :: Typed",
+        "Intended Audience :: End Users/Desktop",
+        "Intended Audience :: Developers",
+        "Natural Language :: English",
+        "Natural Language :: Spanish",
+        "Operating System :: OS Independent",
+    ],
 )

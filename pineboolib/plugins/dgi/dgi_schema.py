@@ -26,7 +26,9 @@ class dgi_schema(object):
         # ... calling __init__, on purpose, to have different behavior than calling it.
 
         self._desktopEnabled = True  # Indica si se usa en formato escritorio con interface Qt
-        self.setUseMLDefault(True)  # FIXME: Setters are wrong. Inside private context, even wronger.
+        self.setUseMLDefault(
+            True
+        )  # FIXME: Setters are wrong. Inside private context, even wronger.
         self.setLocalDesktop(True)
         self._name = "dgi_shema"
         self._alias = "Default Schema"
@@ -109,9 +111,7 @@ class dgi_schema(object):
         # FIXME: Delete me. This functionality DOES NOT DEPEND on which interface is being used.
         # .... a bundle is a bundle regardless of wether is running as jsonrpc or Qt.
         # .... A copy of this function has been moved to pineboolib.core.utils.utils_base.is_deployed() for convenience
-        import sys
-
-        return getattr(sys, "frozen", False)
+        raise Exception("Please DELETE ME. DEPRECATED")
 
     def iconSize(self):
         from PyQt5 import QtCore  # type: ignore

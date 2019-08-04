@@ -126,7 +126,9 @@ class FLReportEngine(object):
 
         self.rd = QtXml.QDomDocument("KugarData")
 
-        self.d_.rows_ = self.rd.createDocumentFragment()  # FIXME: Don't set the private from the public.
+        self.d_.rows_ = (
+            self.rd.createDocumentFragment()
+        )  # FIXME: Don't set the private from the public.
         self.d_.setQuery(q)
         q.setForwardOnly(True)
         if q.exec_() and q.next():

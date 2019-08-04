@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-from pineboolib.qsa import *
+from typing import TYPE_CHECKING
+from pineboolib.qsa.qsa import *  # noqa: F403
+from pineboolib.qsa import qsa
 
 # /** @file */
 
+
 # /** @class_declaration interna */
 class interna(object):
-    ctx = Object()
+    ctx = qsa.Object()
 
     def __init__(self, context=None):
         self.ctx = context
@@ -33,7 +36,8 @@ class ifaceCtx(head):
 
 
 # /** @class_declaration FormInternalObj */
-class FormInternalObj(FormDBWidget):
+class FormInternalObj(qsa.FormDBWidget):
+    iface: ifaceCtx
 
     # /** @class_definition FormInternalObj */
     def _class_init(self):
@@ -41,7 +45,11 @@ class FormInternalObj(FormDBWidget):
 
     # /** @class_definition interna */
     def interna_main(self):
-        sys.updateAbanQ()
+        qsa.sys.updateAbanQ()
 
 
-form = None
+if TYPE_CHECKING:
+    form: FormInternalObj = FormInternalObj()
+    iface = form.iface
+else:
+    form = None

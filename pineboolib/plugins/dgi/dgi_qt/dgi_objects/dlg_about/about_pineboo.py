@@ -31,10 +31,14 @@ class AboutPineboo(QWidget):
     def load_components(self) -> str:
         from PyQt5 import QtCore  # type: ignore
         import platform
-        from pineboolib.application.utils.check_dependencies import DEPENDENCIES_CHECKED
+        from pineboolib.core.utils.check_dependencies import DEPENDENCIES_CHECKED
 
         components = "Versiones de componentes:\n\n"
-        components += "S.O.: %s %s %s\n" % (platform.system(), platform.release(), platform.version())
+        components += "S.O.: %s %s %s\n" % (
+            platform.system(),
+            platform.release(),
+            platform.version(),
+        )
         # py_ver = sys.version
         # if py_ver.find("(") > -1:
         #    py_ver = py_ver[:py_ver.find("(")]

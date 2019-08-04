@@ -8,6 +8,8 @@ from pineboolib import logging
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.core.utils.utils_base import filedir, load2xml
 from pineboolib.application.utils.path import _path
+from pineboolib import qt3_widgets
+
 
 from typing import Any
 
@@ -25,7 +27,7 @@ class dgi_qt(dgi_schema):
         self._name = "qt"
         self._alias = "Qt5"
 
-        from pineboolib.plugins.dgi.dgi_qt import dgi_qt3ui
+        from pineboolib.application.parsers.qt3uiparser import dgi_qt3ui
         from .dgi_objects.splash_screen import splashscreen
         from .dgi_objects.progress_dialog_manager import ProgressDialogManager
         from .dgi_objects.status_help_msg import StatusHelpMsg
@@ -55,12 +57,18 @@ class dgi_qt(dgi_schema):
 
     def msgBoxWarning(self, t):
         from PyQt5.QtWidgets import qApp  # type: ignore
+        from pineboolib.qt3_widgets.messagebox import MessageBox
 
-        parent = qApp.focusWidget().parent() if hasattr(qApp.focusWidget(), "parent") else qApp.focusWidget()
-        self.MessageBox.warning(t, self.MessageBox.Ok, self.MessageBox.NoButton, self.MessageBox.NoButton, "Pineboo", parent)
+        parent = (
+            qApp.focusWidget().parent()
+            if hasattr(qApp.focusWidget(), "parent")
+            else qApp.focusWidget()
+        )
+        MessageBox.warning(
+            t, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo", parent
+        )
 
     def createUI(self, n, connector=None, parent=None, name=None) -> Any:
-        import pineboolib.pncontrolsfactory
 
         if ".ui" not in n:
             n += ".ui"
@@ -89,7 +97,12 @@ class dgi_qt(dgi_schema):
             xclass = wid.get("class")
             if xclass is None:
                 raise Exception("class was expected")
-            parent = getattr(pineboolib.pncontrolsfactory, xclass)()
+            parent = None
+            if xclass == "QMainWindow":
+                parent = qt3_widgets.qmainwindow.QMainWindow()
+
+            if parent is None:
+                raise Exception("xclass not found %s" % xclass)
 
         if hasattr(parent, "widget"):
             w_ = parent.widget
@@ -103,7 +116,7 @@ class dgi_qt(dgi_schema):
         else:
             from PyQt5 import uic  # type: ignore
 
-            qtWidgetPlugings = filedir("./plugins/qtwidgetsplugins")
+            qtWidgetPlugings = filedir("../qtdesigner-plugins")
             if qtWidgetPlugings not in uic.widgetPluginPath:
                 logger.info("Añadiendo path %s a uic.widgetPluginPath", qtWidgetPlugings)
                 uic.widgetPluginPath.append(qtWidgetPlugings)

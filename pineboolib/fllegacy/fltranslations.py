@@ -105,7 +105,9 @@ class FLTranslations(object):
                         self.releaseTsFile(t, verbose, stripped)
 
             if not metTranslations:
-                self.logger.warning("Met no 'TRANSLATIONS' entry in project file '%s'", ts_input_file)
+                self.logger.warning(
+                    "Met no 'TRANSLATIONS' entry in project file '%s'", ts_input_file
+                )
 
 
 """

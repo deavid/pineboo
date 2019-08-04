@@ -1,15 +1,22 @@
 # -*- coding: utf-8 -*-
+"""
+Static loader emulating Eneboo.
+
+Performs load of scripts from disk instead of database.
+"""
 import os
 
 from PyQt5 import QtWidgets, Qt, QtCore  # type: ignore
 
 from pineboolib import logging
 from pineboolib.core import decorators
-from pineboolib import pncontrolsfactory
+
 
 from pineboolib.core.settings import config
 from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.fllegacy.flapplication import aqApp
+from pineboolib.fllegacy import flapplication
+from pineboolib.fllegacy.flcheckbox import FLCheckBox
+
 from typing import Any, List, Optional, cast, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -19,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class AQStaticDirInfo(object):
+    """Store information about a filesystem folder."""
 
     active_: bool
     path_: str
@@ -34,19 +42,21 @@ class AQStaticDirInfo(object):
 
 
 class AQStaticBdInfo(object):
+    """Get or set settings on database related to staticloader."""
 
     enabled_: bool
     dirs_: List[AQStaticDirInfo]
     key_ = None
 
     def __init__(self, database: "PNConnection") -> None:
+        """Create new AQStaticBdInfo."""
         self.db_ = database.DBName()
-
+        self.dirs_ = []
         self.key_ = "StaticLoader/%s/" % self.db_
         self.enabled_ = config.value("%senabled" % self.key_, False)
 
     def findPath(self, p: str) -> Optional[AQStaticDirInfo]:
-
+        """Find if path "p" is managed in this class."""
         for info in self.dirs_:
             if info.path_ == p:
                 return info
@@ -54,9 +64,10 @@ class AQStaticBdInfo(object):
         return None
 
     def readSettings(self) -> None:
+        """Read settings for staticloader."""
         self.enabled_ = config.value("%senabled" % self.key_, False)
         self.dirs_.clear()
-        dirs = config.value("%sdirs" % self.key_)
+        dirs = config.value("%sdirs" % self.key_, [])
         i = 0
 
         while i < len(dirs):
@@ -67,7 +78,7 @@ class AQStaticBdInfo(object):
             self.dirs_.append(AQStaticDirInfo(active_, path_))
 
     def writeSettings(self) -> None:
-
+        """Write settings for staticloader."""
         config.set_value("%senabled" % self.key_, self.enabled_)
         dirs = []
         active_dirs = []
@@ -83,16 +94,19 @@ class AQStaticBdInfo(object):
 
 
 class FLStaticLoaderWarning(QtCore.QObject):
+    """Create warning about static loading."""
 
     warns_: List[str]
     paths_: List[Any]
 
     def __init__(self) -> None:
+        """Create a new FLStaticLoaderWarning."""
         super().__init__()
         self.warns_ = []
         self.paths_ = []
 
     def popupWarnings(self) -> None:
+        """Show a popup if there are any warnings."""
         if not self.warns_:
             return
 
@@ -104,12 +118,12 @@ class FLStaticLoaderWarning(QtCore.QObject):
         msg += "</font><br></p>"
         self.warns_.clear()
 
-        aqApp.popupWarn(msg)
+        flapplication.aqApp.popupWarn(msg)
 
     @decorators.NotImplementedWarn
     def scriptBaseFileName(self, name: str):
-
-        scripts = aqApp.project().scripts()
+        """Return script object given a basename "name"."""
+        scripts = flapplication.aqApp.project().scripts()
         for it in scripts:
             if it.baseFileName() == name:
                 return it
@@ -117,6 +131,7 @@ class FLStaticLoaderWarning(QtCore.QObject):
         return None
 
     def updateScripts(self) -> None:
+        """Read disk and update any scripts."""
         if not self.paths_:
             return
 
@@ -148,7 +163,10 @@ warn_: Optional[FLStaticLoaderWarning] = None
 
 
 class FLStaticLoader(QtCore.QObject):
+    """Perform static loading of scripts from filesystem."""
+
     def __init__(self, b, ui) -> None:
+        """Create a new FLStaticLoader."""
 
         super(FLStaticLoader, self).__init__()
 
@@ -172,6 +190,7 @@ class FLStaticLoader(QtCore.QObject):
 
     @decorators.pyqtSlot()
     def load(self) -> None:
+        """Load and initialize the object."""
         self.b_.readSettings()
         self.lblBdTop.setText(self.b_.db_)
         self.chkEnabled.setChecked(self.b_.enabled_)
@@ -192,7 +211,7 @@ class FLStaticLoader(QtCore.QObject):
             for info in self.b_.dirs_:
                 self.tblDirs.setText(row, 0, info.path_)
 
-                chk = pncontrolsfactory.FLCheckBox(self.tblDirs, row)
+                chk = FLCheckBox(self.tblDirs, row)
                 chk.setChecked(info.active_ == "True")
                 chk.toggled.connect(self.setChecked)
                 self.tblDirs.setCellWidget(row, 1, chk)
@@ -200,13 +219,15 @@ class FLStaticLoader(QtCore.QObject):
 
             self.tblDirs.setCurrentCell(n_rows, 0)
 
-    @QtCore.pyqtSlot(bool)
+    @decorators.pyqtSlot(bool)
     def addDir(self) -> None:
-
+        """Ask user for adding a new folder for static loading."""
         cur_row = self.tblDirs.currentRow()
         dir_init = self.tblDirs.text(cur_row, 0) if cur_row > -1 else ""
 
-        dir = Qt.QFileDialog.getExistingDirectory(None, self.tr("Selecciones el directorio a insertar"), dir_init)
+        dir = Qt.QFileDialog.getExistingDirectory(
+            None, self.tr("Selecciones el directorio a insertar"), dir_init
+        )
 
         if dir:
 
@@ -214,7 +235,7 @@ class FLStaticLoader(QtCore.QObject):
             self.tblDirs.setNumRows(n_rows + 1)
             self.tblDirs.setText(n_rows, 0, dir)
 
-            chk = pncontrolsfactory.FLCheckBox(self.tblDirs, n_rows)
+            chk = FLCheckBox(self.tblDirs, n_rows)
             chk.setChecked(True)
             chk.toggled.connect(self.setChecked)
 
@@ -225,6 +246,7 @@ class FLStaticLoader(QtCore.QObject):
 
     @decorators.pyqtSlot()
     def modDir(self) -> None:
+        """Ask user for a folder to change."""
 
         cur_row = self.tblDirs.currentRow()
         if cur_row == -1:
@@ -232,7 +254,9 @@ class FLStaticLoader(QtCore.QObject):
 
         dir_init = self.tblDirs.text(cur_row, 0) if cur_row > -1 else ""
 
-        dir = Qt.QFileDialog.getExistingDirectory(None, self.tr("Selecciones el directorio a modificar"), dir_init)
+        dir = Qt.QFileDialog.getExistingDirectory(
+            None, self.tr("Selecciones el directorio a modificar"), dir_init
+        )
 
         if dir:
             info = self.b_.findPath(self.tblDirs.text(cur_row, 0))
@@ -243,7 +267,7 @@ class FLStaticLoader(QtCore.QObject):
 
     @decorators.pyqtSlot()
     def delDir(self) -> None:
-
+        """Ask user for folder to delete."""
         cur_row = self.tblDirs.currentRow()
         if cur_row == -1:
             return
@@ -262,13 +286,13 @@ class FLStaticLoader(QtCore.QObject):
 
         self.tblDirs.removeRow(cur_row)
 
-    @QtCore.pyqtSlot(bool)
+    @decorators.pyqtSlot(bool)
     def setEnabled(self, on: bool) -> None:
+        """Enable or disable this object."""
         self.b_.enabled_ = on
 
-    @QtCore.pyqtSlot(bool)
+    @decorators.pyqtSlot(bool)
     def setChecked(self, on: bool) -> None:
-
         chk = self.sender()
         if not chk:
             return
@@ -285,12 +309,14 @@ class FLStaticLoader(QtCore.QObject):
 
     @staticmethod
     def setup(b, ui: Any) -> None:
+        """Configure user interface from given widget."""
         diag_setup = FLStaticLoader(b, ui)
         if QtWidgets.QDialog.Accepted == diag_setup.ui_.exec_():
             b.writeSettings()
 
     @staticmethod
     def content(n, b: Any, only_path=False) -> Any:
+        """Get content from given path."""
         global warn_
         b.readSettings()
         util = FLUtil()
@@ -329,4 +355,5 @@ class FLStaticLoader(QtCore.QObject):
         return None
 
     def __getattr__(self, name) -> Any:
+        """Emulate child properties as if they were inserted into the object."""
         return self.ui_.findChild(QtWidgets.QWidget, name)

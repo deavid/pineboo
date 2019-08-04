@@ -1,11 +1,15 @@
 # # -*- coding: utf-8 -*-
+"""
+FormDBWidget module.
+"""
+from typing import Any, Dict
 from PyQt5 import QtCore  # type: ignore
 import sys
 import weakref
 
 
 class FormDBWidget(QtCore.QObject):
-    """description of class"""
+    """Replacement for FormDBWidget that does not depend on GUI."""
 
     closed = QtCore.pyqtSignal()
     cursor_ = None
@@ -13,10 +17,12 @@ class FormDBWidget(QtCore.QObject):
     iface = None
     signal_test = QtCore.pyqtSignal(str, QtCore.QObject)
     _loaded = None
-    _formconnections: set = None
-    _cursors = {}
+    _formconnections: set
+    _cursors: Dict[str, Any]
 
     def __init__(self, action=None, project=None, parent=None):
+        """Create FormDBWidget."""
+
         if project is None:
             parent = QtCore.QObject()
 
@@ -36,18 +42,18 @@ class FormDBWidget(QtCore.QObject):
         self._class_init()
 
     def _connect(self, sender, signal, receiver, slot):
-        from pineboolib import pncontrolsfactory
+        from pineboolib.application import connections
 
-        signal_slot = pncontrolsfactory.connect(sender, signal, receiver, slot, caller=self)
+        signal_slot = connections.connect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
         self._formconnections.add(signal_slot)
 
     def _disconnect(self, sender, signal, receiver, slot):
         # print(" > > > disconnect:", self)
-        from pineboolib import pncontrolsfactory
+        from pineboolib.application import connections
 
-        signal_slot = pncontrolsfactory.disconnect(sender, signal, receiver, slot, caller=self)
+        signal_slot = connections.disconnect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
 
@@ -81,10 +87,12 @@ class FormDBWidget(QtCore.QObject):
     def doCleanUp(self):
         self.clear_connections()
         if getattr(self, "iface", None) is not None:
-            from pineboolib import pncontrolsfactory
+            from pineboolib.core.garbage_collector import check_gc_referrers
 
-            pncontrolsfactory.check_gc_referrers(
-                "FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name
+            check_gc_referrers(
+                "FormDBWidget.iface:" + self.iface.__class__.__name__,
+                weakref.ref(self.iface),
+                self._action.name,
             )
             del self.iface.ctx
             del self.iface
@@ -199,8 +207,8 @@ class FormDBWidget(QtCore.QObject):
         return list_[self._iter_current]
 
     def legacy(self):
-        from pineboolib import qsa as qsa_dict_modules
+        from pineboolib.application.safeqsa import SafeQSA
 
-        ret_ = getattr(qsa_dict_modules, "%s_legacy" % self._action.name, None)
+        ret_ = SafeQSA.get_any("%s_legacy" % self._action.name)
         if ret_ is None:
             return

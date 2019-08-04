@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
-Pythonyzer
+Pythonyzer.
 
-reads XML AST created by postparse.py and creates an equivalent Python file.
+Reads XML AST created by postparse.py and creates an equivalent Python file.
 """
 import copy
 from optparse import OptionParser
@@ -27,7 +27,7 @@ else:
 STRICT_MODE = True
 
 # To get the following list updated, do:
-# In [1]: from pineboolib import qsa
+# In [1]: from pineboolib.qsa import qsa
 # In [2]: dir(qsa)
 
 QSA_KNOWN_ATTRS = {
@@ -229,6 +229,7 @@ DISALLOW_CONVERSION_FOR_NONSTRICT = {"connect", "disconnect"}
 
 
 def id_translate(name: str, qsa_exclude: Set[str] = None, transform: Dict[str, str] = None) -> str:
+    """Translate identifiers to avoid "import *" issues."""
     orig_name = name
     python_keywords = [
         "and",
@@ -305,7 +306,11 @@ def id_translate(name: str, qsa_exclude: Set[str] = None, transform: Dict[str, s
         name = name + "_"
 
     if qsa_exclude is not None:
-        qsa_lower = {x.lower(): x for x in qsa_exclude | QSA_KNOWN_ATTRS if x.lower() != x and x.lower() not in qsa_exclude}
+        qsa_lower = {
+            x.lower(): x
+            for x in qsa_exclude | QSA_KNOWN_ATTRS
+            if x.lower() != x and x.lower() not in qsa_exclude
+        }
         if orig_name.lower() in qsa_lower:
             new_name = qsa_lower[orig_name.lower()]
             count_diff_chars = len([1 for a, b in zip(new_name, orig_name) if a != b])
@@ -343,21 +348,29 @@ cont_do_while = 0
 
 
 class ASTPythonBase(object):
+    """Generate python lines. Base class."""
+
     elem: ElementTree.Element
 
     def __init__(self, elem) -> None:
+        """Create ASTPythonBase."""
         self.elem = elem
         self.parent: Optional["ASTPythonBase"] = None
         self.source: Optional["Source"] = None
 
     @classmethod
-    def can_process_tag(self, tagname) -> Any:
+    def can_process_tag(self, tagname) -> bool:
+        """Return if this instance can process given tagname."""
         return False
 
-    def generate(self, break_mode=False, include_pass=True, **kwargs) -> Generator[Tuple[str, str], None, None]:
+    def generate(
+        self, break_mode=False, include_pass=True, **kwargs
+    ) -> Generator[Tuple[str, str], None, None]:
+        """Generate Python code."""
         yield "type", "value"
 
     def local_var(self, name: str, is_member=False) -> str:
+        """Transform Identifiers that are local variables."""
         locals = None
         transform = None
         if not is_member and self.source is not None:
@@ -366,22 +379,29 @@ class ASTPythonBase(object):
         return id_translate(name, qsa_exclude=locals, transform=transform)
 
     def other_var(self, name: str) -> str:
+        """Transform identifiers that cannot fit in any other category."""
         return id_translate(name, qsa_exclude=None)
 
 
 class ASTPythonFactory(type):
+    """Metaclass that registers class as a processor for its type based on its classname."""
+
     ast_class_types: List[Type[ASTPythonBase]] = []
 
     def __init__(self, name, bases, dct) -> None:
+        """Register class using class name."""
         if issubclass(self, ASTPythonBase):
             ASTPythonFactory.register_type(self)
 
     @staticmethod
     def register_type(cls) -> None:
+        """Register class using class name."""
         ASTPythonFactory.ast_class_types.append(cls)
 
 
 class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
+    """Generate Python code from AST. Class with common functionality."""
+
     tags: List[str] = []
     debug_file: Optional[TextIO] = None
     generate_depth = 0
@@ -393,9 +413,11 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
 
     @classmethod
     def can_process_tag(self, tagname) -> Any:
+        """Return if the class can process specified tag name."""
         return self.__name__ == tagname or tagname in self.tags
 
     def __init__(self, elem) -> None:
+        """Create new ASTPython class."""
         super().__init__(elem)
         self.internal_generate = self.generate
         ASTPython._last_retlen = 0
@@ -403,9 +425,11 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
             self.generate = self._generate  # type: ignore
 
     def generate(self, **kwargs):
+        """Generate Python code. Abstract method. Generates debug for unknown AST."""
         yield "debug", "* not-known-seq * %s" % ElementTree.tostring(self.elem, encoding="UTF-8")
 
     def debug(self, text) -> None:
+        """Print debug on the generated file."""
         if self.debug_file is None:
             return
         splen = ASTPython.generate_depth
@@ -425,6 +449,7 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
         self.debug_file.write("%04d%s%s: %s\n" % (ASTPython.numline, sp, cname, text))
 
     def _generate(self, **kwargs) -> Generator[Tuple[str, str], Any, None]:
+        """Debugging version of generate method."""
         if self.DEBUGFILE_LEVEL > 5:
             self.debug("begin-gen")
         ASTPython.generate_depth += 1
@@ -439,15 +464,21 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
 
 
 class Source(ASTPython):
+    """Process Source XML tags."""
+
     locals: Set[str]
     locals_transform: Dict[str, str]
 
     def __init__(self, elem) -> None:
+        """Create Source parser. Tracks local variables."""
         super().__init__(elem)
         self.locals = set()
         self.locals_transform = {}
 
-    def generate(self, break_mode=False, include_pass=True, declare_identifiers: Set = None, **kwargs):
+    def generate(
+        self, break_mode=False, include_pass=True, declare_identifiers: Set = None, **kwargs
+    ):
+        """Generate python code."""
         elems = 0
         after_lines = []
         prev_ast_type = None
@@ -463,7 +494,9 @@ class Source(ASTPython):
                 yield "line", ""
             prev_ast_type = ast_type
 
-            for dtype, data in ast_python.generate(break_mode=break_mode, plusplus_as_instruction=True):
+            for dtype, data in ast_python.generate(
+                break_mode=break_mode, plusplus_as_instruction=True
+            ):
                 if dtype == "line+1":
                     after_lines.append(data)
                     continue
@@ -491,7 +524,10 @@ classesDefined: List[str] = []
 
 
 class Class(ASTPython):
+    """Process Class XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
         name = self.elem.get("name")
         extends = self.elem.get("extends", "object")
         self.source.locals.add(name)
@@ -509,7 +545,10 @@ class Class(ASTPython):
 
 
 class Function(ASTPython):
+    """Process Function XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
         _name = self.elem.get("name")
         anonymous = False
         if _name:
@@ -574,11 +613,16 @@ class Function(ASTPython):
 
 
 class FunctionAnon(Function):
+    """Process FunctionAnon XML tags."""
+
     pass
 
 
 class FunctionCall(ASTPython):
+    """Process FunctionCall XML tags."""
+
     def generate(self, is_member=False, **kwargs):
+        """Generate python code."""
         name = self.local_var(self.elem.get("name"), is_member=is_member)
         parent = self.elem.get("parent_")
         # data_ = None
@@ -646,11 +690,17 @@ class FunctionCall(ASTPython):
 
 
 class FunctionAnonExec(FunctionCall):
+    """Process FunctionAnonExec XML tags."""
+
     pass
 
 
 class If(ASTPython):
+    """Process If XML tags."""
+
     def generate(self, break_mode=False, **kwargs):
+        """Generate python code."""
+
         main_expr = []
         for n, arg in enumerate(self.elem.findall("Condition/*")):
             arg.set("parent_", self.elem)
@@ -718,7 +768,10 @@ class If(ASTPython):
 
 
 class TryCatch(ASTPython):
+    """Process TryCatch XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
 
         tryblock, catchblock = self.elem.findall("Source")
         tryblock.set("parent_", self.elem)
@@ -733,7 +786,9 @@ class TryCatch(ASTPython):
         for ident in self.elem.findall("Identifier"):
             ident.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(ident, parent=self).generate(isolate=False, is_member=True):
+            for dtype, data in parse_ast(ident, parent=self).generate(
+                isolate=False, is_member=True
+            ):
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -751,7 +806,11 @@ class TryCatch(ASTPython):
 
 
 class While(ASTPython):
+    """Process While XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         main_expr = []
         for n, arg in enumerate(self.elem.findall("Condition/*")):
             arg.set("parent_", self.elem)
@@ -778,7 +837,11 @@ class While(ASTPython):
 
 
 class DoWhile(ASTPython):
+    """Process DoWhile XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         main_expr = []
         for n, arg in enumerate(self.elem.findall("Condition/*")):
             arg.set("parent_", self.elem)
@@ -812,7 +875,11 @@ class DoWhile(ASTPython):
 
 
 class For(ASTPython):
+    """Process For XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         init_expr = []
         for n, arg in enumerate(self.elem.findall("ForInitialize/*")):
             arg.set("parent_", self.elem)
@@ -893,7 +960,11 @@ class For(ASTPython):
 
 
 class ForIn(ASTPython):
+    """Process ForIn XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         list_elem, main_list = "None", "None"
         myelems = []
         for e in self.elem:
@@ -921,7 +992,11 @@ class ForIn(ASTPython):
 
 
 class OldSwitch(ASTPython):
+    """Process OldSwitch XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         global cont_switch
         cont_switch += 1
         key = "%02x" % cont_switch
@@ -1004,8 +1079,13 @@ class OldSwitch(ASTPython):
 
 
 class Switch(ASTPython):
+    """Process Switch XML tags."""
+
     def generate(self, **kwargs):
-        """Should generate a switch using qsa.switch() like this:
+        """
+        Generate python code.
+
+        Should generate a switch using qsa.switch() like this:
 
         v = 'ten'
         for case in qsa.switch(v):
@@ -1082,6 +1162,8 @@ class Switch(ASTPython):
 
 
 class With(ASTPython):
+    """Process With XML tags."""
+
     python_keywords = [
         "Insert",
         "Edit",
@@ -1109,6 +1191,8 @@ class With(ASTPython):
     ]
 
     def generate(self, **kwargs):
+        """Generate python code."""
+
         # key = "%02x" % random.randint(0, 255)
         # name = "w%s_obj" % key
         # yield "debug", "WITH: %s" % key
@@ -1127,7 +1211,9 @@ class With(ASTPython):
         yield "line", " #WITH_START"
         source = cast(Source, parse_ast(source_elem, parent=self))
         source.locals.add(" ".join(var_expr))
-        source.locals_transform = {x: "%s.%s" % (" ".join(var_expr), x) for x in With.python_keywords}
+        source.locals_transform = {
+            x: "%s.%s" % (" ".join(var_expr), x) for x in With.python_keywords
+        }
 
         for obj in source.generate(break_mode=True):
             obj_ = None
@@ -1142,7 +1228,9 @@ class With(ASTPython):
                 if obj_1.startswith(t):
                     obj_1 = "%s.%s" % (" ".join(var_expr), obj_1)
                 elif obj_1.startswith("connect(%s" % t):
-                    obj_1 = obj_1.replace("connect(%s" % t, "connect(%s.%s" % (" ".join(var_expr), t))
+                    obj_1 = obj_1.replace(
+                        "connect(%s" % t, "connect(%s.%s" % (" ".join(var_expr), t)
+                    )
                 elif obj_1.find(".") == -1 and obj_1.find(t) > -1:
                     obj_1 = obj_1.replace(t, "%s.%s" % (" ".join(var_expr), t))
 
@@ -1155,9 +1243,13 @@ class With(ASTPython):
 
 
 class Variable(ASTPython):
+    """Process Variable XML tags."""
+
     DEBUGFILE_LEVEL = 4
 
     def generate(self, force_value=False, **kwargs):
+        """Generate python code."""
+
         name = self.elem.get("name")
         # if name.startswith("colorFun"): print(name)
         yield "expr", self.local_var(name, is_member=True)
@@ -1211,13 +1303,19 @@ class Variable(ASTPython):
 
 
 class InstructionUpdate(ASTPython):
+    """Process InstructionUpdate XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         arguments = []
         identifier = None
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False, is_member=(n == 0)):
+            for dtype, data in parse_ast(arg, parent=self).generate(
+                isolate=False, is_member=(n == 0)
+            ):
                 if dtype == "expr":
                     if data is None:
                         raise ValueError(ElementTree.tostring(arg))
@@ -1242,7 +1340,11 @@ class InstructionUpdate(ASTPython):
 
 
 class InlineUpdate(ASTPython):
+    """Process InlineUpdate XML tags."""
+
     def generate(self, plusplus_as_instruction=False, **kwargs):
+        """Generate python code."""
+
         arguments = []
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
@@ -1275,7 +1377,11 @@ class InlineUpdate(ASTPython):
 
 
 class InstructionCall(ASTPython):
+    """Process InstructionCall XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         arguments = []
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
@@ -1295,7 +1401,11 @@ class InstructionCall(ASTPython):
 
 
 class Instruction(ASTPython):
+    """Process Instruction XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         arguments = []
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
@@ -1317,7 +1427,11 @@ class Instruction(ASTPython):
 
 
 class InstructionFlow(ASTPython):
+    """Process InstructionFlow XML tags."""
+
     def generate(self, break_mode=False, **kwargs):
+        """Generate python code."""
+
         arguments = []
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
@@ -1356,7 +1470,11 @@ class InstructionFlow(ASTPython):
 
 
 class Member(ASTPython):
+    """Process Member XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         arguments = []
         arg_expr = []
         funs = None
@@ -1418,7 +1536,9 @@ class Member(ASTPython):
                     classname = full_fun_name.split("_")[0]
 
                 arguments[2] = arguments[2][2:]
-                arguments[0:2] = ['super(getattr(self._module, "%s"), %s)' % (classname, ".".join(arguments[0:2]))]
+                arguments[0:2] = [
+                    'super(getattr(self._module, "%s"), %s)' % (classname, ".".join(arguments[0:2]))
+                ]
 
         # Lectura del self.iface.__init() al nuevo estilo yeboyebo
         if len(arguments) >= 2 and arguments[0:1] == ["_i"] and arguments[1].startswith("__"):
@@ -1446,7 +1566,9 @@ class Member(ASTPython):
                 else:
                     classname = full_fun_name.split("_")[0]
                 arguments[1] = arguments[1][2:]
-                arguments[0:1] = ['super(getattr(self._module, "%s"), %s)' % (classname, ".".join(arguments[0:1]))]
+                arguments[0:1] = [
+                    'super(getattr(self._module, "%s"), %s)' % (classname, ".".join(arguments[0:1]))
+                ]
 
         replace_members = [
             "toString()",
@@ -1489,7 +1611,9 @@ class Member(ASTPython):
                     elif member == "right":
                         value = arg[6:]
                         value = value[: len(value) - 1]
-                        arguments = ["%s[(len(%s) - (%s)):]" % (".".join(part1), ".".join(part1), value)] + part2
+                        arguments = [
+                            "%s[(len(%s) - (%s)):]" % (".".join(part1), ".".join(part1), value)
+                        ] + part2
                     elif member == "substring":
                         value = arg[10:]
                         value = value[: len(value) - 1]
@@ -1499,7 +1623,9 @@ class Member(ASTPython):
                         value = arg[4:]
                         value = value[: len(value) - 1]
                         if value.find(",") > -1:
-                            if (value.find("(") < value.find(",")) and value.find(")") < value.find(","):
+                            if (value.find("(") < value.find(",")) and value.find(")") < value.find(
+                                ","
+                            ):
                                 i, k = value.split(",")
                             # if (len(value.split(",")) == 2 and value.find("(") == -1) or value.find("(") < value.find(","):
                             #    i, l = value.split(",")
@@ -1567,7 +1693,9 @@ class Member(ASTPython):
                     elif member == "attributeValue":
                         value = arg[15:]
                         value = value[: len(value) - 1]
-                        arguments = ["%s.attributes().namedItem(%s).nodeValue()" % (".".join(part1), value)] + part2
+                        arguments = [
+                            "%s.attributes().namedItem(%s).nodeValue()" % (".".join(part1), value)
+                        ] + part2
                     elif member == "replace":
                         value = arg[8:-1]
                         part_list = []
@@ -1579,7 +1707,10 @@ class Member(ASTPython):
                             if part_list[1] == ' "':
                                 part_list[1] = '","'
                         if part_list[0].find("re.compile") > -1:
-                            arguments = ["%s.sub(%s,%s)" % (part_list[0], ",".join(part_list[1:]), ".".join(part1))] + part2
+                            arguments = [
+                                "%s.sub(%s,%s)"
+                                % (part_list[0], ",".join(part_list[1:]), ".".join(part1))
+                            ] + part2
                         else:
                             if not part2:
                                 if ".".join(part1) and "replace(" in " ".join(arguments[0:1]):
@@ -1591,7 +1722,9 @@ class Member(ASTPython):
 
                                     rep_extra = arguments[2:]
                                     # print(arguments)
-                                    arguments = ["qsa.replace(%s, %s)" % (rep_str, rep_from_to)] + rep_extra
+                                    arguments = [
+                                        "qsa.replace(%s, %s)" % (rep_str, rep_from_to)
+                                    ] + rep_extra
                                     # print(arguments)
                                     # print("*")
 
@@ -1609,12 +1742,18 @@ class Member(ASTPython):
 
 
 class ArrayMember(ASTPython):
+    """Process ArrayMember XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         arguments = []
         for n, arg in enumerate(self.elem):
             arg.set("parent_", self.elem)
             expr = []
-            for dtype, data in parse_ast(arg, parent=self).generate(isolate=False, is_member=(n == 0)):
+            for dtype, data in parse_ast(arg, parent=self).generate(
+                isolate=False, is_member=(n == 0)
+            ):
                 # if data.find(".") > -1:
                 #    l = data.split(".")
                 #    data = "%s['%s']" % (l[0], l[1])
@@ -1635,7 +1774,11 @@ class ArrayMember(ASTPython):
 
 
 class Value(ASTPython):
+    """Process Value XML tags."""
+
     def generate(self, isolate=True, **kwargs):
+        """Generate python code."""
+
         if isolate:
             yield "expr", "("
         for child in self.elem:
@@ -1650,10 +1793,14 @@ class Value(ASTPython):
 
 
 class Expression(ASTPython):
+    """Process Expression XML tags."""
+
     DEBUGFILE_LEVEL = 10
     tags = ["base_expression", "math_expression"]
 
     def generate(self, isolate=True, **kwargs):
+        """Generate python code."""
+
         if isolate:
             yield "expr", "("
         coerce_string_mode = False
@@ -1679,7 +1826,11 @@ class Expression(ASTPython):
 
 
 class Parentheses(ASTPython):
+    """Process Parentheses XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         yield "expr", "("
         for child in self.elem:
             child.set("parent_", self.elem)
@@ -1689,7 +1840,11 @@ class Parentheses(ASTPython):
 
 
 class Delete(ASTPython):
+    """Process Delete XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         expr = []
         for child in self.elem:
             child.set("parent_", self.elem)
@@ -1702,20 +1857,24 @@ class Delete(ASTPython):
 
 
 class OpTernary(ASTPython):
+    """Process OpTernary XML tags."""
+
     DEBUGFILE_LEVEL = 3
 
     def generate(self, isolate=False, **kwargs):
         """
-            Ejemplo op. ternario
-                <OpTernary>
-                    <Parentheses>
-                        <OpUnary type="LNOT"><Identifier name="codIso"/></OpUnary>
-                        <Compare type="LOR"/><Identifier name="codIso"/><Compare type="EQ"/>
-                        <Constant delim="&quot;" type="String" value=""/>
-                    </Parentheses>
-                    <Constant delim="&quot;" type="String" value="ES"/>
-                    <Identifier name="codIso"/>
-                </OpTernary>
+        Generate python code.
+
+        Example XML:
+            <OpTernary>
+                <Parentheses>
+                    <OpUnary type="LNOT"><Identifier name="codIso"/></OpUnary>
+                    <Compare type="LOR"/><Identifier name="codIso"/><Compare type="EQ"/>
+                    <Constant delim="&quot;" type="String" value=""/>
+                </Parentheses>
+                <Constant delim="&quot;" type="String" value="ES"/>
+                <Identifier name="codIso"/>
+            </OpTernary>
         """
         if_cond = self.elem[0]
         then_val = self.elem[1]
@@ -1733,7 +1892,11 @@ class OpTernary(ASTPython):
 
 
 class DictObject(ASTPython):
+    """Process DictObject XML tags."""
+
     def generate(self, isolate=False, **kwargs):
+        """Generate python code."""
+
         yield "expr", "qsa.AttributeDict({"
         key = True
         for child in self.elem:
@@ -1756,7 +1919,11 @@ class DictObject(ASTPython):
 
 
 class DictElem(ASTPython):
+    """Process DictElem XML tags."""
+
     def generate(self, isolate=False, **kwargs):
+        """Generate python code."""
+
         # Clave:
         for dtype, data in parse_ast(self.elem[0], parent=self).generate():
             yield dtype, data
@@ -1767,9 +1934,13 @@ class DictElem(ASTPython):
 
 
 class OpUnary(ASTPython):
+    """Process OpUnary XML tags."""
+
     DEBUGFILE_LEVEL = 3
 
     def generate(self, isolate=False, **kwargs):
+        """Generate python code."""
+
         ctype = self.elem.get("type")
         if ctype == "LNOT":
             yield "expr", "not"
@@ -1790,7 +1961,11 @@ class OpUnary(ASTPython):
 
 
 class New(ASTPython):
+    """Process New XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         for child in self.elem:
             child.set("parent_", self.elem)
             for dtype, data in parse_ast(child, parent=self).generate():
@@ -1815,9 +1990,13 @@ class New(ASTPython):
 
 
 class Constant(ASTPython):
+    """Process Constant XML tags."""
+
     DEBUGFILE_LEVEL = 10
 
     def generate(self, **kwargs):
+        """Generate python code."""
+
         ctype = self.elem.get("type")
         value = self.elem.get("value")
         self.debug("ctype: %r -> %r" % (ctype, value))
@@ -1880,18 +2059,26 @@ class Constant(ASTPython):
 
 
 class Identifier(ASTPython):
+    """Process Identifier XML tags."""
+
     DEBUGFILE_LEVEL = 0
 
     def generate(self, is_member=False, **kwargs):
+        """Generate python code."""
+
         varname = self.elem.get("name")
         name = self.local_var(varname, is_member=is_member)
         yield "expr", name
 
 
 class regex(ASTPython):
+    """Process regex XML tags."""
+
     DEBUGFILE_LEVEL = 10
 
     def generate(self, **kwargs):
+        """Generate python code."""
+
         child = self.elem.find("regexbody")
         # args_ = self.elem.items()
         if not child:
@@ -1903,18 +2090,26 @@ class regex(ASTPython):
 
 
 class regexbody(ASTPython):
+    """Process regexbody XML tags."""
+
     DEBUGFILE_LEVEL = 10
 
     def generate(self, **kwargs):
+        """Generate python code."""
+
         for arg in self.elem:
             for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 yield "expr", data
 
 
 class regexchar(ASTPython):
+    """Process regexchar XML tags."""
+
     DEBUGFILE_LEVEL = 10
 
     def generate(self, **kwargs):
+        """Generate python code."""
+
         val = self.elem.get("arg00")
         ret = None
         if val == "XOR":
@@ -1964,9 +2159,13 @@ class regexchar(ASTPython):
 
 
 class OpUpdate(ASTPython):
+    """Process OpUpdate XML tags."""
+
     DEBUGFILE_LEVEL = 3
 
     def generate(self, **kwargs):
+        """Generate python code."""
+
         ctype = self.elem.get("type")
         if ctype == "EQUALS":
             yield "expr", "="
@@ -1985,7 +2184,11 @@ class OpUpdate(ASTPython):
 
 
 class Compare(ASTPython):
+    """Process Compare XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         ctype = self.elem.get("type")
         if ctype == "GT":
             yield "expr", ">"
@@ -2014,9 +2217,13 @@ class Compare(ASTPython):
 
 
 class OpMath(ASTPython):
+    """Process OpMath XML tags."""
+
     DEBUGFILE_LEVEL = 3
 
     def generate(self, **kwargs):
+        """Generate python code."""
+
         ctype = self.elem.get("type")
         if ctype == "PLUS":
             yield "expr", "+"
@@ -2043,7 +2250,11 @@ class OpMath(ASTPython):
 
 
 class DeclarationBlock(ASTPython):
+    """Process DeclarationBlock XML tags."""
+
     def generate(self, **kwargs):
+        """Generate python code."""
+
         # mode = self.elem.get("mode")
         is_constructor = self.elem.get("constructor")
         is_definition = True if self.elem.get("definition") else False
@@ -2071,8 +2282,11 @@ class DeclarationBlock(ASTPython):
 
 # ----- keep this one at the end.
 class Unknown(ASTPython):
+    """Process Unknown XML tags."""
+
     @classmethod
     def can_process_tag(self, tagname) -> bool:
+        """Catch all and process it for reporting errors."""
         return True
 
 
@@ -2080,6 +2294,7 @@ class Unknown(ASTPython):
 
 
 def astparser_for(elem) -> ASTPythonBase:
+    """Construct proper AST parser for given XML element."""
     for cls in ASTPythonFactory.ast_class_types:
         if cls.can_process_tag(elem.tag):
             return cls(elem)
@@ -2087,6 +2302,7 @@ def astparser_for(elem) -> ASTPythonBase:
 
 
 def parse_ast(elem, parent=None) -> ASTPythonBase:
+    """Parse XML Element."""
     elemparser = astparser_for(elem)
     elemparser.parent = parent
 
@@ -2112,12 +2328,15 @@ def parse_ast(elem, parent=None) -> ASTPythonBase:
     return elemparser
 
 
-def file_template(ast: Any, import_refs: Dict[str, Tuple[str, str]] = {}) -> Generator[Tuple[Any, Any], Any, None]:
+def file_template(
+    ast: Any, import_refs: Dict[str, Tuple[str, str]] = {}
+) -> Generator[Tuple[Any, Any], Any, None]:
+    """Create a new file template."""
     yield "line", "# -*- coding: utf-8 -*-"
     yield "line", "from typing import TYPE_CHECKING"
     if not STRICT_MODE:
-        yield "line", "from pineboolib.qsa import *  # noqa: F403"
-    yield "line", "from pineboolib import qsa"
+        yield "line", "from pineboolib.qsa.qsa import *  # noqa: F403"
+    yield "line", "from pineboolib.qsa import qsa"
     # yield "line", "from pineboolib.qsaglobals import *"
     for alias, (path, name) in import_refs.items():
         yield "line", "from %s import %s as %s" % (path, name, alias)
@@ -2130,7 +2349,9 @@ def file_template(ast: Any, import_refs: Dict[str, Tuple[str, str]] = {}) -> Gen
         cls.set("parent_", ast)
         sourceclasses.append(cls)
 
-    mainclass = ElementTree.SubElement(sourceclasses, "Class", name="FormInternalObj", extends="qsa.FormDBWidget")
+    mainclass = ElementTree.SubElement(
+        sourceclasses, "Class", name="FormInternalObj", extends="qsa.FormDBWidget"
+    )
     mainsource = ElementTree.SubElement(mainclass, "Source")
 
     constructor = ElementTree.SubElement(mainsource, "Function", name="_class_init")
@@ -2159,6 +2380,7 @@ def file_template(ast: Any, import_refs: Dict[str, Tuple[str, str]] = {}) -> Gen
 
 
 def write_python_file(fobj, ast, import_refs: Dict[str, Tuple[str, str]] = {}) -> None:
+    """Write python file."""
     indent: List[str] = []
     indent_text = "    "
     last_line_for_indent: Dict[int, int] = {}
@@ -2218,6 +2440,7 @@ def write_python_file(fobj, ast, import_refs: Dict[str, Tuple[str, str]] = {}) -
 
 
 def pythonize(filename, destfilename, debugname=None) -> None:
+    """Convert given QS filename into Python saved as destfilename."""
     # bname = os.path.basename(filename)
     ASTPython.debug_file = open(debugname, "w") if debugname else None
     parser = ElementTree.XMLParser(encoding="UTF-8")
@@ -2232,13 +2455,16 @@ def pythonize(filename, destfilename, debugname=None) -> None:
     write_python_file(f1, ast)
     f1.close()
     if black:
-        new_code = black.format_file_contents(Path(destfilename).read_text(), fast=True, mode=BLACK_FILEMODE)
+        new_code = black.format_file_contents(
+            Path(destfilename).read_text(), fast=True, mode=BLACK_FILEMODE
+        )
         f1 = open(destfilename, "w", encoding="UTF-8")
         f1.write(new_code)
         f1.close()
 
 
 def pythonize2(root_ast: ElementTree.Element, known_refs: Dict[str, Tuple[str, str]] = {}) -> str:
+    """Convert AST into Python. Faster version of pythonize as does not read/save XML."""
     from io import StringIO
 
     ASTPython.debug_file = None
@@ -2262,12 +2488,32 @@ def pythonize2(root_ast: ElementTree.Element, known_refs: Dict[str, Tuple[str, s
 
 
 def main() -> None:
+    """Run main program."""
     parser = OptionParser()
-    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
+    parser.add_option(
+        "-q",
+        "--quiet",
+        action="store_false",
+        dest="verbose",
+        default=True,
+        help="don't print status messages to stdout",
+    )
 
-    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
+    parser.add_option(
+        "--optdebug",
+        action="store_true",
+        dest="optdebug",
+        default=False,
+        help="debug optparse module",
+    )
 
-    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
+    parser.add_option(
+        "--debug",
+        action="store_true",
+        dest="debug",
+        default=False,
+        help="prints lots of useless messages",
+    )
 
     parser.add_option("--path", dest="storepath", default=None, help="store PY results in PATH")
 

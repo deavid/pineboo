@@ -9,20 +9,20 @@ import re
 import sys
 import io
 import os.path
-import shutil
-from PyQt5.QtGui import QPixmap  # type: ignore
-from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir, pyqtSignal  # type: ignore
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest  # type: ignore
-from pineboolib.core import decorators
+import hashlib
+import traceback
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir, pyqtSignal
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from typing import Optional, Union, Any, List, cast
+from typing import Callable, TypeVar, TYPE_CHECKING
 from types import FrameType
 from xml.etree.ElementTree import ElementTree, Element
-from . import logging
-
-from typing import Callable, TypeVar, TYPE_CHECKING
+from pineboolib.core.utils import logging
+from pineboolib.core import decorators
 
 if TYPE_CHECKING:
-    from pineboolib.application.types import Date  # noqa: F401
+    from pineboolib.application.qsatypes.date import Date  # noqa: F401
 
 logger = logging.getLogger(__name__)
 T1 = TypeVar("T1")
@@ -79,19 +79,35 @@ class DefFun:
     def __str__(self) -> Any:
         """Emulate call function... when converted to string."""
         if self.realfun:
-            logger.debug("%r: Redirigiendo Propiedad a función %r", self.parent.__class__.__name__, self.funname)
+            logger.debug(
+                "%r: Redirigiendo Propiedad a función %r",
+                self.parent.__class__.__name__,
+                self.funname,
+            )
             return self.realfun()
 
-        logger.debug("WARN: %r: Propiedad no implementada %r", self.parent.__class__.__name__, self.funname)
+        logger.debug(
+            "WARN: %r: Propiedad no implementada %r", self.parent.__class__.__name__, self.funname
+        )
         return 0
 
     def __call__(self, *args: Any) -> Any:
         """Emulate call function."""
         if self.realfun:
-            logger.debug("%r: Redirigiendo Llamada a función %s %s", self.parent.__class__.__name__, self.funname, args)
+            logger.debug(
+                "%r: Redirigiendo Llamada a función %s %s",
+                self.parent.__class__.__name__,
+                self.funname,
+                args,
+            )
             return self.realfun(*args)
 
-        logger.debug("%r: Método no implementado %s %s", self.parent.__class__.__name__, self.funname.encode("UTF-8"), args)
+        logger.debug(
+            "%r: Método no implementado %s %s",
+            self.parent.__class__.__name__,
+            self.funname.encode("UTF-8"),
+            args,
+        )
         return None
 
 
@@ -133,12 +149,14 @@ class TraceBlock:
 
     def __enter__(self) -> Callable[[FrameType, str, Any], Any]:
         """Create tracing context on enter."""
-        sys.settrace(traceit)
+        # NOTE: "sys.systrace" function could lead to arbitrary code execution
+        sys.settrace(traceit)  # noqa: DUO111
         return traceit
 
     def __exit__(self, type: Any, value: Any, traceback: Any) -> None:
         """Remove tracing context on exit."""
-        sys.settrace(None)
+        # NOTE: "sys.systrace" function could lead to arbitrary code execution
+        sys.settrace(None)  # noqa: DUO111
 
 
 def trace_function(f: Callable) -> Callable:
@@ -273,7 +291,7 @@ def copy_dir_recursive(from_dir: str, to_dir: str, replace_on_conflict: bool = F
             else:
                 continue
 
-        if not shutil.copy(from_, to_):
+        if not QFile.copy(from_, to_):
             return False
 
     for dir_ in dir.entryList(cast(QDir.Filter, QDir.Dirs | QDir.NoDotAndDotDot)):
@@ -361,17 +379,6 @@ class StructMyDict(dict):
         self[name] = value
 
 
-def version_check(mod_name: str, mod_ver: str, min_ver: str) -> None:
-    """Compare two version numbers and raise a warning if "minver" is not met."""
-    if version_normalize(mod_ver) < version_normalize(min_ver):
-        logger.warning("La version de <%s> es %s. La mínima recomendada es %s.", mod_name, mod_ver, min_ver)
-
-
-def version_normalize(v: str) -> List[int]:
-    """Normalize version string numbers like 3.10.1 so they can be compared."""
-    return [int(x) for x in re.sub(r"(\.0+)*$", "", v).split(".")]
-
-
 def load2xml(form_path_or_str: str) -> ElementTree:
     """Parse a Eneboo style XML."""
     from xml.etree import ElementTree as ET
@@ -405,14 +412,16 @@ def load2xml(form_path_or_str: str) -> ElementTree:
         raise Exception("File %s not found" % form_path_or_str[:200])
 
     try:
-        parser = ET.XMLParser(html=0)
+        parser = ET.XMLParser()
         return ET.parse(file_ptr or form_path_or_str, parser)
     except Exception:
         try:
-            parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
+            parser = ET.XMLParser(encoding="ISO-8859-15")
             return ET.parse(file_ptr or form_path_or_str, parser)
         except Exception:
-            logger.exception("Error cargando UI después de intentar con UTF8 e ISO \n%s", form_path_or_str)
+            logger.exception(
+                "Error cargando UI después de intentar con UTF8 e ISO \n%s", form_path_or_str
+            )
             raise
 
 
@@ -541,7 +550,11 @@ def format_double(d: Union[int, str, float], part_integer: int, part_decimal: in
     str_integer = format_int(str_integer, part_integer)
 
     # Fixme: Que pasa cuando la parte entera sobrepasa el limite, se coge el maximo valor o
-    ret_ = "%s%s%s" % (str_integer, decimal_separator if found_comma else "", str_decimal if part_decimal > 0 else "")
+    ret_ = "%s%s%s" % (
+        str_integer,
+        decimal_separator if found_comma else "",
+        str_decimal if part_decimal > 0 else "",
+    )
     return ret_
 
 
@@ -639,6 +652,9 @@ def download_files() -> None:
     if os.path.exists(filedir("forms")):
         return
 
+    if not os.path.exists(filedir("../pineboolib")):
+        os.mkdir(filedir("../pineboolib"))
+
     copy_dir_recursive(":/pineboolib", filedir("../pineboolib"))
     copy_dir_recursive(":/share", filedir("../share"))
     if not os.path.exists(filedir("../tempdata")):
@@ -649,3 +665,14 @@ def pixmap_fromMimeSource(name: str) -> Any:
     """Convert mime source into a pixmap."""
     file_name = filedir("../share/icons", name)
     return QPixmap(file_name) if os.path.exists(file_name) else None
+
+
+def sha1(x: str) -> str:
+    """Get SHA1 hash from string in hex form."""
+    return hashlib.sha1(str(x).encode("UTF-8")).hexdigest()
+
+
+def print_stack(maxsize: int = 1) -> None:
+    """Print Python stack, like a traceback."""
+    for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
+        print(tb.rstrip())

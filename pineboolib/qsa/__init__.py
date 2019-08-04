@@ -1,4 +1,6 @@
-from .qsa import *  # noqa: F401
-from typing import TypeVar
+"""
+QSA Package.
 
-AnyStr = TypeVar("AnyStr", str, bytes)
+Includes all sort of functions and classes for QS script compatibility.
+
+"""

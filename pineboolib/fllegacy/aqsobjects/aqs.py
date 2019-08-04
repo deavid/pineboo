@@ -1,56 +1,68 @@
 # -*- coding: utf-8 -*-
+"""
+AQS package.
 
-from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication  # type: ignore
-from PyQt5.QtXml import QDomDocument  # type: ignore
-from PyQt5 import QtCore  # type: ignore
-from PyQt5 import QtGui  # type: ignore
+Main entrance to the different AQS resources.
+"""
+
+from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication, QWidget
+from PyQt5.QtGui import QColor, QPixmap, QCursor
+from PyQt5.QtXml import QDomDocument
+from PyQt5 import QtCore
+from PyQt5 import QtGui
 
 from pineboolib.core.utils import logging
 
 
-from typing import Type, Any, Optional, Union
-from PyQt5.Qt import QCursor  # type: ignore
-from PyQt5.QtWidgets import QWidget  # type : ignore
-from PyQt5.QtGui import QColor  # type: ignore
+from typing import Any, Optional, Union
+
 
 logger = logging.getLogger("AQS")
 
-"""
-Clase AQS
-"""
-
 
 class AQS(object):
+    """AQS Class."""
 
     Box = None
     Plain = None
     translate = ["DockLeft", "ContextMenu"]
+    InDock: str = "InDock"
+    OutSideDock: str = "OutSideDock"
+    SmtpSslConnection: int = 1
+    SmtpTlsConnection: int = 2
+    SmtpAuthPlain: int = 1
+    SmtpAuthLogin: int = 2
+    SmtpSendOk: int = 11
+    SmtpError: int = 7
+    SmtpMxDnsError: int = 10
+    SmtpSocketError: int = 12
+    SmtpAttachError: int = 15
+    SmtpServerError: int = 16
+    SmtpClientError: int = 17
+    StFailed = None
+    AlignTop = QtCore.Qt.AlignTop
+    WordBreak = QtCore.Qt.TextWordWrap
 
-    def __init__(self) -> None:
-        self.InDock: str = "InDock"
-        self.OutSideDock: str = "OutSideDock"
-        self.SmtpSslConnection: int = 1
-        self.SmtpTlsConnection: int = 2
-        self.SmtpAuthPlain: int = 1
-        self.SmtpAuthLogin: int = 2
-        self.SmtpSendOk: int = 11
-        self.SmtpError: int = 7
-        self.SmtpMxDnsError: int = 10
-        self.SmtpSocketError: int = 12
-        self.SmtpAttachError: int = 15
-        self.SmtpServerError: int = 16
-        self.SmtpClientError: int = 17
+    WindowStateChange = QtGui.QWindowStateChangeEvent
+    ContextMenu = QtGui.QContextMenuEvent
+    Close = QtGui.QCloseEvent
+    Show = QtGui.QShowEvent
+    LeftDockWidgetArea: int = 1
 
-    """
-    Muestra el dialog de selección de color
-    @param color. Especifica el color inicial
-    @param parent. Parent
-    @param name. deprecated. Paramametro usado para compatibilidad
-    """
-
+    @staticmethod
     def ColorDialog_getColor(
-        self, color: Optional[Union[int, str, QColor]] = None, parent: Optional["QWidget"] = None, name: Optional[str] = None
+        color: Optional[Union[int, str, QColor]] = None,
+        parent: Optional["QWidget"] = None,
+        name: Optional[str] = None,
     ) -> Any:
+        """
+        Display the color selection dialog.
+
+        @param color. Specify the initial color.
+        @param parent. Parent.
+        @param name. deprecated. Parameter used for compatibility.
+        """
+
         from PyQt5.QtWidgets import QColorDialog  # type: ignore
 
         if color is None:
@@ -63,16 +75,19 @@ class AQS(object):
         cL = QColorDialog(qcolor, parent)
         return cL.getColor()
 
-    """
-    Convierte un objeto a xml
-    @param obj_. Objeto a procesar
-    @param include_children. Incluir hijos del objeto dado
-    @param include_complex_types. Incluir hijos complejos
-    @return xml del objeto dado
-    """
-
     @classmethod
-    def toXml(cls: Type["AQS"], obj_: "QWidget", include_children: bool = True, include_complex_types: bool = False):
+    def toXml(
+        cls, obj_: "QWidget", include_children: bool = True, include_complex_types: bool = False
+    ):
+        """
+        Convert an object to xml.
+
+        @param obj_. Object to be processed
+        @param include_children. Include children of the given object
+        @param include_complex_types. Include complex children
+        @return xml of the given object
+        """
+
         xml_ = QDomDocument()
 
         if not obj_:
@@ -121,14 +136,15 @@ class AQS(object):
                 xml_.firstChild().appendChild(itd.firstChild())
         return xml_
 
-    """
-    Obtiene un QPixmap de un nombre de fichero dado
-    @param name. Nombre del fichero
-    @return QPixmap
-    """
-
     @staticmethod
-    def pixmap_fromMimeSource(name: str) -> Any:
+    def pixmap_fromMimeSource(name: str) -> QPixmap:
+        """
+        Get a QPixmap of a given file name.
+
+        @param name. File Name
+        @return QPixmap
+        """
+
         from pineboolib.core.utils.utils_base import pixmap_fromMimeSource
 
         return pixmap_fromMimeSource(name)
@@ -136,21 +152,43 @@ class AQS(object):
     Pixmap_fromMineSource = pixmap_fromMimeSource
 
     @classmethod
-    def sha1(self, byte_array: bytes) -> Any:
-        from pineboolib.pncontrolsfactory import QByteArray
+    def sha1(cls, byte_array: bytes) -> str:
+        """
+        Return the sha1 of a set of bytes.
+
+        @param byte_array: bytes to process.
+        @return sha1 string
+        """
+
+        from pineboolib.qt3_widgets.qbytearray import QByteArray
 
         ba = QByteArray(byte_array)
         return ba.sha1()
 
     @classmethod
-    def Application_setOverrideCursor(self, shape: "QCursor", replace: bool = False) -> None:
+    def Application_setOverrideCursor(cls, shape: "QCursor", replace: bool = False) -> None:
+        """
+        Set override cursor.
+
+        @param. shape. QCursor instance to override.
+        @param. replace. Not used.
+        """
+
         QApplication.setOverrideCursor(shape)
 
     @classmethod
-    def Application_restoreOverrideCursor(self) -> None:
+    def Application_restoreOverrideCursor(cls) -> None:
+        """Restore override cursor."""
         QApplication.restoreOverrideCursor()
 
     def __getattr__(self, name: str) -> Any:
+        """
+        Return the attributes of the main classes, if it is not in the class.
+
+        @param name. Attribute name.
+        @return Attribute or None.
+        """
+
         if name in self.translate:
             if name == "DockLeft":
                 name = "LeftDockWidgetArea"
@@ -164,6 +202,11 @@ class AQS(object):
                     break
 
         if ret_ is not None:
+            logger.info("AQS: Looking up attr: %r -> %r  (Please set these in AQS)", name, ret_)
             return ret_
 
         logger.warning("AQS: No se encuentra el atributo %s", name)
+
+    @classmethod
+    def TextCodec_codecForName(cls, codec_name):
+        return codec_name

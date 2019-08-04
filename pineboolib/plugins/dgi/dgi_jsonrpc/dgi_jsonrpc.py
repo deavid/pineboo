@@ -126,7 +126,8 @@ class parser(object):
     @dispatcher.add_method
     def action(*args):
         from pineboolib.application import project
-        from pineboolib import pncontrolsfactory
+        from pineboolib.fllegacy.flfielddb import FLFieldDB
+        from pineboolib.fllegacy.fltabledb import FLTableDB
 
         if project.DGI._par._queqe:
             return "queqePending"
@@ -140,7 +141,7 @@ class parser(object):
             cr = ac.child(control)
             if cr:
                 em = getattr(cr, emite, None)
-                if isinstance(cr, pncontrolsfactory.FLFieldDB):
+                if isinstance(cr, FLFieldDB):
                     if emite == "setText":
                         cr.editor_.setText(arguments[3])
                         return True
@@ -148,7 +149,7 @@ class parser(object):
                         print("Función desconocida", emite)
                         return False
 
-                elif isinstance(cr, pncontrolsfactory.FLTableDB):
+                elif isinstance(cr, FLTableDB):
                     if emite == "data":
                         print("Recoge data!!!")
 
@@ -207,7 +208,10 @@ class dgi_jsonrpc(dgi_schema):
 
     def showWidget(self, widget) -> None:
         if self._par:
-            self._par.addQueque("%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
+            self._par.addQueque(
+                "%s_showWidget" % widget.__class__.__module__,
+                self._WJS[widget.__class__.__module__],
+            )
 
     def __getattr__(self, name) -> Any:
         return super().resolveObject(self._name, name)

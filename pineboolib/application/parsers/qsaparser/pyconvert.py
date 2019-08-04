@@ -173,10 +173,16 @@ def main() -> None:
         for action in actions.values():
             if action.scriptform:
                 module_pubname = "form%s" % action.name
-                known_modules[module_pubname] = (package_name + "." + mpath.replace(os.sep, "."), action.scriptform)
+                known_modules[module_pubname] = (
+                    package_name + "." + mpath.replace(os.sep, "."),
+                    action.scriptform,
+                )
             if action.scriptformrecord:
                 module_pubname = "formRecord%s" % action.name
-                known_modules[module_pubname] = (package_name + "." + mpath.replace(os.sep, "."), action.scriptformrecord)
+                known_modules[module_pubname] = (
+                    package_name + "." + mpath.replace(os.sep, "."),
+                    action.scriptformrecord,
+                )
 
     if filter_mod is not None:
         for alias, (path, name) in known_modules.items():
@@ -205,7 +211,10 @@ def main() -> None:
     # Step 5 - Convert QS into Python
     logger.info("Converting %d QS files...", len(qs_files))
 
-    itemlist = [PythonifyItem(src=src, dst=dst, n=n, len=len(qs_files), known=known_modules) for n, (src, dst) in enumerate(qs_files)]
+    itemlist = [
+        PythonifyItem(src=src, dst=dst, n=n, len=len(qs_files), known=known_modules)
+        for n, (src, dst) in enumerate(qs_files)
+    ]
     with Pool(CPU_COUNT) as p:
         # TODO: Add proper signatures to Python files to avoid reparsing
         pycode_list: List[bool] = p.map(pythonify_item, itemlist, chunksize=2)

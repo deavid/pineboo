@@ -1,3 +1,5 @@
+"""Manage cached xpm."""
+
 import os
 import os.path
 
@@ -5,6 +7,13 @@ from pineboolib.core.settings import config
 
 
 def cacheXPM(value: str) -> str:
+    """
+    Return a path to a file with the content of the specified string.
+
+    @param value. text string with the xpm or path to this.
+    @return file path contains Xpm
+    """
+
     if not value:
         raise ValueError("Expected a value")
     xpm_name = value[: value.find("[]")]

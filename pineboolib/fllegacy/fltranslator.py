@@ -50,7 +50,8 @@ class FLTranslator(QTranslator):
             ts_file = filedir("../share/pineboo/translations/%s.%s" % (self.idM_, self.lang_))
         else:
             ts_file = filedir(
-                "%s/cache/%s/%s/file.ts/%s.%s/%s" % (project.tmpdir, project.conn.DBName(), self.idM_, self.idM_, self.lang_, key)
+                "%s/cache/%s/%s/file.ts/%s.%s/%s"
+                % (project.tmpdir, project.conn.DBName(), self.idM_, self.idM_, self.lang_, key)
             )
         # qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
 
@@ -111,11 +112,16 @@ class FLTranslator(QTranslator):
                 if context_dict_key not in self.ts_translation_contexts.keys():
                     self.ts_translation_contexts[context_dict_key] = {}
                 for message in context.findall("message"):
-                    translation_elem, source_elem = (message.find("translation"), message.find("source"))
+                    translation_elem, source_elem = (
+                        message.find("translation"),
+                        message.find("source"),
+                    )
                     translation_text = translation_elem is not None and translation_elem.text
                     source_text = source_elem is not None and source_elem.text
                     if translation_text and source_text:
-                        self.ts_translation_contexts[context_dict_key][source_text] = translation_text
+                        self.ts_translation_contexts[context_dict_key][
+                            source_text
+                        ] = translation_text
 
             return True
         except Exception:

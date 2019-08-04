@@ -1,3 +1,5 @@
+"""DGI Module."""
+
 from pineboolib import logging
 
 from typing import Callable, Any, TYPE_CHECKING
@@ -34,38 +36,52 @@ def load_dgi(name: str, param: Any) -> "dgi_schema":
 
 
 class DGILoader(object):
+    """DGILoader Class."""
+
     @staticmethod
     def load_dgi_qt() -> "dgi_qt":
+        """Load dgi qt."""
+
         from pineboolib.plugins.dgi.dgi_qt import dgi_qt as dgi
 
         return dgi.dgi_qt()
 
     @staticmethod
     def load_dgi_aqnext() -> "dgi_aqnext":
+        """Load dgi aqnext."""
+
         from pineboolib.plugins.dgi.dgi_aqnext import dgi_aqnext as dgi
 
         return dgi.dgi_aqnext()
 
     @staticmethod
     def load_dgi_fcgi() -> "dgi_fcgi":
+        """Load dgi fcgi."""
+
         from pineboolib.plugins.dgi.dgi_fcgi import dgi_fcgi as dgi
 
         return dgi.dgi_fcgi()
 
     @staticmethod
     def load_dgi_jsonrpc() -> "dgi_jsonrpc":
+        """Load dgi jsonrpc."""
+
         from pineboolib.plugins.dgi.dgi_jsonrpc import dgi_jsonrpc as dgi
 
         return dgi.dgi_jsonrpc()
 
     @staticmethod
     def load_dgi_server() -> "dgi_server":
+        """Load dgi server."""
+
         from pineboolib.plugins.dgi.dgi_server import dgi_server as dgi
 
         return dgi.dgi_server()
 
     @classmethod
     def load_dgi(cls, name: str) -> Callable:
+        """Load dgi specified by name."""
+
         loader = getattr(cls, "load_dgi_%s" % name, None)
         if not loader:
             raise ValueError("Unknown DGI %s" % name)

@@ -1,22 +1,25 @@
 # -*- coding: utf-8 -*-
+"""
+Replacement for FLSqlCursor.
+"""
 from pineboolib import logging
 from PyQt5 import QtCore  # type: ignore
 from pineboolib.application.metadata.pnrelationmetadata import PNRelationMetaData
-from typing import Any
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
 
 class DelayedObjectProxyLoader(object):
-
     """
-    Constructor
+    Allow for objects to be loaded when they're needed.
     """
 
-    cursor_tree_dict = {}
+    cursor_tree_dict: Dict[str, Any]
     last_value_buffer = None
 
     def __init__(self, obj, *args, **kwargs) -> None:
+        """Create proxy."""
         if "field_object" in kwargs:
             self._field = kwargs["field_object"]
             del kwargs["field_object"]
@@ -28,13 +31,13 @@ class DelayedObjectProxyLoader(object):
         self.cursor_tree_dict = {}
         self.last_value_buffer = None
 
-    """
-    Carga un objeto nuevo
-    @return objeto nuevo o si ya existe , cacheado
-    """
-
     def __load(self):
-        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+        """
+        Carga un objeto nuevo.
+
+        @return objeto nuevo o si ya existe, cacheado
+        """
+        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor as FLSqlCursor_original
 
         # print("**Carga", self._field.name())
         field_relation = self._field.relationM1()
@@ -59,12 +62,19 @@ class DelayedObjectProxyLoader(object):
                 # rel_mtd = aqApp.db().manager().metadata(relation_table_name)
 
                 relation_mtd = PNRelationMetaData(
-                    relation_table_name, field_relation.field(), PNRelationMetaData.RELATION_1M, False, False, True
+                    relation_table_name,
+                    field_relation.field(),
+                    PNRelationMetaData.RELATION_1M,
+                    False,
+                    False,
+                    True,
                 )
                 relation_mtd.setField(relation_field_name)
 
                 if relation_table_name and relation_field_name:
-                    self.cursor_tree_dict[key_] = FLSqlCursor(relation_table_name, True, self._obj.conn(), self._obj, relation_mtd)
+                    self.cursor_tree_dict[key_] = FLSqlCursor_original(
+                        relation_table_name, True, self._obj.conn(), self._obj, relation_mtd
+                    )
 
             rel_cursor = self.cursor_tree_dict[key_]
 
@@ -79,13 +89,13 @@ class DelayedObjectProxyLoader(object):
         self.loaded_obj = loaded_obj
         return loaded_obj
 
-    """
-    Retorna una función buscada
-    @param name. Nombre del la función buscada
-    @return el objecto del XMLAction afectado
-    """
-
     def __getattr__(self, name: str) -> Any:  # Solo se lanza si no existe la propiedad.
+        """
+        Retorna una función buscada.
+
+        @param name. Nombre del la función buscada
+        @return el objecto del XMLAction afectado
+        """
         obj_ = self.__load()
         ret = getattr(obj_, name, obj_) if obj_ is not None else None
         return ret
@@ -247,6 +257,8 @@ class FLSqlCursor(QtCore.QObject):
         from pineboolib.application import project
 
         cursor = self.parent_cursor
+        if cursor is None:
+            return
         # mtd = cursor.metadata()
         if module_name is None:
             module_name = cursor.curName()
@@ -267,7 +279,7 @@ class meta_model(object):
 
     _model = None
     _cursor = None
-    cursor_tree_dict = {}
+    cursor_tree_dict: Dict[str, Any]
 
     def __init__(self, model, cursor) -> None:
         self._model = model
@@ -275,8 +287,10 @@ class meta_model(object):
         self.cursor_tree_dict = {}
 
     def __getattr__(self, name: str) -> Any:
-        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor as FLSqlCursor_original
 
+        if self._cursor is None:
+            return
         # print("Buscando", name)
         ret = None
         if name == "pk":
@@ -297,13 +311,22 @@ class meta_model(object):
                     # rel_mtd = aqApp.db().manager().metadata(relation_table_name)
 
                     relation_mtd = PNRelationMetaData(
-                        relation_table_name, field_relation.field(), PNRelationMetaData.RELATION_1M, False, False, True
+                        relation_table_name,
+                        field_relation.field(),
+                        PNRelationMetaData.RELATION_1M,
+                        False,
+                        False,
+                        True,
                     )
                     relation_mtd.setField(relation_field_name)
 
                     if relation_table_name and relation_field_name:
-                        self.cursor_tree_dict[key_] = FLSqlCursor(
-                            relation_table_name, True, self._cursor.conn(), self._cursor, relation_mtd
+                        self.cursor_tree_dict[key_] = FLSqlCursor_original(
+                            relation_table_name,
+                            True,
+                            self._cursor.conn(),
+                            self._cursor,
+                            relation_mtd,
                         )
 
                 rel_cursor = self.cursor_tree_dict[key_]

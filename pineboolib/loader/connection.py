@@ -1,13 +1,20 @@
+"""Connection Module."""
+
+from optparse import Values
+from typing import Optional
+
 from pineboolib.core.utils.utils_base import filedir
+from pineboolib.application.database.pnconnection import PNConnection
 from .projectconfig import ProjectConfig
 
-from typing import Optional
-from pineboolib.application.database.pnconnection import PNConnection
 
 DEFAULT_SQLITE_CONN = ProjectConfig(database="pineboo.sqlite3", type="SQLite3 (SQLITE3)")
+IN_MEMORY_SQLITE_CONN = ProjectConfig(database=":memory:", type="SQLite3 (SQLITE3)")
 
 
-def config_dbconn(options) -> Optional[ProjectConfig]:
+def config_dbconn(options: Values) -> Optional[ProjectConfig]:
+    """Obtain a config connection from a file."""
+
     if options.project:  # FIXME: --project debería ser capaz de sobreescribir algunas opciones
         if not options.project.endswith(".xml"):
             options.project += ".xml"
@@ -20,7 +27,15 @@ def config_dbconn(options) -> Optional[ProjectConfig]:
     return None
 
 
-def connect_to_db(config) -> "PNConnection":
+def connect_to_db(config: ProjectConfig) -> "PNConnection":
+    """Try connect a database with projectConfig data."""
 
-    connection = PNConnection(config.database, config.host, config.port, config.username, config.password, config.type)
+    if config.database is None:
+        raise ValueError("database not set")
+    if config.type is None:
+        raise ValueError("type not set")
+    port = int(config.port) if config.port else None
+    connection = PNConnection(
+        config.database, config.host, port, config.username, config.password, config.type
+    )
     return connection
