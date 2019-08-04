@@ -2,7 +2,7 @@
 # Tests that all python modules under pineboolib can be imported isolated and separately.
 
 if [ "$1" == "" ]; then
-    rm tempdata/import_safety_*.log
+    rm tempdata/import_safety_*.log 2>/dev/null || /bin/true
     find pineboolib -type f -iname "*.py" | sed -e 's|/__init__\.py$||' -e 's|\.py||' | tr '/' '.' \
         | xargs -n1 -P8 "$0" 2>/dev/null
     EXIT_CODE="$?"
@@ -20,6 +20,11 @@ if [ "$EXIT_CODE" != "0" ]; then
     echo -ne "$RESULT" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
+    cat "$OUTPUT_FILE"
+    exit 255
+elif [[ "$RESULT" != "" ]]; then
+    echo "When importing $PINEBOO_MODULE the following lines were printed:" > "$OUTPUT_FILE"
+    echo -ne "$RESULT" >> "$OUTPUT_FILE"
     cat "$OUTPUT_FILE"
     exit 255
 fi
