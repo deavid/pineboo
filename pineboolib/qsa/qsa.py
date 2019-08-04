@@ -56,9 +56,10 @@ from .pncontrolsfactory import GroupBox, SpinBox, NumberEdit, DateEdit, TimeEdit
 from .pncontrolsfactory import AQS, AQUnpacker, AQSettings, AQSqlQuery  # noqa: F401
 from .pncontrolsfactory import AQSqlCursor, AQUtil, AQSql, AQSmtpClient  # noqa: F401
 
-from pineboolib.application import project
+from pineboolib.core.utils.utils_base import is_deployed as __is_deployed
 
-if not project.DGI.isDeployed():  # FIXME: No module named 'xml.sax.expatreader' in deploy
+if not __is_deployed():
+    # FIXME: No module named 'xml.sax.expatreader' in deploy
     from .pncontrolsfactory import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet  # noqa: F401
     from .pncontrolsfactory import AQOdsRow, AQOdsColor, AQOdsStyle, AQOdsImage  # noqa: F401
 
