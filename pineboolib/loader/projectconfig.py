@@ -4,7 +4,8 @@ import re
 from typing import Any, Tuple, Optional
 
 from pineboolib import logging
-from pineboolib.core.utils.version import VersionNumber
+
+# from pineboolib.core.utils.version import VersionNumber
 
 
 class ProjectConfig:
