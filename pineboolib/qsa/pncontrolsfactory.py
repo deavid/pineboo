@@ -148,9 +148,9 @@ from pineboolib.fllegacy.aqsobjects.aqsql import AQSql  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqsmtpclient import AQSmtpClient  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqs import AQS  # noqa: F401
 
-from pineboolib.application import project
+from pineboolib.core.utils.utils_base import is_deployed as __is_deployed
 
-if not project.DGI.isDeployed():
+if not __is_deployed():
     from pineboolib.fllegacy.aqsobjects.aqods import AQOdsGenerator, AQOdsSpreadSheet  # noqa: F401
     from pineboolib.fllegacy.aqsobjects.aqods import AQOdsSheet, AQOdsRow  # noqa: F401
     from pineboolib.fllegacy.aqsobjects.aqods import AQOdsColor, AQOdsStyle  # noqa: F401

@@ -111,9 +111,7 @@ class dgi_schema(object):
         # FIXME: Delete me. This functionality DOES NOT DEPEND on which interface is being used.
         # .... a bundle is a bundle regardless of wether is running as jsonrpc or Qt.
         # .... A copy of this function has been moved to pineboolib.core.utils.utils_base.is_deployed() for convenience
-        import sys
-
-        return getattr(sys, "frozen", False)
+        raise Exception("Please DELETE ME. DEPRECATED")
 
     def iconSize(self):
         from PyQt5 import QtCore  # type: ignore
