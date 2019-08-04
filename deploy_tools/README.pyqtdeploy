@@ -2,39 +2,32 @@ Esta herramienta permite crear binarios para plataformas a partir de python3 y p
 
 
 Instalación:
- sudo -H pip3 install pyqtdeploy (Actualmente instala la versión 2.1)
+ sudo -H pip3 install pyqtdeploy (Actualmente instala la versión 2.4)
  
 Copiamos los siguientes paquetes en la carpeta src.
 
 Compilación básica (Linux64 - Linux64)
 ============================================
-https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tar.xz
-https://www.openssl.org/source/openssl-1.0.2n.tar.gz
-https://sourceforge.net/projects/pyqt/files/sip/sip-4.19.6/sip-4.19.6.tar.gz/download
-https://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.10/PyQt5_gpl-5.10.tar.gz/download
+https://www.python.org/ftp/python/3.6.7/Python-3.6.7.tar.xz (3.7.2 linux ok)
+https://www.openssl.org/source/openssl-1.1.0j.tar.gz (1.1.1 no está soportado)
+https://www.riverbankcomputing.com/static/Downloads/sip/4.19.16/sip-4.19.16.tar.gz
+https://www.riverbankcomputing.com/static/Downloads/PyQt5/5.12.1/PyQt5_gpl-5.12.1.tar.gz
+https://download.qt.io/official_releases/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz
 
-http://download.qt.io/official_releases/qt/5.11/5.11.2/qt-opensource-linux-x64-5.11.2.run (Instalar en /opt/Qt5.11.2 o modificar sysroot.json)
+qt5.12 (Instalar en /opt/Qt5.12.3 o modificar sysroot.json)
 
-sudo apt-get install build-essential
-sudo apt-get install libbz2-dev
-sudo apt-get install libsqlite3-dev
-sudo apt-get install pkg-config
-sudo apt-get install flex
-sudo apt-get install bison
-sudo apt-get install gperf
-sudo apt-get install dbus-*dev
-sudo apt-get install libssl-dev
-sudo apt-get install qt5-default
+sudo apt-get install build-essential libbz2-dev libsqlite3-dev pkg-config flex bison gperf dbus-*dev libssl-dev qt5-default libclang-dev
+sudo apt-get install "^libxcb.*" libx11-xcb-dev libglu1-mesa-dev libxrender-dev libre2-dev
 
 Ejecutar:
 build_binaries_linux_64.sh
 
 
 
-Compilación cruzada andorid-32 
+Compilación cruzada android-32 
 ============================================
-https://dl.google.com/android/repository/android-ndk-r15b-linux-x86_64.zip (extraer en ./src)
-https://developer.android.com/studio/index.html (en ./src y ejecutar studio.sh. Configurar compiladores y descargar SDK)
+https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip?hl=ES (extraer en ./src)
+https://dl.google.com/dl/android/studio/ide-zips/3.4.0.18/android-studio-ide-183.5452501-linux.tar.gz (en ./src y ejecutar studio.sh. Configurar compiladores y descargar SDK)
 
 configure -> sdk manager -> Appearance & Behavior -> System Settings -> Android SDK -> SDK Tools
 
@@ -45,10 +38,21 @@ configure -> sdk manager -> Appearance & Behavior -> System Settings -> Android 
     Google Repository
 
 
+sudo apt-get install gcc-arm-linux-gnueabi
 
 
 Ejecutar:
 build_binaries_android.sh
+
+
+Compilación windows-64 (nativa)
+============================================
+
+* Visual Studio Build Tools 2019 Community (Instalar VC2017)
+* qt-unified-windows-x86-3.1.0-online.exe
+
+
+
 
 Compilación cruzada windows-64
 ============================================

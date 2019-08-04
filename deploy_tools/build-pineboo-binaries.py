@@ -87,7 +87,7 @@ if not target:
         sys.exit(2)
 
 # rename al files in scripts for deploy
-path_ = "%s/share/pineboo/scripts" % os.path.dirname(os.path.abspath(__file__))
+path_ = "%s/../share/pineboo/scripts" % os.path.dirname(os.path.abspath(__file__))
 script_files = os.listdir(path_)
 i = 1
 
