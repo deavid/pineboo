@@ -10,10 +10,9 @@ share/pineboo/scripts/*.py.src
 .project
 .pydevproject
 .settings/
-src/*
-builds/*
-sysroots/*
-deploy/*
+deploy_tools/src/*
+deploy_tools/sysroots/*
+deploy_tools/builds/*
 __pycache__
 test.qs.py
 test.qs.py.debug
