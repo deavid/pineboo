@@ -10,8 +10,14 @@ from PyQt5 import QtCore, QtWidgets
 from pineboolib import logging
 from pineboolib.core.utils.utils_base import is_deployed
 from pineboolib.core.settings import config, settings
-from .options import parse_options
-from .dgi import load_dgi
+from pineboolib.loader.dlgconnect.conn_dialog import show_connection_dialog
+from pineboolib.loader.options import parse_options
+from pineboolib.loader.dgi import load_dgi
+from pineboolib.loader.connection import config_dbconn, connect_to_db
+from pineboolib.loader.connection import DEFAULT_SQLITE_CONN, IN_MEMORY_SQLITE_CONN
+
+from pineboolib.application import project  # FIXME: next time, proper singleton
+from pineboolib.application.parsers.qsaparser import pytnyzer
 
 logger = logging.getLogger(__name__)
 
@@ -99,14 +105,30 @@ def exec_main_with_profiler(options: Values) -> int:
     return ret
 
 
-def _excepthook(type_: Type[BaseException], value: BaseException, traceback: TracebackType) -> None:
-    import traceback as pytback
+def init_cli(catch_ctrl_c: bool = True) -> None:
+    """Initialize singletons, signal handling and exception handling."""
 
-    pytback.print_exception(type_, value, traceback)
+    def _excepthook(
+        type_: Type[BaseException], value: BaseException, traceback: TracebackType
+    ) -> None:
+        import traceback as pytback
 
+        pytback.print_exception(type_, value, traceback)
 
-def init_cli() -> None:
-    """Create CLI singletons."""
+    # PyQt 5.5 o superior aborta la ejecución si una excepción en un slot()
+    # no es capturada dentro de la misma; el programa falla con SegFault.
+    # Aunque esto no debería ocurrir, y se debería prevenir lo máximo posible
+    # es bastante incómodo y genera problemas graves para detectar el problema.
+    # Agregamos sys.excepthook para controlar esto y hacer que PyQt5 no nos
+    # dé un segfault, aunque el resultado no sea siempre correcto:
+    sys.excepthook = _excepthook
+    # -------------------
+    if catch_ctrl_c:
+        # Fix Control-C / KeyboardInterrupt for PyQt:
+        import signal
+
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
+
     # FIXME: Order of import is REALLY important here. FIX.
     # from pineboolib.fllegacy.aqsobjects import aqsobjectfactory
     #
@@ -133,10 +155,10 @@ def init_gui() -> None:
 
 
 def setup_gui(app: QtCore.QCoreApplication, options: Values) -> None:
-    """Initialize GUI app."""
+    """Configure GUI app."""
     from pineboolib.core.utils.utils_base import filedir
     from pineboolib.application.utils.mobilemode import is_mobile_mode
-    from PyQt5 import QtGui  # type: ignore
+    from PyQt5 import QtGui
 
     noto_fonts = [
         "NotoSans-BoldItalic.ttf",
@@ -170,19 +192,15 @@ def setup_gui(app: QtCore.QCoreApplication, options: Values) -> None:
 
 def init_testing() -> None:
     """Initialize Pineboo for testing purposes."""
-    from pineboolib.application import project  # FIXME: next time, proper singleton
 
     if project._conn is not None:
         # Assume already initialized, return without doing anything
         # Tests may call this several times, so we have to take it into account.
         return
     qapp = QtWidgets.QApplication(sys.argv + ["-platform", "offscreen"])
-    from .connection import connect_to_db, IN_MEMORY_SQLITE_CONN
-    from pineboolib.application.parsers.qsaparser import pytnyzer
 
-    sys.excepthook = _excepthook
     init_logging()  # NOTE: Use pytest --log-level=0 for debug
-    init_cli()
+    init_cli(catch_ctrl_c=False)
 
     pytnyzer.STRICT_MODE = False
     project.load_version()
@@ -211,19 +229,6 @@ def exec_main(options: Values) -> int:
     """
     # FIXME: This function should not initialize the program
 
-    # PyQt 5.5 o superior aborta la ejecución si una excepción en un slot()
-    # no es capturada dentro de la misma; el programa falla con SegFault.
-    # Aunque esto no debería ocurrir, y se debería prevenir lo máximo posible
-    # es bastante incómodo y genera problemas graves para detectar el problema.
-    # Agregamos sys.excepthook para controlar esto y hacer que PyQt5 no nos
-    # dé un segfault, aunque el resultado no sea siempre correcto:
-    sys.excepthook = _excepthook
-    # -------------------
-
-    # Corregir Control-C:
-    import signal
-
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
     # -------------------
 
     # import pineboolib.pnapplication
@@ -233,8 +238,6 @@ def exec_main(options: Values) -> int:
     init_cli()
 
     # TODO: Refactorizar función en otras más pequeñas
-    from pineboolib.application import project  # FIXME: next time, proper singleton
-    from pineboolib.application.parsers.qsaparser import pytnyzer
 
     pytnyzer.STRICT_MODE = False
 
@@ -293,15 +296,12 @@ def exec_main(options: Values) -> int:
         # and let it take control of the remaining pieces.
         return _DGI.alternativeMain(options)
 
-    from .connection import config_dbconn, connect_to_db, DEFAULT_SQLITE_CONN
-
     configdb = config_dbconn(options)
     logger.debug(configdb)
     project.init_dgi(_DGI)
 
     if not configdb and _DGI.useDesktop() and _DGI.localDesktop():
         if not _DGI.mobilePlatform():
-            from .conn_dialog import show_connection_dialog
 
             configdb = show_connection_dialog(project.app)
         else:
@@ -338,17 +338,6 @@ def exec_main(options: Values) -> int:
             main_form_.setDebugLevel(options.debug_level)
 
     project.message_manager().send("splash", "show")
-    # Cargando spashscreen
-
-    # Create and display the splash screen
-    # if _DGI.localDesktop() and not options.action:
-    #     splash = show_splashscreen(project)
-    #     _DGI.processEvents()
-    # else:
-    #     splash = None
-    # splash = None
-
-    # project._splash = splash
 
     project.run()
 

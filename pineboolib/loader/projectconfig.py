@@ -7,7 +7,9 @@ from typing import Any, Tuple, Optional
 
 
 class ProjectConfig:
-    """ProjectConfig Class."""
+    """
+    Read and write XML on profiles. Represents a database connection configuration.
+    """
 
     logger = logging.getLogger("loader.projectConfig")
 
