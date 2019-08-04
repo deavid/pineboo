@@ -68,7 +68,7 @@ from .pncontrolsfactory import AQBoolFlagState, AQBoolFlagStateList  # noqa: F40
 from .pncontrolsfactory import aqApp  # noqa: F401
 from .pncontrolsfactory import FormDBWidget  # noqa: F401
 from .pncontrolsfactory import Process  # noqa: F401
-from .pncontrolsfactory import sys  # noqa: F401
+from .pncontrolsfactory import SysType, sys  # noqa: F401
 
 
 QFile = File
