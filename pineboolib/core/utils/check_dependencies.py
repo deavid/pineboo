@@ -25,6 +25,7 @@ MINIMUM_VERSION = {
     "fpdf": "1.7.3",
     "PyQt5": "5.11",
 }
+PYTHON_INCLUDED_BATTERIES = {"Python", "sqlite3"}
 
 
 def get_dependency_errors(dict_: DependencyCheck) -> DependencyError:
@@ -43,7 +44,7 @@ def get_dependency_errors(dict_: DependencyCheck) -> DependencyError:
         if key in DEPENDENCIES_CHECKED:
             continue
         version = None
-        if key == "Python":
+        if key in PYTHON_INCLUDED_BATTERIES:
             version = sys.version[: sys.version.find("(")]
         else:
             try:
