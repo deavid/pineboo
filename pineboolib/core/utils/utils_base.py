@@ -9,7 +9,6 @@ import re
 import sys
 import io
 import os.path
-import shutil
 import hashlib
 import traceback
 from PyQt5.QtGui import QPixmap
@@ -293,7 +292,7 @@ def copy_dir_recursive(from_dir: str, to_dir: str, replace_on_conflict: bool = F
             else:
                 continue
 
-        if not shutil.copy(from_, to_):
+        if not QFile.copy(from_, to_):
             return False
 
     for dir_ in dir.entryList(cast(QDir.Filter, QDir.Dirs | QDir.NoDotAndDotDot)):
@@ -666,6 +665,9 @@ def download_files() -> None:
     """Download data for PyInstaller bundles."""
     if os.path.exists(filedir("forms")):
         return
+
+    if not os.path.exists(filedir("../pineboolib")):
+        os.mkdir(filedir("../pineboolib"))
 
     copy_dir_recursive(":/pineboolib", filedir("../pineboolib"))
     copy_dir_recursive(":/share", filedir("../share"))
