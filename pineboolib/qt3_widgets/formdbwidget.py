@@ -100,7 +100,9 @@ class FormDBWidget(QtWidgets.QWidget):
                 weakref.ref(self.iface),
                 self._action.name,
             )
-            del self.iface.ctx
+            if hasattr(self.iface, "ctx"):
+                del self.iface.ctx
+
             del self.iface
             self._action.formrecord_widget = None
 

@@ -213,7 +213,8 @@ class FLFormDB(QDialog):
         self.logger.info("init: Action: %s", self._action)
         self.script = project.actions[self._action.name()].load_script(script_name, self)
         self.widget = self.script.form
-        self.iface = self.widget.iface
+        if hasattr(self.widget, "iface"):
+            self.iface = self.widget.iface
 
         if project._DGI is not None:
             self.iconSize = project.DGI.iconSize()
