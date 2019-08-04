@@ -1,3 +1,5 @@
+"""conn_dialog module."""
+
 from pineboolib import logging
 
 from PyQt5.QtWidgets import QApplication  # type: ignore

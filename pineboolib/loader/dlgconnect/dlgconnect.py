@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+"""dlgconnect module."""
+
 import os
 import base64
 import hashlib
@@ -16,7 +18,9 @@ from typing import Optional, cast
 
 class DlgConnect(QtWidgets.QWidget):
     """
-    Esta clase muestra gestiona el dialogo de Login
+    DlgConnect Class.
+
+    This class shows manages the Login dialog.
     """
 
     optionsShowed = True
@@ -26,7 +30,7 @@ class DlgConnect(QtWidgets.QWidget):
 
     def __init__(self) -> None:
         """
-        Constructor
+        Initialize.
         """
         super(DlgConnect, self).__init__()
         self.optionsShowed = True
@@ -42,7 +46,7 @@ class DlgConnect(QtWidgets.QWidget):
 
     def load(self) -> None:
         """
-        Carga el form dlgconnect
+        Load the dlgconnect form.
         """
         from pineboolib.fllegacy.flmanagermodules import FLManagerModules
 
@@ -77,7 +81,7 @@ class DlgConnect(QtWidgets.QWidget):
 
     def cleanProfileForm(self) -> None:
         """
-        Limpia el tab de creación de profiles , y rellena los datos básicos del driver SQL por defecto
+        Clean the profiles creation tab, and fill in the basic data of the default SQL driver.
         """
         self.ui.leDescription.setText("")
         driver_list = self.pNSqlDrivers.aliasList()
@@ -94,7 +98,7 @@ class DlgConnect(QtWidgets.QWidget):
 
     def loadProfiles(self) -> None:
         """
-        Actualiza el ComboBox de los perfiles
+        Update ComboBox of profiles.
         """
         self.ui.cbProfiles.clear()
         if not os.path.exists(self.profile_dir):
@@ -114,14 +118,10 @@ class DlgConnect(QtWidgets.QWidget):
         if last_profile:
             self.ui.cbProfiles.setCurrentText(last_profile)
 
-    """
-    SLOTS
-    """
-
     @pyqtSlot()
     def showOptions(self) -> None:
         """
-        Muestra el frame opciones
+        Show the frame options.
         """
         if self.optionsShowed:
             self.ui.frmOptions.hide()
@@ -143,7 +143,7 @@ class DlgConnect(QtWidgets.QWidget):
     @pyqtSlot()
     def open(self) -> None:
         """
-        Abre la conexión seleccionada
+        Open the selected connection.
         """
         fileName = os.path.join(self.profile_dir, "%s.xml" % self.ui.cbProfiles.currentText())
         tree = ET.parse(fileName)
@@ -210,7 +210,7 @@ class DlgConnect(QtWidgets.QWidget):
     @pyqtSlot()
     def saveProfile(self) -> None:
         """
-        Guarda la conexión
+        Save the connection.
         """
         profile = ET.Element("Profile")
         profile.set("Version", "1.1")
@@ -295,7 +295,7 @@ class DlgConnect(QtWidgets.QWidget):
     @pyqtSlot()
     def deleteProfile(self) -> None:
         """
-        Borra la conexión seleccionada
+        Delete the selected connection.
         """
         if self.ui.cbProfiles.count() > 0:
             res = QMessageBox.warning(
@@ -315,7 +315,7 @@ class DlgConnect(QtWidgets.QWidget):
     @pyqtSlot()
     def editProfile(self) -> None:
         """
-        Edita la conexión seleccionada
+        Edit the selected connection.
         """
         # Cogemos el perfil y lo abrimos
         file_name = os.path.join(self.profile_dir, "%s.xml" % self.ui.cbProfiles.currentText())
@@ -370,14 +370,14 @@ class DlgConnect(QtWidgets.QWidget):
     @pyqtSlot(int)
     def updatePort(self) -> None:
         """
-        Actualiza al puerto por defecto del driver
+        Update to the driver default port.
         """
         self.ui.lePort.setText(self.pNSqlDrivers.port(self.ui.cbDBType.currentText()))
 
     @pyqtSlot(int)
     def enablePassword(self, n: Optional[int] = None) -> None:
         """
-        Comprueba si el perfil requiere password para login o no
+        Check if the profile requires password to login or not.
         """
         if self.ui.cbProfiles.count() == 0:
             return
@@ -413,14 +413,14 @@ class DlgConnect(QtWidgets.QWidget):
 
     def updateDBName(self) -> None:
         """
-        Actualiza el nombre de la BD con el nombre de la descripción
+        Update the name of the database with the description name.
         """
         self.ui.leDBName.setText(self.ui.leDescription.text().replace(" ", "_"))
 
     @pyqtSlot(int)
     def enableProfilePassword(self) -> None:
         """
-        Comprueba si el perfil requiere password
+        Check if the profile requires password.
         """
 
         if self.ui.cbAutoLogin.isChecked():
@@ -429,6 +429,9 @@ class DlgConnect(QtWidgets.QWidget):
             self.ui.leProfilePassword.setEnabled(True)
 
     def change_profile_dir(self) -> None:
+        """
+        Change the path where profiles are saved.
+        """
 
         new_dir = QtWidgets.QFileDialog.getExistingDirectory(
             self.ui,

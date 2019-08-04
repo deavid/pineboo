@@ -1,3 +1,5 @@
+"""projectconfig module."""
+
 from pineboolib import logging
 import re
 
@@ -5,6 +7,8 @@ from typing import Any, Tuple, Optional
 
 
 class ProjectConfig:
+    """ProjectConfig Class."""
+
     logger = logging.getLogger("loader.projectConfig")
 
     def __init__(
@@ -18,6 +22,8 @@ class ProjectConfig:
         load_xml: Optional[str] = None,
         connstring: Optional[str] = None,
     ) -> None:
+        """Initialize."""
+
         if connstring:
             username, password, type, host, port, database = self.translate_connstring(connstring)
         self.database = database
@@ -30,6 +36,8 @@ class ProjectConfig:
             self.load_projectxml(load_xml)
 
     def __repr__(self) -> str:
+        """Display the information in text mode."""
+
         return "<ProjectConfig database=%s host:port=%s:%s type=%s user=%s>" % (
             self.database,
             self.host,
@@ -39,6 +47,8 @@ class ProjectConfig:
         )
 
     def load_projectxml(self, file_name: str) -> bool:
+        """Collect the connection information from an xml file."""
+
         import hashlib
         import os.path
         from xml.etree import ElementTree as ET
@@ -112,11 +122,12 @@ class ProjectConfig:
 
     @classmethod
     def translate_connstring(cls, connstring: str) -> Tuple[Any, Any, Any, Any, Any, Any]:
-        """Translate a DSN connection string into user, pass, etc.
+        """
+        Translate a DSN connection string into user, pass, etc.
 
-        Acepta un parámetro "connstring" que tenga la forma user@host/dbname
-        y devuelve todos los parámetros por separado. Tiene en cuenta los
-        valores por defecto y las diferentes formas de abreviar que existen.
+        Accept a "connstring" parameter that has the form user @ host / dbname
+        and returns all parameters separately. It takes into account the
+        default values ​​and the different abbreviations that exist.
         """
         user = "postgres"
         passwd = ""

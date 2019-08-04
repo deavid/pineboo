@@ -1,3 +1,5 @@
+"""options module."""
+
 from optparse import OptionParser
 from optparse import Values
 from typing import Optional, List

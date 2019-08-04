@@ -1,3 +1,5 @@
+"""Connection Module."""
+
 from optparse import Values
 from typing import Optional
 
@@ -11,6 +13,8 @@ IN_MEMORY_SQLITE_CONN = ProjectConfig(database=":memory:", type="SQLite3 (SQLITE
 
 
 def config_dbconn(options: Values) -> Optional[ProjectConfig]:
+    """Obtain a config connection from a file."""
+
     if options.project:  # FIXME: --project debería ser capaz de sobreescribir algunas opciones
         if not options.project.endswith(".xml"):
             options.project += ".xml"
@@ -24,6 +28,8 @@ def config_dbconn(options: Values) -> Optional[ProjectConfig]:
 
 
 def connect_to_db(config: ProjectConfig) -> "PNConnection":
+    """Try connect a database with projectConfig data."""
+
     if config.database is None:
         raise ValueError("database not set")
     if config.type is None:
