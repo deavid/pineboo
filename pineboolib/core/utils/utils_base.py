@@ -498,7 +498,7 @@ def _parse_for_duplicates(text: str) -> str:
     return ret_
 
 
-def indent(elem: Element, level: int = 0) -> None:
+def pretty_print_xml(elem: Element, level: int = 0) -> None:
     """
     Generate pretty-printed version of given XML.
 
@@ -513,7 +513,7 @@ def indent(elem: Element, level: int = 0) -> None:
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
         for elem in elem:
-            indent(elem, level + 1)
+            pretty_print_xml(elem, level + 1)
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
     else:

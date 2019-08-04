@@ -1,10 +1,17 @@
 """projectconfig module."""
 
 import re
+import base64
+import hashlib
+import os.path
 from typing import Any, Tuple, Optional
+
+from xml.etree import ElementTree as ET
 
 from pineboolib import logging
 from pineboolib.core.utils.version import VersionNumber
+from pineboolib.core.settings import config
+from pineboolib.core.utils.utils_base import filedir, pretty_print_xml
 
 VERSION_1_0 = VersionNumber("1.0")
 VERSION_1_1 = VersionNumber("1.1")
@@ -17,6 +24,7 @@ class ProjectConfig:
     """
 
     logger = logging.getLogger("loader.projectConfig")
+    profile_dir: str = filedir(config.value("ebcomportamiento/profiles_folder", "../profiles"))
 
     def __init__(
         self,
@@ -28,19 +36,26 @@ class ProjectConfig:
         password: Optional[str] = None,
         load_xml: Optional[str] = None,
         connstring: Optional[str] = None,
+        description: Optional[str] = None,
     ) -> None:
         """Initialize."""
 
         if connstring:
             username, password, type, host, port, database = self.translate_connstring(connstring)
+        elif load_xml:
+            self.filename = load_xml
+            self.load_projectxml()
+            return
         self.database = database
         self.host = host
         self.port = port
         self.type = type
         self.username = username
         self.password = password
-        if load_xml:
-            self.load_projectxml(load_xml)
+        self.project_password = ""
+        self.description = description if description else "unnamed"
+        file_basename = self.description.lower().replace(" ", "_")
+        self.filename = os.path.join(self.profile_dir, "%s.xml" % file_basename)
 
     def __repr__(self) -> str:
         """Display the information in text mode."""
@@ -53,15 +68,12 @@ class ProjectConfig:
             self.username,
         )
 
-    def load_projectxml(self, file_name: str) -> bool:
+    def load_projectxml(self) -> bool:
         """Collect the connection information from an xml file."""
 
-        import hashlib
-        import os.path
-        from xml.etree import ElementTree as ET
-
+        file_name = self.filename
         if not os.path.isfile(file_name):
-            raise ValueError("el proyecto %r no existe." % file_name)
+            raise ValueError("El proyecto %r no existe." % file_name)
 
         tree = ET.parse(file_name)
         root = tree.getroot()
@@ -119,6 +131,57 @@ class ProjectConfig:
                 self.password = ""
 
         return True
+
+    def save_projectxml(self, overwrite_existing: bool = True) -> None:
+        """
+        Save the connection.
+        """
+        profile = ET.Element("Profile")
+        profile.set("Version", str(VERSION_1_1))
+        description = self.description
+        filename = self.filename
+        if not os.path.exists(self.profile_dir):
+            os.mkdir(self.profile_dir)
+
+        if not overwrite_existing and os.path.exists(filename):
+            raise ProfileAlreadyExistsError
+
+        dbt = self.type
+        url = self.host
+        port = self.port
+        userDB = self.username
+
+        passwDB = self.password or ""
+        nameDB = self.database
+
+        pass_profile = hashlib.sha256(self.project_password.encode()).hexdigest()
+        profile_user = ET.SubElement(profile, "profile-data")
+        profile_password = ET.SubElement(profile_user, "password")
+        profile_password.text = pass_profile
+
+        name = ET.SubElement(profile, "name")
+        name.text = description
+        dbs = ET.SubElement(profile, "database-server")
+        dbstype = ET.SubElement(dbs, "type")
+        dbstype.text = dbt
+        dbshost = ET.SubElement(dbs, "host")
+        dbshost.text = url
+        dbsport = ET.SubElement(dbs, "port")
+        dbsport.text = port
+
+        dbc = ET.SubElement(profile, "database-credentials")
+        dbcuser = ET.SubElement(dbc, "username")
+        dbcuser.text = userDB
+        dbcpasswd = ET.SubElement(dbc, "password")
+        dbcpasswd.text = base64.b64encode(passwDB.encode()).decode()
+        dbname = ET.SubElement(profile, "database-name")
+        dbname.text = nameDB
+
+        pretty_print_xml(profile)
+
+        tree = ET.ElementTree(profile)
+
+        tree.write(filename, xml_declaration=True, encoding="utf-8")
 
     @classmethod
     def translate_connstring(cls, connstring: str) -> Tuple[Any, Any, Any, Any, Any, Any]:
@@ -181,3 +244,7 @@ class ProjectConfig:
             dbname,
         )
         return user, passwd, driver_alias, host, port, dbname
+
+
+class ProfileAlreadyExistsError(Exception):
+    """Report that project will not be overwritten."""
