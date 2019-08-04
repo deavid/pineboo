@@ -46,6 +46,7 @@ test_mypy_pyroma_black_pytest:
         - black --check --fast -l 100 --exclude='(\.eggs|\.git|\.hg|\.mypy_cache|\.nox|\.tox|\.venv|_build|buck-out|build|dist|lextab.py)' pineboolib/
         - pytest --cov=pineboolib pineboolib/
         - coverage report --fail-under=23
+        - ./test_import_safety.sh
 
 deploy_build:
     stage: deploy
