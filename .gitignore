@@ -16,6 +16,8 @@ deploy_tools/builds/*
 deploy_tools/pineboolib/*
 deploy_tools/share/*
 deploy_tools/profiles/*
+deploy_tools/pyqt-pineboo.pdy
+*.sqlite3
 __pycache__
 test.qs.py
 test.qs.py.debug
