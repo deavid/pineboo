@@ -4,8 +4,8 @@
 import sys
 from pineboolib.core.utils import logging
 import traceback
-
-from pineboolib.core.utils.utils_base import version_check, is_deployed
+from pineboolib.core.utils.version import VersionNumber
+from pineboolib.core.utils.utils_base import is_deployed
 from pineboolib.application import project
 from typing import Dict
 
@@ -37,53 +37,50 @@ def check_dependencies(dict_: Dict[str, str], exit: bool = True) -> bool:
             else:
                 mod_ = None
                 version = None
-                version_check(key, sys.version[: sys.version.find("(")], "3.6")
+                VersionNumber.check(key, sys.version[: sys.version.find("(")], "3.6")
                 mod_ver = sys.version[: sys.version.find("(")]
             if key == "ply":
-                version_check(key, version, "3.9")
+                VersionNumber.check(key, version, "3.9")
             elif key == "Pillow":
-                version_check(key, version, "5.1.0")
+                VersionNumber.check(key, version, "5.1.0")
             elif key == "fpdf":
-                version_check(key, version, "1.7.3")
+                VersionNumber.check(key, version, "1.7.3")
             elif key == "odf":
                 from odf import namespaces  # type: ignore
 
                 mod_ver = namespaces.__version__
             elif key == "PyQt5.QtCore":
                 version = getattr(mod_, "QT_VERSION_STR", None)
-                version_check("PyQt5", version, "5.11")
+                VersionNumber.check("PyQt5", version, "5.11")
                 mod_ver = version
 
             if mod_ver is None:
                 mod_ver = version or getattr(mod_, "version", "???")
 
-            # settings = FLSettings()
-            # if settings.readBoolEntry("application/isDebuggerMode", False):
-            # if not key in DEPENDENCIES_CHECKED.keys():
-            #    logger.warning("Versión de %s: %s", key, mod_ver)
+            if key not in DEPENDENCIES_CHECKED:
+                DEPENDENCIES_CHECKED[key] = mod_ver
+                logger.debug("Dependency checked %s: %s", key, mod_ver)
         except ImportError:
             dependences.append(dict_[key])
-            # print(traceback.format_exc())
             error.append(traceback.format_exc())
 
-        msg = ""
-        if len(dependences) > 0 and key not in DEPENDENCIES_CHECKED.keys():
-            logger.warning("HINT: Dependencias incumplidas:")
-            for dep in dependences:
-                logger.warning("HINT: Instale el paquete %s" % dep)
-                msg += "Instale el paquete %s.\n%s" % (dep, error)
-                if dep == "pyfpdf":
-                    msg += "\n\n\n Use pip3 install -i https://test.pypi.org/simple/ pyfpdf==1.7.3"
+    msg = ""
+    if len(dependences) > 0 and key not in DEPENDENCIES_CHECKED.keys():
+        logger.debug("Error trying to import modules:\n%s", "\n\n".join(error))
+        logger.warning("Dependencias incumplidas:")
+        for dep in dependences:
+            logger.warning("Instale el paquete %s", dep)
+            msg += "Instale el paquete %s.\n%s" % (dep, error)
+            if dep == "pyfpdf":
+                msg += "\n\n\n Use pip3 install -i https://test.pypi.org/simple/ pyfpdf==1.7.3"
 
-            if exit:
-                if project.DGI.useDesktop() and project.DGI.localDesktop():
-                    from pineboolib.qt3_widgets.messagebox import MessageBox
+        if exit:
+            if project.DGI.useDesktop() and project.DGI.localDesktop():
+                from pineboolib.qt3_widgets.messagebox import MessageBox
 
-                    MessageBox.warning(
-                        None, "Pineboo - Dependencias Incumplidas -", msg, MessageBox.Ok
-                    )
+                MessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, MessageBox.Ok)
 
-                if not is_deployed():
-                    sys.exit(32)
+            if not is_deployed():
+                sys.exit(32)
 
     return len(dependences) == 0
