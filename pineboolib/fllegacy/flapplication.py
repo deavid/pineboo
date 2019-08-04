@@ -70,7 +70,7 @@ class FLApplication(QtCore.QObject):
     show_debug_: bool
     time_user_: QtCore.QTimer
     script_entry_function_: Optional[str]
-    event_loop = None
+    _event_loop: Optional[QtCore.QEventLoop]
     window_menu: Optional[QMenu] = None
     last_text_caption_: Optional[str]
     modules_menu: Any
@@ -118,7 +118,14 @@ class FLApplication(QtCore.QObject):
         v = 1.1
         self.comma_separator = self.locale_system_.toString(v, "f", 1)[1]
         self.setObjectName("aqApp")
-        self.event_loop = QtCore.QEventLoop()
+        self._event_loop = None
+
+    @property
+    def event_loop(self) -> QtCore.QEventLoop:
+        """Get Eventloop, create one if it does not exist."""
+        if self._event_loop is None:
+            self._event_loop = QtCore.QEventLoop()
+        return self._event_loop
 
     def __del__(self) -> None:
         """Cleanup."""

@@ -34,3 +34,6 @@ werkzeug
 odfpy
 wheel
 lxml
+flup
+xmljson
+cryptography

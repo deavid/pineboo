@@ -1,13 +1,16 @@
 """projectconfig module."""
 
-from pineboolib import logging
 import re
-
 from typing import Any, Tuple, Optional
+
+from pineboolib import logging
+from pineboolib.core.utils.version import VersionNumber
 
 
 class ProjectConfig:
-    """ProjectConfig Class."""
+    """
+    Read and write XML on profiles. Represents a database connection configuration.
+    """
 
     logger = logging.getLogger("loader.projectConfig")
 

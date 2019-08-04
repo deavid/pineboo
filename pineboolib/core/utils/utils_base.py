@@ -14,13 +14,12 @@ import traceback
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir, pyqtSignal
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
-from pineboolib.core import decorators
 from typing import Optional, Union, Any, List, cast
+from typing import Callable, TypeVar, TYPE_CHECKING
 from types import FrameType
 from xml.etree.ElementTree import ElementTree, Element
-from . import logging
-
-from typing import Callable, TypeVar, TYPE_CHECKING
+from pineboolib.core.utils import logging
+from pineboolib.core import decorators
 
 if TYPE_CHECKING:
     from pineboolib.application.qsatypes.date import Date  # noqa: F401
@@ -378,19 +377,6 @@ class StructMyDict(dict):
     def __setattr__(self, name: str, value: Any) -> None:
         """Set property."""
         self[name] = value
-
-
-def version_check(mod_name: str, mod_ver: str, min_ver: str) -> None:
-    """Compare two version numbers and raise a warning if "minver" is not met."""
-    if version_normalize(mod_ver) < version_normalize(min_ver):
-        logger.warning(
-            "La version de <%s> es %s. La mínima recomendada es %s.", mod_name, mod_ver, min_ver
-        )
-
-
-def version_normalize(v: str) -> List[int]:
-    """Normalize version string numbers like 3.10.1 so they can be compared."""
-    return [int(x) for x in re.sub(r"(\.0+)*$", "", v).split(".")]
 
 
 def load2xml(form_path_or_str: str) -> ElementTree:
