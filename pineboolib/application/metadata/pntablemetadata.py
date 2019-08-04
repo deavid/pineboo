@@ -562,7 +562,7 @@ class PNTableMetaData(ITableMetaData):
 
         for f in self.fieldList():
             if f.name() == fN.lower():
-                f.visible()
+                return f.visible()
 
         return
 
@@ -695,7 +695,7 @@ class PNTableMetaData(ITableMetaData):
 
         self.d.detectLocks_ = b
 
-    def FTSFunction(self) -> Optional[str]:
+    def FTSFunction(self) -> str:
         """
         Return function name to call for Full Text Search.
 
