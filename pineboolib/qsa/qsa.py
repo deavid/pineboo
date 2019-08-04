@@ -4,6 +4,7 @@ QSA Emulation module.
 
 This file should be imported at top of QS converted files.
 """
+from typing import Optional
 
 from pineboolib.core.utils.utils_base import ustr, filedir  # noqa: F401
 from pineboolib.application.types import Boolean, QString, String, Function, Object  # noqa: F401
@@ -66,11 +67,11 @@ if not __is_deployed():
 from .pncontrolsfactory import AQBoolFlagState, AQBoolFlagStateList  # noqa: F401
 
 
-from .pncontrolsfactory import aqApp  # noqa: F401
 from .pncontrolsfactory import FormDBWidget  # noqa: F401
 from .pncontrolsfactory import Process  # noqa: F401
 from .pncontrolsfactory import SysType, sys  # noqa: F401
 
+from pineboolib.fllegacy import flapplication
 
 QFile = File
 util = FLUtil
@@ -79,3 +80,4 @@ print_ = print
 undefined = None
 LogText = 0
 RichText = 1
+aqApp: Optional[flapplication.FLApplication] = None

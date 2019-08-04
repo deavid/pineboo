@@ -11,32 +11,31 @@ from pineboolib.core.settings import config
 from pineboolib.fllegacy.flformdb import FLFormDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.fllegacy.flapplication import aqApp
+from pineboolib.fllegacy import flapplication
 from typing import Any, cast
 
 
 DEBUG = False
 
-"""
-class FLFormRecordDBInterface;
-
-Subclase de FLFormDB pensada para editar registros.
-
-Básicamente esta clase hace lo mismo que su clase
-base FLFormDB, lo único que añade son dos botones
-Aceptar y/o Cancelar para confirmar o cancelar
-los cambios que se realizan en los componentes de
-datos que contiene.
-
-Esta clase es idónea para cargar los formularios de
-edición de registros definidos en los metadatos
-( FLTableMetaData ).
-
-@author InfoSiAL S.L.
-"""
-
 
 class FLFormRecordDB(FLFormDB):
+    """
+    class FLFormRecordDBInterface;
+
+    Subclase de FLFormDB pensada para editar registros.
+
+    Básicamente esta clase hace lo mismo que su clase
+    base FLFormDB, lo único que añade son dos botones
+    Aceptar y/o Cancelar para confirmar o cancelar
+    los cambios que se realizan en los componentes de
+    datos que contiene.
+
+    Esta clase es idónea para cargar los formularios de
+    edición de registros definidos en los metadatos
+    ( FLTableMetaData ).
+
+    @author InfoSiAL S.L.
+    """
 
     logger = logging.getLogger("dgi_qt.FLFormRecordDB")
     """
@@ -90,29 +89,30 @@ class FLFormRecordDB(FLFormDB):
     """
     initTransLevel = None
 
-    """
-    constructor.
-
-    Solo acepta que se le indique un cursor ya creado.
-
-    @param cursor Objeto FLSqlCursor con el cursor con el que tratar.
-    @param actionName Nombre de la acción asociada al formulario
-    @param showAcceptContinue Indica si se debe mostrar el botón de Aceptar y Continuar
-
-    FLFormRecordDB(FLSqlCursor *cursor, const QString &actionName = QString::null,
-                 QWidget *parent = 0, bool showAcceptContinue = true);
-    """
-
     def __init__(self, parent_or_cursor, action, load=False) -> None:
+        """
+        constructor.
+
+        Solo acepta que se le indique un cursor ya creado.
+
+        @param cursor Objeto FLSqlCursor con el cursor con el que tratar.
+        @param actionName Nombre de la acción asociada al formulario
+        @param showAcceptContinue Indica si se debe mostrar el botón de Aceptar y Continuar
+
+        FLFormRecordDB(FLSqlCursor *cursor, const QString &actionName = QString::null,
+        QWidget *parent = 0, bool showAcceptContinue = true);
+        """
         self.logger.trace(
             "__init__: parent_or_cursor=%s, action=%s, load=%s", parent_or_cursor, action, load
         )
 
         if isinstance(action, str):
-            aqApp.db().manager().action(action)
+            flapplication.aqApp.db().manager().action(action)
 
         parent = (
-            aqApp.mainWidget() if isinstance(parent_or_cursor, FLSqlCursor) else parent_or_cursor
+            flapplication.aqApp.mainWidget()
+            if isinstance(parent_or_cursor, FLSqlCursor)
+            else parent_or_cursor
         )
         cursor = parent_or_cursor if isinstance(parent_or_cursor, FLSqlCursor) else None
         # if not cursor:
@@ -148,22 +148,20 @@ class FLFormRecordDB(FLFormDB):
         self.logger.trace("__init__: done")
         self.loop = False
 
-    """
-    Reimplementado, añade un widget como principal del formulario
-    """
-
     @decorators.NotImplementedWarn
     def setMainWidget(self, w=None):
+        """
+        Reimplementado, añade un widget como principal del formulario
+        """
         pass
 
-    """
-    Establece el título de la ventana.
-
-    @param text Texto a establecer como título de la ventana
-    @author Silix
-    """
-
     def setCaptionWidget(self, text=None) -> None:
+        """
+        Establece el título de la ventana.
+
+        @param text Texto a establecer como título de la ventana
+        @author Silix
+        """
         if not self.cursor_:
             return
 
@@ -177,18 +175,16 @@ class FLFormRecordDB(FLFormDB):
         elif self.cursor_.modeAccess() == self.cursor_.Browse:
             self.setWindowTitle("Visualizar %s" % text)
 
-    """
-    Devuelve el nombre de la clase del formulario en tiempo de ejecución
-    """
-
     def formClassName(self):
+        """
+        Devuelve el nombre de la clase del formulario en tiempo de ejecución
+        """
         return "FormRecordDB"
 
-    """
-    Inicialización
-    """
-
     def initForm(self):
+        """
+        Inicialización
+        """
         if self.cursor() and self.cursor().metadata():
             # caption = None
             if self._action:
@@ -208,6 +204,7 @@ class FLFormRecordDB(FLFormDB):
             acl.process(self)
 
     def loadControls(self):
+        """Load widgets for this form."""
         if self.pushButtonAcceptContinue:
             self.pushButtonAcceptContinue.hide()
 
@@ -447,11 +444,10 @@ class FLFormRecordDB(FLFormDB):
         # self.bottomToolbar.layout.addWidget(self.toolButtonAccept)
         self.inicializeControls()
 
-    """
-    Nombre interno del formulario
-    """
-
     def formName(self):
+        """
+        Nombre interno del formulario
+        """
         return "formRecord%s" % self.idMDI_
 
     """
@@ -469,11 +465,10 @@ class FLFormRecordDB(FLFormDB):
     """
     # bool isIfaceBind() const;
 
-    """
-    Captura evento cerrar
-    """
-
     def closeEvent(self, e):
+        """
+        Captura evento cerrar
+        """
         self.frameGeometry()
         if self.focusWidget():
             fdb = self.focusWidget().parentWidget()
@@ -520,20 +515,19 @@ class FLFormRecordDB(FLFormDB):
         super(FLFormRecordDB, self).closeEvent(e)
         self.deleteLater()
 
-    """
-    Validación de formulario.
-
-    Invoca a la función "validateForm" del script asociado cuando se acepta el
-    formulario y sólo continua con el commit del registro cuando esa función
-    de script devuelve TRUE.
-
-    Si FLTableMetaData::concurWarn() es true y dos o mas sesiones/usuarios están
-    modificando los mismos campos mostrará un aviso de advertencia.
-
-    @return TRUE si el formulario ha sido validado correctamente
-    """
-
     def validateForm(self) -> Any:
+        """
+        Validación de formulario.
+
+        Invoca a la función "validateForm" del script asociado cuando se acepta el
+        formulario y sólo continua con el commit del registro cuando esa función
+        de script devuelve TRUE.
+
+        Si FLTableMetaData::concurWarn() es true y dos o mas sesiones/usuarios están
+        modificando los mismos campos mostrará un aviso de advertencia.
+
+        @return TRUE si el formulario ha sido validado correctamente
+        """
         if not self.cursor_:
             return True
         mtd = self.cursor_.metadata()
@@ -601,75 +595,70 @@ class FLFormRecordDB(FLFormDB):
                     from pineboolib.core.error_manager import error_manager
                     from pineboolib.application import project
 
-                    aqApp.msgBoxWarning(
+                    flapplication.aqApp.msgBoxWarning(
                         error_manager(traceback.format_exc(limit=-6, chain=False)), project._DGI
                     )
 
             return ret_ if isinstance(ret_, bool) else False
         return True
 
-    """
-    Aceptación de formulario.
-
-    Invoca a la función "acceptedForm" del script asociado al formulario, cuando
-    se acepta el formulario y justo antes de hace el commit del registro.
-    """
-
     def acceptedForm(self) -> None:
+        """
+        Aceptación de formulario.
+
+        Invoca a la función "acceptedForm" del script asociado al formulario, cuando
+        se acepta el formulario y justo antes de hace el commit del registro.
+        """
         if self.iface:
             try:
                 self.iface.acceptedForm()
             except Exception:
                 pass
 
-    """
-    Después de fijar los cambios del buffer del registro actual.
-
-    Invoca a la función "afterCommitBuffer" del script asociado al formulario,
-    justo después de hacer el commit del buffer del registro.
-    """
-
     def afterCommitBuffer(self) -> None:
+        """
+        Después de fijar los cambios del buffer del registro actual.
+
+        Invoca a la función "afterCommitBuffer" del script asociado al formulario,
+        justo después de hacer el commit del buffer del registro.
+        """
         if self.iface:
             try:
                 self.iface.afterCommitBuffer()
             except Exception:
                 pass
 
-    """
-    Despues de fijar la transacción.
-
-    Invoca a la función "afterCommitTransaction" del script asociado al formulario,
-    juesto despues de terminar la transacción en curso aceptando.
-    """
-
     def afterCommitTransaction(self) -> None:
+        """
+        Despues de fijar la transacción.
+
+        Invoca a la función "afterCommitTransaction" del script asociado al formulario,
+        juesto despues de terminar la transacción en curso aceptando.
+        """
         if self.iface:
             try:
                 self.iface.afterCommitTransaction()
             except Exception:
                 pass
 
-    """
-    Cancelación de formulario.
-
-    Invoca a la función "canceledForm" del script asociado al formulario, cuando se
-    cancela el formulario.
-    """
-
     def canceledForm(self) -> None:
+        """
+        Cancelación de formulario.
+
+        Invoca a la función "canceledForm" del script asociado al formulario, cuando se
+        cancela el formulario.
+        """
         if self.iface:
             try:
                 self.iface.canceledForm()
             except Exception:
                 pass
 
-    """
-    Se activa al pulsar el boton aceptar
-    """
-
     @decorators.pyqtSlot()
     def accept(self):
+        """
+        Se activa al pulsar el boton aceptar
+        """
         if self.accepting:
             return
 
@@ -701,12 +690,11 @@ class FLFormRecordDB(FLFormDB):
         self.close()
         self.accepting = False
 
-    """
-    Se activa al pulsar el boton aceptar y continuar
-    """
-
     @decorators.pyqtSlot()
     def acceptContinue(self):
+        """
+        Se activa al pulsar el boton aceptar y continuar
+        """
         if self.accepting:
             return
 
@@ -742,31 +730,28 @@ class FLFormRecordDB(FLFormDB):
 
         self.accepting = False
 
-    """
-    Se activa al pulsar el botón cancelar
-    """
-
     @decorators.pyqtSlot()
     def reject(self):
+        """
+        Se activa al pulsar el botón cancelar
+        """
         self.accepted_ = False
         self.canceledForm()
         self.close()
 
-    """
-    Devuelve el script asociado al formulario
-    """
-
     @decorators.pyqtSlot()
     @decorators.NotImplementedWarn
     def script(self):
+        """
+        Devuelve el script asociado al formulario
+        """
         pass
-
-    """
-    Ir al primer anterior
-    """
 
     @decorators.pyqtSlot()
     def firstRecord(self):
+        """
+        Ir al primer anterior
+        """
         if self.cursor_ and not self.cursor_.at() == 0:
             if not self.validateForm():
                 return
@@ -784,12 +769,11 @@ class FLFormRecordDB(FLFormDB):
                     self.setCaptionWidget()
                     self.initScript()
 
-    """
-    Ir al registro anterior
-    """
-
     @decorators.pyqtSlot()
     def previousRecord(self):
+        """
+        Ir al registro anterior
+        """
         if self.cursor_ and self.cursor_.isValid():
             if self.cursor_.at() == 0:
                 self.lastRecord()
@@ -811,12 +795,11 @@ class FLFormRecordDB(FLFormDB):
                     self.setCaptionWidget()
                     self.initScript()
 
-    """
-    Ir al registro siguiente
-    """
-
     @decorators.pyqtSlot()
     def nextRecord(self):
+        """
+        Ir al registro siguiente
+        """
         if self.cursor_ and self.cursor_.isValid():
             if self.cursor_.at() == (self.cursor_.size() - 1):
                 self.firstRecord()
@@ -838,12 +821,11 @@ class FLFormRecordDB(FLFormDB):
                     self.setCaptionWidget()
                     self.initScript()
 
-    """
-    Ir al ultimo registro
-    """
-
     @decorators.pyqtSlot()
     def lastRecord(self):
+        """
+        Ir al ultimo registro
+        """
         if self.cursor_ and not self.cursor_.at() == (self.cursor_.size() - 1):
             if not self.validateForm():
                 return
@@ -861,16 +843,16 @@ class FLFormRecordDB(FLFormDB):
                     self.setCaptionWidget()
                     self.initScript()
 
-    """
-    Desactiva el botón cancelar
-    """
-
     @decorators.pyqtSlot()
     def disablePushButtonCancel(self):
+        """
+        Desactiva el botón cancelar
+        """
         if self.pushButtonCancel:
             self.pushButtonCancel.setDisabled(True)
 
     def show(self):
+        """Show this widget."""
         if self.showed:
             QtWidgets.QMessageBox.information(
                 QtWidgets.QApplication.activeWindow(),
@@ -907,6 +889,7 @@ class FLFormRecordDB(FLFormDB):
         super(FLFormRecordDB, self).show()
 
     def inicializeControls(self) -> None:
+        """Initialize UI controls for this form."""
         from pineboolib.fllegacy.flfielddb import FLFieldDB
 
         for child_ in self.findChildren(QtWidgets.QWidget):
@@ -916,6 +899,7 @@ class FLFormRecordDB(FLFormDB):
                     QtCore.QTimer.singleShot(0, child_.load)
 
     def show_and_wait(self) -> None:
+        """Show this form blocking for exit."""
         if self.loop:
             raise Exception("show_and_wait(): Se ha detectado una llamada recursiva")
 
@@ -927,5 +911,6 @@ class FLFormRecordDB(FLFormDB):
         self.loop = False
 
     def hide(self) -> None:
+        """Hide this form."""
         if self.loop:
             self.eventloop.exit()

@@ -21,7 +21,7 @@ from pineboolib.fllegacy.flformdb import FLFormDB
 # from pineboolib.core.settings import settings
 from pineboolib.fllegacy.aqsobjects import aqsobjectfactory as aqsfac
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import AQUtil, AQSettings
-from pineboolib.fllegacy.flapplication import aqApp
+from pineboolib.fllegacy import flapplication
 from pineboolib.fllegacy.systype import SysType
 from pineboolib.fllegacy import systype
 from pineboolib import logging
@@ -454,7 +454,7 @@ class MainForm(QtWidgets.QMainWindow):
         else:
             w.showFullScreen()
 
-            aqApp.setProxyDesktop(w)
+            flapplication.aqApp.setProxyDesktop(w)
 
         self.loadTabs()
 
@@ -532,7 +532,9 @@ class MainForm(QtWidgets.QMainWindow):
     def initEventFilter(self) -> None:
         """Install event filters."""
         # w = self.w_
-        self.w_.eventFilterFunction = "aqAppScript.mainWindow_.eventFilter"
+        self.w_.eventFilterFunction = (
+            "flapplication.flapplication.aqApp.Script.mainWindow_.eventFilter"
+        )
         if not qsa_sys.isNebulaBuild():
             self.w_.allow_events = [self.AQS.ContextMenu, self.AQS.Close]
         else:
@@ -555,14 +557,14 @@ class MainForm(QtWidgets.QMainWindow):
         if module in self.main_widgets_:
             mwi = self.main_widgets_[module]
             mwi.name = module
-            aqApp.name = module
+            flapplication.aqApp.name = module
             mwi.show()
 
         if module not in self.initialized_mods_:
             self.initialized_mods_.append(module)
-            aqApp.call("%s.iface.init" % module, [], None, False)
+            flapplication.aqApp.call("%s.iface.init" % module, [], None, False)
 
-        mng = aqApp.db().managerModules()
+        mng = flapplication.aqApp.db().managerModules()
         mng.setActiveIdModule(module)
 
     def removeCurrentPage(self, n: Optional[int] = None) -> None:
@@ -769,7 +771,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         self.updateMenu(self.ag_menu_, pinebooMenu)
 
-        aqApp.setMainWidget(self.w_)
+        flapplication.aqApp.setMainWidget(self.w_)
 
         if self.ag_menu_ is None:
             raise Exception("ag_menu_ is empty!")
@@ -792,14 +794,24 @@ class MainForm(QtWidgets.QMainWindow):
         self.dck_mod_.update(self.ag_menu_)
         self.dck_rec_.update(self.ag_rec_)
         self.dck_mar_.update(self.ag_mar_)
-        self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.connect(aqApp.aboutQt)
-        self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.connect(
-            aqApp.aboutPineboo
+        self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.connect(
+            flapplication.aqApp.aboutQt
         )
-        self.w_.findChild(QtWidgets.QAction, "fontAction").triggered.connect(aqApp.chooseFont)
-        self.w_.findChild(QtWidgets.QMenu, "style").triggered.connect(aqApp.showStyles)
-        self.w_.findChild(QtWidgets.QAction, "helpIndexAction").triggered.connect(aqApp.helpIndex)
-        self.w_.findChild(QtWidgets.QAction, "urlEnebooAction").triggered.connect(aqApp.urlPineboo)
+        self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.connect(
+            flapplication.aqApp.aboutPineboo
+        )
+        self.w_.findChild(QtWidgets.QAction, "fontAction").triggered.connect(
+            flapplication.aqApp.chooseFont
+        )
+        self.w_.findChild(QtWidgets.QMenu, "style").triggered.connect(
+            flapplication.aqApp.showStyles
+        )
+        self.w_.findChild(QtWidgets.QAction, "helpIndexAction").triggered.connect(
+            flapplication.aqApp.helpIndex
+        )
+        self.w_.findChild(QtWidgets.QAction, "urlEnebooAction").triggered.connect(
+            flapplication.aqApp.urlPineboo
+        )
 
     def updateActionGroup(self) -> None:
         """Update the available actions."""
@@ -820,7 +832,7 @@ class MainForm(QtWidgets.QMainWindow):
         ac_name.setObjectName("pinebooActionGroup_actiongroup_name")
         ac_name.setText(self.qsa_sys.translate("Menú"))
 
-        mng = aqApp.db().managerModules()
+        mng = flapplication.aqApp.db().managerModules()
         areas = mng.listIdAreas()
 
         if self.act_sig_map_ is None:
@@ -926,33 +938,33 @@ class MainForm(QtWidgets.QMainWindow):
 
         aboutQt = self.w_.findChild(QtWidgets.QAction, "aboutQtAction")
         aboutQt.setIcon(self.iconSet16x16(self.AQS.pixmap_fromMimeSource("aboutqt.png")))
-        # aboutQt.triggered.connect(aqApp.aboutQt)
+        # aboutQt.triggered.connect(flapplication.aqApp.aboutQt)
 
         aboutPineboo = self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction")
         aboutPineboo.setIcon(
             self.iconSet16x16(self.AQS.pixmap_fromMimeSource("pineboo-logo-32.png"))
         )
-        # aboutPineboo.triggered.connect(aqApp.aboutPineboo)
+        # aboutPineboo.triggered.connect(flapplication.aqApp.aboutPineboo)
 
         helpIndex = self.w_.findChild(QtWidgets.QAction, "helpIndexAction")
         helpIndex.setIcon(self.iconSet16x16(self.AQS.pixmap_fromMimeSource("help_index.png")))
-        # helpIndex.triggered.connect(aqApp.helpIndex)
+        # helpIndex.triggered.connect(flapplication.aqApp.helpIndex)
 
         urlPineboo = self.w_.findChild(QtWidgets.QAction, "urlEnebooAction")
         urlPineboo.setIcon(self.iconSet16x16(self.AQS.pixmap_fromMimeSource("pineboo-logo-32.png")))
-        # urlPineboo.triggered.connect(aqApp.urlPineboo)
+        # urlPineboo.triggered.connect(flapplication.aqApp.urlPineboo)
 
     def initConfigMenu(self) -> None:
         """Initialize config menu."""
         font = self.w_.findChild(QtWidgets.QAction, "fontAction")
         font.setIcon(self.iconSet16x16(self.AQS.pixmap_fromMimeSource("font.png")))
-        # font.triggered.connect(aqApp.chooseFont)
+        # font.triggered.connect(flapplication.aqApp.chooseFont)
 
         style = self.w_.findChild(QtWidgets.QMenu, "style")
 
-        aqApp.initStyles()
+        flapplication.aqApp.initStyles()
         style.setIcon(self.iconSet16x16(self.AQS.pixmap_fromMimeSource("estilo.png")))
-        # style.triggered.connect(aqApp.showStyles)
+        # style.triggered.connect(flapplication.aqApp.showStyles)
 
     def initTextLabels(self) -> None:
         """Initialize the tags in the mainForm base."""
@@ -1036,7 +1048,7 @@ class MainForm(QtWidgets.QMainWindow):
     def widgetActions(self, ui_file: str, parent: Any) -> Any:
         """Collect the actions provided by a widget."""
 
-        mng = aqApp.db().managerModules()
+        mng = flapplication.aqApp.db().managerModules()
         doc = QDomDocument()
         cc = mng.contentCached(ui_file)
         if not cc or not doc.setContent(cc):
@@ -1054,7 +1066,7 @@ class MainForm(QtWidgets.QMainWindow):
             return None
 
         w.setObjectName(parent.objectName())
-        aqApp.setMainWidget(w)
+        flapplication.aqApp.setMainWidget(w)
         # if (self.qsa_sys.isNebulaBuild()):
         #    w.show()
 
@@ -1130,7 +1142,7 @@ class MainForm(QtWidgets.QMainWindow):
 
             i += 1
 
-        aqApp.setMainWidget(None)
+        flapplication.aqApp.setMainWidget(None)
         w.close()
         return ag
 
@@ -1158,7 +1170,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         from pineboolib.core.utils.utils_base import filedir
 
-        aqApp.main_widget_ = self
+        flapplication.aqApp.main_widget_ = self
 
         mw = self
         mw.createUi(filedir("plugins/mainform/eneboo/mainform.ui"))
@@ -1173,7 +1185,7 @@ class MainForm(QtWidgets.QMainWindow):
 
     def reinitSript(self) -> None:
         """Re-start process."""
-        main_wid = aqApp.mainWidget() if self.w_ is None else self.w_
+        main_wid = flapplication.aqApp.mainWidget() if self.w_ is None else self.w_
         if main_wid is None or main_wid.objectName() != "container":
             return
 
@@ -1181,9 +1193,11 @@ class MainForm(QtWidgets.QMainWindow):
         # mw.initFormWidget(main_wid)
         mw.writeState()
         mw.removeAllPages()
-        mw.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.disconnect(aqApp.aboutQt)
+        mw.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.disconnect(
+            flapplication.aqApp.aboutQt
+        )
         mw.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.disconnect(
-            aqApp.aboutPineboo
+            flapplication.aqApp.aboutPineboo
         )
         mw.updateMenuAndDocks()
         mw.initModule("sys")
@@ -1219,7 +1233,7 @@ class MainForm(QtWidgets.QMainWindow):
             mw.addRecent(ac)
 
         elif fn_ == "execDefaultScript()":
-            aqApp.execMainScript(ac.objectName())
+            flapplication.aqApp.execMainScript(ac.objectName())
             mw.addRecent(ac)
 
         elif fn_ == "loadModules()":
@@ -1239,7 +1253,7 @@ class MainForm(QtWidgets.QMainWindow):
         #     self.qsa_sys.dumpDatabase()
 
         elif fn_ == "staticLoaderSetup()":
-            aqApp.staticLoaderSetup()
+            flapplication.aqApp.staticLoaderSetup()
 
         elif fn_ == "reinit()":
             self.qsa_sys.reinit()
@@ -1248,7 +1262,7 @@ class MainForm(QtWidgets.QMainWindow):
             self.qsa_sys.Mr_Proper()
 
         elif fn_ == "shConsole()":
-            aqApp.showConsole()
+            flapplication.aqApp.showConsole()
 
         elif fn_ == "exit()":
             self.close()

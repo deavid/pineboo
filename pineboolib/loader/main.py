@@ -143,6 +143,9 @@ def init_cli(catch_ctrl_c: bool = True) -> None:
 
     flapplication.aqApp = flapplication.FLApplication()
 
+    from pineboolib.qsa import qsa
+
+    qsa.aqApp = flapplication.aqApp
     # from pineboolib import pncontrolsfactory
     #
     # pncontrolsfactory.System = pncontrolsfactory.System_class()

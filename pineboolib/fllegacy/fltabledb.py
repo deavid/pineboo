@@ -17,7 +17,7 @@ from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
 
 from .flutil import FLUtil
 from pineboolib.core.settings import config
-from .flapplication import aqApp
+from . import flapplication
 
 
 from typing import Any, Optional, List, Union
@@ -2628,7 +2628,7 @@ class FLTableDB(QtWidgets.QWidget):
         util.setProgress(tdb_num_rows)
         qApp.setOverrideCursor(QtCore.Qt.WaitCursor)
         file_name = "%s/%s%s.ods" % (
-            aqApp.tmp_dir(),
+            flapplication.aqApp.tmp_dir(),
             mtd.name(),
             QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"),
         )

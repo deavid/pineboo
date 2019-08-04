@@ -138,8 +138,6 @@ from pineboolib.qt3_widgets.numberedit import NumberEdit  # noqa: F401
 from pineboolib.qt3_widgets.dateedit import DateEdit  # noqa: F401
 from pineboolib.qt3_widgets.timeedit import TimeEdit  # noqa: F401
 
-from pineboolib.fllegacy.flapplication import aqApp  # noqa: F401
-
 from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqsqlquery import AQSqlQuery  # noqa: F401
 from pineboolib.fllegacy.aqsobjects.aqsqlcursor import AQSqlCursor  # noqa: F401

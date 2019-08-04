@@ -12,13 +12,12 @@ from pineboolib.qt3_widgets.qtoolbutton import QToolButton  # type: ignore
 
 from .flformdb import FLFormDB
 from .flsqlcursor import FLSqlCursor
-from .flapplication import aqApp
+from . import flapplication
 
 from typing import Any
 
 
 class FLFormSearchDB(FLFormDB):
-
     """
     Subclase de la clase FLFormDB, pensada para buscar un registro
     en una tabla.
@@ -46,11 +45,11 @@ class FLFormSearchDB(FLFormDB):
     acceptingRejecting_: bool = False
 
     logger = logging.getLogger("FLFormSearchDB")
-    """
-    constructor.
-    """
 
     def __init__(self, name_or_cursor, parent=None) -> None:
+        """
+        constructor.
+        """
 
         if not name_or_cursor:
             self.logger.warning("Se ha llamado a FLFormSearchDB sin name_or_cursor")
@@ -61,7 +60,7 @@ class FLFormSearchDB(FLFormDB):
         if project.conn is None:
             raise Exception("Project is not connected yet")
 
-        parent = parent or aqApp.mainWidget()
+        parent = parent or flapplication.aqApp.mainWidget()
         if isinstance(name_or_cursor, str):
             action = project.conn.manager().action(name_or_cursor)
             cursor = FLSqlCursor(action.table(), True, "default", None, None, self)

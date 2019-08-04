@@ -132,10 +132,10 @@ class FLApplication(QtCore.QObject):
         self._destroying = True
         self.stopTimerIdle()
         # self.checkAndFixTransactionLAvel("%s:%s" % (__name__, __class__))
-        app_db = self.db()
-        if app_db:
-            app_db.setInteractiveGUI(False)
-            app_db.setQsaExceptions(False)
+        # app_db = self.db()
+        # if app_db:
+        #     app_db.setInteractiveGUI(False)
+        #     app_db.setQsaExceptions(False)
 
         if self._dict_main_widgets:
             for mw in self._dict_main_widgets:
@@ -144,12 +144,12 @@ class FLApplication(QtCore.QObject):
             del self._dict_main_widgets
             self._dict_main_widgets = {}
 
-        self.clearProject()
+        # self.clearProject()
         # self.project_ = None
         self._ted_output = None
 
-        if app_db:
-            app_db.finish()
+        # if app_db:
+        #     app_db.finish()
         """
         if self.showDebug():
             from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
