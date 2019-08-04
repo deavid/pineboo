@@ -36,3 +36,4 @@ wheel
 lxml
 flup
 xmljson
+cryptography
