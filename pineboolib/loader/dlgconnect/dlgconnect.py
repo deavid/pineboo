@@ -286,7 +286,7 @@ class DlgConnect(QtWidgets.QWidget):
             os.remove(os.path.join(self.profile_dir, fileName))
             self.loadProfiles()
 
-    def getProjectConfig(self, name) -> Optional[ProjectConfig]:
+    def getProjectConfig(self, name: str) -> Optional[ProjectConfig]:
         """
         Get a profile by name and ensure its fully loaded.
         """
