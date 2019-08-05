@@ -23,6 +23,8 @@ class ProjectConfig:
     Read and write XML on profiles. Represents a database connection configuration.
     """
 
+    SAVE_VERSION = VERSION_1_1  #: Version for saving
+
     logger = logging.getLogger("loader.projectConfig")
 
     #: Folder where to read/write project configs.
@@ -211,7 +213,7 @@ class ProjectConfig:
         Save the connection.
         """
         profile = ET.Element("Profile")
-        profile.set("Version", str(VERSION_1_1))
+        profile.set("Version", str(self.SAVE_VERSION))
         description = self.description
         filename = self.filename
         if not os.path.exists(self.profile_dir):
@@ -220,13 +222,7 @@ class ProjectConfig:
         if not overwrite_existing and os.path.exists(filename):
             raise ProfileAlreadyExistsError
 
-        dbt = self.type
-        url = self.host
-        port = self.port
-        userDB = self.username
-
         passwDB = self.password or ""
-        nameDB = self.database
 
         profile_user = ET.SubElement(profile, "profile-data")
         profile_password = ET.SubElement(profile_user, "password")
@@ -238,20 +234,20 @@ class ProjectConfig:
         name.text = description
         dbs = ET.SubElement(profile, "database-server")
         dbstype = ET.SubElement(dbs, "type")
-        dbstype.text = dbt
+        dbstype.text = self.type
         dbshost = ET.SubElement(dbs, "host")
-        dbshost.text = url
+        dbshost.text = self.host
         dbsport = ET.SubElement(dbs, "port")
-        if port:
-            dbsport.text = str(port)
+        if self.port:
+            dbsport.text = str(self.port)
 
         dbc = ET.SubElement(profile, "database-credentials")
         dbcuser = ET.SubElement(dbc, "username")
-        dbcuser.text = userDB
+        dbcuser.text = self.username
         dbcpasswd = ET.SubElement(dbc, "password")
         dbcpasswd.text = base64.b64encode(passwDB.encode()).decode()
         dbname = ET.SubElement(profile, "database-name")
-        dbname.text = nameDB
+        dbname.text = self.database
 
         pretty_print_xml(profile)
 

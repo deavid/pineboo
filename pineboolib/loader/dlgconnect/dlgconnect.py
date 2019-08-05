@@ -13,6 +13,7 @@ from PyQt5.QtCore import QSize  # type: ignore
 from pineboolib.core.utils.utils_base import filedir, pretty_print_xml
 from pineboolib.core.settings import config, settings
 from pineboolib.core.decorators import pyqtSlot
+from pineboolib.loader.projectconfig import ProjectConfig
 from typing import Optional, cast
 
 
@@ -23,25 +24,23 @@ class DlgConnect(QtWidgets.QWidget):
     This class shows manages the Login dialog.
     """
 
-    optionsShowed = True
-    minSize = None
-    maxSize = None
-    edit_mode = None
+    optionsShowed: bool
+    minSize: QSize
+    maxSize: QSize
+    edit_mode: bool
 
     def __init__(self) -> None:
         """
         Initialize.
         """
-        super(DlgConnect, self).__init__()
-        self.optionsShowed = True
-        self.minSize = QSize(350, 140)
-        self.maxSize = QSize(350, 495)
-        self.profile_dir: str = config.value(
-            "ebcomportamiento/profiles_folder", filedir("../profiles")
-        )
         from pineboolib.application.database.pnsqldrivers import PNSqlDrivers
 
-        self.pNSqlDrivers = PNSqlDrivers()
+        super(DlgConnect, self).__init__()
+        self.optionsShowed = False
+        self.minSize = QSize(350, 140)
+        self.maxSize = QSize(350, 495)
+        self.profile_dir: str = ProjectConfig.profile_dir
+        self.sql_drivers = PNSqlDrivers()
         self.edit_mode = False
 
     def load(self) -> None:
@@ -65,17 +64,17 @@ class DlgConnect(QtWidgets.QWidget):
         self.move(frameGm.topLeft())
 
         self.ui.pbLogin.clicked.connect(self.open)
-        self.ui.tbOptions.clicked.connect(self.showOptions)
+        self.ui.tbOptions.clicked.connect(self.toggleOptions)
         self.ui.pbSaveConnection.clicked.connect(self.saveProfile)
         self.ui.tbDeleteProfile.clicked.connect(self.deleteProfile)
         self.ui.tbEditProfile.clicked.connect(self.editProfile)
         self.cleanProfileForm()
         self.ui.cbDBType.currentIndexChanged.connect(self.updatePort)
         self.ui.cbProfiles.currentIndexChanged.connect(self.enablePassword)
-        self.ui.cbAutoLogin.stateChanged.connect(self.enableProfilePassword)
+        self.ui.cbAutoLogin.stateChanged.connect(self.cbAutoLogin_checked)
         self.ui.le_profiles.setText(self.profile_dir)
         self.ui.tb_profiles.clicked.connect(self.change_profile_dir)
-        self.showOptions()
+        self.showOptions(False)
         self.loadProfiles()
         self.ui.leDescription.textChanged.connect(self.updateDBName)
 
@@ -84,10 +83,10 @@ class DlgConnect(QtWidgets.QWidget):
         Clean the profiles creation tab, and fill in the basic data of the default SQL driver.
         """
         self.ui.leDescription.setText("")
-        driver_list = self.pNSqlDrivers.aliasList()
+        driver_list = self.sql_drivers.aliasList()
         self.ui.cbDBType.clear()
         self.ui.cbDBType.addItems(driver_list)
-        self.ui.cbDBType.setCurrentText(self.pNSqlDrivers.defaultDriverName())
+        self.ui.cbDBType.setCurrentText(self.sql_drivers.defaultDriverName())
         self.ui.leURL.setText("localhost")
         self.ui.leDBUser.setText("")
         self.ui.leDBPassword.setText("")
@@ -119,26 +118,30 @@ class DlgConnect(QtWidgets.QWidget):
             self.ui.cbProfiles.setCurrentText(last_profile)
 
     @pyqtSlot()
-    def showOptions(self) -> None:
+    def toggleOptions(self) -> None:
+        """Show/Hide Options."""
+        self.showOptions(not self.optionsShowed)
+
+    def showOptions(self, showOptions: bool) -> None:
         """
         Show the frame options.
         """
-        if self.optionsShowed:
-            self.ui.frmOptions.hide()
-            self.ui.tbDeleteProfile.hide()
-            self.ui.tbEditProfile.hide()
-            self.ui.setMinimumSize(self.minSize)
-            self.ui.setMaximumSize(self.minSize)
-            self.ui.resize(self.minSize)
-        else:
+        if showOptions:
             self.ui.frmOptions.show()
             self.ui.tbDeleteProfile.show()
             self.ui.tbEditProfile.show()
             self.ui.setMinimumSize(self.maxSize)
             self.ui.setMaximumSize(self.maxSize)
             self.ui.resize(self.maxSize)
+        else:
+            self.ui.frmOptions.hide()
+            self.ui.tbDeleteProfile.hide()
+            self.ui.tbEditProfile.hide()
+            self.ui.setMinimumSize(self.minSize)
+            self.ui.setMaximumSize(self.minSize)
+            self.ui.resize(self.minSize)
 
-        self.optionsShowed = not self.optionsShowed
+        self.optionsShowed = showOptions
 
     @pyqtSlot()
     def open(self) -> None:
@@ -186,7 +189,7 @@ class DlgConnect(QtWidgets.QWidget):
             self.hostname = getattr(db.find("host"), "text", None)
             self.portnumber = getattr(db.find("port"), "text", None)
             self.driveralias = getattr(db.find("type"), "text", None)
-            if self.driveralias not in self.pNSqlDrivers.aliasList():
+            if self.driveralias not in self.sql_drivers.aliasList():
                 QMessageBox.information(
                     self.ui,
                     "Pineboo",
@@ -202,7 +205,7 @@ class DlgConnect(QtWidgets.QWidget):
             else:
                 self.password = ""
 
-        if self.pNSqlDrivers.isDesktopFile(self.driveralias):
+        if self.sql_drivers.isDesktopFile(self.driveralias):
             self.database = "%s.sqlite3" % self.database
 
         self.close()
@@ -319,6 +322,12 @@ class DlgConnect(QtWidgets.QWidget):
         """
         # Cogemos el perfil y lo abrimos
         file_name = os.path.join(self.profile_dir, "%s.xml" % self.ui.cbProfiles.currentText())
+        self.editProfileName(file_name)
+
+    def editProfileName(self, file_name: str) -> None:
+        """
+        Edit profile from filename.
+        """
         tree = ET.parse(file_name)
         root = tree.getroot()
 
@@ -372,7 +381,7 @@ class DlgConnect(QtWidgets.QWidget):
         """
         Update to the driver default port.
         """
-        self.ui.lePort.setText(self.pNSqlDrivers.port(self.ui.cbDBType.currentText()))
+        self.ui.lePort.setText(self.sql_drivers.port(self.ui.cbDBType.currentText()))
 
     @pyqtSlot(int)
     def enablePassword(self, n: Optional[int] = None) -> None:
@@ -404,12 +413,17 @@ class DlgConnect(QtWidgets.QWidget):
         for profile in root.findall("profile-data"):
             password = profile.find("password")
 
-        if password is None or (
-            version > 1.0 and password.text == hashlib.sha256("".encode()).hexdigest()
+        enable_passwd_control = False
+        if (
+            password is not None
+            and version > 1.0
+            and password.text != ""
+            and password.text != hashlib.sha256("".encode()).hexdigest()
         ):
-            self.ui.lePassword.setEnabled(False)
-        else:
-            self.ui.lePassword.setEnabled(True)
+            enable_passwd_control = True
+
+        self.ui.lePassword.setEnabled(enable_passwd_control)
+        self.ui.lePassword.setText("")
 
     def updateDBName(self) -> None:
         """
@@ -418,9 +432,9 @@ class DlgConnect(QtWidgets.QWidget):
         self.ui.leDBName.setText(self.ui.leDescription.text().replace(" ", "_"))
 
     @pyqtSlot(int)
-    def enableProfilePassword(self) -> None:
+    def cbAutoLogin_checked(self) -> None:
         """
-        Check if the profile requires password.
+        Process checked event from AutoLogin checkbox.
         """
 
         if self.ui.cbAutoLogin.isChecked():
@@ -443,4 +457,5 @@ class DlgConnect(QtWidgets.QWidget):
         if new_dir and new_dir is not self.profile_dir:
             config.set_value("ebcomportamiento/profiles_folder", new_dir)
             self.profile_dir = new_dir
+            ProjectConfig.profile_dir = new_dir
             self.loadProfiles()
