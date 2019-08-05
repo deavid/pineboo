@@ -355,7 +355,8 @@ class Dir(object):
 
         return retorno
 
-    def fileExists(self, file_name: str) -> bool:
+    @staticmethod
+    def fileExists(file_name: str) -> bool:
         """
         Check if a file does exist.
 
@@ -384,7 +385,8 @@ class Dir(object):
         """
         return filename
 
-    def setCurrent(self, val: Optional[str] = None) -> None:
+    @staticmethod
+    def setCurrent(val: Optional[str] = None) -> None:
         """
         Change current working folder.
 

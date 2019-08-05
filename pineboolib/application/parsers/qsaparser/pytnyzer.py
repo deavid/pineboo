@@ -11,7 +11,7 @@ import os
 import os.path
 import re
 from xml.etree import ElementTree
-from typing import Any, Generator, Tuple, Type, List, Dict, Set, cast, Optional, TextIO
+from typing import Any, Generator, Tuple, Type, List, Dict, Set, cast, Optional, TextIO, Callable
 from pathlib import Path
 
 try:
@@ -2329,9 +2329,10 @@ def parse_ast(elem, parent=None) -> ASTPythonBase:
 
 
 def file_template(
-    ast: Any, import_refs: Dict[str, Tuple[str, str]] = {}
+    ast: ElementTree.Element, import_refs: Dict[str, Tuple[str, str]] = {}
 ) -> Generator[Tuple[Any, Any], Any, None]:
     """Create a new file template."""
+
     yield "line", "# -*- coding: utf-8 -*-"
     yield "line", "from typing import TYPE_CHECKING"
     if not STRICT_MODE:
@@ -2344,9 +2345,10 @@ def file_template(
     yield "line", "# /** @file */"
     yield "line", ""
     yield "line", ""
+
     sourceclasses = ElementTree.Element("Source")
     for cls in ast.findall("Class"):
-        cls.set("parent_", ast)
+        cls.set("parent_", cast(str, ast))  # FIXME: AST is an XML Element, not a string.
         sourceclasses.append(cls)
 
     mainclass = ElementTree.SubElement(
@@ -2371,6 +2373,7 @@ def file_template(
 
     for dtype, data in parse_ast(sourceclasses).generate():
         yield dtype, data
+
     yield "line", ""
     yield "line", "if TYPE_CHECKING:"
     yield "line", "    form: FormInternalObj = FormInternalObj()"
@@ -2379,15 +2382,31 @@ def file_template(
     yield "line", "    form = None"
 
 
+def expression_template(
+    ast: ElementTree.Element, import_refs: Dict[str, Tuple[str, str]] = {}
+) -> Generator[Tuple[Any, Any], Any, None]:
+    """Create a new file template."""
+
+    for dtype, data in parse_ast(ast).generate():
+        yield dtype, data
+
+
 def write_python_file(fobj, ast, import_refs: Dict[str, Tuple[str, str]] = {}) -> None:
     """Write python file."""
+    TEMPLATE_LIST: Dict[str, Callable] = {
+        "file_template": file_template,
+        "expression_template": expression_template,
+    }
     indent: List[str] = []
     indent_text = "    "
     last_line_for_indent: Dict[int, int] = {}
     numline = 0
     ASTPython.numline = 1
     last_dtype = None
-    for dtype, data in file_template(ast, import_refs=import_refs):
+
+    parser_template = TEMPLATE_LIST[ast.get("parser-template", default="file_template")]
+
+    for dtype, data in parser_template(ast, import_refs=import_refs):
         # if isinstance(data, bytes):
         #    data = data.decode("UTF-8", "replace")
         line = None
@@ -2455,9 +2474,14 @@ def pythonize(filename, destfilename, debugname=None) -> None:
     write_python_file(f1, ast)
     f1.close()
     if black:
-        new_code = black.format_file_contents(
-            Path(destfilename).read_text(), fast=True, mode=BLACK_FILEMODE
-        )
+        try:
+            new_code = black.format_file_contents(
+                Path(destfilename).read_text(), fast=True, mode=BLACK_FILEMODE
+            )
+        except black.NothingChanged:
+            # The file we saved earlier is already good.
+            return
+
         f1 = open(destfilename, "w", encoding="UTF-8")
         f1.write(new_code)
         f1.close()
@@ -2480,10 +2504,14 @@ def pythonize2(root_ast: ElementTree.Element, known_refs: Dict[str, Tuple[str, s
     known_refs_found: Dict[str, Tuple[str, str]] = {k: known_refs[k] for k in ident_set}
     f1 = StringIO()
     write_python_file(f1, root_ast, import_refs=known_refs_found)
-    if black:
-        new_code = black.format_file_contents(f1.getvalue(), fast=True, mode=BLACK_FILEMODE)
+    unformatted_code = f1.getvalue()
+    if unformatted_code and black:
+        try:
+            new_code = black.format_file_contents(unformatted_code, fast=True, mode=BLACK_FILEMODE)
+        except black.NothingChanged:
+            new_code = unformatted_code
     else:
-        new_code = f1.getvalue()
+        new_code = unformatted_code
     return new_code
 
 
