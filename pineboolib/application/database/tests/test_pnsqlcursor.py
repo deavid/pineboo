@@ -166,11 +166,23 @@ class TestBuffer(unittest.TestCase):
         self.assertEqual(cursor.first(), True)
         cursor.refreshBuffer()
         buffer_copy = cursor.bufferCopy()
+        buffer = cursor.buffer()
+        if not buffer:
+            raise Exception("buffer is empty!")
+
+        if not buffer_copy:
+            raise Exception("buffer is empty!")
+
+        self.assertNotEqual(buffer, None)
         self.assertEqual(cursor.valueBuffer("idarea"), "A")
-        self.assertEqual(cursor.buffer().value("idarea"), "A")
+
+        self.assertEqual(buffer.value("idarea"), "A")
         self.assertEqual(buffer_copy.value("idarea"), "A")
         cursor.next()
-        self.assertEqual(cursor.buffer().value("idarea"), "B")
+        buffer = cursor.buffer()
+        if not buffer:
+            raise Exception("buffer is empty!")
+        self.assertEqual(buffer.value("idarea"), "B")
         self.assertEqual(buffer_copy.value("idarea"), "A")
 
 
@@ -184,13 +196,12 @@ class TestValues(unittest.TestCase):
         """Test values."""
         from pineboolib.application.database import pnsqlcursor
         from pineboolib.application.qsatypes import date
-        from PyQt5 import QtCore
 
         cursor = pnsqlcursor.PNSqlCursor("flupdates")
         cursor.setModeAccess(cursor.Insert)
         cursor.refreshBuffer()
-        date = date.Date()
-        cursor.setValueBuffer("fecha", date)
+        date_ = date.Date()
+        cursor.setValueBuffer("fecha", date_)
         cursor.setValueBuffer("hora", "00:00:01")
         cursor.setValueBuffer("nombre", "nombre de prueba")
         cursor.setValueBuffer("modulesdef", "module_1\nmodule_2\nmodule_3")
@@ -198,7 +209,7 @@ class TestValues(unittest.TestCase):
         cursor.setValueBuffer("shaglobal", "1234567890")
         cursor.setValueBuffer("auxtxt", "aux_1\naux_2\naux_3")
         self.assertEqual(cursor.commitBuffer(), True)
-        self.assertEqual(str(cursor.valueBuffer("fecha"))[0:8], str(date)[0:8])
+        self.assertEqual(str(cursor.valueBuffer("fecha"))[0:8], str(date_)[0:8])
         self.assertEqual(cursor.valueBuffer("hora"), "00:00:01")
         self.assertEqual(cursor.valueBuffer("nombre"), "nombre de prueba")
 

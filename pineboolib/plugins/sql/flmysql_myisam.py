@@ -420,7 +420,7 @@ class FLMYSQL_MYISAM(object):
     def setLastError(self, text, command) -> None:
         self.lastError_ = "%s (%s)" % (text, command)
 
-    def lastError(self) -> str:
+    def lastError(self) -> Optional[str]:
         return self.lastError_
 
     def commitTransaction(self) -> bool:
