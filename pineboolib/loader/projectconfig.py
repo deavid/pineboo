@@ -93,7 +93,8 @@ class ProjectConfig:
             if show_password:
                 user_pass += ":%s" % self.password
             else:
-                user_pass += ":*******"
+                pass_bytes: bytes = hashlib.sha256(self.password.encode()).digest()
+                user_pass += ":*" + base64.b64encode(pass_bytes).decode()[:4]
 
         if user_pass:
             user_pass = "@%s" % user_pass
@@ -104,19 +105,37 @@ class ProjectConfig:
             if uri:
                 uri += "/"
             uri += self.database
-        return uri
+
+        return "[%s]://%s" % (self.type, uri)
 
     def __repr__(self) -> str:
         """Display the information in text mode."""
-
-        return "<ProjectConfig [%s]://%s>" % (self.type, self.get_uri(show_password=False))
+        if self.project_password:
+            # 4 chars in base-64 is 3 bytes. 256**3 should be enough to know if you have the wrong
+            # password.
+            pass_bytes: bytes = hashlib.sha256(self.project_password.encode()).digest()
+            passwd = "-" + base64.b64encode(pass_bytes).decode()[:4]
+        else:
+            passwd = ""
+        return "<ProjectConfig%s name=%r uri=%r>" % (
+            passwd,
+            self.description,
+            self.get_uri(show_password=False),
+        )
 
     def __eq__(self, other: Any) -> bool:
+        """Test for equality."""
         if not isinstance(other, ProjectConfig):
             return False
-        return other.type == self.type and other.get_uri(show_password=True) == self.get_uri(
-            show_password=True
-        )
+        if other.type != self.type:
+            return False
+        if other.get_uri(show_password=True) != self.get_uri(show_password=True):
+            return False
+        if other.description != self.description:
+            return False
+        if other.project_password != self.project_password:
+            return False
+        return True
 
     def load_projectxml(self) -> bool:
         """Collect the connection information from an xml file."""
