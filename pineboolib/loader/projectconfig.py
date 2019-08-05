@@ -4,7 +4,7 @@ import re
 import base64
 import hashlib
 import os.path
-from typing import Any, Tuple, Optional
+from typing import Tuple, Optional
 
 from xml.etree import ElementTree as ET
 
