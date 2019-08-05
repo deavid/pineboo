@@ -80,7 +80,7 @@ class ProjectConfig:
             file_basename = self.description.lower().replace(" ", "_")
             self.filename = os.path.join(self.profile_dir, "%s.xml" % file_basename)
         else:
-            self.filename = filename
+            self.filename = os.path.join(self.profile_dir, filename)
 
     def get_uri(self, show_password: bool = False) -> str:
         """Get connection as an URI."""

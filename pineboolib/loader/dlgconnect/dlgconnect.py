@@ -107,10 +107,11 @@ class DlgConnect(QtWidgets.QWidget):
         """
         Update ComboBox of profiles.
         """
-        self.ui.cbProfiles.clear()
         if not os.path.exists(self.profile_dir):
             # os.mkdir(filedir(self.profile_dir))
             return
+        self.ui.cbProfiles.clear()
+        self.profiles.clear()
 
         with os.scandir(self.profile_dir) as it:
             for entry in it:
@@ -186,85 +187,53 @@ class DlgConnect(QtWidgets.QWidget):
         """
         Save the connection.
         """
-        profile = ET.Element("Profile")
-        profile.set("Version", "1.1")
-        description = self.ui.leDescription.text()
-
-        if description == "":
+        if self.ui.leDescription.text() == "":
             QMessageBox.information(
                 self.ui, "Pineboo", "La descripción no se puede dejar en blanco"
             )
             self.ui.leDescription.setFocus()
             return
 
-        if not os.path.exists(self.profile_dir):
-            os.mkdir(filedir(self.profile_dir))
-
-        if (
-            os.path.exists(os.path.join(self.profile_dir, "%s.xml" % description))
-            and not self.edit_mode
-        ):
-            QMessageBox.information(self.ui, "Pineboo", "El perfil ya existe")
-            return
-
-        dbt = self.ui.cbDBType.currentText()
-        url = self.ui.leURL.text()
-        port = self.ui.lePort.text()
-        userDB = self.ui.leDBUser.text()
         if self.ui.leDBPassword.text() != self.ui.leDBPassword2.text():
             QMessageBox.information(self.ui, "Pineboo", "La contraseña de la BD no coincide")
             self.ui.leDBPassword.setText("")
             self.ui.leDBPassword2.setText("")
             return
 
-        passwDB = self.ui.leDBPassword.text()
-        nameDB = self.ui.leDBName.text()
-
-        auto_login = self.ui.cbAutoLogin.isChecked()
-        pass_profile_text = ""
-        if not auto_login:
-            pass_profile_text = self.ui.leProfilePassword.text()
-
-        pass_profile = hashlib.sha256(pass_profile_text.encode())
-        profile_user = ET.SubElement(profile, "profile-data")
-        profile_password = ET.SubElement(profile_user, "password")
-        profile_password.text = pass_profile.hexdigest()
-
-        name = ET.SubElement(profile, "name")
-        name.text = description
-        dbs = ET.SubElement(profile, "database-server")
-        dbstype = ET.SubElement(dbs, "type")
-        dbstype.text = dbt
-        dbshost = ET.SubElement(dbs, "host")
-        dbshost.text = url
-        dbsport = ET.SubElement(dbs, "port")
-        dbsport.text = port
-
-        dbc = ET.SubElement(profile, "database-credentials")
-        dbcuser = ET.SubElement(dbc, "username")
-        dbcuser.text = userDB
-        dbcpasswd = ET.SubElement(dbc, "password")
-        dbcpasswd.text = base64.b64encode(passwDB.encode()).decode()
-        dbname = ET.SubElement(profile, "database-name")
-        dbname.text = nameDB
-
-        pretty_print_xml(profile)
-
-        tree = ET.ElementTree(profile)
-
         if self.edit_mode:
-            if os.path.exists(os.path.join(self.profile_dir, "%s.xml" % description)):
-                os.remove(os.path.join(self.profile_dir, "%s.xml" % description))
-                self.edit_mode = False
+            pconf = self.getProjectConfig(self.ui.cbProfiles.currentText())
+            if pconf is None:
+                return
+            pconf.description = self.ui.leDescription.text()
+        else:
+            pconf = ProjectConfig(
+                description=self.ui.leDescription.text(), database="unset", type="unset"
+            )
 
-        tree.write(
-            os.path.join(self.profile_dir, "%s.xml" % description),
-            xml_declaration=True,
-            encoding="utf-8",
-        )
+        if not os.path.exists(self.profile_dir):
+            os.mkdir(filedir(self.profile_dir))
+
+        if os.path.exists(pconf.filename) and not self.edit_mode:
+            QMessageBox.information(self.ui, "Pineboo", "El perfil ya existe")
+            return
+
+        pconf.type = self.ui.cbDBType.currentText()
+        pconf.host = self.ui.leURL.text()
+        pconf.port = int(self.ui.lePort.text())
+        pconf.username = self.ui.leDBUser.text()
+
+        pconf.password = self.ui.leDBPassword.text()
+        pconf.database = self.ui.leDBName.text()
+
+        pass_profile_text = ""
+        if not self.ui.cbAutoLogin.isChecked():
+            pass_profile_text = self.ui.leProfilePassword.text()
+        pconf.project_password = pass_profile_text
+        pconf.save_projectxml(overwrite_existing=self.edit_mode)
+
         # self.cleanProfileForm()
         self.loadProfiles()
-        self.ui.cbProfiles.setCurrentText(description)
+        self.ui.cbProfiles.setCurrentText(pconf.description)
 
     @pyqtSlot()
     def deleteProfile(self) -> None:
@@ -282,8 +251,8 @@ class DlgConnect(QtWidgets.QWidget):
             if res == QtWidgets.QMessageBox.No:
                 return
 
-            fileName = "%s.xml" % self.ui.cbProfiles.currentText()
-            os.remove(os.path.join(self.profile_dir, fileName))
+            pconf: ProjectConfig = self.profiles[self.ui.cbProfiles.currentText()]
+            os.remove(pconf.filename)
             self.loadProfiles()
 
     def getProjectConfig(self, name: str) -> Optional[ProjectConfig]:
@@ -351,39 +320,10 @@ class DlgConnect(QtWidgets.QWidget):
         """
         if self.ui.cbProfiles.count() == 0:
             return
-        password = None
-        fileName = os.path.join(self.profile_dir, "%s.xml" % self.ui.cbProfiles.currentText())
-        try:
-            tree = ET.parse(fileName)
-            root = tree.getroot()
-        except Exception:
-            QMessageBox.warning(
-                self.ui,
-                "Pineboo",
-                "El perfil %s no parece válido" % self.ui.cbProfiles.currentText(),
-                QtWidgets.QMessageBox.Ok,
-            )
-            return
-
-        _version = root.get("Version")
-        if _version is None:
-            version = 1.0
-        else:
-            version = float(_version)
-
-        for profile in root.findall("profile-data"):
-            password = profile.find("password")
-
-        enable_passwd_control = False
-        if (
-            password is not None
-            and version > 1.0
-            and password.text != ""
-            and password.text != hashlib.sha256("".encode()).hexdigest()
-        ):
-            enable_passwd_control = True
-
-        self.ui.lePassword.setEnabled(enable_passwd_control)
+        pconf: ProjectConfig = self.profiles[self.ui.cbProfiles.currentText()]
+        # NOTE: This disables the password entry once the password has been processed for
+        # .. the profile once. So the user does not need to retype it.
+        self.ui.lePassword.setEnabled(pconf.password_required)
         self.ui.lePassword.setText("")
 
     def updateDBName(self) -> None:
