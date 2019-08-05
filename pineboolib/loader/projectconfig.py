@@ -4,7 +4,7 @@ import re
 import base64
 import hashlib
 import os.path
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Any
 
 from xml.etree import ElementTree as ET
 
@@ -78,15 +78,44 @@ class ProjectConfig:
         else:
             self.filename = filename
 
+    def get_uri(self, show_password: bool = False) -> str:
+        """Get connection as an URI."""
+        host_port = ""
+        if self.host:
+            host_port += self.host
+        if self.port:
+            host_port += ":%d" % self.port
+
+        user_pass = ""
+        if self.username:
+            user_pass += self.username
+        if self.password:
+            if show_password:
+                user_pass += ":%s" % self.password
+            else:
+                user_pass += ":*******"
+
+        if user_pass:
+            user_pass = "@%s" % user_pass
+
+        uri = host_port + user_pass
+
+        if self.database:
+            if uri:
+                uri += "/"
+            uri += self.database
+        return uri
+
     def __repr__(self) -> str:
         """Display the information in text mode."""
 
-        return "<ProjectConfig database=%s host:port=%s:%s type=%s user=%s>" % (
-            self.database,
-            self.host,
-            self.port,
-            self.type,
-            self.username,
+        return "<ProjectConfig [%s]://%s>" % (self.type, self.get_uri(show_password=False))
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, ProjectConfig):
+            return False
+        return other.type == self.type and other.get_uri(show_password=True) == self.get_uri(
+            show_password=True
         )
 
     def load_projectxml(self) -> bool:
@@ -224,8 +253,7 @@ class ProjectConfig:
         passwd = ""
         host = "127.0.0.1"
         port = "5432"
-        dbname = ""
-        driver_alias = ""
+        driver_alias = "PostgreSQL (PSYCOPG2)"
         user_pass = None
         host_port = None
         if "/" not in connstring:
