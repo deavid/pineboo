@@ -463,7 +463,7 @@ class FLMYSQL_MYISAM2(object):
         """Set last error from database."""
         self.lastError_ = "%s (%s)" % (text, command)
 
-    def lastError(self) -> str:
+    def lastError(self) -> Optional[str]:
         """Get last error happened on database."""
         return self.lastError_
 
