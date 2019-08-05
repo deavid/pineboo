@@ -65,7 +65,10 @@ class TestPNTableMetaData(unittest.TestCase):
 
         mtd = project.conn.manager().metadata("flgroups")
         mtd_2 = project.conn.manager().metadata("flareas")
-
+        if mtd is None:
+            raise Exception
+        if mtd_2 is None:
+            raise Exception
         self.assertEqual(mtd.fieldType("descripcion"), 3)
         self.assertEqual(mtd.fieldIsPrimaryKey("descripcion"), False)
         self.assertEqual(mtd.fieldIsPrimaryKey("idgroup"), True)
@@ -77,6 +80,8 @@ class TestPNTableMetaData(unittest.TestCase):
         self.assertEqual(mtd.fieldVisible("descripcion"), True)
 
         field = mtd.field("descripcion")
+        if field is None:
+            raise Exception
         self.assertEqual(field.name(), "descripcion")
 
         field_list = mtd.fieldList()
@@ -130,6 +135,8 @@ class TestRelationsPNTableMetaData(unittest.TestCase):
         from pineboolib.application import project
 
         mtd_1 = project.conn.manager().metadata("flusers")
+        if mtd_1 is None:
+            raise Exception
         self.assertEqual(mtd_1.fieldTableM1("idgroup"), "flgroups")
         self.assertEqual(mtd_1.fieldForeignFieldM1("idgroup"), "idgroup")
 
@@ -148,7 +155,11 @@ class TestCompoundKeyPNTableMetaData(unittest.TestCase):
         from pineboolib.application import project
 
         mtd = project.conn.manager().metadata("flseqs")
+        if mtd is None:
+            raise Exception
         field_list = mtd.fieldListOfCompoundKey("campo")
+        if field_list is None:
+            raise Exception
         self.assertEqual(field_list[0].name(), "campo")
 
 

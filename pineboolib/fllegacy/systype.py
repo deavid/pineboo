@@ -865,11 +865,9 @@ class SysType(SysBaseType):
         dirBasePath = FileDialog.getExistingDirectory(Dir.home)
         if not dirBasePath:
             return
-        dataBaseName = project.conn.db().database()
+        dataBaseName = project.conn.db_name
         dirBasePath = Dir.cleanDirPath(
-            ustr(
-                dirBasePath, u"/modulos_exportados_", dataBaseName.mid(dataBaseName.rfind(u"/") + 1)
-            )
+            ustr(dirBasePath, u"/modulos_exportados_", dataBaseName[dataBaseName.rfind(u"/") + 1 :])
         )
         dir = Dir()
         if not dir.fileExists(dirBasePath):

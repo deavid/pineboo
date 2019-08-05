@@ -15,13 +15,18 @@ class TestPNCompoundKeyFromTableMetaData(unittest.TestCase):
         from pineboolib.application import project
 
         mtd = project.conn.manager().metadata("flseqs")
-
+        if mtd is None:
+            raise Exception
         field_1 = mtd.field("campo")
+        if field_1 is None:
+            raise Exception
 
         self.assertEqual(field_1.name(), "campo")
         self.assertEqual(field_1.isCompoundKey(), True)
 
         ck_list = mtd.fieldListOfCompoundKey("campo")
+        if ck_list is None:
+            raise Exception
         self.assertEqual(len(ck_list), 1)
         self.assertEqual(ck_list[0].name(), "campo")
 
@@ -40,10 +45,15 @@ class TestGeneratePNCompoundKey(unittest.TestCase):
         from pineboolib.application.metadata.pncompoundkeymetadata import PNCompoundKeyMetaData
 
         mtd = project.conn.manager().metadata("flfiles")
+        if mtd is None:
+            raise Exception
 
         field_1 = mtd.field("sha")
         field_2 = mtd.field("contenido")
-
+        if field_1 is None:
+            raise Exception
+        if field_2 is None:
+            raise Exception
         ck_mtd_1 = PNCompoundKeyMetaData()
         ck_mtd_1.addFieldMD(field_1)
         ck_mtd_1.addFieldMD(field_2)

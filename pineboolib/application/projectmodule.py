@@ -20,7 +20,7 @@ from pineboolib.application.utils.path import _dir
 
 if TYPE_CHECKING:
     from pineboolib.interfaces.dgi_schema import dgi_schema
-    from pineboolib.interfaces.iconnection import IConnection
+    from pineboolib.application.database.pnconnection import PNConnection
     from pineboolib.core.utils.struct import ActionStruct  # noqa: F401
 
 
@@ -33,7 +33,7 @@ class Project(object):
 
     logger = logging.getLogger("main.Project")
     _app: Optional[QtCore.QCoreApplication] = None
-    _conn: Optional["IConnection"] = None  # Almacena la conexión principal a la base de datos
+    _conn: Optional["PNConnection"] = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
     options: Values
     modules: Dict[str, "Module"]
@@ -81,7 +81,7 @@ class Project(object):
         self._app = app
 
     @property
-    def conn(self) -> "IConnection":
+    def conn(self) -> "PNConnection":
         """Retrieve current connection or throw."""
         if self._conn is None:
             raise Exception("Project is not initialized")
@@ -94,7 +94,7 @@ class Project(object):
             raise Exception("Project is not initialized")
         return self._DGI
 
-    def init_conn(self, connection: "IConnection") -> None:
+    def init_conn(self, connection: "PNConnection") -> None:
         """Initialize project with a connection."""
         self._conn = connection
         self.apppath = filedir("..")
