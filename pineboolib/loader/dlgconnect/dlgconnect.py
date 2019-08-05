@@ -31,7 +31,9 @@ class DlgConnect(QtWidgets.QWidget):
     minSize: QSize
     maxSize: QSize
     edit_mode: bool
+
     profiles: Dict[str, ProjectConfig]  #: Index of loaded profiles. Keyed by description.
+    selected_project_config: Optional[ProjectConfig]  #: Contains the selected item to load.
 
     def __init__(self) -> None:
         """
@@ -47,6 +49,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.sql_drivers = PNSqlDrivers()
         self.edit_mode = False
         self.profiles = {}
+        self.selected_project_config = None
 
     def load(self) -> None:
         """
@@ -172,66 +175,10 @@ class DlgConnect(QtWidgets.QWidget):
         """
         Open the selected connection.
         """
-        fileName = os.path.join(self.profile_dir, "%s.xml" % self.ui.cbProfiles.currentText())
-        tree = ET.parse(fileName)
-        root = tree.getroot()
-
-        _version = root.get("Version")
-        if _version is None:
-            version = 1.0
-        else:
-            version = float(_version)
-
-        last_profile = self.ui.cbProfiles.currentText()
-        if last_profile not in (None, ""):
-            settings.set_value("DBA/last_profile", last_profile)
-
-        for profile in root.findall("profile-data"):
-            if getattr(profile.find("password"), "text", None):
-                psP = getattr(profile.find("password"), "text", "")
-                invalid_password = False
-                if version == 1.0:
-                    psP = base64.b64decode(psP).decode()
-                    if psP:
-                        if self.ui.lePassword.text() != psP:
-                            invalid_password = True
-
-                else:
-                    user_pass = self.ui.lePassword.text()
-                    if not user_pass:
-                        user_pass = ""
-                    user_pass = hashlib.sha256(user_pass.encode()).hexdigest()
-                    if psP != user_pass:
-                        invalid_password = True
-
-                if invalid_password:
-                    QMessageBox.information(self.ui, "Pineboo", "Contraseña Incorrecta")
-                    return
-
-        self.database = getattr(root.find("database-name"), "text", None)
-        for db in root.findall("database-server"):
-            self.hostname = getattr(db.find("host"), "text", None)
-            self.portnumber = getattr(db.find("port"), "text", None)
-            self.driveralias = getattr(db.find("type"), "text", None)
-            if self.driveralias not in self.sql_drivers.aliasList():
-                QMessageBox.information(
-                    self.ui,
-                    "Pineboo",
-                    "Esta versión de pineboo no soporta el driver '%s'" % self.driveralias,
-                )
-                self.database = None
-                return
-        for credentials in root.findall("database-credentials"):
-            self.username = getattr(credentials.find("username"), "text", None)
-            ps = getattr(credentials.find("password"), "text", None)
-            if ps:
-                self.password = base64.b64decode(ps).decode()
-            else:
-                self.password = ""
-
-        if self.sql_drivers.isDesktopFile(self.driveralias):
-            self.database = "%s.sqlite3" % self.database
-
+        pconf = self.getProjectConfig(self.ui.cbProfiles.currentText())
+        if pconf is None:
+            return
+        self.selected_project_config = pconf
         self.close()
 
     @pyqtSlot()
@@ -339,6 +286,23 @@ class DlgConnect(QtWidgets.QWidget):
             os.remove(os.path.join(self.profile_dir, fileName))
             self.loadProfiles()
 
+    def getProjectConfig(self, name) -> Optional[ProjectConfig]:
+        """
+        Get a profile by name and ensure its fully loaded.
+        """
+        pconf: ProjectConfig = self.profiles[name]
+
+        if pconf.password_required:
+            # As it failed to load earlier, it needs a password.
+            # Copy the current password and test again...
+            pconf.project_password = self.ui.lePassword.text()
+            try:
+                pconf.load_projectxml()
+            except PasswordMismatchError:
+                QMessageBox.information(self.ui, "Pineboo", "Contraseña Incorrecta")
+                return None
+        return pconf
+
     @pyqtSlot()
     def editProfile(self) -> None:
         """
@@ -351,17 +315,9 @@ class DlgConnect(QtWidgets.QWidget):
         """
         Edit profile from name. Must have been loaded earlier on loadProfiles.
         """
-        pconf: ProjectConfig = self.profiles[name]
-
-        if pconf.password_required:
-            # As it failed to load earlier, it needs a password.
-            # Copy the current password and test again...
-            pconf.project_password = self.ui.lePassword.text()
-            try:
-                pconf.load_projectxml()
-            except PasswordMismatchError:
-                QMessageBox.information(self.ui, "Pineboo", "Contraseña Incorrecta")
-                return
+        pconf = self.getProjectConfig(name)
+        if pconf is None:
+            return
 
         self.ui.leProfilePassword.setText(pconf.project_password)
 

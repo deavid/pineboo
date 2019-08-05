@@ -17,17 +17,5 @@ def show_connection_dialog(app: QApplication) -> Optional[ProjectConfig]:
     connection_window.load()
     connection_window.show()
     app.exec_()  # FIXME: App should be started before this function
-    if connection_window.close():
-        project_config = None
-        if getattr(connection_window, "database", None):
-            project_config = ProjectConfig(
-                connection_window.database,
-                connection_window.hostname,
-                connection_window.portnumber,
-                connection_window.driveralias,
-                connection_window.username,
-                connection_window.password,
-            )
-
-        return project_config
-    return None
+    connection_window.close()
+    return connection_window.selected_project_config

@@ -311,6 +311,8 @@ def exec_main(options: Values) -> int:
         if not _DGI.mobilePlatform():
 
             configdb = show_connection_dialog(project.app)
+            if configdb is None:
+                return 2
         else:
             configdb = DEFAULT_SQLITE_CONN
 
