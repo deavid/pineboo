@@ -32,7 +32,7 @@ class FLREMOTECLIENT(object):
     name_: str
     alias_: str
     errorList: List[str]
-    lastError_: str
+    lastError_: Optional[str]
     db_ = None
     mobile_: bool
     pure_python_: bool
@@ -52,6 +52,7 @@ class FLREMOTECLIENT(object):
         self.id_ = 0
         self.url: Optional[str] = None
         check_dependencies({"requests": "requests"}, False)
+        self.lastError_ = None
 
     def useThreads(self) -> bool:
         return False

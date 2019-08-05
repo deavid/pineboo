@@ -31,7 +31,7 @@ class FLMYSQL_MYISAM2(object):
     conn_ = None
     name_: str
     alias_: str
-    lastError_ = ""
+    lastError_: Optional[str]
     cursorsArray_: Dict[str, Any]  # IApiCursor
     noInnoDB: bool
     mobile_: bool
@@ -61,6 +61,7 @@ class FLMYSQL_MYISAM2(object):
         self.engine_ = None
         self.session_ = None
         self.declarative_base_ = None
+        self.lastError_ = None
 
     def version(self) -> str:
         return self.version_
