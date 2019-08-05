@@ -19,7 +19,7 @@ from pineboolib.core.utils import logging
 from pineboolib.core.error_manager import error_manager
 
 from pineboolib.application import project
-from pineboolib.application.types import Array, Date, File, Dir, Object
+from pineboolib.application.types import Array, Date, File, Dir, Object, FileStatic
 from pineboolib.application.packager.aqunpacker import AQUnpacker
 from pineboolib.application import connections
 from pineboolib.application.qsatypes.sysbasetype import SysBaseType
@@ -915,7 +915,7 @@ class SysType(SysBaseType):
             tag.toElement().setAttribute(u"name", dbProName)
             doc.appendChild(tag)
             try:
-                File.write(ustr(dirBasePath, u"/mvproject.xml"), doc.toString(2))
+                FileStatic.write(ustr(dirBasePath, u"/mvproject.xml"), doc.toString(2))
             except Exception:
                 e = traceback.format_exc()
                 FLUtil.destroyProgressDialog()

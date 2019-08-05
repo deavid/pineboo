@@ -13,6 +13,9 @@ import re
 from xml.etree import ElementTree
 from typing import Any, Generator, Tuple, Type, List, Dict, Set, cast, Optional, TextIO, Callable
 from pathlib import Path
+from pineboolib.core.utils import logging
+
+logger = logging.getLogger(__name__)
 
 try:
     import black  # type: ignore
@@ -1569,7 +1572,8 @@ class Member(ASTPython):
                 arguments[0:1] = [
                     'super(getattr(self._module, "%s"), %s)' % (classname, ".".join(arguments[0:1]))
                 ]
-
+        if arguments[0] == "qsa.File":
+            arguments[0] = "qsa.FileStatic"
         replace_members = [
             "toString()",
             "length",
@@ -1590,6 +1594,7 @@ class Member(ASTPython):
             "replace",
             "search",
         ]
+
         for member in replace_members:
             for idx, arg in enumerate(arguments):
                 if member == arg or arg.startswith(member + "("):
