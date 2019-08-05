@@ -10,7 +10,7 @@ from PyQt5 import QtWidgets  # type: ignore
 from PyQt5.QtWidgets import QMessageBox  # type: ignore
 from PyQt5.QtCore import QSize  # type: ignore
 
-from pineboolib.core.utils.utils_base import filedir, indent
+from pineboolib.core.utils.utils_base import filedir, pretty_print_xml
 from pineboolib.core.settings import config, settings
 from pineboolib.core.decorators import pyqtSlot
 from typing import Optional, cast
@@ -274,7 +274,7 @@ class DlgConnect(QtWidgets.QWidget):
         dbname = ET.SubElement(profile, "database-name")
         dbname.text = nameDB
 
-        indent(profile)
+        pretty_print_xml(profile)
 
         tree = ET.ElementTree(profile)
 

@@ -1,7 +1,7 @@
 """
 Data Types for QSA.
 """
-
+import codecs
 import os
 import os.path
 import collections
@@ -355,7 +355,8 @@ class Dir(object):
 
         return retorno
 
-    def fileExists(self, file_name: str) -> bool:
+    @staticmethod
+    def fileExists(file_name: str) -> bool:
         """
         Check if a file does exist.
 
@@ -384,7 +385,8 @@ class Dir(object):
         """
         return filename
 
-    def setCurrent(self, val: Optional[str] = None) -> None:
+    @staticmethod
+    def setCurrent(val: Optional[str] = None) -> None:
         """
         Change current working folder.
 
@@ -409,9 +411,9 @@ class Dir(object):
             os.mkdir(name)
 
 
-class File(object):  # FIXME : Rehacer!!
+class FileBaseClass(object):
     """
-    Manage a file.
+    Constants for File and FileStatic.
     """
 
     ReadOnly = QIODevice.ReadOnly
@@ -419,6 +421,42 @@ class File(object):  # FIXME : Rehacer!!
     ReadWrite = QIODevice.ReadWrite
     Append = QIODevice.Append
     ioDevice = QIODevice
+
+    @staticmethod
+    def exists(name: str) -> bool:
+        """
+        Check if a file does exist.
+
+        @param name. Nombre del fichero.
+        @return boolean informando si existe o no el fichero.
+        """
+        return os.path.exists(name)
+
+    @staticmethod
+    def isDir(dir_name: str) -> bool:
+        """
+        Check if given path is a folder.
+
+        @param. Nombre del directorio
+        @return. boolean informando si la ruta dada es un directorio o no.
+        """
+        return os.path.isdir(dir_name)
+
+    @staticmethod
+    def isFile(file_name: str) -> bool:
+        """
+        Check if given path is a file.
+
+        @param. Nombre del fichero
+        @return. boolean informando si la ruta dada es un fichero o no.
+        """
+        return os.path.isfile(file_name)
+
+
+class File(FileBaseClass):  # FIXME : Rehacer!!
+    """
+    Manage a file.
+    """
 
     fichero: str
     mode_: QIODevice
@@ -457,7 +495,7 @@ class File(object):  # FIXME : Rehacer!!
         """Close file."""
         pass
 
-    def read(self: Union["File", str], bytes: bool = False) -> Union[str, bytes]:
+    def read(self, bytes: bool = False) -> Union[str, bytes]:
         """
         Read file completely.
 
@@ -467,15 +505,11 @@ class File(object):  # FIXME : Rehacer!!
         file_: str
         encode: str
 
-        if isinstance(self, str):
-            file_ = self
-            encode = "iso-8859-15"
-        else:
-            if self.fichero is None:
-                raise ValueError("self.fichero is not defined!")
+        if self.fichero is None:
+            raise ValueError("self.fichero is not defined!")
 
-            file_ = self.fichero
-            encode = self.encode_
+        file_ = self.fichero
+        encode = self.encode_
         import codecs
 
         if file_ is None:
@@ -487,40 +521,27 @@ class File(object):  # FIXME : Rehacer!!
             ret = ret + l
 
         f.close()
-        if isinstance(self, File):
-            self.eof = True
+        self.eof = True
         return ret
 
-    def write(self: Union["File", str], data: Union[str, bytes], length: int = -1) -> None:
+    def write(self, data: Union[str, bytes], length: int = -1) -> None:
         """
         Write data back to the file.
 
         @param data. Valores a guardar en el fichero
         @param length. Tamaño de data. (No se usa)
         """
-        encode: str
-        file_: str
-
-        if isinstance(self, str):
-            file_ = self
-            encode = "utf-8"
-        else:
-            if self.fichero is None:
-                raise ValueError("self.fichero is empty!")
-            file_ = self.fichero
-            encode = self.encode_
-
-        if encode is None:
-            raise ValueError("encode is empty!")
+        if self.fichero is None:
+            raise ValueError("self.fichero is empty!")
+        file_: str = self.fichero
+        encode: str = self.encode_
 
         if isinstance(data, str):
             bytes_ = data.encode(encode)
         else:
             bytes_ = data
-        mode = "wb"
-        if isinstance(self, File):
-            if self.mode_ == self.Append:
-                mode = "ab"
+
+        mode = "ab" if self.mode_ == self.Append else "wb"
         with open(file_, mode) as file:
             file.write(bytes_)
 
@@ -535,36 +556,6 @@ class File(object):  # FIXME : Rehacer!!
             file.write(bytes_array)
 
         file.close()
-
-    @staticmethod
-    def exists(name: str) -> bool:
-        """
-        Check if a file does exist.
-
-        @param name. Nombre del fichero.
-        @return boolean informando si existe o no el fichero.
-        """
-        return os.path.exists(name)
-
-    @staticmethod
-    def isDir(dir_name: str) -> bool:
-        """
-        Check if given path is a folder.
-
-        @param. Nombre del directorio
-        @return. boolean informando si la ruta dada es un directorio o no.
-        """
-        return os.path.isdir(dir_name)
-
-    @staticmethod
-    def isFile(file_name: str) -> bool:
-        """
-        Check if given path is a file.
-
-        @param. Nombre del fichero
-        @return. boolean informando si la ruta dada es un fichero o no.
-        """
-        return os.path.isfile(file_name)
 
     def getName(self) -> str:
         """
@@ -652,16 +643,59 @@ class File(object):  # FIXME : Rehacer!!
         f.write(data_b)
         f.close()
 
-    def remove(self: Union["File", str]) -> bool:
+    def remove(self) -> bool:
         """
         Delete file from filesystem.
 
         @return Boolean . True si se ha borrado el fichero, si no False.
         """
-        if isinstance(self, str):
-            file = File(self)
-            return file.remove()
-        else:
-            return self.qfile.remove()
+        return self.qfile.remove()
 
     name = property(getName)
+
+
+class FileStatic(FileBaseClass):
+    """
+    Static methods for File that overlap in name.
+    """
+
+    @staticmethod
+    def remove(self: str) -> bool:
+        """
+        Delete file from filesystem.
+
+        @return Boolean . True si se ha borrado el fichero, si no False.
+        """
+        file = File(self)
+        return file.remove()
+
+    @staticmethod
+    def read(file_: str, bytes: bool = False) -> Union[str, bytes]:
+        """
+        Read file completely.
+
+        @param bytes. Especifica si se lee en modo texto o en bytes
+        @return contenido del fichero
+        """
+
+        with codecs.open(file_, "r" if not bytes else "rb", encoding="iso-8859-15") as f:
+            ret = f.read()
+        return ret
+
+    @staticmethod
+    def write(file_: str, data: Union[str, bytes], length: int = -1) -> None:
+        """
+        Write data back to the file.
+
+        @param data. Valores a guardar en el fichero
+        @param length. Tamaño de data. (No se usa)
+        """
+        if isinstance(data, str):
+            bytes_ = data.encode("utf-8")
+        else:
+            bytes_ = data
+
+        with open(file_, "wb") as file:
+            file.write(bytes_)
+
+        file.close()

@@ -120,3 +120,7 @@ class ActionStruct(XMLStruct):
     # FIXME: Those methods are here to avoid projectmodule from loading XMLAction and qsa.*
     load: Callable
     load_script: Callable
+    openDefaultForm: Callable
+    execDefaultScript: Callable
+    openDefaultFormRecord: Callable
+    mod: Any

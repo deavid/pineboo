@@ -103,7 +103,7 @@ class PNRelationMetaData:
         return self.d.cardinality_
 
     @decorators.BetaImplementation
-    def deleteCascade(self):
+    def deleteCascade(self) -> bool:
         """
         Get if the relationship implies cascaded deletions, it is only taken into account in M1 cardinalities.
 
@@ -113,7 +113,7 @@ class PNRelationMetaData:
         return self.d.deleteCascade_ and self.d.cardinality_ == self.RELATION_M1
 
     @decorators.BetaImplementation
-    def updateCascade(self):
+    def updateCascade(self) -> bool:
         """
         Get if the relationship involves cascade modifications, it is only taken into account in M1 cardinalities.
 

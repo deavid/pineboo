@@ -11,7 +11,7 @@ from typing import List, Optional, Union, Any, TYPE_CHECKING
 from .pnrelationmetadata import PNRelationMetaData
 
 if TYPE_CHECKING:
-    from pineboolib.interfaces import ITableMetaData
+    from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
 
 
 logger = logging.getLogger("PNFieldMetadata")
@@ -411,14 +411,16 @@ class PNFieldMetaData(IFieldMetaData):
         self.d.associatedFieldName_ = name
         self.d.associatedFieldFilterTo_ = f
 
-    def associatedField(self) -> Optional["ITableMetaData"]:
+    def associatedField(self) -> Optional["PNFieldMetaData"]:
         """
         Return the associated field for this field.
 
         @return FLFieldMetaData object that defines the field associated with it, or 0 if there is no associated field.
         """
         mtd = self.metadata()
-        return mtd and mtd.field(self.d.associatedFieldName_)
+        if mtd is None:
+            return None
+        return mtd.field(self.d.associatedFieldName_)
 
     def associatedFieldFilterTo(self) -> str:
         """
@@ -550,13 +552,13 @@ class PNFieldMetaData(IFieldMetaData):
 
         self.d.trimmed_ = t
 
-    def setMetadata(self, mtd: "ITableMetaData") -> None:
+    def setMetadata(self, mtd: "PNTableMetaData") -> None:
         """
         Set the PNTableMetaData object to which it belongs.
         """
         self.d.mtd_ = mtd
 
-    def metadata(self) -> Optional["ITableMetaData"]:
+    def metadata(self) -> Optional["PNTableMetaData"]:
         """
         Get the FLTableMetaData object to which it belongs.
         """
@@ -905,7 +907,7 @@ class PNFieldMetaDataPrivate(object):
     """
     Objeto FLTableMetaData al que pertenece
     """
-    mtd_: Optional["ITableMetaData"] = None
+    mtd_: Optional["PNTableMetaData"] = None
 
     def __init__(self, *args, **kwargs) -> None:
         """Initialize the class."""

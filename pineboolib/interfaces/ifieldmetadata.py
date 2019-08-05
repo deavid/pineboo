@@ -33,7 +33,7 @@ class IFieldMetaData:
         """Determine if this field allos NULLs."""
         return False
 
-    def associatedField(self) -> Optional["ITableMetaData"]:
+    def associatedField(self) -> Optional["IFieldMetaData"]:
         """Return associated field."""
         return None
 

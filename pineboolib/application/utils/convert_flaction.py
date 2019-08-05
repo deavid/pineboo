@@ -2,7 +2,7 @@
 
 from pineboolib.core.utils import logging
 
-from typing import Union, TYPE_CHECKING
+from typing import Union, cast, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.application.xmlaction import XMLAction
@@ -23,7 +23,7 @@ def convertFLAction(action: "FLAction") -> "XMLAction":
 
     if action.name() not in project.actions.keys():
         raise KeyError("Action %s not loaded in current project" % action.name())
-    return project.actions[action.name()]
+    return cast("XMLAction", project.actions[action.name()])
 
 
 def convert2FLAction(action: Union[str, "XMLAction"]) -> "FLAction":

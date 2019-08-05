@@ -847,6 +847,22 @@ def pythonify2(filename: str, known_refs: Dict[str, Tuple[str, str]] = {}) -> st
     return pythonize2(ast, known_refs)
 
 
+def pythonify_string(qs_code: str, known_refs: Dict[str, Tuple[str, str]] = {}) -> str:
+    """Convert QS string to Python. For unit-testing, only evaluates expressions."""
+    from .pytnyzer import pythonize2
+
+    prog = flscriptparse.parse(qs_code)
+    if not prog:
+        raise Exception("Parse failed")
+    if prog["error_count"] > 0:
+        raise Exception("Found %d errors parsing string" % (prog["error_count"]))
+
+    tree_data: TreeData = flscriptparse.calctree(prog, alias_mode=0)
+    ast = post_parse(tree_data)
+    ast.set("parser-template", "expression_template")
+    return pythonize2(ast, known_refs)
+
+
 def execute(options: Any, args: List[str]) -> None:
     """Execute conversion orders given by options and args. Can be used to emulate program calls."""
     from pineboolib.application.parsers.qsaparser import pytnyzer

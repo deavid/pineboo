@@ -19,7 +19,7 @@ from pineboolib.core.utils import logging
 from pineboolib.core.error_manager import error_manager
 
 from pineboolib.application import project
-from pineboolib.application.types import Array, Date, File, Dir, Object
+from pineboolib.application.types import Array, Date, File, Dir, Object, FileStatic
 from pineboolib.application.packager.aqunpacker import AQUnpacker
 from pineboolib.application import connections
 from pineboolib.application.qsatypes.sysbasetype import SysBaseType
@@ -865,11 +865,9 @@ class SysType(SysBaseType):
         dirBasePath = FileDialog.getExistingDirectory(Dir.home)
         if not dirBasePath:
             return
-        dataBaseName = project.conn.db().database()
+        dataBaseName = project.conn.db_name
         dirBasePath = Dir.cleanDirPath(
-            ustr(
-                dirBasePath, u"/modulos_exportados_", dataBaseName.mid(dataBaseName.rfind(u"/") + 1)
-            )
+            ustr(dirBasePath, u"/modulos_exportados_", dataBaseName[dataBaseName.rfind(u"/") + 1 :])
         )
         dir = Dir()
         if not dir.fileExists(dirBasePath):
@@ -917,7 +915,7 @@ class SysType(SysBaseType):
             tag.toElement().setAttribute(u"name", dbProName)
             doc.appendChild(tag)
             try:
-                File.write(ustr(dirBasePath, u"/mvproject.xml"), doc.toString(2))
+                FileStatic.write(ustr(dirBasePath, u"/mvproject.xml"), doc.toString(2))
             except Exception:
                 e = traceback.format_exc()
                 FLUtil.destroyProgressDialog()

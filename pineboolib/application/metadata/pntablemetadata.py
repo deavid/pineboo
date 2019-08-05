@@ -550,7 +550,7 @@ class PNTableMetaData(ITableMetaData):
 
         return None
 
-    def fieldVisible(self, fN: str) -> None:
+    def fieldVisible(self, fN: str) -> Optional[bool]:
         """
         Get if a field is visible.
 
@@ -558,13 +558,13 @@ class PNTableMetaData(ITableMetaData):
         """
 
         if not fN:
-            return
+            return None
 
         for f in self.fieldList():
             if f.name() == fN.lower():
                 return f.visible()
 
-        return
+        return None
 
     def field(self, fN: str) -> Optional["PNFieldMetaData"]:
         """

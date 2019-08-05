@@ -2,7 +2,6 @@
 
 if [ "$1" = "" ]; then
     test -e source/code/pineboolib && mv source/code/pineboolib source/code/old.pineboolib
-    mkdir source/code/pineboolib
     # Create folders
     (cd .. && git ls-files -- pineboolib/"*.py") | sed 's|/[^/]*$||' | sort -u | awk '{ print "source/code/" $0}' | xargs mkdir
 
@@ -11,7 +10,7 @@ if [ "$1" = "" ]; then
     (cd .. && git ls-files -- pineboolib/"*.py") | sed 's|\.py||' | sed 's|/__init__$|/index|' | sort -u | xargs -n1 $0 tpl
 
     test -e source/code/old.pineboolib && rm source/code/old.pineboolib -R
-
+    exit 0;
 fi
 
 if [ "$1" = "tpl" ]; then

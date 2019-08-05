@@ -27,7 +27,7 @@ class FLMYSQL_MYISAM(object):
     conn_ = None
     name_: str
     alias_: str
-    lastError_ = ""
+    lastError_: Optional[str]
     cursorsArray_: Dict[str, Any]
     noInnoDB: bool
     mobile_ = False
@@ -57,6 +57,7 @@ class FLMYSQL_MYISAM(object):
         self.engine_ = None
         self.session_ = None
         self.declarative_base_ = None
+        self.lastError_ = None
 
     def version(self) -> str:
         return self.version_
@@ -419,7 +420,7 @@ class FLMYSQL_MYISAM(object):
     def setLastError(self, text, command) -> None:
         self.lastError_ = "%s (%s)" % (text, command)
 
-    def lastError(self) -> str:
+    def lastError(self) -> Optional[str]:
         return self.lastError_
 
     def commitTransaction(self) -> bool:

@@ -29,7 +29,7 @@ class FLSQLITE(object):
     cursor_ = None
     alias_: str
     errorList: List[str]
-    lastError_: str
+    lastError_: Optional[str]
     declare = None
     db_filename: str
     sql: str
@@ -66,6 +66,7 @@ class FLSQLITE(object):
         self.engine_ = None
         self.session_ = None
         self.declarative_base_ = None
+        self.lastError_ = None
 
     def pure_python(self) -> bool:
         return self.pure_python_
@@ -313,7 +314,7 @@ class FLSQLITE(object):
     def setLastError(self, text, command) -> None:
         self.lastError_ = "%s (%s)" % (text, command)
 
-    def lastError(self) -> str:
+    def lastError(self) -> Optional[str]:
         return self.lastError_
 
     def commitTransaction(self) -> bool:

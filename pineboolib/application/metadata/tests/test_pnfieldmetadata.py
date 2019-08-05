@@ -16,7 +16,11 @@ class TestStringField(unittest.TestCase):
         from pineboolib.application import project
 
         mtd = project.conn.manager().metadata("flmodules")
+        if mtd is None:
+            raise Exception
         field = mtd.field("version")
+        if field is None:
+            raise Exception
 
         self.assertNotEqual(field, None)
         self.assertEqual(field.name(), "version")
@@ -51,6 +55,8 @@ class TestCopyField(unittest.TestCase):
         from pineboolib.application.metadata.pnfieldmetadata import PNFieldMetaData
 
         mtd = project.conn.manager().metadata("flmodules")
+        if mtd is None:
+            raise Exception
         field_1 = mtd.field("version")
 
         field_2 = PNFieldMetaData(field_1)
@@ -82,7 +88,11 @@ class TestUintField(unittest.TestCase):
         from pineboolib.application import project
 
         mtd = project.conn.manager().metadata("flseqs")
+        if mtd is None:
+            raise Exception
         field = mtd.field("seq")
+        if field is None:
+            raise Exception
 
         self.assertNotEqual(field, None)
         self.assertEqual(field.name(), "seq")
@@ -102,7 +112,8 @@ class TestUintField(unittest.TestCase):
         self.assertEqual(assign_value, "seq = 666")
 
         table_metadata = field.metadata()
-
+        if table_metadata is None:
+            raise Exception
         self.assertEqual(table_metadata.name(), "flseqs")
 
 
@@ -120,7 +131,11 @@ class TestStringListField(unittest.TestCase):
         from pineboolib.application import project
 
         mtd = project.conn.manager().metadata("flsettings")
+        if mtd is None:
+            raise Exception
         field = mtd.field("valor")
+        if field is None:
+            raise Exception
 
         self.assertNotEqual(field, None)
         self.assertEqual(field.name(), "valor")
@@ -151,8 +166,13 @@ class TestPixmapField(unittest.TestCase):
         from pineboolib.application import project
 
         mtd = project.conn.manager().metadata("flmodules")
+        if mtd is None:
+            raise Exception
 
         field = mtd.field("icono")
+        if field is None:
+            raise Exception
+
         self.assertNotEqual(field, None)
         self.assertEqual(field.name(), "icono")
         self.assertEqual(field.isPrimaryKey(), False)
@@ -181,8 +201,12 @@ class TestUnlockField(unittest.TestCase):
         from pineboolib.application import project
 
         mtd = project.conn.manager().metadata("flmodules")
+        if mtd is None:
+            raise Exception
 
         field = mtd.field("bloqueo")
+        if field is None:
+            raise Exception
         self.assertNotEqual(field, None)
         self.assertEqual(field.name(), "bloqueo")
         self.assertEqual(field.isPrimaryKey(), False)
@@ -212,8 +236,12 @@ class TestBoolField(unittest.TestCase):
         from pineboolib.application import project
 
         mtd = project.conn.manager().metadata("flmetadata")
+        if mtd is None:
+            raise Exception
 
         field = mtd.field("bloqueo")
+        if field is None:
+            raise Exception
         self.assertNotEqual(field, None)
         self.assertEqual(field.name(), "bloqueo")
         self.assertEqual(field.alias(), "Tabla bloqueada")
@@ -244,7 +272,11 @@ class TestDateField(unittest.TestCase):
         from pineboolib.application import project
 
         mtd = project.conn.manager().metadata("flupdates")
+        if mtd is None:
+            raise Exception
         field = mtd.field("fecha")
+        if field is None:
+            raise Exception
 
         self.assertNotEqual(field, None)
         self.assertEqual(field.name(), "fecha")
@@ -276,7 +308,11 @@ class TestTimeField(unittest.TestCase):
         from pineboolib.application import project
 
         mtd = project.conn.manager().metadata("flupdates")
+        if mtd is None:
+            raise Exception
         field = mtd.field("hora")
+        if field is None:
+            raise Exception
 
         self.assertNotEqual(field, None)
         self.assertEqual(field.name(), "hora")

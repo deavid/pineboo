@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Profile Version="1.1">
+  <profile-data>
+    <password />
+  </profile-data>
+  <name>unnamed</name>
+  <database-server>
+    <type>SQLite3 (SQLITE3)</type>
+    <host />
+    <port />
+  </database-server>
+  <database-credentials>
+    <username />
+    <password />
+  </database-credentials>
+  <database-name>mydb</database-name>
+</Profile>

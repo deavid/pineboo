@@ -1,11 +1,11 @@
 """Connection Module."""
-
+import getpass
 from optparse import Values
 from typing import Optional
 
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.application.database.pnconnection import PNConnection
-from .projectconfig import ProjectConfig
+from .projectconfig import ProjectConfig, PasswordMismatchError
 
 
 DEFAULT_SQLITE_CONN = ProjectConfig(database="pineboo.sqlite3", type="SQLite3 (SQLITE3)")
@@ -19,7 +19,14 @@ def config_dbconn(options: Values) -> Optional[ProjectConfig]:
         if not options.project.endswith(".xml"):
             options.project += ".xml"
         prjpath = filedir("../profiles", options.project)
-        return ProjectConfig(load_xml=prjpath)
+        try:
+            return ProjectConfig(load_xml=prjpath)
+        except PasswordMismatchError:
+            # If fails without password, ignore the exception so the stack is cleaned.
+            # This avoids seeing two exceptions if password is wrong.
+            pass
+        password = getpass.getpass()
+        return ProjectConfig(load_xml=prjpath, project_password=password)
 
     if options.connection:
         return ProjectConfig(connstring=options.connection)
