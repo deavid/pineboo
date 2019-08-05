@@ -2334,9 +2334,9 @@ class PNSqlCursor(QtCore.QObject):
         if self._selection is None:
             raise Exception("Call setAction first.")
         self._selection.select(new_selection, QtCore.QItemSelectionModel.ClearAndSelect)
-        self.d._currentregister = row
         # self.d._current_changed.emit(self.at())
         if row < self.d._model.rows and row >= 0:
+            self.d._currentregister = row
             return True
         else:
             return False

@@ -1,3 +1,5 @@
+"""Test_pntablemetadata module."""
+
 import unittest
 from pineboolib.loader.main import init_testing
 
