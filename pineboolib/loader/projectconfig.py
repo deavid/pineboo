@@ -50,8 +50,10 @@ class ProjectConfig:
         connstring: Optional[str] = None,
         description: Optional[str] = None,
         filename: Optional[str] = None,
+        project_password: str = "",
     ) -> None:
         """Initialize."""
+        self.project_password = project_password
 
         if connstring:
             username, password, type, host, port, database = self.translate_connstring(connstring)
@@ -69,7 +71,6 @@ class ProjectConfig:
         self.type = type
         self.username = username
         self.password = password
-        self.project_password = ""
         self.description = description if description else "unnamed"
         if filename is None:
             file_basename = self.description.lower().replace(" ", "_")
@@ -105,20 +106,18 @@ class ProjectConfig:
         for profile in root.findall("profile-data"):
             invalid_password = False
             if version == VERSION_1_0:
-                self.project_password = getattr(profile.find("password"), "text", "")
-                if self.project_password:
+                stored_password = getattr(profile.find("password"), "text", "")
+                if self.project_password != stored_password:
                     invalid_password = True
             else:
                 profile_pwd = getattr(profile.find("password"), "text", "")
-                self.project_password = profile_pwd
                 if profile_pwd:
-                    user_pwd = hashlib.sha256("".encode()).hexdigest()
+                    user_pwd = hashlib.sha256(self.project_password.encode()).hexdigest()
                     if profile_pwd != user_pwd:
                         invalid_password = True
 
             if invalid_password:
-                self.logger.warning("No se puede cargar un profile con contraseña por consola")
-                return False
+                raise ValueError("No se puede cargar un profile con contraseña por consola")
 
         from pineboolib.application.database.pnsqldrivers import PNSqlDrivers
 
