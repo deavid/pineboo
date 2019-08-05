@@ -8,12 +8,14 @@ import types
 
 from pineboolib.qt3_widgets.qdateedit import QDateEdit
 from pineboolib.qt3_widgets.qtable import QTable
+from pineboolib.qt3_widgets.formdbwidget import FormDBWidget
 
 from pineboolib.core.utils import logging
 
-from PyQt5 import QtCore
+from PyQt5.QtCore import Qt, QObject, pyqtSignal
+from PyQt5.QtWidgets import QWidget
 
-from typing import Callable, Any, List, Dict, Tuple, Optional
+from typing import Callable, Any, Dict, Tuple, Optional
 
 logger = logging.getLogger("application.connections")
 
@@ -25,7 +27,7 @@ class ProxySlot:
 
     PROXY_FUNCTIONS: Dict[str, Callable] = {}
 
-    def __init__(self, remote_fn: types.MethodType, receiver: Any, slot: Any) -> None:
+    def __init__(self, remote_fn: types.MethodType, receiver: QObject, slot: str) -> None:
         """Create a proxy for a method."""
         self.key = "%r.%r->%r" % (remote_fn, receiver, slot)
         if self.key not in self.PROXY_FUNCTIONS:
@@ -56,10 +58,10 @@ def get_expected_kwargs(inspected_function: Callable) -> bool:
     return True if expected_kwargs else False
 
 
-def proxy_fn(wf: weakref.WeakMethod, wr: weakref.ref, slot: Any) -> Callable:
+def proxy_fn(wf: weakref.WeakMethod, wr: weakref.ref, slot: str) -> Callable:
     """Create a proxied function, so it does not hold the garbage collector."""
 
-    def fn(*args: List[Any], **kwargs: Dict[str, Any]) -> Optional[Any]:
+    def fn(*args: Any, **kwargs: Any) -> Optional[Any]:
         f = wf()
         if not f:
             return None
@@ -77,16 +79,20 @@ def proxy_fn(wf: weakref.WeakMethod, wr: weakref.ref, slot: Any) -> Callable:
     return fn
 
 
-def slot_done(fn: Callable, signal: Any, sender: Any, caller: Any) -> Callable:
+def slot_done(
+    fn: Callable, signal: pyqtSignal, sender: QWidget, caller: Optional[FormDBWidget]
+) -> Callable:
     """Create a fake slot for QS connects."""
 
-    def new_fn(*args: List[Any], **kwargs: Dict[str, Any]) -> Any:
+    def new_fn(*args: Any, **kwargs: Any) -> Any:
 
         res = False
+        # PyQt5-Stubs seems to miss pyqtSignal.name (also, this seems to be internal)
+        original_signal_name: str = getattr(signal, "signal")
 
         # Este parche es para evitar que las conexiones de un clicked de error de cantidad de argumentos.
         # En Eneboo se esperaba que signal no contenga argumentos
-        if signal.signal == "2clicked(bool)":
+        if original_signal_name == "2clicked(bool)":
             args = tuple()
         # args_num = get_expected_args_num(fn)
         try:
@@ -102,9 +108,11 @@ def slot_done(fn: Callable, signal: Any, sender: Any, caller: Any) -> Callable:
 
         if caller is not None:
             try:
-                if signal.signal != caller.signal_test.signal:
-                    signal_name = signal.signal[
-                        1 : signal.signal.find("(")
+                # PyQt5-Stubs seems to miss pyqtSignal.name (also, this seems to be internal)
+                caller_signal_name: str = getattr(caller.signal_test, "signal")
+                if original_signal_name != caller_signal_name:
+                    signal_name = original_signal_name[
+                        1 : original_signal_name.find("(")
                     ]  # Quitamos el caracter "2" inicial y parámetros
                     logger.debug(
                         "Emitir evento test: %s, args:%s kwargs:%s",
@@ -114,7 +122,7 @@ def slot_done(fn: Callable, signal: Any, sender: Any, caller: Any) -> Callable:
                     )
                     caller.signal_test.emit(signal_name, sender)
             except Exception:
-                pass
+                logger.trace("Error emitting signal_test", exc_info=True)
 
         return res
 
@@ -122,9 +130,21 @@ def slot_done(fn: Callable, signal: Any, sender: Any, caller: Any) -> Callable:
 
 
 def connect(
-    sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = None
-) -> Optional[Tuple[Any, Any]]:
+    sender: QWidget,
+    signal: str,
+    receiver: QObject,
+    slot: str,
+    caller: Optional[FormDBWidget] = None,
+) -> Optional[Tuple[pyqtSignal, Callable]]:
     """Connect signal to slot for QSA."""
+
+    # Parameters example:
+    # caller: <clientes.FormInternalObj object at 0x7f78b5c230f0>
+    # sender: <pineboolib.qt3_widgets.qpushbutton.QPushButton object at 0x7f78b4de1af0>
+    # signal: 'clicked()'
+    # receiver: <clientes.FormInternalObj object at 0x7f78b5c230f0>
+    # slot: 'iface.buscarContacto()'
+
     if caller is not None:
         logger.trace("* * * Connect:: %s %s %s %s %s", caller, sender, signal, receiver, slot)
     else:
@@ -134,7 +154,7 @@ def connect(
     if not signal_slot:
         return None
     # http://pyqt.sourceforge.net/Docs/PyQt4/qt.html#ConnectionType-enum
-    conntype = QtCore.Qt.QueuedConnection | QtCore.Qt.UniqueConnection
+    conntype = Qt.QueuedConnection | Qt.UniqueConnection
     new_signal, new_slot = signal_slot
 
     # if caller:
@@ -143,10 +163,9 @@ def connect(
     #            return False
 
     try:
-        slot_done_fn = slot_done(new_slot, new_signal, sender, caller)
-        new_signal.connect(slot_done_fn, type=conntype)
-        # new_signal.connect(new_slot, type=conntype)
-
+        slot_done_fn: Callable = slot_done(new_slot, new_signal, sender, caller)
+        # MyPy/PyQt5-Stubs misses connect(type=param)
+        new_signal.connect(slot_done_fn, type=conntype)  # type: ignore
     except Exception:
         logger.warning("ERROR Connecting: %s %s %s %s", sender, signal, receiver, slot)
         return None
@@ -156,28 +175,32 @@ def connect(
 
 
 def disconnect(
-    sender: Any, signal: Any, receiver: Any, slot: str, caller: Any = None
-) -> Optional[Tuple[Any, Any]]:
+    sender: QWidget,
+    signal: str,
+    receiver: QObject,
+    slot: str,
+    caller: Optional[FormDBWidget] = None,
+) -> Optional[Tuple[pyqtSignal, Callable]]:
     """Disconnect signal from slot for QSA."""
     signal_slot = solve_connection(sender, signal, receiver, slot)
     if not signal_slot:
         return None
-    signal, slot = signal_slot
+    signal_, real_slot = signal_slot
     try:
-        signal.disconnect(slot)
+        signal_.disconnect(real_slot)
     except Exception:
-        pass
+        logger.trace("Error disconnecting %r", (sender, signal, receiver, slot), exc_info=True)
 
     return signal_slot
 
 
 def solve_connection(
-    sender: Any, signal: str, receiver: Any, slot: str
-) -> Optional[Tuple[Any, Any]]:
+    sender: QWidget, signal: str, receiver: QObject, slot: str
+) -> Optional[Tuple[pyqtSignal, Callable]]:
     """Try hard to guess which is the correct way of connecting signal to slot. For QSA."""
-    if sender is None:
-        logger.error("Connect Error:: %s %s %s %s", sender, signal, receiver, slot)
-        return None
+    # if sender is None:
+    #     logger.error("Connect Error:: %s %s %s %s", sender, signal, receiver, slot)
+    #     return None
 
     m = re.search(r"^(\w+)\.(\w+)(\(.*\))?", slot)
     if slot.endswith("()"):
@@ -232,7 +255,7 @@ def solve_connection(
             raise AttributeError("Object %s not found on %s" % (remote_fn, remote_obj))
         return oSignal, remote_fn
 
-    elif isinstance(receiver, QtCore.QObject):
+    elif isinstance(receiver, QObject):
         if isinstance(slot, str):
             oSlot = getattr(receiver, slot, None)
             if not oSlot:
@@ -248,13 +271,12 @@ def solve_connection(
                 )
                 return None
             return oSignal, oSlot
-    else:
-        logger.error(
-            "Al realizar connect %s:%s -> %s:%s ; "
-            "el slot no se reconoce y el receptor no es QObject.",
-            sender,
-            signal,
-            receiver,
-            slot,
-        )
-    return None
+    # logger.error(
+    #     "Al realizar connect %s:%s -> %s:%s ; "
+    #     "el slot no se reconoce y el receptor no es QObject.",
+    #     sender,
+    #     signal,
+    #     receiver,
+    #     slot,
+    # )
+    # return None
