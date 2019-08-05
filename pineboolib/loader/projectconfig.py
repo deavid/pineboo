@@ -37,6 +37,7 @@ class ProjectConfig:
     password: Optional[str]  #: Database User login password.
     type: str  #: Driver Type name to use when connecting
     project_password: str  #: Password to cipher when load/saving. Empty string for no ciphering.
+    password_required: bool  #: True if a password is required to read data. (Was partially loaded.)
     description: str  #: Project name in GUI
     filename: str  #: File path to read / write this project from / to
 
@@ -56,6 +57,7 @@ class ProjectConfig:
     ) -> None:
         """Initialize."""
         self.project_password = project_password
+        self.password_required = False
 
         if connstring:
             username, password, type, host, port, database = self.translate_connstring(connstring)
@@ -167,6 +169,7 @@ class ProjectConfig:
                         invalid_password = True
 
             if invalid_password:
+                self.password_required = True
                 raise PasswordMismatchError("La contraseña es errónea")
 
         from pineboolib.application.database.pnsqldrivers import PNSqlDrivers
@@ -205,6 +208,7 @@ class ProjectConfig:
                 self.password = base64.b64decode(password_elem.text).decode()
             else:
                 self.password = ""
+        self.password_required = False
 
         return True
 

@@ -12,9 +12,12 @@ from PyQt5.QtCore import QSize  # type: ignore
 
 from pineboolib.core.utils.utils_base import filedir, pretty_print_xml
 from pineboolib.core.settings import config, settings
+from pineboolib.core.utils import logging
 from pineboolib.core.decorators import pyqtSlot
-from pineboolib.loader.projectconfig import ProjectConfig
-from typing import Optional, cast
+from pineboolib.loader.projectconfig import ProjectConfig, PasswordMismatchError
+from typing import Optional, cast, Dict
+
+logger = logging.getLogger(__name__)
 
 
 class DlgConnect(QtWidgets.QWidget):
@@ -28,6 +31,7 @@ class DlgConnect(QtWidgets.QWidget):
     minSize: QSize
     maxSize: QSize
     edit_mode: bool
+    profiles: Dict[str, ProjectConfig]  #: Index of loaded profiles. Keyed by description.
 
     def __init__(self) -> None:
         """
@@ -42,6 +46,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.profile_dir: str = ProjectConfig.profile_dir
         self.sql_drivers = PNSqlDrivers()
         self.edit_mode = False
+        self.profiles = {}
 
     def load(self) -> None:
         """
@@ -104,14 +109,33 @@ class DlgConnect(QtWidgets.QWidget):
             # os.mkdir(filedir(self.profile_dir))
             return
 
-        files = [
-            f
-            for f in sorted(os.listdir(self.profile_dir))
-            if os.path.isfile(os.path.join(self.profile_dir, f))
-        ]
-        for file in files:
-            fileName = file.split(".")[0]
-            self.ui.cbProfiles.addItem(fileName)
+        with os.scandir(self.profile_dir) as it:
+            for entry in it:
+                if entry.name.startswith("."):
+                    continue
+                if not entry.name.endswith(".xml"):
+                    continue
+                if not entry.is_file():
+                    continue
+
+                pconf = ProjectConfig(
+                    filename=os.path.join(self.profile_dir, entry.name),
+                    database="unset",
+                    type="unset",
+                )
+                try:
+                    pconf.load_projectxml()
+                except PasswordMismatchError:
+                    logger.trace(
+                        "Profile %r [%r] requires a password", pconf.description, entry.name
+                    )
+                except Exception:
+                    logger.exception("Unexpected error trying to read profile %r", entry.name)
+                    continue
+                self.profiles[pconf.description] = pconf
+
+        for name in sorted(self.profiles.keys()):
+            self.ui.cbProfiles.addItem(name)
 
         last_profile = settings.value("DBA/last_profile", None)
         if last_profile:
@@ -321,58 +345,39 @@ class DlgConnect(QtWidgets.QWidget):
         Edit the selected connection.
         """
         # Cogemos el perfil y lo abrimos
-        file_name = os.path.join(self.profile_dir, "%s.xml" % self.ui.cbProfiles.currentText())
-        self.editProfileName(file_name)
+        self.editProfileName(self.ui.cbProfiles.currentText())
 
-    def editProfileName(self, file_name: str) -> None:
+    def editProfileName(self, name: str) -> None:
         """
-        Edit profile from filename.
+        Edit profile from name. Must have been loaded earlier on loadProfiles.
         """
-        tree = ET.parse(file_name)
-        root = tree.getroot()
+        pconf: ProjectConfig = self.profiles[name]
 
-        _version = root.get("Version")
-        if _version is None:
-            version = 1.0
-        else:
-            version = float(_version)
+        if pconf.password_required:
+            # As it failed to load earlier, it needs a password.
+            # Copy the current password and test again...
+            pconf.project_password = self.ui.lePassword.text()
+            try:
+                pconf.load_projectxml()
+            except PasswordMismatchError:
+                QMessageBox.information(self.ui, "Pineboo", "Contraseña Incorrecta")
+                return
 
-        self.ui.leProfilePassword.setText("")
+        self.ui.leProfilePassword.setText(pconf.project_password)
 
-        if version == 1.0:
-            self.ui.cbAutoLogin.setChecked(True)
-            for profile in root.findall("profile-data"):
-                if getattr(profile.find("password"), "text", None):
-                    psP = getattr(profile.find("password"), "text", None)
-                    psP = base64.b64decode(psP).decode()
-                    if psP is not None:
-                        self.ui.leProfilePassword.setText(psP)
-                        self.ui.cbAutoLogin.setChecked(False)
-        else:
-            QMessageBox.information(
-                self.ui,
-                "Pineboo",
-                "Tiene que volver a escribir las contraseñas\ndel perfil antes de guardar.",
-                QtWidgets.QMessageBox.Ok,
-            )
-            self.ui.cbAutoLogin.setChecked(False)
+        self.ui.cbAutoLogin.setChecked(pconf.project_password == "")
 
-        self.ui.leDescription.setText(self.ui.cbProfiles.currentText())
-        self.ui.leDBName.setText(getattr(root.find("database-name"), "text", ""))
+        self.ui.leDescription.setText(pconf.description)
+        self.ui.leDBName.setText(pconf.database)
 
-        for db in root.findall("database-server"):
-            self.ui.leURL.setText(getattr(db.find("host"), "text", ""))
-            self.ui.lePort.setText(getattr(db.find("port"), "text", 0))
-            self.ui.cbDBType.setCurrentText(getattr(db.find("type"), "text", None))
-        for credentials in root.findall("database-credentials"):
-            user_name = getattr(credentials.find("username"), "text", None)
-            pass_text = getattr(credentials.find("password"), "text", None)
-            if user_name is not None:
-                self.ui.leDBUser.setText(user_name)
+        self.ui.leURL.setText(pconf.host)
+        self.ui.lePort.setText(str(pconf.port))
+        self.ui.cbDBType.setCurrentText(pconf.type)
 
-            if pass_text is not None and version == 1.0:
-                self.ui.leDBPassword.setText(base64.b64decode(pass_text).decode())
-                self.ui.leDBPassword2.setText(base64.b64decode(pass_text).decode())
+        self.ui.leDBUser.setText(pconf.username)
+
+        self.ui.leDBPassword.setText(pconf.password)
+        self.ui.leDBPassword2.setText(pconf.password)
 
         self.edit_mode = True
 
