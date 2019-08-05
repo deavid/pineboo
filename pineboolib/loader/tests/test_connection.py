@@ -5,6 +5,7 @@ import unittest
 from pineboolib.loader.projectconfig import ProjectConfig
 from pineboolib.loader.connection import config_dbconn  # , connect_to_db
 from pineboolib.loader.options import parse_options
+from . import fixture_path
 
 # from unittest.mock import patch, Mock
 
@@ -27,6 +28,32 @@ class TestConfigDBConn(unittest.TestCase):
             port=5433,
             type="PostgreSQL (PSYCOPG2)",
         )
+        self.assertEqual(cfg1, cfg2)
+
+        options = parse_options(["pineboo", "--connect", "mydb"])
+        cfg1 = config_dbconn(options)
+        cfg2 = ProjectConfig(
+            database="mydb",
+            username="postgres",
+            password="",
+            host="127.0.0.1",
+            port=5432,
+            type="PostgreSQL (PSYCOPG2)",
+        )
+        self.assertEqual(cfg1, cfg2)
+
+    def test_project(self) -> None:
+        """Test to provide a project template."""
+        options = parse_options(["pineboo", "--load", fixture_path("project_test1")])
+        cfg1 = config_dbconn(options)
+        cfg2 = ProjectConfig(database="mydb", type="SQLite3 (SQLITE3)")
+        self.assertEqual(cfg1, cfg2)
+
+    def test_project_passwd(self) -> None:
+        """Test to provide a project template with password."""
+        options = parse_options(["pineboo", "--load", fixture_path("project_test2")])
+        cfg1 = config_dbconn(options)
+        cfg2 = ProjectConfig(database="mydb", type="SQLite3 (SQLITE3)")
         self.assertEqual(cfg1, cfg2)
 
 

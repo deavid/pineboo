@@ -5,6 +5,7 @@ import os.path
 import unittest
 import tempfile
 from pineboolib.loader.projectconfig import ProjectConfig
+from . import fixture_read
 
 # from unittest.mock import patch, Mock
 
@@ -21,7 +22,7 @@ class TestProjectConfig(unittest.TestCase):
 
     def test_read_write(self) -> None:
         """Test that we can read a file, save it back, read it again and stays the same."""
-        project_test1 = fixture("project_test1.xml")
+        project_test1 = fixture_read("project_test1.xml")
         with tempfile.TemporaryDirectory() as tmpdirname:
             cfg = ProjectConfig(
                 database="mydb",
@@ -36,7 +37,7 @@ class TestProjectConfig(unittest.TestCase):
 
     def test_read_write2(self) -> None:
         """Test we can read and write and stays equal (slightly more complicated)."""
-        project_test1 = fixture("project_test2.xml")
+        project_test1 = fixture_read("project_test2.xml")
         with tempfile.TemporaryDirectory() as tmpdirname:
             cfg = ProjectConfig(
                 database="postgres_testdb",
@@ -54,17 +55,6 @@ class TestProjectConfig(unittest.TestCase):
             cfg2 = ProjectConfig(load_xml=cfg.filename, project_password="myhardtoguesspassword")
             cfg2.save_projectxml(True)
             self.assertEqual(open(cfg2.filename).read(), project_test1)
-
-
-def fixture(*path: str) -> str:
-    """
-    Get fixture path for this test file.
-    """
-    basedir = os.path.realpath(os.path.dirname(__file__))
-    filepath = os.path.join(basedir, "fixtures", *path)
-    with open(filepath, "r") as file:
-        contents = file.read()
-    return contents
 
 
 if __name__ == "__main__":

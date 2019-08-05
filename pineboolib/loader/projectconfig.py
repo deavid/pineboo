@@ -146,7 +146,7 @@ class ProjectConfig:
                         invalid_password = True
 
             if invalid_password:
-                raise ValueError("No se puede cargar un profile con contraseña por consola")
+                raise PasswordMismatchError("La contraseña es errónea")
 
         from pineboolib.application.database.pnsqldrivers import PNSqlDrivers
 
@@ -304,3 +304,7 @@ class ProjectConfig:
 
 class ProfileAlreadyExistsError(Exception):
     """Report that project will not be overwritten."""
+
+
+class PasswordMismatchError(Exception):
+    """Provided password is wrong."""
