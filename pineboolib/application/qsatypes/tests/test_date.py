@@ -1,4 +1,4 @@
-"""Test_systype module."""
+"""Test_date module."""
 
 import unittest
 from pineboolib.loader.main import init_testing
