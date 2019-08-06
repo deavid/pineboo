@@ -59,12 +59,15 @@ class FLLineEdit(QtWidgets.QLineEdit):
             if s[0] == "-":
                 minus = True
                 s = s[1:]
-            if QtCore.QLocale.system().toString(1.1, "f", 1)[1] == ",":
+
+            orig_s = s
+            if QtCore.QLocale.system().toString(float(s), "f", 1)[1] == ",":
                 s = s.replace(".", ",")
 
             val, ok = QtCore.QLocale.system().toDouble(s)
+
             if ok:
-                s = QtCore.QLocale.system().toString(1.1, "f", self.partDecimal)
+                s = QtCore.QLocale.system().toString(float(orig_s), "f", self.partDecimal)
             if minus:
                 s = "-%s" % s
 
