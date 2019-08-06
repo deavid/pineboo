@@ -2,15 +2,12 @@
 """dlgconnect module."""
 
 import os
-import base64
-import hashlib
-from xml.etree import ElementTree as ET
 
-from PyQt5 import QtWidgets  # type: ignore
-from PyQt5.QtWidgets import QMessageBox  # type: ignore
-from PyQt5.QtCore import QSize  # type: ignore
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import QSize
 
-from pineboolib.core.utils.utils_base import filedir, pretty_print_xml
+from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.settings import config, settings
 from pineboolib.core.utils import logging
 from pineboolib.core.decorators import pyqtSlot
