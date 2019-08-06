@@ -660,13 +660,13 @@ class FileStatic(FileBaseClass):
     """
 
     @staticmethod
-    def remove(self: str) -> bool:
+    def remove(file_name: str) -> bool:
         """
         Delete file from filesystem.
 
         @return Boolean . True si se ha borrado el fichero, si no False.
         """
-        file = File(self)
+        file = File(file_name)
         return file.remove()
 
     @staticmethod
