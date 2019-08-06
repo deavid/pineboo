@@ -8,7 +8,7 @@ import sys
 
 # from pineboolib.core import decorators
 
-from typing import Any, List, Optional, Iterable, Union, TYPE_CHECKING
+from typing import Any, List, Optional, Iterable, Union, overload, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pineboolib.application import types  # noqa: F401
@@ -120,22 +120,18 @@ class Process(QtCore.QProcess):
         self.stdout = self.readAllStandardOutput().data().decode(self._encoding)
         return self.exitCode()
 
+    @staticmethod
     def execute(
-        self, comando: Union[str, List, "types.Array"], arguments: Optional[Iterable[str]] = None
+        program: Union[str, List, "types.Array"], arguments: Optional[Iterable[str]] = None
     ) -> int:
         """Execute normal command."""
-
         comando_: List[str] = []
-        if isinstance(comando, list):
-            comando_ = comando
+        if isinstance(program, list):
+            comando_ = program
         else:
-            comando_ = str(comando).split(" ")
+            comando_ = str(program).split(" ")
 
-        programa = comando_[0]
-        argumentos = comando_[1:]
-
-        self.setProgram(programa)
-        self.setArguments(argumentos)
+        self = Process(comando_)
         self.start()
         self.waitForFinished(30000)
         self.stderr = self.readAllStandardError().data().decode(self._encoding)
