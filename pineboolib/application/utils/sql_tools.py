@@ -224,6 +224,8 @@ class SqlInspector(object):
         """
 
         if not self.mtd_fields():
+            if self._sql.find("sum(") > -1:
+                return 0
             return None
 
         type_ = "double"
