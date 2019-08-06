@@ -36,7 +36,7 @@ class SysBaseType(object):
     time_user_ = QtCore.QDateTime.currentDateTime()
 
     @classmethod
-    def nameUser(self) -> str:
+    def nameUser(self) -> Optional[str]:
         """Get current database user."""
         ret_ = None
         if project.conn is None:
@@ -52,7 +52,7 @@ class SysBaseType(object):
     @classmethod
     def interactiveGUI(self) -> str:
         """Check if running in GUI mode."""
-        return project.DGI.self.interactiveGUI()
+        return project.DGI.interactiveGUI()
 
     @classmethod
     def isUserBuild(self) -> bool:
@@ -158,11 +158,11 @@ class SysBaseType(object):
     @classmethod
     def write(self, encode_: str, dir_: str, contenido: str) -> None:
         """Write to file."""
-        b_ = contenido.encode()
-        f = codecs.open(dir_, encoding=encode_, mode="wb+")
-        f.write(b_.decode(encode_))
-        f.seek(0)
-        f.close()
+        from pineboolib.application.types import File
+
+        fileISO = File(dir_, encode_)
+        fileISO.write(contenido)
+        fileISO.close()
 
     @classmethod
     def cleanupMetaData(self, connName="default") -> None:
