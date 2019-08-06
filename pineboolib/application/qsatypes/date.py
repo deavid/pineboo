@@ -154,7 +154,7 @@ class Date(object):
             dd = "0%s" % dd
 
         self.date_ = QtCore.QDate.fromString(
-            "%s-%s-%s" % (self.date_.toString("yyyy"), self.date_.toString("mm"), dd), "yyyy-MM-dd"
+            "%s-%s-%s" % (self.date_.toString("yyyy"), self.date_.toString("MM"), dd), "yyyy-MM-dd"
         )
 
         return self

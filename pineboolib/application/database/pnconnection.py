@@ -123,7 +123,6 @@ class PNConnection(QtCore.QObject, IConnection):
             return self
 
         connection = self.connAux.get(name, None)
-
         if connection is None:
             if self.driverSql is None:
                 raise Exception("No driver selected")

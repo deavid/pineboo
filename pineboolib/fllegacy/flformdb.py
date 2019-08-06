@@ -166,8 +166,9 @@ class FLFormDB(QDialog):
         if not parent:
             parent = flapplication.aqApp.mainWidget()
         # if project.DGI.localDesktop():  # Si es local Inicializa
-        QtWidgets.QWidget.__init__(self, parent)  # FIXME: Porqué pide dos argumentos extra??
+        # QtWidgets.QWidget.__init__(self, parent)  # FIXME: Porqué pide dos argumentos extra??
         # super(QtWidgets.QWidget, self).__init__(parent)
+        super().__init__(parent)
 
         self._loaded = False
         self.known_instances[(self.__class__, action.name())] = self
@@ -963,8 +964,8 @@ class FLFormDB(QDialog):
         #    self.tiempo_ini = time.time()
         super().show()
         # tiempo_fin = time.time()
-
-        if self.parent().parent() is None:
+        parent_ = self.parent()
+        if parent_ and parent_.parent() is None:
             from PyQt5.QtWidgets import QDesktopWidget  # type: ignore # Centrado
 
             qt_rectangle = self.frameGeometry()
@@ -981,10 +982,9 @@ class FLFormDB(QDialog):
         if not self.showed:
             self.show()
 
-    @decorators.NotImplementedWarn
-    def child(self, childName):
+    def child(self, child_name):
         """Get child by name. Not implemented."""
-        return False
+        return self.findChild(QtWidgets.QWidget, child_name, QtCore.Qt.FindChildrenRecursively)
 
     # def __getattr__(self, name):
     # if getattr(self.script, "form", None):

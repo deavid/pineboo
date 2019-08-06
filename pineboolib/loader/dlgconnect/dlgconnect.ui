@@ -495,13 +495,43 @@
                 <widget class="QLineEdit" name="leProfilePassword">
                  <property name="minimumSize">
                   <size>
-                   <width>150</width>
+                   <width>140</width>
                    <height>0</height>
                   </size>
                  </property>
                  <property name="maximumSize">
                   <size>
-                   <width>150</width>
+                   <width>140</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="echoMode">
+                  <enum>QLineEdit::Password</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_16">
+               <item>
+                <widget class="QLabel" name="label_19">
+                 <property name="text">
+                  <string>Rep. Contraseña :</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="leProfilePassword2">
+                 <property name="minimumSize">
+                  <size>
+                   <width>140</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>140</width>
                    <height>16777215</height>
                   </size>
                  </property>

@@ -37,9 +37,9 @@ class TestCopyPNTableMetaData(unittest.TestCase):
         """Test copy a PNTableMetaData from other."""
 
         from pineboolib.application.metadata.pntablemetadata import PNTableMetaData
-        from pineboolib.application import project
+        from pineboolib import application
 
-        mtd_1 = project.conn.manager().metadata("flgroups")
+        mtd_1 = application.project.conn.manager().metadata("flgroups")
 
         mtd_2 = PNTableMetaData(mtd_1)
 
@@ -61,10 +61,10 @@ class TestPNTableMetaData(unittest.TestCase):
     def test_basic(self) -> None:
         """Test manage a PNTableMetaData."""
 
-        from pineboolib.application import project
+        from pineboolib import application
 
-        mtd = project.conn.manager().metadata("flgroups")
-        mtd_2 = project.conn.manager().metadata("flareas")
+        mtd = application.project.conn.manager().metadata("flgroups")
+        mtd_2 = application.project.conn.manager().metadata("flareas")
         if mtd is None:
             raise Exception
         if mtd_2 is None:
@@ -132,9 +132,9 @@ class TestRelationsPNTableMetaData(unittest.TestCase):
     def test_basic(self) -> None:
         """Test Relations M1 and 1M."""
 
-        from pineboolib.application import project
+        from pineboolib import application
 
-        mtd_1 = project.conn.manager().metadata("flusers")
+        mtd_1 = application.project.conn.manager().metadata("flusers")
         if mtd_1 is None:
             raise Exception
         self.assertEqual(mtd_1.fieldTableM1("idgroup"), "flgroups")
@@ -152,9 +152,9 @@ class TestCompoundKeyPNTableMetaData(unittest.TestCase):
     def test_basic(self) -> None:
         """Test CompoundKey."""
 
-        from pineboolib.application import project
+        from pineboolib import application
 
-        mtd = project.conn.manager().metadata("flseqs")
+        mtd = application.project.conn.manager().metadata("flseqs")
         if mtd is None:
             raise Exception
         field_list = mtd.fieldListOfCompoundKey("campo")

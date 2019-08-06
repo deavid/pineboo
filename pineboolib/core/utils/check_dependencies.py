@@ -62,6 +62,11 @@ def get_dependency_errors(dict_: DependencyCheck) -> DependencyError:
 
             version = namespaces.__version__
 
+        if key == "barcode":
+            import barcode  # type: ignore
+
+            version = barcode.version
+
         if not isinstance(version, str):
             error[(key, suggested_pkg)] = (
                 "Error: version detected should be string, but found %r" % version
