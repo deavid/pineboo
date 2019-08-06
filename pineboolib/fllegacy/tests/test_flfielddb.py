@@ -30,7 +30,6 @@ class TestFLFieldDBString(unittest.TestCase):
         cursor_2 = module_.cursor()
         field = module_.child("fLFieldDB2")
         self.assertNotEqual(field, None)
-        print(field, module_.child)
         field.setValue("hola")
 
         self.assertEqual(cursor_1.valueBuffer("descripcion"), "hola")
