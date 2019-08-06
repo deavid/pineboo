@@ -963,31 +963,35 @@ class SysType(SysBaseType):
         return doc
 
     @classmethod
-    def fileWriteIso(self, fileName=None, content=None):
+    def fileWriteIso(self, file_name=None, content=None):
         from pineboolib.application.types import File
-        from PyQt5.QtCore import QTextStream
 
-        fileISO = File(fileName)
-        if not fileISO.open(File.WriteOnly):
-            logger.warning(ustr(u"Error abriendo fichero ", fileName, u" para escritura"))
-            return False
-        tsISO = QTextStream(fileISO.ioDevice())
-        tsISO.setCodec(AQS.TextCodec_codecForName(u"ISO8859-15"))
-        tsISO.opIn(content)
+        # from PyQt5.QtCore import QTextStream
+
+        fileISO = File(file_name, "ISO8859-15")
+        fileISO.write(content)
+        # if not fileISO.open(File.WriteOnly):
+        #    logger.warning(ustr(u"Error abriendo fichero ", fileName, u" para escritura"))
+        #    return False
+        # tsISO = QTextStream(fileISO)
+        # tsISO.setCodec(AQS.TextCodec_codecForName(u"ISO8859-15"))
+        # tsISO.opIn(content)
         fileISO.close()
 
     @classmethod
-    def fileWriteUtf8(self, fileName=None, content=None):
+    def fileWriteUtf8(self, file_name=None, content=None):
         from pineboolib.application.types import File
-        from PyQt5.QtCore import QTextStream
 
-        fileUTF = File(fileName)
-        if not fileUTF.open(File.WriteOnly):
-            logger.warning(ustr(u"Error abriendo fichero ", fileName, u" para escritura"))
-            return False
-        tsUTF = QTextStream(fileUTF.ioDevice())
-        tsUTF.setCodec(AQS.TextCodec_codecForName(u"utf8"))
-        tsUTF.opIn(content)
+        # from PyQt5.QtCore import QTextStream
+
+        fileUTF = File(file_name, "UTF-8")
+        fileUTF.write(content)
+        # if not fileUTF.open(File.WriteOnly):
+        #    logger.warning(ustr(u"Error abriendo fichero ", fileName, u" para escritura"))
+        #    return False
+        # tsUTF = QTextStream(fileUTF.ioDevice)
+        # tsUTF.setCodec(AQS.TextCodec_codecForName(u"utf8"))
+        # tsUTF.opIn(content)
         fileUTF.close()
 
     @classmethod
