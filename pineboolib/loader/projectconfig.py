@@ -23,12 +23,14 @@ class ProjectConfig:
     Read and write XML on profiles. Represents a database connection configuration.
     """
 
-    SAVE_VERSION = VERSION_1_1  #: Version for saving
+    SAVE_VERSION = VERSION_1_2  #: Version for saving
 
     logger = logging.getLogger("loader.projectConfig")
 
     #: Folder where to read/write project configs.
     profile_dir: str = filedir(config.value("ebcomportamiento/profiles_folder", "../profiles"))
+
+    version: VersionNumber  #: Version number for the profile read.
 
     database: str  #: Database Name, file path to store it, or :memory:
     host: Optional[str]  #: DB server Hostname. None for local files.
@@ -58,6 +60,7 @@ class ProjectConfig:
         """Initialize."""
         self.project_password = project_password
         self.password_required = False
+        self.version = self.SAVE_VERSION
 
         if connstring:
             username, password, type, host, port, database = self.translate_connstring(connstring)
@@ -151,26 +154,16 @@ class ProjectConfig:
         tree = ET.parse(file_name)
         root = tree.getroot()
         version = VersionNumber(root.get("Version"), default="1.0")
+        self.version = version
         self.description = ""
         for xmldescription in root.findall("name"):
             self.description = xmldescription.text or ""
-
+        profile_pwd = ""
         for profile in root.findall("profile-data"):
-            invalid_password = False
-            if version == VERSION_1_0:
-                stored_password = getattr(profile.find("password"), "text", "")
-                if self.project_password != stored_password:
-                    invalid_password = True
-            else:
-                profile_pwd = getattr(profile.find("password"), "text", "")
-                if profile_pwd:
-                    user_pwd = hashlib.sha256(self.project_password.encode()).hexdigest()
-                    if profile_pwd != user_pwd:
-                        invalid_password = True
-
-            if invalid_password:
-                self.password_required = True
-                raise PasswordMismatchError("La contraseña es errónea")
+            profile_pwd = getattr(profile.find("password"), "text", "")
+            if profile_pwd:
+                break
+        self.checkProfilePasswordForVersion(self.project_password, profile_pwd, version)
 
         from pineboolib.application.database.pnsqldrivers import PNSqlDrivers
 
@@ -212,6 +205,80 @@ class ProjectConfig:
 
         return True
 
+    @classmethod
+    def encodeProfilePasswordForVersion(cls, password: str, save_version: VersionNumber) -> str:
+        """
+        Hash a password for a profile/projectconfig using the protocol for specified version.
+        """
+        if password == "":
+            return ""
+        if save_version < VERSION_1_1:
+            return password
+
+        if save_version < VERSION_1_2:
+            return hashlib.sha256(password.encode()).hexdigest()
+        # Minimum salt size recommended is 8 bytes
+        # multiple of 3 bytes as it is shorter in base64
+        salt = os.urandom(9)
+        hmac = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 10000)
+        dict_passwd = {
+            # Algorithm:
+            # .. pbkdf2: short algorithm name
+            # .. sha256: hash function used
+            # .. 4: number of zeroes used on iterations
+            "algorithm": "pbkdf2-sha256-4",
+            "salt": base64.b64encode(salt).decode(),
+            "hash": base64.b64encode(hmac).decode(),
+        }
+        hashed_password = "%(algorithm)s:%(salt)s:%(hash)s" % dict_passwd
+
+        return hashed_password
+
+    @classmethod
+    def checkProfilePasswordForVersion(
+        cls, user_pwd: str, profile_pwd: str, version: VersionNumber
+    ) -> None:
+        """
+        Check a saved password against a user-supplied one.
+
+        user_pwd: User-supplied password in clear text.
+        profile_pwd: Raw data saved as password in projectconfig file.
+        version: Version number used for checks.
+
+        This function returns None and raises PasswordMismatchError if the password is wrong.
+        We can only check if it is good. It's not a good idea to check if two encoded passwords
+        are the same, because most secure methods will store different encoded versions every
+        time we try to encode again.
+        """
+        if not profile_pwd:
+            return
+
+        if version < VERSION_1_1:
+            if user_pwd == profile_pwd:
+                return
+            raise PasswordMismatchError("La contraseña es errónea")
+
+        if version < VERSION_1_2:
+            user_hash = hashlib.sha256(user_pwd.encode()).hexdigest()
+            if profile_pwd == user_hash:
+                return
+            raise PasswordMismatchError("La contraseña es errónea")
+
+        algo, *algo_extra = profile_pwd.split(":")
+        if algo != "pbkdf2-sha256-4":
+            raise Exception("Unsupported password algorithm %r" % algo)
+
+        salt64, hash64 = algo_extra
+
+        salt = base64.b64decode(salt64.encode())
+
+        user_hash2 = hashlib.pbkdf2_hmac("sha256", user_pwd.encode(), salt, 10000)
+        user_hash64 = base64.b64encode(user_hash2).decode()
+        if user_hash64 == hash64:
+            return
+
+        raise PasswordMismatchError("La contraseña es errónea")
+
     def save_projectxml(self, overwrite_existing: bool = True) -> None:
         """
         Save the connection.
@@ -230,9 +297,9 @@ class ProjectConfig:
 
         profile_user = ET.SubElement(profile, "profile-data")
         profile_password = ET.SubElement(profile_user, "password")
-        if self.project_password:
-            pass_profile = hashlib.sha256(self.project_password.encode()).hexdigest()
-            profile_password.text = pass_profile
+        profile_password.text = self.encodeProfilePasswordForVersion(
+            self.project_password, self.SAVE_VERSION
+        )
 
         name = ET.SubElement(profile, "name")
         name.text = description
@@ -258,6 +325,7 @@ class ProjectConfig:
         tree = ET.ElementTree(profile)
 
         tree.write(filename, xml_declaration=True, encoding="utf-8")
+        self.version = self.SAVE_VERSION
 
     @classmethod
     def translate_connstring(cls, connstring: str) -> Tuple[str, str, str, str, int, str]:
