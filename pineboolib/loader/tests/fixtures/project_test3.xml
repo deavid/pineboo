@@ -5,13 +5,13 @@
   </profile-data>
   <name>Postgres Test DB</name>
   <database-server>
-    <type>PostgreSQL (PSYCOPG2)</type>
-    <host>192.168.1.101</host>
-    <port>5432</port>
+    <type cipher-method="cryptography.Fernet" cipher-text="Z0FBQUFBQUFBQ2NRTVRJek5EVTJOemc1TURFeU16UTFOdWJQVkNmVXZOVi1aVWE5OUoyMkNrR0hsWWJWbks0M3dBcG5pb1JWRnRuaFV4Tk1MalpuZU9iNkE4ZEJNRkphV21pdUpBYkxxV0lpVTZtMUZIMGxMTV9qalE1RFZMQzY2QmhTLWZJeE5MTE55dUVFWUVCbHdXcFRPNENvZ1hhalFvU09KOEwwTExPLUZOcEx6bzFLMUNNPQ==" />
+    <host cipher-method="cryptography.Fernet" cipher-text="Z0FBQUFBQUFBQ2NRTVRJek5EVTJOemc1TURFeU16UTFOdnViM3hfaFozMkR2dWtzcTV5THRXbGR2Z2dSYVo1dFNyVXQzZF9DTlMtZzVrRVRyR1V0MTU4cG9OS2hCQjN2Z3k3M1hHdURCWVk0TzZHa0dEang0YzU2aGYxc2J3b1Nhb3FyZ2NvckFDMDFFb0h6MEdrNDdSZlhSelRhakFJWjlRQkdhdGRTc2RIM0h0ZDBOZjU1em8wPQ==" />
+    <port cipher-method="cryptography.Fernet" cipher-text="Z0FBQUFBQUFBQ2NRTVRJek5EVTJOemc1TURFeU16UTFOcWwxVlEtNWhfVDdhY3UyNmJpU3ItT2VFWHBIY2Nibk9LbXVDaGx4bDRORFVHcVFieUIxejRGVkRRZUJwazVybk5SdFRfWUFPaTNSbTdsb1FTX21VejQyRl8yZ05sZjRrNWNKWi1TQjVkZ2RUdEFiOHZEQlJpajhrZVlVU2gyWEg1bXJsb2pOMjdjOEQzQ21UbEE5ckdnPQ==" />
   </database-server>
   <database-credentials>
-    <username>postgres</username>
-    <password>cG9zdGdyZXNwYXNzd29yZA==</password>
+    <username cipher-method="cryptography.Fernet" cipher-text="Z0FBQUFBQUFBQ2NRTVRJek5EVTJOemc1TURFeU16UTFObTcxbzEybTVpT0M1RF82aW9nMzFqRDNtNDhVaks0Q2EwWWJ4V1praWFaZlE0SmRTMG9kLUFvN3NXeEVKQ1BkUmdBTmJieXBrS2RQOUljZlVwbzFoOXhrX2dsdGhESHR2eGhvM21xejF6ejFBY1BSdy0yYWhjNnBzZ3cxakU0dmp5TzJDOVJnSVZnXzFKOUpxV1RacTZjPQ==" />
+    <password cipher-method="cryptography.Fernet" cipher-text="Z0FBQUFBQUFBQ2NRTVRJek5EVTJOemc1TURFeU16UTFOaGRjMmIzcm82eFczbk1xX2twOGlueG1qdVRxdXBTY29ld1lOallHRm8xZDVTWXFEUmU0RUNPcHNIN0w0MGgtNnFzYUxKVUhlWkREanU4TS1zdHVqSWJMMnA1LTZON211bDlHdmlCSldCdHMxTEZzektOdElkNjBkemVYNFpJTUMtVzN3NnFabk1LazJTVnpyUWJsNUVZPQ==" />
   </database-credentials>
-  <database-name>postgres_testdb</database-name>
+  <database-name cipher-method="cryptography.Fernet" cipher-text="Z0FBQUFBQUFBQ2NRTVRJek5EVTJOemc1TURFeU16UTFObkxaRnFxV25rcWhSMFpzT0tUQlo4TlktYkZNX2ozQy1fQmd3RmY4RTc2QW9PVlJnSGJtMTVsTU5GZXEydU11ck1XMm5lanZXRVZyYldQSzJkWnRkYXZNRFkzOHp2RmFnYmpiMnhJVWFKanNUSEF2Tmh3NnBCLTFvTmk3amxDWFBpU0RNLWhpdU0yT1FvcUZyOEhQdVdFPQ==" />
 </Profile>

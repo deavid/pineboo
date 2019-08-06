@@ -4,9 +4,10 @@ import re
 import base64
 import hashlib
 import os.path
+from xml.etree import ElementTree as ET
 from typing import Tuple, Optional, Any
 
-from xml.etree import ElementTree as ET
+from cryptography.fernet import Fernet  # type: ignore
 
 from pineboolib import logging
 from pineboolib.core.utils.version import VersionNumber
@@ -31,6 +32,7 @@ class ProjectConfig:
     profile_dir: str = filedir(config.value("ebcomportamiento/profiles_folder", "../profiles"))
 
     version: VersionNumber  #: Version number for the profile read.
+    fernet: Optional[Fernet]  #: Cipher used, if any.
 
     database: str  #: Database Name, file path to store it, or :memory:
     host: Optional[str]  #: DB server Hostname. None for local files.
@@ -61,6 +63,7 @@ class ProjectConfig:
         self.project_password = project_password
         self.password_required = False
         self.version = self.SAVE_VERSION
+        self.fernet = None
 
         if connstring:
             username, password, type, host, port, database = self.translate_connstring(connstring)
@@ -167,42 +170,33 @@ class ProjectConfig:
         self.password_required = True
         self.checkProfilePasswordForVersion(self.project_password, profile_pwd, version)
 
+        if self.project_password and self.version > VERSION_1_1:
+            key_salt = hashlib.sha256(profile_pwd.encode()).digest()
+            key = hashlib.pbkdf2_hmac("sha256", self.project_password.encode(), key_salt, 10000)
+            key64 = base64.urlsafe_b64encode(key)
+            self.fernet = Fernet(key64)
+        else:
+            self.fernet = None
+
         from pineboolib.application.database.pnsqldrivers import PNSqlDrivers
 
         sql_drivers_manager = PNSqlDrivers()
-        dbname_elem = root.find("database-name")
-        if dbname_elem is None:
-            raise ValueError("database-name not found")
-        if not dbname_elem.text:
-            raise ValueError("database-name not valid")
-        self.database = dbname_elem.text
+        self.database = self.retrieveCipherSubElement(root, "database-name")
         for db in root.findall("database-server"):
-            host_elem, port_elem, type_elem = (db.find("host"), db.find("port"), db.find("type"))
-            if host_elem is None or port_elem is None or type_elem is None:
-                raise ValueError("host, port and type are required")
-            self.host = host_elem.text
-            self.port = int(port_elem.text) if port_elem.text else None
-            if type_elem.text:
-                self.type = type_elem.text
-            else:
-                raise ValueError("No type defined")
+            self.host = self.retrieveCipherSubElement(db, "host")
+            port_text = self.retrieveCipherSubElement(db, "port")
+            self.port = int(port_text) if port_text else None
+            self.type = self.retrieveCipherSubElement(db, "type")
+
             # FIXME: Move this to project, or to the connection handler.
             if self.type not in sql_drivers_manager.aliasList():
                 self.logger.warning("Esta versión de pineboo no soporta el driver '%s'" % self.type)
 
         for credentials in root.findall("database-credentials"):
-            username_elem, password_elem = (
-                credentials.find("username"),
-                credentials.find("password"),
-            )
-            if username_elem is None:
-                self.username = ""
-            else:
-                self.username = username_elem.text
-            if password_elem is not None and password_elem.text:
-                self.password = base64.b64decode(password_elem.text).decode()
-            else:
-                self.password = ""
+            self.username = self.retrieveCipherSubElement(credentials, "username")
+            self.password = self.retrieveCipherSubElement(credentials, "password")
+            if self.password and self.fernet is None:
+                self.password = base64.b64decode(self.password).decode()
         self.password_required = False
 
         return True
@@ -281,6 +275,44 @@ class ProjectConfig:
 
         raise PasswordMismatchError("La contraseña es errónea")
 
+    def createCipherSubElement(self, parent: ET.Element, tagname: str, text: str) -> ET.Element:
+        """Create a XML SubElement ciphered if self.fernet is present."""
+        child = ET.SubElement(parent, tagname)
+        if self.fernet is None:
+            child.text = text
+            return child
+        # NOTE: This method returns ciphertext even for empty strings! This is intended.
+        # ... this is to avoid anyone knowing if a field is empty or not.
+        if len(text) < 64:
+            # Right Pad with new line at least up to 64 bytes. Avoid giving out field size.
+            text = text.ljust(64, "\n")
+        encoded_bytes = self.fernet.encrypt(text.encode())
+        encoded_text = base64.b64encode(encoded_bytes).decode()
+        child.set("cipher-method", "cryptography.Fernet")
+        child.set("cipher-text", encoded_text)
+        return child
+
+    def retrieveCipherSubElement(self, parent: ET.Element, tagname: str) -> str:
+        """Get a XML SubElement ciphered if self.fernet is present."""
+        child = parent.find(tagname)
+        if child is None:
+            raise ValueError("Tag %r not present" % tagname)
+
+        if self.fernet is None:
+            return child.text or ""
+        cipher_method = child.get("cipher-method")
+        cipher_text = child.get("cipher-text")
+        if cipher_method != "cryptography.Fernet":
+            raise ValueError("Cipher method %r not supported." % cipher_method)
+
+        if not cipher_text:
+            raise ValueError("Missing ciphertext for %r" % tagname)
+
+        cipher_bytes = base64.b64decode(cipher_text.encode())
+        text = self.fernet.decrypt(cipher_bytes).decode()
+        text = text.rstrip("\n")
+        return text
+
     def save_projectxml(self, overwrite_existing: bool = True) -> None:
         """
         Save the connection.
@@ -302,25 +334,27 @@ class ProjectConfig:
         profile_password.text = self.encodeProfilePasswordForVersion(
             self.project_password, self.SAVE_VERSION
         )
-
+        if self.project_password and self.SAVE_VERSION > VERSION_1_1:
+            key_salt = hashlib.sha256(profile_password.text.encode()).digest()
+            key = hashlib.pbkdf2_hmac("sha256", self.project_password.encode(), key_salt, 10000)
+            key64 = base64.urlsafe_b64encode(key)
+            self.fernet = Fernet(key64)
+        else:
+            # Mask the password if no cipher is used!
+            passwDB = base64.b64encode(passwDB.encode()).decode()
+            self.fernet = None
         name = ET.SubElement(profile, "name")
         name.text = description
         dbs = ET.SubElement(profile, "database-server")
-        dbstype = ET.SubElement(dbs, "type")
-        dbstype.text = self.type
-        dbshost = ET.SubElement(dbs, "host")
-        dbshost.text = self.host
-        dbsport = ET.SubElement(dbs, "port")
-        if self.port:
-            dbsport.text = str(self.port)
+        self.createCipherSubElement(dbs, "type", text=self.type)
+        self.createCipherSubElement(dbs, "host", text=self.host or "")
+        self.createCipherSubElement(dbs, "port", text=str(self.port) if self.port else "")
 
         dbc = ET.SubElement(profile, "database-credentials")
-        dbcuser = ET.SubElement(dbc, "username")
-        dbcuser.text = self.username
-        dbcpasswd = ET.SubElement(dbc, "password")
-        dbcpasswd.text = base64.b64encode(passwDB.encode()).decode()
-        dbname = ET.SubElement(profile, "database-name")
-        dbname.text = self.database
+        self.createCipherSubElement(dbc, "username", text=self.username or "")
+        self.createCipherSubElement(dbc, "password", text=passwDB)
+
+        self.createCipherSubElement(profile, "database-name", text=self.database)
 
         pretty_print_xml(profile)
 

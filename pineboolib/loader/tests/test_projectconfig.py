@@ -15,7 +15,7 @@ from . import fixture_read
 class TestProjectConfig(unittest.TestCase):
     """Test ProjectConfig class."""
 
-    maxDiff = 1000
+    maxDiff = 50000
 
     def test_basic(self) -> None:
         """Test to create projectConfig class."""
@@ -40,12 +40,15 @@ class TestProjectConfig(unittest.TestCase):
             cfg2.save_projectxml(True)
             self.assertEqual(open(cfg2.filename).read(), project_test1)
 
+    @patch("time.time")
     @patch("os.urandom")
-    def test_read_write2(self, mock_urandom: Mock) -> None:
+    def test_read_write2(self, mock_urandom: Mock, mock_time: Mock) -> None:
         """Test we can read and write and stays equal (slightly more complicated)."""
+        # NOTE: urandom and time need to be mocked so hashes and ciphers always return the same value
+        mock_urandom.side_effect = lambda n: b"1234567890123456789012345678901234567890"[:n]
+        mock_time.side_effect = lambda: 10000
         project_test2 = fixture_read("project_test2.xml")
         project_test3 = fixture_read("project_test3.xml")
-        mock_urandom.return_value = b"123456789"
         with tempfile.TemporaryDirectory() as tmpdirname:
             # Verify Version 1.1
             cfg = ProjectConfig(
@@ -74,6 +77,7 @@ class TestProjectConfig(unittest.TestCase):
             # Verify Version 1.2
             cfg2.SAVE_VERSION = VERSION_1_2
             cfg2.save_projectxml(True)
+            # print(open(cfg2.filename).read())
             self.assertEqual(open(cfg2.filename).read(), project_test3)
 
             with self.assertRaises(PasswordMismatchError):
