@@ -38,11 +38,11 @@ class TestParser(unittest.TestCase):
     def test_flfacturac(self) -> None:
         """Test conveting fixture flfacturac."""
         flfacturac_qs = fixture_read("flfacturac.qs")
-        flfacturac_py = fixture_read("flfacturac.py")
+        flfacturac_py = fixture_read("flfacturac.python")
         flfacturac_qs_py = qs2py(flfacturac_qs, parser_template="file_template")
 
         # Write onto git so we have an example.
-        with open(fixture_path("flfacturac.qs.py"), "w") as f:
+        with open(fixture_path("flfacturac.qs.python"), "w") as f:
             f.write(flfacturac_qs_py)
 
         self.assertEqual(flfacturac_qs_py, flfacturac_py)
