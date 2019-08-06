@@ -9,7 +9,6 @@ from pineboolib.core import decorators
 from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.settings import config
 from pineboolib.fllegacy.flformdb import FLFormDB
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.application.database import pnsqlcursor
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy import flapplication
@@ -96,11 +95,11 @@ class FLFormRecordDB(FLFormDB):
 
         Solo acepta que se le indique un cursor ya creado.
 
-        @param cursor Objeto FLSqlCursor con el cursor con el que tratar.
+        @param cursor Objeto pnsqlcursor.PNSqlCursor con el cursor con el que tratar.
         @param actionName Nombre de la acción asociada al formulario
         @param showAcceptContinue Indica si se debe mostrar el botón de Aceptar y Continuar
 
-        FLFormRecordDB(FLSqlCursor *cursor, const QString &actionName = QString::null,
+        FLFormRecordDB(pnsqlcursor.PNSqlCursor *cursor, const QString &actionName = QString::null,
         QWidget *parent = 0, bool showAcceptContinue = true);
         """
         self.logger.trace(
@@ -112,10 +111,10 @@ class FLFormRecordDB(FLFormDB):
 
         parent = (
             flapplication.aqApp.mainWidget()
-            if isinstance(parent_or_cursor, (FLSqlCursor, pnsqlcursor.PNSqlCursor))
+            if isinstance(parent_or_cursor, pnsqlcursor.PNSqlCursor)
             else parent_or_cursor
         )
-        cursor = parent_or_cursor if isinstance(parent_or_cursor, FLSqlCursor) else None
+        cursor = parent_or_cursor if isinstance(parent_or_cursor, pnsqlcursor.PNSqlCursor) else None
         # if not cursor:
         #    load = True
 
@@ -140,7 +139,7 @@ class FLFormRecordDB(FLFormDB):
         else:
             if DEBUG:
                 print("*** FLFormRecordDB::__init__ -> Sin cursor??")
-            self.initialModeAccess = FLSqlCursor.Browse
+            self.initialModeAccess = pnsqlcursor.PNSqlCursor.Browse
 
         self.logger.trace("__init__: load form")
         self.load()
@@ -535,7 +534,7 @@ class FLFormRecordDB(FLFormDB):
         if not mtd:
             return True
 
-        if self.cursor_.modeAccess() == FLSqlCursor.Edit and mtd.concurWarn():
+        if self.cursor_.modeAccess() == pnsqlcursor.PNSqlCursor.Edit and mtd.concurWarn():
             colFields = self.cursor_.concurrencyFields()
 
             if colFields:
@@ -583,8 +582,8 @@ class FLFormRecordDB(FLFormDB):
 
         if (
             self.iface
-            and self.cursor_.modeAccess() == FLSqlCursor.Insert
-            or self.cursor_.modeAccess() == FLSqlCursor.Edit
+            and self.cursor_.modeAccess() == pnsqlcursor.PNSqlCursor.Insert
+            or self.cursor_.modeAccess() == pnsqlcursor.PNSqlCursor.Edit
         ):
             ret_ = True
             fun_ = getattr(self.iface, "validateForm", None)
@@ -715,7 +714,7 @@ class FLFormRecordDB(FLFormDB):
             if self.cursor_.commitBuffer():
                 self.cursor_.setActivatedCheckIntegrity(True)
                 self.cursor_.commit()
-                self.cursor_.setModeAccess(FLSqlCursor.Insert)
+                self.cursor_.setModeAccess(pnsqlcursor.PNSqlCursor.Insert)
                 self.accepted_ = False
                 caption = None
                 if self._action:
@@ -880,7 +879,7 @@ class FLFormRecordDB(FLFormDB):
                 self.initTransLevel = self.cursor().transactionLevel()
                 self.setCaptionWidget(caption)
                 self.cursor().setContext(self.iface)
-            if self.cursor().modeAccess() == FLSqlCursor.Insert:
+            if self.cursor().modeAccess() == pnsqlcursor.PNSqlCursor.Insert:
                 self.showAcceptContinue_ = True
             else:
                 self.showAcceptContinue_ = False
