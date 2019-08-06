@@ -63,7 +63,7 @@ def get_dependency_errors(dict_: DependencyCheck) -> DependencyError:
             version = namespaces.__version__
 
         if key == "barcode":
-            import barcode
+            import barcode  # type: ignore
 
             version = barcode.version
 
