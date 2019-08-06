@@ -4,6 +4,7 @@ Test QS Snippets.
 import unittest
 from pineboolib.application.parsers.qsaparser.postparse import pythonify_string as qs2py
 from pineboolib.application.parsers.qsaparser import pytnyzer
+from . import fixture_read, fixture_path
 
 
 class TestParser(unittest.TestCase):
@@ -33,6 +34,18 @@ class TestParser(unittest.TestCase):
             qs2py('x = File("test").write("contents")'), 'x = qsa.File("test").write("contents")\n'
         )
         self.assertEqual(qs2py('x = File("test").remove()'), 'x = qsa.File("test").remove()\n')
+
+    def test_flfacturac(self) -> None:
+        """Test conveting fixture flfacturac."""
+        flfacturac_qs = fixture_read("flfacturac.qs")
+        flfacturac_py = fixture_read("flfacturac.py")
+        flfacturac_qs_py = qs2py(flfacturac_qs, parser_template="file_template")
+
+        # Write onto git so we have an example.
+        with open(fixture_path("flfacturac.qs.py"), "w") as f:
+            f.write(flfacturac_qs_py)
+
+        self.assertEqual(flfacturac_qs_py, flfacturac_py)
 
 
 if __name__ == "__main__":

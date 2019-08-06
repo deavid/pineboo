@@ -847,7 +847,11 @@ def pythonify2(filename: str, known_refs: Dict[str, Tuple[str, str]] = {}) -> st
     return pythonize2(ast, known_refs)
 
 
-def pythonify_string(qs_code: str, known_refs: Dict[str, Tuple[str, str]] = {}) -> str:
+def pythonify_string(
+    qs_code: str,
+    known_refs: Dict[str, Tuple[str, str]] = {},
+    parser_template: str = "expression_template",
+) -> str:
     """Convert QS string to Python. For unit-testing, only evaluates expressions."""
     from .pytnyzer import pythonize2
 
@@ -859,7 +863,7 @@ def pythonify_string(qs_code: str, known_refs: Dict[str, Tuple[str, str]] = {}) 
 
     tree_data: TreeData = flscriptparse.calctree(prog, alias_mode=0)
     ast = post_parse(tree_data)
-    ast.set("parser-template", "expression_template")
+    ast.set("parser-template", parser_template)
     return pythonize2(ast, known_refs)
 
 
