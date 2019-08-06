@@ -163,6 +163,8 @@ class ProjectConfig:
             profile_pwd = getattr(profile.find("password"), "text", "")
             if profile_pwd:
                 break
+
+        self.password_required = True
         self.checkProfilePasswordForVersion(self.project_password, profile_pwd, version)
 
         from pineboolib.application.database.pnsqldrivers import PNSqlDrivers
