@@ -1574,6 +1574,8 @@ class Member(ASTPython):
                 ]
         if arguments[0] == "qsa.File":
             arguments[0] = "qsa.FileStatic"
+        if arguments[0] == "qsa.Process":
+            arguments[0] = "qsa.ProcessStatic"
         replace_members = [
             "toString()",
             "length",
