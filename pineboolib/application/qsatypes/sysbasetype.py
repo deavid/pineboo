@@ -6,7 +6,6 @@ Will be inherited at fllegacy.
 
 import platform
 import traceback
-import codecs
 import ast
 
 from typing import Any, Dict, Optional, List
@@ -36,7 +35,7 @@ class SysBaseType(object):
     time_user_ = QtCore.QDateTime.currentDateTime()
 
     @classmethod
-    def nameUser(self) -> Optional[str]:
+    def nameUser(self) -> str:
         """Get current database user."""
         ret_ = None
         if project.conn is None:
@@ -47,7 +46,7 @@ class SysBaseType(object):
         else:
             ret_ = project.conn.user()
 
-        return ret_
+        return ret_ or ""
 
     @classmethod
     def interactiveGUI(self) -> str:
@@ -236,6 +235,7 @@ class SysBaseType(object):
         """Remove a database."""
         if project.conn is None:
             raise Exception("Project is not connected yet")
+        project.conn.useConn(connName)._isOpen = False
         return project.conn.useConn(connName).removeConn(connName)
 
     @classmethod

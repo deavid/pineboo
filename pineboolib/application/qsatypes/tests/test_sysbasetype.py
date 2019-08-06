@@ -22,7 +22,7 @@ class TestSysBaseClassGeneral(unittest.TestCase):
 
         base_type = sysbasetype.SysBaseType()
 
-        self.assertEqual(base_type.nameUser(), None)
+        self.assertEqual(base_type.nameUser(), "")
         self.assertEqual(base_type.interactiveGUI(), "Pineboo")
         self.assertEqual(base_type.isLoadedModule("sys"), True)
         os_name = "LINUX"
@@ -45,12 +45,35 @@ class TestSysBaseClassGeneral(unittest.TestCase):
         self.assertEqual(base_type.nameDriver(), "FLsqlite")
         self.assertEqual(base_type.nameHost(), None)
 
-        prueba_conn = application.project.conn.useConn("prueba")
-        self.assertEqual(prueba_conn.isOpen(), False)
+
+class TestSysBaseClassDataBase(unittest.TestCase):
+    """TestSysBaseClassDataBase Class."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Ensure pineboo is initialized for testing."""
+        init_testing()
+
+    def test_basic(self) -> None:
+        """Test addDatabase and removeDatabase functions."""
+        from pineboolib.application.qsatypes import sysbasetype
+        from pineboolib import application
+
+        base_type = sysbasetype.SysBaseType()
+
+        prueba_conn_1 = application.project.conn.useConn("prueba")
+        self.assertEqual(prueba_conn_1.isOpen(), False)
         self.assertEqual(base_type.addDatabase("prueba"), True)
-        self.assertEqual(prueba_conn.isOpen(), True)
+        self.assertEqual(prueba_conn_1.isOpen(), True)
         self.assertEqual(base_type.removeDatabase("prueba"), True)
         self.assertNotEqual(base_type.idSession(), None)
+        self.assertEqual(prueba_conn_1.isOpen(), False)
+        prueba_conn_2 = application.project.conn.useConn("prueba")
+        self.assertEqual(prueba_conn_2.isOpen(), False)
+        self.assertEqual(base_type.addDatabase("prueba"), True)
+        self.assertEqual(prueba_conn_2.isOpen(), True)
+        self.assertEqual(base_type.removeDatabase("prueba"), True)
+        self.assertEqual(prueba_conn_1.isOpen(), False)
 
 
 if __name__ == "__main__":
