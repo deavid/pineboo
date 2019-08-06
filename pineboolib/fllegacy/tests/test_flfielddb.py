@@ -25,7 +25,7 @@ class TestFLFieldDBString(unittest.TestCase):
         cursor_1.insertRecord(False)
 
         module_ = dictmodules.from_project("formRecordflmodules")
-        self.assertNotEqual(module_, None)
+        self.assertTrue(module_)
 
         cursor_2 = module_.cursor()
         field = module_.child("fLFieldDB2")

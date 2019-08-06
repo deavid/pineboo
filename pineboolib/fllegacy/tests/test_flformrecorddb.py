@@ -27,7 +27,7 @@ class TestFLFormrecordCursor(unittest.TestCase):
         cursor_3 = pnsqlcursor.PNSqlCursor("flareas")
 
         module_ = dictmodules.from_project("formRecordflareas")
-        self.assertNotEqual(module_, None)
+        self.assertTrue(module_)
         cursor_2 = module_.cursor()
 
         self.assertNotEqual(cursor_1, cursor_3)
