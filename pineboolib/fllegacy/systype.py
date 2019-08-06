@@ -26,6 +26,7 @@ from pineboolib.application.qsatypes.sysbasetype import SysBaseType
 from pineboolib.application.database.pnsqlcursor import PNSqlCursor
 from pineboolib.application.database.pnsqlquery import PNSqlQuery
 from pineboolib.application.database.utils import sqlSelect
+from pineboolib.application.process import Process
 
 # from pineboolib.fllegacy.flapplication import aqApp  # avoid importing at root.
 from pineboolib.fllegacy.aqsobjects.aqs import AQS
@@ -36,7 +37,6 @@ from pineboolib.fllegacy.flutil import FLUtil
 
 from pineboolib.qt3_widgets.dialog import Dialog
 from pineboolib.qt3_widgets.qbytearray import QByteArray
-from pineboolib.qt3_widgets.process import Process
 from pineboolib.qt3_widgets.messagebox import MessageBox
 from pineboolib.qt3_widgets.qtextedit import QTextEdit
 from pineboolib.qt3_widgets.qlabel import QLabel
@@ -1440,7 +1440,7 @@ class SysType(SysBaseType):
 
         command = "git status %s" % url
 
-        pro = Process
+        pro = Process()
         pro.execute(command)
         if pro.stdout is None:
             return

@@ -10,6 +10,7 @@ from pineboolib.fllegacy import flapplication
 from pineboolib.core.utils.utils_base import ustr, filedir  # noqa: F401
 from pineboolib.application.types import Boolean, QString, String, Function, Object  # noqa: F401
 from pineboolib.application.types import File, Dir, Array, Date, AttributeDict  # noqa: F401
+from pineboolib.application.types import FileStatic  # noqa: F401
 
 from .input import Input  # noqa: F401
 from .utils import switch, qsaRegExp, RegExp, Math, parseFloat, parseString, parseInt  # noqa: F401
@@ -69,9 +70,11 @@ from .pncontrolsfactory import AQBoolFlagState, AQBoolFlagStateList  # noqa: F40
 
 
 from .pncontrolsfactory import FormDBWidget  # noqa: F401
-from .pncontrolsfactory import Process  # noqa: F401
+from pineboolib.application.process import Process  # noqa: F401
 from .pncontrolsfactory import SysType, sys  # noqa: F401
 
+
+ProcessStatic = Process()
 
 QFile = File
 util = FLUtil

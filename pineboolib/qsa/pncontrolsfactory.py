@@ -35,7 +35,6 @@ from pineboolib.qt3_widgets.qmenu import QMenu  # noqa: F401
 from pineboolib.qt3_widgets.qtoolbar import QToolBar  # noqa: F401
 from pineboolib.qt3_widgets.qaction import QAction  # noqa: F401
 from pineboolib.qt3_widgets.qdataview import QDataView  # noqa: F401
-from pineboolib.qt3_widgets.process import Process  # noqa: F401
 from pineboolib.qt3_widgets.qbytearray import QByteArray  # noqa: F401
 from pineboolib.qt3_widgets.qradiobutton import QRadioButton  # noqa: F401
 from pineboolib.qt3_widgets.qspinbox import QSpinBox  # noqa: F401

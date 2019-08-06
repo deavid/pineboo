@@ -22,7 +22,7 @@ from pineboolib.core.utils import logging
 from pineboolib.application import project
 from pineboolib.application import connections
 
-from pineboolib.qt3_widgets.process import Process
+from pineboolib.application.process import Process
 
 logger = logging.getLogger("fllegacy.systype")
 
@@ -629,7 +629,8 @@ class SysBaseType(object):
     def launchCommand(self, comando):
         """Execute a program."""
         try:
-            Process.execute(comando)
+            proc = Process()
+            proc.execute(comando)
             return True
         except Exception:
             e = traceback.format_exc()
