@@ -1,22 +1,33 @@
 # -*- coding: utf-8 -*-
+"""Process Module."""
 
 from PyQt5 import QtCore  # type: ignore
-from PyQt5.QtCore import pyqtSignal
+
+# from PyQt5.QtCore import pyqtSignal
 import sys
-from typing import Any, List, cast, Optional, Iterable
-from pineboolib.core import decorators
+
+# from pineboolib.core import decorators
+
+from typing import Any, List, Optional, Iterable, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pineboolib.application import types  # noqa: F401
 
 
 class Process(QtCore.QProcess):
+    """Process class."""
 
-    stderr = None
-    stdout = None
+    _encoding: str
+    _std_out: Optional[str]
+    _std_error: Optional[str]
 
     def __init__(self, *args) -> None:
-        super(Process, self).__init__()
-        cast(pyqtSignal, self.readyReadStandardOutput).connect(self.stdoutReady)
-        cast(pyqtSignal, self.readyReadStandardError).connect(self.stderrReady)
-        self.stderr = None
+        """Inicialize."""
+
+        super().__init__()
+        # cast(pyqtSignal, self.readyReadStandardOutput).connect(self.stdoutReady)
+        # cast(pyqtSignal, self.readyReadStandardError).connect(self.stderrReady)
+        self._encoding = sys.getfilesystemencoding()
         self.normalExit = self.NormalExit
         self.crashExit = self.CrashExit
 
@@ -26,94 +37,112 @@ class Process(QtCore.QProcess):
             self.setArguments(argumentos)
 
     def start(self, *args: Any) -> None:
-        super(Process, self).start()
+        """Start the process."""
+        super().start()
 
     def stop(self) -> None:
-        super(Process, self).stop()
+        """Stop the process."""
+
+        super().stop()
 
     def writeToStdin(self, stdin_) -> None:
-        encoding = sys.getfilesystemencoding()
-        stdin_as_bytes = stdin_.encode(encoding)
+        """Write data to stdin channel."""
+
+        stdin_as_bytes = stdin_.encode(self._encoding)
         self.writeData(stdin_as_bytes)
         # self.closeWriteChannel()
 
-    @decorators.pyqtSlot()
-    def stdoutReady(self) -> None:
-        self.stdout = str(self.readAllStandardOutput())
+    # @decorators.pyqtSlot()
+    # def stdoutReady(self) -> None:
+    #    self._stdout = str(self.readAllStandardOutput())
 
-    @decorators.pyqtSlot()
-    def stderrReady(self) -> None:
-        self.stderr = str(self.readAllStandardError())
+    # @decorators.pyqtSlot()
+    # def stderrReady(self) -> None:
+    #    self._stderr = str(self.readAllStandardError())
 
-    def readStderr(self) -> Any:
-        return self.stderr
+    def read_std_error(self) -> Any:
+        """Return last std error."""
 
-    def readStdout(self) -> Any:
-        return self.stdout
+        return self._std_error
 
-    def getWorkingDirectory(self) -> Any:
-        return super(Process, self).workingDirectory()
+    def read_std_out(self) -> Any:
+        """Return last std out."""
+        return self._std_out
 
-    def setWorkingDirectory(self, wd) -> None:
-        super(Process, self).setWorkingDirectory(wd)
+    def set_std_out(self, value: Any):
+        """Set last std out."""
 
-    def getIsRunning(self) -> bool:
+        self._std_out = value
+
+    def set_std_error(self, value: Any):
+        """Set last std error."""
+
+        self._std_error = value
+
+    def get_working_directory(self) -> Any:
+        """Return working directory."""
+
+        return super().workingDirectory()
+
+    def set_working_directory(self, wd) -> None:
+        """Set working directory."""
+
+        super().setWorkingDirectory(wd)
+
+    def get_is_running(self) -> bool:
+        """Return if the process is running."""
+
         return self.state() in (self.Running, self.Starting)
 
     def exitcode(self) -> Any:
+        """Return exit code."""
+
         return self.exitCode()
 
-    @staticmethod
-    def executeNoSplit(
-        comando: list, stdin_buffer
-    ) -> None:  # FIXME: aquí hay otro problema parecido a File, que se llama inicializado y sin inicializar
+    def executeNoSplit(self, comando: list, stdin_buffer) -> int:
+        """Execute command no splitted."""
 
         list_ = []
         for c in comando:
             list_.append(c)
 
-        pro = QtCore.QProcess()
         programa = list_[0]
         arguments = list_[1:]
-        pro.setProgram(programa)
-        pro.setArguments(arguments)
-        pro.start()
-        encoding = sys.getfilesystemencoding()
-        stdin_as_bytes = stdin_buffer.encode(encoding)
-        pro.writeData(stdin_as_bytes)
-        pro.waitForFinished(30000)
-        Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
-        Process.stderr = pro.readAllStandardError().data().decode(encoding)
+        self.setProgram(programa)
+        self.setArguments(arguments)
+        self.start()
 
-    @staticmethod
+        stdin_as_bytes = stdin_buffer.encode(self._encoding)
+        self.writeData(stdin_as_bytes)
+        self.waitForFinished(30000)
+
+        self.stderr = self.readAllStandardError().data().decode(self._encoding)
+        self.stdout = self.readAllStandardOutput().data().decode(self._encoding)
+        return self.exitCode()
+
     def execute(
-        comando: str, arguments: Optional[Iterable[str]] = None
-    ) -> int:  # FIXME: aquí hay otro problema parecido a File, que se llama inicializado y sin inicializar
-        import sys
-
-        encoding = sys.getfilesystemencoding()
-        pro = QtCore.QProcess()
-        from pineboolib.application import types
+        self, comando: Union[str, List, "types.Array"], arguments: Optional[Iterable[str]] = None
+    ) -> int:
+        """Execute normal command."""
 
         comando_: List[str] = []
         if isinstance(comando, list):
             comando_ = comando
-
-        if isinstance(comando, types.Array):
-            comando = str(comando)
-
-        if isinstance(comando, str):
-            comando_ = comando.split(" ")
+        else:
+            comando_ = str(comando).split(" ")
 
         programa = comando_[0]
         argumentos = comando_[1:]
-        pro.setProgram(programa)
-        pro.setArguments(argumentos)
-        pro.start()
-        pro.waitForFinished(30000)
-        Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
-        Process.stderr = pro.readAllStandardError().data().decode(encoding)
-        return 0  # FIXME: Probably we need to return the exit code
 
-    running = property(getIsRunning)
-    workingDirectory = property(getWorkingDirectory, setWorkingDirectory)  # type: ignore
+        self.setProgram(programa)
+        self.setArguments(argumentos)
+        self.start()
+        self.waitForFinished(30000)
+        self.stderr = self.readAllStandardError().data().decode(self._encoding)
+        self.stdout = self.readAllStandardOutput().data().decode(self._encoding)
+        return self.exitCode()
+
+    running = property(get_is_running)
+    workingDirectory = property(get_working_directory, set_working_directory)  # type: ignore
+    stdout = property(read_std_out, set_std_out)
+    stderr = property(read_std_error, set_std_error)
