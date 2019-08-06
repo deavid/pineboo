@@ -10,6 +10,7 @@ from pineboolib.core.utils.utils_base import filedir
 from pineboolib.core.settings import config
 from pineboolib.fllegacy.flformdb import FLFormDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.application.database import pnsqlcursor
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy import flapplication
 from typing import Any, cast
@@ -111,7 +112,7 @@ class FLFormRecordDB(FLFormDB):
 
         parent = (
             flapplication.aqApp.mainWidget()
-            if isinstance(parent_or_cursor, FLSqlCursor)
+            if isinstance(parent_or_cursor, (FLSqlCursor, pnsqlcursor.PNSqlCursor))
             else parent_or_cursor
         )
         cursor = parent_or_cursor if isinstance(parent_or_cursor, FLSqlCursor) else None
