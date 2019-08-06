@@ -298,9 +298,11 @@ class ProjectConfig:
         if child is None:
             raise ValueError("Tag %r not present" % tagname)
 
-        if self.fernet is None:
-            return child.text or ""
         cipher_method = child.get("cipher-method")
+        if cipher_method is None:
+            return child.text or ""
+        if self.fernet is None:
+            raise Exception("Tried to load ciphered tag %r with no loaded cipher" % tagname)
         cipher_text = child.get("cipher-text")
         if cipher_method != "cryptography.Fernet":
             raise ValueError("Cipher method %r not supported." % cipher_method)
