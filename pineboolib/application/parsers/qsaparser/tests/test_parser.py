@@ -35,6 +35,13 @@ class TestParser(unittest.TestCase):
         )
         self.assertEqual(qs2py('x = File("test").remove()'), 'x = qsa.File("test").remove()\n')
 
+    def test_process_class(self) -> None:
+        """Test parsing the process class."""
+        self.assertEqual(
+            qs2py('x = Process.execute(["ls", "*"])'),
+            'x = qsa.ProcessStatic.execute(qsa.Array(["ls", "*"]))\n',
+        )
+
     def test_flfacturac(self) -> None:
         """Test conveting fixture flfacturac."""
         flfacturac_qs = fixture_read("flfacturac.qs")
