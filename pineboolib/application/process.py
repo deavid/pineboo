@@ -69,12 +69,12 @@ class Process(QtCore.QProcess):
         """Return last std out."""
         return self._std_out
 
-    def set_std_out(self, value: Any):
+    def set_std_out(self, value: str) -> None:
         """Set last std out."""
 
         self._std_out = value
 
-    def set_std_error(self, value: Any):
+    def set_std_error(self, value: str) -> None:
         """Set last std error."""
 
         self._std_error = value
@@ -84,7 +84,7 @@ class Process(QtCore.QProcess):
 
         return super().workingDirectory()
 
-    def set_working_directory(self, wd) -> None:
+    def set_working_directory(self, wd: str) -> None:
         """Set working directory."""
 
         super().setWorkingDirectory(wd)
@@ -99,7 +99,7 @@ class Process(QtCore.QProcess):
 
         return self.exitCode()
 
-    def executeNoSplit(self, comando: list, stdin_buffer) -> int:
+    def executeNoSplit(self, comando: list, stdin_buffer: str) -> int:
         """Execute command no splitted."""
 
         list_ = []
