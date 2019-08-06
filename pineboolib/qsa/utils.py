@@ -280,7 +280,7 @@ def isNaN(x: Any) -> bool:
     @return True o False
     """
 
-    if x is None or math.isnan(x):
+    if x in [None, ""] or math.isnan(x):
         return True
 
     if isinstance(x, str) and x.find(":"):
