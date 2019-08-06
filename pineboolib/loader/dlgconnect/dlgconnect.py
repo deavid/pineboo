@@ -100,6 +100,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.ui.leDBPassword.setText("")
         self.ui.leDBName.setText("")
         self.ui.leProfilePassword.setText("")
+        self.ui.leProfilePassword2.setText("")
         self.ui.cbAutoLogin.setChecked(False)
         self.updatePort()
 
@@ -200,6 +201,12 @@ class DlgConnect(QtWidgets.QWidget):
             self.ui.leDBPassword2.setText("")
             return
 
+        if self.ui.leProfilePassword.text() != self.ui.leProfilePassword2.text():
+            QMessageBox.information(self.ui, "Pineboo", "La contraseña del perfil no coincide")
+            self.ui.leProfilePassword.setText("")
+            self.ui.leProfilePassword2.setText("")
+            return
+
         if self.edit_mode:
             pconf = self.getProjectConfig(self.ui.cbProfiles.currentText())
             if pconf is None:
@@ -289,6 +296,7 @@ class DlgConnect(QtWidgets.QWidget):
             return
 
         self.ui.leProfilePassword.setText(pconf.project_password)
+        self.ui.leProfilePassword2.setText(pconf.project_password)
 
         self.ui.cbAutoLogin.setChecked(pconf.project_password == "")
 
@@ -340,8 +348,10 @@ class DlgConnect(QtWidgets.QWidget):
 
         if self.ui.cbAutoLogin.isChecked():
             self.ui.leProfilePassword.setEnabled(False)
+            self.ui.leProfilePassword2.setEnabled(False)
         else:
             self.ui.leProfilePassword.setEnabled(True)
+            self.ui.leProfilePassword2.setEnabled(True)
 
     def change_profile_dir(self) -> None:
         """
