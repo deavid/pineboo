@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Profile Version="1.2">
+  <profile-data>
+    <password>pbkdf2-sha256-4:MTIzNDU2Nzg5:KBvxsj1UCqPoGuVknp+bqxK47eTIrgqF6Z/4GYWEqg4=</password>
+  </profile-data>
+  <name>Postgres Test DB</name>
+  <database-server>
+    <type>PostgreSQL (PSYCOPG2)</type>
+    <host>192.168.1.101</host>
+    <port>5432</port>
+  </database-server>
+  <database-credentials>
+    <username>postgres</username>
+    <password>cG9zdGdyZXNwYXNzd29yZA==</password>
+  </database-credentials>
+  <database-name>postgres_testdb</database-name>
+</Profile>
