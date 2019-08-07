@@ -1,46 +1,57 @@
 # -*- coding: utf-8 -*-
+"""Fllineedit module."""
+
 from PyQt5 import QtCore, QtWidgets  # type: ignore
 from pineboolib import logging
-from typing import Any
+from typing import Any, Optional
+
+logger = logging.getLogger(__name__)
 
 
 class FLLineEdit(QtWidgets.QLineEdit):
-    logger = logging.getLogger(__name__)
-    _tipo: str = ""
-    partDecimal = 0
-    partInteger = 0
-    _maxValue = None
-    autoSelect = True
-    _name = None
-    _longitudMax = None
-    _parent = None
-    _last_text = None
-    _formating = False
+    """FLLineEdit class."""
+
+    _tipo: str
+    _part_decimal: int
+    _part_integer: int
+    _max_value: int
+    _auto_select: bool
+    _name: str
+    _longitud_max: int
+    _parent: QtWidgets.QWidget
+    _last_text: str
+    _formating: bool
+    _field_name: str
 
     lostFocus = QtCore.pyqtSignal()
 
-    def __init__(self, parent, name=None) -> None:
+    def __init__(self, parent: QtWidgets.QWidget, name: str = "") -> None:
+        """Inicialize."""
+
         super(FLLineEdit, self).__init__(parent)
         self._name = name
         if hasattr(parent, "fieldName_"):
             if isinstance(parent.fieldName_, str):
-                self._fieldName = parent.fieldName_
+                self._field_name = parent.fieldName_
 
-            self._tipo = parent.cursor_.metadata().field(self._fieldName).type()
-            self.partDecimal = 0
-            self.autoSelect = True
-            self.partInteger = parent.cursor_.metadata().field(self._fieldName).partInteger()
+            self._tipo = parent.cursor_.metadata().field(self._field_name).type()
+            self._part_decimal = 0
+            self._auto_select = True
+            self._formating = False
+            self._part_integer = parent.cursor_.metadata().field(self._field_name).partInteger()
 
             self._parent = parent
 
             if self._tipo == "string":
-                self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
-                self.setMaxLength(self._longitudMax)
+                self._longitud_max = parent.cursor_.metadata().field(self._field_name).length()
+                self.setMaxLength(self._longitud_max)
 
             if self._tipo in ("int", "uint", "double"):
                 self.setAlignment(QtCore.Qt.AlignRight)
 
-    def setText(self, text_, check_focus=True) -> None:
+    def setText(self, text_: str, check_focus: bool = True) -> None:
+        """Set text to control."""
+
         text_ = str(text_)
         # if not project.DGI.localDesktop():
         #    project.DGI._par.addQueque("%s_setText" % self._parent.objectName(), text_)
@@ -60,14 +71,10 @@ class FLLineEdit(QtWidgets.QLineEdit):
                 minus = True
                 s = s[1:]
 
-            orig_s = s
-            if QtCore.QLocale.system().toString(float(s), "f", 1)[1] == ",":
-                s = s.replace(".", ",")
-
-            val, ok = QtCore.QLocale.system().toDouble(s)
+            val, ok = QtCore.QLocale.system().toDouble(s.replace(".", ","))
 
             if ok:
-                s = QtCore.QLocale.system().toString(float(orig_s), "f", self.partDecimal)
+                s = QtCore.QLocale.system().toString(float(s), "f", self._part_decimal)
             if minus:
                 s = "-%s" % s
 
@@ -81,9 +88,11 @@ class FLLineEdit(QtWidgets.QLineEdit):
             if ok:
                 s = QtCore.QLocale.system().toString(val)
 
-        super().setText(s)
+        super().setText(str(s))
 
-    def text(self) -> Any:
+    def text(self) -> str:
+        """Return text from control."""
+
         text_ = super().text()
         if text_ == "":
             return text_
@@ -116,26 +125,32 @@ class FLLineEdit(QtWidgets.QLineEdit):
 
         return text_
 
-    def setMaxValue(self, max_value) -> None:
-        self._maxValue = max_value
+    def setMaxValue(self, max_value: int) -> None:
+        """Set max value for numeric types."""
 
-    def focusOutEvent(self, f) -> None:
+        self._max_value = max_value
+
+    def focusOutEvent(self, f: Any) -> None:
+        """Focus out event."""
+
         if self._tipo in ("double", "int", "uint"):
-            text_ = super(FLLineEdit, self).text()
+            text_ = super().text()
 
             if self._tipo == "double":
 
                 val, ok = QtCore.QLocale.system().toDouble(text_)
 
                 if ok:
-                    text_ = QtCore.QLocale.system().toString(val, "f", self.partDecimal)
+                    text_ = QtCore.QLocale.system().toString(val, "f", self._part_decimal)
                 super().setText(text_)
             else:
 
                 self.setText(text_)
         super().focusOutEvent(f)
 
-    def focusInEvent(self, f) -> None:
+    def focusInEvent(self, f: Any) -> None:
+        """Focus in event."""
+
         if self.isReadOnly():
             return
 
@@ -144,8 +159,9 @@ class FLLineEdit(QtWidgets.QLineEdit):
             s = self.text()
             if self._tipo == "double":
                 if s != "":
-                    s = QtCore.QLocale.system().toString(float(s), "f", self.partDecimal)
-                if QtCore.QLocale.system().toString(1.1, "f", 1)[1] == ",":
+                    s = QtCore.QLocale.system().toString(float(s), "f", self._part_decimal)
+
+                if QtCore.QLocale.system().toString(float(s), "f", 1)[1] == ",":
                     s = s.replace(".", "")
                 else:
                     s = s.replace(",", "")
@@ -158,7 +174,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
             super().setText(s)
             self.blockSignals(False)
 
-        if self.autoSelect and not self.selectedText() and not self.isReadOnly():
+        if self._auto_select and not self.selectedText() and not self.isReadOnly():
             self.selectAll()
 
         super().focusInEvent(f)
