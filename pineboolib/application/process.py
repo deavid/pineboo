@@ -102,15 +102,18 @@ class Process(QtCore.QProcess):
     def executeNoSplit(self, comando: list, stdin_buffer: str) -> int:
         """Execute command no splitted."""
 
-        list_ = []
+        comando_ = []
         for c in comando:
-            list_.append(c)
+            comando_.append(c)
 
         # programa = list_[0]
         # arguments = list_[1:]
         # self.setProgram(programa)
         # self.setArguments(arguments)
-        self = Process(*list_)
+        self.setProgram(comando_[0])
+        argumentos = comando_[1:]
+        self.setArguments(argumentos)
+
         self.start()
 
         stdin_as_bytes = stdin_buffer.encode(self._encoding)
@@ -121,9 +124,8 @@ class Process(QtCore.QProcess):
         self.stdout = self.readAllStandardOutput().data().decode(self._encoding)
         return self.exitCode()
 
-    @staticmethod
     def execute(
-        program: Union[str, List, "types.Array"], arguments: Optional[Iterable[str]] = None
+        self, program: Union[str, List, "types.Array"], arguments: Optional[Iterable[str]] = None
     ) -> int:
         """Execute normal command."""
         comando_: List[str] = []
@@ -132,7 +134,11 @@ class Process(QtCore.QProcess):
         else:
             comando_ = str(program).split(" ")
 
-        self = Process(*comando_)
+        # self = Process(*comando_)
+        self.setProgram(comando_[0])
+        argumentos = comando_[1:]
+        self.setArguments(argumentos)
+
         self.start()
         self.waitForFinished(30000)
         self.stderr = self.readAllStandardError().data().decode(self._encoding)
