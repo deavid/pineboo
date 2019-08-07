@@ -140,6 +140,7 @@ class DlgConnect(QtWidgets.QWidget):
             self.ui.cbProfiles.addItem(name)
 
         last_profile = settings.value("DBA/last_profile", None)
+
         if last_profile:
             self.ui.cbProfiles.setCurrentText(last_profile)
 
@@ -174,10 +175,12 @@ class DlgConnect(QtWidgets.QWidget):
         """
         Open the selected connection.
         """
-        pconf = self.getProjectConfig(self.ui.cbProfiles.currentText())
+        current_profile = self.ui.cbProfiles.currentText()
+        pconf = self.getProjectConfig(current_profile)
         if pconf is None:
             return
         self.selected_project_config = pconf
+        settings.set_value("DBA/last_profile", current_profile)
         self.close()
 
     @pyqtSlot()
