@@ -100,6 +100,8 @@ class dgi_qt(dgi_schema):
             parent = None
             if xclass == "QMainWindow":
                 parent = qt3_widgets.qmainwindow.QMainWindow()
+            if xclass == "QDialog":
+                parent = qt3_widgets.qdialog.QDialog()
 
             if parent is None:
                 raise Exception("xclass not found %s" % xclass)
