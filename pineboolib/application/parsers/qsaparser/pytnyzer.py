@@ -1222,8 +1222,10 @@ class With(ASTPython):
             obj_ = None
 
             # para sustituir los this sueltos por var_expr
-            if obj[1].find("self") > -1 and obj[1].find("self.") == -1:
-                obj_1 = obj[1].replace("self", " ".join(var_expr))
+            if obj[1].find("self)") > -1:
+                obj_1 = obj[1].replace("self)", "%s)" % " ".join(var_expr))
+            elif obj[1].find("self ") > -1:
+                obj_1 = obj[1].replace("self ", " ".join(var_expr))
             else:
                 obj_1 = obj[1]
 
