@@ -124,8 +124,9 @@ class Process(QtCore.QProcess):
         self.stdout = self.readAllStandardOutput().data().decode(self._encoding)
         return self.exitCode()
 
+    @staticmethod
     def execute(
-        self, program: Union[str, List, "types.Array"], arguments: Optional[Iterable[str]] = None
+        program: Union[str, List, "types.Array"], arguments: Optional[Iterable[str]] = None
     ) -> int:
         """Execute normal command."""
         comando_: List[str] = []
@@ -134,7 +135,7 @@ class Process(QtCore.QProcess):
         else:
             comando_ = str(program).split(" ")
 
-        # self = Process(*comando_)
+        self = Process()
         self.setProgram(comando_[0])
         argumentos = comando_[1:]
         self.setArguments(argumentos)
