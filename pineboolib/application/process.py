@@ -106,10 +106,11 @@ class Process(QtCore.QProcess):
         for c in comando:
             list_.append(c)
 
-        programa = list_[0]
-        arguments = list_[1:]
-        self.setProgram(programa)
-        self.setArguments(arguments)
+        # programa = list_[0]
+        # arguments = list_[1:]
+        # self.setProgram(programa)
+        # self.setArguments(arguments)
+        self = Process(*list_)
         self.start()
 
         stdin_as_bytes = stdin_buffer.encode(self._encoding)
@@ -131,7 +132,7 @@ class Process(QtCore.QProcess):
         else:
             comando_ = str(program).split(" ")
 
-        self = Process(comando_)
+        self = Process(*comando_)
         self.start()
         self.waitForFinished(30000)
         self.stderr = self.readAllStandardError().data().decode(self._encoding)
