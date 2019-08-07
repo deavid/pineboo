@@ -1254,8 +1254,10 @@ class FLFieldDB(QtWidgets.QWidget):
             except Exception:
                 self.logger.debug("Error al desconectar señal textChanged", exc_info=True)
             s = None
-            if nulo and v in (None, 0):
+
+            if nulo and v is None:
                 dv = field.defaultValue()
+
                 if field.allowNull():
                     if dv is None:
                         self.editor_.setText("")
@@ -1266,7 +1268,7 @@ class FLFieldDB(QtWidgets.QWidget):
                         self.editor_.setText(dv)
 
             else:
-                if v is None:
+                if not v:
                     v = 0.0
                 s = str(round(float(v), partDecimal))
                 pos_dot = s.find(".")
@@ -2340,7 +2342,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.setMinimumSize(self.iconSize)
                 self.editor_.setMaximumHeight(self.iconSize.height())
             self.editor_._tipo = type_
-            self.editor_.partDecimal = partDecimal
+            self.editor_._part_decimal = partDecimal
             if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                 if not field.allowNull() and field.editable() and type_ not in ("time", "date"):
                     # self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
@@ -2355,7 +2357,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     FLDoubleValidator(
                         ((pow(10, partInteger) - 1) * -1),
                         pow(10, partInteger) - 1,
-                        self.editor_.partDecimal,
+                        self.editor_._part_decimal,
                         self.editor_,
                     )
                 )
@@ -3213,6 +3215,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
     def setDisabled(self, disable: bool) -> None:
         self.setEnabled(not disable)
+        self.setKeepDisabled(disable)
 
     """
     Redefinida por conveniencia

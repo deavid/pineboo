@@ -12,7 +12,7 @@ class FormInternalObj(qsa.FormDBWidget):
         connect(self.cursor(), u"cursorUpdated()", self, u"actualizarAreas")
 
     def actualizarAreas(self):
-        sys.updateAreas()
+        qsa.sys.updateAreas()
 
 
 form = None

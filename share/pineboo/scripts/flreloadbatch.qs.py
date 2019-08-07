@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-from pineboolib.qsa import *
+from pineboolib.qsa import qsa
+import os
+import traceback
 
 
 class interna(object):
-    ctx = Object()
+    ctx = qsa.Object()
 
     def __init__(self, context=None):
         self.ctx = context
@@ -18,7 +20,7 @@ class interna(object):
 class oficial(interna):
     pathLocal = ""
     idFuncional = ""
-    bloqueo = Boolean()
+    bloqueo = qsa.Boolean()
 
     def __init__(self, context=None):
         super(oficial, self).__init__(context)
@@ -52,7 +54,7 @@ class ifaceCtx(head):
         return self.cargarModulo(nombreFichero)
 
 
-class FormInternalObj(FormDBWidget):
+class FormInternalObj(qsa.FormDBWidget):
     def _class_init(self):
         self.iface = ifaceCtx(self)
 
@@ -60,27 +62,30 @@ class FormInternalObj(FormDBWidget):
         pass
 
     def interna_main(self):
-        util = FLUtil()
-        setting = "scripts/sys/modLastDirModules_%s" % sys.nameBD()
+        util = qsa.FLUtil()
+        setting = "scripts/sys/modLastDirModules_%s" % qsa.sys.nameBD()
         dirAnt = util.readSettingEntry(setting)
-        dirMods = FileDialog.getExistingDirectory(dirAnt, util.translate(u"scripts", u"Directorio de Módulos"))
+        dirMods = qsa.FileDialog.getExistingDirectory(
+            dirAnt, util.translate(u"scripts", u"Directorio de Módulos")
+        )
 
         if not dirMods:
             return
-        Dir().setCurrent(dirMods)
+        qsa.Dir().setCurrent(dirMods)
 
-        resComando = Array()
+        resComando = qsa.Array()
         if util.getOS() == u"WIN32":
             resComando = self.iface.ejecutarComando(u"cmd.exe \/C dir \/B \/S *.mod")
         else:
             resComando = self.iface.ejecutarComando(u"find . -name *.mod")
 
         if resComando.ok == False:
-            MessageBox.warning(
-                util.translate(u"scripts", u"Error al buscar los módulos en el directorio:\n") + dirMods,
-                MessageBox.Ok,
-                MessageBox.NoButton,
-                MessageBox.NoButton,
+            qsa.MessageBox.warning(
+                util.translate(u"scripts", u"Error al buscar los módulos en el directorio:\n")
+                + dirMods,
+                qsa.MessageBox.Ok,
+                qsa.MessageBox.NoButton,
+                qsa.MessageBox.NoButton,
             )
             return
 
@@ -97,13 +102,13 @@ class FormInternalObj(FormDBWidget):
                 while_pass = True
                 continue
             while_pass = False
-            sys.processEvents()
+            qsa.sys.processEvents()
             if not self.iface.cargarModulo(modulos[i]):
-                MessageBox.warning(
+                qsa.MessageBox.warning(
                     util.translate(u"scripts", u"Error al cargar el módulo:\n") + modulos[i],
-                    MessageBox.Ok,
-                    MessageBox.NoButton,
-                    MessageBox.NoButton,
+                    qsa.MessageBox.Ok,
+                    qsa.MessageBox.NoButton,
+                    qsa.MessageBox.NoButton,
                 )
                 return
             i += 1
@@ -114,33 +119,37 @@ class FormInternalObj(FormDBWidget):
                 break
 
         util.writeSettingEntry(setting, dirMods)
-        aqApp.reinit()
+        qsa.aqApp.reinit()
 
     def oficial_ejecutarComando(self, comando=None):
-        res = Array()
-        Process.execute(comando)
-        if Process.stderr != u"":
+        res = qsa.Array()
+        qsa.ProcessStatic.execute(comando)
+        if qsa.ProcessStatic.stderr != u"":
             res[u"ok"] = False
-            res[u"salida"] = Process.stderr
+            res[u"salida"] = qsa.ProcessStatic.stderr
             if self.iface.pub_log:
-                self.iface.pub_log.child(u"log").append(ustr(u"Error al ejecutar el comando: ", comando, u"\n", Process.stderr))
+                self.iface.pub_log.child(u"log").append(
+                    ustr(
+                        u"Error al ejecutar el comando: ", comando, u"\n", qsa.ProcessStatic.stderr
+                    )
+                )
                 self.iface.pub_log.child(u"log").append(res.salida)
 
         else:
             res[u"ok"] = True
-            res[u"salida"] = Process.stdout
+            res[u"salida"] = qsa.ProcessStatic.stdout
 
         return res
 
     def oficial_cargarModulo(self, nombreFichero=None):
-        util = FLUtil()
+        util = qsa.FLUtil()
         if util.getOS() == u"WIN32":
             nombreFichero = nombreFichero[0 : len(nombreFichero) - 1]
 
         if not isinstance(nombreFichero, str):
             nombreFichero = nombreFichero.data().decode("utf-8")
 
-        fichero = File(nombreFichero, "iso-8859-15")
+        fichero = qsa.File(nombreFichero, "iso-8859-15")
         modulo = None
         descripcion = None
         area = None
@@ -148,15 +157,17 @@ class FormInternalObj(FormDBWidget):
         version = None
         nombreIcono = None
         versionMinimaFL = None
-        dependencias = Array()
-        fichero.open(File.ReadOnly)
+        dependencias = qsa.Array()
+        fichero.open(qsa.File.ReadOnly)
         f = fichero.read()
-        xmlModule = FLDomDocument()
+        xmlModule = qsa.FLDomDocument()
         if xmlModule.setContent(f):
             nodeModule = xmlModule.namedItem(u"MODULE")
             if not nodeModule:
-                MessageBox.critical(
-                    util.translate(u"scripts", u"Error en la carga del fichero xml .mod"), MessageBox.Ok, MessageBox.NoButton
+                qsa.MessageBox.critical(
+                    util.translate(u"scripts", u"Error en la carga del fichero xml .mod"),
+                    qsa.MessageBox.Ok,
+                    qsa.MessageBox.NoButton,
                 )
             modulo = nodeModule.namedItem(u"name").toElement().text()
             descripcion = nodeModule.namedItem(u"alias").toElement().text()
@@ -204,8 +215,8 @@ class FormInternalObj(FormDBWidget):
 
         descripcion = self.iface.traducirCadena(descripcion, fichero.path, modulo)
         desArea = self.iface.traducirCadena(desArea, fichero.path, modulo)
-        fichIcono = File(ustr(fichero.path, u"/", nombreIcono))
-        fichIcono.open(File.ReadOnly)
+        fichIcono = qsa.File(ustr(fichero.path, u"/", nombreIcono))
+        fichIcono.open(qsa.File.ReadOnly)
         icono = fichIcono.read()
 
         # DEBUG:: Argument 0 not understood
@@ -217,10 +228,14 @@ class FormInternalObj(FormDBWidget):
         #        return
         if not util.sqlSelect(u"flareas", u"idarea", ustr(u"idarea = '", area, u"'")):
             if not util.sqlInsert(u"flareas", u"idarea,descripcion", ustr(area, u",", desArea)):
-                MessageBox.warning(util.translate(u"scripts", u"Error al crear el área:\n") + area, MessageBox.Ok, MessageBox.NoButton)
+                qsa.MessageBox.warning(
+                    util.translate(u"scripts", u"Error al crear el área:\n") + area,
+                    qsa.MessageBox.Ok,
+                    qsa.MessageBox.NoButton,
+                )
                 return False
         recargar = util.sqlSelect(u"flmodules", u"idmodulo", ustr(u"idmodulo = '", modulo, u"'"))
-        curModulo = FLSqlCursor(u"flmodules")
+        curModulo = qsa.FLSqlCursor(u"flmodules")
         if recargar:
             # WITH_START
             curModulo.select(ustr(u"idmodulo = '", modulo, u"'"))
@@ -240,15 +255,15 @@ class FormInternalObj(FormDBWidget):
         curModulo.setValueBuffer(u"icono", icono)
         curModulo.commitBuffer()
         # WITH_END
-        curSeleccion = FLSqlCursor(u"flmodules")
+        curSeleccion = qsa.FLSqlCursor(u"flmodules")
         curModulo.setMainFilter(ustr(u"idmodulo = '", modulo, u"'"))
         curModulo.editRecord(False)
-        formRecordflmodules.cargarDeDisco(u"%s/" % fichero.path, False)
-        formRecordflmodules.accept()
-        setting = "scripts/sys/modLastModule_%s" % sys.nameBD()
+        qsa.from_project("formRecordflmodules").cargarDeDisco(u"%s/" % fichero.path, False)
+        qsa.from_project("formRecordflmodules").accept()
+        setting = "scripts/sys/modLastModule_%s" % qsa.sys.nameBD()
         nombreFichero = "%s" % os.path.abspath(nombreFichero)
         util.writeSettingEntry(setting, nombreFichero)
-        sys.processEvents()
+        qsa.sys.processEvents()
         return True
 
     def oficial_compararVersiones(self, v1=None, v2=None):
@@ -265,9 +280,9 @@ class FormInternalObj(FormDBWidget):
                     while_pass = True
                     continue
                 while_pass = False
-                if parseInt(a1[i]) > parseInt(a2[i]):
+                if qsa.parseInt(a1[i]) > qsa.parseInt(a2[i]):
                     return 1
-                if parseInt(a1[i]) < parseInt(a2[i]):
+                if qsa.parseInt(a1[i]) < qsa.parseInt(a2[i]):
                     return 2
                 i += 1
                 while_pass = True
@@ -279,24 +294,26 @@ class FormInternalObj(FormDBWidget):
         return 0
 
     def oficial_traducirCadena(self, cadena=None, path=None, modulo=None):
-        util = FLUtil()
+        util = qsa.FLUtil()
         if cadena.find(u"QT_TRANSLATE_NOOP") == -1:
             return cadena
         cadena2 = cadena
-        cadena = QString(cadena).mid(41, len(cadena) - 43)
+        cadena = qsa.QString(cadena).mid(41, len(cadena) - 43)
         nombreFichero = None
         try:
-            nombreFichero = ustr(path, u"/translations/", modulo, u".", util.getIdioma(), u".ts")
+            nombreFichero = qsa.ustr(
+                path, u"/translations/", modulo, u".", util.getIdioma(), u".ts"
+            )
         except Exception as e:
             e = traceback.format_exc()
             return cadena
 
-        if not File.exists(nombreFichero):
+        if not qsa.File.exists(nombreFichero):
             return cadena
-        fichero = File(nombreFichero)
-        fichero.open(File.ReadOnly)
+        fichero = qsa.File(nombreFichero)
+        fichero.open(qsa.File.ReadOnly)
         f = fichero.read()
-        xmlTranslations = FLDomDocument()
+        xmlTranslations = qsa.FLDomDocument()
         if xmlTranslations.setContent(f):
             nodeMess = xmlTranslations.elementsByTagName(u"message")
             i = 0
@@ -321,15 +338,15 @@ class FormInternalObj(FormDBWidget):
         return cadena
 
     def oficial_elegirOpcion(self, opciones=None):
-        util = FLUtil()
-        dialog = Dialog()
+        util = qsa.FLUtil()
+        dialog = qsa.Dialog()
         dialog.okButtonText = util.translate(u"scripts", u"Aceptar")
         dialog.cancelButtonText = util.translate(u"scripts", u"Cancelar")
-        bgroup = GroupBox()
+        bgroup = qsa.GroupBox()
         bgroup.title = util.translate(u"scripts", u"Seleccione módulos a cargar")
         dialog.add(bgroup)
-        resultado = Array()
-        cB = Array()
+        resultado = qsa.Array()
+        cB = qsa.Array()
         i = 0
         while_pass = True
         while i < len(opciones):
@@ -338,7 +355,7 @@ class FormInternalObj(FormDBWidget):
                 while_pass = True
                 continue
             while_pass = False
-            cB[i] = CheckBox()
+            cB[i] = qsa.CheckBox()
             bgroup.add(cB[i])
             cB[i].text = opciones[i]
             cB[i].checked = True

@@ -42,6 +42,20 @@ class TestParser(unittest.TestCase):
             'x = qsa.ProcessStatic.execute(qsa.Array(["ls", "*"]))\n',
         )
 
+    def test_while(self) -> None:
+        """Test while class."""
+        value = "with (this.iface.curFactura)"
+        value += (
+            'setValueBuffer("neto", formfacturascli.iface.pub_commonCalculateField("neto", this));'
+        )
+        result_value = "# WITH_START\n"
+        result_value += "self.iface.curFactura.setValueBuffer(\n"
+        result_value += '    "neto", qsa.from_project("formfacturascli").iface.pub_commonCalculateField("neto", self.iface.curFactura)\n'
+        result_value += ")\n"
+        result_value += "# WITH_END\n"
+
+        self.assertEqual(qs2py(value), result_value)
+
     def test_flfacturac(self) -> None:
         """Test conveting fixture flfacturac."""
         flfacturac_qs = fixture_read("flfacturac.qs")

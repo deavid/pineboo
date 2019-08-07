@@ -1,20 +1,14 @@
 # -*- coding: utf-8 -*-
-
-from pineboolib.qsa import *
-from pineboolib.core.utils.utils_base import filedir
-from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings
-from PyQt5 import QtCore  # type: ignore
-from pineboolib.qt3_widgets.formdbwidget import FormDBWidget
-import os
-
-settings = AQSettings()
+from pineboolib.qsa import qsa
 
 
-class FormInternalObj(FormDBWidget):
+class FormInternalObj(qsa.FormDBWidget):
     def _class_init(self):
         pass
 
     def main(self):
+        from PyQt5 import QtCore  # type: ignore
+
         mng = qsa.aqApp.db().managerModules()
         self.w_ = qsa.QWidget(qsa.aqApp.mainWidget(), QtCore.Qt.Dialog)
         self.w_ = mng.createUI(u"ebcomportamiento.ui", None, self.w_)
@@ -33,7 +27,6 @@ class FormInternalObj(FormDBWidget):
 
     def cargarConfiguracion(self):
         w = self.w_
-        from pineboolib.application import project
 
         w.child(u"cbFLTableDC").checked = self.leerValorLocal("FLTableDoubleClick")
         w.child(u"cbFLTableSC").checked = self.leerValorLocal("FLTableShortCut")
@@ -80,6 +73,8 @@ class FormInternalObj(FormDBWidget):
         w.child(u"leCO").setStyleSheet("background-color:" + self.colorActual_)
 
         # Actualizaciones.
+        from pineboolib.core.utils.utils_base import filedir
+        import os
 
         if os.path.exists(filedir("../.git")):
             w.child("cb_git_activar").checked = self.leerValorLocal("git_updates_enabled")
@@ -119,12 +114,19 @@ class FormInternalObj(FormDBWidget):
         if valor_name in ("isDebuggerMode", "dbadmin_enabled"):
             valor = config.value("application/%s" % valor_name, False)
         else:
-            if valor_name in ("ebCallFunction", "maxPixImages", "kugarParser", "colorObligatorio", "kugar_temp_dir", "git_updates_repo"):
+            if valor_name in (
+                "ebCallFunction",
+                "maxPixImages",
+                "kugarParser",
+                "colorObligatorio",
+                "kugar_temp_dir",
+                "git_updates_repo",
+            ):
                 valor = config.value("ebcomportamiento/%s" % valor_name, "")
                 if valor_name == "kugar_temp_dir" and valor == "":
                     from pineboolib.application import project
 
-                    valor = project.tmpdir
+                    valor = qsa.aqApp.tmp_dir()
 
             else:
                 valor = config.value("ebcomportamiento/%s" % valor_name, False)
