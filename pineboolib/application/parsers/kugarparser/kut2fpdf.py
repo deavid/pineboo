@@ -581,7 +581,7 @@ class Kut2FPDF(object):
         if calculation_type is not None and xml.tag != "Field":
             if calculation_type == "6":
                 function_name = xml.get("FunctionName")
-                if function_name and data_row:
+                if function_name and data_row is not None:
                     try:
                         nodo = self._parser_tools.convertToNode(data_row)
 
