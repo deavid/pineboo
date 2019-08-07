@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-from pineboolib.qsa import *
+from pineboolib.qsa import qsa
 
 
-class FormInternalObj(FormDBWidget):
+class FormInternalObj(qsa.FormDBWidget):
     def _class_init(self):
         pass
 
     def main(self):
-        sys.loadModules()
+        qsa.sys.loadModules()
 
 
 form = None

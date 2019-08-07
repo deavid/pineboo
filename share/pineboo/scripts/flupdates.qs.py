@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from typing import TYPE_CHECKING
-from pineboolib.qsa.qsa import *  # noqa: F403
 from pineboolib.qsa import qsa
 
 # /** @file */
