@@ -143,9 +143,11 @@ class QTable(Q3TableWidget):
 
     def setColumnStrechable(self, col, b) -> None:
         if b:
-            self.horizontalHeader().setSectionResizeMode(col, Qt.QHeaderView.Stretch)
+            self.horizontalHeader().setSectionResizeMode(col, QtWidgets.QHeaderView.Stretch)
         else:
-            self.horizontalHeader().setSectionResizeMode(col, Qt.QHeaderView.AdjustToContents)
+            self.horizontalHeader().setSectionResizeMode(
+                col, QtWidgets.QHeaderView.AdjustToContents
+            )
 
     def setHeaderLabel(self, l) -> None:
         self.cols_list.append(l)
