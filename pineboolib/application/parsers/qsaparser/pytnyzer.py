@@ -16,6 +16,7 @@ from pathlib import Path
 from pineboolib.core.utils import logging
 
 logger = logging.getLogger(__name__)
+ASTGenerator = Generator[Tuple[str, str], None, None]
 
 try:
     import black  # type: ignore
@@ -229,6 +230,7 @@ QSA_KNOWN_ATTRS = {
 }
 
 DISALLOW_CONVERSION_FOR_NONSTRICT = {"connect", "disconnect"}
+classesDefined: List[str] = []
 
 
 def id_translate(name: str, qsa_exclude: Set[str] = None, transform: Dict[str, str] = None) -> str:
@@ -355,27 +357,27 @@ class ASTPythonBase(object):
 
     elem: ElementTree.Element
 
-    def __init__(self, elem) -> None:
+    def __init__(self, elem: ElementTree.Element) -> None:
         """Create ASTPythonBase."""
-        self.elem = elem
+        self.elem: ElementTree.Element = elem
         self.parent: Optional["ASTPythonBase"] = None
         self.source: Optional["Source"] = None
 
     @classmethod
-    def can_process_tag(self, tagname) -> bool:
+    def can_process_tag(self, tagname: str) -> bool:
         """Return if this instance can process given tagname."""
         return False
 
     def generate(
-        self, break_mode=False, include_pass=True, **kwargs
-    ) -> Generator[Tuple[str, str], None, None]:
+        self, *, break_mode: bool = False, include_pass: bool = True, **kwargs: Any
+    ) -> ASTGenerator:
         """Generate Python code."""
         yield "type", "value"
 
-    def local_var(self, name: str, is_member=False) -> str:
+    def local_var(self, name: str, is_member: bool = False) -> str:
         """Transform Identifiers that are local variables."""
-        locals = None
-        transform = None
+        locals: Optional[Set[str]] = None
+        transform: Optional[Dict[str, str]] = None
         if not is_member and self.source is not None:
             locals = self.source.locals if self.source else set()
             transform = self.source.locals_transform
@@ -391,13 +393,13 @@ class ASTPythonFactory(type):
 
     ast_class_types: List[Type[ASTPythonBase]] = []
 
-    def __init__(self, name, bases, dct) -> None:
+    def __init__(self, name: str, bases: tuple, dct: dict) -> None:
         """Register class using class name."""
         if issubclass(self, ASTPythonBase):
-            ASTPythonFactory.register_type(self)
+            ASTPythonFactory.register_type(cast(Type[ASTPythonBase], self))
 
     @staticmethod
-    def register_type(cls) -> None:
+    def register_type(cls: Type[ASTPythonBase]) -> None:
         """Register class using class name."""
         ASTPythonFactory.ast_class_types.append(cls)
 
@@ -415,11 +417,11 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
     parent: "ASTPythonBase"
 
     @classmethod
-    def can_process_tag(self, tagname) -> Any:
+    def can_process_tag(self, tagname: str) -> bool:
         """Return if the class can process specified tag name."""
         return self.__name__ == tagname or tagname in self.tags
 
-    def __init__(self, elem) -> None:
+    def __init__(self, elem: ElementTree.Element) -> None:
         """Create new ASTPython class."""
         super().__init__(elem)
         self.internal_generate = self.generate
@@ -427,11 +429,11 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
         if self.debug_file:
             self.generate = self._generate  # type: ignore
 
-    def generate(self, **kwargs):
+    def generate(self, **kwargs: Any) -> ASTGenerator:
         """Generate Python code. Abstract method. Generates debug for unknown AST."""
         yield "debug", "* not-known-seq * %s" % ElementTree.tostring(self.elem, encoding="UTF-8")
 
-    def debug(self, text) -> None:
+    def debug(self, text: str) -> None:
         """Print debug on the generated file."""
         if self.debug_file is None:
             return
@@ -451,7 +453,7 @@ class ASTPython(ASTPythonBase, metaclass=ASTPythonFactory):
         cname = self.__class__.__name__
         self.debug_file.write("%04d%s%s: %s\n" % (ASTPython.numline, sp, cname, text))
 
-    def _generate(self, **kwargs) -> Generator[Tuple[str, str], Any, None]:
+    def _generate(self, **kwargs: Any) -> ASTGenerator:
         """Debugging version of generate method."""
         if self.DEBUGFILE_LEVEL > 5:
             self.debug("begin-gen")
@@ -472,15 +474,20 @@ class Source(ASTPython):
     locals: Set[str]
     locals_transform: Dict[str, str]
 
-    def __init__(self, elem) -> None:
+    def __init__(self, elem: ElementTree.Element) -> None:
         """Create Source parser. Tracks local variables."""
         super().__init__(elem)
         self.locals = set()
         self.locals_transform = {}
 
     def generate(
-        self, break_mode=False, include_pass=True, declare_identifiers: Set = None, **kwargs
-    ):
+        self,
+        *,
+        break_mode: bool = False,
+        include_pass: bool = True,
+        declare_identifiers: Set[str] = None,
+        **kwargs: Any
+    ) -> ASTGenerator:
         """Generate python code."""
         elems = 0
         after_lines = []
@@ -523,15 +530,12 @@ class Source(ASTPython):
             yield "line", "pass"
 
 
-classesDefined: List[str] = []
-
-
 class Class(ASTPython):
     """Process Class XML tags."""
 
-    def generate(self, **kwargs):
+    def generate(self, **kwargs: Any) -> ASTGenerator:
         """Generate python code."""
-        name = self.elem.get("name")
+        name = self.elem.get("name", "unnamed")
         extends = self.elem.get("extends", "object")
         self.source.locals.add(name)
 
@@ -539,7 +543,8 @@ class Class(ASTPython):
         yield "line", "class %s(%s):" % (name, extends)
         yield "begin", "block-class-%s" % (name)
         for source in self.elem.findall("Source"):
-            source.set("parent_", self.elem)
+            # FIXME: Element.set expects string.
+            source.set("parent_", self.elem)  # type: ignore
             classesDefined.clear()
             ast_python = parse_ast(source, parent=self)
             for obj in ast_python.generate():
@@ -550,7 +555,7 @@ class Class(ASTPython):
 class Function(ASTPython):
     """Process Function XML tags."""
 
-    def generate(self, **kwargs):
+    def generate(self, **kwargs: Any) -> ASTGenerator:
         """Generate python code."""
         _name = self.elem.get("name")
         anonymous = False
@@ -561,10 +566,10 @@ class Function(ASTPython):
             name = "_anonymous_fn_"
             anonymous = True
         withoutself = self.elem.get("withoutself")
-        parent = self.elem.get("parent_")
+        parent = cast(ElementTree.Element, self.elem.get("parent_"))  # FIXME
         grandparent = None
         if parent is not None:
-            grandparent = parent.get("parent_")
+            grandparent = cast(Optional[ElementTree.Element], parent.get("parent_"))  # FIXME
 
         if grandparent and grandparent.get("name") == "FormInternalObj":
             className = name.split("_")[0]
@@ -587,7 +592,8 @@ class Function(ASTPython):
         id_list: Set[str] = set()
         for n, arg in enumerate(self.elem.findall("Arguments/*")):
             expr = []
-            arg.set("parent_", self.elem)
+            # FIXME: ElementTree.Element.set expects a string not Element.
+            arg.set("parent_", self.elem)  # type: ignore
             for dtype, data in parse_ast(arg, parent=self).generate():
                 if dtype == "expr":
                     id_list.add(data)
@@ -607,7 +613,8 @@ class Function(ASTPython):
         yield "begin", "block-def-%s" % (name)
         # if returns:  yield "debug", "Returns: %s" % returns
         for source in self.elem.findall("Source"):
-            source.set("parent_", self.elem)
+            # FIXME: ElementTree.Element.set expects a string not Element.
+            source.set("parent_", self.elem)  # type: ignore
             for obj in parse_ast(source, parent=self).generate(declare_identifiers=id_list):
                 yield obj
         yield "end", "block-def-%s" % (name)
@@ -624,14 +631,16 @@ class FunctionAnon(Function):
 class FunctionCall(ASTPython):
     """Process FunctionCall XML tags."""
 
-    def generate(self, is_member=False, **kwargs):
+    def generate(self, is_member: bool = False, **kwargs: Any):
         """Generate python code."""
-        name = self.local_var(self.elem.get("name"), is_member=is_member)
-        parent = self.elem.get("parent_")
+        name: str = self.local_var(self.elem.get("name", "noname"), is_member=is_member)
+        # FIXME:
+        parent = cast(ElementTree.Element, self.elem.get("parent_"))
         # data_ = None
         if name == "":
             arg = self.elem[0]
-            arg.set("parent_", self.elem)
+            # FIXME:
+            arg.set("parent_", self.elem)  # type: ignore
             expr = []
             for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 # data_ = data
@@ -652,12 +661,12 @@ class FunctionCall(ASTPython):
 
         if parent and parent.tag == "InstructionCall":
             class_ = None
-            p_ = parent
+            p_: Optional[ElementTree.Element] = parent
             while p_:
                 if p_.tag == "Class":
                     class_ = p_
                     break
-                p_ = p_.get("parent_")
+                p_ = cast(ElementTree.Element, p_.get("parent_"))
 
             if class_:
                 extends = class_.get("extends")
@@ -671,7 +680,8 @@ class FunctionCall(ASTPython):
 
         arguments = []
         for n, arg in enumerate(self.elem.findall("CallArguments/*")):
-            arg.set("parent_", self.elem)
+            # FIXME:
+            arg.set("parent_", self.elem)  # type: ignore
             expr = []
             for dtype, data in parse_ast(arg, parent=self).generate(isolate=False):
                 # data_ = data
@@ -684,10 +694,10 @@ class FunctionCall(ASTPython):
                 yield "debug", "Argument %d not understood" % n
                 yield "debug", ElementTree.tostring(arg)
             else:
-                arg = " ".join(expr)
-                arg = arg.replace("( ", "(")
-                arg = arg.replace(" )", ")")
-                arguments.append(arg)
+                arg1 = " ".join(expr)
+                arg1 = arg1.replace("( ", "(")
+                arg1 = arg1.replace(" )", ")")
+                arguments.append(arg1)
 
         yield "expr", "%s(%s)" % (name, ", ".join(arguments))
 
