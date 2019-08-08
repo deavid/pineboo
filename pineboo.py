@@ -3,9 +3,9 @@
 """
 Start the application and give control to pineboolib.pnapplication().
 
-Bootstrap. Se encarga de inicializar la aplicación y ceder el control a
-pineboolib.pnapplication(); para ello acepta los parámetros necesarios de consola
-y configura el programa adecuadamente.
+Bootstrap. It is responsible for initializing the application and transfer control to
+pineboolib.pnapplication (); for this, it accepts the necessary console parameters
+and configure the program properly.
 """
 
 
