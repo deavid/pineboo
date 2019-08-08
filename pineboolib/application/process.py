@@ -14,7 +14,64 @@ if TYPE_CHECKING:
     from pineboolib.application import types  # noqa: F401
 
 
-class Process(QtCore.QProcess):
+class ProcessBaseClass(QtCore.QProcess):
+    """Process base class."""
+
+
+class ProcessStatic(ProcessBaseClass):
+    """Process static class."""
+
+    @classmethod
+    def executeNoSplit(cls, comando: list, stdin_buffer: str) -> int:
+        """Execute command no splitted."""
+
+        comando_ = []
+        for c in comando:
+            comando_.append(c)
+
+        # programa = list_[0]
+        # arguments = list_[1:]
+        # self.setProgram(programa)
+        # self.setArguments(arguments)
+        process = Process()
+        process.setProgram(comando_[0])
+        argumentos = comando_[1:]
+        process.setArguments(argumentos)
+
+        process.start()
+
+        stdin_as_bytes = stdin_buffer.encode(process._encoding)
+        process.writeData(stdin_as_bytes)
+        process.waitForFinished(30000)
+
+        cls.stderr = process.readAllStandardError().data().decode(process._encoding)
+        cls.stdout = process.readAllStandardOutput().data().decode(process._encoding)
+        return process.exitCode()
+
+    @classmethod
+    def execute(
+        cls, program: Union[str, List, "types.Array"], arguments: Optional[Iterable[str]] = None
+    ) -> int:
+        """Execute normal command."""
+        comando_: List[str] = []
+        if isinstance(program, list):
+            comando_ = program
+        else:
+            comando_ = str(program).split(" ")
+
+        process = Process()
+        process.setProgram(comando_[0])
+        argumentos = comando_[1:]
+        process.setArguments(argumentos)
+
+        process.start()
+        process.waitForFinished(30000)
+        cls.stderr = process.readAllStandardError().data().decode(process._encoding)
+        cls.stdout = process.readAllStandardOutput().data().decode(process._encoding)
+        return process.exitCode()
+
+
+class Process(ProcessBaseClass):
     """Process class."""
 
     _encoding: str
@@ -124,9 +181,8 @@ class Process(QtCore.QProcess):
         self.stdout = self.readAllStandardOutput().data().decode(self._encoding)
         return self.exitCode()
 
-    @staticmethod
-    def execute(
-        program: Union[str, List, "types.Array"], arguments: Optional[Iterable[str]] = None
+    def execute(  # type: ignore
+        self, program: Union[str, List, "types.Array"], arguments: Optional[Iterable[str]] = None
     ) -> int:
         """Execute normal command."""
         comando_: List[str] = []
@@ -135,7 +191,6 @@ class Process(QtCore.QProcess):
         else:
             comando_ = str(program).split(" ")
 
-        self = Process()
         self.setProgram(comando_[0])
         argumentos = comando_[1:]
         self.setArguments(argumentos)

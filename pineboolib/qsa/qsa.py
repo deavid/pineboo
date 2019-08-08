@@ -70,11 +70,8 @@ from .pncontrolsfactory import AQBoolFlagState, AQBoolFlagStateList  # noqa: F40
 
 
 from .pncontrolsfactory import FormDBWidget  # noqa: F401
-from pineboolib.application.process import Process  # noqa: F401
+from pineboolib.application.process import Process, ProcessStatic  # noqa: F401
 from .pncontrolsfactory import SysType, sys  # noqa: F401
-
-
-ProcessStatic = Process()
 
 QFile = File
 util = FLUtil
