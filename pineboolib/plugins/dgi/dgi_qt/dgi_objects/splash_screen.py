@@ -1,5 +1,6 @@
 from PyQt5 import QtGui, QtCore, QtWidgets  # type: ignore
 from pineboolib.core.utils.utils_base import filedir
+from pineboolib.core.settings import config
 
 
 class splashscreen(object):
@@ -9,7 +10,10 @@ class splashscreen(object):
 
     def __init__(self):
 
-        splash_path = filedir("../share/splashscreen/splash.png")
+        splash_path = filedir(
+            "../share/splashscreen/%s240.png"
+            % ("dbadmin" if config.value("application/dbadmin_enabled") else "quick")
+        )
 
         splash_pix = QtGui.QPixmap(splash_path)
         self._splash = QtWidgets.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
