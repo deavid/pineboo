@@ -1,7 +1,9 @@
-# # -*- coding: utf-8 -*-
-from pineboolib.application.utils.mobilemode import is_mobile_mode
+# -*- coding: utf-8 -*-
 from importlib import import_module
+from typing import List, cast, Optional
+from PyQt5 import QtCore
 
+from pineboolib.application.utils.mobilemode import is_mobile_mode
 from pineboolib import logging
 
 logger = logging.getLogger(__name__)
@@ -20,7 +22,7 @@ class dgi_schema(object):
     # .... this is really obscure. Please avoid at all costs. Having __NO_PYTHON__ is bad enough.
     _alternative_content_cached: bool
 
-    def __init__(self):
+    def __init__(self) -> None:
         # FIXME: This init is intended to be called only on certain conditions.
         # ... Worse than it seems: looks like this class is prepared to be constructed without
         # ... calling __init__, on purpose, to have different behavior than calling it.
@@ -42,7 +44,7 @@ class dgi_schema(object):
     def alias(self) -> str:
         return self._alias
 
-    def create_app(self):
+    def create_app(self) -> QtCore.QCoreApplication:
         from pineboolib.application import project
 
         return project.app
@@ -138,7 +140,7 @@ class dgi_schema(object):
     def __getattr__(self, name):
         return self.resolveObject(self._name, name)
 
-    def resolveObject(self, module_name, name):
+    def resolveObject(self, module_name, name) -> Optional[QtCore.QObject]:
         cls = None
         mod_name_full = "pineboolib.plugins.dgi.dgi_%s.dgi_objects.%s" % (module_name, name.lower())
         try:
@@ -150,12 +152,12 @@ class dgi_schema(object):
             logger.trace("resolveObject: Module not found %s", mod_name_full)
         except Exception:
             logger.exception("resolveObject: Unable to load module %s", mod_name_full)
-        return cls
+        return cast(Optional[QtCore.QObject], cls)
 
-    def sys_mtds(self):
+    def sys_mtds(self) -> List[str]:
         return []
 
-    def use_alternative_credentials(self):
+    def use_alternative_credentials(self) -> bool:
         return False
 
     def debug(self, txt):

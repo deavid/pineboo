@@ -37,10 +37,6 @@ class SysBaseType(object):
     @classmethod
     def nameUser(self) -> str:
         """Get current database user."""
-        ret_ = None
-        if project.conn is None:
-            raise Exception("Project is not connected yet")
-
         if project.DGI.use_alternative_credentials():
             ret_ = project.DGI.get_nameuser()
         else:
@@ -92,8 +88,6 @@ class SysBaseType(object):
     @classmethod
     def isLoadedModule(self, modulename: str) -> bool:
         """Check if a module has been loaded."""
-        if project.conn is None:
-            raise Exception("Project is not connected yet")
         return modulename in project.conn.managerModules().listAllIdModules()
 
     @classmethod
@@ -113,10 +107,8 @@ class SysBaseType(object):
             return platform.system()
 
     @classmethod
-    def nameBD(self) -> Any:
+    def nameBD(self) -> str:
         """Get database name."""
-        if project.conn is None:
-            raise Exception("Project is not connected yet")
         return project.conn.DBName()
 
     @classmethod
@@ -125,15 +117,13 @@ class SysBaseType(object):
         return val.encode(format).decode("utf-8", "replace")
 
     @classmethod
-    def fromUnicode(self, val, format) -> Any:
+    def fromUnicode(self, val, format) -> str:
         """Convert from unicode to string."""
         return val.encode("utf-8").decode(format, "replace")
 
     @classmethod
     def Mr_Proper(self) -> None:
         """Cleanup database like Mr. Proper."""
-        if project.conn is None:
-            raise Exception("Project is not connected yet")
         project.conn.Mr_Proper()
 
     @classmethod
@@ -166,22 +156,16 @@ class SysBaseType(object):
     @classmethod
     def cleanupMetaData(self, connName="default") -> None:
         """Clean up metadata."""
-        if project.conn is None:
-            raise Exception("Project is not connected yet")
         project.conn.useConn(connName).manager().cleanupMetaData()
 
     @classmethod
     def nameDriver(self, connName="default") -> Any:
         """Get driver name."""
-        if project.conn is None:
-            raise Exception("Project is not connected yet")
         return project.conn.useConn(connName).driverName()
 
     @classmethod
     def nameHost(self, connName="default") -> Any:
         """Get database host name."""
-        if project.conn is None:
-            raise Exception("Project is not connected yet")
         return project.conn.useConn(connName).host()
 
     @classmethod
@@ -189,8 +173,6 @@ class SysBaseType(object):
         """Add a new database."""
         # def addDatabase(self, driver_name = None, db_name = None, db_user_name = None,
         #                 db_password = None, db_host = None, db_port = None, connName="default"):
-        if project.conn is None:
-            raise Exception("Project is not connected yet")
         if len(args) == 1:
             conn_db = project.conn.useConn(args[0])
             if not conn_db.isOpen():
@@ -233,8 +215,6 @@ class SysBaseType(object):
     @classmethod
     def removeDatabase(self, connName="default") -> Any:
         """Remove a database."""
-        if project.conn is None:
-            raise Exception("Project is not connected yet")
         project.conn.useConn(connName)._isOpen = False
         return project.conn.useConn(connName).removeConn(connName)
 
