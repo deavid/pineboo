@@ -25,17 +25,17 @@ class TestPNBuffer(unittest.TestCase):
         cursor.setModeAccess(cursor.Insert)
         cursor.refreshBuffer()
         cursor.setValueBuffer("string_field", "Campo texto 2")
-        cursor.setValueBuffer("date_field", "2019-02-02")
-        cursor.setValueBuffer("time_field", "02:02:02")
-        cursor.setValueBuffer("bool_field", True)
+        cursor.setValueBuffer("date_field", "2019-02-02T00:00:00")
+        cursor.setValueBuffer("time_field", "02:02:02.1234")
+        cursor.setValueBuffer("bool_field", "true")
         cursor.setValueBuffer("double_field", 2.02)
         cursor.commitBuffer()
         cursor.setModeAccess(cursor.Insert)
         cursor.refreshBuffer()
         cursor.setValueBuffer("string_field", "Campo texto 3")
         cursor.setValueBuffer("date_field", "2019-03-03")
-        cursor.setValueBuffer("time_field", "03:03:03")
-        cursor.setValueBuffer("bool_field", True)
+        cursor.setValueBuffer("time_field", "2019-03-03T03:03:03 +2")
+        cursor.setValueBuffer("bool_field", "false")
         cursor.setValueBuffer("double_field", 3.03)
         cursor.commitBuffer()
 
@@ -50,6 +50,8 @@ class TestPNBuffer(unittest.TestCase):
 
         if buffer_ is None:
             raise Exception("buffer is empty!.")
+
+        buffer_.primeInsert()
 
         self.assertEqual(buffer_.value(2), "2019-01-01")
         self.assertEqual(buffer_.value("date_field"), "2019-01-01")
@@ -71,16 +73,31 @@ class TestPNBuffer(unittest.TestCase):
 
         self.assertEqual(time_field_.generated, True)
         buffer_.setGenerated(3, False)
+
         self.assertEqual(time_field_.generated, False)
+
+        mtd_field = cursor.metadata().field("time_field")
+
+        if mtd_field is None:
+            raise Exception("mtd_field is empty!.")
+
+        buffer_.setGenerated(mtd_field, True)
+
+        self.assertEqual(time_field_.generated, True)
 
     def test_basic2(self) -> None:
         """Basic test 2."""
+
+        import datetime
 
         cursor = pnsqlcursor.PNSqlCursor("fltest")
         cursor.select()
         cursor.first()
 
         buffer_ = cursor.buffer()
+
+        self.assertFalse(buffer_.field(0).has_changed(buffer_.value(0)))
+        self.assertFalse(buffer_.field(2).has_changed(datetime.date(2019, 1, 1)))
 
         if buffer_ is None:
             raise Exception("buffer is empty!.")
@@ -147,6 +164,10 @@ class TestPNBuffer(unittest.TestCase):
             raise Exception("field_ is empty!.")
 
         self.assertEqual(field_.name, "bool_field")
+
+        cursor_2 = buffer_.cursor()
+
+        self.assertFalse(buffer_.field("new_field"))
 
 
 if __name__ == "__main__":
