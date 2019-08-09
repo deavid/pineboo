@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 class DelayedObjectProxyLoader(object):
     """
     Delay load of an object until its first accessed.
+
     This is used to create entities such "formclientes" or "flfactppal" ahead of time and
     publish them in pineboolib.qsa.qsa so the code can freely call flfactppal.iface.XXX.
 
