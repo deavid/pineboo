@@ -3,6 +3,7 @@
 import unittest
 from pineboolib.loader.main import init_testing
 from pineboolib import application
+from pineboolib.application.database import pnsqlcursor
 
 
 class TestPNConnection(unittest.TestCase):
@@ -110,6 +111,27 @@ class TestPNConnection(unittest.TestCase):
         self.assertTrue(conn_.existsTable("flseqs"))
         self.assertFalse(conn_.mismatchedTable("flseqs", mtd_seqs))
         self.assertEqual(conn_.normalizeValue("holá, 'avión'"), "holá, ''avión''")
+
+    def test_basic5(self) -> None:
+        """Basic test 5."""
+
+        conn_ = application.project.conn
+
+        cursor = pnsqlcursor.PNSqlCursor("flareas")
+        conn_.doTransaction(cursor)
+        cursor.setModeAccess(cursor.Insert)
+        cursor.setValueBuffer("idarea", "test")
+        cursor.setValueBuffer("bloqueo", "false")
+        cursor.setValueBuffer("descripcion", "test area")
+        cursor.commitBuffer()
+        conn_.doRollback(cursor)
+        conn_.doTransaction(cursor)
+        cursor.setModeAccess(cursor.Insert)
+        cursor.setValueBuffer("idarea", "test")
+        cursor.setValueBuffer("bloqueo", "false")
+        cursor.setValueBuffer("descripcion", "test area")
+        cursor.commitBuffer()
+        conn_.doCommit(cursor, False)
 
 
 if __name__ == "__main__":
