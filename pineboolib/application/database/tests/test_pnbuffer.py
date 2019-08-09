@@ -96,11 +96,20 @@ class TestPNBuffer(unittest.TestCase):
 
         buffer_ = cursor.buffer()
 
-        self.assertFalse(buffer_.field(0).has_changed(buffer_.value(0)))
-        self.assertFalse(buffer_.field(2).has_changed(datetime.date(2019, 1, 1)))
-
         if buffer_ is None:
             raise Exception("buffer is empty!.")
+
+        field_1 = buffer_.field(0)
+        field_2 = buffer_.field(2)
+
+        if field_1 is None:
+            raise Exception("field_1 is empty!.")
+
+        if field_2 is None:
+            raise Exception("field_2 is empty!.")
+
+        self.assertFalse(field_1.has_changed(buffer_.value(0)))
+        self.assertFalse(field_2.has_changed(datetime.date(2019, 1, 1)))
 
         self.assertEqual(buffer_.isNull("string_field"), False)
         self.assertEqual(buffer_.isNull("date_field"), False)
@@ -166,6 +175,8 @@ class TestPNBuffer(unittest.TestCase):
         self.assertEqual(field_.name, "bool_field")
 
         cursor_2 = buffer_.cursor()
+
+        self.assertTrue(cursor_2)
 
         self.assertFalse(buffer_.field("new_field"))
 
