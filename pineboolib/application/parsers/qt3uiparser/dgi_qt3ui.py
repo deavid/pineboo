@@ -7,7 +7,7 @@ Loads old Qt3 UI files and creates a Qt5 UI.
 from importlib import import_module
 
 from PyQt5 import QtCore, QtGui, QtWidgets  # type: ignore
-
+from PyQt5.QtWidgets import QWidget
 from xml.etree import ElementTree as ET
 from binascii import unhexlify
 from pineboolib import logging
@@ -50,7 +50,8 @@ class Options:
 #      una nueva clase.
 
 
-def loadUi(form_path: str, widget, parent=None) -> None:
+# FIXME: widget is QWidget type but Qt5-Stubs for findChild reports QObject instead of Optional[QObject]
+def loadUi(form_path: str, widget: Any, parent: Optional[QWidget] = None) -> None:
     """
     Load Qt3 UI file from eneboo.
 
@@ -255,7 +256,7 @@ def loadUi(form_path: str, widget, parent=None) -> None:
         widget.show()
 
 
-def loadToolBar(xml: ET.Element, widget) -> None:
+def loadToolBar(xml: ET.Element, widget: QWidget) -> None:
     """
     Load UI Toolbar from XML and store it into widget.
 
@@ -285,7 +286,7 @@ def loadToolBar(xml: ET.Element, widget) -> None:
     widget.addToolBar(tb)
 
 
-def loadMenuBar(xml: ET.Element, widget) -> None:
+def loadMenuBar(xml: ET.Element, widget: QWidget) -> None:
     """
     Load a menu bar into widget.
 
@@ -336,7 +337,7 @@ def loadMenuBar(xml: ET.Element, widget) -> None:
             process_item(x, mB, widget)
 
 
-def process_item(xml: ET.Element, parent, widget) -> None:
+def process_item(xml: ET.Element, parent: QWidget, widget: QWidget) -> None:
     """
     Process random XML item.
 
@@ -358,11 +359,12 @@ def process_item(xml: ET.Element, parent, widget) -> None:
             process_item(x, menu_, widget)
 
 
-def load_action(action, widget) -> None:
+def load_action(action: QtWidgets.QAction, widget: QWidget) -> None:
     """
     Load Action into widget.
 
     widget: pre-created widget to store the object.
+    used only on loadToolBar and process_item
     """
     real_action = widget.findChild(QtWidgets.QAction, action.objectName())
     if real_action is not None:
@@ -378,7 +380,7 @@ def load_action(action, widget) -> None:
         action.toggled.connect(real_action.toggle)
 
 
-def loadAction(action, widget) -> None:
+def loadAction(action: ET.Element, widget: QWidget) -> None:
     """
     Load Action into widget.
 
@@ -394,18 +396,18 @@ def loadAction(action, widget) -> None:
         iconset = p.find("iconset")
 
         if name == "name" and cstring is not None:
-            act_.setObjectName(cstring.text)
+            act_.setObjectName(cstring.text or "unnamed")
         elif name == "text" and string is not None:
-            act_.setText(string.text)
+            act_.setText(string.text or "")
         elif name == "iconSet" and iconset is not None:
-            if iconset.text in ICONS.keys():
+            if iconset.text and iconset.text in ICONS.keys():
                 act_.setIcon(ICONS[iconset.text])
         elif name == "toolTip" and string is not None:
-            act_.setToolTip(string.text)
+            act_.setToolTip(string.text or "")
         elif name == "statusTip" and string is not None:
-            act_.setStatusTip(string.text)
+            act_.setStatusTip(string.text or "")
         elif name == "whatsThis" and string is not None:
-            act_.setWhatsThis(string.text)
+            act_.setWhatsThis(string.text or "")
 
 
 class WidgetResolver:
@@ -451,7 +453,8 @@ class WidgetResolver:
         return cls
 
 
-def createWidget(classname: str, parent=None) -> Any:
+# NOTE: This function may create QAction too, which inherits from QObject, not QWidget.
+def createWidget(classname: str, parent: Optional[QWidget] = None) -> QtCore.QObject:
     """
     Create a Widget for given class name.
     """
@@ -722,7 +725,7 @@ class loadWidget:
         #    if nwidget is not None and origWidget.objectName() not in origWidget.ui_:
         #        origWidget.ui_[origWidget.objectName()] = nwidget
 
-    def process_property(self, xmlprop, widget=None):
+    def process_property(self, xmlprop: ET.Element, widget: Optional[QtCore.QObject] = None):
         """
         Process a XML property from the UI.
         """
@@ -739,10 +742,10 @@ class loadWidget:
         elif pname in ("paletteBackgroundColor", "paletteForegroundColor"):
             set_fn = widget.setStyleSheet
         elif pname == "menuText":
-            if not isinstance(widget, qaction.QAction):
-                set_fn = widget.menuText
-            else:
+            if isinstance(widget, qaction.QAction):
                 return
+            else:
+                set_fn = widget.menuText
         elif pname == "movingEnabled":
             set_fn = widget.setMovable
         elif pname == "toggleAction":
@@ -771,7 +774,7 @@ class loadWidget:
             return
         if pname == "contentsMargins" or pname == "layoutSpacing":
             try:
-                value = int(xmlprop.get("stdset"))
+                value = int(xmlprop.get("stdset", "0"))
                 value //= 2
             except Exception:
                 value = 0
@@ -815,9 +818,9 @@ class loadWidget:
             # if Options.DEBUG_LEVEL > 50:
             #    print(e, repr(value))
             # if Options.DEBUG_LEVEL > 50:
-            #    print(etree.ElementTree.tostring(xmlprop))
+            #    print(etree.ET.tostring(xmlprop))
 
-    def process_action(self, xmlaction, toolBar):
+    def process_action(self, xmlaction: ET.Element, toolBar: QtWidgets.QToolBar):
         """
         Process a QAction.
         """
@@ -955,7 +958,7 @@ def loadIcon(xml: "ET.Element") -> None:
     ICONS[name] = icon
 
 
-def loadVariant(xml: ET.Element, widget=None) -> Any:
+def loadVariant(xml: ET.Element, widget: Optional[QWidget] = None) -> Any:
     """Load Variant from XML."""
     for variant in xml:
         return _loadVariant(variant, widget)
@@ -995,7 +998,7 @@ def b(x: str) -> bool:
     return False
 
 
-def _loadVariant(variant, widget=None) -> Any:
+def _loadVariant(variant: ET.Element, widget: Optional[QWidget] = None) -> Any:
     """Load a variant from XM. Internal."""
     text = variant.text or ""
     text = text.strip()
@@ -1015,14 +1018,14 @@ def _loadVariant(variant, widget=None) -> Any:
     if variant.tag == "rect":
         k = {}
         for c in variant:
-            k[c.tag] = int(c.text.strip())
+            k[c.tag] = int((c.text or "0").strip())
         return QtCore.QRect(k["x"], k["y"], k["width"], k["height"])
 
     if variant.tag == "sizepolicy":
 
         p = QtWidgets.QSizePolicy()
         for c in variant:
-            ivalue_policy = cast(QtWidgets.QSizePolicy.Policy, int(c.text.strip()))
+            ivalue_policy = cast(QtWidgets.QSizePolicy.Policy, int((c.text or "0").strip()))
             if c.tag == "hsizetype":
                 p.setHorizontalPolicy(ivalue_policy)
             if c.tag == "vsizetype":
@@ -1035,7 +1038,7 @@ def _loadVariant(variant, widget=None) -> Any:
     if variant.tag == "size":
         p_sz = QtCore.QSize()
         for c in variant:
-            ivalue = int(c.text.strip())
+            ivalue = int((c.text or "0").strip())
             if c.tag == "width":
                 p_sz.setWidth(ivalue)
             if c.tag == "height":
@@ -1044,7 +1047,7 @@ def _loadVariant(variant, widget=None) -> Any:
     if variant.tag == "font":
         p_font = QtGui.QFont()
         for c in variant:
-            value = c.text.strip()
+            value = (c.text or "0").strip()
             bv: bool = False
             if c.tag not in ("family", "pointsize"):
                 bv = b(value)
@@ -1066,7 +1069,7 @@ def _loadVariant(variant, widget=None) -> Any:
     if variant.tag == "set":
         v = None
         final = 0
-        text = variant.text
+        text = variant.text or "0"
         libs_1: List[Any] = [QtCore.Qt]
 
         if text.find("WordBreak|") > -1:
@@ -1110,11 +1113,13 @@ def _loadVariant(variant, widget=None) -> Any:
             return att_found
 
     if variant.tag == "color":
-        c = QtGui.QColor()
+        qcolor = QtGui.QColor()
         red_ = 0
         green_ = 0
         blue_ = 0
         for color in variant:
+            if color.text is None:
+                continue
             if color.tag == "red":
                 red_ = int(color.text.strip())
             elif color.tag == "green":
@@ -1122,8 +1127,8 @@ def _loadVariant(variant, widget=None) -> Any:
             elif color.tag == "blue":
                 blue_ = int(color.text.strip())
 
-        c.setRgb(red_, green_, blue_)
-        return c
+        qcolor.setRgb(red_, green_, blue_)
+        return qcolor
 
     if variant.tag == "palette":
         p = QtGui.QPalette()
@@ -1134,6 +1139,8 @@ def _loadVariant(variant, widget=None) -> Any:
                 g_ = 0
                 b_ = 0
                 for c in color:
+                    if c.text is None:
+                        continue
                     if c.tag == "red":
                         r_ = int(c.text)
                     elif c.tag == "green":
@@ -1165,6 +1172,8 @@ def _loadVariant(variant, widget=None) -> Any:
         m_ = 1
         d_ = 1
         for v in variant:
+            if v.text is None:
+                continue
             if v.tag == "year":
                 y_ = int(v.text)
             elif v.tag == "month":
