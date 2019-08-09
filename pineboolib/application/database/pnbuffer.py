@@ -218,7 +218,7 @@ class PNBuffer(object):
 
     def clear_buffer(self):
         """Empty the values ​​buffer and mark the fields as unmodified."""
-        self.clearValues(True)
+        self.clearValues()
         self.setNoModifiedFields()
 
     def primeInsert(self, row: int = None) -> None:
@@ -323,14 +323,10 @@ class PNBuffer(object):
             f = f.name()
         self._field(f).generated = value
 
-    def clearValues(self, b: bool) -> None:
+    def clearValues(self) -> None:
         """
         Set all values ​​to None and check field.modified to True.
-
-        @param b bool = True or False (does nothing).
         """
-        if not b:
-            return
         for field in self.fieldList_:
             field.value = None
             field.modified = True
@@ -358,11 +354,6 @@ class PNBuffer(object):
             logger.debug("PNBuffer.isNull: Field <%s> not found", n)
             return True
 
-        if field.type_ in ("bool", "unlock"):
-            # FIXME: Why do we need this as an special case?
-            return self.value(field.name) not in (True, False)
-
-        # FIXME: This confuses empty with Null
         return field.value in (None, "")
 
     def value(self, n: Union[str, int]) -> T_VALUE2:

@@ -1061,7 +1061,7 @@ class PNSqlCursor(QtCore.QObject):
         self.d.modeAccess_ = m
 
         if self.d.buffer_:
-            self.d.buffer_.clearValues(True)
+            self.d.buffer_.clearValues()
 
         # if not self.d._action:
         # self.d.action_ = self.db().manager().action(self.d.metadata_.name())
