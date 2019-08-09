@@ -7,12 +7,13 @@ Will be inherited at fllegacy.
 import platform
 import traceback
 import ast
+from PyQt5.QtXml import QDomNode
 
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional, List, Union
 
 from PyQt5 import QtCore
 
-from PyQt5.QtWidgets import QMessageBox, QApplication
+from PyQt5.QtWidgets import QMessageBox, QApplication, QWidget
 
 from pineboolib.core.settings import config
 from pineboolib.core import decorators
@@ -117,7 +118,7 @@ class SysBaseType(object):
         return val.encode(format).decode("utf-8", "replace")
 
     @classmethod
-    def fromUnicode(self, val, format) -> str:
+    def fromUnicode(self, val: str, format: str) -> str:
         """Convert from unicode to string."""
         return val.encode("utf-8").decode(format, "replace")
 
@@ -154,22 +155,22 @@ class SysBaseType(object):
         fileISO.close()
 
     @classmethod
-    def cleanupMetaData(self, connName="default") -> None:
+    def cleanupMetaData(self, connName: str = "default") -> None:
         """Clean up metadata."""
         project.conn.useConn(connName).manager().cleanupMetaData()
 
     @classmethod
-    def nameDriver(self, connName="default") -> Any:
+    def nameDriver(self, connName: str = "default") -> Any:
         """Get driver name."""
         return project.conn.useConn(connName).driverName()
 
     @classmethod
-    def nameHost(self, connName="default") -> Any:
+    def nameHost(self, connName: str = "default") -> Any:
         """Get database host name."""
         return project.conn.useConn(connName).host()
 
     @classmethod
-    def addDatabase(self, *args) -> bool:
+    def addDatabase(self, *args: Any) -> bool:
         """Add a new database."""
         # def addDatabase(self, driver_name = None, db_name = None, db_user_name = None,
         #                 db_password = None, db_host = None, db_port = None, connName="default"):
@@ -213,7 +214,7 @@ class SysBaseType(object):
         return True
 
     @classmethod
-    def removeDatabase(self, connName="default") -> Any:
+    def removeDatabase(self, connName: str = "default") -> Any:
         """Remove a database."""
         project.conn.useConn(connName)._isOpen = False
         return project.conn.useConn(connName).removeConn(connName)
@@ -225,7 +226,7 @@ class SysBaseType(object):
         return self.time_user_.toString(QtCore.Qt.ISODate)
 
     @classmethod
-    def reportChanges(self, changes=None):
+    def reportChanges(self, changes: Dict[str, str] = {}):
         """Create a report for project changes."""
         ret = u""
         # DEBUG:: FOR-IN: ['key', 'changes']
@@ -242,7 +243,7 @@ class SysBaseType(object):
         return ret
 
     @classmethod
-    def diffXmlFilesDef(self, xmlOld=None, xmlNew=None):
+    def diffXmlFilesDef(self, xmlOld: QDomNode, xmlNew: QDomNode) -> Dict[str, Any]:
         """Create a Diff for XML."""
         arrOld = self.filesDefToArray(xmlOld)
         arrNew = self.filesDefToArray(xmlNew)
@@ -281,7 +282,7 @@ class SysBaseType(object):
         return ret
 
     @classmethod
-    def filesDefToArray(self, xml=None):
+    def filesDefToArray(self, xml: QDomNode) -> Dict[str, Dict[str, str]]:
         """Convert Module MOD xml to array."""
         root = xml.firstChild()
         files = root.childNodes()
@@ -316,7 +317,7 @@ class SysBaseType(object):
         return ret
 
     @classmethod
-    def textPacking(self, ext=None):
+    def textPacking(self, ext: str = "") -> bool:
         """Determine if file is text."""
         return (
             ext.endswith(".ui")
@@ -334,12 +335,12 @@ class SysBaseType(object):
         )
 
     @classmethod
-    def binaryPacking(self, ext=None):
+    def binaryPacking(self, ext: str = "") -> bool:
         """Determine if file is binary."""
-        return ext.endswith(u".qs")
+        return ext.endswith(".qs")
 
     @classmethod
-    def infoMsgBox(self, msg=None):
+    def infoMsgBox(self, msg: str = "") -> None:
         """Show information message box."""
         msg = ustr(msg)
         msg += u"\n"
@@ -349,7 +350,7 @@ class SysBaseType(object):
             logger.warning(ustr(u"INFO: ", msg))
 
     @classmethod
-    def warnMsgBox(self, msg=None):
+    def warnMsgBox(self, msg: str = "") -> None:
         """Show Warning message box."""
         msg = ustr(msg)
         msg += u"\n"
@@ -359,7 +360,7 @@ class SysBaseType(object):
             logger.warning(ustr(u"WARN: ", msg))
 
     @classmethod
-    def errorMsgBox(self, msg=None):
+    def errorMsgBox(self, msg: str = None) -> None:
         """Show error message box."""
         msg = ustr(msg)
         msg += u"\n"
@@ -369,8 +370,10 @@ class SysBaseType(object):
             logger.warning(ustr(u"ERROR: ", msg))
 
     @classmethod
-    def translate(self, text: str) -> str:
+    def translate(self, text: str, arg2: Optional[str] = None) -> str:
         """Translate text."""
+        if arg2:
+            return arg2
         return text
 
     @classmethod
@@ -379,7 +382,7 @@ class SysBaseType(object):
         raise Exception("not implemented.")
 
     @classmethod
-    def infoPopup(self, msg: Optional[str] = None):
+    def infoPopup(self, msg: Optional[str] = None) -> None:
         """Show information popup."""
         msg = ustr(msg)
         caption = self.translate(u"AbanQ Información")
@@ -395,7 +398,7 @@ class SysBaseType(object):
         self._warnHtmlPopup(msgHtml, [])
 
     @classmethod
-    def warnPopup(self, msg=None):
+    def warnPopup(self, msg: str = "") -> None:
         """Show warning popup."""
         msg = ustr(msg)
         msg = msg.replace("\n", "<br>")
@@ -411,7 +414,7 @@ class SysBaseType(object):
         self._warnHtmlPopup(msgHtml, [])
 
     @classmethod
-    def errorPopup(self, msg=None):
+    def errorPopup(self, msg: str = "") -> None:
         """Show error popup."""
         msg = ustr(msg)
         msg = msg.replace("\n", "<br>")
@@ -427,7 +430,7 @@ class SysBaseType(object):
         self._warnHtmlPopup(msgHtml, [])
 
     @classmethod
-    def trTagText(self, tagText=None):
+    def trTagText(self, tagText: str = "") -> str:
         """Process QT_TRANSLATE_NOOP tags."""
         if not tagText.startswith(u"QT_TRANSLATE_NOOP"):
             return tagText
@@ -437,7 +440,7 @@ class SysBaseType(object):
         return self.translate(arr[0], arr[1])
 
     @classmethod
-    def updatePineboo(self):
+    def updatePineboo(self) -> None:
         """Execute auto-updater."""
         QMessageBox.warning(
             QApplication.focusWidget(),
@@ -448,7 +451,7 @@ class SysBaseType(object):
         return
 
     @classmethod
-    def setObjText(self, container=None, component=None, value=None):
+    def setObjText(self, container: QWidget, component: QWidget, value: str = "") -> bool:
         """Set text to random widget."""
         c = self.testObj(container, component)
         if c is None:
@@ -468,7 +471,7 @@ class SysBaseType(object):
         return True
 
     @classmethod
-    def disableObj(self, container=None, component=None):
+    def disableObj(self, container: QWidget, component: QWidget) -> bool:
         """Disable random widget."""
         c = self.testObj(container, component)
         if not c:
@@ -490,7 +493,7 @@ class SysBaseType(object):
         return True
 
     @classmethod
-    def enableObj(self, container=None, component=None):
+    def enableObj(self, container: QWidget, component: QWidget) -> bool:
         """Enable random widget."""
         c = self.testObj(container, component)
         if not c:
@@ -511,7 +514,7 @@ class SysBaseType(object):
         return True
 
     @classmethod
-    def filterObj(self, container=None, component=None, filter=None):
+    def filterObj(self, container: QWidget, component: QWidget, filter: str = "") -> bool:
         """Apply filter to random widget."""
         c = self.testObj(container, component)
         if not c:
@@ -530,18 +533,20 @@ class SysBaseType(object):
         return True
 
     @classmethod
-    def testObj(self, container=None, component=None):
+    def testObj(self, container: QWidget = None, component: QWidget = None) -> Optional[QWidget]:
         """Test if object does exist."""
         if not container or container is None:
-            return False
+            return None
         c = container.child(component)
         if not c:
             logger.warning(ustr(component, u" no existe"))
-            return False
+            return None
         return c
 
     @classmethod
-    def testAndRun(self, container=None, component=None, method=None, param=None):
+    def testAndRun(
+        self, container: QWidget, component: QWidget, method: str = "", param: Any = None
+    ) -> bool:
         """Test and execute object."""
         c = self.testObj(container, component)
         if not c:
@@ -551,7 +556,9 @@ class SysBaseType(object):
         return True
 
     @classmethod
-    def runObjMethod(self, container=None, component=None, method=None, param=None):
+    def runObjMethod(
+        self, container: QWidget, component: QWidget, method: str, param: Any = None
+    ) -> bool:
         """Execute method from object."""
         c = container.child(component)
         m = getattr(c, method, None)
@@ -563,7 +570,7 @@ class SysBaseType(object):
         return True
 
     @classmethod
-    def connectSS(self, ssSender=None, ssSignal=None, ssReceiver=None, ssSlot=None):
+    def connectSS(self, ssSender: QWidget, ssSignal: str, ssReceiver: QWidget, ssSlot: str) -> bool:
         """Connect signal to slot."""
         if not ssSender:
             return False
@@ -571,10 +578,14 @@ class SysBaseType(object):
         return True
 
     @classmethod
-    def openUrl(self, url=None):
+    def openUrl(self, url: Union[str, List[str]] = "") -> bool:
         """Open given URL in a browser."""
         if not url:
             return False
+        if not isinstance(url, str):
+            logger.warning("openUrl: url should be string")
+            # Assuming url is list.
+            url = url[0]
         os_name = self.osName()
         if os_name == "LINUX":
             if self.launchCommand([u"xdg-open", url]):
@@ -606,7 +617,7 @@ class SysBaseType(object):
         return False
 
     @classmethod
-    def launchCommand(self, comando):
+    def launchCommand(self, comando: Union[str, List[str]]) -> bool:
         """Execute a program."""
         try:
             proc = Process()

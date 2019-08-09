@@ -182,7 +182,9 @@ class Process(ProcessBaseClass):
         return self.exitCode()
 
     def execute(  # type: ignore
-        self, program: Union[str, List, "types.Array"], arguments: Optional[Iterable[str]] = None
+        self,
+        program: Union[str, List[str], "types.Array"],
+        arguments: Optional[Iterable[str]] = None,
     ) -> int:
         """Execute normal command."""
         comando_: List[str] = []
