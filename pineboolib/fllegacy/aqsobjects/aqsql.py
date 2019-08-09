@@ -27,6 +27,8 @@ class AQSql(object):
 
     @unique
     class TableType(IntEnum):
+        """TableType class."""
+
         Tables = 0x01
         SystemTables = 0x02
         Views = 0x04

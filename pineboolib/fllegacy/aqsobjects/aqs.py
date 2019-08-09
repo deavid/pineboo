@@ -78,7 +78,7 @@ class AQS(object):
     @classmethod
     def toXml(
         cls, obj_: "QWidget", include_children: bool = True, include_complex_types: bool = False
-    ):
+    ) -> QDomDocument:
         """
         Convert an object to xml.
 
@@ -208,5 +208,7 @@ class AQS(object):
         logger.warning("AQS: No se encuentra el atributo %s", name)
 
     @classmethod
-    def TextCodec_codecForName(cls, codec_name):
+    def TextCodec_codecForName(cls, codec_name: str) -> str:
+        """Return codec name."""
+
         return codec_name
