@@ -1,3 +1,5 @@
+"""dictmodules module."""
+
 from typing import Any
 
 
@@ -12,7 +14,7 @@ class Application:
     """
     Emulate QS Application class.
 
-    El modulo "Datos" usa "Application.formRecorddat_procesos" para leer el módulo.
+    The "Data" module uses "Application.formRecorddat_processes" to read the module.
     """
 
     def __getattr__(self, name: str) -> Any:

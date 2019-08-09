@@ -1,20 +1,23 @@
+"""Input module."""
+
 from PyQt5.QtWidgets import QInputDialog, QLineEdit, QWidget  # type: ignore
 from typing import Any, Optional, Union, List
 
 
 class Input(object):
     """
-    Dialogo de entrada de datos
+    Data entry dialog.
     """
 
     @classmethod
     def getText(cls, question: str, prevtxt: str = "", title: str = "Pineboo") -> Optional[str]:
         """
-        Recoge texto
-        @param question. Label del diálogo.
-        @param prevtxt. Valor inicial a especificar en el campo
-        @param title. Título del diálogo
-        @return cadena de texto recogida
+        Return Text.
+
+        @param question. Label of the dialogue.
+        @param prevtxt. Initial value to specify in the field.
+        @param title. Title of the dialogue.
+        @return string of collected text.
         """
         parent = QWidget()  # FIXME: Should be the mainWindow or similar
         text, ok = QInputDialog.getText(parent, title, question, QLineEdit.Normal, prevtxt)
@@ -26,6 +29,8 @@ class Input(object):
     def getNumber(
         cls, question: str, value: Union[str, float], part_decimal: int, title: str = "Pineboo"
     ) -> Optional[float]:
+        """Return number."""
+
         parent = QWidget()  # FIXME: Should be the mainWindow or similar
         text, ok = QInputDialog.getText(
             parent, title, question, QLineEdit.Normal, str(round(float(value), part_decimal))
@@ -43,11 +48,12 @@ class Input(object):
         editable: bool = True,
     ) -> Any:
         """
-        Recoge Item
-        @param question. Label del diálogo.
-        @param item_list. Lista de items.
-        @param title. Título del diálogo.
-        @return item, Item seleccionado.
+        Return Item.
+
+        @param question. Label of the dialogue.
+        @param item_list. Items List.
+        @param title. Title of the dialogue.
+        @return item, Selected item.
         """
 
         parent = QWidget()  # FIXME: Should be the mainWindow or similar

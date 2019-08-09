@@ -1,37 +1,62 @@
 # -*- coding: utf-8 -*-
-from pineboolib.qt3_widgets.formdbwidget import FormDBWidget
+"""emptyscript module."""
+
+from pineboolib.qt3_widgets import formdbwidget
 
 
 class interna(object):
-    ctx: FormDBWidget
+    """Interna class."""
 
-    def __init__(self, context: FormDBWidget) -> None:
+    ctx: formdbwidget.FormDBWidget
+
+    def __init__(self, context: formdbwidget.FormDBWidget) -> None:
+        """Inicialize."""
+
         self.ctx = context
 
     def init(self) -> None:
+        """Run optional inicialize script."""
+
         self.ctx.interna_init()
 
 
 class oficial(interna):
-    def __init__(self, context: FormDBWidget):
-        super(oficial, self).__init__(context)
+    """Oficial class."""
+
+    def __init__(self, context: formdbwidget.FormDBWidget) -> None:
+        """Inicialize."""
+
+        super().__init__(context)
 
 
 class head(oficial):
-    def __init__(self, context: FormDBWidget):
-        super(head, self).__init__(context)
+    """Head class."""
+
+    def __init__(self, context: formdbwidget.FormDBWidget) -> None:
+        """Inicialize."""
+
+        super().__init__(context)
 
 
 class ifaceCtx(head):
-    def __init__(self, context: FormDBWidget):
-        super(ifaceCtx, self).__init__(context)
+    """IfaceCtx class."""
+
+    def __init__(self, context: formdbwidget.FormDBWidget) -> None:
+        """Inicialize."""
+
+        super().__init__(context)
 
 
-class FormInternalObj(FormDBWidget):
+class FormInternalObj(formdbwidget.FormDBWidget):
+    """FormInternalObj class."""
+
     def _class_init(self) -> None:
+        """Inicialize ifaceCtx."""
+
         self.iface = ifaceCtx(self)
 
     def interna_init(self) -> None:
+        """Run optional inicialize script."""
         pass
 
 
