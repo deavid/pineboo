@@ -87,6 +87,16 @@ class TestArray(unittest.TestCase):
         a.append(10)
         self.assertEqual(a[5], 10)
 
+    def test_basic3(self) -> None:
+        """Basic Testing."""
+        test_arr = {"key_0": "item_0", "key_1": "item_1", "key_2": "item_2"}
+        a = Array(test_arr)
+        self.assertEqual(a["key_0"], "item_0")
+        self.assertEqual(a.key_1, a["key_1"])
+        self.assertEqual(a.length(), 3)
+        self.assertEqual(a[2], "item_2")
+        self.assertEqual(list(a._dict.values()), ["item_0", "item_1", "item_2"])
+
     def test_repr(self) -> None:
         """Test repr method."""
         test_arr = [3, 4, 5, 6, 7]
