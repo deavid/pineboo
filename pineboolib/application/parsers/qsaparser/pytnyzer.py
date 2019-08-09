@@ -1647,8 +1647,8 @@ class Member(ASTPython):
                             if (value.find("(") < value.find(",")) and value.find(")") < value.find(
                                 ","
                             ):
-                                # si, sk = value.split(",")
-                                arguments = ["%s[%s]" % (".".join(part1), value)] + part2
+                                si, sk = value.split(",")
+                                arguments = ["%s[%s:%s]" % (".".join(part1), si, sk)] + part2
                                 continue
                             # if (len(value.split(",")) == 2 and value.find("(") == -1) or value.find("(") < value.find(","):
                             #    i, l = value.split(",")
