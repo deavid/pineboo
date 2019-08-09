@@ -34,7 +34,7 @@
 	<field>
 		<name>time_field</name>
 		<alias>QT_TRANSLATE_NOOP("MetaData","Time field")</alias>
-		<null>false</null>
+		<null>true</null>
 		<pk>false</pk>
 		<type>time</type>
 	</field>
