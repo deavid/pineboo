@@ -46,7 +46,7 @@ class PNConnection(QtCore.QObject, IConnection):
     _dbAux = None
     _isOpen: bool
     driver_ = None
-    lastActiveCursor_: Optional["PNSqlCursor"]
+    _last_active_cursor: Optional["PNSqlCursor"]
 
     def __init__(
         self,
@@ -95,7 +95,7 @@ class PNConnection(QtCore.QObject, IConnection):
         self.stackSavePoints_ = []
         self.queueSavePoints_ = []
         self.interactiveGUI_ = True
-        self.lastActiveCursor_ = None
+        self._last_active_cursor = None
         self.driver().db_ = self
 
     @decorators.NotImplementedWarn
@@ -341,7 +341,7 @@ class PNConnection(QtCore.QObject, IConnection):
 
         return self.driver().formatValue(t, v, upper)
 
-    def formatValueLike(self, t, v, upper) -> str:
+    def formatValueLike(self, t: str, v: Any, upper: bool) -> str:
         """Return a correctly formatted value to be assigned as a WHERE LIKE filter."""
 
         return self.driver().formatValueLike(t, v, upper)
@@ -358,7 +358,7 @@ class PNConnection(QtCore.QObject, IConnection):
     def lastActiveCursor(self):
         """Return the last active cursor in the sql driver."""
 
-        return self.lastActiveCursor_
+        return self._last_active_cursor
 
     def doTransaction(self, cursor: "PNSqlCursor") -> bool:
         """Make a transaction or savePoint according to transaction level."""
@@ -374,7 +374,7 @@ class PNConnection(QtCore.QObject, IConnection):
                     "status_help_msg", "send", ["Iniciando Transacción... %s" % self.transaction_]
                 )
             if self.transaction():
-                self.lastActiveCursor_ = cursor
+                self._last_active_cursor = cursor
                 db_signals.emitTransactionBegin(cursor)
 
                 if not self.canSavePoint():
@@ -484,7 +484,7 @@ class PNConnection(QtCore.QObject, IConnection):
                     "status_help_msg", "send", ["Deshaciendo Transacción... %s" % self.transaction_]
                 )
             if self.rollbackTransaction():
-                self.lastActiveCursor_ = None
+                self._last_active_cursor = None
 
                 if not self.canSavePoint():
                     if self.currentSavePoint_:
@@ -586,7 +586,7 @@ class PNConnection(QtCore.QObject, IConnection):
                 )
             try:
                 if self.commit():
-                    self.lastActiveCursor_ = None
+                    self._last_active_cursor = None
 
                     if not self.canSavePoint():
                         if self.currentSavePoint_:
