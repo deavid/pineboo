@@ -27,7 +27,7 @@ class TestIsLoadedModule(unittest.TestCase):
         """Test str.mid(5, 2)."""
 
         value_1 = 'var cadena:String = "abcdefg";\ncadena.mid(5, 2);'
-        self.assertEqual(qs2py(value_1), 'cadena = "abcdefg"\ncadena[5:2]\n')
+        self.assertEqual(qs2py(value_1), 'cadena = "abcdefg"\ncadena[5 : 5 + 2]\n')
 
         value_2 = 'var cadena:String = "abcdefg";\ncadena.mid(5);'
         self.assertEqual(qs2py(value_2), 'cadena = "abcdefg"\ncadena[0 + 5 :]\n')

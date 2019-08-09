@@ -1648,7 +1648,9 @@ class Member(ASTPython):
                                 ","
                             ):
                                 si, sk = value.split(",")
-                                arguments = ["%s[%s:%s]" % (".".join(part1), si, sk)] + part2
+                                arguments = [
+                                    "%s[%s:%s + %s]" % (".".join(part1), si, si, sk)
+                                ] + part2
                                 continue
                             # if (len(value.split(",")) == 2 and value.find("(") == -1) or value.find("(") < value.find(","):
                             #    i, l = value.split(",")
