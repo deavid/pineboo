@@ -39,22 +39,8 @@ class TestPNConnection(unittest.TestCase):
 
         conn_ = application.project.conn
 
-        default_tables_list = [
-            "flareas",
-            "flmodules",
-            "flfiles",
-            "flgroups",
-            "fllarge",
-            "flserial",
-            "flusers",
-            "flvar",
-            "flmetadata",
-            "fltest",
-        ]
-
-        self.assertEqual(conn_.tables("Tables"), default_tables_list)
-        default_tables_list.append("sqlite_master")
-        self.assertEqual(conn_.tables(), default_tables_list)
+        self.assertTrue("flareas" in conn_.tables("Tables"))
+        self.assertTrue("sqlite_master" in conn_.tables())
         self.assertEqual(conn_.tables("SystemTables"), ["sqlite_master"])
         self.assertEqual(conn_.tables("Views"), [])
 
