@@ -8,7 +8,7 @@ from PyQt5.QtCore import QDate  # type: ignore
 from typing import Optional, List, Any
 
 
-def date_dma_to_amd(f) -> Optional[str]:
+def date_dma_to_amd(f: str) -> Optional[str]:
     """
     Convert day, month, year to year, month day.
 
@@ -46,7 +46,7 @@ def date_dma_to_amd(f) -> Optional[str]:
     return "%s-%s-%s" % (ano_, mes_, dia_)
 
 
-def date_amd_to_dma(f) -> Optional[str]:
+def date_amd_to_dma(f: str) -> Optional[str]:
     """
     Convert year, month day to day, month, year.
 
