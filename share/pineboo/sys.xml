@@ -121,4 +121,8 @@
 		<name>fldumpdb</name>
 		<scriptform>fldumpdb</scriptform>
 	</action>
+	<action>
+		<name>fltest</name>
+		<table>fltest</table>
+	</action>
 </ACTIONS>
