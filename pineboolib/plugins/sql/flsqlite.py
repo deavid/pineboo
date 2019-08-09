@@ -946,20 +946,20 @@ class FLSQLITE(object):
         t = PNSqlQuery()
         t.setForwardOnly(True)
 
-        if typeName == "Tables" and typeName == "Views":
+        if typeName is None:
             t.exec_("SELECT name FROM sqlite_master WHERE type='table' OR type='view'")
-        elif not typeName or typeName == "Tables":
+        elif typeName == "Tables":
             t.exec_("SELECT name FROM sqlite_master WHERE type='table'")
-        elif not typeName or typeName == "Views":
+        elif typeName == "Views":
             t.exec_("SELECT name FROM sqlite_master WHERE type='view'")
 
-        while t.next():
-            tl.append(str(t.value(0)))
+        if typeName != "SystemTables":
+            while t.next():
+                tl.append(str(t.value(0)))
 
-        if not typeName or typeName == "SystemTables":
+        if typeName in ["SystemTables", None]:
             tl.append("sqlite_master")
 
-        del t
         return tl
 
     def normalizeValue(self, text) -> Optional[str]:
